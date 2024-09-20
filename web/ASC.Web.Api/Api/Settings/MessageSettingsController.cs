@@ -189,11 +189,11 @@ public class MessageSettingsController(MessageService messageService,
                 throw new MethodAccessException("Method not available");
             }
 
-            if (!email.TestEmailRegex())
+            if (!email.TestEmailRegex() || email.TestPunyCode())
             {
                 throw new Exception(Resource.ErrorNotCorrectEmail);
             }
-
+            
             CheckCache("sendjoininvite");
 
             var user = await userManager.GetUserByEmailAsync(email);

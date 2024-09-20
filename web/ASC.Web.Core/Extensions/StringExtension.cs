@@ -54,6 +54,32 @@ public static class StringExtension
         return !string.IsNullOrEmpty(emailAddress) && _reStrict.IsMatch(emailAddress);
     }
 
+    public static bool TestPunyCode(this string emailAddress)
+    {
+        var idn = new IdnMapping();
+        var toTest = _reStrict.Match(emailAddress);
+        
+        foreach (var g in toTest.Groups.Values.Distinct().Select(r=> r.Value).Where(r=> !string.IsNullOrEmpty(r)))
+        {
+            try
+            {
+                var punyCode = idn.GetAscii(g);
+                var domain2 = idn.GetUnicode(punyCode);
+
+                if (!string.Equals(punyCode, domain2))
+                {
+                    return true;
+                }
+            }
+            catch (ArgumentException)
+            {
+            }
+        }
+        
+        return false;
+    }
+    
+
     public static int EnumerableComparer(this string x, string y)
     {
         var xIndex = 0;
