@@ -442,7 +442,9 @@ public class WhitelabelController(ApiContext apiContext,
 
         await DemandRebrandingPermissionAsync();
 
-        if (companyWhiteLabelSettingsWrapper.Settings == null)
+        if (companyWhiteLabelSettingsWrapper.Settings == null || 
+            companyWhiteLabelSettingsWrapper.Settings.Email.TestEmailPunyCode() || 
+            companyWhiteLabelSettingsWrapper.Settings.Site.TestUrlPunyCode())
         {
             throw new ArgumentNullException("settings");
         }

@@ -189,7 +189,7 @@ public class MessageSettingsController(MessageService messageService,
                 throw new MethodAccessException("Method not available");
             }
 
-            if (!email.TestEmailRegex() || email.TestPunyCode())
+            if (!email.TestEmailRegex() || email.TestEmailPunyCode())
             {
                 throw new Exception(Resource.ErrorNotCorrectEmail);
             }
