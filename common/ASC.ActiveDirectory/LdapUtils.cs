@@ -132,12 +132,7 @@ public static class LdapUtils
 
             var accessableEmail = GetLdapAccessableEmail(email);
 
-            if (string.IsNullOrEmpty(accessableEmail))
-            {
-                return false;
-            }
-
-            return accessableLogin.Equals(accessableEmail, StringComparison.InvariantCultureIgnoreCase);
+            return !string.IsNullOrEmpty(accessableEmail) && accessableLogin.Equals(accessableEmail, StringComparison.InvariantCultureIgnoreCase);
         }
         catch (Exception)
         {

@@ -138,7 +138,7 @@ public class DIHelper
     private readonly List<string> _added = [];
     private IServiceCollection _serviceCollection;
 
-    readonly HashSet<string> _visited = new();
+    readonly HashSet<string> _visited = [];
     
     public void Scan()
     {        

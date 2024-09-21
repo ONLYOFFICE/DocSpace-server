@@ -209,7 +209,7 @@ public abstract class VirtualRoomsController<T>(
         if (inDto.Quota >= 0)
         {
             await _filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomChanged, inDto.Quota.ToString(), folderTitles.ToArray());
-    }
+        }
         else
         {
             await _filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, string.Join(", ", folderTitles.ToArray()));
@@ -336,7 +336,7 @@ public abstract class VirtualRoomsController<T>(
         var aceCollection = new AceCollection<T>
         {
             Files = Array.Empty<T>(),
-            Folders = new[] { id },
+            Folders = [id],
             Aces = wrappers,
             Message = inDto.Message
         };

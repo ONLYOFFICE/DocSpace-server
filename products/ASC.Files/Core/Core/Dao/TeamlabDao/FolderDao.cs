@@ -361,7 +361,7 @@ internal class FolderDao(
         }
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetParentFoldersAsync(int folderId)
+    public virtual async IAsyncEnumerable<Folder<int>> GetParentFoldersAsync(int folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -506,7 +506,7 @@ internal class FolderDao(
             //itself link
             List<DbFolderTree> treeToAdd =
             [
-                new DbFolderTree { FolderId = folder.Id, ParentId = folder.Id, Level = 0 }
+                new() { FolderId = folder.Id, ParentId = folder.Id, Level = 0 }
             ];
             
             //full path to root
@@ -764,10 +764,12 @@ internal class FolderDao(
         copy.RootCreateBy = toFolder.RootCreateBy;
         copy.RootFolderType = toFolder.RootFolderType;
         copy.Title = folder.Title;
-        copy.FolderType = (folder.FolderType == FolderType.ReadyFormFolder || 
-            folder.FolderType == FolderType.InProcessFormFolder ||
-            folder.FolderType == FolderType.FormFillingFolderDone || 
-            folder.FolderType == FolderType.FormFillingFolderInProgress) ? FolderType.DEFAULT : folder.FolderType;
+        copy.FolderType = folder.FolderType is 
+            FolderType.ReadyFormFolder or 
+            FolderType.InProcessFormFolder or 
+            FolderType.FormFillingFolderDone or 
+            FolderType.FormFillingFolderInProgress ? 
+            FolderType.DEFAULT : folder.FolderType;
 
         copy = await GetFolderAsync(await SaveFolderAsync(copy));
         var tagDao = daoFactory.GetTagDao<int>();
@@ -867,8 +869,8 @@ internal class FolderDao(
                 Indexing = folder.SettingsIndexing,
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue
             };
-        };
-        
+        }
+
         filesDbContext.Update(toUpdate);
         await filesDbContext.SaveChangesAsync();
 
@@ -1831,5 +1833,20 @@ internal class CacheFolderDao(
         }
         
         return result;
+    }
+    
+    private readonly ConcurrentDictionary<int, IEnumerable<Folder<int>>> _parentFoldersCache = new();
+    public override async IAsyncEnumerable<Folder<int>> GetParentFoldersAsync(int folderId)
+    {
+        if (!_parentFoldersCache.TryGetValue(folderId, out var result))
+        {
+            result = await base.GetParentFoldersAsync(folderId).ToListAsync();
+            _parentFoldersCache.TryAdd(folderId, result);
+        }
+
+        foreach (var folder in result)
+        {
+            yield return folder;
+        }
     }
 }

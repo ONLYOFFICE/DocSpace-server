@@ -717,7 +717,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -1,
-                            Features = "trial,audit,ldap,sso,whitelabel,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
+                            Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
                             Name = "trial",
                             Price = 0m,
                             Visible = false
@@ -726,7 +726,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -2,
                             Description = "until 01.04.2024",
-                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
                             Name = "admin",
                             Price = 15m,
                             ProductId = "1002",
@@ -761,7 +761,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -6,
-                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
                             Name = "subscription",
                             Price = 0m,
                             ProductId = "1001",
@@ -787,7 +787,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -9,
                             Description = "since 01.04.2024",
-                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
                             Name = "admin",
                             Price = 20m,
                             ProductId = "1006",

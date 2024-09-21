@@ -52,12 +52,7 @@ public static class NoTextileEncoder
                         };
 
 
-    public static string EncodeNoTextileZones(string tmp, string patternPrefix, string patternSuffix)
-    {
-        return EncodeNoTextileZones(tmp, patternPrefix, patternSuffix, null);
-    }
-
-    public static string EncodeNoTextileZones(string tmp, string patternPrefix, string patternSuffix, string[] exceptions)
+    public static string EncodeNoTextileZones(string tmp, string patternPrefix, string patternSuffix, string[] exceptions = null)
     {
         string evaluator(Match m)
         {
@@ -79,12 +74,7 @@ public static class NoTextileEncoder
         return tmp;
     }
 
-    public static string DecodeNoTextileZones(string tmp, string patternPrefix, string patternSuffix)
-    {
-        return DecodeNoTextileZones(tmp, patternPrefix, patternSuffix, null);
-    }
-
-    public static string DecodeNoTextileZones(string tmp, string patternPrefix, string patternSuffix, string[] exceptions)
+    public static string DecodeNoTextileZones(string tmp, string patternPrefix, string patternSuffix, string[] exceptions = null)
     {
         string evaluator(Match m)
         {

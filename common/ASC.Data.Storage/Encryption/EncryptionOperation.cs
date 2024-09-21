@@ -147,7 +147,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
     {
         if (!_useProgressFile)
         {
-            return new List<string>();
+            return [];
         }
 
         var encryptedFiles = new List<string>();

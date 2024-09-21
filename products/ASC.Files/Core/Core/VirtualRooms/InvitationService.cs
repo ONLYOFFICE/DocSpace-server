@@ -229,7 +229,7 @@ public class InvitationService(
         }
 
         var securityDao = daoFactory.GetSecurityDao<string>();
-        var record = await securityDao.GetSharesAsync(new[] { result.LinkId })
+        var record = await securityDao.GetSharesAsync([result.LinkId])
             .FirstOrDefaultAsync(s => s.SubjectType == SubjectType.InvitationLink);
         
         if (record is not { SubjectType: SubjectType.InvitationLink })

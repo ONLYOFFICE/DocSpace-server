@@ -197,10 +197,7 @@ public class Builder<T>(ThumbnailSettings settings,
         {
             if (maxSize.Width > maxSize.Height) // change thumbnail orientation
             {
-                var originThumbnailHeight = thumbnailHeight;
-
-                thumbnailHeight = thumbnailWidth;
-                thumbnailWidth = originThumbnailHeight;
+                (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
             }
         }
 
@@ -436,10 +433,7 @@ public class Builder<T>(ThumbnailSettings settings,
             if (sourceBitmap.Bounds.Width > sourceBitmap.Bounds.Height && thumbnailWidth < thumbnailHeight ||
                 sourceBitmap.Bounds.Width < sourceBitmap.Bounds.Height && thumbnailWidth > thumbnailHeight)
             {
-                var originThumbnailHeight = thumbnailHeight;
-
-                thumbnailHeight = thumbnailWidth;
-                thumbnailWidth = originThumbnailHeight;
+                (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
             }
         }
 

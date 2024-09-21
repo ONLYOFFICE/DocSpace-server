@@ -1023,7 +1023,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>The number of users in room should not exceed {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding &amp; customization</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">

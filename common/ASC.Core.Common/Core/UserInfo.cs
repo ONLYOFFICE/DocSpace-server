@@ -222,7 +222,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
             ContactsList.Clear();
         }
 
-        ContactsList.AddRange(contacts.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries));
+        ContactsList.AddRange(contacts.Split(['|'], StringSplitOptions.RemoveEmptyEntries));
 
         return this;
     }

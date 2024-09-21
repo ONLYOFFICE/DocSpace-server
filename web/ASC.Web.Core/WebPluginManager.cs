@@ -214,7 +214,7 @@ public class WebPluginManager(
             {
                 var ext = Path.GetExtension(zipEntry.Name);
 
-                if (webPluginConfigSettings.AssetExtensions.Any() && !webPluginConfigSettings.AssetExtensions.Contains(ext))
+                if (webPluginConfigSettings.AssetExtensions.Length != 0 && !webPluginConfigSettings.AssetExtensions.Contains(ext))
                 {
                     continue;
                 }
@@ -436,7 +436,7 @@ public class WebPluginManager(
             enabledPlugins.Remove(webPlugin.Name);
         }
 
-        webPluginSettings.EnabledPlugins = enabledPlugins.Any() ? enabledPlugins : null;
+        webPluginSettings.EnabledPlugins = enabledPlugins.Count != 0 ? enabledPlugins : null;
 
         await settingsManager.SaveAsync(webPluginSettings);
 

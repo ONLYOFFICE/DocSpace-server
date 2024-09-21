@@ -229,13 +229,19 @@ $activity.Key
     <subject resource="|subject_change_email_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_change_email_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-	
-	<!-- change_password v115 -->
-	<pattern id="change_password_v115">
-		<subject resource="|subject_change_password_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-		<body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_change_password_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-	</pattern>
-	
+
+  <!-- change_password v115 -->
+  <pattern id="change_password_v115">
+    <subject resource="|subject_change_password_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_change_password_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- set_password -->
+  <pattern id="set_password">
+    <subject resource="|subject_set_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_set_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
   <!-- change_phone -->
   <pattern id="change_phone">
     <subject resource="|subject_change_phone|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
@@ -656,6 +662,66 @@ $activity.Key
   <pattern id="migration_personal_to_docspace">
     <subject resource="|subject_migration_personal_to_docspace|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_migration_personal_to_docspace|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- enterprise admin payment warning grace period before activation -->
+  <pattern id="enterprise_admin_payment_warning_grace_period_before_activation">
+    <subject resource="|subject_enterprise_admin_payment_warning_grace_period_before_activation|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_admin_payment_warning_grace_period_before_activation|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- enterprise admin payment warning grace period activation -->
+  <pattern id="enterprise_admin_payment_warning_grace_period_activation">
+    <subject resource="|subject_enterprise_admin_payment_warning_grace_period_activation|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_admin_payment_warning_grace_period_activation|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- enterprise admin payment warning grace period before expiration -->
+  <pattern id="enterprise_admin_payment_warning_grace_period_before_expiration">
+    <subject resource="|subject_enterprise_admin_payment_warning_grace_period_before_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_admin_payment_warning_grace_period_before_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- enterprise admin payment warning grace period expiration -->
+  <pattern id="enterprise_admin_payment_warning_grace_period_expiration">
+    <subject resource="|subject_enterprise_admin_payment_warning_grace_period_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_admin_payment_warning_grace_period_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- enterprise admin payment warning lifetime before expiration -->
+  <pattern id="enterprise_admin_payment_warning_lifetime_before_expiration">
+    <subject resource="|subject_enterprise_admin_payment_warning_lifetime_before_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_admin_payment_warning_lifetime_before_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- enterprise admin payment warning lifetime expiration -->
+  <pattern id="enterprise_admin_payment_warning_lifetime_expiration">
+    <subject resource="|subject_enterprise_admin_payment_warning_lifetime_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_admin_payment_warning_lifetime_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- developer admin payment warning grace period before activation -->
+  <pattern id="developer_admin_payment_warning_grace_period_before_activation">
+    <subject resource="|subject_developer_admin_payment_warning_grace_period_before_activation|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_developer_admin_payment_warning_grace_period_before_activation|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- developer admin payment warning grace period activation -->
+  <pattern id="developer_admin_payment_warning_grace_period_activation">
+    <subject resource="|subject_developer_admin_payment_warning_grace_period_activation|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_developer_admin_payment_warning_grace_period_activation|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- developer admin payment warning grace period before expiration -->
+  <pattern id="developer_admin_payment_warning_grace_period_before_expiration">
+    <subject resource="|subject_developer_admin_payment_warning_grace_period_before_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_developer_admin_payment_warning_grace_period_before_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- developer admin payment warning grace period expiration -->
+  <pattern id="developer_admin_payment_warning_grace_period_expiration">
+    <subject resource="|subject_developer_admin_payment_warning_grace_period_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_developer_admin_payment_warning_grace_period_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
 </patterns>

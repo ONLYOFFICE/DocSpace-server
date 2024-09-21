@@ -168,7 +168,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
             RootFolderType == FolderType.VirtualRooms ?
                 ASC.Core.Configuration.Constants.CoreSystem.ID :
 
-                RootFolderType == FolderType.USER || RootFolderType == FolderType.DEFAULT || RootFolderType == FolderType.TRASH ?
+                RootFolderType is FolderType.USER or FolderType.DEFAULT or FolderType.TRASH ?
                     RootCreateBy :
 
                     RootFolderType == FolderType.Privacy && CreateBy == _securityContext.CurrentAccount.ID ?

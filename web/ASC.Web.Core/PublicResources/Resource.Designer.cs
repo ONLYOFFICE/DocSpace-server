@@ -2815,6 +2815,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Branding &amp; customization.
+        /// </summary>
+        public static string TariffsFeature_customization {
+            get {
+                return ResourceManager.GetString("TariffsFeature_customization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Max file size.
         /// </summary>
         public static string TariffsFeature_file_size {
@@ -3000,15 +3009,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_usersInRoom_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_usersInRoom_exception", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Branding &amp; customization.
-        /// </summary>
-        public static string TariffsFeature_whitelabel {
-            get {
-                return ResourceManager.GetString("TariffsFeature_whitelabel", resourceCulture);
             }
         }
         

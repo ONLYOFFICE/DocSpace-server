@@ -36,25 +36,25 @@ public class IdentityModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(help
 
     private readonly TableInfo[] _tables =
     [
-        new TableInfo("identity_clients", "tenant_id", "client_id", IdType.Guid),
-        new TableInfo("identity_authorizations", "tenant_id", "id", IdType.Guid){ UserIDColumns = ["principal_id"] },
-        new TableInfo("identity_client_allowed_origins"),
-        new TableInfo("identity_client_authentication_methods"),
-        new TableInfo("identity_client_redirect_uris"),
-        new TableInfo("identity_client_scopes"),
-        new TableInfo("identity_consents"){ UserIDColumns = ["principal_id"] },
-        new TableInfo("identity_consent_scopes"){ UserIDColumns = ["principal_id"] }
+        new("identity_clients", "tenant_id", "client_id", IdType.Guid),
+        new("identity_authorizations", "tenant_id", "id", IdType.Guid){ UserIDColumns = ["principal_id"] },
+        new("identity_client_allowed_origins"),
+        new("identity_client_authentication_methods"),
+        new("identity_client_redirect_uris"),
+        new("identity_client_scopes"),
+        new("identity_consents"){ UserIDColumns = ["principal_id"] },
+        new("identity_consent_scopes"){ UserIDColumns = ["principal_id"] }
     ];
 
     private readonly RelationInfo[] _tableRelations =
     [
-        new RelationInfo("identity_clients", "client_id", "identity_authorizations", "registered_client_id"),
-        new RelationInfo("identity_clients", "client_id", "identity_client_allowed_origins", "client_id"),
-        new RelationInfo("identity_clients", "client_id", "identity_client_authentication_methods", "client_id"),
-        new RelationInfo("identity_clients", "client_id", "identity_client_redirect_uris", "client_id"),
-        new RelationInfo("identity_clients", "client_id", "identity_client_scopes", "client_id"),
-        new RelationInfo("identity_clients", "client_id", "identity_consents", "registered_client_id"),
-        new RelationInfo("identity_clients", "client_id", "identity_consent_scopes", "registered_client_id"),
+        new("identity_clients", "client_id", "identity_authorizations", "registered_client_id"),
+        new("identity_clients", "client_id", "identity_client_allowed_origins", "client_id"),
+        new("identity_clients", "client_id", "identity_client_authentication_methods", "client_id"),
+        new("identity_clients", "client_id", "identity_client_redirect_uris", "client_id"),
+        new("identity_clients", "client_id", "identity_client_scopes", "client_id"),
+        new("identity_clients", "client_id", "identity_consents", "registered_client_id"),
+        new("identity_clients", "client_id", "identity_consent_scopes", "registered_client_id"),
     ];
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)

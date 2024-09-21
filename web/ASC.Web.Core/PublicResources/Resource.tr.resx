@@ -421,7 +421,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Odadaki kullanıcı sayısı {0} değerini geçmemelidir</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Markalaşma ve özelleştirme</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
