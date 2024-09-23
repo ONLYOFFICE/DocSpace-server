@@ -60,7 +60,8 @@ public class FileSharingAceHelper(
         }
 
         if (!aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None) &&
-            !await fileSharingHelper.CanSetAccessAsync(entry) && advancedSettings is not { InvitationLink: true })
+            !beforeOwnerChange &&
+            !await fileSharingHelper.CanSetAccessAsync(entry))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }

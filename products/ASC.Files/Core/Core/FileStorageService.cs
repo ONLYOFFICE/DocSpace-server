@@ -3447,8 +3447,8 @@ public class FileStorageService //: IFileStorageService
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            if (!await fileSecurity.CanEditAsync(folder))
-            {
+            if (!await fileSecurity.CanChangeOwnerAsync(folder))
+            { 
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
@@ -3506,7 +3506,7 @@ public class FileStorageService //: IFileStorageService
 
         await foreach (var file in files)
         {
-            if (!await fileSecurity.CanEditAsync(file))
+            if (!await fileSecurity.CanChangeOwnerAsync(file))
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
@@ -3581,7 +3581,6 @@ public class FileStorageService //: IFileStorageService
             yield return newFile;
         }
     }
-
 
     public async Task<IEnumerable<JsonElement>> CreateThumbnailsAsync(List<JsonElement> fileIds)
     {

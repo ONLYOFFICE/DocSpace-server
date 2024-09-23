@@ -192,8 +192,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.CreateRoomFrom,
                     FilesSecurityActions.EditForm,
                     FilesSecurityActions.CopyLink,
-                    FilesSecurityActions.Embed,
-
+                    FilesSecurityActions.Embed
                 }
             },
             {
@@ -217,13 +216,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Reconnect,
                     FilesSecurityActions.CreateRoomFrom,
                     FilesSecurityActions.CopyLink,
-                    FilesSecurityActions.Embed
+                    FilesSecurityActions.Embed,
+                    FilesSecurityActions.ChangeOwner
                 }
             }
     }.ToFrozenDictionary();
 
     private ConcurrentDictionary<string, FileShareRecord<int>> _cachedRecordsInternal;
-    private ConcurrentDictionary<string, FileShareRecord<string>> _cachedRecordsThirdparty;
+    private ConcurrentDictionary<string, FileShareRecord<string>> _cachedRecordsThirdParty;
     private readonly ConcurrentDictionary<string, Guid> _cachedRoomOwner = new();
 
     private ConcurrentDictionary<string, FileShareRecord<T>> GetCachedRecords<T>()
@@ -235,8 +235,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         
         if (typeof(T) == typeof(string))
         {
-            _cachedRecordsThirdparty ??= new ConcurrentDictionary<string, FileShareRecord<string>>();
-            return (ConcurrentDictionary<string, FileShareRecord<T>>)Convert.ChangeType(_cachedRecordsThirdparty, typeof(ConcurrentDictionary<string, FileShareRecord<T>>));
+            _cachedRecordsThirdParty ??= new ConcurrentDictionary<string, FileShareRecord<string>>();
+            return (ConcurrentDictionary<string, FileShareRecord<T>>)Convert.ChangeType(_cachedRecordsThirdParty, typeof(ConcurrentDictionary<string, FileShareRecord<T>>));
         }
 
         return null;
@@ -450,6 +450,11 @@ public class FileSecurity(IDaoFactory daoFactory,
     public async Task<bool> CanReadLinksAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.ReadLinks);
+    }
+    
+    public async Task<bool> CanChangeOwnerAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.ChangeOwner);
     }
     
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false)
@@ -890,11 +895,12 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             if (action != FilesSecurityActions.Read)
             {
-                if (action is FilesSecurityActions.Delete &&
+                if (action is FilesSecurityActions.Delete && 
                     folder.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder)
                 {
                     return false;
                 }
+                
                 if (action is FilesSecurityActions.Duplicate or
                               FilesSecurityActions.EditAccess or
                               FilesSecurityActions.Edit or
@@ -911,7 +917,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
                 
-                if (action is FilesSecurityActions.Pin or FilesSecurityActions.EditAccess or FilesSecurityActions.Mute && !isRoom)
+                if (action is FilesSecurityActions.Pin or FilesSecurityActions.EditAccess or FilesSecurityActions.Mute or FilesSecurityActions.ChangeOwner && !isRoom)
                 {
                     return false;
                 }
@@ -1016,6 +1022,20 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return false;
                 }
+                
+                if (isDocSpaceAdmin)
+                {
+                    if (action is FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory)
+                    {
+                        return true;
+                    }
+
+                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.Duplicate or FilesSecurityActions.ChangeOwner)
+                    {
+                        return true;
+                    }
+                }
+                
                 if (action == FilesSecurityActions.FillForms && file != null)
                 {
                     var parentFolders = await GetFileParentFolders(file.ParentId);
@@ -1028,7 +1048,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                     }
                 }
-                if(action is 
+                
+                if (action is 
                        FilesSecurityActions.Rename or 
                        FilesSecurityActions.Lock or 
                        FilesSecurityActions.Move or 
@@ -1048,6 +1069,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                     }
                 }
+                
                 if (action == FilesSecurityActions.CopyLink && file != null)
                 {
                     var parentFolders = await GetFileParentFolders(file.ParentId);
@@ -1057,7 +1079,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     }
                 }
-                if (await HasFullAccessAsync(e, userId, isGuest, isDocSpaceAdmin, isRoom, isUser))
+                
+                if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
                 }
@@ -1080,8 +1103,21 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return false;
                 }
+                
+                if (isDocSpaceAdmin)
+                {
+                    if (action is FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory)
+                    {
+                        return true;
+                    }
 
-                if (await HasFullAccessAsync(e, userId, isGuest, isDocSpaceAdmin, isRoom, isUser))
+                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Delete)
+                    {
+                        return true;
+                    }
+                }
+
+                if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
                 }
@@ -2249,16 +2285,11 @@ public class FileSecurity(IDaoFactory daoFactory,
         return parentFolders;
     }
 
-    private async Task<bool> HasFullAccessAsync<T>(FileEntry<T> entry, Guid userId, bool isGuest, bool isDocSpaceAdmin, bool isRoom, bool isUser)
+    private async Task<bool> HasFullAccessAsync<T>(FileEntry<T> entry, Guid userId, bool isGuest, bool isRoom, bool isUser)
     {
         if (isGuest || isUser)
         {
             return false;
-        }
-
-        if (isDocSpaceAdmin)
-        {
-            return true;
         }
 
         if (isRoom)
@@ -2365,6 +2396,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         CreateRoomFrom,
         EditForm,
         CopyLink,
-        Embed
+        Embed,
+        ChangeOwner
     }
 }
