@@ -3327,7 +3327,7 @@ public class FileStorageService //: IFileStorageService
             {
                 if (indexing.Value)
                 {
-                    await ReOrderAsync(room.Id, true);
+                    await ReOrderAsync(room.Id, true, true);
                 }
                 
                 room.SettingsIndexing = indexing.Value;
@@ -3369,7 +3369,7 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
-    public async Task<Folder<T>> ReOrderAsync<T>(T folderId, bool subfolders = false)
+    public async Task<Folder<T>> ReOrderAsync<T>(T folderId, bool subfolders = false, bool init = false)
     {        
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -3385,10 +3385,10 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        
-        
-        var folders = folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.CustomOrder, true), FilterType.None, false, Guid.Empty, null);
-        var files = fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.CustomOrder, true), FilterType.None, false, Guid.Empty, null, null, false);
+
+        var orderBy = init ? new OrderBy(SortedByType.DateAndTime, false) : new OrderBy(SortedByType.CustomOrder, true);
+        var folders = folderDao.GetFoldersAsync(folderId, orderBy, FilterType.None, false, Guid.Empty, null);
+        var files = fileDao.GetFilesAsync(folderId, orderBy, FilterType.None, false, Guid.Empty, null, null, false);
         
         var entries = await files.Concat(folders.Cast<FileEntry>())
             .OrderBy(r => r.Order)
@@ -3426,7 +3426,7 @@ public class FileStorageService //: IFileStorageService
         {
             foreach (var t in folderIds)
             {
-                await ReOrderAsync(t.Key, true);
+                await ReOrderAsync(t.Key, true, init);
             }
         }
 
