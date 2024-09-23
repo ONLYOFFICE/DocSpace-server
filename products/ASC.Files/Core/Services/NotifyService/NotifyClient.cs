@@ -275,6 +275,10 @@ public class NotifyClient(WorkContext notifyContext,
 
         var documentUrl = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, filledForm.Title, filledForm.Id));
 
+        var userName = filledForm.CreateBy == ConfigurationConstants.Guest.ID
+            ? AuditReportResource.ResourceManager.GetString("GuestAccount", managerCulture)
+            : user.DisplayUserName(displayUserSettingsHelper);
+
         var userButtonText = FilesPatternResource.ResourceManager.GetString("button_CheckReadyForms", userCulture);
 
         var managerButtonText = FilesPatternResource.ResourceManager.GetString("button_CheckReadyForms", managerCulture);
@@ -305,7 +309,7 @@ public class NotifyClient(WorkContext notifyContext,
             new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
             new TagValue(NotifyConstants.RoomTitle, room.Title),
             new TagValue(NotifyConstants.RoomUrl, roomUrl),
-            new TagValue(Tags.FromUserName, user.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(Tags.FromUserName, userName),
             new TagValue(Tags.FromUserLink, userUrl),
             new TagValue(CommonTags.Culture, managerCulture.Name),
             TagValues.OrangeButton(managerButtonText, documentParentUrl)
