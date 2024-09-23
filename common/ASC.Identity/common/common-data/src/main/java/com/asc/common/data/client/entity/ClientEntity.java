@@ -62,6 +62,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 public class ClientEntity implements Serializable {
 
   /** The unique identifier for the client. */
+  // TODO: Use UUID generator to avoid extra select
   @Id
   @Column(name = "client_id", unique = true, length = 36)
   private String clientId;
@@ -173,6 +174,13 @@ public class ClientEntity implements Serializable {
   @JsonBackReference
   @OneToMany(mappedBy = "client")
   private Set<ConsentEntity> consents;
+
+  /**
+   * The version field is used for optimistic locking. It tracks the number of updates made to the
+   * entity. This helps to avoid conflicts during concurrent updates by ensuring that a transaction
+   * updates an entity based on the most recent version.
+   */
+  @Version private Integer version;
 
   /**
    * This method is called before the entity is persisted. It sets the enabled flag to true, the

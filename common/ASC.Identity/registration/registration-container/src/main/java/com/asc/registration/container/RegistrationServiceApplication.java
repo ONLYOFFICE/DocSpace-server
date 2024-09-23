@@ -40,8 +40,12 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+@EnableRetry
 @EnableCaching
+@EnableTransactionManagement
 @EntityScan(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
 @EnableJpaRepositories(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
 @SpringBootApplication(scanBasePackages = {"com.asc.registration", "com.asc.common"})
