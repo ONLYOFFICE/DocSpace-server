@@ -26,13 +26,13 @@
     <ItemGroup>
       <None Remove="img\audit.svg" />
       <None Remove="img\backup.svg" />
+      <None Remove="img\customization.svg" />
       <None Remove="img\restore.svg" />
       <None Remove="img\room.svg" />
       <None Remove="img\sso.svg" />
       <None Remove="img\thirdparty.svg" />
       <None Remove="img\total_size.svg" />
       <None Remove="img\users.svg" />
-      <None Remove="img\whitelabel.svg" />
 	  <None Remove="img\statistic.svg" />
     </ItemGroup>
     <ItemGroup>
@@ -43,7 +43,7 @@
       <EmbeddedResource Include="img\thirdparty.svg" />
       <EmbeddedResource Include="img\total_size.svg" />
       <EmbeddedResource Include="img\users.svg" />
-      <EmbeddedResource Include="img\whitelabel.svg" />
+      <EmbeddedResource Include="img\customization.svg" />
       <EmbeddedResource Include="img\statistic.svg" />
     </ItemGroup>
     <ItemGroup>

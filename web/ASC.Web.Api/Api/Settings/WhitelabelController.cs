@@ -442,7 +442,9 @@ public class WhitelabelController(ApiContext apiContext,
 
         await DemandRebrandingPermissionAsync();
 
-        if (companyWhiteLabelSettingsWrapper.Settings == null)
+        if (companyWhiteLabelSettingsWrapper.Settings == null || 
+            companyWhiteLabelSettingsWrapper.Settings.Email.TestEmailPunyCode() || 
+            companyWhiteLabelSettingsWrapper.Settings.Site.TestUrlPunyCode())
         {
             throw new ArgumentNullException("settings");
         }
@@ -652,9 +654,9 @@ public class WhitelabelController(ApiContext apiContext,
     /// <category>Rebranding</category>
     /// <short>Check the white label availability</short>
     /// <returns type="System.Boolean, System">Boolean value: true if the white label is enabled</returns>
-    /// <path>api/2.0/settings/enableWhitelabel</path>
+    /// <path>api/2.0/settings/enablewhitelabel</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("enableWhitelabel")]
+    [HttpGet("enablewhitelabel")]
     public async Task<bool> GetEnableWhitelabelAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
