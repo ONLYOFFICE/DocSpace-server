@@ -306,7 +306,7 @@ public class TfaappController(
 
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings ||
             !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
-            !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
+            await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
         {
             throw new Exception(Resource.TfaAppNotAvailable);
         }
