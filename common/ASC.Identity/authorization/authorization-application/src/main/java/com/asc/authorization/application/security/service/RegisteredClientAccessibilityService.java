@@ -25,42 +25,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.exception.authorization;
+package com.asc.authorization.application.security.service;
 
-import static com.asc.authorization.application.security.error.AuthorizationError.ASC_IDENTITY_PERSISTENCE_ERROR;
-
-import org.springframework.security.oauth2.core.OAuth2Error;
-
-/** Exception thrown when there is an issue with persisting identity authorization. */
-public class AuthorizationPersistenceException extends AuthorizationProcessingException {
-  private static final OAuth2Error persistenceError =
-      new OAuth2Error(ASC_IDENTITY_PERSISTENCE_ERROR.getCode());
+/** Repository interface for validating the accessibility of registered clients. */
+public interface RegisteredClientAccessibilityService {
 
   /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message.
+   * Validates the accessibility of the client associated with the given tenant.
    *
-   * @param message the detail message
+   * @param clientId the ID of the registered client.
+   * @param tenantId the tenant ID of the current caller to validate accessibility against.
+   * @return true if the client is accessible, false otherwise.
    */
-  public AuthorizationPersistenceException(String message) {
-    super(persistenceError, message);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified cause.
-   *
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(Throwable cause) {
-    super(persistenceError, cause);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message and cause.
-   *
-   * @param message the detail message
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(String message, Throwable cause) {
-    super(persistenceError, message, cause);
-  }
+  boolean validateClientAccessibility(String clientId, int tenantId);
 }

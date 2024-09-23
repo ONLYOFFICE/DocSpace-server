@@ -25,42 +25,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.exception.authorization;
+package com.asc.registration.application.security.authentication;
 
-import static com.asc.authorization.application.security.error.AuthorizationError.ASC_IDENTITY_PERSISTENCE_ERROR;
+import com.asc.common.application.transfer.response.AscPersonResponse;
+import com.asc.common.application.transfer.response.AscSettingsResponse;
+import com.asc.common.application.transfer.response.AscTenantResponse;
 
-import org.springframework.security.oauth2.core.OAuth2Error;
-
-/** Exception thrown when there is an issue with persisting identity authorization. */
-public class AuthorizationPersistenceException extends AuthorizationProcessingException {
-  private static final OAuth2Error persistenceError =
-      new OAuth2Error(ASC_IDENTITY_PERSISTENCE_ERROR.getCode());
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message.
-   *
-   * @param message the detail message
-   */
-  public AuthorizationPersistenceException(String message) {
-    super(persistenceError, message);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified cause.
-   *
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(Throwable cause) {
-    super(persistenceError, cause);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message and cause.
-   *
-   * @param message the detail message
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(String message, Throwable cause) {
-    super(persistenceError, message, cause);
-  }
-}
+/**
+ * Represents the principal in ASC authentication token, holding information about the person,
+ * tenant, and settings.
+ *
+ * @param me the asc person response.
+ * @param tenant the asc tenant response.
+ * @param settings the asc settings response.
+ */
+public record AscAuthenticationTokenPrincipal(
+    AscPersonResponse me, AscTenantResponse tenant, AscSettingsResponse settings) {}

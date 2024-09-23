@@ -25,42 +25,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.exception.authorization;
+package com.asc.authorization.application.configuration.security;
 
-import static com.asc.authorization.application.security.error.AuthorizationError.ASC_IDENTITY_PERSISTENCE_ERROR;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-import org.springframework.security.oauth2.core.OAuth2Error;
+/** Configuration properties for OAuth2 registered client settings. */
+@Getter
+@Setter
+@Configuration
+@ConfigurationProperties(prefix = "spring.security.oauth2.registered-client")
+public class RegisteredClientConfiguration {
+  /** Time-to-live (TTL) for access tokens, in minutes. Default value is 60 minutes. */
+  private int accessTokenMinutesTTL = 60;
 
-/** Exception thrown when there is an issue with persisting identity authorization. */
-public class AuthorizationPersistenceException extends AuthorizationProcessingException {
-  private static final OAuth2Error persistenceError =
-      new OAuth2Error(ASC_IDENTITY_PERSISTENCE_ERROR.getCode());
+  /** Time-to-live (TTL) for refresh tokens, in days. Default value is 365 days. */
+  private int refreshTokenDaysTTL = 365;
 
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message.
-   *
-   * @param message the detail message
-   */
-  public AuthorizationPersistenceException(String message) {
-    super(persistenceError, message);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified cause.
-   *
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(Throwable cause) {
-    super(persistenceError, cause);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message and cause.
-   *
-   * @param message the detail message
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(String message, Throwable cause) {
-    super(persistenceError, message, cause);
-  }
+  /** Time-to-live (TTL) for authorization codes, in minutes. Default value is 1 minute. */
+  private int authorizationCodeMinutesTTL = 1;
 }

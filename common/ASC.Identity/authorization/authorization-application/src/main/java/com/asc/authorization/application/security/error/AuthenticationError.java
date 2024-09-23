@@ -25,42 +25,50 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.exception.authorization;
+package com.asc.authorization.application.security.error;
 
-import static com.asc.authorization.application.security.error.AuthorizationError.ASC_IDENTITY_PERSISTENCE_ERROR;
+import lombok.Getter;
 
-import org.springframework.security.oauth2.core.OAuth2Error;
+/** Enum representing various authentication errors. */
+@Getter
+public enum AuthenticationError {
 
-/** Exception thrown when there is an issue with persisting identity authorization. */
-public class AuthorizationPersistenceException extends AuthorizationProcessingException {
-  private static final OAuth2Error persistenceError =
-      new OAuth2Error(ASC_IDENTITY_PERSISTENCE_ERROR.getCode());
+  /** Error indicating an issue with retrieving ASC data. */
+  ASC_RETRIEVAL_ERROR("asc_retrieval_error"),
+
+  /** Error indicating that the authentication method is not supported. */
+  AUTHENTICATION_NOT_SUPPORTED_ERROR("authentication_not_supported_error"),
+
+  /** Error indicating that the client is disabled. */
+  CLIENT_DISABLED_ERROR("client_disabled_error"),
+
+  /** Error indicating that the client was not found. */
+  CLIENT_NOT_FOUND_ERROR("client_not_found_error"),
+
+  /** Error indicating that the client does not have permission. */
+  CLIENT_PERMISSION_DENIED_ERROR("client_permission_denied_error"),
+
+  /** Error indicating that the redirect URI is invalid. */
+  INVALID_REDIRECT_URI_ERROR("invalid_redirect_uri_error"),
+
+  /** Error indicating that the ASC cookie is missing. */
+  MISSING_ASC_COOKIE_ERROR("missing_asc_cookie_error"),
+
+  /** Error indicating that the client ID is missing. */
+  MISSING_CLIENT_ID_ERROR("missing_client_id_error"),
+
+  /** Error indicating that something went wrong during the authentication process. */
+  SOMETHING_WENT_WRONG_ERROR("something_went_wrong_error");
+
+  /** The error code associated with the authentication error. */
+  private final String code;
 
   /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message.
+   * Constructs an AuthenticationError with the specified error code.
    *
-   * @param message the detail message
+   * @param code the error code
    */
-  public AuthorizationPersistenceException(String message) {
-    super(persistenceError, message);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified cause.
-   *
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(Throwable cause) {
-    super(persistenceError, cause);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message and cause.
-   *
-   * @param message the detail message
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(String message, Throwable cause) {
-    super(persistenceError, message, cause);
+  AuthenticationError(String code) {
+    this.code = code;
   }
 }

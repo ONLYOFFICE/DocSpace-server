@@ -25,42 +25,40 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.exception.authorization;
+package com.asc.authorization.application.controller.exception.handler;
 
-import static com.asc.authorization.application.security.error.AuthorizationError.ASC_IDENTITY_PERSISTENCE_ERROR;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import org.springframework.security.oauth2.core.OAuth2Error;
-
-/** Exception thrown when there is an issue with persisting identity authorization. */
-public class AuthorizationPersistenceException extends AuthorizationProcessingException {
-  private static final OAuth2Error persistenceError =
-      new OAuth2Error(ASC_IDENTITY_PERSISTENCE_ERROR.getCode());
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message.
-   *
-   * @param message the detail message
-   */
-  public AuthorizationPersistenceException(String message) {
-    super(persistenceError, message);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified cause.
-   *
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(Throwable cause) {
-    super(persistenceError, cause);
-  }
+/**
+ * Global exception handler for handling database-related exceptions.
+ *
+ * <p>This class handles {@link DataAccessException} thrown by any controller and returns a standard
+ * HTTP response with an appropriate status code.
+ */
+@Slf4j
+@ControllerAdvice
+public class DatabaseExceptionHandler {
 
   /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message and cause.
+   * Handles {@link DataAccessException} and returns a response with HTTP status 500.
    *
-   * @param message the detail message
-   * @param cause the cause of the exception
+   * <p>This method logs the exception and returns a {@link ResponseEntity} with HTTP status {@link
+   * HttpStatus#INTERNAL_SERVER_ERROR}.
+   *
+   * @param ex the {@link DataAccessException} thrown during a database operation
+   * @param request the {@link HttpServletRequest} in which the exception was raised
+   * @return a {@link ResponseEntity} with HTTP status 500 (Internal Server Error)
    */
-  public AuthorizationPersistenceException(String message, Throwable cause) {
-    super(persistenceError, message, cause);
+  @ExceptionHandler(DataAccessException.class)
+  public ResponseEntity<?> handleDataAccessException(
+      DataAccessException ex, HttpServletRequest request) {
+    log.error("Could not perform a database operation", ex);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
   }
 }

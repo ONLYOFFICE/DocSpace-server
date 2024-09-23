@@ -25,42 +25,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.exception.authorization;
+package com.asc.authorization.application.security.service;
 
-import static com.asc.authorization.application.security.error.AuthorizationError.ASC_IDENTITY_PERSISTENCE_ERROR;
+import com.asc.common.service.transfer.response.ClientResponse;
 
-import org.springframework.security.oauth2.core.OAuth2Error;
-
-/** Exception thrown when there is an issue with persisting identity authorization. */
-public class AuthorizationPersistenceException extends AuthorizationProcessingException {
-  private static final OAuth2Error persistenceError =
-      new OAuth2Error(ASC_IDENTITY_PERSISTENCE_ERROR.getCode());
+/** Interface for a service that provides cached operations for querying registered clients. */
+public interface CacheableRegisteredClientQueryService {
 
   /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message.
+   * Finds a client by its ID with caching support.
    *
-   * @param message the detail message
+   * @param id the ID of the client.
+   * @return the ClientResponse containing the client's details.
    */
-  public AuthorizationPersistenceException(String message) {
-    super(persistenceError, message);
-  }
+  ClientResponse findById(String id);
 
   /**
-   * Constructs a new AuthorizationPersistenceException with the specified cause.
+   * Finds a client by its client ID with caching support.
    *
-   * @param cause the cause of the exception
+   * @param clientId the client ID of the client.
+   * @return the ClientResponse containing the client's details.
    */
-  public AuthorizationPersistenceException(Throwable cause) {
-    super(persistenceError, cause);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message and cause.
-   *
-   * @param message the detail message
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(String message, Throwable cause) {
-    super(persistenceError, message, cause);
-  }
+  ClientResponse findByClientId(String clientId);
 }

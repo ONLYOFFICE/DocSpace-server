@@ -25,42 +25,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.exception.authorization;
+package com.asc.authorization.application.security.grant;
 
-import static com.asc.authorization.application.security.error.AuthorizationError.ASC_IDENTITY_PERSISTENCE_ERROR;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
-import org.springframework.security.oauth2.core.OAuth2Error;
+/** Defines extensions for authorization grant types for the application. */
+public final class ExtendedAuthorizationGrantType {
 
-/** Exception thrown when there is an issue with persisting identity authorization. */
-public class AuthorizationPersistenceException extends AuthorizationProcessingException {
-  private static final OAuth2Error persistenceError =
-      new OAuth2Error(ASC_IDENTITY_PERSISTENCE_ERROR.getCode());
+  /** Authorization grant type for personal access tokens. */
+  public static final AuthorizationGrantType PERSONAL_ACCESS_TOKEN =
+      new AuthorizationGrantType("personal_access_token");
 
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message.
-   *
-   * @param message the detail message
-   */
-  public AuthorizationPersistenceException(String message) {
-    super(persistenceError, message);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified cause.
-   *
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(Throwable cause) {
-    super(persistenceError, cause);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message and cause.
-   *
-   * @param message the detail message
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(String message, Throwable cause) {
-    super(persistenceError, message, cause);
-  }
+  private ExtendedAuthorizationGrantType() {}
 }

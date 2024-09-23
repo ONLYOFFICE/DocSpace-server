@@ -25,42 +25,41 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.exception.authorization;
+package com.asc.authorization.application.security.authority;
 
-import static com.asc.authorization.application.security.error.AuthorizationError.ASC_IDENTITY_PERSISTENCE_ERROR;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
 
-import org.springframework.security.oauth2.core.OAuth2Error;
+/** Represents a tenant authority for OAuth2 authorization. */
+@Getter
+@Setter
+@JsonDeserialize
+@NoArgsConstructor
+@AllArgsConstructor
+public class TenantAuthority implements GrantedAuthority, Serializable {
 
-/** Exception thrown when there is an issue with persisting identity authorization. */
-public class AuthorizationPersistenceException extends AuthorizationProcessingException {
-  private static final OAuth2Error persistenceError =
-      new OAuth2Error(ASC_IDENTITY_PERSISTENCE_ERROR.getCode());
+  /** The ID of the tenant */
+  @JsonProperty(value = "tenant_id")
+  private int tenantId;
+
+  /** The URL of the tenant. */
+  @JsonProperty(value = "tenant_url")
+  private String tenantUrl;
 
   /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message.
+   * Returns the authority granted to the tenant.
    *
-   * @param message the detail message
+   * @return the tenant URL as the authority.
    */
-  public AuthorizationPersistenceException(String message) {
-    super(persistenceError, message);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified cause.
-   *
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(Throwable cause) {
-    super(persistenceError, cause);
-  }
-
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message and cause.
-   *
-   * @param message the detail message
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(String message, Throwable cause) {
-    super(persistenceError, message, cause);
+  @JsonIgnore
+  public String getAuthority() {
+    return tenantUrl;
   }
 }

@@ -25,42 +25,32 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.exception.authorization;
+package com.asc.authorization.application.security.error;
 
-import static com.asc.authorization.application.security.error.AuthorizationError.ASC_IDENTITY_PERSISTENCE_ERROR;
+import lombok.Getter;
 
-import org.springframework.security.oauth2.core.OAuth2Error;
+/** Enum representing various authorization errors. */
+@Getter
+public enum AuthorizationError {
 
-/** Exception thrown when there is an issue with persisting identity authorization. */
-public class AuthorizationPersistenceException extends AuthorizationProcessingException {
-  private static final OAuth2Error persistenceError =
-      new OAuth2Error(ASC_IDENTITY_PERSISTENCE_ERROR.getCode());
+  /** Error indicating an issue with cleaning up identity authorization. */
+  ASC_IDENTITY_CLEANUP_ERROR("identity_authorization_cleanup_error"),
 
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message.
-   *
-   * @param message the detail message
-   */
-  public AuthorizationPersistenceException(String message) {
-    super(persistenceError, message);
-  }
+  /** Error indicating an issue with persisting identity authorization. */
+  ASC_IDENTITY_PERSISTENCE_ERROR("identity_authorization_persistence_error"),
 
-  /**
-   * Constructs a new AuthorizationPersistenceException with the specified cause.
-   *
-   * @param cause the cause of the exception
-   */
-  public AuthorizationPersistenceException(Throwable cause) {
-    super(persistenceError, cause);
-  }
+  /** Error indicating an issue with retrieving identity authorization. */
+  ASC_IDENTITY_RETRIEVAL_ERROR("identity_authorization_retrieval_error");
+
+  /** The error code associated with the authorization error. */
+  private final String code;
 
   /**
-   * Constructs a new AuthorizationPersistenceException with the specified detail message and cause.
+   * Constructs an AuthorizationError with the specified error code.
    *
-   * @param message the detail message
-   * @param cause the cause of the exception
+   * @param code the error code
    */
-  public AuthorizationPersistenceException(String message, Throwable cause) {
-    super(persistenceError, message, cause);
+  AuthorizationError(String code) {
+    this.code = code;
   }
 }
