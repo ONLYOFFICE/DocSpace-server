@@ -799,13 +799,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
 
         if (file != null &&
-            action == FilesSecurityActions.Edit &&
-            fileUtility.CanWebRestrictedEditing(file.Title))
-        {
-            return false;
-        }
-
-        if (file != null &&
             action is FilesSecurityActions.EditForm or FilesSecurityActions.FillForms &&
             !file.IsForm)
         {
