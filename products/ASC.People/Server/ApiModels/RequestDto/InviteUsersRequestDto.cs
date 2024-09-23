@@ -35,6 +35,7 @@ public class InviteUsersRequestDto
     /// List of user invitations
     /// </summary>
     [MaxEmailInvitations]
+    [Required]
     public IEnumerable<UserInvitation> Invitations { get; set; }
 
     /// <summary>

@@ -39,6 +39,7 @@ public class MigratingApiUser : ImportableApiEntity
     /// Email
     /// </summary>
     [ProtoMember(3)]
+    [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>

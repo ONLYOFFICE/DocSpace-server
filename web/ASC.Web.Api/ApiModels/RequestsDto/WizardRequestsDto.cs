@@ -34,6 +34,7 @@ public class WizardRequestsDto
     /// <summary>
     /// Email
     /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Users;
 
 public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
@@ -86,6 +88,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     /// <summary>
     /// Email
     /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
     private string _contacts;

@@ -71,6 +71,7 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     /// <summary>
     /// Sales email
     /// </summary>
+    [EmailAddress]
     public string SalesEmail { get; set; }
 
     /// <summary>

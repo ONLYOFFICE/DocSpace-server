@@ -191,6 +191,7 @@ public class SsoFieldMapping
     /// <summary>
     /// Email
     /// </summary>
+    [EmailAddress]
     public string Email { get; init; }
 
     /// <summary>

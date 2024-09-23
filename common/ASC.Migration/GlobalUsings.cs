@@ -73,3 +73,4 @@ global using Microsoft.Extensions.Caching.Distributed;
 
 global using ProtoBuf;
 global using ASC.Api.Core.Extensions;
+global using System.ComponentModel.DataAnnotations;

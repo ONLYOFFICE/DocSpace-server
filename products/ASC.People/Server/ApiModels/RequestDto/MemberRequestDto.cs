@@ -34,6 +34,7 @@ public class EmailMemberRequestDto
     /// <summary>
     /// Email
     /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 }
 
@@ -255,7 +256,8 @@ public class GetMemberByEmailRequestDto
     /// <summary>
     /// User email address
     /// </summary>
-    [FromQuery(Name = "email")] 
+    [FromQuery(Name = "email")]
+    [EmailAddress]
     public string Email { get; set; }
 }
 

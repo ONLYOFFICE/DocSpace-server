@@ -36,6 +36,7 @@ public class FileShareParams
     /// <summary>
     /// User email address
     /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>

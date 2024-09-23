@@ -197,6 +197,7 @@ public class EmailValidationKeyModel
     /// <summary>
     /// Email
     /// </summary>
+    [EmailAddress]
     public string Email { get; init; }
 
     /// <summary>

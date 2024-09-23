@@ -41,6 +41,7 @@ public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
     /// <summary>
     /// Email
     /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>

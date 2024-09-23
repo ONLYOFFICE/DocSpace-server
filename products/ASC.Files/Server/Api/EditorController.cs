@@ -90,7 +90,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     {
         await using var stream = httpContextAccessor.HttpContext.Request.Body;
 
-        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.File.FileExtension, inDto.File.DownloadUri, stream, inDto.File.Forcesave));
+        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Forcesave));
     }
 
     /// <summary>

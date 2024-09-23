@@ -401,7 +401,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpPut("{fileId}/update")]
     public async Task<FileDto<T>> UpdateFileStreamFromFormAsync(FileStreamRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UpdateFileStreamAsync(filesControllerHelper.GetFileFromRequest(inDto.File).OpenReadStream(), inDto.FileId, inDto.File.FileExtension, inDto.File.Encrypted, inDto.File.Forcesave);
+        return await filesControllerHelper.UpdateFileStreamAsync(filesControllerHelper.GetFileFromRequest(inDto).OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
     }
 
     /// <summary>

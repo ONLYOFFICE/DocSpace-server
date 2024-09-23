@@ -38,6 +38,7 @@ public class MentionWrapper
     /// <summary>
     /// User email
     /// </summary>
+    [EmailAddress]
     public string Email { get; internal set; }
 
     /// <summary>

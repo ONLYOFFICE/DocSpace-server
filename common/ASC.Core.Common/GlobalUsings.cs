@@ -181,3 +181,4 @@ global using FirebaseAdminMessaging = FirebaseAdmin.Messaging;
 global using JsonSerializer = System.Text.Json.JsonSerializer;
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 global using ASC.Api.Core.Extensions; 
+global using System.ComponentModel.DataAnnotations; 

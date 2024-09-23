@@ -38,6 +38,7 @@ public class EmailInvitationDto
     /// <summary>
     /// Email address
     /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 }
 

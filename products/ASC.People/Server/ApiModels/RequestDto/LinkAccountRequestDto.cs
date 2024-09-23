@@ -60,6 +60,7 @@ public class SignupAccountRequestDto : LinkAccountRequestDto
     /// <summary>
     /// Email address
     /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>

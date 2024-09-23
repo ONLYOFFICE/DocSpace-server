@@ -55,6 +55,7 @@ public class AdminMessageBaseSettingsRequestsDto
     /// <summary>
     /// Email
     /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>

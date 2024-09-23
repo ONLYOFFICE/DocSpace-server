@@ -113,6 +113,7 @@ public class ConfirmData
     /// <summary>
     /// Email address
     /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>
