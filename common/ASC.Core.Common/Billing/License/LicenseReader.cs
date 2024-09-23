@@ -188,7 +188,6 @@ public class LicenseReader(
             Audit = true,
             Ldap = true,
             Sso = true,
-            WhiteLabel = true,
             ThirdParty = true,
             AutoBackupRestore = true,
             Oauth = true,
@@ -196,6 +195,7 @@ public class LicenseReader(
             MaxFileSize = defaultQuota.MaxFileSize,
             DocsEdition = true,
             Customization = license.Customization,
+            Lifetime = !license.TimeLimited,
             Statistic = true
         };
 

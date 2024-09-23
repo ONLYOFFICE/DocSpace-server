@@ -832,7 +832,7 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Quoi de neuf</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Personnalisation</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">

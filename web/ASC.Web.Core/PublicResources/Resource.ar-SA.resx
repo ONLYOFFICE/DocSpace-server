@@ -1017,7 +1017,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>يجب ألا يتجاوز عدد المستخدمين في الغرفة {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>العلامة التجارية والتخصيص</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">

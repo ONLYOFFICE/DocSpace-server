@@ -29,7 +29,7 @@ namespace ASC.Core.Users;
 /// <summary>
 /// </summary>
 [Flags]
-[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
+[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter<EmployeeType>))]
 [EnumExtensions]
 public enum EmployeeType
 {

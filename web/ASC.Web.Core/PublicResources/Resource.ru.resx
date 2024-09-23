@@ -832,7 +832,7 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Новенькое</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Брендинг и кастомизация</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
