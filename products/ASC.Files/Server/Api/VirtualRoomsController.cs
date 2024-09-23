@@ -74,7 +74,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     {
         var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
 
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -511,7 +511,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id}/watermark")]
-    public async Task<WatermarkDto> AddWaterMarksAsync(T id, WatermarkRequestDto<T> inDto)
+    public async Task<WatermarkDto> AddWaterMarksAsync(T id, WatermarkRequestDto inDto)
     {
         var watermarkSettings = await watermarkManager.SetWatermarkAsync(id, inDto);
 

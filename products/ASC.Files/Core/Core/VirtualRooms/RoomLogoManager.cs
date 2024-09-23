@@ -121,17 +121,7 @@ public class RoomLogoManager(
 
         return uri;
     }
-
-    public async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, Stream stream)
-    {
-        var store = await GetDataStoreAsync();
-
-        var data = await ReadStreamToByteArrayAsync(stream);
-
-        var uri = await CreateWatermarkImageAsync(room, store, data);
-
-        return uri;
-    }
+    
 
     private async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, IDataStore store, byte[] data)
     {

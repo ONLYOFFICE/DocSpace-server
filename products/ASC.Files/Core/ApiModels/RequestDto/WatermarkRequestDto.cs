@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class WatermarkRequestDto<T>
+public class WatermarkRequestDto
 {
     /// <summary>Specifies whether watermarks are on or off</summary>
     /// <type>System.Boolean, System</type>
@@ -50,9 +50,6 @@ public class WatermarkRequestDto<T>
     /// <summary>The path to the temporary image file</summary>
     /// <type>System.String, System</type>
     public string ImageUrl { get; set; }
-
-    /// <summary> The id of image file</summary>
-    public T ImageId { get; set; }
 
     /// <summary>Watermark image height</summary>
     /// <type>System.Double, System</type>

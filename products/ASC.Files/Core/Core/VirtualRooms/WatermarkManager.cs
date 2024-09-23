@@ -63,11 +63,18 @@ public class WatermarkManager
         _roomLogoManager = roomLogoManager;
     }
 
-    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto<T> watermarkRequestDto)
+    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarkRequestDto)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
 
         var room = await folderDao.GetFolderAsync(roomId);
+
+        return await SetWatermarkAsync(room, watermarkRequestDto);
+    }
+
+    public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)
+    {
+        var folderDao = _daoFactory.GetFolderDao<T>();
 
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
         {
@@ -79,7 +86,7 @@ public class WatermarkManager
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
-        var watermarkSettings = new WatermarkSettings()
+        var watermarkSettings = new WatermarkSettings
         {
             Enabled = watermarkRequestDto.Enabled,
             Text = watermarkRequestDto.Text,
@@ -98,18 +105,6 @@ public class WatermarkManager
             else
             {
                 imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
-            }
-        }
-        else if (!Equals(watermarkRequestDto.ImageId, default(T)))
-        {
-            var fileDao = _daoFactory.GetFileDao<T>();
-            var file = await fileDao.GetFileAsync(watermarkRequestDto.ImageId);
-
-            if (file != null && await _fileSecurity.CanReadAsync(file))
-            {
-                await using var stream = await fileDao.GetFileStreamAsync(file);
-
-                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, stream);
             }
         }
 

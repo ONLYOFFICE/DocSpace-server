@@ -74,4 +74,6 @@ public class CreateRoomRequestDto
     public RoomDataLifetimeDto Lifetime { get; set; }
     
     public bool DenyDownload { get; set; }
+    
+    public WatermarkRequestDto Watermark { get; set; }
 }
