@@ -424,7 +424,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool indexing, IEnumerable<FileShareParams> share, long quota, RoomDataLifetime lifetime, bool denyDownload, WatermarkRequestDto watermark)
+    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var parentId = await globalFolderHelper.GetFolderVirtualRooms();
@@ -439,7 +439,7 @@ public class FileStorageService //: IFileStorageService
         }, privacy, share);
     }
 
-    public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool indexing, bool createAsNewFolder, bool denyDownload)
+    public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool? indexing, bool createAsNewFolder, bool? denyDownload)
     {
         var folderDao = daoFactory.GetFolderDao<string>();
         var providerDao = daoFactory.ProviderDao;
@@ -540,7 +540,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, long quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool denyDownload = false, WatermarkRequestDto watermark = null)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
@@ -592,9 +592,21 @@ public class FileStorageService //: IFileStorageService
             newFolder.FolderType = folderType;
             newFolder.SettingsPrivate = parent.SettingsPrivate ? parent.SettingsPrivate : privacy;
             newFolder.SettingsColor = roomLogoManager.GetRandomColour();
-            newFolder.SettingsIndexing = indexing;
-            newFolder.SettingsDenyDownload = denyDownload;
-            newFolder.SettingsQuota = quota;
+            if (indexing.HasValue)
+            {
+                newFolder.SettingsIndexing = indexing.Value;
+            }
+
+            if (denyDownload.HasValue)
+            {
+                newFolder.SettingsDenyDownload = denyDownload.Value;
+            }
+
+            if (quota.HasValue)
+            {
+                newFolder.SettingsQuota = quota.Value;
+            }
+
             newFolder.SettingsLifetime = lifetime;
 
             var folderId = await folderDao.SaveFolderAsync(newFolder);
@@ -753,11 +765,16 @@ public class FileStorageService //: IFileStorageService
         var watermarkChanged = updateData.Watermark != null;
         
         if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged)
-        {
+        {                
             var oldTitle = folder.Title;
-            var watermark = mapper.Map<WatermarkRequestDto, WatermarkSettings>(updateData.Watermark);
-            watermark.ImageUrl = await watermarkManager.GetWatermarkImageUrlAsync(folder, watermark.ImageUrl);
+            WatermarkSettings watermark = null;
             
+            if (watermarkChanged)
+            {
+                watermark = mapper.Map<WatermarkRequestDto, WatermarkSettings>(updateData.Watermark);
+                watermark.ImageUrl = await watermarkManager.GetWatermarkImageUrlAsync(folder, watermark.ImageUrl);
+            }
+
             var newFolderId = await folderDao.UpdateFolderAsync(
                 folder,
                 titleChanged ? updateData.Title : folder.Title,
@@ -765,7 +782,9 @@ public class FileStorageService //: IFileStorageService
                 indexingChanged ? updateData.Indexing.Value : folder.SettingsIndexing,
                 denyDownloadChanged ? updateData.DenyDownload.Value : folder.SettingsDenyDownload,
                 lifetimeChanged ? mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(updateData.Lifetime) : folder.SettingsLifetime,
-                watermarkChanged ? JsonSerializer.Serialize(watermark) : folder.SettingsWatermark);
+                watermarkChanged ? 
+                    (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : JsonSerializer.Serialize(watermark)) : 
+                    folder.SettingsWatermark);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
             folder.Access = folderAccess;

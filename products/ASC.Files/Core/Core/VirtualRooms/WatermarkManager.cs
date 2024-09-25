@@ -37,7 +37,6 @@ public enum WatermarkAdditions
 }
 public class WatermarkSettings : IMapFrom<WatermarkRequestDto>
 {
-    public bool Enabled { get; set; }
     public string Text { get; set; }
     public WatermarkAdditions Additions { get; set; }
     public int Rotate { get; set; }
@@ -88,7 +87,6 @@ public class WatermarkManager
 
         var watermarkSettings = new WatermarkSettings
         {
-            Enabled = watermarkRequestDto.Enabled,
             Text = watermarkRequestDto.Text,
             Additions = watermarkRequestDto.Additions,
             Rotate = watermarkRequestDto.Rotate
@@ -130,14 +128,9 @@ public class WatermarkManager
 
     public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
     {
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType) || room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
         {
-            throw new ItemNotFoundException();
-        }
-
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
+            return null;
         }
 
         var folderDao = _daoFactory.GetFolderDao<T>();

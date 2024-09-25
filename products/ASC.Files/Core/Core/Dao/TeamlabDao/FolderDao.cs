@@ -945,7 +945,18 @@ internal class FolderDao(
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         toUpdate.Settings.Indexing = indexing;
         toUpdate.Settings.DenyDownload = denyDownload;
-        toUpdate.Settings.Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(lifeTime);
+        if (lifeTime != null)
+        {
+            if (lifeTime.Enabled.HasValue && !lifeTime.Enabled.Value)
+            {
+                toUpdate.Settings.Lifetime = null;
+            }
+            else
+            {
+                toUpdate.Settings.Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(lifeTime);
+            }
+        }
+
         toUpdate.Settings.Watermark = watermark;
         filesDbContext.Update(toUpdate);
 

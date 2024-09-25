@@ -43,6 +43,8 @@ public class RoomDataLifetimeDto : IMapFrom<RoomDataLifetime>
     /// <summary>Specifies time period value</summary>
     /// <type>System.Int32, System</type>
     [Range(1, 9999)]
-    public int Value { get; set; }
+    public int? Value { get; set; }
+    
+    public bool? Enabled { get; set; }
 }
 

@@ -63,7 +63,7 @@ public class WatermarkDto
     public double ImageWidth { get; set; }
 }
 [Scope]
-public class WatermarkDtoHelper()
+public class WatermarkDtoHelper
 {
     public WatermarkDto Get(WatermarkSettings watermarkSettings)
     {
@@ -74,7 +74,6 @@ public class WatermarkDtoHelper()
 
         return new WatermarkDto
         {
-            Enabled = watermarkSettings.Enabled,
             Additions = watermarkSettings.Additions,
             Text = watermarkSettings.Text,
             Rotate = watermarkSettings.Rotate,

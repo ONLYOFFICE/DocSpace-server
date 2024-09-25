@@ -97,7 +97,7 @@ public static class DocSpaceHelper
     {
         var (watermarkSettings, _) = await GetWatermarkSettings(file, folderDao);
 
-        return watermarkSettings != null && watermarkSettings.Enabled;
+        return watermarkSettings != null;
     }
 
     public static async Task<(WatermarkSettings, Folder<T>)> GetWatermarkSettings<T>(File<T> file, IFolderDao<T> folderDao)
