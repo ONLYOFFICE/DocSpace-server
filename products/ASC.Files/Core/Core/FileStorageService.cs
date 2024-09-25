@@ -94,7 +94,8 @@ public class FileStorageService //: IFileStorageService
     ShortUrl shortUrl,
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
     PasswordSettingsManager passwordSettingsManager,
-    WatermarkManager watermarkManager)
+    WatermarkManager watermarkManager,
+    IMapper mapper)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -725,10 +726,9 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
-        
-        var canEdit = DocSpaceHelper.IsRoom(folder.FolderType) 
-            ? folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder)
-            : await fileSecurity.CanRenameAsync(folder);
+
+        var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+        var canEdit = folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder);
 
         if (!canEdit)
         {
@@ -745,22 +745,52 @@ public class FileStorageService //: IFileStorageService
 
         var folderAccess = folder.Access;
 
-        if (!string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) || (folder.SettingsQuota != updateData.Quota && updateData.Quota != null))
+        var titleChanged = !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal)  && updateData.Title != null;
+        var quotaChanged = folder.SettingsQuota != updateData.Quota && updateData.Quota != null;
+        var indexingChanged = updateData.Indexing.HasValue && folder.SettingsIndexing != updateData.Indexing;
+        var denyDownloadChanged = updateData.DenyDownload.HasValue && folder.SettingsDenyDownload != updateData.DenyDownload;
+        var lifetimeChanged = updateData.Lifetime != null;
+        var watermarkChanged = updateData.Watermark != null;
+        
+        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged)
         {
             var oldTitle = folder.Title;
-            var oldQuota = folder.SettingsQuota;
+            var watermark = mapper.Map<WatermarkRequestDto, WatermarkSettings>(updateData.Watermark);
+            watermark.ImageUrl = await watermarkManager.GetWatermarkImageUrlAsync(folder, watermark.ImageUrl);
             
             var newFolderId = await folderDao.UpdateFolderAsync(
                 folder,
-                !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && updateData.Title != null ? updateData.Title : folder.Title,
-                folder.SettingsQuota != updateData.Quota && updateData.Quota != null ? (long)updateData.Quota : folder.SettingsQuota);
+                titleChanged ? updateData.Title : folder.Title,
+                quotaChanged ? (long)updateData.Quota : folder.SettingsQuota,
+                indexingChanged ? updateData.Indexing.Value : folder.SettingsIndexing,
+                denyDownloadChanged ? updateData.DenyDownload.Value : folder.SettingsDenyDownload,
+                lifetimeChanged ? mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(updateData.Lifetime) : folder.SettingsLifetime,
+                watermarkChanged ? JsonSerializer.Serialize(watermark) : folder.SettingsWatermark);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
             folder.Access = folderAccess;
             
-            if (!string.Equals(oldTitle, updateData.Title, StringComparison.Ordinal))
+            if (isRoom)
             {
-                if (DocSpaceHelper.IsRoom(folder.FolderType))
+                if (indexingChanged)
+                {
+                    if (updateData.Indexing.Value)
+                    {
+                        await ReOrderAsync(folder.Id, true, true);
+                    }
+                    
+                    _ = filesMessageService.SendAsync(MessageAction.RoomIndexingChanged, folder, folder.Title);
+                }
+            
+                if (denyDownloadChanged)
+                {
+                    _ = filesMessageService.SendAsync(MessageAction.RoomDenyDownloadChanged, folder, folder.Title);
+                }
+            }
+            
+            if (titleChanged)
+            {
+                if (isRoom)
                 {
                     _ = filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
                 }
@@ -769,7 +799,8 @@ public class FileStorageService //: IFileStorageService
                     _ = filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
                 }
             }
-            if (DocSpaceHelper.IsRoom(folder.FolderType) && oldQuota != updateData.Quota && updateData.Quota != null)
+            
+            if (isRoom && quotaChanged)
             {
                 if (updateData.Quota >= 0)
                 {
@@ -777,7 +808,7 @@ public class FileStorageService //: IFileStorageService
                 }
                 else if(updateData.Quota == -1)
                 {
-                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, string.Join(", ", [folder.Title]));
+                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, folder.Title);
                 }
                 else
                 {
@@ -785,6 +816,12 @@ public class FileStorageService //: IFileStorageService
                     _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), [folder.Title]);
                 }
             }
+            
+        }
+
+        if (updateData.Logo != null)
+        {
+            await roomLogoManager.SaveLogo(updateData.Logo.TmpFile, updateData.Logo.X, updateData.Logo.Y, updateData.Logo.Width, updateData.Logo.Height, folder, folderDao);
         }
 
         var newTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder);

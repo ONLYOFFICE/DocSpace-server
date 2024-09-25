@@ -373,7 +373,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folderDao.CanMoveOrCopyAsync(matchedIds, to);
     }
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota)
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, string watermark)
     {
         return await RenameFolderAsync(folder, newTitle);
     }

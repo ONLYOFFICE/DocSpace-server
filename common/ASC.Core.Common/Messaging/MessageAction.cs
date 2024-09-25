@@ -229,6 +229,9 @@ public enum MessageAction
     RoomLogoCreated = 5080,
     RoomLogoDeleted = 5081,
     
+    RoomIndexingChanged = 5104,
+    RoomDenyDownloadChanged = 5105,
+    
     RoomExternalLinkCreated = 5088,
     RoomExternalLinkUpdated = 5089,
     RoomExternalLinkDeleted = 5090,

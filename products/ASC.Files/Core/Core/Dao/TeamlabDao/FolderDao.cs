@@ -929,7 +929,7 @@ internal class FolderDao(
         return folder.Id;
     }
 
-    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota)
+    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, string watermark)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -943,6 +943,10 @@ internal class FolderDao(
         toUpdate.Title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
         toUpdate.ModifiedOn = DateTime.UtcNow;
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
+        toUpdate.Settings.Indexing = indexing;
+        toUpdate.Settings.DenyDownload = denyDownload;
+        toUpdate.Settings.Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(lifeTime);
+        toUpdate.Settings.Watermark = watermark;
         filesDbContext.Update(toUpdate);
 
         await filesDbContext.SaveChangesAsync();

@@ -35,7 +35,7 @@ public enum WatermarkAdditions
     CurrentDate = 8,
     RoomName = 16
 }
-public class WatermarkSettings
+public class WatermarkSettings : IMapFrom<WatermarkRequestDto>
 {
     public bool Enabled { get; set; }
     public string Text { get; set; }
@@ -94,19 +94,7 @@ public class WatermarkManager
             Rotate = watermarkRequestDto.Rotate
         };
 
-        string imageUrl = null;
-
-        if (!string.IsNullOrEmpty(watermarkRequestDto.ImageUrl))
-        {
-            if(Uri.IsWellFormedUriString(watermarkRequestDto.ImageUrl, UriKind.Absolute))
-            {
-                imageUrl = watermarkRequestDto.ImageUrl;
-            }
-            else
-            {
-                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
-            }
-        }
+        var imageUrl = await GetWatermarkImageUrlAsync(room, watermarkRequestDto.ImageUrl);
 
         if (!string.IsNullOrEmpty(imageUrl))
         {
@@ -119,6 +107,25 @@ public class WatermarkManager
         await folderDao.SetWatermarkSettings(watermarkSettings, room);
 
         return watermarkSettings;
+    }
+
+    public async Task<string> GetWatermarkImageUrlAsync<T>(Folder<T> folder,string imageUrlFromDto)
+    {
+        string imageUrl = null;
+
+        if (!string.IsNullOrEmpty(imageUrlFromDto))
+        {
+            if(Uri.IsWellFormedUriString(imageUrlFromDto, UriKind.Absolute))
+            {
+                imageUrl = imageUrlFromDto;
+            }
+            else
+            {
+                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(folder, imageUrlFromDto);
+            }
+        }
+
+        return imageUrl;
     }
 
     public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)

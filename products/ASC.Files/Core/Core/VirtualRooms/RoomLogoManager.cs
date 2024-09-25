@@ -63,7 +63,7 @@ public class RoomLogoManager(
         {
             var tenantId = await tenantManager.GetCurrentTenantIdAsync();
             _dataStore = await storageFactory.GetStorageAsync(tenantId, ModuleName);
-    }
+        }
 
         return _dataStore;
     }
@@ -72,12 +72,7 @@ public class RoomLogoManager(
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
-
-        if (string.IsNullOrEmpty(tempFile))
-        {
-            return room;
-        }
-
+        
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
         {
             throw new ItemNotFoundException();
@@ -87,7 +82,19 @@ public class RoomLogoManager(
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
+        
+        if (string.IsNullOrEmpty(tempFile))
+        {
+            return room;
+        }
+        
+        await SaveLogo(tempFile, x, y, width, height, room, folderDao);
 
+        return room;
+    }
+
+    public async Task SaveLogo<T>(string tempFile, int x, int y, int width, int height, Folder<T> room, IFolderDao<T> folderDao)
+    {
         var store = await GetDataStoreAsync();
         var fileName = Path.GetFileName(tempFile);
         var data = await GetTempAsync(store, fileName);
@@ -105,8 +112,6 @@ public class RoomLogoManager(
         {
             await filesMessageService.SendAsync(MessageAction.RoomLogoCreated, room, room.Title);
         }
-
-        return room;
     }
 
     public async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, string imageUrl)
