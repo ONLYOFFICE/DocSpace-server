@@ -196,8 +196,8 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             if (arraySchema?.Example != null)
             {
                 array.Add(arraySchema.Example);
+                result.Example = array;
             }
-            result.Example = array;
             if(arraySchema.OneOf != null)
             {
                 result.Items = new OpenApiSchema { AnyOf = arraySchema.OneOf };
@@ -248,52 +248,32 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 {
                     new()
                     {
+                        Enum = enumDataString,
                         Type = "string",
                         Description = $"[{string.Join(", ", enumDescriptionString)}]",
                         Example = enumDataString[0]
                     },
                     new()
                     {
+                        Enum = enumDataInt,
                         Type = "integer",
                         Description = $"[{string.Join(", ", enumDescriptionInt)}]",
                         Example = enumDataInt[0]
                     }
                 };
+                result.Enum = null;
                 result.Type = null;
-                result.Enum = enumDataString;
                 result.Format = null;
             }
         }
         else if(checkType == typeof(object))
         {
-            var openApiSchema = new OpenApiSchema
+            result.Example = new OpenApiObject
             {
-                Properties = new Dictionary<string, OpenApiSchema>
-                {
-                    { 
-                        "key1", new ()
-                        {
-                            Type = "integer",
-                            Example = new OpenApiInteger(SwaggerSchemaCustomAttribute.DefaultIntExample)
-                        }
-                    },
-                    { 
-                        "key2", new ()
-                        {
-                            Type = "string",
-                            Example = new OpenApiString(SwaggerSchemaCustomAttribute.DefaultStringExample)
-                        }
-                    },
-                    { 
-                        "key3", new ()
-                        {
-                            Type = "boolean",
-                            Example = new OpenApiBoolean(false)
-                        }
-                    }
-                }
+                ["int"] = new OpenApiInteger(SwaggerSchemaCustomAttribute.DefaultIntExample),
+                ["string"] = new OpenApiString(SwaggerSchemaCustomAttribute.DefaultStringExample),
+                ["boolean"] = new OpenApiBoolean(true)
             };
-            result.Properties = openApiSchema.Properties;
         }
         else if(checkType == typeof(TimeSpan))
         {
@@ -329,23 +309,5 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                type == typeof(DateTime) ||
                type == typeof(Guid) ||
                type == typeof(JsonElement);
-    }
-}
-
-public class HideRouteDocumentFilter : IDocumentFilter
-{
-    private readonly string _routeToHide;
-
-    public HideRouteDocumentFilter(string RouteToHide)
-    {
-        _routeToHide = RouteToHide;
-    }
-
-    public void Apply(OpenApiDocument document, DocumentFilterContext context)
-    {
-        if (document.Paths.ContainsKey(_routeToHide))
-        {
-            document.Paths.Remove(_routeToHide);
-        }
     }
 }

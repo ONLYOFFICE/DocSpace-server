@@ -294,7 +294,6 @@ public class UserController(
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
-        ArgumentNullException.ThrowIfNull(inDto.Invitations);
 
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
