@@ -28,9 +28,18 @@ using System.Reflection;
 
 public class Programm
 {
-
     public static async Task Main(string[] args)
     {
+        Console.WriteLine("Write extension to file: yaml or json");
+        var extension = Console.ReadLine();
+
+        if (extension != "yaml" && extension != "json")
+        {
+            ArgumentNullException.ThrowIfNull(extension);
+
+            Console.WriteLine("Wrong extension");
+            return;
+        }
         var assembliesPath = $"{AppContext.BaseDirectory}";
 
         if (!Directory.Exists(assembliesPath))
@@ -45,21 +54,22 @@ public class Programm
             var assemblyName = assembly.GetName().Name?.ToLower();
             if (assemblyName != null && IsApiAssembly(assemblyName))
             {
-                var url = $"http://localhost:8092/openapi/{assemblyName}/common.json";
-                await GenerateSwaggerFile(url, assemblyName);
+
+                var url = $"http://localhost:8092/openapi/{assemblyName}/common.{extension}";
+                await GenerateSwaggerFile(url, assemblyName, extension);
             }
         }
     }
 
 
-    private static async Task GenerateSwaggerFile(string url, string name)
+    private static async Task GenerateSwaggerFile(string url, string name, string extension)
     {
         var httpClient = new HttpClient();
 
         try
         {
             var swaggerJson = await httpClient.GetStringAsync(url);
-            var fileName = $"{name}.json";
+            var fileName = $"{name}.{extension}";
             File.WriteAllText(Path.Combine(AppContext.BaseDirectory, fileName), swaggerJson);
             Console.WriteLine($"File created successfully {fileName}");
         }
