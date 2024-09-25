@@ -336,7 +336,7 @@ public class RoomLogoManager(
         {
             if (!Color.TryParse(color, out _))
             {
-                throw new AggregateException(nameof(color));
+                throw new ArgumentException(null, nameof(color));
             }
             
             room.SettingsColor = color;
@@ -354,7 +354,7 @@ public class RoomLogoManager(
             var covers = await GetCoversAsync();
             if (!covers.ContainsKey(cover))
             {
-                throw new AggregateException(nameof(cover));
+                throw new ArgumentException(null, nameof(cover));
             }
 
             room.SettingsCover = cover;
