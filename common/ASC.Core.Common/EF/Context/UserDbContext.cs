@@ -41,6 +41,7 @@ public partial class UserDbContext(DbContextOptions<UserDbContext> dbContextOpti
     public DbSet<AccountLinks> AccountLinks { get; set; }
     public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }
     public DbSet<DbQuotaRow> QuotaRow { get; set; }
+    public DbSet<DbUserRelation> UserRelations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -58,6 +59,7 @@ public partial class UserDbContext(DbContextOptions<UserDbContext> dbContextOpti
         .AddDbTenant()
         .AddAccountLinks()
         .AddWebstudioSettings()
-        .AddDbQuotaRow();
+        .AddDbQuotaRow()
+        .AddUserRelation();
     }
 }
