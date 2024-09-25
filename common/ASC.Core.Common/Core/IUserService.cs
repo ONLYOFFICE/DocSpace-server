@@ -42,6 +42,7 @@ public interface IUserService
         string text,
         string separatorm,
         bool withoutGroup);
+    
     IAsyncEnumerable<UserInfo> GetUsers(
         int tenant,
         bool isDocSpaceAdmin,
@@ -84,4 +85,5 @@ public interface IUserService
     Task RemoveUserGroupRefAsync(int tenant, Guid userId, Guid groupId, UserGroupRefType refType);
     Task SetUserPasswordHashAsync(int tenant, Guid id, string passwordHash);
     Task SetUserPhotoAsync(int tenant, Guid id, byte[] photo);
+    Task SaveUsersRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId);
 }

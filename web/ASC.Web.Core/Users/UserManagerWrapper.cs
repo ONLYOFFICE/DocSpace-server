@@ -109,6 +109,8 @@ public sealed class UserManagerWrapper(
             throw new Exception(string.Format(pattern, linkedUser.DisplayUserName(displayUserSettingsHelper)));
         }
 
+        var currentUserId = securityContext.CurrentAccount.ID;
+        
         var user = new UserInfo
         {
             Email = mail.Address,
@@ -118,7 +120,7 @@ public sealed class UserManagerWrapper(
             ActivationStatus = EmployeeActivationStatus.Pending,
             Status = EmployeeStatus.Pending,
             CultureName = culture,
-            CreatedBy = securityContext.CurrentAccount.ID
+            CreatedBy = currentUserId
         };
 
         user.UserName = await MakeUniqueNameAsync(user);
@@ -142,6 +144,8 @@ public sealed class UserManagerWrapper(
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
         }
+        
+        await userManager.AddUserRelationAsync(currentUserId, newUser.Id);
 
         return newUser;
     }

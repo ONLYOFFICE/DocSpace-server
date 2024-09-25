@@ -299,6 +299,11 @@ public class CachedUserService : IUserService, ICachedService
         await _cacheUserInfoItem.PublishAsync(new UserInfoCacheItem { Id = id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
     }
 
+    public Task SaveUsersRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
+    {
+        return _service.SaveUsersRelationAsync(tenantId, sourceUserId, targetUserId);
+    }
+
     public async Task<DateTime> GetUserPasswordStampAsync(int tenant, Guid id)
     {
         return await _service.GetUserPasswordStampAsync(tenant, id);

@@ -206,9 +206,23 @@ public class FileSharingAceHelper(
 
                 if (emailInvite)
                 {
+                    if (!FileSecurity.PaidShares.Contains(w.Access))
+                    {
+                        userType = EmployeeType.Guest;
+                    }
+
+                    var user = await userManager.GetUserByEmailAsync(w.Email);
+                    if (!user.Equals(Constants.LostUser))
+                    {
+                        await userManager.AddUserRelationAsync(authContext.CurrentAccount.ID, user.Id);
+                        //TODO: send invite to room
+                        
+                        continue;
+                    }
+                    
                     try
                     {
-                        var user = await userManagerWrapper.AddInvitedUserAsync(w.Email, userType, culture);
+                        user = await userManagerWrapper.AddInvitedUserAsync(w.Email, userType, culture);
                         w.Id = user.Id;
                     }
                     catch (Exception e)

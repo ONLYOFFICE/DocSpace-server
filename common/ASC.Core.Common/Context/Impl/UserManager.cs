@@ -442,6 +442,11 @@ public class UserManager(
                 await SyncCardDavAsync(u, oldUserData, newUser);
             }
 
+            if (u.CreatedBy.HasValue)
+            {
+                await AddUserRelationAsync(u.CreatedBy.Value, newUser.Id);
+            }
+
             return newUser;
         }
         finally
@@ -793,6 +798,35 @@ public class UserManager(
                  throw;
              }
          }
+    }
+    
+    public async Task AddUserRelationAsync(Guid sourceUserId, Guid targetUserId)
+    {
+        if (sourceUserId == targetUserId)
+        {
+            return;
+        }
+        
+        var sourceUser = await GetUsersAsync(sourceUserId);
+        if (!IsValidUser(sourceUser))
+        {
+            return;
+        }
+
+        var targetUser = await GetUsersAsync(targetUserId);
+        if (!IsValidUser(targetUser))
+        {
+            return;
+        }
+        
+        await userService.SaveUsersRelationAsync(Tenant.Id, sourceUserId, targetUserId);
+        
+        return;
+
+        bool IsValidUser(UserInfo userInfo)
+        {
+            return !userInfo.Equals(Constants.LostUser) && userInfo.Status != EmployeeStatus.Terminated;
+        }
     }
     
     #endregion Users

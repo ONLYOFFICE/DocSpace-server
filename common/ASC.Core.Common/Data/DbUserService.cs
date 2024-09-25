@@ -673,6 +673,27 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         await userDbContext.SaveChangesAsync();
     }
 
+    public async Task SaveUsersRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
+    {
+        var relation = new DbUserRelation
+        {
+            TenantId = tenantId,
+            SourceUserId = sourceUserId,
+            TargetUserId = targetUserId
+        };
+
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var existedRecord = await userDbContext.UserRelations.FindAsync(relation.GetKeys());
+        if (existedRecord != null)
+        {
+            return;
+        }
+        
+        await userDbContext.UserRelations.AddAsync(relation);
+        await userDbContext.SaveChangesAsync();
+    }
+
     private IQueryable<User> GetUserQuery(UserDbContext userDbContext, int tenant)
     {
         var q = userDbContext.Users.AsQueryable();
