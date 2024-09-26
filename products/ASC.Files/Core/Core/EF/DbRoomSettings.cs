@@ -33,6 +33,7 @@ public class DbRoomSettings
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
     public string Color { get; set; }
+    public string Cover { get; set; }
     public bool Indexing { get; set; }
     public long Quota { get; set; }
     public string Watermark { get; set; }
@@ -81,6 +82,12 @@ public static class DbRoomSettingsExtension
             entity.Property(e => e.Color)
                 .HasColumnName("color")
                 .HasColumnType("char(6)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.Cover)      
+                .HasColumnName("cover")
+                .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

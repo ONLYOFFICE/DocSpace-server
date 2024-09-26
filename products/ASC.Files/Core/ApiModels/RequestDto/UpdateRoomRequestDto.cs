@@ -43,4 +43,6 @@ public class UpdateRoomRequestDto
     public RoomDataLifetimeDto Lifetime { get; set; }
     public WatermarkRequestDto Watermark { get; set; }
     public LogoRequestDto Logo { get; set; }
+    public string Color { get; set; }
+    public string Cover { get; set; }
 }

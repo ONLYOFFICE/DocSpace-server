@@ -323,7 +323,7 @@ public abstract class Migrator(
         {
             newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
-                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null);
+                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null);
         Log(MigrationResource.СreateRootFolder);
         }
         else
@@ -341,7 +341,7 @@ public abstract class Migrator(
             {
                 if (storage.Type == FolderType.BUNCH && !folder.Private)
                 {
-                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null);
+                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null);
                 }
                 else
                 {
@@ -491,7 +491,7 @@ public abstract class Migrator(
                         {
                             await SecurityContext.AuthenticateMeAsync(user.Info.Id);
                         }
-                        var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null);
+                        var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null);
 
                         orderedFolders = storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
