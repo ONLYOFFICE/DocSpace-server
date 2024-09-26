@@ -24,51 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
-public enum RoomType
+public class CoversResultDto
 {
-    FillingFormsRoom = 1,
-    EditingRoom = 2,
-    CustomRoom = 5,
-    PublicRoom = 6
-}
-
-/// <summary>
-/// </summary>
-public class CreateRoomRequestDto
-{
-    /// <summary>Room name</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
-
-    /// <summary>Room type</summary>
-    /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
-    public RoomType RoomType { get; set; }
-
-    public bool Private { get; set; }
-
-    /// <summary>Collection of sharing parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.FileShareParams}, System.Collections.Generic</type>
-    public IEnumerable<FileShareParams> Share { get; set; }
-
-    /// <summary>Notifies users about the shared room or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Notify { get; set; }
-
-    /// <summary>Message to send when notifying about the shared room</summary>
-    /// <type>System.String, System</type>
-    public string SharingMessage { get; set; }
-
-    /// <summary>Room quota</summary>
-    /// <type>System.Int64, System</type>
-    public long Quota { get; set; }
-    
-    public bool Indexing { get; set; }
-    
-    public string Color { get; set; }
-    
-    public string Cover { get; set; }
+    public string Id { get; set; }
+    public string Data { get; set; }
 }

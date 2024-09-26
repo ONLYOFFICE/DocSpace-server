@@ -68,7 +68,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoomAsync(CreateRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, inDto.Color, inDto.Cover);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -116,7 +116,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     [HttpPost("thirdparty/{id}")]
     public async Task<FolderDto<string>> CreateRoomAsync(string id, CreateThirdPartyRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder);
+        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder, inDto.Color, inDto.Cover);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -506,6 +506,25 @@ public abstract class VirtualRoomsController<T>(
 
         return await _folderDtoHelper.GetAsync(room);
     }
+    
+    [HttpPost("{id}/cover")]
+    public async Task<FolderDto<T>> ChangeRoomCoverAsync(T id, CoverRequestDto inDto)
+    {
+        var room = await roomLogoManager.ChangeCoverAsync(id, inDto.Color, inDto.Cover);
+
+        await socketManager.UpdateFolderAsync(room);
+
+        return await _folderDtoHelper.GetAsync(room);
+    }
+    
+    [HttpGet("covers")]
+    public async IAsyncEnumerable<CoversResultDto> GetCovers()
+    {
+        foreach (var c in await RoomLogoManager.GetCoversAsync())
+        {
+            yield return new CoversResultDto { Id = c.Key, Data = c.Value };
+        }
+    }
 
     /// <summary>
     /// Removes a logo from a room with the ID specified in the request.
@@ -599,8 +618,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         ApiContext apiContext,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
-        SetupInfo setupInfo,
-        FileSizeComment fileSizeComment,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         AuthContext authContext,
@@ -759,23 +776,8 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             if (formCollection.Files.Count != 0)
             {
                 var roomLogo = formCollection.Files[0];
-
-                if (roomLogo.Length > setupInfo.MaxImageUploadSize)
-                {
-                    throw new Exception(fileSizeComment.FileImageSizeExceptionString);
-                }
                 
-                byte[] data;
-                await using(var inputStream = roomLogo.OpenReadStream())
-                using (var ms = new MemoryStream())
-                {
-                    await inputStream.CopyToAsync(ms);
-                    data = ms.ToArray();
-                }
-                
-                UserPhotoThumbnailManager.CheckImgFormat(data);
-
-                result.Data = await roomLogoManager.SaveTempAsync(data, setupInfo.MaxImageUploadSize);
+                result.Data = await roomLogoManager.SaveTempAsync(roomLogo);
                 result.Success = true;
             }
             else
