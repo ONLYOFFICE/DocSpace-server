@@ -81,6 +81,7 @@ public static class DocSpaceHelper
             FilterType.EditingRooms => FolderType.EditingRoom,
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
+            FilterType.VirtualDataRooms => FolderType.VirtualDataRoom,
             _ => null
         };
     }
