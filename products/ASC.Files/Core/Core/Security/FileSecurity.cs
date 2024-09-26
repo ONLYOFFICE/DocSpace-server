@@ -1197,7 +1197,25 @@ public class FileSecurity(IDaoFactory daoFactory,
         e.ShareRecord = ace;
         e.Access = ace?.Share ?? defaultShare;
         e.Access = e.RootFolderType is FolderType.ThirdpartyBackup ? FileShare.Restrict : e.Access;
-        
+
+        if (file != null)
+        {
+            var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+            if (fileType is FileType.Pdf or FileType.Spreadsheet)
+            {
+                var folderDao = daoFactory.GetFolderDao<T>();
+                var parentFolders = await GetFileParentFolders(file.ParentId);
+
+                if (parentFolders.Exists(parent => parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder))
+                {
+                    if (ace is { Share: FileShare.FillForms } && authContext.CurrentAccount.ID != file.CreateBy)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
         if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
             await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e) != Status.Ok)
         {

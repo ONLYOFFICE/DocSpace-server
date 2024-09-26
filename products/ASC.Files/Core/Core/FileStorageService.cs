@@ -213,11 +213,7 @@ public class FileStorageService //: IFileStorageService
         }
         if (parent.FolderType == FolderType.FormFillingFolderDone || parent.FolderType == FolderType.FormFillingFolderInProgress)
         {
-            var (currentRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(parent);
-            var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
-            var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
-
-            if (ace is { Access: FileShare.FillForms })
+            if (parent.ShareRecord is { Share: FileShare.FillForms })
             {
                 subjectId = authContext.CurrentAccount.ID;
             }
