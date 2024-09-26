@@ -3215,10 +3215,8 @@ public class FileStorageService //: IFileStorageService
     private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
     {
         var whoCanReadTask = (await fileSecurity.WhoCanReadAsync(entry, true)).ToList();
-        whoCanReadTask.AddRange(await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
-                null, null, null, null, false, null, true, 0, 0)
-            .Select(r=> r.Id)
-            .ToListAsync());
+        whoCanReadTask.AddRange((await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
+            .Select(x => x.Id));
         
         whoCanReadTask.Add((await tenantManager.GetCurrentTenantAsync()).OwnerId);
         
@@ -3229,6 +3227,7 @@ public class FileStorageService //: IFileStorageService
 
         return userIds;
     }
+    
     public async Task<Folder<T>> SetPinnedStatusAsync<T>(T folderId, bool pin)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
