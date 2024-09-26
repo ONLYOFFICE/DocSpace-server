@@ -68,6 +68,10 @@ public class CreateRoomRequestDto
     public long Quota { get; set; }
 
     public bool Indexing { get; set; }
+    
+    public string Color { get; set; }
+    
+    public string Cover { get; set; }
 
     /// <summary>Room data lifetime settings</summary>
     /// <type>ASC.Files.Core.ApiModels.RoomDataLifetimeDto, ASC.Files.Core</type>
