@@ -2238,29 +2238,77 @@ internal class FileDao(
     {
         IQueryable<FileByTagQuery> query;
         
-        var initQuery = (await GetFileQuery(filesDbContext, r => r.CurrentVersion))
-            .Join(filesDbContext.TagLink, f => f.Id.ToString(), l => l.EntryId, (file, tagLink) => new { file, tagLink })
-            .Where(r => r.tagLink.EntryType == FileEntryType.File)
-            .Join(filesDbContext.Tag, r => r.tagLink.TagId, t => t.Id,
-                (fileWithTagLink, tag) => new { fileWithTagLink.file, fileWithTagLink.tagLink, tag })
-            .Where(r => r.tag.Type == tagType);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        var initQuery = filesDbContext.Files
+            .Where(x => x.TenantId == tenantId && x.CurrentVersion)
+            .Join(filesDbContext.TagLink,
+                f => new
+                {
+                    tenantId, 
+                    entryId = f.Id.ToString(), 
+                    entryType = FileEntryType.File
+                }, 
+                l => new
+                {
+                    tenantId = l.TenantId, 
+                    entryId = l.EntryId, 
+                    entryType = l.EntryType
+                },
+                (f, l) => new { f, l })
+            .Join(filesDbContext.Tag, 
+                x => x.l.TagId, 
+                t => t.Id,
+                (x, t) => new { x.f, x.l, t })
+            .Where(x => x.t.Type == tagType);
+        
+        if (tagOwner.HasValue)
+        {
+            initQuery = initQuery.Where(x => x.t.Owner == tagOwner.Value);
+        }
 
         if (tagType == TagType.RecentByLink)
         {
-            query = initQuery .Join(filesDbContext.Security, r => r.tag.Name, s => s.Subject.ToString(), 
-                    (fileWithTag, security) => new { fileWithTag, security, 
-                        expirationDate = (DateTime)(object)DbFunctionsExtension.JsonValue(nameof(security.Options), "ExpirationDate").Trim('"')})
-                .Where(r => r.security.Share != FileShare.Restrict && (r.expirationDate == DateTime.MinValue || r.expirationDate > DateTime.UtcNow))
-                .Select(r => new FileByTagQuery { Entry = r.fileWithTag.file, Tag = r.fileWithTag.tag, TagLink = r.fileWithTag.tagLink, Security = r.security}); 
+            query = initQuery.Join(filesDbContext.Security, 
+                    x => new
+                    {
+                        tenantId,
+                        entryId = x.f.Id.ToString(),
+                        entryType = FileEntryType.File, 
+                        subject = x.t.Name
+                    },
+                    s => new
+                    {
+                        tenantId = s.TenantId,
+                        entryId = s.EntryId,
+                        entryType = s.EntryType,
+                        subject = s.Subject.ToString()
+                    },
+                    (x, s) => new
+                    { 
+                        x.f,
+                        x.t,
+                        x.l,
+                        s, 
+                        expirationDate = (DateTime)(object)DbFunctionsExtension.JsonValue(nameof(s.Options), "ExpirationDate")
+                    })
+                .Where(x => x.s.Share != FileShare.Restrict && (x.expirationDate == DateTime.MinValue || x.expirationDate > DateTime.UtcNow))
+                .Select(x => new FileByTagQuery
+                {
+                    Entry = x.f, 
+                    Tag = x.t, 
+                    TagLink = x.l, 
+                    Security = x.s
+                }); 
         }
         else
         {
-            query = initQuery.Select(r => new FileByTagQuery { Entry = r.file, Tag = r.tag, TagLink = r.tagLink});
-        }
-
-        if (tagOwner.HasValue)
-        {
-            query = query.Where(r => r.Tag.Owner == tagOwner.Value);
+            query = initQuery.Select(x => new FileByTagQuery
+            {
+                Entry = x.f, 
+                Tag = x.t, 
+                TagLink = x.l
+            });
         }
 
         return query;
