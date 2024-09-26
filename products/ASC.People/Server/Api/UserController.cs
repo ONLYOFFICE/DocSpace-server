@@ -1961,25 +1961,40 @@ public class UserController(
 }
 
 [ConstraintRoute("int")]
-public class UserControllerAdditionalInternal(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity, 
-        ApiContext apiContext, 
-        IDaoFactory daoFactory) 
-    : UserControllerAdditional<int>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory);
+public class UserControllerAdditionalInternal(
+    EmployeeFullDtoHelper employeeFullDtoHelper, 
+    FileSecurity fileSecurity, 
+    ApiContext apiContext, 
+    IDaoFactory daoFactory,
+    AuthContext authContext,
+    UserManager userManager) 
+    : UserControllerAdditional<int>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
         
-public class UserControllerAdditionalThirdParty(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity, 
-        ApiContext apiContext, 
-        IDaoFactory daoFactory) 
-    : UserControllerAdditional<string>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory);
+public class UserControllerAdditionalThirdParty(
+    EmployeeFullDtoHelper employeeFullDtoHelper, 
+    FileSecurity fileSecurity, 
+    ApiContext apiContext, 
+    IDaoFactory daoFactory,
+    AuthContext authContext,
+    UserManager userManager) 
+    : UserControllerAdditional<string>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
         
-public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHelper,
-        FileSecurity fileSecurity, 
-        ApiContext apiContext, 
-        IDaoFactory daoFactory) : ApiControllerBase
-    {
+public class UserControllerAdditional<T>(
+    EmployeeFullDtoHelper employeeFullDtoHelper, 
+    FileSecurity fileSecurity, 
+    ApiContext apiContext, 
+    IDaoFactory daoFactory,
+    AuthContext authContext,
+    UserManager userManager) 
+    : ApiControllerBase 
+{
     [HttpGet("room/{id}")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(T id, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool? excludeShared)
+    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(
+        T id,
+        EmployeeStatus? employeeStatus,
+        EmployeeActivationStatus? activationStatus,
+        bool? excludeShared,
+        Area? area)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
 
@@ -1994,13 +2009,29 @@ public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHe
         var filterSeparator = apiContext.FilterSeparator;
 
         var securityDao = daoFactory.GetSecurityDao<T>();
+        var excludeStrangers = !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
 
-        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, filterValue, employeeStatus, activationStatus, excludeShared ?? false, filterSeparator);
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room,
+            filterValue,
+            employeeStatus,
+            activationStatus,
+            excludeShared ?? false,
+            filterSeparator,
+            excludeStrangers,
+            Area.All);
 
         apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
 
-        await foreach (var u in securityDao.GetUsersWithSharedAsync(room, filterValue, employeeStatus, activationStatus, excludeShared ?? false, filterSeparator, 
-                           offset, count))
+        await foreach (var u in securityDao.GetUsersWithSharedAsync(room, 
+                           filterValue,
+                           employeeStatus,
+                           activationStatus,
+                           excludeShared ?? false,
+                           filterSeparator,
+                           excludeStrangers,
+                           area ?? Area.All,
+                           offset,
+                           count))
         {
             yield return await employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
         }

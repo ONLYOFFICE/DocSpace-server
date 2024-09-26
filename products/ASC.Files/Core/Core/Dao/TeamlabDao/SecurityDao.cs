@@ -553,7 +553,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, 
-        bool excludeShared, string separator, int offset, int count)
+        bool excludeShared, string separator, bool excludeStrangers, Area area = Area.All, int offset = 0, int count = -1)
     {
         if (entry == null || count == 0)
         {
@@ -564,7 +564,7 @@ internal abstract class SecurityBaseDao<T>(
         var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator, excludeStrangers, area);
 
         if (offset > 0)
         {
@@ -583,7 +583,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, string separator)
+        bool excludeShared, string separator, bool excludeStrangers, Area area)
     {
         if (entry == null)
         {
@@ -594,15 +594,17 @@ internal abstract class SecurityBaseDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator, excludeStrangers, area);
 
         return await q1.CountAsync();
     }
 
-    private static IQueryable<UserWithShared> GetUsersWithSharedQuery(int tenantId, string entryId, FileEntry entry, string text, EmployeeStatus? employeeStatus, 
-        EmployeeActivationStatus? activationStatus, bool excludeShared, FilesDbContext filesDbContext, string separator)
+    private IQueryable<UserWithShared> GetUsersWithSharedQuery(int tenantId, string entryId, FileEntry entry, string text, EmployeeStatus? employeeStatus, 
+        EmployeeActivationStatus? activationStatus, bool excludeShared, FilesDbContext filesDbContext, string separator, bool excludeStrangers, Area area)
     {
-        var q = filesDbContext.Users.AsNoTracking().Where(u => u.TenantId == tenantId && !u.Removed);
+        var q = filesDbContext.Users
+            .AsNoTracking()
+            .Where(u => u.TenantId == tenantId && !u.Removed);
 
         if (employeeStatus.HasValue)
         {
@@ -614,21 +616,138 @@ internal abstract class SecurityBaseDao<T>(
             q = q.Where(u => u.ActivationStatus == activationStatus.Value);
         }
 
+        switch (area)
+        {
+            case Area.People:
+                q = q.Where(u =>
+                    !filesDbContext.UserGroup.Any(ug =>
+                        ug.TenantId == tenantId &&
+                        ug.Userid == u.Id &&
+                        ug.UserGroupId == Constants.GroupGuest.ID &&
+                        ug.RefType == UserGroupRefType.Contains &&
+                        !ug.Removed));
+                break;
+            case Area.Guests:
+                {
+                    var currentUserId = _authContext.CurrentAccount.ID;
+                    q = q.Join(filesDbContext.UserGroup,
+                            u => new
+                            {
+                                TenantId = tenantId,
+                                Userid = u.Id,
+                                UserGroupId = Constants.GroupGuest.ID,
+                                RefType = UserGroupRefType.Contains,
+                                Removed = false
+                            },
+                            ug => new
+                            {
+                                ug.TenantId,
+                                ug.Userid,
+                                ug.UserGroupId,
+                                ug.RefType,
+                                ug.Removed
+                            },
+                            (u, ug) => u)
+                        .Join(filesDbContext.UserRelations,
+                            u => new { TenantId = tenantId, SourceUserId = currentUserId, TargetUserId = u.Id },
+                            ur => new { ur.TenantId, ur.SourceUserId, ur.TargetUserId },
+                            (u, ur) => u);
+                    break;
+                }
+        }
+
         q = UserQueryHelper.FilterByText(q, text, separator);
 
         var q1 = excludeShared
-            ? q.Where(u => !filesDbContext.Security.Any(s => s.TenantId == tenantId && s.EntryType == entry.FileEntryType && s.EntryId == entryId && s.Subject == u.Id) &&
-                           u.Id != entry.CreateBy)
-                .OrderBy(u => u.ActivationStatus)
-                .ThenBy(u => u.FirstName)
+            ? q.Where(u => 
+                    !filesDbContext.Security.Any(s => 
+                        s.TenantId == tenantId &&
+                        s.EntryId == entryId &&
+                        s.EntryType == entry.FileEntryType &&
+                        s.Subject == u.Id) && 
+                    u.Id != entry.CreateBy)
                 .Select(u => new UserWithShared { User = u, Shared = false })
-            : from user in q
-            join security in filesDbContext.Security.Where(s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entry.FileEntryType) on user.Id equals
-                security.Subject into grouping
-            from s in grouping.DefaultIfEmpty()
-            orderby user.ActivationStatus, user.FirstName
-            select new UserWithShared { User = user, Shared = s != null || user.Id == entry.CreateBy };
+            : q.GroupJoin(
+                    filesDbContext.Security, 
+                    user => new
+                    {
+                        TenantId = tenantId,
+                        Subject = user.Id,
+                        EntryId = entryId,
+                        EntryType = entry.FileEntryType
+                    },
+                    security => new
+                    {
+                        security.TenantId,
+                        security.Subject,
+                        security.EntryId,
+                        security.EntryType
+                    },
+                    (user, grouping) => new { user, grouping }
+                )
+                .SelectMany(
+                    x => x.grouping.DefaultIfEmpty(), 
+                    (x, s) => new { x.user, s }
+                )
+                .Select(x => new UserWithShared
+                {
+                    User = x.user, 
+                    Shared = x.s != null || x.user.Id == entry.CreateBy
+                });
+
+        if (area == Area.All && excludeStrangers)
+        {
+            var currentUserId = _authContext.CurrentAccount.ID;
+            
+            q1 = q1.GroupJoin(filesDbContext.UserRelations,
+                    us => new
+                    {
+                        TenantId = tenantId,
+                        SourceUserId = currentUserId, 
+                        TargetUserId = us.User.Id
+                    },
+                    ur => new
+                    {
+                        ur.TenantId,
+                        ur.SourceUserId, 
+                        ur.TargetUserId
+                    },
+                    (us, ur) => new { us, ur })
+                .SelectMany(
+                    x => x.ur.DefaultIfEmpty(),
+                    (x, ur) => new { x.us, ur })
+                .GroupJoin(filesDbContext.UserGroup,
+                    x => new
+                    {
+                        TenantId = tenantId,
+                        Userid = x.us.User.Id,
+                        UserGroupId = Constants.GroupGuest.ID,
+                        RefType = UserGroupRefType.Contains,
+                        Removed = false
+                    },
+                    ug => new
+                    {
+                        ug.TenantId,
+                        ug.Userid,
+                        ug.UserGroupId,
+                        ug.RefType,
+                        ug.Removed
+                    },
+                    (x, ug) => new { x.us, x.ur, ug })
+                .SelectMany(
+                    x => x.ug.DefaultIfEmpty(),
+                    (x, ug) => new { x.us, x.ur, ug })
+                .Where(x => 
+                    x.ug == null ||
+                    x.us.Shared ||
+                    (x.ur != null && x.ug != null))
+                .Select(x => x.us);
+        }
         
+        q1 = q1
+            .OrderBy(u => u.User.ActivationStatus)
+            .ThenBy(u => u.User.FirstName);
+
         return q1;
     }
 
