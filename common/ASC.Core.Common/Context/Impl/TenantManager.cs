@@ -37,6 +37,7 @@ public class TenantManager(
     IDistributedLockProvider distributedLockProvider)
 {
     private Tenant _currentTenant;
+    public const string CouldNotResolveCurrentTenant = "Could not resolve current tenant :-(.";
 
     private const string CurrentTenant = "CURRENT_TENANT";
 
@@ -221,7 +222,7 @@ public class TenantManager(
 
         if (tenant == null && throwIfNotFound)
         {
-            throw new Exception("Could not resolve current tenant :-(.");
+            throw new Exception(CouldNotResolveCurrentTenant);
         }
 
         _currentTenant = tenant;
@@ -275,7 +276,7 @@ public class TenantManager(
 
         if (tenant == null && throwIfNotFound)
         {
-            throw new Exception("Could not resolve current tenant :-(.");
+            throw new Exception(CouldNotResolveCurrentTenant);
         }
 
         _currentTenant = tenant;
