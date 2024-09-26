@@ -45,17 +45,17 @@ public class PathProvider(WebImageSupplier webImageSupplier,
 
     public string RoomUrlString
     {
-        get { return "/rooms/shared/{0}/filter?withSubfolders=true&folder={0}&count=100&page=1&sortby=DateAndTime&sortorder=descending"; }
+        get { return "/rooms/shared/{0}/filter?withSubfolders={1}&folder={0}&count=100&page=1&sortby=DateAndTime&sortorder=descending"; }
     }
 
-    public string GetRoomsUrl(int roomId)
+    public string GetRoomsUrl(int roomId, bool withSubfolders = true)
     {
-        return commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId));//ToDo
+        return commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId, withSubfolders.ToString().ToLowerInvariant()));//ToDo
     }
 
-    public string GetRoomsUrl(string roomId)
+    public string GetRoomsUrl(string roomId, bool withSubfolders = true)
     {
-        return commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId));//ToDo
+        return commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId, withSubfolders.ToString().ToLowerInvariant()));//ToDo
     }
 
     public async Task<string> GetFolderUrlAsync<T>(Folder<T> folder, int projectID = 0)
