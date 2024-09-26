@@ -181,7 +181,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
         var user = userManager.GetUsers(activityInfo.UserId);
 
-        var date = activityInfo.Data.ConvertNumerals("g");
+        var date = activityInfo.Data.ConvertNumerals("t");
         var userName = user.DisplayUserName(displayUserSettingsHelper);
         var userRole = activityInfo.UserRole;
         var fileUrl = activityInfo.FileUrl;
