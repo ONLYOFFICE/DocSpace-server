@@ -158,6 +158,8 @@ public class DocumentConfig<T>(
     }
 
     public PermissionsConfig Permissions { get; set; } = new();
+    
+	public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
     public async Task<FileReferenceData> GetReferenceData(File<T> file)
@@ -483,6 +485,116 @@ public class PermissionsConfig
     public bool Rename { get; set; }
     public bool Review { get; set; } = true;
     public bool Copy { get; set; } = true;
+}
+
+public class Options
+{
+    [JsonPropertyName("watermark_on_draw")]
+    public WatermarkOnDraw WatermarkOnDraw { get; set; }
+
+    public string GetMD5Hash()
+    {
+        if (WatermarkOnDraw == null)
+        {
+            return null;
+        }
+
+        var stringBuilder = new StringBuilder();
+
+        _ = stringBuilder.Append(WatermarkOnDraw.Width.ToString(CultureInfo.InvariantCulture));
+        _ = stringBuilder.Append(WatermarkOnDraw.Height.ToString(CultureInfo.InvariantCulture));
+        _ = stringBuilder.Append(WatermarkOnDraw.Fill);
+        _ = stringBuilder.Append(WatermarkOnDraw.Rotate);
+        _ = stringBuilder.Append(WatermarkOnDraw.Transparent.ToString(CultureInfo.InvariantCulture));
+
+        if (WatermarkOnDraw.Paragraphs != null)
+        {
+            foreach (var paragraph in WatermarkOnDraw.Paragraphs)
+            {
+                if (paragraph.Runs != null)
+                {
+                    foreach (var run in paragraph.Runs)
+                    {
+                        if (run.UsedInHash)
+                        {
+                            _ = stringBuilder.Append(run.Text);
+                        }
+                    }
+                }
+            }
+        }
+
+        var bytes = MD5.HashData(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
+
+        return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+    }
+}
+
+public class WatermarkOnDraw
+{
+    public WatermarkOnDraw(double width, double height, string fill, int rotate, List<Paragraph> paragraphs)
+    {
+        Width = width == 0 ? 200 : width; 
+        Height = height == 0 ? 240 : height;
+        Fill = fill;
+        Rotate = rotate;
+        Transparent = 0.4;
+        Paragraphs = paragraphs;
+    }
+    [JsonPropertyName("width")]
+    public double Width { get; set; }
+
+    [JsonPropertyName("height")]
+    public double Height { get; set; }
+
+    [JsonPropertyName("fill")]
+    public string Fill { get; set; }
+
+    [JsonPropertyName("rotate")]
+    public int Rotate { get; set; }
+
+    [JsonPropertyName("transparent")]
+    public double Transparent { get; set; }
+
+    [JsonPropertyName("paragraphs")]
+    public List<Paragraph> Paragraphs { get; set; }
+}
+public class Paragraph
+{
+    public Paragraph(List<Run> runs)
+    {
+        Runs = runs;
+        Align = 2;
+    }
+    [JsonPropertyName("align")]
+    public int Align { get; set; }
+
+    [JsonPropertyName("runs")]
+    public List<Run> Runs { get; set; }
+}
+public class Run
+{
+    private readonly bool _usedInHash;
+
+    internal bool UsedInHash => _usedInHash;
+
+    public Run(string text, bool usedInHash = true)
+    {
+        FontSize = "42";
+        Fill = [124, 124, 124];
+        Text = text;
+
+        _usedInHash = usedInHash;
+    }
+
+    [JsonPropertyName("fill")]
+    public int[] Fill { get; set; }
+
+    [JsonPropertyName("text")]
+    public string Text { get; set; }
+
+    [JsonPropertyName("font-size")]
+    public string FontSize { get; set; }
 }
 
 /// <summary>

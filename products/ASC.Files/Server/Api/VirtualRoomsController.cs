@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2024
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -30,32 +30,36 @@ namespace ASC.Files.Api;
 public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
         CustomTagsService customTagsService,
+        WatermarkManager watermarkManager,
         RoomLogoManager roomLogoManager,
         FileOperationsManager fileOperationsManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         FileShareDtoHelper fileShareDtoHelper,
+        WatermarkDtoHelper watermarkDtoHelper,
         IMapper mapper,
         SocketManager socketManager,
         ApiContext apiContext,
         FilesMessageService filesMessageService,
         SettingsManager settingsManager)
     : VirtualRoomsController<int>(globalFolderHelper,
-    fileOperationDtoHelper,
-    customTagsService,
-    roomLogoManager,
+            fileOperationDtoHelper,
+            customTagsService,
+            watermarkManager,
+            roomLogoManager,
     fileOperationsManager,
-    fileStorageService,
-    folderDtoHelper,
-    fileDtoHelper,
-    fileShareDtoHelper,
-    mapper,
-    socketManager,
+            fileStorageService,
+            folderDtoHelper,
+            fileDtoHelper,
+            fileShareDtoHelper,
+            watermarkDtoHelper,
+            mapper,
+            socketManager,
     apiContext,
     filesMessageService,
     settingsManager)
-{
+    {
     /// <summary>
     /// Creates a room in the "Rooms" section.
     /// </summary>
@@ -68,7 +72,9 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoomAsync(CreateRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, inDto.Color, inDto.Cover);
+        var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
+
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -77,32 +83,36 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
 public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
         CustomTagsService customTagsService,
+        WatermarkManager watermarkManager,
         RoomLogoManager roomLogoManager,
         FileOperationsManager fileOperationsManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         FileShareDtoHelper fileShareDtoHelper,
+        WatermarkDtoHelper watermarkDtoHelper,
         IMapper mapper,
         SocketManager socketManager,
         ApiContext apiContext,
         FilesMessageService filesMessageService,
         SettingsManager settingsManager)
     : VirtualRoomsController<string>(globalFolderHelper,
-    fileOperationDtoHelper,
-    customTagsService,
-    roomLogoManager,
+            fileOperationDtoHelper,
+            customTagsService,
+            watermarkManager,
+            roomLogoManager,
     fileOperationsManager,
-    fileStorageService,
-    folderDtoHelper,
-    fileDtoHelper,
-    fileShareDtoHelper,
-    mapper,
-    socketManager,
+            fileStorageService,
+            folderDtoHelper,
+            fileDtoHelper,
+            fileShareDtoHelper,
+            watermarkDtoHelper,
+            mapper,
+            socketManager,
     apiContext,
     filesMessageService,
     settingsManager)
-{
+    {
     /// <summary>
     /// Creates a room in the "Rooms" section stored in a third-party storage.
     /// </summary>
@@ -116,7 +126,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     [HttpPost("thirdparty/{id}")]
     public async Task<FolderDto<string>> CreateRoomAsync(string id, CreateThirdPartyRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder, inDto.Color, inDto.Cover);
+        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder, inDto.DenyDownload, inDto.Color, inDto.Cover);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -125,23 +135,26 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
 [DefaultRoute("rooms")]
 public abstract class VirtualRoomsController<T>(
     GlobalFolderHelper globalFolderHelper,
-    FileOperationDtoHelper fileOperationDtoHelper,
-    CustomTagsService customTagsService,
-    RoomLogoManager roomLogoManager,
+        FileOperationDtoHelper fileOperationDtoHelper,
+        CustomTagsService customTagsService,
+        WatermarkManager watermarkManager,
+        RoomLogoManager roomLogoManager,
     FileOperationsManager fileOperationsManager,
-    FileStorageService fileStorageService,
-    FolderDtoHelper folderDtoHelper,
-    FileDtoHelper fileDtoHelper,
-    FileShareDtoHelper fileShareDtoHelper,
-    IMapper mapper,
-    SocketManager socketManager,
+        FileStorageService fileStorageService,
+        FolderDtoHelper folderDtoHelper,
+        FileDtoHelper fileDtoHelper,
+        FileShareDtoHelper fileShareDtoHelper,
+        WatermarkDtoHelper watermarkDtoHelper,
+        IMapper mapper,
+        SocketManager socketManager,
     ApiContext apiContext,
     FilesMessageService filesMessageService,
     SettingsManager settingsManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-{
+    {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
     protected readonly FilesMessageService _filesMessageService = filesMessageService;
+    protected readonly IMapper _mapper = mapper;
 
     /// <summary>
     /// Returns the room information.
@@ -263,7 +276,7 @@ public abstract class VirtualRoomsController<T>(
     public async Task<FileOperationDto> DeleteRoomAsync(T id, DeleteRoomRequestDto inDto)
     {
         await fileOperationsManager.PublishDelete(new List<T> { id }, new List<T>(), false, !inDto.DeleteAfter, true);
-        
+
         return await fileOperationDtoHelper.GetAsync((await fileOperationsManager.GetOperationResults()).FirstOrDefault());
     }
 
@@ -282,9 +295,9 @@ public abstract class VirtualRoomsController<T>(
     {
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
-        
+
         await fileOperationsManager.PublishMoveOrCopyAsync([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.DeleteAfter);
-        
+
         return await fileOperationDtoHelper.GetAsync((await fileOperationsManager.GetOperationResults()).FirstOrDefault());
     }
 
@@ -303,7 +316,7 @@ public abstract class VirtualRoomsController<T>(
     {
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
-        
+
         await fileOperationsManager.PublishMoveOrCopyAsync([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.DeleteAfter);
         return await fileOperationDtoHelper.GetAsync((await fileOperationsManager.GetOperationResults()).FirstOrDefault());
     }
@@ -331,7 +344,7 @@ public abstract class VirtualRoomsController<T>(
             return result;
         }
 
-        var wrappers = mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.Invitations);
+        var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.Invitations);
 
         var aceCollection = new AceCollection<T>
         {
@@ -488,6 +501,57 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
+    /// Adds the watermarks settings to a room with the ID specified in the request.
+    /// </summary>
+    /// <short>Add room watermarks settings</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarkRequestDto, ASC.Files.Core" name="inDto">Request parameters for adding watermarks</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Room information</returns>
+    /// <path>api/2.0/files/rooms/{id}/watermark</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("{id}/watermark")]
+    public async Task<WatermarkDto> AddWaterMarksAsync(T id, WatermarkRequestDto inDto)
+    {
+        var watermarkSettings = await watermarkManager.SetWatermarkAsync(id, inDto);
+
+        return watermarkDtoHelper.Get(watermarkSettings);
+    }
+
+    /// <summary>
+    /// Returns the watermark information.
+    /// </summary>
+    /// <short>Get watermark information</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Watermark information</returns>
+    /// <path>api/2.0/files/rooms/{id}/watermark</path>
+    /// <httpMethod>GET</httpMethod>
+    [AllowAnonymous]
+    [HttpGet("{id}/watermark")]
+    public async Task<WatermarkDto> GetWatermarkInfoAsync(T id)
+    {
+        var room = await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
+        var watermarkSettings = await watermarkManager.GetWatermarkAsync(room);
+
+        return watermarkDtoHelper.Get(watermarkSettings);
+    }
+
+    /// <summary>
+    /// Removes the watermarks from a room with the ID specified in the request.
+    /// </summary>
+    /// <short>Remove room watermarks</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <returns></returns>
+    /// <path>api/2.0/files/rooms/{id}/watermark</path>
+    /// <httpMethod>DELETE</httpMethod>
+    [HttpDelete("{id}/watermark")]
+    public async Task DeleteWatermarkAsync(T id)
+    {
+        await watermarkManager.DeleteWatermarkAsync(id);
+    }
+    /// <summary>
     /// Creates a logo for a room with the ID specified in the request.
     /// </summary>
     /// <short>Create a room logo</short>
@@ -506,7 +570,7 @@ public abstract class VirtualRoomsController<T>(
 
         return await _folderDtoHelper.GetAsync(room);
     }
-    
+
     [HttpPost("{id}/cover")]
     public async Task<FolderDto<T>> ChangeRoomCoverAsync(T id, CoverRequestDto inDto)
     {
@@ -598,19 +662,29 @@ public abstract class VirtualRoomsController<T>(
     [HttpPut("{id}/settings")]
     public async Task<FolderDto<T>> UpdateSettingsAsync(T id, SettingsRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.SetRoomSettingsAsync(id, inDto.Indexing);
+        var room = await _fileStorageService.SetRoomSettingsAsync(id, inDto.Indexing, inDto.DenyDownload);
 
         return await _folderDtoHelper.GetAsync(room);
     }
-    
+
+    [HttpPut("{id}/lifetime")]
+    public async Task<FolderDto<T>> UpdateLifetimeSettingsAsync(T id, RoomDataLifetimeDto inDto = null)
+    {
+        var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto);
+
+        var room = await _fileStorageService.SetRoomLifetimeSettingsAsync(id, lifetime);
+
+        return await _folderDtoHelper.GetAsync(room);
+    }
+
     [HttpPut("{id}/reorder")]
     public async Task<FolderDto<T>> ReorderAsync(T id)
     {
-        var room = await _fileStorageService.ReOrder(id);
+        var room = await _fileStorageService.ReOrderAsync(id);
 
         return await _folderDtoHelper.GetAsync(room);
     }
-}
+        }
 
 public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         FolderContentDtoHelper folderContentDtoHelper,
@@ -627,7 +701,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         UserManager userManager,
         IServiceProvider serviceProvider)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-{
+    {
     /// <summary>
     /// Returns the contents of the "Rooms" section by the parameters specified in the request.
     /// </summary>
@@ -673,6 +747,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             RoomType.EditingRoom => FilterType.EditingRooms,
             RoomType.CustomRoom => FilterType.CustomRooms,
             RoomType.PublicRoom => FilterType.PublicRooms,
+            RoomType.VirtualDataRoom => FilterType.VirtualDataRooms,
             _ => FilterType.None
         };
 
@@ -776,7 +851,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             if (formCollection.Files.Count != 0)
             {
                 var roomLogo = formCollection.Files[0];
-                
+
                 result.Data = await roomLogoManager.SaveTempAsync(roomLogo);
                 result.Success = true;
             }

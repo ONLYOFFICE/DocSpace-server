@@ -307,7 +307,20 @@ static file class FileQueries
                                   .Select(t => t.ParentId)
                                   .Skip(1)
                                   .FirstOrDefault()
-                                  .ToString())))
+                                  .ToString()))),
+                        Order = (
+                            from f in ctx.FileOrder
+                            where (
+                                from rs in ctx.RoomSettings 
+                                where rs.TenantId == f.TenantId && rs.RoomId ==
+                                    (from t in ctx.Tree
+                                        where t.FolderId == r.ParentId
+                                        orderby t.Level descending
+                                        select t.ParentId
+                                    ).Skip(1).FirstOrDefault()
+                                select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                            select f.Order
+                        ).FirstOrDefault()
                     })
                     .SingleOrDefault());
 

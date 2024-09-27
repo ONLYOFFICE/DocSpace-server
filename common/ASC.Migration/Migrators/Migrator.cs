@@ -247,7 +247,7 @@ public abstract class Migrator(
     {
         user.Info.UserName ??= user.Info.Email.Split('@').First();
         user.Info.LastName ??= user.Info.FirstName;
-    }
+        }
 
     private async Task MigrateGroupAsync()
     {
@@ -322,9 +322,9 @@ public abstract class Migrator(
         if (storage.Type != FolderType.BUNCH) 
         {
             newFolder = storage.Type == FolderType.USER
-                ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
-                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, null);
-            Log(MigrationResource.СreateRootFolder);
+            ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
+                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null);
+        Log(MigrationResource.СreateRootFolder);
         }
         else
         {
@@ -341,7 +341,7 @@ public abstract class Migrator(
             {
                 if (storage.Type == FolderType.BUNCH && !folder.Private)
                 {
-                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, null);
+                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null);
                 }
                 else
                 {
@@ -416,7 +416,7 @@ public abstract class Migrator(
                 }
                 var access = (Files.Core.Security.FileShare)security.Security;
 
-                var entryIsFile = security.EntryType == 2;
+                    var entryIsFile = security.EntryType == 2;
                 if (entryIsFile && storage.ShouldImportSharedFiles)
                 {
                     var key = $"{_fileKey}-{security.EntryId}";
@@ -491,7 +491,7 @@ public abstract class Migrator(
                         {
                             await SecurityContext.AuthenticateMeAsync(user.Info.Id);
                         }
-                        var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, null);
+                        var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null);
 
                         orderedFolders = storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
@@ -531,28 +531,28 @@ public abstract class Migrator(
                         {
                             try
                             {
-                                await using var fs = new FileStream(file.Path, FileMode.Open);
+                            await using var fs = new FileStream(file.Path, FileMode.Open);
 
-                                var newFile = ServiceProvider.GetService<File<int>>();
+                            var newFile = ServiceProvider.GetService<File<int>>();
                                 newFile.ParentId = localMatchingRoomIds[security.EntryId].Id;
-                                newFile.Comment = FilesCommonResource.CommentCreate;
-                                newFile.Title = Path.GetFileName(file.Title);
-                                newFile.ContentLength = fs.Length;
-                                newFile.Version = file.Version;
-                                newFile.VersionGroup = file.VersionGroup;
+                            newFile.Comment = FilesCommonResource.CommentCreate;
+                            newFile.Title = Path.GetFileName(file.Title);
+                            newFile.ContentLength = fs.Length;
+                            newFile.Version = file.Version;
+                            newFile.VersionGroup = file.VersionGroup;
                                 newFile.CreateOn = file.Created;
                                 newFile.ModifiedOn = file.Modified;
                                 if (matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
                                 {
                                     newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
                                 }
-                                newFile = await fileDao.SaveFileAsync(newFile, fs);
+                            newFile = await fileDao.SaveFileAsync(newFile, fs);
                                 Log(string.Format(MigrationResource.CreateFile, file.Title));
                                 if (!matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
                                 {
                                     matchingFilesIds.Add($"{_fileKey}-{file.Id}", newFile);
-                                }
-                            }
+                        }
+                    }
                             catch(Exception ex)
                             {
                                 Log(string.Format(MigrationResource.CanNotCreateFile, Path.GetFileName(file.Title)), ex);

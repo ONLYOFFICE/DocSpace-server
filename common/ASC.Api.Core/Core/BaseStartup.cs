@@ -483,6 +483,8 @@ public abstract class BaseStartup
             .AddStartupTask<WarmupBaseDbContextStartupTask>()
             .AddStartupTask<WarmupMappingStartupTask>()
             .TryAddSingleton(services);
+        
+        services.AddTransient<DistributedTaskProgress>();
     }
 
     public static IEnumerable<Assembly> GetAutoMapperProfileAssemblies()

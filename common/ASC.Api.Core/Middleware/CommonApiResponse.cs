@@ -113,7 +113,10 @@ public class SuccessApiResponse : CommonApiResponse
     {
         Status = 0;
         _httpContext = httpContext;
-        Response = response;
+        if (response != null)
+        {
+            Response = response;
+        }
 
         Links =
         [

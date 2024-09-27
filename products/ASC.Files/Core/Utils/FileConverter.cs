@@ -37,15 +37,15 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
 
     public async Task AddAsync<T>(
         File<T> file,
-        string password,
+                        string password,
         string outputType,
-        int tenantId,
-        IAccount account,
-        bool deleteAfter,
-        string url,
-        string serverRootPath,
-        bool updateIfExist,
-        IDictionary<string, string> headers)
+                        int tenantId,
+                        IAccount account,
+                        bool deleteAfter,
+                        string url,
+                        string serverRootPath,
+                        bool updateIfExist,
+                        IDictionary<string, string> headers)
     {
         var cacheKey = GetCacheKey<T>();
 
@@ -319,7 +319,7 @@ public class FileConverter(
         var fileExtension = file.ConvertedExtension;
         if (fileExtension.Trim('.').Equals(toExtension.Trim('.'), StringComparison.OrdinalIgnoreCase))
         {
-            return false;
+            return FileUtility.WatermarkedDocumentExt.Equals(fileExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         fileExtension = FileUtility.GetFileExtension(file.Title);
@@ -346,10 +346,19 @@ public class FileConverter(
         }
 
         var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
-        var docKey = await documentServiceHelper.GetDocKeyAsync(file);
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
-        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, false, toForm);
+        Options options = null;
+        if (file.RootFolderType == FolderType.VirtualRooms)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
+            options = documentServiceHelper.GetOptions(room);
+        }
+
+        var docKey = await documentServiceHelper.GetDocKeyAsync(file, options?.GetMD5Hash());
+
+        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, options, false, toForm);
         var convertUri = uriTuple.ConvertedDocumentUri;
         var request = new HttpRequestMessage
         {
@@ -370,11 +379,11 @@ public class FileConverter(
             {
                 throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
             }
-        }
+            }
 
         var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
         var fileExtension = file.ConvertedExtension;
-        var toExtension =  fileUtility.GetInternalExtension(file.Title);
+        var toExtension = fileUtility.GetInternalExtension(file.Title);
         if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType))
         {
             toExtension = outputType;
@@ -384,7 +393,7 @@ public class FileConverter(
 
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
-        var (_, convertUri, convertType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentUICulture.Name, null, null, false, false);
+        var (_, convertUri, convertType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
 
         var operationResult = new FileConverterOperationResult
         {

@@ -37,6 +37,7 @@ public class AbstractDao
     protected readonly SettingsManager _settingsManager;
     protected readonly AuthContext _authContext;
     protected readonly IServiceProvider _serviceProvider;
+    protected readonly IDistributedLockProvider _distributedLockProvider;
 
     protected AbstractDao(
         IDbContextFactory<FilesDbContext> dbContextFactory,
@@ -47,7 +48,8 @@ public class AbstractDao
         MaxTotalSizeStatistic maxTotalSizeStatistic,
         SettingsManager settingsManager,
         AuthContext authContext,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        IDistributedLockProvider distributedLockProvider)
     {
         _dbContextFactory = dbContextFactory;
         _userManager = userManager;
@@ -58,6 +60,7 @@ public class AbstractDao
         _settingsManager = settingsManager;
         _authContext = authContext;
         _serviceProvider = serviceProvider;
+        _distributedLockProvider = distributedLockProvider;
     }
 
 
@@ -74,7 +77,7 @@ public class AbstractDao
             .Where(where);
     }
     
-    
+        
     protected async Task IncrementCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId, FileEntryType fileEntryType)
     {
         await ChangeCountAsync(filesDbContext, folderId, tenantId, fileEntryType, 1);
@@ -226,70 +229,94 @@ public class AbstractDao
             return;
         }
 
-        var fileOrder = await filesDbContext.GetFileOrderAsync(tenantId, fileId, fileEntryType);
-
-        if (order == 0 || fileOrder?.ParentFolderId != parentFolderId)
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync(GetCustomOrderLockKey(tenantId, parentFolderId)))
         {
-            var lastOrder = await filesDbContext.GetLastFileOrderAsync(tenantId, parentFolderId, fileEntryType);
-            order = ++lastOrder;
-        }
+            var fileOrder = await filesDbContext.GetFileOrderAsync(tenantId, fileId, fileEntryType);
 
-        if (fileOrder != null)
-        {
-            if (fileOrder.ParentFolderId == parentFolderId)
+            if (order == 0 || fileOrder?.ParentFolderId != parentFolderId)
             {
-                var currentOrder = fileOrder.Order;
+                var lastOrder = await filesDbContext.GetLastFileOrderAsync(tenantId, parentFolderId);
+                order = ++lastOrder;
+            }
 
-                if (currentOrder == order)
+            if (fileOrder != null)
+            {
+                if (fileOrder.ParentFolderId == parentFolderId)
                 {
-                    return;
+                    var currentOrder = fileOrder.Order;
+
+                    if (currentOrder == order)
+                    {
+                        return;
+                    }
+
+                    if (currentOrder > order)
+                    {
+                        await filesDbContext.IncreaseFileOrderAsync(tenantId, parentFolderId, order, currentOrder);
+                    }
+                    else
+                    {
+                        await filesDbContext.DecreaseFileOrderAsync(tenantId, parentFolderId, order, currentOrder);
+                    }
                 }
-                
-                if (currentOrder > order)
+
+                fileOrder.ParentFolderId = parentFolderId;
+                fileOrder.Order = order;
+            }
+            else
+            {
+                await filesDbContext.FileOrder.AddAsync(new DbFileOrder
                 {
-                    await filesDbContext.IncreaseFileOrderAsync(tenantId, parentFolderId, order, currentOrder);
+                    EntryId = fileId,
+                    EntryType = fileEntryType,
+                    ParentFolderId = parentFolderId,
+                    TenantId = tenantId,
+                    Order = order
+                });
+            }
+
+            await filesDbContext.SaveChangesAsync();
+        }
+    }
+
+    internal async Task InitCustomOrder(Dictionary<int, int> fileIds, int parentFolderId, FileEntryType entryType)
+    {
+        var ids = fileIds.Select(r => r.Key).ToList();
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync(GetCustomOrderLockKey(tenantId, parentFolderId)))
+        {
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+            var order = await filesDbContext.FileOrder
+                .AsTracking()
+                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && ids.Contains(r.EntryId))
+                .ToListAsync();
+            
+            var orders = new List<DbFileOrder>();
+            
+            foreach (var id in fileIds)
+            {
+                var o = order.FirstOrDefault(r => r.EntryId == id.Key && r.EntryType == entryType);
+                if (o != null)
+                {
+                    o.Order = fileIds[o.EntryId];
                 }
                 else
                 {
-                    await filesDbContext.DecreaseFileOrderAsync(tenantId, parentFolderId, order, currentOrder);
+                    orders.Add(new DbFileOrder
+                    {
+                        TenantId = tenantId,
+                        ParentFolderId = parentFolderId,
+                        EntryId = id.Key,
+                        EntryType = entryType,
+                        Order = id.Value
+                    });
                 }
             }
-
-            fileOrder.ParentFolderId = parentFolderId;
-            fileOrder.Order = order;
+            
+            filesDbContext.FileOrder.AddRange(orders);
+            await filesDbContext.SaveChangesAsync();
         }
-        else
-        {
-            await filesDbContext.FileOrder.AddAsync(new DbFileOrder
-            {
-                EntryId = fileId,
-                EntryType = fileEntryType,
-                ParentFolderId = parentFolderId,
-                TenantId = tenantId,
-                Order = order
-            });
-        }
-
-        await filesDbContext.SaveChangesAsync();
-    }
-
-    internal async Task InitCustomOrder(IEnumerable<int> fileIds, int parentFolderId, FileEntryType entryType)
-    {        
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        await filesDbContext.ClearFileOrderAsync(tenantId, parentFolderId, entryType);
-        
-        await filesDbContext.FileOrder.AddRangeAsync(fileIds.Select((r, i) => new DbFileOrder
-        {
-            TenantId = tenantId,
-            ParentFolderId = parentFolderId,
-            EntryId = r,
-            EntryType = entryType,
-            Order = i + 1
-        }));
-        
-        await filesDbContext.SaveChangesAsync();
     }
     
     internal async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId, FileEntryType fileEntryType)
@@ -304,6 +331,8 @@ public class AbstractDao
         }
     }
 
+    private string GetCustomOrderLockKey(int tenantId, int folderId) => $"order_{folderId}_{tenantId}";
+    
     internal enum SearchType
     {
         Start,

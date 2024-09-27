@@ -6294,6 +6294,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<bool>("DenyDownload")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("deny_download")
+                        .HasDefaultValueSql("0");
+
                     b.Property<bool>("HasLogo")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
@@ -6306,6 +6312,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("indexing")
                         .HasDefaultValueSql("0");
 
+                    b.Property<string>("Lifetime")
+                        .HasColumnType("json")
+                        .HasColumnName("lifetime")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<bool>("Private")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
@@ -6317,6 +6329,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("quota")
                         .HasDefaultValueSql("'-2'");
+
+                    b.Property<string>("Watermark")
+                        .HasColumnType("json")
+                        .HasColumnName("watermark")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.HasKey("TenantId", "RoomId")
                         .HasName("primary");
