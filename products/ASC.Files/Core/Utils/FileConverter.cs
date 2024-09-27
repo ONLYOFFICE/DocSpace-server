@@ -352,8 +352,8 @@ public class FileConverter(
         if (file.RootFolderType == FolderType.VirtualRooms)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
-            var (watermarkSettings, room) = await DocSpaceHelper.GetWatermarkSettings(file, folderDao);
-            options = documentServiceHelper.GetOptions(watermarkSettings, room);
+            var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
+            options = documentServiceHelper.GetOptions(room);
         }
 
         var docKey = await documentServiceHelper.GetDocKeyAsync(file, options?.GetMD5Hash());

@@ -83,7 +83,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     public bool SettingsHasLogo { get; set; }
     public string SettingsColor { get; set; }
     public string SettingsCover { get; set; }
-    public string SettingsWatermark { get; set; }
+    public WatermarkSettings SettingsWatermark { get; set; }
     public bool SettingsIndexing { get; set; }
     public long SettingsQuota { get; set; }
     public RoomDataLifetime SettingsLifetime { get; set; }

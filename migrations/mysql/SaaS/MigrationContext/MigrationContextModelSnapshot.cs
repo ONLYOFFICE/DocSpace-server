@@ -6331,8 +6331,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasDefaultValueSql("'-2'");
 
                     b.Property<string>("Watermark")
-                        .HasColumnType("text")
-                        .HasColumnName("watermark");
+                        .HasColumnType("json")
+                        .HasColumnName("watermark")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.HasKey("TenantId", "RoomId")
                         .HasName("primary");
