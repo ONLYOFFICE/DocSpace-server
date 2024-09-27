@@ -29,7 +29,7 @@ public class WatermarkRequestDto
 {
     /// <summary>Specifies whether watermarks are on or off</summary>
     /// <type>System.Boolean, System</type>
-    public bool Enabled { get; set; }
+    public bool? Enabled { get; set; }
 
     /// <summary>Specifies whether to display: username, user email, user ip-adress, current date and room name </summary>
     /// <type>WatermarkAdditions</type>

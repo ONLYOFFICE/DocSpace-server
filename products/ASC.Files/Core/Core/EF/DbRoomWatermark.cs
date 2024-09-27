@@ -24,30 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.Files.Core.EF;
 
-/// <summary>
-/// </summary>
-public enum RoomType
+public class DbRoomWatermark : IMapFrom<WatermarkSettings>
 {
-    FillingFormsRoom = 1,
-    EditingRoom = 2,
-    CustomRoom = 5,
-    PublicRoom = 6,
-    VirtualDataRoom = 8
-}
-
-/// <summary>
-/// </summary>
-public class CreateRoomRequestDto : UpdateRoomRequestDto
-{
-    /// <summary>Room type</summary>
-    /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
-    public RoomType RoomType { get; set; }
-
-    public bool Private { get; set; }
-
-    /// <summary>Collection of sharing parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.FileShareParams}, System.Collections.Generic</type>
-    public IEnumerable<FileShareParams> Share { get; set; }
+    public string Text { get; set; }
+    public WatermarkAdditions Additions { get; set; }
+    public int Rotate { get; set; }
+    public double ImageWidth { get; set; }
+    public double ImageHeight { get; set; }
+    public string ImageUrl { get; set; }
+    public int ImageScale { get; set; }
 }

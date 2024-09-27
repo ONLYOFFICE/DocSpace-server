@@ -30,10 +30,6 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// </summary>
 public class WatermarkDto
 {
-    /// <summary>Specifies whether watermarks are on or off</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Enabled { get; set; }
-
     /// <summary>Specifies whether to display: username, user email, user ip-adress, current date and room name </summary>
     /// <type>WatermarkAdditions</type>
     public WatermarkAdditions Additions { get; set; }
@@ -63,7 +59,7 @@ public class WatermarkDto
     public double ImageWidth { get; set; }
 }
 [Scope]
-public class WatermarkDtoHelper()
+public class WatermarkDtoHelper
 {
     public WatermarkDto Get(WatermarkSettings watermarkSettings)
     {
@@ -74,7 +70,6 @@ public class WatermarkDtoHelper()
 
         return new WatermarkDto
         {
-            Enabled = watermarkSettings.Enabled,
             Additions = watermarkSettings.Additions,
             Text = watermarkSettings.Text,
             Rotate = watermarkSettings.Rotate,

@@ -341,10 +341,14 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         {
                             ext = outType;
                         }
-                        var folderDao = daoFactory.GetFolderDao<T>();
-                        if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+
+                        if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)))
                         {
-                            ext = FileUtility.WatermarkedDocumentExt;
+                            var folderDao = daoFactory.GetFolderDao<T>();
+                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+                            {
+                                ext = FileUtility.WatermarkedDocumentExt;
+                            }
                         }
 
                         long offset = 0;

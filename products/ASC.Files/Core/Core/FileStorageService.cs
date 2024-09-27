@@ -94,7 +94,8 @@ public class FileStorageService //: IFileStorageService
     ShortUrl shortUrl,
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
     PasswordSettingsManager passwordSettingsManager,
-    WatermarkManager watermarkManager)
+    WatermarkManager watermarkManager,
+    IMapper mapper)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -423,7 +424,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool indexing, IEnumerable<FileShareParams> share, long quota, RoomDataLifetime lifetime, bool denyDownload, WatermarkRequestDto watermark, string color, string cover)
+    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var parentId = await globalFolderHelper.GetFolderVirtualRooms();
@@ -438,7 +439,7 @@ public class FileStorageService //: IFileStorageService
         }, privacy, share);
     }
 
-    public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool indexing, bool createAsNewFolder, bool denyDownload, string color, string cover)
+    public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool? indexing, bool createAsNewFolder, bool? denyDownload, string color, string cover)
     {
         var folderDao = daoFactory.GetFolderDao<string>();
         var providerDao = daoFactory.ProviderDao;
@@ -539,7 +540,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, long quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
@@ -591,9 +592,21 @@ public class FileStorageService //: IFileStorageService
             newFolder.FolderType = folderType;
             newFolder.SettingsPrivate = parent.SettingsPrivate ? parent.SettingsPrivate : privacy;
             newFolder.SettingsColor = roomLogoManager.GetRandomColour();
-            newFolder.SettingsIndexing = indexing;
-            newFolder.SettingsDenyDownload = denyDownload;
-            newFolder.SettingsQuota = quota;
+            if (indexing.HasValue)
+            {
+                newFolder.SettingsIndexing = indexing.Value;
+            }
+
+            if (denyDownload.HasValue)
+            {
+                newFolder.SettingsDenyDownload = denyDownload.Value;
+            }
+
+            if (quota.HasValue)
+            {
+                newFolder.SettingsQuota = quota.Value;
+            }
+
             newFolder.SettingsLifetime = lifetime;
             _ = RoomLogoManager.ColorChanged(color, newFolder);
             _ = await RoomLogoManager.CoverChanged(cover, newFolder);
@@ -726,10 +739,9 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
-        
-        var canEdit = DocSpaceHelper.IsRoom(folder.FolderType) 
-            ? folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder)
-            : await fileSecurity.CanRenameAsync(folder);
+
+        var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+        var canEdit = folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder);
 
         if (!canEdit)
         {
@@ -746,29 +758,69 @@ public class FileStorageService //: IFileStorageService
 
         var folderAccess = folder.Access;
 
-        var titleChanged = !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && updateData.Title != null;
+        var titleChanged = !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal)  && updateData.Title != null;
         var quotaChanged = folder.SettingsQuota != updateData.Quota && updateData.Quota != null;
+        var indexingChanged = updateData.Indexing.HasValue && folder.SettingsIndexing != updateData.Indexing;
+        var denyDownloadChanged = updateData.DenyDownload.HasValue && folder.SettingsDenyDownload != updateData.DenyDownload;
+        var lifetimeChanged = updateData.Lifetime != null;
+        var watermarkChanged = updateData.Watermark != null;
         
-        if (titleChanged || quotaChanged)
-        {
+        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged)
+        {                
             var oldTitle = folder.Title;
-            var oldQuota = folder.SettingsQuota;
+            WatermarkSettings watermark = null;
             
+            if (watermarkChanged)
+            {
+                watermark = mapper.Map<WatermarkRequestDto, WatermarkSettings>(updateData.Watermark);
+                watermark.ImageUrl = await watermarkManager.GetWatermarkImageUrlAsync(folder, watermark.ImageUrl);
+            }
+
             var newFolderId = await folderDao.UpdateFolderAsync(
                 folder,
-                 titleChanged ? updateData.Title : folder.Title,
-                 quotaChanged ? (long)updateData.Quota : folder.SettingsQuota);
+                titleChanged ? updateData.Title : folder.Title,
+                quotaChanged ? (long)updateData.Quota : folder.SettingsQuota,
+                indexingChanged ? updateData.Indexing.Value : folder.SettingsIndexing,
+                denyDownloadChanged ? updateData.DenyDownload.Value : folder.SettingsDenyDownload,
+                lifetimeChanged ? mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(updateData.Lifetime) : folder.SettingsLifetime,
+                watermarkChanged ? 
+                    (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark) : 
+                    folder.SettingsWatermark);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
             folder.Access = folderAccess;
             
+            if (isRoom)
+            {
+                if (indexingChanged)
+                {
+                    if (updateData.Indexing.Value)
+                    {
+                        await ReOrderAsync(folder.Id, true, true);
+                    }
+                    
+                    _ = filesMessageService.SendAsync(MessageAction.RoomIndexingChanged, folder, folder.Title);
+                }
+            
+                if (denyDownloadChanged)
+                {
+                    _ = filesMessageService.SendAsync(MessageAction.RoomDenyDownloadChanged, folder, folder.Title);
+                }
+            }
+            
             if (titleChanged)
             {
-                _ = DocSpaceHelper.IsRoom(folder.FolderType) ? 
-                    filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title) : 
-                    filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
+                if (isRoom)
+                {
+                    _ = filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
                 }
-            if (DocSpaceHelper.IsRoom(folder.FolderType) && oldQuota != updateData.Quota && updateData.Quota != null)
+                else
+                {
+                    _ = filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
+                }
+            }
+            
+            if (isRoom && quotaChanged)
             {
                 if (updateData.Quota >= 0)
                 {
@@ -776,7 +828,7 @@ public class FileStorageService //: IFileStorageService
                 }
                 else if(updateData.Quota == -1)
                 {
-                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, string.Join(", ", [folder.Title]));
+                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, folder.Title);
                 }
                 else
                 {
@@ -784,8 +836,13 @@ public class FileStorageService //: IFileStorageService
                     _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), [folder.Title]);
                 }
             }
+            
         }
 
+        if (updateData.Logo != null)
+        {
+            await roomLogoManager.SaveLogo(updateData.Logo.TmpFile, updateData.Logo.X, updateData.Logo.Y, updateData.Logo.Width, updateData.Logo.Height, folder, folderDao);
+        }
 
         var newTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder);
         var tag = await newTags.FirstOrDefaultAsync();
@@ -2811,16 +2868,19 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<AceWrapper> GetPrimaryExternalLinkAsync<T>(T entryId, FileEntryType entryType)
     {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+
         FileEntry<T> entry = entryType == FileEntryType.File 
-            ? await daoFactory.GetFileDao<T>().GetFileAsync(entryId)
-            : await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
+            ? await fileDao.GetFileAsync(entryId)
+            : await folderDao.GetFolderAsync(entryId);
 
         entry.NotFoundIfNull();
 
         if ((entry is File<T> || entry is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)) && entry.RootFolderType == FolderType.VirtualRooms)
         {
-            var room = await daoFactory.GetFolderDao<T>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
-            
+            var room = await DocSpaceHelper.GetParentRoom(entry, folderDao);
+
             var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
             if (parentLink == null)
             {

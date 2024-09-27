@@ -87,7 +87,7 @@ internal class FolderDao(
 
         var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
 
-        return string.IsNullOrEmpty(roomSettings.Watermark) ? null : JsonSerializer.Deserialize<WatermarkSettings>(roomSettings.Watermark);
+        return mapper.Map<DbRoomWatermark, WatermarkSettings>(roomSettings.Watermark);
     }
     public async Task<Folder<int>> GetFolderAsync(string title, int parentId)
     {
@@ -460,7 +460,7 @@ internal class FolderDao(
                     Cover = folder.SettingsCover,
                     Indexing = folder.SettingsIndexing,
                     DenyDownload = folder.SettingsDenyDownload,
-                    Watermark = folder.SettingsWatermark,
+                    Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(folder.SettingsWatermark),
                     Quota = folder.SettingsQuota,
                     Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
                 };
@@ -503,7 +503,7 @@ internal class FolderDao(
                     Cover = folder.SettingsCover,
                     Indexing = folder.SettingsIndexing,
                     DenyDownload = folder.SettingsDenyDownload,
-                    Watermark = folder.SettingsWatermark,
+                    Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(folder.SettingsWatermark),
                     Quota = folder.SettingsQuota,
                     Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
                 };
@@ -550,7 +550,8 @@ internal class FolderDao(
 
         var toUpdate = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
 
-        toUpdate.Watermark = JsonSerializer.Serialize(watermarkSettings);
+        toUpdate.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermarkSettings);
+
         filesDbContext.Update(toUpdate);
 
         await filesDbContext.SaveChangesAsync();
@@ -932,7 +933,7 @@ internal class FolderDao(
         return folder.Id;
     }
 
-    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota)
+    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -946,6 +947,22 @@ internal class FolderDao(
         toUpdate.Title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
         toUpdate.ModifiedOn = DateTime.UtcNow;
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
+        toUpdate.Settings.Indexing = indexing;
+        toUpdate.Settings.DenyDownload = denyDownload;
+        if (lifeTime != null)
+        {
+            if (lifeTime.Enabled.HasValue && !lifeTime.Enabled.Value)
+            {
+                toUpdate.Settings.Lifetime = null;
+            }
+            else
+            {
+                toUpdate.Settings.Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(lifeTime);
+            }
+        }
+
+        toUpdate.Settings.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermark);
+
         filesDbContext.Update(toUpdate);
 
         await filesDbContext.SaveChangesAsync();

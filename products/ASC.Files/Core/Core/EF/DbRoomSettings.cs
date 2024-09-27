@@ -36,7 +36,7 @@ public class DbRoomSettings
     public string Cover { get; set; }
     public bool Indexing { get; set; }
     public long Quota { get; set; }
-    public string Watermark { get; set; }
+    public DbRoomWatermark Watermark { get; set; }
     public bool DenyDownload { get; set; }
     public DbRoomDataLifetime Lifetime { get; set; }
     public DbTenant Tenant { get; set; }
@@ -77,7 +77,11 @@ public static class DbRoomSettingsExtension
             
             entity.Property(e => e.Indexing).HasColumnName("indexing").HasDefaultValueSql("0");
 
-            entity.Property(e => e.Watermark).HasColumnName("watermark").HasColumnType("text");
+            entity.Property(e => e.Watermark)
+                .HasColumnName("watermark")
+                .HasColumnType("json")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Color)
                 .HasColumnName("color")

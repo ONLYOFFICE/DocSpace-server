@@ -230,7 +230,10 @@ public enum MessageAction
     RoomLogoDeleted = 5081,
     
     RoomColorChanged = 5102,
-    RoomCoverChanged = 5103, //last
+    RoomCoverChanged = 5103, 
+    
+    RoomIndexingChanged = 5104,
+    RoomDenyDownloadChanged = 5105,//last
     
     RoomExternalLinkCreated = 5088,
     RoomExternalLinkUpdated = 5089,
