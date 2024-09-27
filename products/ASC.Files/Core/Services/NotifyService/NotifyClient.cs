@@ -269,11 +269,15 @@ public class NotifyClient(WorkContext notifyContext,
 
         var managerUrl = baseCommonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(originalForm.CreateBy));
 
-        var roomUrl = pathProvider.GetRoomsUrl(room.Id.ToString());
+        var roomUrl = pathProvider.GetRoomsUrl(room.Id.ToString(), false);
 
-        var documentParentUrl = pathProvider.GetRoomsUrl(filledForm.ParentId.ToString());
+        var documentParentUrl = pathProvider.GetRoomsUrl(filledForm.ParentId.ToString(), false);
 
         var documentUrl = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, filledForm.Title, filledForm.Id));
+
+        var userName = filledForm.CreateBy == ConfigurationConstants.Guest.ID
+            ? AuditReportResource.ResourceManager.GetString("GuestAccount", managerCulture)
+            : user.DisplayUserName(displayUserSettingsHelper);
 
         var userButtonText = FilesPatternResource.ResourceManager.GetString("button_CheckReadyForms", userCulture);
 
@@ -305,7 +309,7 @@ public class NotifyClient(WorkContext notifyContext,
             new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
             new TagValue(NotifyConstants.RoomTitle, room.Title),
             new TagValue(NotifyConstants.RoomUrl, roomUrl),
-            new TagValue(Tags.FromUserName, user.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(Tags.FromUserName, userName),
             new TagValue(Tags.FromUserLink, userUrl),
             new TagValue(CommonTags.Culture, managerCulture.Name),
             TagValues.OrangeButton(managerButtonText, documentParentUrl)

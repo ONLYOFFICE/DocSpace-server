@@ -81,6 +81,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     public bool SettingsPrivate { get; set; }
     public bool SettingsHasLogo { get; set; }
     public string SettingsColor { get; set; }
+    public string SettingsCover { get; set; }
     public bool SettingsIndexing { get; set; }
     public long SettingsQuota { get; set; }
     public long Counter { get; set; }

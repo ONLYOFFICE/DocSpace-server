@@ -446,6 +446,7 @@ internal class FolderDao(
                     Private = folder.SettingsPrivate,
                     HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
+                    Cover = folder.SettingsCover,
                     Indexing = folder.SettingsIndexing,
                     Quota = folder.SettingsQuota
                 };
@@ -485,6 +486,7 @@ internal class FolderDao(
                     Private = folder.SettingsPrivate,
                     HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
+                    Cover = folder.SettingsCover,
                     Indexing = folder.SettingsIndexing,
                     Quota = folder.SettingsQuota
                 };
@@ -863,6 +865,7 @@ internal class FolderDao(
                 Private = folder.SettingsPrivate,
                 HasLogo = folder.SettingsHasLogo,
                 Color = folder.SettingsColor,
+                Cover = folder.SettingsCover,
                 Indexing = folder.SettingsIndexing,
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue
             };

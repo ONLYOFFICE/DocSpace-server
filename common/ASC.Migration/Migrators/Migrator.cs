@@ -323,7 +323,7 @@ public abstract class Migrator(
         {
             newFolder = storage.Type == FolderType.USER
                 ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
-                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0);
+                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, null);
             Log(MigrationResource.СreateRootFolder);
         }
         else
@@ -332,7 +332,7 @@ public abstract class Migrator(
             newFolder.Id = -1;
         }
 
-        matchingFilesIds.Add($"{_folderKey}-{storage.RootKey}", newFolder);
+            matchingFilesIds.Add($"{_folderKey}-{storage.RootKey}", newFolder);
         var orderedFolders = storage.Folders.OrderBy(f => f.Level);
         foreach (var folder in orderedFolders)
         {
@@ -341,15 +341,15 @@ public abstract class Migrator(
             {
                 if (storage.Type == FolderType.BUNCH && !folder.Private)
                 {
-                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0);
+                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, null);
                 }
                 else
                 {
                     newFolder = await FileStorageService.CreateFolderAsync(matchingFilesIds[$"{_folderKey}-{folder.ParentId}"].Id, folder.Title);
                 }
 
-                Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
-            }
+                    Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
+                }
             else
             {
                 newFolder = ServiceProvider.GetService<Folder<int>>();
@@ -500,8 +500,7 @@ public abstract class Migrator(
                         {
                             await SecurityContext.AuthenticateMeAsync(user.Info.Id);
                         }
-                        var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}",
-                            RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0);
+                        var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, null);
 
                         orderedFolders = storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
