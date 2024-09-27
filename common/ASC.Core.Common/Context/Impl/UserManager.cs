@@ -140,63 +140,20 @@ public class UserManager(
         return u is { Removed: false } ? u : Constants.LostUser;
     }
     
-    public Task<int> GetUsersCountAsync(
-        bool isDocSpaceAdmin,
-        EmployeeStatus? employeeStatus,
-        List<List<Guid>> includeGroups,
-        List<Guid> excludeGroups,
-        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
-        EmployeeActivationStatus? activationStatus,
-        AccountLoginType? accountLoginType,
-        QuotaFilter? quotaFilter,
-        Area? area,
-        string text,
-        string separator,
-        bool withoutGroup,
-        bool includeStrangers)
+    public Task<int> GetUsersCountAsync(UserQueryFilter filter)
     {
-        return userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, 
-            quotaFilter, area, text, separator, withoutGroup, includeStrangers);
+        filter.TenantId = Tenant.Id;
+        filter.OwnerId = Tenant.OwnerId;
+        
+        return userService.GetUsersCountAsync(filter);
     }
 
-    public IAsyncEnumerable<UserInfo> GetUsers(
-        bool isDocSpaceAdmin,
-        EmployeeStatus? employeeStatus,
-        List<List<Guid>> includeGroups,
-        List<Guid> excludeGroups,
-        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
-        EmployeeActivationStatus? activationStatus,
-        AccountLoginType? accountLoginType,
-        QuotaFilter? quotaFilter,
-        Area? area,
-        string text,
-        string separator,
-        bool withoutGroup,
-        string sortBy,
-        bool sortOrderAsc,
-        bool includeStrangers,
-        long limit,
-        long offset)
+    public IAsyncEnumerable<UserInfo> GetUsers(UserQueryFilter filter)
     {
-        if (!UserSortTypeExtensions.TryParse(sortBy, true, out var sortType))
-        {
-            sortType = UserSortType.FirstName;
-        }
-
-        if (sortType == UserSortType.DisplayName)
-        {
-            if (UserFormatter.GetUserDisplayDefaultOrder() == DisplayUserNameFormat.FirstLast)
-            {
-                sortType = UserSortType.FirstName;
-            }
-            else
-            {
-                sortType = UserSortType.LastName;
-            }
-        }
-
-        return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, area, 
-            text, separator, withoutGroup, Tenant.OwnerId, sortType, sortOrderAsc, includeStrangers, limit, offset);
+        filter.TenantId = Tenant.Id;
+        filter.OwnerId = Tenant.OwnerId;
+        
+        return userService.GetUsers(filter);
     }
 
     public UserInfo GetUsers(Guid id)

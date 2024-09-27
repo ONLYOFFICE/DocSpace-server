@@ -170,49 +170,14 @@ public class CachedUserService : IUserService, ICachedService
         _cacheUserGroupRefItem = userServiceCache.CacheUserGroupRefItem;
     }
 
-    public Task<int> GetUsersCountAsync(
-        int tenant,
-        bool isDocSpaceAdmin,
-        EmployeeStatus? employeeStatus,
-        List<List<Guid>> includeGroups,
-        List<Guid> excludeGroups,
-        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
-        EmployeeActivationStatus? activationStatus,
-        AccountLoginType? accountLoginType,
-        QuotaFilter? quotaFilter,
-        Area? area,
-        string text,
-        string separator,
-        bool withoutGroup,
-        bool includeStrangers)
+    public Task<int> GetUsersCountAsync(UserQueryFilter filter)
     {
-        return _service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, area, 
-            text, separator, withoutGroup, includeStrangers);
+        return _service.GetUsersCountAsync(filter);
     }
 
-    public IAsyncEnumerable<UserInfo> GetUsers(
-        int tenant,
-        bool isDocSpaceAdmin,
-        EmployeeStatus? employeeStatus,
-        List<List<Guid>> includeGroups,
-        List<Guid> excludeGroups,
-        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
-        EmployeeActivationStatus? activationStatus,
-        AccountLoginType? accountLoginType,
-        QuotaFilter? quotaFilter,
-        Area? area,
-        string text,
-        string separator,
-        bool withoutGroup,
-        Guid ownerId,
-        UserSortType sortBy,
-        bool sortOrderAsc,
-        bool includeStrangers,
-        long limit,
-        long offset)
+    public IAsyncEnumerable<UserInfo> GetUsers(UserQueryFilter filter)
     {
-        return _service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, area, text, 
-            separator, withoutGroup, ownerId, sortBy, sortOrderAsc, includeStrangers, limit, offset);
+        return _service.GetUsers(filter);
     }
 
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id)
