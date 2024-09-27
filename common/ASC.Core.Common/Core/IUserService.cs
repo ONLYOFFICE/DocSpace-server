@@ -39,9 +39,11 @@ public interface IUserService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
+        Area? area,
         string text,
-        string separatorm,
-        bool withoutGroup);
+        string separator,
+        bool withoutGroup,
+        bool includeStrangers);
     
     IAsyncEnumerable<UserInfo> GetUsers(
         int tenant,
@@ -53,12 +55,14 @@ public interface IUserService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
+        Area? area,
         string text,
         string separator,
         bool withoutGroup,
         Guid ownerId,
         UserSortType sortBy,
         bool sortOrderAsc,
+        bool includeStrangers,
         long limit,
         long offset);
     Task<byte[]> GetUserPhotoAsync(int tenant, Guid id);

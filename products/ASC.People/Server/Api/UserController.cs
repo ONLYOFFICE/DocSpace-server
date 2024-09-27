@@ -704,6 +704,8 @@ public class UserController(
     /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter">Filter by quota (Default - 1, Custom - 2)</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified ID</param>
+    /// <param type="ASC.Core.Common.Core.Area, ASC.Core.Common.Core" name="area">Search area (All = 0, People = 1, Guests = 2)</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="includeStrangers">Specifies whether to include stranger guests</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/filter</path>
     /// <httpMethod>GET</httpMethod>
@@ -719,9 +721,11 @@ public class UserController(
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         bool? withoutGroup,
-        bool? excludeGroup)
+        bool? excludeGroup,
+        Area area = Area.All,
+        bool includeStrangers = false)
     {
-        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, quotaFilter, withoutGroup, excludeGroup);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, quotaFilter, withoutGroup, excludeGroup, area, includeStrangers);
 
         await foreach (var user in users)
         {
@@ -808,6 +812,8 @@ public class UserController(
     /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter">Filter by quota (Default - 1, Custom - 2)</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified ID</param>
+    /// <param type="ASC.Core.Common.Core.Area, ASC.Core.Common.Core" name="area">Search area (All = 0, People = 1, Guests = 2)</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="includeStrangers">Specifies whether to include stranger guests</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
     /// <path>api/2.0/people/simple/filter</path>
     /// <httpMethod>GET</httpMethod>
@@ -823,9 +829,11 @@ public class UserController(
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         bool? withoutGroup,
-        bool? excludeGroup)
+        bool? excludeGroup,
+        Area area = Area.All,
+        bool includeStrangers = false)
     {
-        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, quotaFilter, withoutGroup, excludeGroup);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType, quotaFilter, withoutGroup, excludeGroup, area, includeStrangers);
 
         await foreach (var user in users)
         {
@@ -1785,10 +1793,17 @@ public class UserController(
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         bool? withoutGroup,
-        bool? excludeGroup)
+        bool? excludeGroup,
+        Area area = Area.All,
+        bool includeStrangers = false)
     {
         var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
                       await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
+
+        if (includeStrangers && !isDocSpaceAdmin)
+        {
+            includeStrangers = false;
+        }
 
         var excludeGroups = new List<Guid>();
         var includeGroups = new List<List<Guid>>();
@@ -1839,7 +1854,7 @@ public class UserController(
         {
             var adminGroups = new List<Guid>
             {
-                    Constants.GroupAdmin.ID
+                Constants.GroupAdmin.ID
             };
             
             var products = webItemManager.GetItemsAll().Where(i => i is IProduct || i.ID == WebItemManager.MailProductID);
@@ -1851,11 +1866,11 @@ public class UserController(
         var filterValue = _apiContext.FilterValue;
         var filterSeparator = _apiContext.FilterSeparator;
 
-        var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter,
-            filterValue, filterSeparator, withoutGroup ?? false);
+        var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, area,
+            filterValue, filterSeparator, withoutGroup ?? false, includeStrangers);
 
-        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter,
-            filterValue, filterSeparator, withoutGroup ?? false, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
+        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, area,
+            filterValue, filterSeparator, withoutGroup ?? false, _apiContext.SortBy, !_apiContext.SortDescending, includeStrangers, _apiContext.Count, _apiContext.StartIndex);
 
         var counter = 0;
 

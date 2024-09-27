@@ -180,12 +180,14 @@ public class CachedUserService : IUserService, ICachedService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
+        Area? area,
         string text,
         string separator,
-        bool withoutGroup)
+        bool withoutGroup,
+        bool includeStrangers)
     {
-        return _service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
-            text, separator, withoutGroup);
+        return _service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, area, 
+            text, separator, withoutGroup, includeStrangers);
     }
 
     public IAsyncEnumerable<UserInfo> GetUsers(
@@ -198,17 +200,19 @@ public class CachedUserService : IUserService, ICachedService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
+        Area? area,
         string text,
         string separator,
         bool withoutGroup,
         Guid ownerId,
         UserSortType sortBy,
         bool sortOrderAsc,
+        bool includeStrangers,
         long limit,
         long offset)
     {
-        return _service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, 
-            separator, withoutGroup, ownerId, sortBy, sortOrderAsc, limit, offset);
+        return _service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, area, text, 
+            separator, withoutGroup, ownerId, sortBy, sortOrderAsc, includeStrangers, limit, offset);
     }
 
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id)

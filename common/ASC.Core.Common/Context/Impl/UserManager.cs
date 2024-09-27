@@ -149,12 +149,14 @@ public class UserManager(
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
+        Area? area,
         string text,
         string separator,
-        bool withoutGroup)
+        bool withoutGroup,
+        bool includeStrangers)
     {
         return userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, 
-            quotaFilter, text, separator, withoutGroup);
+            quotaFilter, area, text, separator, withoutGroup, includeStrangers);
     }
 
     public IAsyncEnumerable<UserInfo> GetUsers(
@@ -166,11 +168,13 @@ public class UserManager(
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
+        Area? area,
         string text,
         string separator,
         bool withoutGroup,
         string sortBy,
         bool sortOrderAsc,
+        bool includeStrangers,
         long limit,
         long offset)
     {
@@ -191,8 +195,8 @@ public class UserManager(
             }
         }
 
-        return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
-            text, separator, withoutGroup, Tenant.OwnerId, sortType, sortOrderAsc, limit, offset);
+        return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, area, 
+            text, separator, withoutGroup, Tenant.OwnerId, sortType, sortOrderAsc, includeStrangers, limit, offset);
     }
 
     public UserInfo GetUsers(Guid id)

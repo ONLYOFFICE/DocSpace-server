@@ -29,9 +29,11 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Core.Data;
 
 [Scope]
-public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
-        MachinePseudoKeys machinePseudoKeys,
-        IMapper mapper)
+public class EFUserService(
+    IDbContextFactory<UserDbContext> dbContextFactory,
+    MachinePseudoKeys machinePseudoKeys,
+    IMapper mapper,
+    AuthContext authContext)
     : IUserService
 {
     public async Task<Group> GetGroupAsync(int tenant, Guid id)
@@ -289,16 +291,18 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
+        Area? area,
         string text,
         string separator,
-        bool withoutGroup)
+        bool withoutGroup,
+        bool includeStrangers)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = GetUserQuery(userDbContext, tenant);
 
         q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
-            text, separator, withoutGroup);
+            area, text, separator, withoutGroup, includeStrangers, tenant);
 
         return await q.CountAsync();
     }
@@ -313,12 +317,14 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
+        Area? area,
         string text,
         string separator,
         bool withoutGroup,
         Guid ownerId,
         UserSortType sortBy,
         bool sortOrderAsc,
+        bool includeStrangers,
         long limit,
         long offset)
     {
@@ -331,8 +337,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         var q = GetUserQuery(userDbContext, tenant);
 
-        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
-            text, separator, withoutGroup);
+        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, area, 
+            text, separator, withoutGroup, includeStrangers, tenant);
 
         switch (sortBy)
         {
@@ -718,8 +724,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         return q;
     }
 
-    private IQueryable<User> GetUserQueryForFilter(
-        UserDbContext userDbContext,
+    private IQueryable<User> GetUserQueryForFilter(UserDbContext userDbContext,
         IQueryable<User> q,
         bool isDocSpaceAdmin,
         EmployeeStatus? employeeStatus,
@@ -729,11 +734,24 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
+        Area? area,
         string text,
         string separator,
-        bool withoutGroup)
+        bool withoutGroup,
+        bool includeStrangers, 
+        int tenant)
     {
         q = q.Where(r => !r.Removed);
+
+        switch (area)
+        {
+            case Area.Guests:
+                includeGroups.Add([Constants.GroupGuest.ID]);
+                break;
+            case Area.People:
+                excludeGroups.Add(Constants.GroupGuest.ID);
+                break;
+        }
 
         if (includeGroups is { Count: > 0 } || excludeGroups is { Count: > 0 })
         {
@@ -838,6 +856,78 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         if (activationStatus != null)
         {
             q = q.Where(r => r.ActivationStatus == activationStatus.Value);
+        }
+
+        switch (area)
+        {
+            case Area.Guests when !includeStrangers:
+                {
+                    var currentUserId = authContext.CurrentAccount.ID;
+            
+                    q = q.Join(userDbContext.UserRelations,
+                        u => new
+                        {
+                            TenantId = tenant,
+                            SourceUserId = currentUserId, 
+                            TargetUserId = u.Id
+                        },
+                        ur => new
+                        {
+                            ur.TenantId,
+                            ur.SourceUserId, 
+                            ur.TargetUserId
+                        },
+                        (u, ur) => u);
+                    break;
+                }
+            case Area.All when !includeStrangers:
+                {
+                    var currentUserId = authContext.CurrentAccount.ID;
+            
+                    q = q.GroupJoin(userDbContext.UserRelations,
+                            u => new
+                            {
+                                TenantId = tenant,
+                                SourceUserId = currentUserId, 
+                                TargetUserId = u.Id
+                            },
+                            ur => new
+                            {
+                                ur.TenantId,
+                                ur.SourceUserId, 
+                                ur.TargetUserId
+                            },
+                            (u, ur) => new { u, ur })
+                        .SelectMany(
+                            x => x.ur.DefaultIfEmpty(),
+                            (x, ur) => new { x.u, ur })
+                        .GroupJoin(userDbContext.UserGroups,
+                            x => new
+                            {
+                                TenantId = tenant,
+                                Userid = x.u.Id,
+                                UserGroupId = Constants.GroupGuest.ID,
+                                RefType = UserGroupRefType.Contains,
+                                Removed = false
+                            },
+                            ug => new
+                            {
+                                ug.TenantId,
+                                ug.Userid,
+                                ug.UserGroupId,
+                                ug.RefType,
+                                ug.Removed
+                            },
+                            (x, ug) => new { x.u, x.ur, ug })
+                        .SelectMany(
+                            x => x.ug.DefaultIfEmpty(),
+                            (x, ug) => new { x.u, x.ur, ug })
+                        .Where(x => 
+                            x.ug == null ||
+                            (x.ur != null && x.ug != null))
+                        .Select(x => x.u);
+                    break;
+                }
         }
 
         q = UserQueryHelper.FilterByText(q, text, separator);

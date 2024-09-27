@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Core;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.Core.Migrators;
@@ -456,8 +458,8 @@ public abstract class Migrator(
                         {
                             var users = UserManager.GetUsers(false, EmployeeStatus.Active,
                                 [[MigrationInfo.Groups[security.Subject].Info.ID]],
-                                [], [], null, null, null, "", null, false, "firstname",
-                                true, 100000, 0).Where(u => u.Id != user.Info.Id);
+                                [], [], null, null, null, Area.All, "", null, false, "firstname",
+                                true, true, 100000, 0).Where(u => u.Id != user.Info.Id);
                             await foreach (var u in users)
                             {
                                 await SecurityContext.AuthenticateMeAsync(u.Id);
