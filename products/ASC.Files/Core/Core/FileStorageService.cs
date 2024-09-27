@@ -121,7 +121,7 @@ public class FileStorageService //: IFileStorageService
             folder.NewForMe = tag.Count;
         }
 
-        var tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, null).ToListAsync();
+        var tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, null, authContext.CurrentAccount.ID).ToListAsync();
         folder.Pinned = tags.Any(r => r.Type == TagType.Pin);
         folder.IsFavorite = tags.Any(r => r.Type == TagType.Favorite);
         folder.Tags = tags.Where(r=> r.Type == TagType.Custom).ToList();
