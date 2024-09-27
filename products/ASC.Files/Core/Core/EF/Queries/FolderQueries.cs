@@ -179,7 +179,7 @@ public partial class FilesDbContext
     }
         
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<ParentIdFolderTypePair> ParentIdTypePairAsync(int folderId)
+    public Task<DbFolderQuery> ParentIdTypePairAsync(int folderId)
     {
         return FolderQueries.ParentIdTypePairAsync(this, folderId);
     }
@@ -309,6 +309,12 @@ public partial class FilesDbContext
     {
         return FolderQueries.UpdateTreeFolderCounterAsync(this, tenantId, folderId, size);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<DbRoomSettings> RoomSettingsAsync(int tenantId, int roomId)
+    {
+        return FolderQueries.RoomSettingsAsync(this, tenantId, roomId);
+    }
 }
 
 static file class FolderQueries
@@ -380,7 +386,20 @@ static file class FolderQueries
                                          s.SubjectType == SubjectType.PrimaryExternalLink),
                             Settings = (from f in ctx.RoomSettings 
                                 where f.TenantId == r.TenantId && f.RoomId == r.Id 
-                                select f).FirstOrDefault()
+                                select f).FirstOrDefault(),
+                            Order = (
+                                from f in ctx.FileOrder
+                                where (
+                                    from rs in ctx.RoomSettings 
+                                    where rs.TenantId == f.TenantId && rs.RoomId ==
+                                        (from t in ctx.Tree
+                                            where t.FolderId == r.ParentId
+                                            orderby t.Level descending
+                                            select t.ParentId
+                                        ).Skip(1).FirstOrDefault()
+                                    select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
+                                select f.Order
+                            ).FirstOrDefault(),
                         }
                     ).SingleOrDefault());
 
@@ -842,14 +861,23 @@ static file class FolderQueries
                     .OrderByDescending(r => r.Tree.Level)
                     .Select(r => new ParentIdTitlePair { ParentId = r.Tree.ParentId, Title = r.Folders.Title }));
 
-    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<ParentIdFolderTypePair>> ParentIdTypePairAsync =
+    public static readonly Func<FilesDbContext, int, Task<DbFolderQuery>> ParentIdTypePairAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int folderId) =>
                 ctx.Tree
                     .Join(ctx.Folders, r => r.ParentId, s => s.Id, (t, f) => new { Tree = t, Folders = f })
                     .Where(r => r.Tree.FolderId == folderId)
                     .OrderByDescending(r => r.Tree.Level)
-                    .Select(r => new ParentIdFolderTypePair { ParentId = r.Tree.ParentId, FolderType = r.Folders.FolderType }));
+                    .Select(r => new DbFolderQuery
+                    {
+                        Folder = r.Folders,
+                        Settings = (from f in ctx.RoomSettings
+                                where f.TenantId == r.Folders.TenantId && f.RoomId == r.Folders.Id
+                                select f)
+                            .FirstOrDefault()
+                    })
+                    .Skip(1)
+                    .FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, IEnumerable<FolderType>, IAsyncEnumerable<FolderTypeUsedSpacePair>> FolderTypeUsedSpaceAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -873,4 +901,10 @@ static file class FolderQueries
                     .ExecuteUpdate(toUpdate => toUpdate
                             .SetProperty(p => p.folder.Counter, p => p.folder.Counter + size)
                         ));
+    
+    public static readonly Func<FilesDbContext, int, int, Task<DbRoomSettings>> RoomSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId) =>
+                ctx.RoomSettings
+                    .FirstOrDefault(r => r.TenantId == tenantId && r.RoomId == roomId));
 }

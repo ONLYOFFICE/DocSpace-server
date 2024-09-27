@@ -81,16 +81,7 @@ public class TenantDomainValidator
 
     public void ValidateDomainCharacters(string domain)
     {
-        if (!_validDomain.IsMatch(domain))
-        {
-            throw new TenantIncorrectCharsException(DomainContainsInvalidCharacters);
-        }
-        
-        var idn = new IdnMapping();
-        var punyCode = idn.GetAscii(domain);
-        var domain2 = idn.GetUnicode(punyCode);
-
-        if (!string.Equals(punyCode, domain2))
+        if (!_validDomain.IsMatch(domain) || domain.TestPunnyCode())
         {
             throw new TenantIncorrectCharsException(DomainContainsInvalidCharacters);
         }

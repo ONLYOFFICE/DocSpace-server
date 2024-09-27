@@ -64,8 +64,9 @@ public class Startup : BaseWorkerStartup
             services.AddHostedService<ThumbnailBuilderService>();
             services.AddActivePassiveHostedService<AutoCleanTrashService>(Configuration);
             services.AddActivePassiveHostedService<DeleteExpiredService>(Configuration);
+            services.AddActivePassiveHostedService<CleanupLifetimeExpiredService>(Configuration);
         }
-        
+
         services.RegisterQuotaFeature();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddScoped<IWebItem, ProductEntryPoint>();

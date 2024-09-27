@@ -38,7 +38,8 @@ internal class LinkDao<T>(
     MaxTotalSizeStatistic maxTotalSizeStatistic,
     SettingsManager settingsManager,
     AuthContext authContext,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    IDistributedLockProvider distributedLockProvider)
     : AbstractDao(dbContextManager,
         userManager,
         tenantManager,
@@ -47,7 +48,8 @@ internal class LinkDao<T>(
         maxTotalSizeStatistic,
         settingsManager,
         authContext,
-        serviceProvider), ILinkDao<T>
+        serviceProvider,
+        distributedLockProvider), ILinkDao<T>
 {
     public async Task AddLinkAsync(T sourceId, T linkedId)
     {
@@ -74,14 +76,14 @@ internal class LinkDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var mappedLinkedId = (await mapping.MappingIdAsync(linkedId));
-        
+
         var fromDb = await filesDbContext.SourceIdAsync(tenantId, mappedLinkedId, _authContext.CurrentAccount.ID);
-        
+
         if (Equals(fromDb, default))
         {
             return default;
-        }
-        
+    }
+
         return (T)Convert.ChangeType(fromDb, typeof(T));
     }
 
@@ -95,12 +97,12 @@ internal class LinkDao<T>(
         var mappedSourceId = await mapping.MappingIdAsync(sourceId);
 
         var fromDb = await filesDbContext.LinkedIdAsync(tenantId, mappedSourceId, _authContext.CurrentAccount.ID);
-        
+
         if (Equals(fromDb, default))
         {
             return default;
-        }
-        
+    }
+
         return (T)Convert.ChangeType(fromDb, typeof(T));
     }
 

@@ -28,5 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class SettingsRoomRequestDto
 {
-    public bool Indexing { get; set; }
+    public bool? Indexing { get; set; }
+    public bool? DenyDownload { get; set; }
 }

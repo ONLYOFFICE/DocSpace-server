@@ -342,6 +342,15 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                             ext = outType;
                         }
 
+                        if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)))
+                        {
+                            var folderDao = daoFactory.GetFolderDao<T>();
+                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+                            {
+                                ext = FileUtility.WatermarkedDocumentExt;
+                            }
+                        }
+
                         long offset = 0;
                         long length;
                         long fullLength;
@@ -460,7 +469,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
 
         return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) &&
-               file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict };
+               file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict } or { IsLink: false, Share: FileShare.Read, SubjectType: SubjectType.User  };
     }
 
     private async Task TryMarkAsRecentByLink<T>(File<T> file)

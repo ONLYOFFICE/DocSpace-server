@@ -373,7 +373,11 @@ public class UserController(
     {
         await _apiContext.AuthByClaimAsync();
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(userid), Constants.Action_EditUser);
-
+        if (userid == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(userid));
+        }
+        
         var user = await _userManager.GetUsersAsync(userid);
 
         if (!_userManager.UserExists(user))
@@ -386,8 +390,23 @@ public class UserController(
             throw new SecurityException();
         }
 
+        var viewer = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        if (user.IsOwner(tenant) && viewer.Id != user.Id)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+        
         if (!string.IsNullOrEmpty(inDto.Email))
         {
+            var email = (inDto.Email ?? "").Trim();
+
+            if (!email.TestEmailRegex())
+            {
+                throw new Exception(Resource.ErrorNotCorrectEmail);
+            }
+            
             var address = new MailAddress(inDto.Email);
             if (!string.Equals(address.Address, user.Email, StringComparison.OrdinalIgnoreCase))
             {

@@ -95,9 +95,9 @@ public partial class FilesDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, TagType.Custom, null, null])]
-    public IAsyncEnumerable<TagLinkData> GetTagsByEntryTypeAsync(int tenantId, TagType? tagType, FileEntryType entryType, string mappedId)
+    public IAsyncEnumerable<TagLinkData> GetTagsByEntryTypeAsync(int tenantId, TagType? tagType, FileEntryType entryType, string mappedId, Guid? owner)
     {
-        return TagQueries.GetTagsByEntryTypeAsync(this, tenantId, tagType, entryType, mappedId);
+        return TagQueries.GetTagsByEntryTypeAsync(this, tenantId, tagType, entryType, mappedId, owner);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, TagType.Custom, PreCompileQuery.DefaultGuid])]
@@ -412,13 +412,14 @@ static file class TagQueries
                     .Where(r => r.Link.EntryType == FileEntryType.File && filesId.Contains(r.Link.EntryId)
                                 || r.Link.EntryType == FileEntryType.Folder && foldersId.Contains(r.Link.EntryId)));
 
-    public static readonly Func<FilesDbContext, int, TagType?, FileEntryType, string, IAsyncEnumerable<TagLinkData>> GetTagsByEntryTypeAsync = 
+    public static readonly Func<FilesDbContext, int, TagType?, FileEntryType, string, Guid?, IAsyncEnumerable<TagLinkData>> GetTagsByEntryTypeAsync = 
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-        (FilesDbContext ctx, int tenantId, TagType? tagType, FileEntryType entryType, string mappedId) =>
+        (FilesDbContext ctx, int tenantId, TagType? tagType, FileEntryType entryType, string mappedId, Guid? owner) =>
             ctx.Tag.Where(r => r.TenantId == tenantId)
             .Join(ctx.TagLink, r => r.Id, l => l.TagId, (tag, link) => new TagLinkData { Tag = tag, Link = link })
             .Where(r => r.Link.TenantId == r.Tag.TenantId)
-            .Where(r => tagType == null || r.Tag.Type == tagType)
+            .Where(r => tagType == null || r.Tag.Type == tagType.Value)
+            .Where(r => owner == null || r.Tag.Owner == owner.Value)
             .Where(r => r.Link.EntryType == entryType)
             .Where(r => r.Link.EntryId == mappedId));
 

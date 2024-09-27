@@ -33,8 +33,12 @@ public class DbRoomSettings
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
     public string Color { get; set; }
+    public string Cover { get; set; }
     public bool Indexing { get; set; }
     public long Quota { get; set; }
+    public DbRoomWatermark Watermark { get; set; }
+    public bool DenyDownload { get; set; }
+    public DbRoomDataLifetime Lifetime { get; set; }
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
 }
@@ -73,9 +77,21 @@ public static class DbRoomSettingsExtension
             
             entity.Property(e => e.Indexing).HasColumnName("indexing").HasDefaultValueSql("0");
 
+            entity.Property(e => e.Watermark)
+                .HasColumnName("watermark")
+                .HasColumnType("json")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
             entity.Property(e => e.Color)
                 .HasColumnName("color")
                 .HasColumnType("char(6)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.Cover)      
+                .HasColumnName("cover")
+                .HasColumnType("varchar(50)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -84,6 +100,14 @@ public static class DbRoomSettingsExtension
             entity.Property(e => e.Quota)
                 .HasColumnName("quota")
                 .HasDefaultValueSql("'-2'");
+
+            entity.Property(e => e.Lifetime)
+                .HasColumnName("lifetime")
+                .HasColumnType("json")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.DenyDownload).HasColumnName("deny_download").HasDefaultValueSql("0");
         });
     }
 
