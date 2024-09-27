@@ -26,13 +26,14 @@
 
 namespace ASC.People.Api;
 
-public class NotificationController(UserManager userManager,
-        SecurityContext securityContext,
-        AuthContext authContext,
-        PermissionContext permissionContext,
-        CommonLinkUtility commonLinkUtility,
-        StudioNotifyService studioNotifyService)
-    : ApiControllerBase
+public class NotificationController    : ApiControllerBase
+    // UserManager userManager,
+    //     SecurityContext securityContext,
+    //     AuthContext authContext,
+    //     PermissionContext permissionContext,
+    //     CommonLinkUtility commonLinkUtility,
+    //     StudioNotifyService studioNotifyService
+
 {
     /// <summary>
     /// Sends a notification to the user with the ID specified in the request to change their phone number.
@@ -46,29 +47,30 @@ public class NotificationController(UserManager userManager,
     /// <path>api/2.0/people/phone</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("phone")]
-    public async Task<object> SendNotificationToChangeAsync(UpdateMemberRequestDto inDto)
+    public Task<object> SendNotificationToChangeAsync(UpdateMemberRequestDto inDto)
     {
-        var user = await userManager.GetUsersAsync(string.IsNullOrEmpty(inDto.UserId)
-            ? securityContext.CurrentAccount.ID : new Guid(inDto.UserId));
-
-        var canChange = user.IsMe(authContext) || await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
-
-        if (!canChange)
-        {
-            throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
-        }
-
-        user.MobilePhoneActivationStatus = MobilePhoneActivationStatus.NotActivated;
-
-        await userManager.UpdateUserInfoAsync(user);
-
-        if (user.IsMe(authContext))
-        {
-            return await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneActivation);
-        }
-
-        await studioNotifyService.SendMsgMobilePhoneChangeAsync(user);
-
-        return string.Empty;
+        throw new NotImplementedException();
+        // var user = await userManager.GetUsersAsync(string.IsNullOrEmpty(inDto.UserId)
+        //     ? securityContext.CurrentAccount.ID : new Guid(inDto.UserId));
+        //
+        // var canChange = user.IsMe(authContext) || await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
+        //
+        // if (!canChange)
+        // {
+        //     throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
+        // }
+        //
+        // user.MobilePhoneActivationStatus = MobilePhoneActivationStatus.NotActivated;
+        //
+        // await userManager.UpdateUserInfoAsync(user);
+        //
+        // if (user.IsMe(authContext))
+        // {
+        //     return await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneActivation);
+        // }
+        //
+        // await studioNotifyService.SendMsgMobilePhoneChangeAsync(user);
+        //
+        // return string.Empty;
     }
 }
