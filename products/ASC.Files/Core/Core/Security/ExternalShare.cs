@@ -33,7 +33,8 @@ public class ExternalShare(Global global,
     IHttpContextAccessor httpContextAccessor,
     BaseCommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
-    FileUtility fileUtility)
+    FileUtility fileUtility,
+    ILogger<ExternalShare> logger)
 {
     private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
@@ -121,8 +122,9 @@ public class ExternalShare(Global global,
         if (string.IsNullOrEmpty(passwordKey))
         {
             passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, record.Subject.ToString(), true);
+            logger.LogDebug("Validate record. cookies password key  {passwordKey}", passwordKey);
         }
-        
+        logger.LogDebug("Validate record. password key {passwordKey} record password {recordPassword}", passwordKey, record.Options.Password);
         if (passwordKey == record.Options.Password)
         {
             return Status.Ok;
