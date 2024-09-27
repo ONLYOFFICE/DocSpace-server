@@ -1214,6 +1214,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.Core.Common.EF.DbUserRelation", b =>
                 {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant");
+
                     b.Property<string>("SourceUserId")
                         .HasColumnType("varchar(36)")
                         .HasColumnName("source_user_id")
@@ -1226,14 +1230,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant");
-
-                    b.HasKey("SourceUserId", "TargetUserId")
+                    b.HasKey("TenantId", "SourceUserId", "TargetUserId")
                         .HasName("PRIMARY");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("core_user_relations", (string)null);
                 });

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20240925092447_MigrationContext_Upgrade31")]
+    [Migration("20240923102406_MigrationContext_Upgrade31")]
     partial class MigrationContext_Upgrade31
     {
         /// <inheritdoc />
@@ -1217,6 +1217,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.Core.Common.EF.DbUserRelation", b =>
                 {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant");
+
                     b.Property<string>("SourceUserId")
                         .HasColumnType("varchar(36)")
                         .HasColumnName("source_user_id")
@@ -1229,14 +1233,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant");
-
-                    b.HasKey("SourceUserId", "TargetUserId")
+                    b.HasKey("TenantId", "SourceUserId", "TargetUserId")
                         .HasName("PRIMARY");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("core_user_relations", (string)null);
                 });
@@ -6322,6 +6320,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<string>("Color")
                         .HasColumnType("char(6)")
                         .HasColumnName("color")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Cover")
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("cover")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 

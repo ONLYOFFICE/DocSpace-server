@@ -14,15 +14,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "core_user_relations",
                 columns: table => new
                 {
+                    tenant = table.Column<int>(type: "int", nullable: false),
                     source_user_id = table.Column<string>(type: "varchar(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     target_user_id = table.Column<string>(type: "varchar(36)", nullable: false, collation: "utf8_general_ci")
-                        .Annotation("MySql:CharSet", "utf8"),
-                    tenant = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.source_user_id, x.target_user_id });
+                    table.PrimaryKey("PRIMARY", x => new { x.tenant, x.source_user_id, x.target_user_id });
                     table.ForeignKey(
                         name: "FK_core_user_relations_tenants_tenants_tenant",
                         column: x => x.tenant,
@@ -31,11 +31,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_core_user_relations_tenant",
-                table: "core_user_relations",
-                column: "tenant");
         }
 
         /// <inheritdoc />

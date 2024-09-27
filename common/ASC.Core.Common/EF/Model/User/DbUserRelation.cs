@@ -35,7 +35,7 @@ public class DbUserRelation : BaseEntity
     
     public override object[] GetKeys()
     {
-        return [SourceUserId, TargetUserId];
+        return [TenantId, SourceUserId, TargetUserId];
     }
 }
 
@@ -60,7 +60,7 @@ public static class UserRelationExtension
         {
             builder.ToTable("core_user_relations");
             
-            builder.HasKey(e => new { e.SourceUserId, e.TargetUserId })
+            builder.HasKey(e => new { e.TenantId, e.SourceUserId, e.TargetUserId })
                 .HasName("PRIMARY");
 
             builder.Property(e => e.TenantId)
@@ -86,7 +86,7 @@ public static class UserRelationExtension
         {
             builder.ToTable("core_user_relations");
             
-            builder.HasKey(e => new { e.SourceUserId, e.TargetUserId })
+            builder.HasKey(e => new { e.TenantId, e.SourceUserId, e.TargetUserId })
                 .HasName("PRIMARY");
             
             builder.Property(e => e.TenantId)
