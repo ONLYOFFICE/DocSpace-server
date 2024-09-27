@@ -180,9 +180,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         if (file.RootFolderType == FolderType.VirtualRooms)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
-            locatedInPrivateRoom = await DocSpaceHelper.LocatedInPrivateRoomAsync(file, folderDao);
-            var (watermarkSettings, room) = await DocSpaceHelper.GetWatermarkSettings(file, folderDao);
-            options = GetOptions(watermarkSettings, room);
+            var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
+            locatedInPrivateRoom = DocSpaceHelper.LocatedInPrivateRoomAsync(room);
+            options = GetOptions(room);
         }
 
         if (file.Encrypted && file.RootFolderType != FolderType.Privacy && !locatedInPrivateRoom)
@@ -327,8 +327,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return null;
     }
 
-    public Options GetOptions<T>(WatermarkSettings watermarkSettings, Folder<T> room)
+    public Options GetOptions<T>(Folder<T> room)
     {
+        var watermarkSettings = room?.SettingsWatermark;
         if (watermarkSettings == null)
         {
             return null;

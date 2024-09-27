@@ -35,7 +35,7 @@ public enum WatermarkAdditions
     CurrentDate = 8,
     RoomName = 16
 }
-public class WatermarkSettings : IMapFrom<WatermarkRequestDto>
+public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRequestDto>
 {
     public string Text { get; set; }
     public WatermarkAdditions Additions { get; set; }

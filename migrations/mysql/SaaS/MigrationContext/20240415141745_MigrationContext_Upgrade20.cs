@@ -13,8 +13,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "watermark",
                 table: "files_room_settings",
-                type: "text",
-                nullable: true)
+                type: "json",
+                nullable: true,
+                collation: "utf8_general_ci")
                 .Annotation("MySql:CharSet", "utf8");
         }
 

@@ -784,7 +784,7 @@ public class FileStorageService //: IFileStorageService
                 denyDownloadChanged ? updateData.DenyDownload.Value : folder.SettingsDenyDownload,
                 lifetimeChanged ? mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(updateData.Lifetime) : folder.SettingsLifetime,
                 watermarkChanged ? 
-                    (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : JsonSerializer.Serialize(watermark)) : 
+                    (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark) : 
                     folder.SettingsWatermark);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
@@ -2868,16 +2868,19 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<AceWrapper> GetPrimaryExternalLinkAsync<T>(T entryId, FileEntryType entryType)
     {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+
         FileEntry<T> entry = entryType == FileEntryType.File 
-            ? await daoFactory.GetFileDao<T>().GetFileAsync(entryId)
-            : await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
+            ? await fileDao.GetFileAsync(entryId)
+            : await folderDao.GetFolderAsync(entryId);
 
         entry.NotFoundIfNull();
 
         if ((entry is File<T> || entry is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)) && entry.RootFolderType == FolderType.VirtualRooms)
         {
-            var room = await daoFactory.GetFolderDao<T>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
-            
+            var room = await DocSpaceHelper.GetParentRoom(entry, folderDao);
+
             var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
             if (parentLink == null)
             {
