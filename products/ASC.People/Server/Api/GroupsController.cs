@@ -412,6 +412,10 @@ public class GroupControllerAdditional<T>(
     FileSecurity fileSecurity,
     GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
+    /// <summary>
+    /// Gets groups with shared
+    /// </summary>
+    /// <path>api/2.0/group/room/{id}</path>
     [Tags("Group / Rooms")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<GroupDto> GetGroupsWithSharedAsync(GetGroupsWithSharedRequestDto<T> inDto)

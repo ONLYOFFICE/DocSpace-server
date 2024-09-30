@@ -136,7 +136,9 @@ public abstract class FoldersController<T>(
     }
 
     /// <summary>
+    /// Sets file order in the folder with ID specified in the request
     /// </summary>
+    /// <path>api/2.0/files/folder/{folderId}/order</path>
     [Tags("Files / Folders")]
     [HttpPut("folder/{folderId}/order")]
     public async Task SetFileOrder(OrderFolderRequestDto<T> inDto)

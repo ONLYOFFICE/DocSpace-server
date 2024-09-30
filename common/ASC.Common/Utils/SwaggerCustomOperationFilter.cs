@@ -23,34 +23,21 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+using Microsoft.OpenApi.Models;
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
-/// <summary>
-/// Request parameters for track file changes when editing
-/// </summary>
-public class TrackEditFileRequestDto<T>
+public class SwaggerCustomOperationFilter : IOperationFilter
 {
-    /// <summary>
-    /// File ID
-    /// </summary>
-    [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
-    /// <summary>
-    /// Tab ID
-    /// </summary>
-    [FromQuery(Name = "tabId")]
-    public Guid TabId { get; set; }
-
-    /// <summary>
-    /// Document key for tracking
-    /// </summary>
-    [FromQuery(Name = "docKeyForTrack")]
-    public string DocKeyForTrack { get; set; }
-
-    /// <summary>
-    /// Specifies whether to finish file tracking or not
-    /// </summary>
-    [FromQuery(Name = "isFinish")]
-    public bool IsFinish { get; set; }
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        foreach (var parameter in operation.Parameters)
+        {
+            if (parameter.In == ParameterLocation.Query && parameter.Schema.Type == "array")
+            {
+                parameter.Style = ParameterStyle.DeepObject;
+            }
+        }
+    }
 }
+

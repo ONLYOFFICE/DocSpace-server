@@ -323,7 +323,11 @@ public class SecurityController(PermissionContext permissionContext,
 
         return inDto.Settings;
     }
-
+    
+    /// <summary>
+    /// Csp
+    /// </summary
+    /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
     [HttpPost("csp")]
@@ -361,6 +365,10 @@ public class SecurityController(PermissionContext permissionContext,
         return new CspDto { Domains = request.Domains, Header = header };
     }
 
+    /// <summary>
+    /// Gets csp
+    /// </summary>
+    /// <path>api/2.0/security/csp</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]

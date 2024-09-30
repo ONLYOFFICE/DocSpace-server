@@ -102,7 +102,9 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     }
 
     /// <summary>
+    /// Checks upload
     /// </summary>
+    /// <path>api/2.0/files/{folderId}/upload/check</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(List<string>))]
     [HttpPost("{folderId}/upload/check")]

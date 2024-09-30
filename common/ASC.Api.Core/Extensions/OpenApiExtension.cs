@@ -36,7 +36,7 @@ namespace ASC.Api.Core.Extensions;
 
 public static class OpenApiExtension
 {
-    public static IServiceCollection AddOpenApi(this IServiceCollection services)
+    public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration)
     {
         return services.AddSwaggerGen(c =>
         {
@@ -56,7 +56,19 @@ public static class OpenApiExtension
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
+            c.OperationFilter<SwaggerCustomOperationFilter>();
             c.EnableAnnotations();
+            var serverUrls = new List<string>(configuration.GetSection("openApi:servers").Get<List<string>>()) ?? [];
+            var serverDescription = new List<string>(configuration.GetSection("openApi:serversDescription").Get<List<string>>()) ?? [];
+
+            for (var i = 0; i < serverUrls.Count; i++)
+            {
+                c.AddServer(new OpenApiServer
+                {
+                    Url = serverUrls[i], 
+                    Description = serverDescription.Count > i ? serverDescription[i] : null
+                });
+            }
             
             // ToDo: add security definitions
             c.AddSecurityDefinition(CookiesManager.AuthCookiesName, new OpenApiSecurityScheme

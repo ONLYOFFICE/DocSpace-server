@@ -121,8 +121,8 @@ public class UserController(
         var address = new MailAddress(inDto.Email);
         user.Email = address.Address;
         //Set common fields
-        user.FirstName = inDto.Firstname;
-        user.LastName = inDto.Lastname;
+        user.FirstName = inDto.FirstName;
+        user.LastName = inDto.LastName;
         user.Title = inDto.Title;
         user.Location = inDto.Location;
         user.Notes = inDto.Comment;
@@ -222,8 +222,8 @@ public class UserController(
         user.Email = address.Address;
         //Set common fields
         user.CultureName = inDto.CultureName;
-        user.FirstName = inDto.Firstname;
-        user.LastName = inDto.Lastname;
+        user.FirstName = inDto.FirstName;
+        user.LastName = inDto.LastName;
         user.Title = inDto.Title;
         user.Location = inDto.Location;
         user.Notes = inDto.Comment;
@@ -1166,8 +1166,8 @@ public class UserController(
             {
                 //Set common fields
 
-                var firstName = inDto.UpdateMember.Firstname ?? user.FirstName;
-                var lastName = inDto.UpdateMember.Lastname ?? user.LastName;
+                var firstName = inDto.UpdateMember.FirstName ?? user.FirstName;
+                var lastName = inDto.UpdateMember.LastName ?? user.LastName;
 
                 if (!userFormatter.IsValidUserName(firstName, lastName))
                 {
@@ -1810,6 +1810,10 @@ public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHe
         ApiContext apiContext, 
         IDaoFactory daoFactory) : ApiControllerBase
     {
+    /// <summary>
+    /// Gets users with shared in room ID specified in request
+    /// </summary>
+    /// <path>api/2.0/people/room/{id}</path>
     [Tags("People / Search")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(UsersWithRoomSharedRequestDto<T> inDto)

@@ -27,10 +27,15 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters to open file
+/// Request parameters to open file
 /// </summary>
-public class OpenEdit
+public class OpenEditRequestDto<T>
 {
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
     /// <summary>
     /// File version
     /// </summary>
@@ -54,21 +59,4 @@ public class OpenEdit
     /// </summary>
     [FromQuery(Name = "edit")]
     public bool Edit { get; set; }
-}
-
-/// <summary>
-/// Request parameters to open file
-/// </summary>
-public class OpenEditRequestDto<T>
-{
-    /// <summary>
-    /// File ID
-    /// </summary>
-    [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
-
-    /// <summary>
-    /// File
-    /// </summary>
-    public OpenEdit File { get; set; }
 }

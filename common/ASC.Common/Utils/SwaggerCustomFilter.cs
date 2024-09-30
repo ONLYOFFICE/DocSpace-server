@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Bogus;
+
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 
@@ -45,18 +47,6 @@ public class SwaggerSchemaCustomAttribute : SwaggerSchemaAttribute
     public object Example { get; set; }
 }
 
-
-[AttributeUsage(AttributeTargets.Property)]
-public class SwaggerSchemaCustomAttribute<T> : SwaggerSchemaAttribute
-{
-    public SwaggerSchemaCustomAttribute(string description = null)
-    {
-        Description = description;
-    }
-
-    public T Example { get; set; }
-}
-
 public class SwaggerSchemaCustomFilter : ISchemaFilter
 {
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
@@ -71,7 +61,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         {
             return;
         }
-        
+
         UpdateSchema(propertyInfo.PropertyType, schema);
         
         var swaggerSchemaCustomAttribute = propertyInfo.GetCustomAttributes(true).OfType<SwaggerSchemaCustomAttribute>().FirstOrDefault();
@@ -84,36 +74,15 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             }
             return;
         }
-            
-        var attribute = context.MemberInfo.GetCustomAttributes(true).FirstOrDefault(attr =>
+        else
         {
-            var baseType = attr.GetType().BaseType;
-            if (baseType == null)
+            var example = GenerateFakeData(propertyInfo);
+            if(example != null)
             {
-                return false;
+                schema.Example = example;
             }
-
-            return baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(SwaggerSchemaCustomAttribute<>);
-        });
-
-        if (attribute == null)
-        {
             return;
         }
-
-        var exampleValue = GetExampleValue(attribute);
-
-        if (exampleValue != null)
-        {
-            schema.Example = GetExample(exampleValue);
-        }
-    }
-
-    private object GetExampleValue(object attribute)
-    {
-        var attributeType = attribute.GetType();
-        var exampleProperty = attributeType.GetProperty("Example");
-        return exampleProperty == null ? null : exampleProperty.GetValue(attribute);
     }
 
     private OpenApiSchema UpdateSchema(Type checkType, OpenApiSchema result)
@@ -123,7 +92,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         {
             checkType = nullableType;
         }
-            
+        
         if (checkType == typeof(int))
         {
             result.Example = new OpenApiInteger(SwaggerSchemaCustomAttribute.DefaultIntExample);
@@ -300,7 +269,54 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             _ => null
         };
     }
-
+    private IOpenApiAny GenerateFakeData(PropertyInfo propertyInfo)
+    {
+        var faker = new Faker();
+        var fileExtension = ".txt";
+        switch (propertyInfo.Name)
+        {
+            case "Name":
+                return new OpenApiString(faker.Name.FullName());
+            case "Email":
+                return new OpenApiString(faker.Internet.Email());
+            case "FirstName":
+                return new OpenApiString(faker.Name.FirstName());
+            case "LastName":
+                return new OpenApiString(faker.Name.LastName());
+            case "Location":
+                return new OpenApiString(faker.Address.FullAddress());
+            case "Password":
+                    return new OpenApiString(faker.Internet.Password());
+            case "Extension":
+            case "Ext":
+            case "FileExtension":
+                return new OpenApiString(fileExtension);
+            case "Title":
+                var fileName = faker.System.FileName();
+                return new OpenApiString(fileName.Substring(0, fileName.LastIndexOf('.')));
+            case "Id":
+            case "FileId":
+            case "FolderId":
+            case "RoomId":
+            case "InstanceId":
+            case "UserId":
+            case "ProductId":
+                if(propertyInfo.PropertyType == typeof(string))
+                {
+                    return new OpenApiString(faker.Random.Int(1, 10000).ToString());
+                }
+                else if(propertyInfo.PropertyType == typeof(int))
+                {
+                    return new OpenApiInteger(faker.Random.Int(1, 10000));
+                }
+                else
+                {
+                    return new OpenApiString(Guid.NewGuid().ToString());
+                }
+            default:
+                return null;
+        }
+    }
     private static bool IsSimpleType(Type type)
     {
         return type.IsPrimitive ||

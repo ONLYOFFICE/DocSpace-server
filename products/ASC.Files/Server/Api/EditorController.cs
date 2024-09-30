@@ -128,7 +128,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(TrackEditFileRequestDto<T> inDto)
     {
-        return await fileStorageService.TrackEditFileAsync(inDto.FileId, inDto.File.TabId, inDto.File.DocKeyForTrack, inDto.File.IsFinish);
+        return await fileStorageService.TrackEditFileAsync(inDto.FileId, inDto.TabId, inDto.DocKeyForTrack, inDto.IsFinish);
     }
 
     /// <summary>
@@ -144,7 +144,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpGet("{fileId}/openedit")]
     public async Task<ConfigurationDto<T>> OpenEditAsync(OpenEditRequestDto<T> inDto)
     {
-        var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(inDto.FileId, inDto.File.Version);
+        var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(inDto.FileId, inDto.Version);
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
@@ -184,13 +184,13 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         canEdit = false;
                         canFill = true;
                         isSubmitOnly = true;
-                        inDto.File.EditorType = EditorType.Embedded;
+                        inDto.EditorType = EditorType.Embedded;
                         fillingSessionId = Guid.NewGuid().ToString("N");
                         break;
                     }
 
                    
-                    if (inDto.File.Edit)
+                    if (inDto.Edit)
                     {
                         await linkDao.DeleteAllLinkAsync(file.Id);
                         await fileDao.SaveProperties(file.Id, null);
@@ -214,7 +214,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
                                 canEdit = false;
                                 canFill = true;
-                                inDto.File.EditorType = EditorType.Embedded;
+                                inDto.EditorType = EditorType.Embedded;
 
                                 file = formDraft;
                                 fillingSessionId = Guid.NewGuid().ToString("N");
@@ -232,19 +232,19 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 case FolderType.FormFillingFolderInProgress:
                     canEdit = false;
                     canFill = true;
-                    inDto.File.EditorType = EditorType.Embedded;
+                    inDto.EditorType = EditorType.Embedded;
                     fillingSessionId = Guid.NewGuid().ToString("N");
                     break;
 
                 case FolderType.FormFillingFolderDone:
-                    inDto.File.EditorType = EditorType.Embedded;
+                    inDto.EditorType = EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
                     break;
 
                 default:
-                    canEdit = inDto.File.Edit;
-                    canFill = !inDto.File.Edit;
+                    canEdit = inDto.Edit;
+                    canFill = !inDto.Edit;
                     break;
             }
         }
@@ -254,7 +254,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             canFill = true;
         }
 
-        var docParams = await documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !inDto.File.View, true, canFill, inDto.File.EditorType, isSubmitOnly);
+        var docParams = await documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !inDto.View, true, canFill, inDto.EditorType, isSubmitOnly);
         var configuration = docParams.Configuration;
         file = docParams.File;
 

@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.ApiModels.RequestDto;
-
-using static Dropbox.Api.Team.MobileClientPlatform;
-
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -525,7 +521,9 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
+    /// Updates settings to a room with ID specified in the request
     /// </summary>
+    /// <path>api/2.0/files/rooms/{id}/settings</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPut("{id}/settings")]
@@ -537,7 +535,9 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
+    /// Reorders to a room with ID specified in the request
     /// </summary>
+    /// <path>api/2.0/files/rooms/{id}/reorder</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPut("{id}/reorder")]
@@ -719,7 +719,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     /// <summary>
+    /// Starts room index export
     /// </summary>
+    /// <path>api/2.0/files/rooms/{id:int}/indexexport</path>
     /// <exception cref="NotSupportedException"></exception>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
@@ -753,6 +755,10 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         return DocumentBuilderTaskDto.Get(taskProgress);
     }
 
+    /// <summary>
+    /// Gets room index export
+    /// </summary>
+    /// <path>api/2.0/files/rooms/indexexport</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
     [HttpGet("rooms/indexexport")]
@@ -766,6 +772,10 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         return DocumentBuilderTaskDto.Get(task);
     }
 
+    /// <summary>
+    /// Terminates room index export
+    /// </summary>
+    /// <path>api/2.0/files/rooms/indexexport</path>
     [Tags("Files / Rooms")]
     [HttpDelete("rooms/indexexport")]
     public async Task TerminateRoomIndexExport()

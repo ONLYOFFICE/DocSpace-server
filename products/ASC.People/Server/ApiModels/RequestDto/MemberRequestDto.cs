@@ -90,12 +90,12 @@ public class MemberRequestDto : MemberBaseRequestDto
     /// <summary>
     /// First name
     /// </summary>
-    public string Firstname { get; set; }
+    public string FirstName { get; set; }
 
     /// <summary>
     /// Last name
     /// </summary>
-    public string Lastname { get; set; }
+    public string LastName { get; set; }
 
     /// <summary>
     /// List of user departments

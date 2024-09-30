@@ -24,33 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for track file changes when editing
 /// </summary>
-public class TrackEditFileRequestDto<T>
+public class AccountsEntriesRequestDto<T>
 {
-    /// <summary>
-    /// File ID
-    /// </summary>
-    [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
-    /// <summary>
-    /// Tab ID
-    /// </summary>
-    [FromQuery(Name = "tabId")]
-    public Guid TabId { get; set; }
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
 
-    /// <summary>
-    /// Document key for tracking
-    /// </summary>
-    [FromQuery(Name = "docKeyForTrack")]
-    public string DocKeyForTrack { get; set; }
+    [FromQuery(Name = "employeeStatus")]
+    public EmployeeStatus? EmployeeStatus { get; set; }
 
-    /// <summary>
-    /// Specifies whether to finish file tracking or not
-    /// </summary>
-    [FromQuery(Name = "isFinish")]
-    public bool IsFinish { get; set; }
+    [FromQuery(Name = "activationStatus")]
+    public EmployeeActivationStatus? ActivationStatus { get; set; }
+
+    [FromQuery(Name = "excludeShared")]
+    public bool? ExcludeShared {  get; set; }
 }

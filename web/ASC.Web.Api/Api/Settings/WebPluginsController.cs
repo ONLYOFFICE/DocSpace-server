@@ -39,7 +39,9 @@ public class WebPluginsController(ApiContext apiContext,
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
+    /// Adds web plugins from file
     /// </summary>
+    /// <path>api/2.0/settings/webplugins</path>
     /// <exception cref="CustomHttpException"></exception>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
@@ -72,7 +74,9 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
+    /// Gets web plugins
     /// </summary>
+    /// <path>api/2.0/settings/webplugins</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [HttpGet("")]
@@ -93,7 +97,9 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
+    /// Gets web plugins by name specified in request
     /// </summary>
+    /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [HttpGet("{name}")]
@@ -109,7 +115,9 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
+    /// Updates web plugins
     /// </summary>
+    /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [HttpPut("{name}")]
     public async Task UpdateWebPluginAsync(WebPluginRequestsDto inDto)
@@ -124,7 +132,9 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
+    /// Deletes web plugins by name specified in request
     /// </summary>
+    /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [HttpDelete("{name}")]
     public async Task DeleteWebPluginAsync(WebPluginNameRequestDto inDto)

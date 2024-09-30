@@ -176,6 +176,10 @@ public class OperationController(
         }
     }
 
+    /// <summary>
+    /// Duplicates all the selected files and folders
+    /// </summary>
+    /// <path>api/2.0/files/fileops/duplicate</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpPut("duplicate")]
@@ -189,6 +193,10 @@ public class OperationController(
         }
     }
     
+    /// <summary>
+    /// Moves or copies 
+    /// </summary>
+    /// <path>api/2.0/files/fileops/checkdestfolder</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Result", typeof(CheckDestFolderDto))]
     [HttpGet("checkdestfolder")]

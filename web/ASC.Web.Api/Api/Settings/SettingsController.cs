@@ -336,6 +336,10 @@ public partial class SettingsController(MessageService messageService,
         return quotaSettings;
     }
 
+    /// <summary>
+    /// Gets user quota
+    /// </summary>
+    /// <path>api/2.0/settings/userquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Ok", typeof(object))]
     [HttpGet("userquotasettings")]

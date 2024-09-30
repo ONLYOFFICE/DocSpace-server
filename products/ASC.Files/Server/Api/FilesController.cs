@@ -242,6 +242,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         }
     }
 
+    /// <summary>
+    /// Gets fill result
+    /// </summary>
+    /// <path>api/2.0/files/file/fillresult</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Ok", typeof(FillingFormResultDto<int>))]
     [AllowAnonymous]
@@ -420,6 +424,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         return await fileShareDtoHelper.Get(linkAce);
     }
 
+    /// <summary>
+    /// Sets order of a file with ID specified in the request
+    /// </summary>
+    /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
     [HttpPut("{fileId}/order")]
     public async Task SetOrder(OrderFileRequestDto<T> inDto)
