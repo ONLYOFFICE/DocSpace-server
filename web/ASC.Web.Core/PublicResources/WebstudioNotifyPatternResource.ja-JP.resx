@@ -731,7 +731,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="ButtonAccept" xml:space="preserve">
-    <value>承認</value>
+    <value>承諾</value>
   </data>
   <data name="ButtonAccessControlPanel" xml:space="preserve">
     <value>コントロールパネルにアクセスする</value>
@@ -1674,7 +1674,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
     <value>こんにちは！
 
-$__AuthorName は、"${__VirtualRootPath}":"$_VirtualRootPath}"のルーム"$Message":"$InviteLink"にあなたを招待しました。
+$__AuthorName は、"${__VirtualRootPath}":"$_VirtualRootPath}" のルーム "$Message":"$InviteLink" にあなたを招待しました。
 
 $OrangeButton
 
