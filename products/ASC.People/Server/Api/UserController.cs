@@ -340,7 +340,30 @@ public class UserController(
                     continue;
             }
 
-            var user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
+            var user = await userManager.GetUserByEmailAsync(invite.Email);
+            if (!user.Equals(Constants.LostUser))
+            {
+                if (user.Status == EmployeeStatus.Terminated)
+                {
+                    continue;
+                }
+                
+                var type = await _userManager.GetUserTypeAsync(user.Id);
+                
+                var comparer = EmployeeTypeComparer.Instance;
+                if (comparer.Compare(type, invite.Type) < 0)
+                {
+                    if (!await userManagerWrapper.UpdateUserTypeAsync(user, invite.Type))
+                    {
+                        continue;
+                    }
+                }
+
+                await userManager.AddUserRelationAsync(currentUser.Id, user.Id);
+                continue;
+            }
+
+            user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture, false);
             var link = await commonLinkUtility.GetInvitationLinkAsync(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 

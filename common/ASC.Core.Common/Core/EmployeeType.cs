@@ -39,3 +39,24 @@ public enum EmployeeType
     DocSpaceAdmin = 3,
     User = 4
 }
+
+public class EmployeeTypeComparer : IComparer<EmployeeType>
+{
+    private static readonly FrozenDictionary<EmployeeType, int> _priority = new Dictionary<EmployeeType, int>
+    {
+        { EmployeeType.DocSpaceAdmin, 4 },
+        { EmployeeType.RoomAdmin, 3 },
+        { EmployeeType.User, 2 },
+        { EmployeeType.Guest, 1 },
+        { EmployeeType.All, 0 }
+    }.ToFrozenDictionary();
+
+    private EmployeeTypeComparer() { }
+
+    public static EmployeeTypeComparer Instance { get; } = new();
+
+    public int Compare(EmployeeType x, EmployeeType y)
+    {
+        return _priority[x].CompareTo(_priority[y]);
+    }
+}
