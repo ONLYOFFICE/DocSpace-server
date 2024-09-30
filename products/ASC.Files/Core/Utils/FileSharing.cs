@@ -206,29 +206,46 @@ public class FileSharingAceHelper(
 
                 if (emailInvite)
                 {
-                    if (!FileSecurity.PaidShares.Contains(w.Access))
-                    {
-                        userType = EmployeeType.Guest;
-                    }
-
                     var user = await userManager.GetUserByEmailAsync(w.Email);
                     if (!user.Equals(Constants.LostUser))
                     {
-                        await userManager.AddUserRelationAsync(authContext.CurrentAccount.ID, user.Id);
-                        //TODO: send invite to room
-                        
-                        continue;
-                    }
-                    
-                    try
-                    {
-                        user = await userManagerWrapper.AddInvitedUserAsync(w.Email, userType, culture);
                         w.Id = user.Id;
+                        
+                        if (FileSecurity.PaidShares.Contains(w.Access))
+                        {
+                            try
+                            {
+                                if (!await userManagerWrapper.UpdateUserTypeAsync(user, FileSecurity.GetTypeByShare(w.Access)))
+                                {
+                                    continue;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                warning ??= e.Message;
+                                continue;
+                            }
+                        }
+                        
+                        await userManager.AddUserRelationAsync(authContext.CurrentAccount.ID, user.Id);
                     }
-                    catch (Exception e)
+                    else
                     {
-                        warning ??= e.Message;
-                        continue;
+                        if (!FileSecurity.PaidShares.Contains(w.Access))
+                        {
+                            userType = EmployeeType.Guest;
+                        }
+                        
+                        try
+                        {
+                            user = await userManagerWrapper.AddInvitedUserAsync(w.Email, userType, culture, false);
+                            w.Id = user.Id;
+                        }
+                        catch (Exception e)
+                        {
+                            warning ??= e.Message;
+                            continue;
+                        }
                     }
                 }
             }

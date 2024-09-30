@@ -90,12 +90,12 @@ public sealed class UserManagerWrapper(
         return Equals(foundUser, Constants.LostUser) || foundUser.Id == userId;
     }
 
-    public async Task<UserInfo> AddInvitedUserAsync(string email, EmployeeType type, string culture)
+    public async Task<UserInfo> AddInvitedUserAsync(string email, EmployeeType type, string culture, bool existenceCheck = true)
     {
         var mail = new MailAddress(email);
         var emailLinkedCheckTask = IsEmailLinkedAsync(mail.Address);
 
-        if ((await userManager.GetUserByEmailAsync(mail.Address)).Id != Constants.LostUser.Id)
+        if (existenceCheck && (await userManager.GetUserByEmailAsync(mail.Address)).Id != Constants.LostUser.Id)
         {
             throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
