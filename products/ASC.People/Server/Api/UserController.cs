@@ -2080,7 +2080,8 @@ public class UserControllerAdditional<T>(
         EmployeeStatus? employeeStatus,
         EmployeeActivationStatus? activationStatus,
         bool? excludeShared,
-        Area? area)
+        Area? area,
+        bool includeStrangers = false)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
 
@@ -2089,13 +2090,17 @@ public class UserControllerAdditional<T>(
             throw new SecurityException();
         }
         
+        if (includeStrangers && !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        {
+            includeStrangers = false;
+        }
+        
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         var filterValue = apiContext.FilterValue;
         var filterSeparator = apiContext.FilterSeparator;
 
         var securityDao = daoFactory.GetSecurityDao<T>();
-        var excludeStrangers = !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
 
         var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room,
             filterValue,
@@ -2103,8 +2108,8 @@ public class UserControllerAdditional<T>(
             activationStatus,
             excludeShared ?? false,
             filterSeparator,
-            excludeStrangers,
-            Area.All);
+            includeStrangers,
+            area ?? Area.All);
 
         apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
 
@@ -2114,7 +2119,7 @@ public class UserControllerAdditional<T>(
                            activationStatus,
                            excludeShared ?? false,
                            filterSeparator,
-                           excludeStrangers,
+                           includeStrangers,
                            area ?? Area.All,
                            offset,
                            count))

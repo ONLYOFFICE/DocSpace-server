@@ -64,7 +64,8 @@ public class AccountsController<T>(
     public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(T id,
         EmployeeStatus? employeeStatus,
         EmployeeActivationStatus? activationStatus,
-        bool? excludeShared)
+        bool? excludeShared,
+        bool includeStrangers = false)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
 
@@ -77,7 +78,11 @@ public class AccountsController<T>(
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
         var separator = apiContext.FilterSeparator;
-        var excludeStrangers = !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
+        
+        if (includeStrangers && !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        {
+            includeStrangers = false;
+        }
 
         if (string.IsNullOrEmpty(text))
         {
@@ -88,7 +93,7 @@ public class AccountsController<T>(
         var securityDao = daoFactory.GetSecurityDao<T>();
 
         var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(room, text, excludeShared ?? false);
-        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, text, employeeStatus, activationStatus, excludeShared ?? false, separator, excludeStrangers, Area.All);
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, text, employeeStatus, activationStatus, excludeShared ?? false, separator, includeStrangers, Area.All);
         var total = totalGroups + totalUsers;
         
         apiContext.SetCount(Math.Min(Math.Max(total - offset, 0), count)).SetTotalCount(total);
@@ -105,7 +110,7 @@ public class AccountsController<T>(
         var usersOffset = Math.Max(groupsCount > 0 ? 0 : offset - totalGroups, 0);
 
         await foreach (var item in securityDao.GetUsersWithSharedAsync(room, text, employeeStatus, activationStatus, excludeShared ?? false, 
-                           separator, excludeStrangers, Area.All, usersOffset, usersCount))
+                           separator, includeStrangers, Area.All, usersOffset, usersCount))
         {
             yield return await employeeFullDtoHelper.GetFullAsync(item.UserInfo, item.Shared);
         }

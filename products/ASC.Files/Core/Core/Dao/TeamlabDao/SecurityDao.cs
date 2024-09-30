@@ -633,7 +633,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     private IQueryable<UserWithShared> GetUsersWithSharedQuery(int tenantId, string entryId, FileEntry entry, string text, EmployeeStatus? employeeStatus, 
-        EmployeeActivationStatus? activationStatus, bool excludeShared, FilesDbContext filesDbContext, string separator, bool excludeStrangers, Area area)
+        EmployeeActivationStatus? activationStatus, bool excludeShared, FilesDbContext filesDbContext, string separator, bool includeStrangers, Area area)
     {
         var q = filesDbContext.Users
             .AsNoTracking()
@@ -662,29 +662,43 @@ internal abstract class SecurityBaseDao<T>(
                 break;
             case Area.Guests:
                 {
-                    var currentUserId = _authContext.CurrentAccount.ID;
                     q = q.Join(filesDbContext.UserGroup,
+                        u => new
+                        {
+                            TenantId = tenantId,
+                            Userid = u.Id,
+                            UserGroupId = Constants.GroupGuest.ID,
+                            RefType = UserGroupRefType.Contains,
+                            Removed = false
+                        },
+                        ug => new
+                        {
+                            ug.TenantId,
+                            ug.Userid,
+                            ug.UserGroupId,
+                            ug.RefType,
+                            ug.Removed
+                        },
+                        (u, ug) => u);
+
+                    if (!includeStrangers)
+                    {
+                        var currentUserId = _authContext.CurrentAccount.ID;
+                        q = q.Join(filesDbContext.UserRelations,
                             u => new
                             {
-                                TenantId = tenantId,
-                                Userid = u.Id,
-                                UserGroupId = Constants.GroupGuest.ID,
-                                RefType = UserGroupRefType.Contains,
-                                Removed = false
+                                TenantId = tenantId, 
+                                SourceUserId = currentUserId, 
+                                TargetUserId = u.Id
                             },
-                            ug => new
+                            ur => new
                             {
-                                ug.TenantId,
-                                ug.Userid,
-                                ug.UserGroupId,
-                                ug.RefType,
-                                ug.Removed
+                                ur.TenantId, 
+                                ur.SourceUserId, 
+                                ur.TargetUserId
                             },
-                            (u, ug) => u)
-                        .Join(filesDbContext.UserRelations,
-                            u => new { TenantId = tenantId, SourceUserId = currentUserId, TargetUserId = u.Id },
-                            ur => new { ur.TenantId, ur.SourceUserId, ur.TargetUserId },
                             (u, ur) => u);
+                    }
                     break;
                 }
         }
@@ -728,7 +742,7 @@ internal abstract class SecurityBaseDao<T>(
                     Shared = x.s != null || x.user.Id == entry.CreateBy
                 });
 
-        if (area == Area.All && excludeStrangers)
+        if (area == Area.All && !includeStrangers)
         {
             var currentUserId = _authContext.CurrentAccount.ID;
             
