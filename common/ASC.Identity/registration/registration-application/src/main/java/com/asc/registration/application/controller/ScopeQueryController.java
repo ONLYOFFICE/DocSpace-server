@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,7 +52,9 @@ import org.springframework.web.bind.annotation.RestController;
 /** Controller class for managing scopes. */
 @Slf4j
 @RestController
-@RequestMapping(value = "${web.api}/scopes")
+@RequestMapping(
+    value = "${web.api}/scopes",
+    produces = {MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class ScopeQueryController {
 

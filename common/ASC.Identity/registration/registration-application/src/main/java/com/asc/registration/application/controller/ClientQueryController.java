@@ -59,6 +59,7 @@ import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -67,7 +68,9 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "${web.api}/clients")
+@RequestMapping(
+    value = "${web.api}/clients",
+    produces = {MediaType.APPLICATION_JSON_VALUE})
 public class ClientQueryController {
 
   /** The service for managing client applications. */
