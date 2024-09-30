@@ -33,17 +33,14 @@ public enum RoomType
     FillingFormsRoom = 1,
     EditingRoom = 2,
     CustomRoom = 5,
-    PublicRoom = 6
+    PublicRoom = 6,
+    VirtualDataRoom = 8
 }
 
 /// <summary>
 /// </summary>
-public class CreateRoomRequestDto
+public class CreateRoomRequestDto : UpdateRoomRequestDto
 {
-    /// <summary>Room name</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
-
     /// <summary>Room type</summary>
     /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
     public RoomType RoomType { get; set; }
@@ -53,22 +50,4 @@ public class CreateRoomRequestDto
     /// <summary>Collection of sharing parameters</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.FileShareParams}, System.Collections.Generic</type>
     public IEnumerable<FileShareParams> Share { get; set; }
-
-    /// <summary>Notifies users about the shared room or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Notify { get; set; }
-
-    /// <summary>Message to send when notifying about the shared room</summary>
-    /// <type>System.String, System</type>
-    public string SharingMessage { get; set; }
-
-    /// <summary>Room quota</summary>
-    /// <type>System.Int64, System</type>
-    public long Quota { get; set; }
-    
-    public bool Indexing { get; set; }
-    
-    public string Color { get; set; }
-    
-    public string Cover { get; set; }
 }

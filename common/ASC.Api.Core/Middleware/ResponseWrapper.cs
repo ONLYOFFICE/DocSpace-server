@@ -103,6 +103,10 @@ public class CustomResponseFilterAttribute : ResultFilterAttribute
             result.DeclaredType = typeof(SuccessApiResponse);
             result.Value = new SuccessApiResponse(context.HttpContext, result.Value);
         }
+        if (context.Result is EmptyResult)
+        {
+            context.Result = new ObjectResult(new SuccessApiResponse(context.HttpContext, null));
+        }
 
         base.OnResultExecuting(context);
     }

@@ -34,7 +34,8 @@ public static class DocSpaceHelper
             FolderType.CustomRoom or 
             FolderType.EditingRoom or 
             FolderType.FillingFormsRoom or
-            FolderType.PublicRoom;
+            FolderType.PublicRoom or 
+            FolderType.VirtualDataRoom;
     }
 
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
@@ -54,6 +55,7 @@ public static class DocSpaceHelper
             FolderType.EditingRoom => RoomType.EditingRoom,
             FolderType.CustomRoom => RoomType.CustomRoom,
             FolderType.PublicRoom => RoomType.PublicRoom,
+            FolderType.VirtualDataRoom => RoomType.VirtualDataRoom,
             _ => null
         };
     }
@@ -66,10 +68,11 @@ public static class DocSpaceHelper
             RoomType.EditingRoom => FolderType.EditingRoom,
             RoomType.CustomRoom => FolderType.CustomRoom,
             RoomType.PublicRoom => FolderType.PublicRoom,
+            RoomType.VirtualDataRoom => FolderType.VirtualDataRoom,
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
         };
     }
-    
+
     public static FolderType? MapToFolderType(FilterType filterType)
     {
         return filterType switch
@@ -78,15 +81,37 @@ public static class DocSpaceHelper
             FilterType.EditingRooms => FolderType.EditingRoom,
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
+            FilterType.VirtualDataRooms => FolderType.VirtualDataRoom,
             _ => null
         };
     }
 
-    public static async Task<bool> LocatedInPrivateRoomAsync<T>(File<T> file, IFolderDao<T> folderDao)
+    public static async Task<bool> LocatedInPrivateRoomAsync<T>(FileEntry<T> file, IFolderDao<T> folderDao)
     {
-        var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
-        var room = parents.Find(f => IsRoom(f.FolderType));
+        var room = await GetParentRoom(file, folderDao);
 
+        return LocatedInPrivateRoomAsync(room);
+    }
+
+    public static bool LocatedInPrivateRoomAsync<T>(Folder<T> room)
+    {
         return room is { SettingsPrivate: true };
+    }
+
+    public static async Task<bool> IsWatermarkEnabled<T>(FileEntry<T> file, IFolderDao<T> folderDao)
+    {
+        var room = await GetParentRoom(file, folderDao);
+
+        return IsWatermarkEnabled(room);
+    }
+
+    public static bool IsWatermarkEnabled<T>(Folder<T> room)
+    {
+        return room?.SettingsWatermark != null;
+    }
+
+    public static async Task<Folder<T>> GetParentRoom<T>(FileEntry<T> file, IFolderDao<T> folderDao)
+    {
+        return await folderDao.GetParentFoldersAsync(file.ParentId).FirstOrDefaultAsync(f => IsRoom(f.FolderType));
     }
 }

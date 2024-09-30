@@ -133,10 +133,6 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
         set => _folderIdDisplay = value;
     }
 
-    public bool DenyDownload { get; set; }
-
-    public bool DenySharing { get; set; }
-
     public T RootId { get; set; }
 
     [JsonIgnore]

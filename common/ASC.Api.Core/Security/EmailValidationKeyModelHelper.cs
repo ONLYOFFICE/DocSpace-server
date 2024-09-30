@@ -130,9 +130,7 @@ public class EmailValidationKeyModelHelper(
                 break;
 
             case ConfirmType.PortalOwnerChange:
-                var tenantOwnerId = (await tenantManager.GetCurrentTenantAsync()).OwnerId;
-                var oldOwner = await userManager.GetUserByEmailAsync(email);
-                if (!tenantOwnerId.Equals(oldOwner.Id))
+                if (!await CheckOwnerRights(email))
                 {
                     checkKeyResult = ValidationResult.Invalid;
                     break;
@@ -240,8 +238,18 @@ public class EmailValidationKeyModelHelper(
                 }
                 break;
 
+            case ConfirmType.PortalSuspend:
+            case ConfirmType.PortalRemove:
             case ConfirmType.PortalContinue:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type, key);
+                if (!await CheckOwnerRights(email))
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
+
+                var validTimeInterval = type == ConfirmType.PortalContinue ? TimeSpan.MaxValue : provider.ValidEmailKeyInterval;
+
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type, key, validTimeInterval);
                 break;
 
             default:
@@ -250,5 +258,12 @@ public class EmailValidationKeyModelHelper(
         }
 
         return checkKeyResult;
+
+        async Task<bool> CheckOwnerRights(string email)
+        {
+            var ownerId = (await tenantManager.GetCurrentTenantAsync()).OwnerId;
+            var user = await userManager.GetUserByEmailAsync(email);
+            return ownerId.Equals(user.Id);
+        }
     }
 }

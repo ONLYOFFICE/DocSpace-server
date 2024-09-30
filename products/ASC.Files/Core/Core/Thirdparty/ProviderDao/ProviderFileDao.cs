@@ -540,7 +540,7 @@ internal class ProviderFileDao(
         await fileDao.SetCustomOrder(fileId, parentFolderId, order);
     }
 
-    public async Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    public async Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)
     {
         var selector = _selectorFactory.GetSelector(parentFolderId);
         var fileDao = selector.GetFileDao(parentFolderId);

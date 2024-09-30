@@ -64,10 +64,10 @@ public partial class FilesDbContext
         return AbstractQueries.ClearFileOrderAsync(this, tenantId, parentFolderId, entryType);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
-    public Task<int> GetLastFileOrderAsync(int tenantId, int parentFolderId, FileEntryType entryType)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<int> GetLastFileOrderAsync(int tenantId, int parentFolderId)
     {
-        return AbstractQueries.GetLastFileOrderAsync(this, tenantId, parentFolderId, entryType);
+        return AbstractQueries.GetLastFileOrderAsync(this, tenantId, parentFolderId);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
@@ -164,14 +164,13 @@ static file class AbstractQueries
                 .ExecuteDelete());
 
 
-    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<int>> GetLastFileOrderAsync =
+    public static readonly Func<FilesDbContext, int, int, Task<int>> GetLastFileOrderAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int parentFolderId, FileEntryType entryType) =>
+            (FilesDbContext ctx, int tenantId, int parentFolderId) =>
                 ctx.FileOrder
                     .AsTracking()
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.ParentFolderId == parentFolderId)
-                    .Where(r => r.EntryType == entryType)
                     .OrderBy(r => r.Order)
                     .Select(r => r.Order)
                     .LastOrDefault());

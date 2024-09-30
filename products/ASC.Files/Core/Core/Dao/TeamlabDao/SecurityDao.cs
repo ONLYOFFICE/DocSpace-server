@@ -40,7 +40,8 @@ internal abstract class SecurityBaseDao<T>(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IMapper mapper)
+    IMapper mapper,
+    IDistributedLockProvider distributedLockProvider)
     : AbstractDao(dbContextFactory,
         userManager,
         tenantManager,
@@ -49,10 +50,11 @@ internal abstract class SecurityBaseDao<T>(
         maxTotalSizeStatistic,
         settingsManager,
         authContext,
-        serviceProvider)
+        serviceProvider,
+        distributedLockProvider)
 {
     public async Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord<T>> records)
-    {        
+    {
         var mapping = daoFactory.GetMapping<T>();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -450,8 +452,8 @@ internal abstract class SecurityBaseDao<T>(
                             (x, ug) => new { x.security, x.user, ug });
                     
                     var userQuery2 = userQuery1.Select(r => new SecurityOrderRecord
-                    {
-                        Security = r.security, 
+                            {
+                                Security = r.security, 
                         Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending 
                             ? 4 
                             : r.ug != null 
@@ -460,14 +462,14 @@ internal abstract class SecurityBaseDao<T>(
                                     ? 0 
                                     : 2,
                         Name = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? r.user.Email : r.user.FirstName
-                    });
-                    
+                            });
+
                     var groupQuery1 = groupQuery.Select(r => new SecurityOrderRecord
                     {
-                        Security = r.security, 
+                                    Security = r.security,
                         Order = 1,
                         Name = r.group.Name
-                    });
+                                });
 
                     q = userQuery2.Concat(groupQuery1)
                         .OrderBy(r => r.Order)
@@ -688,7 +690,7 @@ internal abstract class SecurityBaseDao<T>(
         }
 
         q = UserQueryHelper.FilterByText(q, text, separator);
-
+            
         var q1 = excludeShared
             ? q.Where(u => 
                     !filesDbContext.Security.Any(s => 
@@ -965,16 +967,17 @@ internal abstract class SecurityBaseDao<T>(
 internal class SecurityDao(
     IDaoFactory daoFactory,
     UserManager userManager,
-    IDbContextFactory<FilesDbContext> dbContextFactory,
-    TenantManager tenantManager,
-    TenantUtil tenantUtil,
-    SetupInfo setupInfo,
-    MaxTotalSizeStatistic maxTotalSizeStatistic,
-    SettingsManager settingsManager,
-    AuthContext authContext,
-    IServiceProvider serviceProvider,
-    IMapper mapper)
-    : SecurityBaseDao<int>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper), ISecurityDao<int>
+        IDbContextFactory<FilesDbContext> dbContextFactory,
+        TenantManager tenantManager,
+        TenantUtil tenantUtil,
+        SetupInfo setupInfo,
+        MaxTotalSizeStatistic maxTotalSizeStatistic,
+        SettingsManager settingsManager,
+        AuthContext authContext,
+        IServiceProvider serviceProvider,
+        IMapper mapper,
+        IDistributedLockProvider distributedLockProvider)
+    : SecurityBaseDao<int>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<int>
 {
     public async Task<IEnumerable<FileShareRecord<int>>> GetSharesAsync(FileEntry<int> entry, IEnumerable<Guid> subjects = null)
     {
@@ -1053,7 +1056,7 @@ internal class SecurityDao(
         {
             return entry.FileEntryType is FileEntryType.File && 
                    await filesDbContext.IsPureSharedAsync(tenantId, entry.Id.ToString(), FileEntryType.File, subjectTypes);
-        }
+}
 
         if (entry.RootFolderType is not FolderType.VirtualRooms)
         {
@@ -1073,18 +1076,18 @@ internal class SecurityDao(
 internal class ThirdPartySecurityDao(
     IDaoFactory daoFactory,
     UserManager userManager,
-    IDbContextFactory<FilesDbContext> dbContextFactory,
-    TenantManager tenantManager,
-    TenantUtil tenantUtil,
-    SetupInfo setupInfo,
-    MaxTotalSizeStatistic maxTotalSizeStatistic,
-    SettingsManager settingsManager,
-    AuthContext authContext,
-    IServiceProvider serviceProvider,
-    IMapper mapper,
-    SelectorFactory selectorFactory)
-    : SecurityBaseDao<string>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo,
-        maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper), ISecurityDao<string>
+        IDbContextFactory<FilesDbContext> dbContextFactory,
+        TenantManager tenantManager,
+        TenantUtil tenantUtil,
+        SetupInfo setupInfo,
+        MaxTotalSizeStatistic maxTotalSizeStatistic,
+        SettingsManager settingsManager,
+        AuthContext authContext,
+        IServiceProvider serviceProvider,
+        IMapper mapper,
+        SelectorFactory selectorFactory,
+        IDistributedLockProvider distributedLockProvider)
+    : SecurityBaseDao<string>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<string>
 {
     public async Task<IEnumerable<FileShareRecord<string>>> GetSharesAsync(FileEntry<string> entry, IEnumerable<Guid> subjects = null)
     {

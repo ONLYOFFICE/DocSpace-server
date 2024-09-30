@@ -42,24 +42,25 @@ public class RoomLogoManager(
     FilesMessageService filesMessageService,
     EmailValidationKeyProvider emailValidationKeyProvider,
     SecurityContext securityContext,
-    FileUtilityConfiguration fileUtilityConfiguration, 
-    ExternalShare externalShare,
+    FileUtilityConfiguration fileUtilityConfiguration,
     SetupInfo setupInfo,
-    FileSizeComment fileSizeComment)
+    FileSizeComment fileSizeComment,
+    CommonLinkUtility commonLinkUtility, 
+    ExternalShare externalShare)
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
+    private const string ImageWatermarkPath = $"{{0}}{LogosPathSplitter}watermark.png";
     private const string LogoModuleName = "room_logos";
     private const string TempDomainPath = "logos_temp";
     private static readonly SemaphoreSlim _semaphore = new(1);
-    
+
     private static readonly (SizeName, Size) _originalLogoSize = (SizeName.Original, new Size(1280, 1280));
     private static readonly (SizeName, Size) _largeLogoSize = (SizeName.Large, new Size(96, 96));
     private static readonly (SizeName, Size) _mediumLogoSize = (SizeName.Medium, new Size(32, 32));
     private static readonly (SizeName, Size) _smallLogoSize = (SizeName.Small, new Size(16, 16));
 
     private IDataStore _logoStore;
-
     public bool EnableAudit { get; set; } = true;
 
     private async ValueTask<IDataStore> GetLogoStoreAsync()
@@ -73,17 +74,12 @@ public class RoomLogoManager(
         _logoStore = await storageFactory.GetStorageAsync(tenantId, LogoModuleName);
         return _logoStore;
     }
-    
+
     public async Task<Folder<T>> CreateAsync<T>(T id, string tempFile, int x, int y, int width, int height)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
-
-        if (string.IsNullOrEmpty(tempFile))
-        {
-            return room;
-        }
-
+        
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
         {
             throw new ItemNotFoundException();
@@ -93,7 +89,19 @@ public class RoomLogoManager(
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
+        
+        if (string.IsNullOrEmpty(tempFile))
+        {
+            return room;
+        }
+        
+        await SaveLogo(tempFile, x, y, width, height, room, folderDao);
 
+        return room;
+    }
+
+    public async Task SaveLogo<T>(string tempFile, int x, int y, int width, int height, Folder<T> room, IFolderDao<T> folderDao)
+    {
         var store = await GetLogoStoreAsync();
         var fileName = Path.GetFileName(tempFile);
         var data = await GetTempAsync(store, fileName);
@@ -111,10 +119,54 @@ public class RoomLogoManager(
         {
             await filesMessageService.SendAsync(MessageAction.RoomLogoCreated, room, room.Title);
         }
+    }
+
+    public async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, string imageUrl)
+    {
+        var store = await GetLogoStoreAsync();
+        var fileName = Path.GetFileName(imageUrl);
+        var data = await GetTempAsync(store, fileName);
+
+        var uri = await CreateWatermarkImageAsync(room, store, data);
+
+        await RemoveTempAsync(store, fileName);
+
+        return uri;
+    }
+    
+
+    private async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, IDataStore store, byte[] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+
+        var stringId = GetId(room);
+
+        await SaveWatermarkImageAsync(store, stringId, data, -1);
+
+        var uri = await GetWatermarkImageAsync(room);
+
+        return commonLinkUtility.GetFullAbsolutePath(uri);
+    }
+
+    public async Task<Folder<T>> DeleteWatermarkImageAsync<T>(Folder<T> room)
+    {
+        var stringId = GetId(room);
+
+        try
+        {
+            var store = await GetLogoStoreAsync();
+            await store.DeleteFilesAsync(string.Empty, string.Format(ImageWatermarkPath, ProcessFolderId(stringId)), false);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorRemoveRoomLogo(e);
+        }
 
         return room;
     }
-
     public async Task<Folder<T>> DeleteAsync<T>(T id, bool checkPermissions = true)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -160,7 +212,7 @@ public class RoomLogoManager(
             if (string.IsNullOrEmpty(room.SettingsColor))
             {
                 room.SettingsColor = GetRandomColour();
-                
+
                 await SaveRoomAsync(daoFactory.GetFolderDao<T>(), room);
             }
 
@@ -190,7 +242,7 @@ public class RoomLogoManager(
         var cacheKey = Math.Abs(room.ModifiedOn.GetHashCode());
         var secure = !securityContext.IsAuthenticated;
         var store = await GetLogoStoreAsync();
-        
+
         return new Logo
         {
             Original = await GetLogoPathAsync(store, id, SizeName.Original, cacheKey, secure),
@@ -198,6 +250,14 @@ public class RoomLogoManager(
             Medium = await GetLogoPathAsync(store, id, SizeName.Medium, cacheKey, secure),
             Small = await GetLogoPathAsync(store, id, SizeName.Small, cacheKey, secure)
         };
+    }
+    public async ValueTask<string> GetWatermarkImageAsync<T>(Folder<T> room)
+    {
+        var id = GetId(room);
+
+        var cacheKey = Math.Abs(room.ModifiedOn.GetHashCode());
+
+        return await GetWatermarkImagePathAsync(id, cacheKey, true);
     }
 
     public async Task<string> SaveTempAsync(IFormFile roomLogo)
@@ -446,12 +506,40 @@ public class RoomLogoManager(
             throw new UnknownImageFormatException(error);
         }
     }
+    private async Task SaveWatermarkImageAsync(IDataStore store, string id, byte[] imageData, long maxFileSize)
+    {
+        imageData = UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
 
+        var fileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
+
+        if (imageData == null || imageData.Length == 0)
+        {
+            return;
+        }
+        if (maxFileSize != -1 && imageData.Length > maxFileSize)
+        {
+            throw new ImageWeightLimitException();
+        }
+
+        using var stream = new MemoryStream(imageData);
+            await store.SaveAsync(fileName, stream);
+        }
+    private async ValueTask<string> GetWatermarkImagePathAsync<T>(T id, int hash, bool secure = false)
+    {
+        var fileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
+        var headers = secure ? new[] { await SecureHelper.GenerateSecureKeyHeaderAsync(fileName, emailValidationKeyProvider) } : null;
+
+        var store = await GetLogoStoreAsync();
+
+        var uri = await store.GetPreSignedUriAsync(string.Empty, fileName, TimeSpan.MaxValue, headers);
+
+        return uri + (secure ? "&" : "?") + $"hash={hash}";
+    }
     private async ValueTask<string> GetLogoPathAsync<T>(IDataStore store, T id, SizeName size, int hash, bool secure = false)
     {
         var fileName = GetFileName(id, size);
         var headers = secure ? new[] { await SecureHelper.GenerateSecureKeyHeaderAsync(fileName, emailValidationKeyProvider) } : null;
-        
+
         var uri = await store.GetPreSignedUriAsync(string.Empty, fileName, TimeSpan.MaxValue, headers);
 
         return externalShare.GetUrlWithShare(uri + (secure ? "&" : "?") + $"hash={hash}");
@@ -478,22 +566,26 @@ public class RoomLogoManager(
         
         await using var stream = await store.GetReadStreamAsync(TempDomainPath, fileName);
 
-        var data = new MemoryStream();
-        var buffer = new byte[1024 * 10];
-        while (true)
-        {
-            var count = await stream.ReadAsync(buffer);
-            if (count == 0)
-            {
-                break;
-            }
+        var data = await ReadStreamToByteArrayAsync(stream);
 
-            await data.WriteAsync(buffer.AsMemory(0, count));
+        return data;
+    }
+
+    private static async Task<byte[]> ReadStreamToByteArrayAsync(Stream inputStream)
+    {
+        if (inputStream == null)
+        {
+            return null;
         }
 
-        return data.ToArray();
+        await using (inputStream)
+        {
+            using var memoryStream = new MemoryStream();
+            await inputStream.CopyToAsync(memoryStream);
+            return memoryStream.ToArray();
+        }
     }
-    
+
     private async Task SaveRoomAsync<T>(IFolderDao<T> folderDao, Folder<T> room)
     {
         if (room.ProviderEntry)
@@ -532,8 +624,8 @@ public class RoomLogoManager(
         var match = Selectors.Pattern.Match(room.Id.ToString()!);
 
         return $"{match.Groups["selector"]}-{match.Groups["id"]}";
+        }
     }
-}
 
 [EnumExtensions]
 public enum SizeName
