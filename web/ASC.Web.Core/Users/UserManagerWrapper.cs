@@ -319,6 +319,13 @@ public sealed class UserManagerWrapper(
                     changed = true;
                 }
             }
+            else if (type is EmployeeType.User && currentType is EmployeeType.Guest)
+            {
+                await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
+                await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
+                webItemSecurityCache.ClearCache(tenant.Id);
+                changed = true;
+            }
         }
         finally
         {
