@@ -192,7 +192,7 @@ public class AscCodeAuthenticationProvider implements AuthenticationProvider {
               .build());
 
       return authenticationToken;
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException | RuntimeException e) {
       throw new AuthenticationProcessingException(
           AuthenticationError.SOMETHING_WENT_WRONG_ERROR, "Authentication failed", e);
     }

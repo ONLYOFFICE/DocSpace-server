@@ -166,7 +166,7 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
           tenantResponse.getTenantId(),
           hostAddress,
           additionalParameters);
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException | RuntimeException e) {
       log.error("Error during authentication conversion", e);
       throwError(OAuth2ErrorCodes.SERVER_ERROR, "internal_parameter");
       return null;
