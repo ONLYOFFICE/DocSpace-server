@@ -203,7 +203,8 @@ public class ConfigurationConverter<T>(
     FileDtoHelper fileDtoHelper,
     EditorConfigurationConverter<T> editorConfigurationConverter,
     DocumentConfigConverter<T> documentConfigConverter,
-    DocumentServiceHelper documentServiceHelper)
+    DocumentServiceHelper documentServiceHelper,
+    ExternalShare externalShare)
 {
     public async Task<ConfigurationDto<T>> Convert(Configuration<T> source, File<T> file, string fillingSessionId = "")
     {   
@@ -225,6 +226,15 @@ public class ConfigurationConverter<T>(
         result.Token = documentServiceHelper.GetSignature(result);
         result.File = await fileDtoHelper.GetAsync(file);
         result.Type = source.Type;
+
+        if (source.EditorType == EditorType.Embedded)
+        {
+            var shareParam = file.ShareRecord != null
+                ? $"&{FilesLinkUtility.ShareKey}={await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject)}"
+                : "";
+
+            result.EditorConfig.Embedded.ShareLinkParam = $"&{FilesLinkUtility.FileId}={file.Id}{shareParam}";
+        }
         return result;
     }
 }
