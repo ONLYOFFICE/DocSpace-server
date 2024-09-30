@@ -40,6 +40,8 @@ public class FilesSettings : ISettings<FilesSettings>
     [JsonPropertyName("KeepNewFileName")]
     public bool KeepNewFileName { get; set; }
 
+    public bool DisplayFileExtension { get; set; }
+
     [JsonPropertyName("ConvertNotify")]
     public bool ConvertNotifySetting { get; set; }
 
@@ -233,6 +235,21 @@ public class FilesSettingsHelper(
         return current.KeepNewFileName;
     }
 
+    public async Task<bool> GetDisplayFileExtension() => (await LoadForCurrentUser()).DisplayFileExtension;
+
+    public async Task<bool> SetDisplayFileExtension(bool value)
+    {        
+        var current = await LoadForCurrentUser();
+        if (current.DisplayFileExtension != value)
+        {
+            current.DisplayFileExtension = value;
+            await SaveForCurrentUser(current);
+            await messageService.SendHeadersMessageAsync(MessageAction.DocumentsDisplayFileExtensionUpdated);
+        }
+
+        return current.DisplayFileExtension;
+    }
+
     public async Task<bool> GetConvertNotify() => (await LoadForCurrentUser()).ConvertNotifySetting;
 
     public async Task SetConvertNotify(bool value)
@@ -410,7 +427,7 @@ public class FilesSettingsHelper(
     {
         List<FileShare> GetNormalizedList(List<FileShare> src)
         {
-            if (src == null || !src.Any())
+            if (src == null || src.Count == 0)
             {
                 return null;
             }

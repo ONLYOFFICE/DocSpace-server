@@ -45,6 +45,7 @@ global using ASC.ElasticSearch.Service;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
 global using ASC.Files.Core;
+global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
@@ -53,6 +54,7 @@ global using ASC.Files.Core.Log;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.DocumentBuilderService;
+global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Service;
 global using ASC.Files.Service.Extension;
 global using ASC.Files.Service.Log;
@@ -61,10 +63,13 @@ global using ASC.Web.Core;
 global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Services.DocumentService;
 global using ASC.Web.Files.Services.FFmpegService;
+global using ASC.Web.Files.Services.WCFService.FileOperations;
 global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Utility;
 
 global using Autofac;
+
+global using AutoMapper;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;

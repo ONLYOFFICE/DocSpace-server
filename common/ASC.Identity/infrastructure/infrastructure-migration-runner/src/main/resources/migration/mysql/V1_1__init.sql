@@ -1,3 +1,18 @@
+-- Drop all if exist
+DROP EVENT IF EXISTS identity_delete_invalidated_clients;
+DROP EVENT IF EXISTS identity_delete_invalidated_consents;
+DROP EVENT IF EXISTS identity_delete_invalidated_authorization;
+
+DROP TABLE IF EXISTS identity_authorizations CASCADE;
+DROP TABLE IF EXISTS identity_client_authentication_methods CASCADE;
+DROP TABLE IF EXISTS identity_client_redirect_uris CASCADE;
+DROP TABLE IF EXISTS identity_client_allowed_origins CASCADE;
+DROP TABLE IF EXISTS identity_client_scopes CASCADE;
+DROP TABLE IF EXISTS identity_consent_scopes CASCADE;
+DROP TABLE IF EXISTS identity_consents CASCADE;
+DROP TABLE IF EXISTS identity_clients CASCADE;
+DROP TABLE IF EXISTS identity_scopes CASCADE;
+
 -- Create table for identity clients
 CREATE TABLE identity_clients (
     client_id varchar(36) not null,
@@ -41,7 +56,7 @@ CREATE TABLE identity_scopes (
 -- Create table for identity authorizations
 CREATE TABLE identity_authorizations (
     id varchar(255),
-    registered_client_id varchar(255) not null,
+    registered_client_id varchar(36) not null,
     principal_id varchar(255) not null,
     tenant_id integer not null,
     state varchar(500),
@@ -66,9 +81,10 @@ CREATE TABLE identity_authorizations (
     refresh_token_expires_at datetime(6),
     is_invalidated tinyint(1) default false,
     modified_at datetime(6),
-    primary key (principal_id, registered_client_id),
+    primary key (principal_id, registered_client_id, authorization_grant_type),
     index idx_identity_authorizations_registered_client_id (registered_client_id),
     index idx_identity_authorizations_principal_id (principal_id),
+    index idx_identity_authorizations_grant_type (authorization_grant_type),
     index idx_identity_authorizations_is_invalidated (is_invalidated)
 ) engine=InnoDB;
 
@@ -118,11 +134,11 @@ CREATE TABLE identity_client_scopes (
 
 -- Create table for identity consents
 CREATE TABLE identity_consents (
+    registered_client_id varchar(36) not null,
     principal_id varchar(255) not null,
-    registered_client_id varchar(255) not null,
     is_invalidated tinyint(1) default false,
     modified_at datetime(6),
-    primary key (principal_id, registered_client_id),
+    primary key (registered_client_id, principal_id),
     index idx_identity_consents_registered_client_id (registered_client_id),
     index idx_identity_consents_principal_id (principal_id),
     index idx_identity_consents_is_invalidated (is_invalidated),

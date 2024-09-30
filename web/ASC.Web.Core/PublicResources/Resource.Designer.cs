@@ -2653,6 +2653,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to set quota per room. The entered value is greater than the total DocSpace storage..
+        /// </summary>
+        public static string RoomQuotaGreaterPortalError {
+            get {
+                return ResourceManager.GetString("RoomQuotaGreaterPortalError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Asia Pacific (Singapore).
         /// </summary>
         public static string SgServerRegion {
@@ -2802,6 +2811,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_audit {
             get {
                 return ResourceManager.GetString("TariffsFeature_audit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Branding &amp; customization.
+        /// </summary>
+        public static string TariffsFeature_customization {
+            get {
+                return ResourceManager.GetString("TariffsFeature_customization", resourceCulture);
             }
         }
         
@@ -2995,15 +3013,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Branding &amp; customization.
-        /// </summary>
-        public static string TariffsFeature_whitelabel {
-            get {
-                return ResourceManager.GetString("TariffsFeature_whitelabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Incorrect code.
         /// </summary>
         public static string TfaAppAuthMessageError {
@@ -3036,6 +3045,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string UserFreeSpaceException {
             get {
                 return ResourceManager.GetString("UserFreeSpaceException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to set quota per user. The entered value is greater than the total DocSpace storage..
+        /// </summary>
+        public static string UserQuotaGreaterPortalError {
+            get {
+                return ResourceManager.GetString("UserQuotaGreaterPortalError", resourceCulture);
             }
         }
         

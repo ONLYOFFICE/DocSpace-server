@@ -44,7 +44,7 @@ public class CoreBaseSettings(IConfiguration configuration)
     public bool CustomMode => _customMode ??= string.Equals(configuration["core:custom-mode"], "true", StringComparison.OrdinalIgnoreCase);
 
     public List<CultureInfo> EnabledCultures => _enabledCultures ??= (configuration["web:cultures"] ?? "en-US")
-        .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+        .Split([','], StringSplitOptions.RemoveEmptyEntries)
         .Distinct()
         .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
         .ToList();

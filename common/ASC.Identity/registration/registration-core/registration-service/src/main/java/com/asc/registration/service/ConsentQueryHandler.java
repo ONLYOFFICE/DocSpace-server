@@ -33,6 +33,7 @@ import com.asc.registration.service.ports.output.repository.ConsentQueryReposito
 import com.asc.registration.service.transfer.request.fetch.ConsentsPaginationQuery;
 import com.asc.registration.service.transfer.response.ConsentResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +76,7 @@ public class ConsentQueryHandler {
                         consentDataMapper.toConsentResponse(
                             clientConsent.getConsent(),
                             clientDataMapper.toClientInfoResponse(clientConsent.getClient())))
-                .collect(Collectors.toSet()))
+                .collect(Collectors.toCollection(LinkedHashSet::new)))
         .next(result.getNext())
         .previous(result.getPrevious())
         .build();

@@ -160,7 +160,7 @@ public class LdapOperationJob(
 
                         await SetProgress(5, _resource.LdapSettingsStatusLoadingBaseInfo);
 
-                        var result = novellLdapSettingsChecker.CheckSettings();
+                        var result = await novellLdapSettingsChecker.CheckSettings();
 
                         if (result != LdapSettingsStatus.Ok)
                         {
@@ -530,7 +530,7 @@ public class LdapOperationJob(
     {
         var current = await _settingsManager.LoadAsync<LdapCurrentAcccessSettings>();
         var currentAccessRights = new Dictionary<LdapSettings.AccessRight, List<string>>();
-        var usersWithRightsFlat = current.CurrentAccessRights == null ? new List<string>() : current.CurrentAccessRights.SelectMany(x => x.Value).Distinct().ToList();
+        var usersWithRightsFlat = current.CurrentAccessRights == null ? [] : current.CurrentAccessRights.SelectMany(x => x.Value).Distinct().ToList();
 
         var step = 3.0 / accessRightsSettings.Count;
         var currentPercent = 95.0;
@@ -589,7 +589,7 @@ public class LdapOperationJob(
 
                         if (!currentAccessRights.ContainsKey(access.Key))
                         {
-                            currentAccessRights.Add(access.Key, new List<string>());
+                            currentAccessRights.Add(access.Key, []);
                         }
                         currentAccessRights[access.Key].Add(user.Id.ToString());
 
@@ -637,7 +637,7 @@ public class LdapOperationJob(
 
         await SetProgress(70, _resource.LdapSettingsStatusRemovingOldGroups, "");
 
-        await RemoveOldDbGroupsAsync(new List<GroupInfo>()); // Remove all db groups with sid
+        await RemoveOldDbGroupsAsync([]); // Remove all db groups with sid
     }
 
     private async Task SyncLDAPUsersInGroupsAsync()
@@ -703,12 +703,8 @@ public class LdapOperationJob(
         var gIndex = 0;
         var gCount = ldapGroupsWithUsers.Count;
 
-        foreach (var ldapGroupWithUsers in ldapGroupsWithUsers)
+        foreach (var (ldapGroup, ldapGroupUsers) in ldapGroupsWithUsers)
         {
-            var ldapGroup = ldapGroupWithUsers.Key;
-
-            var ldapGroupUsers = ldapGroupWithUsers.Value;
-
             ++gIndex;
 
             await SetProgress(Convert.ToInt32(percentage), currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}");

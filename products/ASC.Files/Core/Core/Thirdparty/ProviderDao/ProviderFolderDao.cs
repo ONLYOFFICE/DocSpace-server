@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.Files.Thirdparty.ProviderDao;
 
 [Scope(typeof(IFolderDao<string>))]
@@ -76,7 +77,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var folderDao = selector.GetFolderDao(fileId);
-        
+
         var folder = await folderDao.GetRootFolderByFileAsync(selector.ConvertId(fileId));
 
         return await ResolveParentAsync(folder);
@@ -156,7 +157,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             yield return ToProviderRoom(providerDao.ToProviderInfo(providerQuery.Account), virtualRoomsFolderId, archiveFolderId, providerQuery.Shared);
         }
     }
-    
+
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderType type)
     {
         return GetFoldersAsync(parentId);
@@ -171,7 +172,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         await foreach (var folder in folders.Where(r => r != null))
         {
             yield return await ResolveParentAsync(folder);
-        }
+    }
     }
 
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
@@ -228,7 +229,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         await foreach (var folder in folderDao.GetParentFoldersAsync(selector.ConvertId(folderId)))
         {
             yield return await ResolveParentAsync(folder);
-        }
+    }
     }
 
     public async Task<string> SaveFolderAsync(Folder<string> folder)
@@ -316,7 +317,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             string tsId => await ResolveParentAsync(await CopyFolderAsync(folderId, tsId, cancellationToken) as Folder<TTo>),
             _ => throw new NotImplementedException()
         };
-    }
+        }
 
     public async Task<Folder<int>> CopyFolderAsync(string folderId, int toFolderId, CancellationToken? cancellationToken)
     {
@@ -372,7 +373,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folderDao.CanMoveOrCopyAsync(matchedIds, to);
     }
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota)
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark)
     {
         return await RenameFolderAsync(folder, newTitle);
     }
@@ -572,7 +573,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                     .Where(r => r.tag.Type == TagType.Custom)
                     .Any(t => t.EntryId == a.HashId))
                 .Select(r => new { Account = r.a, Hash = r.HashId });
-        }
+    }
         else if (tags != null && tags.Any())
         {
             q1 = q.Join(filesDbContext.ThirdpartyIdMapping, f => f.FolderId, m => m.Id, (account, map) => new { account, map.HashId })
@@ -583,7 +584,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         }
 
         var q2 = q1.Select(r => new RoomProviderQuery
-        {
+    {
             Account = r.Account,
             Shared = filesDbContext.Security.Any(s => s.TenantId == tenantId && s.EntryType == FileEntryType.Folder && s.EntryId == r.Hash
                                                       && s.SubjectType == SubjectType.PrimaryExternalLink)
@@ -619,7 +620,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folder;
     }
-    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    public Task<Folder<string>> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
     {
         throw new NotImplementedException();
     }
@@ -638,7 +639,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         await folderDao.SetCustomOrder(folderId, parentFolderId, order);
     }
 
-    public async Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    public async Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
     {
         var selector = _selectorFactory.GetSelector(parentFolderId);
         var folderDao = selector.GetFolderDao(parentFolderId);
@@ -671,5 +672,31 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     {
         public DbFilesThirdpartyAccount Account { get; init; }
         public bool Shared { get; init; }
+    }
+
+    public Task<string> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<string> folder)
+    {
+        ArgumentNullException.ThrowIfNull(folder);
+        var selector = _selectorFactory.GetSelector(folder.Id);
+        var folderDao = selector.GetFolderDao(folder.Id);
+
+        return folderDao.SetWatermarkSettings(watermarkSettings, folder);
+    }
+
+    public async Task<WatermarkSettings> GetWatermarkSettings(Folder<string> room)
+    {
+        ArgumentNullException.ThrowIfNull(room);
+        var selector = _selectorFactory.GetSelector(room.Id);
+        var folderDao = selector.GetFolderDao(room.Id);
+        
+        return await folderDao.GetWatermarkSettings(room);
+    }
+    public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
+    {
+        ArgumentNullException.ThrowIfNull(room);
+        var selector = _selectorFactory.GetSelector(room.Id);
+        var folderDao = selector.GetFolderDao(room.Id);
+
+        return folderDao.DeleteWatermarkSettings(room);
     }
 }

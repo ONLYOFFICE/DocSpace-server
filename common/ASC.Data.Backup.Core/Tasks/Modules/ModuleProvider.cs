@@ -36,7 +36,8 @@ public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, Cor
             new FilesModuleSpecifics(logger,helpers),
             new FilesModuleSpecifics2(helpers),
             new WebStudioModuleSpecifics(helpers),
-            new CoreModuleSpecifics(helpers)
+            new CoreModuleSpecifics(helpers),
+            new IdentityModuleSpecifics(helpers)
         }
         .ToList();
 

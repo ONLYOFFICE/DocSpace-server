@@ -75,7 +75,10 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
     private async Task InitializeAsync()
     {
-        if (_consumerChannel is not null) return;
+        if (_consumerChannel is not null)
+        {
+            return;
+        }
 
         _consumerChannel = await CreateConsumerChannelAsync();
     }
@@ -271,9 +274,9 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
             {
                 _logger.WarningNoSubscription(eventName);
 
-                Guid.TryParse(eventArgs.BasicProperties?.MessageId, out var messageId);
+                Guid.TryParse(eventArgs.BasicProperties.MessageId, out var messageId);
 
-                if (_rejectedEvents.ContainsKey(messageId) || messageId == default(Guid))
+                if (_rejectedEvents.ContainsKey(messageId) || messageId == default)
                 {
                     _rejectedEvents.TryRemove(messageId, out _);
 

@@ -372,7 +372,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     if (payer.Id != Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
                     {
-                        users = users.Concat(new[] { payer });
+                        users = users.Concat([payer]);
                     }
                 }
                 var asyncUsers = users.ToAsyncEnumerable();
@@ -447,10 +447,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var createdDate = tenant.CreationDateTime.Date;
 
                 var actualEndDate = tariff.DueDate != DateTime.MaxValue ? tariff.DueDate : tariff.LicenseDate;
-                // var dueDate = actualEndDate.Date;
-                //
-                // var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
-                // var delayDueDate = tariff.DelayDueDate.Date;
+                var dueDate = actualEndDate.Date;
+                var delayDueDate = tariff.DelayDueDate.Date;
 
                 INotifyAction action = null;
                 var paymentMessage = true;
@@ -470,6 +468,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var img5 = string.Empty;
 
                 var trulyYoursAsTableRow = false;
+
+                var siteUrl = commonLinkUtility.GetSiteLink();
+                var pricingPageUrl = $"{siteUrl}/docspace-prices.aspx";
 
                 if (quota.Trial && defaultRebranding)
                 {
@@ -522,8 +523,89 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     #endregion
 
                     #endregion
-
                 }
+
+                if (tariff.State == TariffState.Paid)
+                {
+                    #region Payment warning letters
+
+                    #region 7 days before ENTERPRISE PAID expired to admins
+
+                    if (dueDate.AddDays(-7) == nowDate)
+                    {
+                        action = quota.Lifetime
+                            ? Actions.EnterpriseAdminPaymentWarningLifetimeBeforeExpiration
+                            : quota.Customization
+                                ? Actions.DeveloperAdminPaymentWarningGracePeriodBeforeActivation
+                                : Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeActivation;
+
+                        toadmins = true;
+
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonPurchaseNow", c);
+                        orangeButtonUrl = $"{pricingPageUrl}?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_expire_7_days";
+                    }
+
+                    #endregion
+
+                    #region ENTERPRISE PAID expires today to admins
+
+                    else if (dueDate == nowDate)
+                    {
+                        action = quota.Lifetime
+                            ? Actions.EnterpriseAdminPaymentWarningLifetimeExpiration
+                            : quota.Customization
+                                ? Actions.DeveloperAdminPaymentWarningGracePeriodActivation
+                                : Actions.EnterpriseAdminPaymentWarningGracePeriodActivation;
+
+                        toadmins = true;
+
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonPurchaseNow", c);
+                        orangeButtonUrl = $"{pricingPageUrl}?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_grace_period";
+                    }
+
+                    #endregion
+
+                    #endregion
+                }
+                else if (tariff.State == TariffState.Delay)
+                {
+                    #region Payment warning letters
+
+                    #region 7 days before ENTERPRISE GRACE PERIOD expired to admins
+
+                    if (delayDueDate.AddDays(-7) == nowDate)
+                    {
+                        action = quota.Customization
+                                ? Actions.DeveloperAdminPaymentWarningGracePeriodBeforeExpiration
+                                : Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeExpiration;
+
+                        toadmins = true;
+
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonPurchaseNow", c);
+                        orangeButtonUrl = $"{pricingPageUrl}?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_grace_period_expire_soon";
+                    }
+
+                    #endregion
+
+                    #region ENTERPRISE GRACE PERIOD expires today to admins
+
+                    else if (delayDueDate == nowDate)
+                    {
+                        action = quota.Customization
+                                ? Actions.DeveloperAdminPaymentWarningGracePeriodExpiration
+                                : Actions.EnterpriseAdminPaymentWarningGracePeriodExpiration;
+
+                        toadmins = true;
+
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonPurchaseNow", c);
+                        orangeButtonUrl = $"{pricingPageUrl}?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_no_available";
+                    }
+
+                    #endregion
+
+                    #endregion
+                }
+
 
                 if (action == null)
                 {
@@ -549,6 +631,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
+                        new TagValue(Tags.PaymentDelay, tariffService.GetPaymentDelay()),
                         //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
                         //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
                         TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),

@@ -40,7 +40,7 @@ public class ConfigurationDto<T>
 
     /// <summary>Editor config</summary>
     /// <type>ASC.Web.Files.Services.DocumentService.EditorConfiguration, ASC.Files.Core</type>
-    public EditorConfigurationDto<T> EditorConfig { get; set; }
+    public EditorConfigurationDto EditorConfig { get; set; }
 
     /// <summary>Editor type</summary>
     /// <type>ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core</type>
@@ -75,7 +75,7 @@ public class ConfigurationDto<T>
     public string FillingSessionId { get; set; }
 }
 
-public class EditorConfigurationDto<T>
+public class EditorConfigurationDto
 {
     public string CallbackUrl { get; set; }
 
@@ -83,7 +83,7 @@ public class EditorConfigurationDto<T>
 
     public string CreateUrl { get; set; }
 
-    public CustomizationConfigDto<T> Customization { get; set; }
+    public CustomizationConfigDto Customization { get; set; }
 
     public EmbeddedConfig Embedded { get; set; }
 
@@ -103,7 +103,7 @@ public class EditorConfigurationDto<T>
 
     public UserConfig User { get; set; }
 }
-public class CustomizationConfigDto<T>
+public class CustomizationConfigDto
 {
     public bool About { get; set; }
 
@@ -178,6 +178,8 @@ public class DocumentConfigDto
     public string Title { get; set; }
 
     public string Url { get; set; }
+
+    public Options Options { get; set; }
 }
 
 public class InfoConfigDto
@@ -221,7 +223,11 @@ public class ConfigurationConverter<T>(
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
             ErrorMessage = source.Error
         };
-        
+
+        result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string>() {
+            { FilesLinkUtility.ShardKey, result.Document?.Key }
+        });
+
         result.Token = documentServiceHelper.GetSignature(result);
         result.File = await fileDtoHelper.GetAsync(file);
         result.Type = source.Type;
@@ -233,7 +239,7 @@ public class ConfigurationConverter<T>(
 [Scope(GenericArguments = [typeof(string)])]
 public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> configConverter)
 {
-    public async Task<EditorConfigurationDto<T>> Convert(Configuration<T> configuration, File<T> file, string fillingSessionId)
+    public async Task<EditorConfigurationDto> Convert(Configuration<T> configuration, File<T> file, string fillingSessionId)
     {
         var source = configuration.EditorConfig;
         
@@ -243,7 +249,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         }
 
         var fileType = configuration.GetFileType(file);
-        var result = new EditorConfigurationDto<T>
+        var result = new EditorConfigurationDto
         {
             CallbackUrl = await source.GetCallbackUrl(file.Id.ToString(), fillingSessionId),
             CoEditing = await source.GetCoEditingAsync(),
@@ -271,7 +277,7 @@ public class CustomizationConfigConverter<T>(
     CoreBaseSettings coreBaseSettings,
     AnonymousConfigConverter<T> anonymousConfigConverter)
 {
-    public async Task<CustomizationConfigDto<T>> Convert(Configuration<T> configuration, File<T> file)
+    public async Task<CustomizationConfigDto> Convert(Configuration<T> configuration, File<T> file)
     {    
         var source = configuration.EditorConfig?.Customization;
         
@@ -280,7 +286,7 @@ public class CustomizationConfigConverter<T>(
             return null;
         }
 
-        var result = new CustomizationConfigDto<T>
+        var result = new CustomizationConfigDto
         {
             About = source.About,
             Customer = coreBaseSettings.Standalone ? await customerConfigConverter.Convert(source.Customer) : null,
@@ -392,7 +398,8 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
             SharedLinkKey = source.SharedLinkKey,
             ReferenceData = await source.GetReferenceData(file),
             Title = source.Title ?? file.Title,
-            Url = await source.GetUrl(file)
+            Url = await source.GetUrl(file),
+            Options = source.Options,
         };
 
         return result;

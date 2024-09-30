@@ -129,7 +129,7 @@ namespace ASC.Core.Common.Notify.Stylers.Resources {
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
         ///    &lt;td style=&quot;margin: 0; text-align: center; vertical-align: top; width: 600px;&quot;&gt;
         ///        &lt;a href=&quot;%SITEURL%&quot; style=&quot;color: #333333; display: block; font-size: 16px; font-weight: bold; line-height: 22px; margin-bottom: 32px; text-decoration: none;&quot; target=&quot;_blank&quot;&gt;
-        ///            &lt;img src=&quot;%LOGO%&quot; style=&quot;border: 0 none; height: 360px; width: 600px; color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 40px; font-weight: 70 [rest of string was truncated]&quot;;.
+        ///            &lt;img src=&quot;%LOGO%&quot; style=&quot;border: 0 none; height: 360px; width: 600px; color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 32px; font-weight: 70 [rest of string was truncated]&quot;;.
         /// </summary>
         public static string TopGif {
             get {

@@ -31,7 +31,6 @@ using ASC.Api.Core.Cors;
 using ASC.Common.Mapping;
 using ASC.Core.Notify.Socket;
 using ASC.MessagingSystem;
-using ASC.MessagingSystem.Data;
 
 using Flurl.Util;
 
@@ -67,6 +66,11 @@ public abstract class BaseStartup
 
     public virtual async Task ConfigureServices(IServiceCollection services)
     {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
+        }
+        
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
@@ -128,7 +132,10 @@ public abstract class BaseStartup
                 {
                     foreach (var knownIPAddress in knownIPAddresses)
                     {
-                        if (IPAddress.Parse(knownIPAddress).Equals(address)) return true;
+                        if (IPAddress.Parse(knownIPAddress).Equals(address))
+                        {
+                            return true;
+                        }
                     }
                 }
 
@@ -140,7 +147,10 @@ public abstract class BaseStartup
                         var prefixLength = Convert.ToInt32(knownNetwork.Split("/")[1]);
                         var ipNetwork = new IPNetwork(prefix, prefixLength);
 
-                        if (ipNetwork.Contains(address)) return true;
+                        if (ipNetwork.Contains(address))
+                        {
+                            return true;
+                        }
                     }
                 }
 
@@ -193,7 +203,7 @@ public abstract class BaseStartup
                     {
                         permitLimit = _configuration.GetSection("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests").Get<int>();
 
-                        if (permitLimit == default(int))
+                        if (permitLimit == default)
                         {
                             permitLimit = 15;
                         }
@@ -296,11 +306,11 @@ public abstract class BaseStartup
 
                 var partitionKey = $"{RateLimiterPolicy.EmailInvitationApi}_{tenant.Id}";
 
-                RedisFixedWindowRateLimiterOptions optionFactory(string key) => new RedisFixedWindowRateLimiterOptions { PermitLimit = invitationLimitPerDay, Window = TimeSpan.FromDays(1), ConnectionMultiplexerFactory = () => connectionMultiplexer };
+                RedisFixedWindowRateLimiterOptions OptionFactory() => new() { PermitLimit = invitationLimitPerDay, Window = TimeSpan.FromDays(1), ConnectionMultiplexerFactory = () => connectionMultiplexer };
 
-                RateLimiter limitterFactory(string key) => new LooppedRedisFixedWindowRateLimiter<string>(key, optionFactory(key), invitationsCount);
+                RateLimiter LimitterFactory(string key) => new LooppedRedisFixedWindowRateLimiter<string>(key, OptionFactory(), invitationsCount);
 
-                return RateLimitPartition.Get(partitionKey, limitterFactory);
+                return RateLimitPartition.Get(partitionKey, LimitterFactory);
             });
 
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
@@ -473,6 +483,8 @@ public abstract class BaseStartup
             .AddStartupTask<WarmupBaseDbContextStartupTask>()
             .AddStartupTask<WarmupMappingStartupTask>()
             .TryAddSingleton(services);
+        
+        services.AddTransient<DistributedTaskProgress>();
     }
 
     public static IEnumerable<Assembly> GetAutoMapperProfileAssemblies()

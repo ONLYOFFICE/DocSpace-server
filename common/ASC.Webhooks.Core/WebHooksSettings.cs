@@ -35,7 +35,7 @@ public class WebHooksSettings : ISettings<WebHooksSettings>
 
     public WebHooksSettings GetDefault() => new()
     {
-        Ids = new List<int>()
+        Ids = []
     };
 }
 

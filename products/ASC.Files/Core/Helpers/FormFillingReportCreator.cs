@@ -69,24 +69,24 @@ public class FormFillingReportCreator(
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        var formNumber = new List<FormsItemData>()
+        var formNumber = new List<FormsItemData>
         {
-            new FormsItemData()
+            new()
             {
                 Key = FilesCommonResource.FormNumber,
                 Value = resultFormNumber
             },
         };
 
-        var formLink = new FormsItemData()
+        var formLink = new FormsItemData
         {
             Key = FilesCommonResource.LinkToForm,
             Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.OpenForm}\")"
         };
-        var date = new FormsItemData()
+        var date = new FormsItemData
         {
             Key = FilesCommonResource.Date,
-            Value = $"{tenantUtil.DateTimeNow().ToString("MM/dd/yyyy H:mm:ss")}"
+            Value = $"{tenantUtil.DateTimeNow():MM/dd/yyyy H:mm:ss}"
         };
         var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
 

@@ -49,7 +49,7 @@ public class LdapLogin(string username, string domain)
         {
             var splited = login.Split('\\');
 
-            if (splited.Length == 0 || splited.Length != 2)
+            if (splited.Length is 0 or not 2)
             {
                 return null;
             }
@@ -62,7 +62,7 @@ public class LdapLogin(string username, string domain)
         {
             var splited = login.Split('@');
 
-            if (splited.Length == 0 || splited.Length != 2)
+            if (splited.Length is 0 or not 2)
             {
                 return null;
             }

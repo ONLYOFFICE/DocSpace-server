@@ -45,7 +45,7 @@ public interface JpaConsentRepository
 
   @EntityGraph(value = "ConsentEntity.withClientAndScopes", type = EntityGraph.EntityGraphType.LOAD)
   @Query(
-      "SELECT c FROM ConsentEntity c JOIN c.client cl WHERE c.principalId = :principalId AND cl.invalidated = false")
+      "SELECT c FROM ConsentEntity c JOIN c.client cl WHERE c.principalId = :principalId AND c.invalidated = false")
   Page<ConsentEntity> findAllConsentsByPrincipalId(
       @Param("principalId") String principalId, Pageable pageable);
 
@@ -60,7 +60,7 @@ public interface JpaConsentRepository
    */
   @EntityGraph(value = "ConsentEntity.withClientAndScopes", type = EntityGraph.EntityGraphType.LOAD)
   @Query(
-      "SELECT c FROM ConsentEntity c JOIN c.client cl WHERE c.principalId = :principalId AND cl.tenantId = :tenant AND cl.invalidated = false")
+      "SELECT c FROM ConsentEntity c JOIN c.client cl WHERE c.principalId = :principalId AND cl.tenantId = :tenant AND c.invalidated = false")
   Page<ConsentEntity> findAllConsentsByPrincipalIdAndTenant(
       @Param("principalId") String principalId, @Param("tenant") int tenant, Pageable pageable);
 }

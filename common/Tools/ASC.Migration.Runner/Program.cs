@@ -48,5 +48,13 @@ var targetMigration = app.Configuration["targetMigration"];
 foreach (var providerInfo in providersInfo.Providers)
 {
     var migrationCreator = new MigrationRunner(app.Services);
-    migrationCreator.RunApplyMigrations(AppContext.BaseDirectory, providerInfo, providersInfo.TeamlabsiteProviders.SingleOrDefault(q => q.Provider == providerInfo.Provider), configurationInfo, targetMigration);
+    migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(MigrationContext), targetMigration);
 }
+
+foreach (var providerInfo in providersInfo.TeamlabsiteProviders)
+{
+    var migrationCreator = new MigrationRunner(app.Services);
+    migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(TeamlabSiteContext), targetMigration);
+}
+
+Console.WriteLine("Migrations applied");

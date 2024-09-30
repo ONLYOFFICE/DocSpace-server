@@ -91,12 +91,7 @@ class InterceptorStorage
         RemoveInternal(name, _globalInterceptors);
     }
 
-    public void Clear()
-    {
-        Clear(InterceptorLifetime.Call | InterceptorLifetime.Global);
-    }
-
-    public void Clear(InterceptorLifetime lifetime)
+    public void Clear(InterceptorLifetime lifetime = InterceptorLifetime.Call | InterceptorLifetime.Global)
     {
         lock (_syncRoot)
         {

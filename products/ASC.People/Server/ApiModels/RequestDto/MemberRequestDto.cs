@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
@@ -40,6 +42,7 @@ public class MemberRequestDto
 
     /// <summary>Email</summary>
     /// <type>System.String, System</type>
+    [StringLength(255)]
     public string Email { get; set; }
 
     /// <summary>First name</summary>

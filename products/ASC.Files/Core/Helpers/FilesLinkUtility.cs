@@ -79,6 +79,8 @@ public class FilesLinkUtility
     public const string ShareKey = "share";
     public const string FillingSessionId = "filling_session_id";
     public const string IsFile = "is_file";
+    public const string View = "view";
+    public const string ShardKey = "shardkey";
 
     public string FileHandlerPath
     {
@@ -480,5 +482,40 @@ public class FilesLinkUtility
         }
         
         return FilesBaseAbsolutePath + $"#preview/{id}";
+    }
+
+    public static string AddQueryString(string uri, Dictionary<string, string> queryString)
+    {
+        var uriToBeAppended = uri;
+        var anchorText = string.Empty;
+
+        var anchorIndex = uri.IndexOf('#');
+        if (anchorIndex != -1)
+        {
+            anchorText = uriToBeAppended.Substring(anchorIndex);
+            uriToBeAppended = uriToBeAppended.Substring(0, anchorIndex);
+        }
+
+        var queryIndex = uriToBeAppended.IndexOf('?');
+        var hasQuery = queryIndex != -1;
+
+        var sb = new StringBuilder();
+        sb.Append(uriToBeAppended);
+        foreach (var parameter in queryString)
+        {
+            if (parameter.Value == null)
+            {
+                continue;
+            }
+
+            sb.Append(hasQuery ? '&' : '?');
+            sb.Append(HttpUtility.UrlEncode(parameter.Key));
+            sb.Append('=');
+            sb.Append(HttpUtility.UrlEncode(parameter.Value));
+            hasQuery = true;
+        }
+
+        sb.Append(anchorText);
+        return sb.ToString();
     }
 }

@@ -116,7 +116,9 @@ public class AscAuthorizationService implements OAuth2AuthorizationService {
 
       jpaAuthorizationRepository.deleteById(
           new AuthorizationEntity.AuthorizationId(
-              authorization.getRegisteredClientId(), authorization.getPrincipalName()));
+              authorization.getRegisteredClientId(),
+              authorization.getPrincipalName(),
+              authorization.getAuthorizationGrantType().getValue()));
 
       log.info("Authorization removed successfully");
     } catch (Exception e) {
@@ -266,8 +268,10 @@ public class AscAuthorizationService implements OAuth2AuthorizationService {
   private AuthorizationEntity createAuthorizationEntity(
       OAuth2Authorization authorization, AscTenantResponse tenant) {
     var existingAuthorizationOpt =
-        jpaAuthorizationRepository.findByRegisteredClientIdAndPrincipalId(
-            authorization.getRegisteredClientId(), authorization.getPrincipalName());
+        jpaAuthorizationRepository.findByRegisteredClientIdAndPrincipalIdAndAuthorizationGrantType(
+            authorization.getRegisteredClientId(),
+            authorization.getPrincipalName(),
+            authorization.getAuthorizationGrantType().getValue());
 
     var mappedAuthorization = authorizationMapper.toEntity(authorization);
     var entity =

@@ -83,7 +83,7 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
 
             await PublishChanges();
 
-            var fileUri = await documentBuilderTask.BuildFileAsync(CancellationToken, _script, _tempFileName);
+            var fileUri = await documentBuilderTask.BuildFileAsync(_script, _tempFileName, CancellationToken);
 
             Percentage = 60;
 
@@ -128,7 +128,7 @@ public class DocumentBuilderTask(
     IDaoFactory daoFactory,
     SocketManager socketManager)
 {
-    internal async Task<string> BuildFileAsync(CancellationToken cancellationToken, string script, string fileName)
+    internal async Task<string> BuildFileAsync(string script, string fileName, CancellationToken cancellationToken)
     {
         var resultTuple = await documentServiceConnector.DocbuilderRequestAsync(null, script, true);
 
@@ -152,7 +152,7 @@ public class DocumentBuilderTask(
 
             if (resultTuple.Urls != null)
             {
-                if (!resultTuple.Urls.Any())
+                if (resultTuple.Urls.Count == 0)
                 {
                     throw new Exception("DocbuilderRequest: empty Urls");
                 }

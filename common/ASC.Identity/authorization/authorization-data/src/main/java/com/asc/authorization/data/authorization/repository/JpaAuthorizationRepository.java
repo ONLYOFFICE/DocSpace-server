@@ -51,14 +51,15 @@ public interface JpaAuthorizationRepository
   Optional<AuthorizationEntity> findByAuthorizationId(String id);
 
   /**
-   * Finds an authorization entity by registered client ID and principal ID.
+   * Finds an authorization entity by registered client ID, principal ID and grant type.
    *
    * @param registeredClientId the registered client ID
    * @param principalId the principal ID
+   * @param authorizationGrantType the grant type of the authorization
    * @return an {@link Optional} containing the found authorization entity, or empty if not found
    */
-  Optional<AuthorizationEntity> findByRegisteredClientIdAndPrincipalId(
-      String registeredClientId, String principalId);
+  Optional<AuthorizationEntity> findByRegisteredClientIdAndPrincipalIdAndAuthorizationGrantType(
+      String registeredClientId, String principalId, String authorizationGrantType);
 
   /**
    * Finds an authorization entity by its state.

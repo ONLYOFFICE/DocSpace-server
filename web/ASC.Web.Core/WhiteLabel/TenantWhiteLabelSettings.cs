@@ -503,20 +503,13 @@ public class TenantWhiteLabelSettingsHelper(
     {
         var extNotification = tenantWhiteLabelSettings.GetExt(WhiteLabelLogoType.Notification, false);
 
-        switch (extLogo)
+        return extLogo switch
         {
-            case "png":
-                return (logoData, extNotification);
-            case "svg":
-                return (GetLogoDataFromSvg(), extNotification);
-            case "bmp":
-            case "jpg":
-            case "jpeg":
-            case "ico":
-                return (GetLogoDataFromJpg(), extNotification);
-            default:
-                return (null, extNotification);
-        }
+            "png" => (logoData, extNotification),
+            "svg" => (GetLogoDataFromSvg(), extNotification),
+            "bmp" or "jpg" or "jpeg" or "ico" => (GetLogoDataFromJpg(), extNotification),
+            _ => ((byte[], string))(null, extNotification)
+        };
 
         byte[] GetLogoDataFromSvg()
         {
@@ -536,7 +529,7 @@ public class TenantWhiteLabelSettingsHelper(
                 canvas.DrawPicture(svg.Picture);
 
                 using (var image = SKImage.FromBitmap(bitMap))
-                using (var pngData = image.Encode(SKEncodedImageFormat.Png, 100))
+                using (var pngData = image.Encode())
                 {
                     return pngData.ToArray();
                 }
@@ -546,7 +539,7 @@ public class TenantWhiteLabelSettingsHelper(
         byte[] GetLogoDataFromJpg()
         {
             using var image = SKImage.FromEncodedData(logoData);
-            using var pngData = image.Encode(SKEncodedImageFormat.Png, 100);
+            using var pngData = image.Encode();
             return pngData.ToArray();
         }
     }
@@ -584,17 +577,17 @@ public class TenantWhiteLabelSettingsHelper(
 
     #region Get logo path
 
-    public async Task<string> GetAbsoluteLogoPathAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark = false)
+    public async Task<string> GetAbsoluteLogoPathAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark = false, string culture = default)
     {
         if (tenantWhiteLabelSettings.GetIsDefault(type))
         {
-            return await GetAbsoluteDefaultLogoPathAsync(type, dark);
+            return await GetAbsoluteDefaultLogoPathAsync(type, dark, culture);
         }
 
-        return await GetAbsoluteStorageLogoPath(tenantWhiteLabelSettings, type, dark);
+        return await GetAbsoluteStorageLogoPath(tenantWhiteLabelSettings, type, dark, culture);
     }
 
-    private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark)
+    private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark, string culture = default)
     {
         var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), ModuleName);
         var fileName = BuildLogoFileName(type, tenantWhiteLabelSettings.GetExt(type, dark), dark);
@@ -603,10 +596,10 @@ public class TenantWhiteLabelSettingsHelper(
         {
             return await store.GetUrlWithHashAsync(string.Empty, fileName);
         }
-        return await GetAbsoluteDefaultLogoPathAsync(type, dark);
+        return await GetAbsoluteDefaultLogoPathAsync(type, dark, culture);
     }
 
-    public async Task<string> GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType type, bool dark)
+    public async Task<string> GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType type, bool dark, string culture = default)
     {
         var partnerLogoPath = await GetPartnerStorageLogoPathAsync(type, dark);
         if (!string.IsNullOrEmpty(partnerLogoPath))
@@ -621,7 +614,7 @@ public class TenantWhiteLabelSettingsHelper(
             _ => "svg"
         };
 
-        var regionalPath = await GetCustomRegionalPath();
+        var regionalPath = await GetCustomRegionalPath(culture);
 
         var path = type switch
         {
@@ -659,7 +652,7 @@ public class TenantWhiteLabelSettingsHelper(
         return (await partnerStorage.IsFileAsync(logoPath)) ? (await partnerStorage.GetUrlWithHashAsync(string.Empty, logoPath)) : null;
     }
 
-    private async Task<string> GetCustomRegionalPath()
+    private async Task<string> GetCustomRegionalPath(string culture)
     {
         var customCultures = configuration.GetSection("web:logo:custom-cultures").Get<string[]>() ?? [];
 
@@ -668,19 +661,17 @@ public class TenantWhiteLabelSettingsHelper(
             return string.Empty;
         }
 
-        var language = string.Empty;
-
-        if (authContext.IsAuthenticated)
+        if (string.IsNullOrEmpty(culture) && authContext.IsAuthenticated)
         {
-            language = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).CultureName;
+            culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).CultureName;
         }
 
-        if (string.IsNullOrEmpty(language))
+        if (string.IsNullOrEmpty(culture))
         {
-            language = (await tenantManager.GetCurrentTenantAsync()).Language;
+            culture = (await tenantManager.GetCurrentTenantAsync()).Language;
         }
 
-        return customCultures.Contains(language, StringComparer.InvariantCultureIgnoreCase) ? $"{language.ToLower()}/" : string.Empty;
+        return customCultures.Contains(culture, StringComparer.InvariantCultureIgnoreCase) ? $"{culture.ToLower()}/" : string.Empty;
     }
 
     #endregion
@@ -765,7 +756,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     #region Save for Resource replacement
 
-    private static readonly List<int> _appliedTenants = new();
+    private static readonly List<int> _appliedTenants = [];
 
     public async Task ApplyAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId)
     {

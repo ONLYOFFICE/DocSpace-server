@@ -51,7 +51,8 @@ public enum FolderType
     ReadyFormFolder = 25,
     InProcessFormFolder = 26,
     FormFillingFolderDone = 27,
-    FormFillingFolderInProgress = 28
+    FormFillingFolderInProgress = 28,
+    VirtualDataRoom = 29
 }
 
 public interface IFolder
@@ -81,8 +82,12 @@ public class Folder<T> : FileEntry<T>, IFolder
     public bool SettingsPrivate { get; set; }
     public bool SettingsHasLogo { get; set; }
     public string SettingsColor { get; set; }
+    public string SettingsCover { get; set; }
+    public WatermarkSettings SettingsWatermark { get; set; }
     public bool SettingsIndexing { get; set; }
     public long SettingsQuota { get; set; }
+    public RoomDataLifetime SettingsLifetime { get; set; }
+    public bool SettingsDenyDownload { get; set; }
     public long Counter { get; set; }
     public override bool IsNew
     {

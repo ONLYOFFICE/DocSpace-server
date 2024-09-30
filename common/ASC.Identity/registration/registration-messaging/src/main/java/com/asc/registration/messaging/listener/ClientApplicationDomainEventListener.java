@@ -27,9 +27,9 @@
 
 package com.asc.registration.messaging.listener;
 
+import com.asc.common.messaging.mapper.AuditDataMapper;
+import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
 import com.asc.registration.core.domain.event.ClientEvent;
-import com.asc.registration.messaging.mapper.AuditDataMapper;
-import com.asc.registration.service.ports.output.message.publisher.ClientAuditMessagePublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -43,7 +43,7 @@ public class ClientApplicationDomainEventListener {
   // We do not need outbox here since it is
   // not that crucial to handle all the incoming
   // audit messages
-  private final ClientAuditMessagePublisher messagePublisher;
+  private final AuditMessagePublisher messagePublisher;
   private final AuditDataMapper auditDataMapper;
 
   /**
@@ -52,7 +52,7 @@ public class ClientApplicationDomainEventListener {
    * @param event The client event to process.
    */
   @TransactionalEventListener
-  void process(ClientEvent event) {
+  public void process(ClientEvent event) {
     messagePublisher.publish(auditDataMapper.toMessage(event.getAudit()));
   }
 }

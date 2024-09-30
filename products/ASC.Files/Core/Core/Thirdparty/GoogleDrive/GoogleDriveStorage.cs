@@ -90,7 +90,7 @@ internal class GoogleDriveStorage(
                 ClientId = _token.ClientID,
                 ClientSecret = _token.ClientSecret
             },
-            Scopes = new[] { DriveService.Scope.Drive }
+            Scopes = [DriveService.Scope.Drive]
         });
 
         _driveService = new DriveService(new BaseClientService.Initializer

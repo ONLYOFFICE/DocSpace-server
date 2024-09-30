@@ -93,7 +93,7 @@ public class WebItemSecurity(UserManager userManager,
         IDistributedLockProvider distributedLockProvider)
     {
     
-    private static readonly SecurityAction _read = new(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false, true);
+    private static readonly SecurityAction _read = new(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false);
 
     //
     public async Task<bool> IsAvailableForMeAsync(Guid id)

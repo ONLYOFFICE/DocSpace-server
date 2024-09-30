@@ -186,7 +186,7 @@ public class ThirdpartyController(
         }
         
         var model = emailValidationKeyModelHelper.GetModel();
-        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
+        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, null, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
 
         if (!linkData.IsCorrect)
         {
@@ -209,9 +209,10 @@ public class ThirdpartyController(
                 GetEmailAddress(inDto, thirdPartyProfile), 
                 passwordHash, 
                 employeeType, 
-                true, 
+                false, 
                 invitedByEmail,
-                inDto.Culture);
+                inDto.Culture,
+                model?.UiD);
             
             var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
             await messageService.SendAsync(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
@@ -236,7 +237,7 @@ public class ThirdpartyController(
 
         if (mustChangePassword)
         {
-            await studioNotifyService.UserPasswordChangeAsync(user);
+            await studioNotifyService.UserPasswordChangeAsync(user, true);
         }
 
         await userHelpTourHelper.SetIsNewUser(true);
@@ -266,7 +267,8 @@ public class ThirdpartyController(
         await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(provider));
     }
 
-    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail, string cultureName)
+    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, 
+        bool inviteByEmail, string cultureName, Guid? invitedBy)
     {
         if (SetupInfo.IsSecretEmail(email))
         {
@@ -283,6 +285,11 @@ public class ThirdpartyController(
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
             }
+        }
+
+        if (!inviteByEmail)
+        {
+            user.CreatedBy = invitedBy;
         }
 
         user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
@@ -378,19 +385,13 @@ public class ThirdpartyController(
 
     private static string GetMeaningfulProviderName(string providerName)
     {
-        switch (providerName)
+        return providerName switch
         {
-            case "google":
-            case "openid":
-                return "Google";
-            case "facebook":
-                return "Facebook";
-            case "twitter":
-                return "Twitter";
-            case "linkedin":
-                return "LinkedIn";
-            default:
-                return "Unknown Provider";
-        }
+            "google" or "openid" => "Google",
+            "facebook" => "Facebook",
+            "twitter" => "Twitter",
+            "linkedin" => "LinkedIn",
+            _ => "Unknown Provider"
+        };
     }
 }

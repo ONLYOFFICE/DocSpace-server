@@ -313,7 +313,7 @@ public class FileMarker(
 
                     if (room.CreateBy != obj.CurrentAccountId)
                     {
-                        var roomOwnerEntries = parentFolders.Cast<FileEntry>().Concat(new[] { obj.FileEntry }).ToList();
+                        var roomOwnerEntries = parentFolders.Cast<FileEntry>().Concat([obj.FileEntry]).ToList();
 
                         if (userEntriesData.TryGetValue(room.CreateBy, out var entries) && !entries.Contains(obj.FileEntry))
                         {
@@ -589,7 +589,7 @@ public class FileMarker(
                             cacheFolderId = rootFolderId = privacyFolderId;
                         }
 
-                                    break;
+                        break;
                     }
                 case FolderType.SHARE:
                     cacheFolderId = await globalFolder.GetFolderShareAsync(daoFactory);
@@ -624,7 +624,7 @@ public class FileMarker(
 
         var socketManager = serviceProvider.GetRequiredService<SocketManager>();
 
-        var toRemove = removeTags.Select(r => new Tag(r.Name, r.Type, r.Owner, 0) { EntryId = r.EntryId, EntryType = r.EntryType });
+        var toRemove = removeTags.Select(r => new Tag(r.Name, r.Type, r.Owner) { EntryId = r.EntryId, EntryType = r.EntryType });
 
         await SendChangeNoticeAsync(updateTags.Concat(toRemove).ToList(), socketManager);
     }
@@ -1112,16 +1112,16 @@ public class FileMarker(
                 return;
             }
 
-                if (entry.FileEntryType == FileEntryType.Folder)
-                {
-                    ((IFolder)entry).NewForMe = curTag.Count;
-                }
-                else
-                {
-                    entry.IsNew = true;
-                }
+            if (entry.FileEntryType == FileEntryType.Folder)
+            {
+                ((IFolder)entry).NewForMe = curTag.Count;
+            }
+            else
+            {
+                entry.IsNew = true;
             }
         }
+    }
 
     private async Task InsertToCacheAsync(object folderId, int count)
     {
