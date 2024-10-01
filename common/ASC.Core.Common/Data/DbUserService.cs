@@ -307,6 +307,40 @@ public class EFUserService(
 
         switch (filter.SortType)
         {
+            case UserSortType.CreatedBy:
+                {
+                    var q1 = q.GroupJoin(userDbContext.Users,
+                        u1 => new
+                        {
+                            Id = u1.CreatedBy, 
+                            Removed = false
+                        },
+                        u2 => new
+                        {
+                            Id = (Guid?)u2.Id, 
+                            u2.Removed
+                        }, 
+                        (u, users) => new { u, users })
+                        .SelectMany(
+                            x => x.users.DefaultIfEmpty(), 
+                            (x, createdBy) => new { x.u, createdBy });
+
+                    if (UserFormatter.GetUserDisplayDefaultOrder() == DisplayUserNameFormat.FirstLast)
+                    {
+                        q = (filter.SortOrderAsc
+                                ? q1.OrderBy(x => x.createdBy.FirstName)
+                                : q1.OrderByDescending(x => x.createdBy.FirstName))
+                            .Select(x => x.u);
+                    }
+                    else
+                    {
+                        q = (filter.SortOrderAsc
+                                ? q1.OrderBy(x => x.createdBy.LastName)
+                                : q1.OrderByDescending(x => x.createdBy.LastName))
+                            .Select(x => x.u);
+                    }
+                    break;
+                }
             case UserSortType.Type:
                 {
                     var q1 = (from user in q

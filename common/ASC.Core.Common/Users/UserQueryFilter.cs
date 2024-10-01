@@ -86,10 +86,9 @@ public record UserQueryFilter
         Limit = limit;
         Offset = offset;
         
-        if (!UserSortTypeExtensions.TryParse(sortBy, true, out var sortType))
-        {
-            SortType = UserSortType.FirstName;
-        }
+        SortType = !UserSortTypeExtensions.TryParse(sortBy, true, out var sortType) 
+            ? UserSortType.FirstName 
+            : sortType;
 
         if (sortType == UserSortType.DisplayName)
         {

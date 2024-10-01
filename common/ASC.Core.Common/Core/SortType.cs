@@ -43,5 +43,6 @@ public enum UserSortType
     Type,
     Email,
     Department,
-    UsedSpace
+    UsedSpace,
+    CreatedBy
 }
