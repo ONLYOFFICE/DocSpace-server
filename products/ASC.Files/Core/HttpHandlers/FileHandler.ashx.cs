@@ -781,7 +781,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var fileExtension = fileUtility.GetInternalExtension(toExtension);
             fileName = "new" + fileExtension;
             var path = FileConstant.NewDocPath
-                       + (coreBaseSettings.CustomMode ? "ru-RU/" : "en-US/")
+                       + (coreBaseSettings.CustomMode ? "ru-RU/" : "default/")
                        + fileName;
 
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
@@ -1341,7 +1341,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         var templatePath = FileConstant.NewDocPath + lang + "/";
         if (!await storeTemplate.IsDirectoryAsync(templatePath))
         {
-            templatePath = FileConstant.NewDocPath + "en-US/";
+            templatePath = FileConstant.NewDocPath + "default/";
         }
 
         templatePath += templateName;

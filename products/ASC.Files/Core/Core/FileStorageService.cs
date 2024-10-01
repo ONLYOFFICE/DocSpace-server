@@ -1104,7 +1104,7 @@ public class FileStorageService //: IFileStorageService
             var path = FileConstant.NewDocPath + culture + "/";
             if (!await storeTemplate.IsDirectoryAsync(path))
             {
-                path = FileConstant.NewDocPath + "en-US/";
+                path = FileConstant.NewDocPath + "default/";
             }
 
             try
@@ -1725,7 +1725,7 @@ public class FileStorageService //: IFileStorageService
                 var path = FileConstant.NewDocPath + culture + "/";
                 if (!await storeTemplate.IsDirectoryAsync(path))
                 {
-                    path = FileConstant.NewDocPath + "en-US/";
+                    path = FileConstant.NewDocPath + "default/";
                 }
 
                 var fileExt = FileUtility.GetFileExtension(file.Title);

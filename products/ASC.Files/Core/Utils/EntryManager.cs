@@ -1402,7 +1402,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 var path = FileConstant.NewDocPath + CultureInfo.CurrentCulture + "/";
                 if (!await storeTemplate.IsDirectoryAsync(path))
                 {
-                    path = FileConstant.NewDocPath + "en-US/";
+                    path = FileConstant.NewDocPath + "default/";
                 }
 
                 var fileExt = currentExt != fileUtility.MasterFormExtension
