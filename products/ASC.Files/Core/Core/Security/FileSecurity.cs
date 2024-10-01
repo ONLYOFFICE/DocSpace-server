@@ -1203,12 +1203,10 @@ public class FileSecurity(IDaoFactory daoFactory,
             var fileType = FileUtility.GetFileTypeByFileName(file.Title);
             if (fileType is FileType.Pdf or FileType.Spreadsheet)
             {
-                var folderDao = daoFactory.GetFolderDao<T>();
                 var parentFolders = await GetFileParentFolders(file.ParentId);
-
                 if (parentFolders.Exists(parent => parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder))
                 {
-                    if (ace is { Share: FileShare.FillForms } && authContext.CurrentAccount.ID != file.CreateBy)
+                    if (ace is { Share: FileShare.FillForms } && userId != file.CreateBy)
                     {
                         return false;
                     }
