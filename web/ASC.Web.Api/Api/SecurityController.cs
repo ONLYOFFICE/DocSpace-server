@@ -326,7 +326,7 @@ public class SecurityController(PermissionContext permissionContext,
     
     /// <summary>
     /// Csp
-    /// </summary
+    /// </summary>
     /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
