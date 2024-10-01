@@ -1399,17 +1399,11 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 var storeTemplate = await globalStore.GetStoreTemplateAsync();
 
-                var path = FileConstant.NewDocPath + CultureInfo.CurrentCulture + "/";
-                if (!await storeTemplate.IsDirectoryAsync(path))
-                {
-                    path = FileConstant.NewDocPath + "default/";
-                }
-
                 var fileExt = currentExt != fileUtility.MasterFormExtension
                     ? fileUtility.GetInternalExtension(file.Title)
                     : currentExt;
 
-                path += "new" + fileExt;
+                var path = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, CultureInfo.CurrentCulture);
 
                 //todo: think about the criteria for saving after creation
                 if (!await storeTemplate.IsFileAsync(path) || file.ContentLength != await storeTemplate.GetFileSizeAsync("", path))

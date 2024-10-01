@@ -282,7 +282,7 @@ public partial class Global(
 }
 
 [Scope]
-public class GlobalStore(StorageFactory storageFactory, TenantManager tenantManager)
+public class GlobalStore(StorageFactory storageFactory, TenantManager tenantManager, CoreBaseSettings coreBaseSettings)
 {    
     public async Task<IDataStore> GetStoreAsync(bool currentTenant = true)
     {
@@ -306,6 +306,22 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
     public async Task<IDataStore> GetStoreTemplateAsync()
     {
         return await storageFactory.GetStorageAsync(-1, FileConstant.StorageTemplate);
+    }
+
+    public async Task<string> GetNewDocTemplatePath(IDataStore storeTemplate, string extension, CultureInfo culture = null)
+    {
+        var path = $"{FileConstant.NewDocPath}{culture}/";
+
+        if (culture == null || !await storeTemplate.IsDirectoryAsync(path))
+        {
+            var defaultPath = coreBaseSettings.CustomMode
+                ? FileConstant.NewDocDefaultCustomModePath
+                : FileConstant.NewDocDefaultPath;
+
+            path = $"{FileConstant.NewDocPath}{defaultPath}";
+        }
+
+        return $"{path}{FileConstant.NewDocFileName}{extension}";
     }
 }
 
