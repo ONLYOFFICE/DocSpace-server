@@ -255,7 +255,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         var fileType = configuration.GetFileType(file);
         var result = new EditorConfigurationDto<T>
         {
-            CallbackUrl = await source.GetCallbackUrl(file.Id.ToString(), fillingSessionId),
+            CallbackUrl = await source.GetCallbackUrl(file, fillingSessionId),
             CoEditing = await source.GetCoEditingAsync(),
             CreateUrl = await source.GetCreateUrl(configuration.EditorType, fileType),
             Customization = await configConverter.Convert(configuration, file),

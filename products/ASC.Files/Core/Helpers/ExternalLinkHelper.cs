@@ -39,13 +39,12 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
             Access = FileShare.Restrict
         };
 
-        var linkId = await externalShare.ParseShareKeyAsync(key);
+        var data = await externalShare.ParseShareKeyAsync(key);
         var securityDao = daoFactory.GetSecurityDao<string>();
 
-        var record = await securityDao.GetSharesAsync(new[] { linkId }).FirstOrDefaultAsync();
+        var record = await securityDao.GetSharesAsync([data.Id]).FirstOrDefaultAsync();
         if (record == null)
         {
-            logger.LogDebug(" 1. Result Validate External Link: {result}. File id: {fileId}. Record: {record}", JsonSerializer.Serialize(result), fileId, JsonSerializer.Serialize(record));
             return result;
         }
 
@@ -54,7 +53,6 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
 
         if (status != Status.Ok && status != Status.RequiredPassword)
         {
-            logger.LogDebug(" 2. Result Validate External Link: {result}. File id: {fileId}.  Record: {record}", JsonSerializer.Serialize(result), fileId, JsonSerializer.Serialize(record));
             return result;
         }
 
@@ -91,7 +89,7 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
         
         result.Access = record.Share;
         result.TenantId = record.TenantId;
-        result.LinkId = linkId;
+        result.LinkId = data.Id;
 
         if (securityContext.IsAuthenticated)
         {
