@@ -68,13 +68,14 @@ public class Recaptcha(SetupInfo setupInfo, IHttpClientFactory clientFactory)
             var httpClient = clientFactory.CreateClient();
             using var httpClientResponse = await httpClient.SendAsync(request);
             var resp = await httpClientResponse.Content.ReadAsStringAsync();
-            var resObj = JObject.Parse(resp);
+            var recaptchData = JsonSerializer.Deserialize<RecaptchData>(resp, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (resObj["success"] != null && resObj.Value<bool>("success"))
+            if (recaptchData.Success.GetValueOrDefault())
             {
                 return true;
             }
-            if (resObj["error-codes"] != null && resObj["error-codes"].HasValues)
+            
+            if (recaptchData.ErrorCodes is { Count: > 0 })
             {
                 return false;
             }
@@ -85,4 +86,12 @@ public class Recaptcha(SetupInfo setupInfo, IHttpClientFactory clientFactory)
 
         return false;
     }
+}
+
+public class RecaptchData
+{
+    public bool? Success { get; set; }
+    
+    [JsonPropertyName("error-codes")]
+    public List<string> ErrorCodes { get; set; }
 }

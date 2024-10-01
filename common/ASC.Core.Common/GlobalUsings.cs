@@ -156,8 +156,6 @@ global using MimeKit;
 
 global using NetEscapades.EnumGenerators;
 
-global using Newtonsoft.Json;
-
 global using NVelocity;
 global using NVelocity.App.Events;
 

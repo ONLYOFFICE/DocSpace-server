@@ -54,7 +54,7 @@ public class BillingClient
     public async Task<string> GetAccountLinkAsync(string portalId, string backUrl)
     {
         var result = await RequestAsync("GetAccountLink", portalId, [Tuple.Create("BackRef", backUrl)]);
-        var link = JsonConvert.DeserializeObject<string>(result);
+        var link = JsonSerializer.Deserialize<string>(result);
         return link;
     }
 
@@ -123,7 +123,7 @@ public class BillingClient
             .ToArray();
 
         var result = await RequestAsync("GetSinglePaymentUrl", portalId, parameters);
-        var paymentUrl = JsonConvert.DeserializeObject<string>(result);
+        var paymentUrl = JsonSerializer.Deserialize<string>(result);
 
         return paymentUrl;
     }
@@ -135,7 +135,7 @@ public class BillingClient
             .ToArray();
 
         var result = await RequestAsync("ChangeSubscription", portalId, parameters);
-        var changed = JsonConvert.DeserializeObject<bool>(result);
+        var changed = JsonSerializer.Deserialize<bool>(result);
 
         return changed;
     }

@@ -59,6 +59,5 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Logging;
 
-global using Newtonsoft.Json;
 global using ASC.Notify;
 global using ASC.Notify.Extension;

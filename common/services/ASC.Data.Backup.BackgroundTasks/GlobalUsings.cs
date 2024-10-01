@@ -55,5 +55,3 @@ global using ASC.Web.Studio.Core.Notify;
 global using Autofac;
 
 global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using Newtonsoft.Json;
