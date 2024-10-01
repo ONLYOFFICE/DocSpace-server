@@ -310,15 +310,24 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
 
     public async Task<string> GetNewDocTemplatePath(IDataStore storeTemplate, string extension, CultureInfo culture = null)
     {
-        var path = $"{FileConstant.NewDocPath}{culture}/";
-
-        if (culture == null || !await storeTemplate.IsDirectoryAsync(path))
-        {
-            var defaultPath = coreBaseSettings.CustomMode
+        var defaultPath = coreBaseSettings.CustomMode
                 ? FileConstant.NewDocDefaultCustomModePath
                 : FileConstant.NewDocDefaultPath;
 
-            path = $"{FileConstant.NewDocPath}{defaultPath}";
+        var path = $"{FileConstant.NewDocPath}{defaultPath}";
+
+        if (culture != null)
+        {
+            var ciltureName = culture.ToString();
+
+            await foreach (var dirName in storeTemplate.ListDirectoriesRelativeAsync(FileConstant.NewDocPath, false))
+            {
+                if (dirName.StartsWith(ciltureName))
+                {
+                    path = $"{FileConstant.NewDocPath}{dirName}/";
+                    break;
+                }
+            }
         }
 
         return $"{path}{FileConstant.NewDocFileName}{extension}";
