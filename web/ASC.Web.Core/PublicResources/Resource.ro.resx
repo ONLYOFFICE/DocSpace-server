@@ -210,7 +210,7 @@
   <data name="ConsumersboxClientSecret" xml:space="preserve">
     <value>Cheie Box</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding și particularizare</value>
   </data>
   <data name="ConsumersS3bucket" xml:space="preserve">

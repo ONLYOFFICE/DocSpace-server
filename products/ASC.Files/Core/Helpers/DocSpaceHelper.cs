@@ -81,35 +81,37 @@ public static class DocSpaceHelper
             FilterType.EditingRooms => FolderType.EditingRoom,
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
+            FilterType.VirtualDataRooms => FolderType.VirtualDataRoom,
             _ => null
         };
     }
 
-    public static async Task<bool> LocatedInPrivateRoomAsync<T>(File<T> file, IFolderDao<T> folderDao)
+    public static async Task<bool> LocatedInPrivateRoomAsync<T>(FileEntry<T> file, IFolderDao<T> folderDao)
     {
-        var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
-        var room = parents.Find(f => IsRoom(f.FolderType));
+        var room = await GetParentRoom(file, folderDao);
 
+        return LocatedInPrivateRoomAsync(room);
+    }
+
+    public static bool LocatedInPrivateRoomAsync<T>(Folder<T> room)
+    {
         return room is { SettingsPrivate: true };
     }
 
-    public static async Task<bool> IsWatermarkEnabled<T>(File<T> file, IFolderDao<T> folderDao)
+    public static async Task<bool> IsWatermarkEnabled<T>(FileEntry<T> file, IFolderDao<T> folderDao)
     {
-        var (watermarkSettings, _) = await GetWatermarkSettings(file, folderDao);
+        var room = await GetParentRoom(file, folderDao);
 
-        return watermarkSettings != null && watermarkSettings.Enabled;
+        return IsWatermarkEnabled(room);
     }
 
-    public static async Task<(WatermarkSettings, Folder<T>)> GetWatermarkSettings<T>(File<T> file, IFolderDao<T> folderDao)
+    public static bool IsWatermarkEnabled<T>(Folder<T> room)
     {
-        var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
-        var room = parents.Find(f => IsRoom(f.FolderType));
+        return room?.SettingsWatermark != null;
+    }
 
-        if (room != null)
-        {
-            var watermarkSettings = string.IsNullOrEmpty(room.SettingsWatermark) ? null : JsonSerializer.Deserialize<WatermarkSettings>(room.SettingsWatermark);
-            return (watermarkSettings, room);
-        }
-        return (null, null);
+    public static async Task<Folder<T>> GetParentRoom<T>(FileEntry<T> file, IFolderDao<T> folderDao)
+    {
+        return await folderDao.GetParentFoldersAsync(file.ParentId).FirstOrDefaultAsync(f => IsRoom(f.FolderType));
     }
 }

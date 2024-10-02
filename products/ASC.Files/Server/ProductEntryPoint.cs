@@ -32,7 +32,6 @@ namespace ASC.Files;
 [Scope]
 public class ApiProductEntryPoint(FilesSpaceUsageStatManager filesSpaceUsageStatManager,
        CoreBaseSettings coreBaseSettings,
-       AuthContext authContext,
        UserManager userManager,
        NotifyConfiguration notifyConfiguration,
        AuditEventsRepository auditEventsRepository,
@@ -47,7 +46,6 @@ public class ApiProductEntryPoint(FilesSpaceUsageStatManager filesSpaceUsageStat
        ILogger<ProductEntryPoint> logger)
     : ProductEntryPoint(filesSpaceUsageStatManager,
            coreBaseSettings,
-           authContext, 
            userManager,
            notifyConfiguration, 
            auditEventsRepository, 
@@ -67,4 +65,4 @@ public class ApiProductEntryPoint(FilesSpaceUsageStatManager filesSpaceUsageStat
     }
 
     //SubscriptionManager subscriptionManager
-    }
+}

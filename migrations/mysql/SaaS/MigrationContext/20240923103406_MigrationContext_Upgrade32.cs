@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationContext_Upgrade29 : Migration
+    public partial class MigrationContext_Upgrade32 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "lifetime",
+                name: "cover",
                 table: "files_room_settings",
-                type: "json",
+                type: "varchar(50)",
                 nullable: true,
                 collation: "utf8_general_ci")
                 .Annotation("MySql:CharSet", "utf8");
@@ -23,7 +23,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "lifetime",
+                name: "cover",
                 table: "files_room_settings");
         }
     }

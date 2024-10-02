@@ -94,14 +94,14 @@ internal abstract class BaseTagDao<T>(
         return GetTagsAsync(Guid.Empty, tagType, fileEntries);
     }
 
-    public async IAsyncEnumerable<Tag> GetTagsAsync(T entryId, FileEntryType entryType, TagType? tagType)
+    public async IAsyncEnumerable<Tag> GetTagsAsync(T entryId, FileEntryType entryType, TagType? tagType, Guid? owner = null)
     {
         var mapping = daoFactory.GetMapping<T>();
         var mappedId = await mapping.MappingIdAsync(entryId);
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = filesDbContext.GetTagsByEntryTypeAsync(tenantId, tagType, entryType, mappedId);
+        var q = filesDbContext.GetTagsByEntryTypeAsync(tenantId, tagType, entryType, mappedId, owner);
         var fromDb = await q.ToListAsync();
 
         foreach (var e in fromDb)
@@ -218,7 +218,7 @@ internal abstract class BaseTagDao<T>(
                         continue;
                     }
 
-                    var id = await internalFilesDbContext.TagIdAsync(t.Owner, t.Name, t.Type);
+                    var id = await internalFilesDbContext.TagIdAsync(t.Owner, t.Name, t.Type, tenantId);
 
                     var toAdd = new DbFilesTag
                     {
@@ -313,7 +313,7 @@ internal abstract class BaseTagDao<T>(
 
         if (!cacheTagId.TryGetValue(cacheTagIdKey, out var id))
         {
-            id = await filesDbContext.TagIdAsync(t.Owner, t.Name, t.Type);
+            id = await filesDbContext.TagIdAsync(t.Owner, t.Name, t.Type, tenantId);
 
             if (id == 0)
             {

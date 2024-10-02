@@ -58,7 +58,10 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
             {
                 processedFailed++;
 
-                logger.DebugWarmupFailed(processedFailed, service.FullName, ex);
+                if (ex.Message != TenantManager.CouldNotResolveCurrentTenant)
+                {
+                    logger.DebugWarmupFailed(processedFailed, service.FullName, ex);
+                }
             }
         }
 

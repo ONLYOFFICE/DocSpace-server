@@ -35,9 +35,8 @@ public enum WatermarkAdditions
     CurrentDate = 8,
     RoomName = 16
 }
-public class WatermarkSettings
+public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRequestDto>
 {
-    public bool Enabled { get; set; }
     public string Text { get; set; }
     public WatermarkAdditions Additions { get; set; }
     public int Rotate { get; set; }
@@ -55,11 +54,18 @@ public class WatermarkManager(
     RoomLogoManager roomLogoManager,
     FilesMessageService filesMessageService)
 {
-    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto<T> watermarkRequestDto)
+    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarkRequestDto)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
 
         var room = await folderDao.GetFolderAsync(roomId);
+
+        return await SetWatermarkAsync(room, watermarkRequestDto);
+    }
+
+    public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)
+    {
+        var folderDao = _daoFactory.GetFolderDao<T>();
 
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
         {
@@ -73,38 +79,13 @@ public class WatermarkManager(
 
         var watermarkSettings = new WatermarkSettings
         {
-            Enabled = watermarkRequestDto.Enabled,
             Text = watermarkRequestDto.Text,
             Additions = watermarkRequestDto.Additions,
             Rotate = watermarkRequestDto.Rotate,
             Created = DateTime.UtcNow
         };
 
-        string imageUrl = null;
-
-        if (!string.IsNullOrEmpty(watermarkRequestDto.ImageUrl))
-        {
-            if(Uri.IsWellFormedUriString(watermarkRequestDto.ImageUrl, UriKind.Absolute))
-            {
-                imageUrl = watermarkRequestDto.ImageUrl;
-            }
-            else
-            {
-                imageUrl = await roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
-            }
-        }
-        else if (!Equals(watermarkRequestDto.ImageId, default(T)))
-        {
-            var fileDao = daoFactory.GetFileDao<T>();
-            var file = await fileDao.GetFileAsync(watermarkRequestDto.ImageId);
-
-            if (file != null && await fileSecurity.CanReadAsync(file))
-            {
-                await using var stream = await fileDao.GetFileStreamAsync(file);
-
-                imageUrl = await roomLogoManager.CreateWatermarkImageAsync(room, stream);
-            }
-        }
+        var imageUrl = await GetWatermarkImageUrlAsync(room, watermarkRequestDto.ImageUrl);
 
         if (!string.IsNullOrEmpty(imageUrl))
         {
@@ -128,16 +109,30 @@ public class WatermarkManager(
         return watermarkSettings;
     }
 
-    public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
+    public async Task<string> GetWatermarkImageUrlAsync<T>(Folder<T> folder,string imageUrlFromDto)
     {
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        string imageUrl = null;
+
+        if (!string.IsNullOrEmpty(imageUrlFromDto))
         {
-            throw new ItemNotFoundException();
+            if(Uri.IsWellFormedUriString(imageUrlFromDto, UriKind.Absolute))
+            {
+                imageUrl = imageUrlFromDto;
+            }
+            else
+            {
+                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(folder, imageUrlFromDto);
+            }
         }
 
-        if (room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
+        return imageUrl;
+    }
+
+    public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
+    {
+        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType) || room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
+            return null;
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();

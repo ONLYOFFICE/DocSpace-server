@@ -33,8 +33,8 @@ namespace ASC.Files.Thirdparty.GoogleDrive;
 internal class GoogleDriveProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
     : AbstractProviderInfo<DriveFile, DriveFile, DriveFile, GoogleLoginProvider>(wrapper, providerInfoHelper)
 {
-    public override Selector Selector { get; } = Selectors.GoogleDrive;
-    public override ProviderFilter ProviderFilter { get; } = ProviderFilter.GoogleDrive;
+    public override Selector Selector => Selectors.GoogleDrive;
+    public override ProviderFilter ProviderFilter => ProviderFilter.GoogleDrive;
 
     public async Task<List<DriveFile>> GetItemsAsync(string folderId, bool? folder)
     {

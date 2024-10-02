@@ -102,7 +102,7 @@ public class UserServiceCache
         if (groupRef != null && r.Removed)
         {
             Cache.Remove(groupRef);
-    }
+        }
     }
 
     public static string GetUserPhotoCacheKey(int tenant, Guid userId)

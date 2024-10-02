@@ -100,9 +100,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         try
         {
             var tenant = await tenantManager.GetTenantAsync(tenantId);
-            if (tenant == null ||
-                tenant.Status != TenantStatus.Active ||
-                !TimeToSendWhatsNew(tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType))
+            if (tenant is not { Status: TenantStatus.Active } || !TimeToSendWhatsNew(tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType))
             {
                 return;
             }
@@ -158,7 +156,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 var action = whatsNewType == WhatsNewType.RoomsActivity ? Actions.RoomsActivity : Actions.SendWhatsNew;
 
-                if (userActivities.Any())
+                if (userActivities.Count != 0)
                 {
                     _log.InformationSendWhatsNewTo(user.Email);
                     await client.SendNoticeAsync(
@@ -183,7 +181,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
         var user = userManager.GetUsers(activityInfo.UserId);
 
-        var date = activityInfo.Data.ConvertNumerals("g", false);
+        var date = activityInfo.Data.ConvertNumerals("t");
         var userName = user.DisplayUserName(displayUserSettingsHelper);
         var userRole = activityInfo.UserRole;
         var fileUrl = activityInfo.FileUrl;
@@ -324,7 +322,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     {
         d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
 
-        return d.ConvertNumerals("M", false);
+        return d.ConvertNumerals("M");
     }
 }
 

@@ -139,7 +139,7 @@ public class MigrationOperation(
         {
             Exception = e;
             logger.ErrorWithException(e);
-            if (migrator != null && migrator.MigrationInfo != null)
+            if (migrator is { MigrationInfo: not null })
             {
                 MigrationApiInfo = migrator.MigrationInfo.ToApiInfo();
             }
@@ -162,7 +162,7 @@ public class MigrationOperation(
         async Task Migrator_OnProgressUpdateAsync(double arg1, string arg2)
         {
             Percentage = arg1;
-            if (migrator != null && migrator.MigrationInfo != null)
+            if (migrator is { MigrationInfo: not null })
             {
                 MigrationApiInfo = migrator.MigrationInfo.ToApiInfo();
             }

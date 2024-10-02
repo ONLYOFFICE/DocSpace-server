@@ -48,9 +48,9 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.NotFound;
                 message = "The record could not be found";
                 break;
-            case ArgumentException:
+            case ArgumentException e:
                 status = HttpStatusCode.BadRequest;
-                message = "Invalid arguments";
+                message = e.Message;
                 break;
             case SecurityException:
                 status = HttpStatusCode.Forbidden;
@@ -102,6 +102,10 @@ public class CustomResponseFilterAttribute : ResultFilterAttribute
         {
             result.DeclaredType = typeof(SuccessApiResponse);
             result.Value = new SuccessApiResponse(context.HttpContext, result.Value);
+        }
+        if (context.Result is EmptyResult)
+        {
+            context.Result = new ObjectResult(new SuccessApiResponse(context.HttpContext, null));
         }
 
         base.OnResultExecuting(context);

@@ -70,7 +70,7 @@ public class FactoryIndexerFolder(ILoggerProvider options,
                     if (j >= settings.Threads)
                     {
                         Task.WaitAll(tasks.ToArray());
-                        tasks = new List<Task>();
+                        tasks = [];
                         j = 0;
                     }
                 }

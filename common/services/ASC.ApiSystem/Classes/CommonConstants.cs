@@ -45,7 +45,7 @@ public class CommonConstants
         }
         else
         {
-            AppSecretKeys = new List<string>();
+            AppSecretKeys = [];
         }
 
         AutotestSecretEmails = (configuration["web:autotest:secret-email"] ?? "").Trim();

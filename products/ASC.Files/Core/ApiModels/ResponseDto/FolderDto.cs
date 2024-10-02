@@ -84,6 +84,8 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <type>ASC.Files.Core.ApiModels.RoomDataLifetimeDto, ASC.Files.Core</type>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
+    public WatermarkDto Watermark { get; set; }
+    
     /// <summary>Folder type</summary>
     /// <type>System.Nullable{ASC.Files.Core.FolderType}, System</type>
     public FolderType? Type { get; set; }
@@ -144,6 +146,8 @@ public class FolderDtoHelper(
     CoreBaseSettings coreBaseSettings,
     BreadCrumbsManager breadCrumbsManager,
     TenantManager tenantManager,
+    WatermarkManager watermarkManager,
+    WatermarkDtoHelper watermarkHelper,
     IMapper mapper)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
@@ -158,7 +162,7 @@ public class FolderDtoHelper(
             if (folder.Tags == null)
             {
                 var tagDao = daoFactory.GetTagDao<T>();
-                result.Tags = await tagDao.GetTagsAsync(TagType.Custom, new[] { folder }).Select(t => t.Name).ToListAsync();
+                result.Tags = await tagDao.GetTagsAsync(TagType.Custom, [folder]).Select(t => t.Name).ToListAsync();
             }
             else
             {
@@ -209,6 +213,9 @@ public class FolderDtoHelper(
                     result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaRoomSettings.DefaultQuota;
                 }
             }
+            
+            var watermarkSettings = await watermarkManager.GetWatermarkAsync(folder);
+            result.Watermark = watermarkHelper.Get(watermarkSettings);
         }
 
         if (folder.Order != 0)
@@ -227,7 +234,7 @@ public class FolderDtoHelper(
         }
 
         result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
-
+        
         return result;
     }
 

@@ -183,7 +183,7 @@ public class UserController(
     {
         await _apiContext.AuthByClaimAsync();
         var model = emailValidationKeyModelHelper.GetModel();
-        var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, model.Type, inDto.Type, model?.UiD) : null;
+        var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, model.Type, inDto.Type, model.UiD) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
@@ -373,7 +373,11 @@ public class UserController(
     {
         await _apiContext.AuthByClaimAsync();
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(userid), Constants.Action_EditUser);
-
+        if (userid == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(userid));
+        }
+        
         var user = await _userManager.GetUsersAsync(userid);
 
         if (!_userManager.UserExists(user))
@@ -386,8 +390,23 @@ public class UserController(
             throw new SecurityException();
         }
 
+        var viewer = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        if (user.IsOwner(tenant) && viewer.Id != user.Id)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+        
         if (!string.IsNullOrEmpty(inDto.Email))
         {
+            var email = (inDto.Email ?? "").Trim();
+
+            if (!email.TestEmailRegex())
+            {
+                throw new Exception(Resource.ErrorNotCorrectEmail);
+            }
+            
             var address = new MailAddress(inDto.Email);
             if (!string.Equals(address.Address, user.Email, StringComparison.OrdinalIgnoreCase))
             {
@@ -457,7 +476,7 @@ public class UserController(
             throw new SecurityException();
         }
         
-        await CheckReassignProcessAsync(new[] { user.Id });
+        await CheckReassignProcessAsync([user.Id]);
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
@@ -1451,14 +1470,14 @@ public class UserController(
 
                             if (user.Status == EmployeeStatus.Terminated && string.IsNullOrEmpty(user.FirstName) && string.IsNullOrEmpty(user.LastName))
                             {
-                                var emailChangeEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.SendJoinInvite, entry: EntryType.User, target: MessageTarget.Create(user.Id).ToString(), limit: 1)).FirstOrDefault() ?? 
-                                                       (await auditEventsRepository.GetByFilterAsync(action: MessageAction.RoomInviteLinkUsed, entry: EntryType.User, target: MessageTarget.Create(user.Id).ToString(), limit: 1)).FirstOrDefault();
+                                var emailChangeEvent = (await auditEventsRepository.GetByFilterWithActionsAsync(actions: [MessageAction.SendJoinInvite, MessageAction.RoomInviteLinkUsed, MessageAction.RoomCreateUser], entry: EntryType.User, target: MessageTarget.Create(user.Id).ToString(), limit: 1)).FirstOrDefault() ??
+                                                       (await auditEventsRepository.GetByFilterWithActionsAsync(actions: [MessageAction.RoomCreateUser], limit: 1, description: user.Email)).FirstOrDefault();
 
                                 user.Status = emailChangeEvent != null ? EmployeeStatus.Pending : EmployeeStatus.Active;
                             }
                             else
                             {
-                            user.Status = EmployeeStatus.Active;
+                                user.Status = EmployeeStatus.Active;
                             }
 
                             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
@@ -1583,7 +1602,7 @@ public class UserController(
     {
         if (!inDto.Quota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
 
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -1599,7 +1618,7 @@ public class UserController(
         
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
         if (coreBaseSettings.Standalone)
         {
@@ -1608,7 +1627,7 @@ public class UserController(
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.QuotaGreaterPortalError);
+                    throw new Exception(Resource.UserQuotaGreaterPortalError);
                 }
             }
         }
@@ -1628,7 +1647,7 @@ public class UserController(
         {
             await messageService.SendAsync(MessageAction.CustomQuotaPerUserChanged, quota.ToString(),
                         users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
-    }
+        }
         else
         {
             await messageService.SendAsync(MessageAction.CustomQuotaPerUserDisabled, MessageTarget.Create(users.Select(x => x.Id)), users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
@@ -1772,8 +1791,8 @@ public class UserController(
             }
             else
             {
-            includeGroups.Add([groupId.Value]);
-        }
+                includeGroups.Add([groupId.Value]);
+            }
         }
 
         if (employeeType.HasValue)

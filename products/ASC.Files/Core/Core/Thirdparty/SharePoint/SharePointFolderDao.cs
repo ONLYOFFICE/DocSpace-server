@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Folder = Microsoft.SharePoint.Client.Folder;
-
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
@@ -354,7 +352,7 @@ internal class SharePointFolderDao(
     {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota)
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark)
     {
         return await RenameFolderAsync(folder, newTitle);
     }

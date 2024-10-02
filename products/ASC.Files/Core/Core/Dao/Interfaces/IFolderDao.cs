@@ -180,8 +180,12 @@ public interface IFolderDao<T>
     /// </summary>
     /// <param name="folder"></param>
     /// <param name="newTitle">new name</param>
-    /// <param name="newQuota">new name</param>
-    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota);
+    /// <param name="newQuota">new quota</param>
+    /// <param name="indexing">indexing</param>
+    /// <param name="denyDownload">denyDownload</param>
+    /// <param name="lifetime">lifetime</param>
+    /// <param name="watermark">watermark</param>
+    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifetime, WatermarkSettings watermark);
 
     /// <summary>
     ///    Change folder type

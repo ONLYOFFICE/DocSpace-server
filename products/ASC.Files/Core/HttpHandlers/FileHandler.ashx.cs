@@ -57,7 +57,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility,
     Global global,
     EmailValidationKeyProvider emailValidationKeyProvider,
-    CoreBaseSettings coreBaseSettings,
     GlobalFolderHelper globalFolderHelper,
     PathProvider pathProvider,
     UserManager userManager,
@@ -341,10 +340,14 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         {
                             ext = outType;
                         }
-                        var folderDao = daoFactory.GetFolderDao<T>();
-                        if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+
+                        if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)))
                         {
-                            ext = FileUtility.WatermarkedDocumentExt;
+                            var folderDao = daoFactory.GetFolderDao<T>();
+                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+                            {
+                                ext = FileUtility.WatermarkedDocumentExt;
+                            }
                         }
 
                         long offset = 0;
@@ -675,10 +678,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             long offset = 0;
             var length = ProcessRangeHeader(context, fullLength, ref offset);
 
-            await using (var stream = await fileDao.GetFileStreamAsync(file, offset, length))
-            {
-                await SendStreamByChunksAsync(context, length, offset, fullLength, file.Title, stream);
-            }
+            await using var stream = await fileDao.GetFileStreamAsync(file, offset, length);
+            await SendStreamByChunksAsync(context, length, offset, fullLength, file.Title, stream);
         }
         catch (Exception ex)
         {
@@ -777,18 +778,18 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
             var toExtension = FileUtility.GetFileExtension(fileName);
             var fileExtension = fileUtility.GetInternalExtension(toExtension);
-            fileName = "new" + fileExtension;
-            var path = FileConstant.NewDocPath
-                       + (coreBaseSettings.CustomMode ? "ru-RU/" : "en-US/")
-                       + fileName;
 
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
+            var path = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExtension);
+
             if (!await storeTemplate.IsFileAsync("", path))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_FileNotFound);
                 return;
             }
+
+            fileName = Path.GetFileName(path);
 
             context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(fileName));
             context.Response.ContentType = MimeMapping.GetMimeMapping(fileName);
@@ -1303,8 +1304,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     private async Task FormWriteOk<T>(HttpContext context, Folder<T> folder, File<T> file)
     {
         await context.Response.WriteAsync(
-            JsonSerializer.Serialize(new CreatedFormData<T>()
-                    {
+            JsonSerializer.Serialize(new CreatedFormData<T>
+                {
                         Message = string.Format(FilesCommonResource.MessageFileCreatedForm, folder.Title),
                         Form = await fileDtoHelper.GetAsync(file)
             },
@@ -1334,19 +1335,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             }
         }
 
-        var templateName = "new" + fileExt;
-
-        var templatePath = FileConstant.NewDocPath + lang + "/";
-        if (!await storeTemplate.IsDirectoryAsync(templatePath))
-        {
-            templatePath = FileConstant.NewDocPath + "en-US/";
-        }
-
-        templatePath += templateName;
+        var templatePath = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, lang);
 
         if (string.IsNullOrEmpty(fileTitle))
         {
-            fileTitle = templateName;
+            fileTitle = Path.GetFileName(templatePath);
         }
         else
         {

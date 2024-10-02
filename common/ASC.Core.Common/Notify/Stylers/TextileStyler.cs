@@ -117,9 +117,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
 
     private string GetLogoImg(NoticeMessage message, string imagePath)
     {
-        string logoImg;
-
-        logoImg = configuration["web:logo:mail"];
+        var logoImg = configuration["web:logo:mail"];
         if (string.IsNullOrEmpty(logoImg))
         {
             var logo = message.GetArgument("LetterLogo");

@@ -288,15 +288,34 @@ public class AbstractDao
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-            var order = filesDbContext.FileOrder
+            var order = await filesDbContext.FileOrder
                 .AsTracking()
-                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && ids.Contains(r.EntryId));
-
-            foreach (var o in order)
+                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && ids.Contains(r.EntryId))
+                .ToListAsync();
+            
+            var orders = new List<DbFileOrder>();
+            
+            foreach (var id in fileIds)
             {
-                o.Order = fileIds[o.EntryId];
+                var o = order.FirstOrDefault(r => r.EntryId == id.Key && r.EntryType == entryType);
+                if (o != null)
+                {
+                    o.Order = fileIds[o.EntryId];
+                }
+                else
+                {
+                    orders.Add(new DbFileOrder
+                    {
+                        TenantId = tenantId,
+                        ParentFolderId = parentFolderId,
+                        EntryId = id.Key,
+                        EntryType = entryType,
+                        Order = id.Value
+                    });
+                }
             }
             
+            filesDbContext.FileOrder.AddRange(orders);
             await filesDbContext.SaveChangesAsync();
         }
     }

@@ -33,7 +33,7 @@ namespace ASC.Web.Studio.Utility;
 //  portal-continue - confirm portal continuation  - Tenant.SetStatus(TenantStatus.Active)
 //  portal-remove - confirm portal deletation - Tenant.SetStatus(TenantStatus.RemovePending)
 //  DnsChange - change Portal Address and/or Custom domain name
-[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
+[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter<ConfirmType>))]
 [EnumExtensions]
 public enum ConfirmType
 {

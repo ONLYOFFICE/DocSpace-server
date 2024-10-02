@@ -37,7 +37,7 @@ public class EntryProperties<T>
 
     public static EntryProperties<T> Deserialize(string data, ILogger logger)
     {
-        var options = new JsonSerializerOptions()
+        var options = new JsonSerializerOptions
         {
             NumberHandling = JsonNumberHandling.AllowReadingFromString
         };

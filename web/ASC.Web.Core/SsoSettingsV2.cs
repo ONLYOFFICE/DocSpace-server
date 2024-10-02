@@ -54,7 +54,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
                 NameIdFormat = SsoNameIdFormatType.Saml20Transient
             },
 
-            IdpCertificates = new List<SsoCertificate>(),
+            IdpCertificates = [],
             IdpCertificateAdvanced = new SsoIdpCertificateAdvanced
             {
                 DecryptAlgorithm = SsoEncryptAlgorithmType.AES_128,
@@ -65,7 +65,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
                 VerifyLogoutResponsesSign = false
             },
 
-            SpCertificates = new List<SsoCertificate>(),
+            SpCertificates = [],
             SpCertificateAdvanced = new SsoSpCertificateAdvanced
             {
                 DecryptAlgorithm = SsoEncryptAlgorithmType.AES_128,

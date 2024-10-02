@@ -70,7 +70,7 @@ public sealed class NVelocityPatternFormatter() : PatternFormatter(DefaultPatter
             return;
         }
 
-        var lines = originalString.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+        var lines = originalString.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
         if (lines.Length == 0)
         {
             return;

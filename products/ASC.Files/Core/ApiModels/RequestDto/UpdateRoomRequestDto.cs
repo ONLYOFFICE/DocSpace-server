@@ -37,4 +37,12 @@ public class UpdateRoomRequestDto
     /// <summary>Room quota</summary>
     /// <type>System.Nullable{System.Int64}, System</type>
     public long? Quota { get; set; }
+    
+    public bool? Indexing { get; set; }
+    public bool? DenyDownload { get; set; }
+    public RoomDataLifetimeDto Lifetime { get; set; }
+    public WatermarkRequestDto Watermark { get; set; }
+    public LogoRequestDto Logo { get; set; }
+    public string Color { get; set; }
+    public string Cover { get; set; }
 }

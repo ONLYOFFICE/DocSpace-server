@@ -187,7 +187,7 @@ public enum MessageAction
     DocumentsUploadingFormatsSettingsUpdated = 5033,
     DocumentsExternalShareSettingsUpdated = 5069,
     DocumentsKeepNewFileNameSettingsUpdated = 5083,
-    DocumentsDisplayFileExtensionUpdated = 5101, //last
+    DocumentsDisplayFileExtensionUpdated = 5101,
 
     FileConverted = 5035,
 
@@ -231,6 +231,12 @@ public enum MessageAction
 
     RoomLogoCreated = 5080,
     RoomLogoDeleted = 5081,
+    
+    RoomColorChanged = 5102,
+    RoomCoverChanged = 5103, 
+    
+    RoomIndexingChanged = 5104,
+    RoomDenyDownloadChanged = 5105,//last
     
     RoomExternalLinkCreated = 5088,
     RoomExternalLinkUpdated = 5089,

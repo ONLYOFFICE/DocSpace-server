@@ -95,9 +95,9 @@ public partial class FilesDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, TagType.Custom, null, null])]
-    public IAsyncEnumerable<TagLinkData> GetTagsByEntryTypeAsync(int tenantId, TagType? tagType, FileEntryType entryType, string mappedId)
+    public IAsyncEnumerable<TagLinkData> GetTagsByEntryTypeAsync(int tenantId, TagType? tagType, FileEntryType entryType, string mappedId, Guid? owner)
     {
-        return TagQueries.GetTagsByEntryTypeAsync(this, tenantId, tagType, entryType, mappedId);
+        return TagQueries.GetTagsByEntryTypeAsync(this, tenantId, tagType, entryType, mappedId, owner);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, TagType.Custom, PreCompileQuery.DefaultGuid])]
@@ -142,10 +142,10 @@ public partial class FilesDbContext
         return TagQueries.DeleteTagAsync(this);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultGuid, null, TagType.Custom])]
-    public Task<int> TagIdAsync(Guid owner, string name, TagType type)
+    [PreCompileQuery([PreCompileQuery.DefaultGuid, null, TagType.Custom, PreCompileQuery.DefaultInt])]
+    public Task<int> TagIdAsync(Guid owner, string name, TagType type, int tenantId)
     {
-        return TagQueries.TagIdAsync(this,  owner, name, type);
+        return TagQueries.TagIdAsync(this,  owner, name, type, tenantId);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File, null, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultInt])]
@@ -412,13 +412,14 @@ static file class TagQueries
                     .Where(r => r.Link.EntryType == FileEntryType.File && filesId.Contains(r.Link.EntryId)
                                 || r.Link.EntryType == FileEntryType.Folder && foldersId.Contains(r.Link.EntryId)));
 
-    public static readonly Func<FilesDbContext, int, TagType?, FileEntryType, string, IAsyncEnumerable<TagLinkData>> GetTagsByEntryTypeAsync = 
+    public static readonly Func<FilesDbContext, int, TagType?, FileEntryType, string, Guid?, IAsyncEnumerable<TagLinkData>> GetTagsByEntryTypeAsync = 
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-        (FilesDbContext ctx, int tenantId, TagType? tagType, FileEntryType entryType, string mappedId) =>
+        (FilesDbContext ctx, int tenantId, TagType? tagType, FileEntryType entryType, string mappedId, Guid? owner) =>
             ctx.Tag.Where(r => r.TenantId == tenantId)
             .Join(ctx.TagLink, r => r.Id, l => l.TagId, (tag, link) => new TagLinkData { Tag = tag, Link = link })
             .Where(r => r.Link.TenantId == r.Tag.TenantId)
-            .Where(r => tagType == null || r.Tag.Type == tagType)
+            .Where(r => tagType == null || r.Tag.Type == tagType.Value)
+            .Where(r => owner == null || r.Tag.Owner == owner.Value)
             .Where(r => r.Link.EntryType == entryType)
             .Where(r => r.Link.EntryId == mappedId));
 
@@ -486,10 +487,11 @@ static file class TagQueries
                     where ftl == null
                     select ft).ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, Guid, string, TagType, Task<int>> TagIdAsync =
+    public static readonly Func<FilesDbContext, Guid, string, TagType, int, Task<int>> TagIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, Guid owner, string name, TagType type) =>
+            (FilesDbContext ctx, Guid owner, string name, TagType type, int tenantId) =>
                 ctx.Tag
+                    .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Owner == owner)
                     .Where(r => r.Name == name)
                     .Where(r => r.Type == type)

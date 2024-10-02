@@ -74,7 +74,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     {
         var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
 
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -126,7 +126,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     [HttpPost("thirdparty/{id}")]
     public async Task<FolderDto<string>> CreateRoomAsync(string id, CreateThirdPartyRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder, inDto.DenyDownload);
+        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder, inDto.DenyDownload, inDto.Color, inDto.Cover);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -222,7 +222,7 @@ public abstract class VirtualRoomsController<T>(
         if (inDto.Quota >= 0)
         {
             await _filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomChanged, inDto.Quota.ToString(), folderTitles.ToArray());
-    }
+        }
         else
         {
             await _filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, string.Join(", ", folderTitles.ToArray()));
@@ -349,7 +349,7 @@ public abstract class VirtualRoomsController<T>(
         var aceCollection = new AceCollection<T>
         {
             Files = Array.Empty<T>(),
-            Folders = new[] { id },
+            Folders = [id],
             Aces = wrappers,
             Message = inDto.Message
         };
@@ -511,7 +511,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id}/watermark")]
-    public async Task<WatermarkDto> AddWaterMarksAsync(T id, WatermarkRequestDto<T> inDto)
+    public async Task<WatermarkDto> AddWaterMarksAsync(T id, WatermarkRequestDto inDto)
     {
         var watermarkSettings = await watermarkManager.SetWatermarkAsync(id, inDto);
 
@@ -569,6 +569,25 @@ public abstract class VirtualRoomsController<T>(
         await socketManager.UpdateFolderAsync(room);
 
         return await _folderDtoHelper.GetAsync(room);
+    }
+
+    [HttpPost("{id}/cover")]
+    public async Task<FolderDto<T>> ChangeRoomCoverAsync(T id, CoverRequestDto inDto)
+    {
+        var room = await roomLogoManager.ChangeCoverAsync(id, inDto.Color, inDto.Cover);
+
+        await socketManager.UpdateFolderAsync(room);
+
+        return await _folderDtoHelper.GetAsync(room);
+    }
+    
+    [HttpGet("covers")]
+    public async IAsyncEnumerable<CoversResultDto> GetCovers()
+    {
+        foreach (var c in await RoomLogoManager.GetCoversAsync())
+        {
+            yield return new CoversResultDto { Id = c.Key, Data = c.Value };
+        }
     }
 
     /// <summary>
@@ -635,6 +654,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("{id}/resend")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task ResendEmailInvitationsAsync(T id, UserInvitationRequestDto inDto)
     {
         await _fileStorageService.ResendEmailInvitationsAsync(id, inDto.UsersIds, inDto.ResendAll);
@@ -673,8 +693,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         ApiContext apiContext,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
-        SetupInfo setupInfo,
-        FileSizeComment fileSizeComment,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         AuthContext authContext,
@@ -835,22 +853,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             {
                 var roomLogo = formCollection.Files[0];
 
-                if (roomLogo.Length > setupInfo.MaxImageUploadSize)
-                {
-                    throw new Exception(fileSizeComment.FileImageSizeExceptionString);
-                }
-
-                byte[] data;
-                await using(var inputStream = roomLogo.OpenReadStream())
-                using (var ms = new MemoryStream())
-                {
-                    await inputStream.CopyToAsync(ms);
-                    data = ms.ToArray();
-                }
-
-                UserPhotoThumbnailManager.CheckImgFormat(data);
-
-                result.Data = await roomLogoManager.SaveTempAsync(data, setupInfo.MaxImageUploadSize);
+                result.Data = await roomLogoManager.SaveTempAsync(roomLogo);
                 result.Success = true;
             }
             else

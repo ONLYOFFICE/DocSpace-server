@@ -129,7 +129,7 @@ public class ContactsController(UserManager userManager,
             return;
         }
 
-        user.ContactsList ??= new List<string>();
+        user.ContactsList ??= [];
 
         foreach (var contact in contacts)
         {

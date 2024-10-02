@@ -261,7 +261,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var title = file.Title;
 
         var fileExt = FileUtility.GetFileExtension(title);
-        if (await DocSpaceHelper.IsWatermarkEnabled((File<T>)file, folderDao) && (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(fileExt))
+        if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao) && (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(fileExt))
         {
             _files[file.Id] = FileUtility.WatermarkedDocumentExt;
         }
@@ -509,7 +509,7 @@ internal class ItemNameValueCollection<T>
     {
         if (!_dic.ContainsKey(name))
         {
-            _dic.Add(name, new List<T>());
+            _dic.Add(name, []);
         }
 
         _dic[name].Add(value);
@@ -530,7 +530,7 @@ internal class ItemNameValueCollection<T>
     {
         if (!_dic.ContainsKey(name))
         {
-            _dic.Add(name, new List<T>());
+            _dic.Add(name, []);
         }
 
         _dic[name].AddRange(values);

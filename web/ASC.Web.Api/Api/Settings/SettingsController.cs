@@ -300,7 +300,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (!inDto.DefaultQuota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
@@ -309,7 +309,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
 
         if (coreBaseSettings.Standalone)
@@ -319,7 +319,7 @@ public partial class SettingsController(MessageService messageService,
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.QuotaGreaterPortalError);
+                    throw new Exception(Resource.UserQuotaGreaterPortalError);
                 }
             }
         }
@@ -367,7 +367,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (!inDto.DefaultQuota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.RoomQuotaGreaterPortalError);
         }
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
@@ -376,7 +376,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.RoomQuotaGreaterPortalError);
         }
         if (coreBaseSettings.Standalone)
         {
@@ -385,7 +385,7 @@ public partial class SettingsController(MessageService messageService,
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.QuotaGreaterPortalError);
+                    throw new Exception(Resource.RoomQuotaGreaterPortalError);
                 }
             }
         }
@@ -903,7 +903,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (webitem == null)
         {
-            return new List<UsageSpaceStatItemDto>();
+            return [];
         }
 
         var statData = await webitem.Context.SpaceUsageStatManager.GetStatDataAsync();
