@@ -214,7 +214,7 @@ public class WebPluginManager(
             {
                 var ext = Path.GetExtension(zipEntry.Name);
 
-                if (webPluginConfigSettings.AssetExtensions.Any() && !webPluginConfigSettings.AssetExtensions.Contains(ext))
+                if (webPluginConfigSettings.AssetExtensions.Length != 0 && !webPluginConfigSettings.AssetExtensions.Contains(ext))
                 {
                     continue;
                 }
@@ -303,18 +303,35 @@ public class WebPluginManager(
         webPlugins.AddRange((await GetWebPluginsFromCacheAsync(Tenant.DefaultTenant)).Select(x => x.Clone()));
         webPlugins.AddRange((await GetWebPluginsFromCacheAsync(tenantId)).Select(x => x.Clone()));
 
+        if (webPlugins.Count == 0)
+        {
+            return webPlugins;
+        }
+
         var webPluginSettings = await settingsManager.LoadAsync<WebPluginSettings>();
 
-        var enabledPlugins = webPluginSettings?.EnabledPlugins ?? new Dictionary<string, WebPluginState>();
+        var enabledPlugins = webPluginSettings?.EnabledPlugins ?? [];
 
-        if (enabledPlugins.Any())
+        if (enabledPlugins.Count != 0)
         {
             foreach (var webPlugin in webPlugins)
             {
                 if (enabledPlugins.TryGetValue(webPlugin.Name, out var webPluginState))
                 {
-                    webPlugin.Enabled = webPluginState.Enabled;
-                    webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : await instanceCrypto.DecryptAsync(webPluginState.Settings);
+                    try
+                    {
+                        webPlugin.Enabled = webPluginState.Enabled;
+                        webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : await instanceCrypto.DecryptAsync(webPluginState.Settings);
+                    }
+                    catch (CryptographicException e)
+                    {
+                        log.ErrorWithException(webPlugin.Name, e);
+
+                        webPlugin.Enabled = false;
+                        webPlugin.Settings = null;
+
+                        await UpdateWebPluginAsync(tenantId, webPlugin, false, null);
+                    }
                 }
             }
         }
@@ -419,7 +436,7 @@ public class WebPluginManager(
             enabledPlugins.Remove(webPlugin.Name);
         }
 
-        webPluginSettings.EnabledPlugins = enabledPlugins.Any() ? enabledPlugins : null;
+        webPluginSettings.EnabledPlugins = enabledPlugins.Count != 0 ? enabledPlugins : null;
 
         await settingsManager.SaveAsync(webPluginSettings);
 

@@ -304,7 +304,7 @@ public class FileUploader(
                 var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);
 
-                var isForm = false;
+                bool isForm;
                 var cloneStreamForCheck = await tempStream.CloneMemoryStream(memoryStream, 300);
                 try
                 {
@@ -312,7 +312,7 @@ public class FileUploader(
                 }
                 finally
                 {
-                    cloneStreamForCheck.Dispose();
+                    await cloneStreamForCheck.DisposeAsync();
                 }
 
                 uploadSession.File.Category = isForm ? (int)FilterType.PdfForm : (int)FilterType.Pdf;
@@ -333,8 +333,8 @@ public class FileUploader(
                 }
                 finally
                 {
-                    memoryStream.Dispose();
-                    cloneStreamForSave.Dispose();
+                    await memoryStream.DisposeAsync();
+                    await cloneStreamForSave.DisposeAsync();
                 }
 
                 return uploadSession;

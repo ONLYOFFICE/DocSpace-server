@@ -31,8 +31,8 @@ namespace ASC.ActiveDirectory.Base.Expressions;
 public class Criteria : ICloneable
 {
     private readonly CriteriaType _type;
-    private readonly List<Expression> _expressions = new();
-    private readonly List<Criteria> _nestedCriteras = new();
+    private readonly List<Expression> _expressions = [];
+    private readonly List<Criteria> _nestedCriteras = [];
 
     /// <summary>
     /// Constructor

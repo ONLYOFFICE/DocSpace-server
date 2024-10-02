@@ -256,11 +256,19 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
         await fileMarker.RemoveMarkAsNewAsync(file);
 
+        var folderDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFolderDao<T>();
+        var fileUtility = scope.ServiceProvider.GetService<FileUtility>();
         var title = file.Title;
+
+        var fileExt = FileUtility.GetFileExtension(title);
+        if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao) && (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(fileExt))
+        {
+            _files[file.Id] = FileUtility.WatermarkedDocumentExt;
+        }
 
         if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
         {
-                title = FileUtility.ReplaceFileExtension(title, convertToExt);
+            title = FileUtility.ReplaceFileExtension(title, convertToExt);
         }
 
         var entriesPathId = new ItemNameValueCollection<T>();
@@ -501,7 +509,7 @@ internal class ItemNameValueCollection<T>
     {
         if (!_dic.ContainsKey(name))
         {
-            _dic.Add(name, new List<T>());
+            _dic.Add(name, []);
         }
 
         _dic[name].Add(value);
@@ -522,7 +530,7 @@ internal class ItemNameValueCollection<T>
     {
         if (!_dic.ContainsKey(name))
         {
-            _dic.Add(name, new List<T>());
+            _dic.Add(name, []);
         }
 
         _dic[name].AddRange(values);

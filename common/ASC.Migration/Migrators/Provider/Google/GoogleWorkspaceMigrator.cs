@@ -34,16 +34,16 @@ public class GoogleWorkspaceMigrator : Migrator
 
     private CancellationToken _cancellationToken;
     private string[] _takeouts;
-    private readonly Regex _emailRegex = new Regex(@"(\S*@\S*\.\S*)");
-    private readonly Regex _phoneRegex = new Regex(@"(\+?\d+)");
+    private readonly Regex _emailRegex = new(@"(\S*@\S*\.\S*)");
+    private readonly Regex _phoneRegex = new(@"(\+?\d+)");
 
-    private  readonly Regex _workspacesRegex = new Regex(@"Workspaces(\(\d+\))?.json");
-    private readonly Regex _pinnedRegex = new Regex(@".*-at-.*-pinned\..*");
+    private  readonly Regex _workspacesRegex = new(@"Workspaces(\(\d+\))?.json");
+    private readonly Regex _pinnedRegex = new(@".*-at-.*-pinned\..*");
     private const string CommentsFile = "-comments.html";
     private const string InfoFile = "-info.json";
-    private readonly Regex _commentsVersionFile = new Regex(@"-comments(\([\d]+\))\.html");
-    private readonly Regex _infoVersionFile = new Regex(@"-info(\([\d]+\))\.json");
-    private readonly Regex _versionRegex = new Regex(@"(\([\d]+\))");
+    private readonly Regex _commentsVersionFile = new(@"-comments(\([\d]+\))\.html");
+    private readonly Regex _infoVersionFile = new(@"-info(\([\d]+\))\.json");
+    private readonly Regex _versionRegex = new(@"(\([\d]+\))");
 
     public GoogleWorkspaceMigrator(SecurityContext securityContext,
         UserManager userManager,
@@ -150,22 +150,14 @@ public class GoogleWorkspaceMigrator : Migrator
                     }
                     else if (await UserManager.GetUserByEmailAsync(user.Info.Email) != ASC.Core.Users.Constants.LostUser)
                     {
-                        if (!MigrationInfo.ExistUsers.ContainsKey(user.Info.Email))
-                        {
-                            MigrationInfo.ExistUsers.Add(user.Info.Email, user);
-                        }
-                        else
+                        if (!MigrationInfo.ExistUsers.TryAdd(user.Info.Email, user))
                         {
                             MergeStorages(MigrationInfo.ExistUsers[user.Info.Email], user);
                         }
                     }
                     else
                     {
-                        if (!MigrationInfo.Users.ContainsKey(user.Info.Email))
-                        {
-                            MigrationInfo.Users.Add(user.Info.Email, user);
-                        }
-                        else
+                        if (!MigrationInfo.Users.TryAdd(user.Info.Email, user))
                         {
                             MergeStorages(MigrationInfo.Users[user.Info.Email], user);
                         }
@@ -206,7 +198,7 @@ public class GoogleWorkspaceMigrator : Migrator
     }
     private void ParseGroup(string tmpFolder)
     {
-        var group = new MigrationGroup { Info = new(), UserKeys = new HashSet<string>() };
+        var group = new MigrationGroup { Info = new GroupInfo(), UserKeys = [] };
         var groupsFolder = Path.Combine(tmpFolder, "Groups");
         var groupInfo = Path.Combine(groupsFolder, "info.csv");
         using (var sr = new StreamReader(groupInfo))
@@ -364,18 +356,11 @@ public class GoogleWorkspaceMigrator : Migrator
                     return ASCShare.Read;
                 }
 
-                if (fileInfo.AdditionalRoles.Contains("commenter"))
-                {
-                    return ASCShare.Comment;
-                }
-                else
-                {
-                    return ASCShare.Read;
-                }
+                return fileInfo.AdditionalRoles.Contains("commenter") ? ASCShare.Comment : ASCShare.Read;
 
             default:
                 return null;
-        };
+        }
     }
 
     private void ParseFolders(string entry, Dictionary<string, MigrationFolder> foldersdictionary, int i)
@@ -392,10 +377,7 @@ public class GoogleWorkspaceMigrator : Migrator
                 Level = j++
             };
             var key = string.Join(',', split[0..(j - 1)]);
-            if (!foldersdictionary.ContainsKey(key))
-            {
-                foldersdictionary.Add(key, folder);
-            }
+            foldersdictionary.TryAdd(key, folder);
         }
     }
 
@@ -521,20 +503,12 @@ public class GoogleWorkspaceMigrator : Migrator
 
         if (googleProfile.Gender != null)
         {
-            switch (googleProfile.Gender.Type)
+            user.Info.Sex = googleProfile.Gender.Type switch
             {
-                case "male":
-                    user.Info.Sex = true;
-                    break;
-
-                case "female":
-                    user.Info.Sex = false;
-                    break;
-
-                default:
-                    user.Info.Sex = null;
-                    break;
-            }
+                "male" => true,
+                "female" => false,
+                _ => null
+            };
         }
 
         user.Info.FirstName = googleProfile.Name.GivenName;

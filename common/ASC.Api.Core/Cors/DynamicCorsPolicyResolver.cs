@@ -33,46 +33,36 @@ using ASC.Web.Studio.Core;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace ASC.Api.Core.Cors;
-public class DynamicCorsPolicyResolver : IDynamicCorsPolicyResolver
+public class DynamicCorsPolicyResolver(
+    IHttpContextAccessor httpContextAccessor,
+    IHttpClientFactory httpClientFactory,
+    CookieStorage cookieStorage,
+    CookiesManager cookiesManager,
+    TenantManager tenantManager,
+    CommonLinkUtility linkUtility,
+    SetupInfo setupInfo,
+    IMemoryCache memoryCache,
+    ILogger<DynamicCorsPolicyResolver> logger)
+    : IDynamicCorsPolicyResolver
 {
-    private readonly HttpContext _context;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly CookieStorage _cookieStorage;
-    private readonly CookiesManager _cookiesManager;
-    private readonly TenantManager _tenantManager;
-    private readonly string _apiBaseUrl;
-    private readonly IMemoryCache _memoryCache;
-    private readonly ILogger<DynamicCorsPolicyResolver> _logger;
+    private readonly HttpContext _context = httpContextAccessor?.HttpContext;
 
-    public DynamicCorsPolicyResolver(IHttpContextAccessor httpContextAccessor,
-                                     IHttpClientFactory httpClientFactory,
-                                     CookieStorage cookieStorage,
-                                     CookiesManager cookiesManager,
-                                     TenantManager tenantManager,
-                                     CommonLinkUtility linkUtility,
-                                     SetupInfo setupInfo,
-                                     IMemoryCache memoryCache,
-                                     ILogger<DynamicCorsPolicyResolver> logger)
+    private string ApiBaseUrl
     {
-        _context = httpContextAccessor?.HttpContext;
-        _httpClientFactory = httpClientFactory;
-        _cookieStorage = cookieStorage;
-        _cookiesManager = cookiesManager;
-        _tenantManager = tenantManager;
-        _memoryCache = memoryCache;
-        _apiBaseUrl = setupInfo.WebApiBaseUrl;
-
-        if (Uri.IsWellFormedUriString(_apiBaseUrl, UriKind.Relative))
-        {
-            _apiBaseUrl = linkUtility.GetFullAbsolutePath(_apiBaseUrl);
+        get
+        {        
+            var apiBaseUrl = setupInfo.WebApiBaseUrl;
+            if (Uri.IsWellFormedUriString(apiBaseUrl, UriKind.Relative))
+            {
+                apiBaseUrl = linkUtility.GetFullAbsolutePath(apiBaseUrl);
+            }
+            return apiBaseUrl;
         }
-
-        _logger = logger;   
     }
 
     public async Task<bool> ResolveForOrigin(string origin)
     {
-        _logger.DebugCheckOrigin(origin);
+        logger.DebugCheckOrigin(origin);
 
         var origins = await GetOriginsFromOAuth2App();
 
@@ -94,9 +84,8 @@ public class DynamicCorsPolicyResolver : IDynamicCorsPolicyResolver
         // Validated token early in JwtBearerAuthHandler
         var token = new JwtSecurityToken(accessToken);
         var subject = token.Subject;
-        var userId = Guid.Parse(subject);
 
-        if (!Guid.TryParse(subject, out userId))
+        if (!Guid.TryParse(subject, out var userId))
         {
             return new List<string>();
         }
@@ -104,17 +93,17 @@ public class DynamicCorsPolicyResolver : IDynamicCorsPolicyResolver
         var claimIdClaim = token.Claims.Single(c => string.Equals(c.Type, "cid", StringComparison.OrdinalIgnoreCase));
         var clientId = Guid.Parse(claimIdClaim.Value);
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var cookieValue = await _cookieStorage.EncryptCookieAsync(tenantId, userId, 0);
-        var cookieName = _cookiesManager.GetAscCookiesName();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var cookieValue = await cookieStorage.EncryptCookieAsync(tenantId, userId, 0);
+        var cookieName = cookiesManager.GetAscCookiesName();
 
-        var origins = _memoryCache.Get<IEnumerable<string>>(clientId);
+        var origins = memoryCache.Get<IEnumerable<string>>(clientId);
 
         if (origins == null)
         {
-            using var httpClient = _httpClientFactory.CreateClient();
+            using var httpClient = httpClientFactory.CreateClient();
 
-            var requestUri = new Uri($"{_apiBaseUrl}clients/{clientId}");
+            var requestUri = new Uri($"{ApiBaseUrl}clients/{clientId}");
 
             httpClient.DefaultRequestHeaders.Add("Cookie", $"{cookieName}={cookieValue}");
 
@@ -124,10 +113,10 @@ public class DynamicCorsPolicyResolver : IDynamicCorsPolicyResolver
 
             origins = forecastNode!["allowed_origins"]!.AsArray().Select(x => x.GetValue<string>());
 
-            _memoryCache.Set(clientId, origins, TimeSpan.FromMinutes(15));
+            memoryCache.Set(clientId, origins, TimeSpan.FromMinutes(15));
         }
 
-        _logger.DebugGetOriginsFromOAuth2App(clientId, origins);
+        logger.DebugGetOriginsFromOAuth2App(clientId, origins);
 
         return origins;
     }

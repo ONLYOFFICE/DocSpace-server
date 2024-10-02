@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Folder = Microsoft.SharePoint.Client.Folder;
-
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
@@ -512,7 +510,7 @@ internal class SharePointFileDao(
         return Task.CompletedTask;
     }
 
-    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    public Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)
     {
         return Task.CompletedTask;
     }

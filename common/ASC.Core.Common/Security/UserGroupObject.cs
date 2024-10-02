@@ -45,17 +45,17 @@ public class UserGroupObject : SecurityObject
     {
         if (_groupId == Constants.GroupAdmin.ID)
         { 
-            return new[] { AuthConstants.DocSpaceAdmin };
+            return [AuthConstants.DocSpaceAdmin];
         }
 
         if (_groupId == Constants.GroupUser.ID)
         {
-            return new[] { AuthConstants.User };
+            return [AuthConstants.User];
         }
 
         if (_groupId == Constants.GroupCollaborator.ID)
         {
-            return new[] { AuthConstants.Collaborator };
+            return [AuthConstants.Collaborator];
         }
 
         return Array.Empty<IRole>();

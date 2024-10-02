@@ -76,12 +76,12 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
         AddHeaderValues(result.AllowedExposedHeaders, policy.ExposedHeaders);
 
         var allowedMethods = policy.AllowAnyMethod
-            ? new[]
-            {
+            ?
+            [
                 result.IsPreflightRequest
-                    ? (string) context.Request.Headers[CorsConstants.AccessControlRequestMethod]
+                    ? context.Request.Headers[CorsConstants.AccessControlRequestMethod]
                     : context.Request.Method
-            }
+            ]
             : policy.Methods;
         AddHeaderValues(result.AllowedMethods, allowedMethods);
 

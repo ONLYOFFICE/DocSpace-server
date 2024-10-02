@@ -137,8 +137,33 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
             return PrintableASCII ? @"(?=.*[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E])" : @"(?=.*[!""#$%&()*+,.:;<>?@^_{}~])";
         }
     }
+
+    public void CheckPassword(string password, PasswordSettings passwordSettings)
+    {
+        if (!CheckPasswordRegex(passwordSettings, password) || !CheckLengthInRange(password.Length))
+        {
+            throw new ArgumentException(GetPasswordHelpMessage(passwordSettings));
+        }
+    }
+
+    public bool CheckPasswordRegex(PasswordSettings passwordSettings, string password)
+    {
+        var passwordRegex = GetPasswordRegex(passwordSettings);
+
+        return new Regex(passwordRegex).IsMatch(password);
+    }
+
+    public bool CheckLengthInRange(int length)
+    {
+        if (!int.TryParse(configuration["web:password:min"], out var defaultMinLength))
+        {
+            defaultMinLength = 0;
+        }
+
+        return length >= defaultMinLength && length <= MaxLength;
+    }
     
-    public string GetPasswordRegex(PasswordSettings passwordSettings)
+    private string GetPasswordRegex(PasswordSettings passwordSettings)
     {
         var pwdBuilder = new StringBuilder("^");
 
@@ -162,20 +187,30 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
         return pwdBuilder.ToString();
     }
 
-    public bool CheckPasswordRegex(PasswordSettings passwordSettings, string password)
+    private static string GetPasswordHelpMessage(PasswordSettings passwordSettings)
     {
-        var passwordRegex = GetPasswordRegex(passwordSettings);
+        var text = new StringBuilder();
 
-        return new Regex(passwordRegex).IsMatch(password);
-    }
+        text.Append($"{Resource.ErrorPasswordMessage} ");
+        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettingsManager.MaxLength);
+        text.Append($", {Resource.ErrorPasswordOnlyLatinLetters}");
+        text.Append($", {Resource.ErrorPasswordNoSpaces}");
 
-    public bool CheckLengthInRange(int length)
-    {
-        if (!int.TryParse(configuration["web:password:min"], out var defaultMinLength))
+        if (passwordSettings.UpperCase)
         {
-            defaultMinLength = 0;
+            text.Append($", {Resource.ErrorPasswordNoUpperCase}");
         }
 
-        return length >= defaultMinLength && length <= MaxLength;
+        if (passwordSettings.Digits)
+        {
+            text.Append($", {Resource.ErrorPasswordNoDigits}");
+        }
+
+        if (passwordSettings.SpecSymbols)
+        {
+            text.Append($", {Resource.ErrorPasswordNoSpecialSymbols}");
+        }
+
+        return text.ToString();
     }
 }

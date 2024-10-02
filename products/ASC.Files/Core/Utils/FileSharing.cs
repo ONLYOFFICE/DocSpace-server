@@ -368,12 +368,6 @@ public class FileSharingAceHelper(
             }
         }
 
-        if (advancedSettings != null && entryType == FileEntryType.File && ownerId == authContext.CurrentAccount.ID && fileUtility.CanWebView(entry.Title) && !entry.ProviderEntry)
-        {
-            await fileSecurity.ShareAsync(entry.Id, entryType, FileConstant.DenyDownloadId, advancedSettings.DenyDownload ? FileShare.Restrict : FileShare.None);
-            await fileSecurity.ShareAsync(entry.Id, entryType, FileConstant.DenySharingId, advancedSettings.DenySharing ? FileShare.Restrict : FileShare.None);
-        }
-
         foreach (var userId in usersWithoutRight)
         {
             await fileMarker.RemoveMarkAsNewAsync(entry, userId);
@@ -422,13 +416,9 @@ public class FileSharingHelper(
             return false;
         }
 
-        if (entry is File<T>)
+        if (entry is File<T> { IsForm: true })
         {
-            var file = entry as File<T>;
-            if (file.IsForm)
-            {
-                return false;
-            }
+            return false;
         }
 
         if (entry.RootFolderType == FolderType.COMMON && await global.IsDocSpaceAdministratorAsync)
@@ -603,11 +593,6 @@ public class FileSharing(
             }
             
             if (r.SubjectType is SubjectType.User or SubjectType.Group && !canReadMembers)
-            {
-                continue;
-            }
-
-            if (r.Subject == FileConstant.DenyDownloadId || r.Subject == FileConstant.DenySharingId)
             {
                 continue;
             }
@@ -810,17 +795,19 @@ public class FileSharing(
 
         var securityDao = daoFactory.GetSecurityDao<T>();
         var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
+        var userId = authContext.CurrentAccount.ID;
 
         await foreach (var member in securityDao.GetGroupMembersWithSecurityAsync(entry, groupId, text, offset, count))
         {
             var isOwner = entry.CreateBy == member.UserId;
+            var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(member.UserId);
             
             yield return new GroupMemberSecurity
             {
                 User = await userManager.GetUsersAsync(member.UserId),
                 GroupShare = member.GroupShare,
-                UserShare = member.UserShare,
-                CanEditAccess = canEditAccess && !isOwner,
+                UserShare = isOwner || isDocSpaceAdmin ? FileShare.RoomAdmin : member.UserShare,
+                CanEditAccess = canEditAccess && !isOwner && userId != member.UserId && !isDocSpaceAdmin,
                 Owner = isOwner
             };
         }

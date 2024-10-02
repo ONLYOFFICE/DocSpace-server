@@ -43,7 +43,7 @@ public class WebStudioModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(hel
 
     private readonly RelationInfo[] _relations = 
     [
-        new RelationInfo("webhooks_config", "id", "webhooks_logs", "config_id")
+        new("webhooks_config", "id", "webhooks_logs", "config_id")
     ];
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)

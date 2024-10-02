@@ -77,7 +77,15 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>Specifies if a folder is private or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
+    public bool Indexing { get; set; }
+    public bool DenyDownload { get; set; }
 
+    /// <summary>Room data lifetime settings</summary>
+    /// <type>ASC.Files.Core.ApiModels.RoomDataLifetimeDto, ASC.Files.Core</type>
+    public RoomDataLifetimeDto Lifetime { get; set; }
+
+    public WatermarkDto Watermark { get; set; }
+    
     /// <summary>Folder type</summary>
     /// <type>System.Nullable{ASC.Files.Core.FolderType}, System</type>
     public FolderType? Type { get; set; }
@@ -124,28 +132,32 @@ public class FolderDto<T> : FileEntryDto<T>
 }
 
 [Scope]
-public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
-        EmployeeDtoHelper employeeWrapperHelper,
-        AuthContext authContext,
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        GlobalFolderHelper globalFolderHelper,
-        FileSharingHelper fileSharingHelper,
-        RoomLogoManager roomLogoManager,
-        BadgesSettingsHelper badgesSettingsHelper,
-        RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-        FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime,
-        SettingsManager settingsManager,
-        CoreBaseSettings coreBaseSettings,
-        TenantManager tenantManager)
+public class FolderDtoHelper(
+    ApiDateTimeHelper apiDateTimeHelper,
+    EmployeeDtoHelper employeeWrapperHelper,
+    AuthContext authContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    GlobalFolderHelper globalFolderHelper,
+    FileSharingHelper fileSharingHelper,
+    RoomLogoManager roomLogoManager,
+    BadgesSettingsHelper badgesSettingsHelper,
+    RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
+    FilesSettingsHelper filesSettingsHelper,
+    FileDateTime fileDateTime,
+    SettingsManager settingsManager,
+    CoreBaseSettings coreBaseSettings,
+    BreadCrumbsManager breadCrumbsManager,
+    TenantManager tenantManager,
+    WatermarkManager watermarkManager,
+    WatermarkDtoHelper watermarkHelper,
+    IMapper mapper)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null)
     {
         var result = await GetFolderWrapperAsync(folder);
-
         result.ParentId = folder.ParentId;
 
         if (DocSpaceHelper.IsRoom(folder.FolderType))
@@ -153,7 +165,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             if (folder.Tags == null)
             {
                 var tagDao = daoFactory.GetTagDao<T>();
-                result.Tags = await tagDao.GetTagsAsync(TagType.Custom, new[] { folder }).Select(t => t.Name).ToListAsync();
+                result.Tags = await tagDao.GetTagsAsync(TagType.Custom, [folder]).Select(t => t.Name).ToListAsync();
             }
             else
             {
@@ -204,6 +216,9 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                     result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaRoomSettings.DefaultQuota;
                 }
             }
+            
+            var watermarkSettings = await watermarkManager.GetWatermarkAsync(folder);
+            result.Watermark = watermarkHelper.Get(watermarkSettings);
 
             result.External = folder.ShareRecord?.IsLink;
             result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord?.Options?.Password) && 
@@ -213,6 +228,11 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         if (folder.Order != 0)
         {
+            if (string.IsNullOrEmpty(order))
+            {
+                order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(folder.ParentId);
+            }
+            
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
         }
 
@@ -221,6 +241,8 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             result.Type = folder.FolderType;
         }
 
+        result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
+        
         return result;
     }
 
@@ -246,6 +268,8 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         result.New = newBadges;
         result.Pinned = folder.Pinned;
         result.Private = folder.SettingsPrivate;
+        result.Indexing = folder.SettingsIndexing;
+        result.DenyDownload = folder.SettingsDenyDownload;
 
         return result;
     }

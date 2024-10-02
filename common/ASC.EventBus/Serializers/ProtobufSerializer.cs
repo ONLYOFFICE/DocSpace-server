@@ -38,7 +38,7 @@ public class ProtobufSerializer : IIntegrationEventSerializer
 
     public ProtobufSerializer()
     {
-        _processedProtoTypes = new SynchronizedCollection<string>();
+        _processedProtoTypes = [];
 
         Array.ForEach(AppDomain.CurrentDomain.GetAssemblies(), BuildTypeModelFromAssembly);
     }

@@ -61,6 +61,7 @@ public class SetupInfo
     public long ProviderMaxUploadSize { get; private set; }
     public bool ThirdPartyAuthEnabled { get; private set; }
     public string LegalTerms { get; private set; }
+    public string LicenseUrl { get; private set; }
     public string NoTenantRedirectURL { get; private set; }
     public string NotifyAddress { get; private set; }
     public string TipsAddress { get; private set; }
@@ -140,6 +141,7 @@ public class SetupInfo
         ThirdPartyAuthEnabled = string.Equals(GetAppSettings("web:thirdparty-auth", "true"), "true");
         NoTenantRedirectURL = GetAppSettings("web.notenant-url", "");
         LegalTerms = GetAppSettings("web:legalterms", "");
+        LicenseUrl = GetAppSettings("web:license-url", "");
 
         NotifyAddress = GetAppSettings("web.promo-url", string.Empty);
         TipsAddress = GetAppSettings("web.promo-tips-url", string.Empty);
@@ -156,7 +158,7 @@ public class SetupInfo
         HcaptchaPrivateKey = GetAppSettings("web:hcaptcha:private-key", null);
         HcaptchaVerifyUrl = GetAppSettings("web:hcaptcha:verify-url", "https://api.hcaptcha.com/siteverify");
 
-        _webDisplayMobappsBanner = (configuration["web.display.mobapps.banner"] ?? "").Trim().Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        _webDisplayMobappsBanner = (configuration["web.display.mobapps.banner"] ?? "").Trim().Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries);
         ShareTwitterUrl = GetAppSettings("web.share.twitter", "https://twitter.com/intent/tweet?text={0}");
         ShareFacebookUrl = GetAppSettings("web.share.facebook", "");
         ControlPanelUrl = GetAppSettings("web:controlpanel:url", "");
@@ -165,7 +167,7 @@ public class SetupInfo
         SsoSamlLoginUrl = GetAppSettings("web:sso:saml:login:url", "");
         SsoSamlLogoutUrl = GetAppSettings("web:sso:saml:logout:url", "");
 
-        _hideSettings = GetAppSettings("web:hide-settings", string.Empty).Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        _hideSettings = GetAppSettings("web:hide-settings", string.Empty).Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries);
 
         SmsTrial = GetAppSettings("core.sms.trial", false);
 

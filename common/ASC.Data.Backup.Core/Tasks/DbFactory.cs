@@ -38,12 +38,7 @@ public class DbFactory(IConfiguration configuration, ConfigurationExtension conf
             return connectionString;
         }
 
-        if (key != null)
-        {
-            return configurationExtension.GetConnectionStrings(key, region).ConnectionString;
-        }
-
-        return configurationExtension.GetConnectionStrings(DefaultConnectionStringName, region).ConnectionString;
+        return key != null ? configurationExtension.GetConnectionStrings(key, region).ConnectionString : configurationExtension.GetConnectionStrings(DefaultConnectionStringName, region).ConnectionString;
     }
 
     private DbProviderFactory DbProviderFactory

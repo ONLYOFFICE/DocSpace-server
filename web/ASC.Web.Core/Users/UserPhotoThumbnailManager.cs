@@ -117,7 +117,7 @@ public static class UserPhotoThumbnailManager
 
     public static byte[] TryParseImage(byte[] data, long maxFileSize, Size maxsize)
     {
-        if (data == null || data.Length <= 0)
+        if (data is not { Length: > 0 })
         {
             throw new UnknownImageFormatException();
         }

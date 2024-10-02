@@ -52,6 +52,7 @@ public class AscCacheNotify
 public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
 {
     private CancellationTokenSource _resetCacheToken = new();
+    private bool _disposed;
 
     public T Get<T>(string key) where T : class
     {
@@ -70,11 +71,21 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
 
     public void Remove(string key)
     {
+        if (_disposed)
+        {
+            return;
+        }
+        
         memoryCache.Remove(key);
     }
 
     public void Remove(ConcurrentDictionary<string, object> keys, Regex pattern)
-    {
+    {       
+        if (_disposed)
+        {
+            return;
+        }
+        
         var copy = keys.ToDictionary(p => p.Key, p => p.Value);
         var matchedKeys = copy.Select(p => p.Key).Where(k => pattern.IsMatch(k));
 
@@ -86,6 +97,11 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
 
     public void Reset()
     {
+        if (_disposed)
+        {
+            return;
+        }
+        
         if (_resetCacheToken is { IsCancellationRequested: false, Token.CanBeCanceled: true })
         {
             _resetCacheToken.Cancel();
@@ -95,11 +111,15 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
         _resetCacheToken = new CancellationTokenSource();
     }
 
-    public ConcurrentDictionary<string, T> HashGetAll<T>(string key) =>
-        memoryCache.GetOrCreate(key, _ => new ConcurrentDictionary<string, T>());
+    public ConcurrentDictionary<string, T> HashGetAll<T>(string key) => memoryCache.GetOrCreate(key, _ => new ConcurrentDictionary<string, T>());
 
     public T HashGet<T>(string key, string field)
     {
+        if (_disposed)
+        {
+            return default;
+        }
+        
         if (memoryCache.TryGetValue<ConcurrentDictionary<string, T>>(key, out var dic)
             && dic.TryGetValue(field, out var value))
         {
@@ -110,7 +130,12 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
     }
 
     public void HashSet<T>(string key, string field, T value)
-    {
+    {       
+        if (_disposed)
+        {
+            return;
+        }
+        
         var options = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(DateTime.MaxValue)
                 .AddExpirationToken(new CancellationChangeToken(_resetCacheToken.Token));
@@ -140,6 +165,11 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
 
     private void Insert(string key, object value, TimeSpan? sligingExpiration = null, DateTime? absolutExpiration = null, Action<object, object, EvictionReason, object> evictionCallback = null)
     {
+        if (_disposed)
+        {
+            return;
+        }
+        
         var options = new MemoryCacheEntryOptions()
             .AddExpirationToken(new CancellationChangeToken(_resetCacheToken.Token));
 
@@ -163,8 +193,14 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
     
     private void Dispose(bool disposing)
     {
+        if (_disposed)
+        {
+            return;
+        }
+        
         if (disposing)
         {
+            _disposed = true;
             memoryCache?.Dispose();
             _resetCacheToken?.Dispose();
         }

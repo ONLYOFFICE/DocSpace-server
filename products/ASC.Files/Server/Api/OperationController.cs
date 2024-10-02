@@ -213,7 +213,7 @@ public class OperationController(
             checkedFiles = await fileStorageService.MoveOrCopyDestFolderCheckAsync(inDto.FileIds.ToList(), inDto.DestFolderId.GetString());
         }
 
-        var entries = await fileStorageService.GetItemsAsync(checkedFiles.Select(c => Convert.ToInt32(c)), checkedFiles.Select(c => Convert.ToInt32(c)), FilterType.FilesOnly, false);
+        var entries = await fileStorageService.GetItemsAsync(checkedFiles.Select(Convert.ToInt32), checkedFiles.Select(Convert.ToInt32), FilterType.FilesOnly, false);
         entries.AddRange(await fileStorageService.GetItemsAsync(checkedFiles.OfType<string>(), [], FilterType.FilesOnly, false));
 
         var filesTask = GetFilesDto(entries).ToListAsync();

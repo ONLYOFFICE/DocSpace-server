@@ -50,7 +50,7 @@ public class ExternalLinkHelper(
         var linkId = await externalShare.ParseShareKeyAsync(key);
         var securityDao = daoFactory.GetSecurityDao<string>();
 
-        var record = await securityDao.GetSharesAsync(new[] { linkId }).FirstOrDefaultAsync();
+        var record = await securityDao.GetSharesAsync([linkId]).FirstOrDefaultAsync();
         if (record == null)
         {
             return result;

@@ -140,15 +140,18 @@ public class RestoreDbModuleTask : PortalTaskBase
                     newIdValue = _columnMapper.GetMapping(tableInfo.Name, tableInfo.IdColumn, oldIdValue);
                     if (newIdValue == null)
                     {
-                        if (tableInfo.IdType == IdType.Guid)
+                        switch (tableInfo.IdType)
                         {
-                            newIdValue = Guid.NewGuid().ToString("D");
-                        }
-                        else if (tableInfo.IdType == IdType.Integer)
-                        {
-                            var command = connection.CreateCommand();
-                            command.CommandText = $"select max({tableInfo.IdColumn}) from {tableInfo.Name};";
-                            newIdValue = (int)await command.WithTimeout(120).ExecuteScalarAsync() + 1;
+                            case IdType.Guid:
+                                newIdValue = Guid.NewGuid().ToString("D");
+                                break;
+                            case IdType.Integer:
+                                {
+                                    var command = connection.CreateCommand();
+                                    command.CommandText = $"select max({tableInfo.IdColumn}) from {tableInfo.Name};";
+                                    newIdValue = (int)await command.WithTimeout(120).ExecuteScalarAsync() + 1;
+                                    break;
+                                }
                         }
                     }
                     if (newIdValue != null)

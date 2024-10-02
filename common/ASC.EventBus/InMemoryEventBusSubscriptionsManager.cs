@@ -29,7 +29,7 @@ namespace ASC.EventBus;
 public partial class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptionsManager
 {
     private readonly Dictionary<string, List<SubscriptionInfo>> _handlers = new();
-    private readonly List<Type> _eventTypes = new();
+    private readonly List<Type> _eventTypes = [];
 
     public event EventHandler<string> OnEventRemoved;
 
@@ -60,7 +60,7 @@ public partial class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptio
     {
         if (!HasSubscriptionsForEvent(eventName))
         {
-            _handlers.Add(eventName, new List<SubscriptionInfo>());
+            _handlers.Add(eventName, []);
         }
 
         if (_handlers[eventName].Any(s => s.HandlerType == handlerType))
@@ -141,13 +141,7 @@ public partial class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptio
 
     private SubscriptionInfo DoFindSubscriptionToRemove(string eventName, Type handlerType)
     {
-        if (!HasSubscriptionsForEvent(eventName))
-        {
-            return null;
-        }
-
-        return _handlers[eventName].SingleOrDefault(s => s.HandlerType == handlerType);
-
+        return !HasSubscriptionsForEvent(eventName) ? null : _handlers[eventName].SingleOrDefault(s => s.HandlerType == handlerType);
     }
 
     public bool HasSubscriptionsForEvent<T>() where T : IntegrationEvent

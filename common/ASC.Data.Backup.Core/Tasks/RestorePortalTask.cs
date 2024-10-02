@@ -37,7 +37,8 @@ public class RestorePortalTask(DbFactory dbFactory,
         TenantManager tenantManager,
         AscCacheNotify ascCacheNotify,
         ModuleProvider moduleProvider,
-        BackupRepository backupRepository)
+        BackupRepository backupRepository,
+        TenantExtra tenantExtra)
     : PortalTaskBase(dbFactory, options, storageFactory, storageFactoryConfig, moduleProvider)
 {
     public bool ReplaceDate { get; set; }
@@ -80,6 +81,7 @@ public class RestorePortalTask(DbFactory dbFactory,
 
             if (Dump)
             {
+                await tenantExtra.DemandAccessSpacePermissionAsync();
                 await RestoreFromDump(dataReader);
             }
             else
@@ -123,7 +125,7 @@ public class RestorePortalTask(DbFactory dbFactory,
             }
         }
 
-        if (coreBaseSettings.Standalone)
+        if (coreBaseSettings.Standalone && Dump)
         {
             options.DebugRefreshLicense();
             try
@@ -155,14 +157,11 @@ public class RestorePortalTask(DbFactory dbFactory,
         }
 
         var stepscount = keys.Count * 2 + upgrades.Count;
-
-        var databasesFromDirs = new Dictionary<string, List<string>>();
-        var databases = new Dictionary<Tuple<string, string>, List<string>>();
+        
         foreach (var db in dbs)
         {
             var keys1 = dataReader.GetEntries(db + "/" + keyBase).Select(Path.GetFileName).ToList();
             stepscount += keys1.Count * 2;
-            databasesFromDirs.Add(db, keys1);
         }
 
         SetStepsCount(ProcessStorage ? stepscount + 1 : stepscount);
@@ -195,23 +194,6 @@ public class RestorePortalTask(DbFactory dbFactory,
             }
 
             Task.WaitAll(tasks.ToArray());
-        }
-
-        foreach (var database in databases)
-        {
-            for (var i = 0; i < database.Value.Count; i += TasksLimit)
-            {
-                var tasks = new List<Task>(TasksLimit * 2);
-
-                for (var j = 0; j < TasksLimit && i + j < database.Value.Count; j++)
-                {
-                    var key1 = Path.Combine(database.Key.Item1, KeyHelper.GetDatabaseSchema(), database.Value[i + j]);
-                    var key2 = Path.Combine(database.Key.Item1, KeyHelper.GetDatabaseData(), database.Value[i + j]);
-                    tasks.Add(RestoreFromDumpFile(dataReader, key1, key2, database.Key.Item2));
-                }
-
-                Task.WaitAll(tasks.ToArray());
-            }
         }
 
         var comparer = new SqlComparer();

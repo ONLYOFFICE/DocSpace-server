@@ -36,7 +36,7 @@ internal class DocumentsActionMapper : IProductActionMapper
         new SettingsActionMapper()
     ];
 
-    public ProductType Product { get; } = ProductType.Documents;
+    public ProductType Product => ProductType.Documents;
 }
 internal class FilesActionMapper : IModuleActionMapper
 {
@@ -203,12 +203,11 @@ internal class SettingsActionMapper : IModuleActionMapper
                 }
             },
             {
-                ActionType.Update, new []
-                {
+                ActionType.Update, [
                     MessageAction.DocumentsThirdPartySettingsUpdated, MessageAction.DocumentsOverwritingSettingsUpdated,
                     MessageAction.DocumentsForcesave, MessageAction.DocumentsStoreForcesave, MessageAction.DocumentsUploadingFormatsSettingsUpdated,
                     MessageAction.DocumentsExternalShareSettingsUpdated
-                }
+                ]
             }
         };
     }

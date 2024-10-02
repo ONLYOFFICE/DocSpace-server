@@ -43,7 +43,7 @@ public class SearchSettings : ISettings<SearchSettings>
 
             var parsed = JsonConvert.DeserializeObject<List<SearchSettingsItem>>(Data ?? "");
 
-            return _items = parsed ?? new List<SearchSettingsItem>();
+            return _items = parsed ?? [];
         }
         set
         {
@@ -82,7 +82,7 @@ public class SearchSettingsHelper(TenantManager tenantManager,
     {
         if (!coreBaseSettings.Standalone)
         {
-            return new List<SearchSettingsItem>();
+            return [];
         }
 
         var settings = await settingsManager.LoadAsync<SearchSettings>();

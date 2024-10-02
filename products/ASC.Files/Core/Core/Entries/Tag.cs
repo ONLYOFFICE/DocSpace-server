@@ -57,12 +57,7 @@ public sealed class Tag : IMapFrom<DbFilesTag>
 
     public Tag() { }
 
-    public Tag(string name, TagType type, Guid owner)
-        : this(name, type, owner, 0)
-    {
-    }
-
-    public Tag(string name, TagType type, Guid owner, int count)
+    public Tag(string name, TagType type, Guid owner, int count = 0)
     {
         Name = name;
         Type = type;
@@ -81,44 +76,39 @@ public sealed class Tag : IMapFrom<DbFilesTag>
         return this;
     }
 
-    public static Tag New<T>(Guid owner, FileEntry<T> entry)
-    {
-        return New(owner, entry, 1);
-    }
-
-    public static Tag New<T>(Guid owner, FileEntry<T> entry, int count)
+    public static Tag New<T>(Guid owner, FileEntry<T> entry, int count = 1)
     {
         return new Tag("new", TagType.New, owner, count).AddEntry(entry);
     }
 
     public static Tag Recent<T>(Guid owner, FileEntry<T> entry)
     {
-        return new Tag("recent", TagType.Recent, owner, 0).AddEntry(entry);
+        return new Tag("recent", TagType.Recent, owner).AddEntry(entry);
     }
 
     public static Tag Favorite<T>(Guid owner, FileEntry<T> entry)
     {
-        return new Tag("favorite", TagType.Favorite, owner, 0).AddEntry(entry);
+        return new Tag("favorite", TagType.Favorite, owner).AddEntry(entry);
     }
 
     public static Tag Template<T>(Guid owner, FileEntry<T> entry)
     {
-        return new Tag("template", TagType.Template, owner, 0).AddEntry(entry);
+        return new Tag("template", TagType.Template, owner).AddEntry(entry);
     }
 
     public static Tag Custom<T>(Guid owner, FileEntry<T> entry, string name)
     {
-        return new Tag(name, TagType.Custom, owner, 0).AddEntry(entry);
+        return new Tag(name, TagType.Custom, owner).AddEntry(entry);
     }
 
     public static Tag Pin<T>(Guid owner, FileEntry<T> entry)
     {
-        return new Tag("pin", TagType.Pin, owner, 0).AddEntry(entry);
+        return new Tag("pin", TagType.Pin, owner).AddEntry(entry);
     }
 
     public static Tag FromRoom<T>(T entryId, FileEntryType type, Guid owner)
     {
-        return new Tag("fromroom", TagType.FromRoom, owner, 0)
+        return new Tag("fromroom", TagType.FromRoom, owner)
         {
             EntryId = entryId,
             EntryType = type
@@ -127,7 +117,7 @@ public sealed class Tag : IMapFrom<DbFilesTag>
 
     public static Tag Origin<T>(T entryId, FileEntryType type, T originId, Guid owner)
     {
-        return new Tag(originId.ToString(), TagType.Origin, owner, 0)
+        return new Tag(originId.ToString(), TagType.Origin, owner)
         {
             EntryId = entryId,
             EntryType = type
@@ -136,7 +126,7 @@ public sealed class Tag : IMapFrom<DbFilesTag>
 
     public static Tag RecentByLink<T>(Guid owner, Guid linkId, FileEntry<T> file)
     {
-        return new Tag(linkId.ToString(), TagType.RecentByLink, owner, 0).AddEntry(file);
+        return new Tag(linkId.ToString(), TagType.RecentByLink, owner).AddEntry(file);
     }
 
     public override bool Equals(object obj)

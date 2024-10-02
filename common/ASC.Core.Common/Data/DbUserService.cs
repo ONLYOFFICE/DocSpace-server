@@ -68,24 +68,41 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             q = BuildUserGroupSearch(userId, manager, q, userDbContext);
         }
 
-        if (sortBy == GroupSortType.Manager)
+        switch (sortBy)
         {
-            var q1 = q.Select(g => new
-            {
-                Group = g,
-                Manager = userDbContext.UserGroups
-                    .Where(ug => ug.TenantId == tenant && !ug.Removed && ug.UserGroupId == g.Id && ug.RefType == UserGroupRefType.Manager)
-                    .Join(userDbContext.Users, ug => ug.Userid, u => u.Id, (ug, u) => u)
-                    .FirstOrDefault()
-            });
+            case GroupSortType.Manager:
+                {
+                    var q1 = q.Select(g => new
+                    {
+                        Group = g,
+                        Manager = userDbContext.UserGroups
+                            .Where(ug => ug.TenantId == tenant && !ug.Removed && ug.UserGroupId == g.Id && ug.RefType == UserGroupRefType.Manager)
+                            .Join(userDbContext.Users, ug => ug.Userid, u => u.Id, (ug, u) => u)
+                            .FirstOrDefault()
+                    });
 
-            q = (sortOrderAsc ?
-                q1.OrderBy(r => r.Manager.FirstName) :
-                q1.OrderByDescending(r => r.Manager.FirstName)).Select(r => r.Group);
-        }
-        else
-        {
-            q = sortOrderAsc ? q.OrderBy(g => g.Name) : q.OrderByDescending(g => g.Name);
+                    q = (sortOrderAsc ?
+                        q1.OrderBy(r => r.Manager.FirstName) :
+                        q1.OrderByDescending(r => r.Manager.FirstName)).Select(r => r.Group);
+                    break;
+                }
+            case GroupSortType.MembersCount:
+                {
+                    var q1 = q.Select(g => new
+                    {
+                        Group = g,
+                        MembersCount = userDbContext.UserGroups
+                            .Count(ug => ug.TenantId == tenant && ug.UserGroupId == g.Id && ug.RefType == UserGroupRefType.Contains && !ug.Removed)
+                    });
+
+                    q = (sortOrderAsc ?
+                        q1.OrderBy(r => r.MembersCount) :
+                        q1.OrderByDescending(r => r.MembersCount)).Select(r => r.Group);
+                    break;
+                }
+            default:
+                q = sortOrderAsc ? q.OrderBy(g => g.Name) : q.OrderByDescending(g => g.Name);
+                break;
         }
 
         if (offset > 0)
@@ -273,13 +290,15 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = GetUserQuery(userDbContext, tenant);
 
-        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
+        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
+            text, separator, withoutGroup);
 
         return await q.CountAsync();
     }
@@ -295,6 +314,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup,
         Guid ownerId,
         UserSortType sortBy,
@@ -311,7 +331,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         var q = GetUserQuery(userDbContext, tenant);
 
-        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
+        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
+            text, separator, withoutGroup);
 
         switch (sortBy)
         {
@@ -377,6 +398,13 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                 }
             case UserSortType.Email:
                 q = (sortOrderAsc ? q.OrderBy(u => u.Email) : q.OrderByDescending(u => u.Email));
+                break;
+            case UserSortType.LastName:
+                q = sortOrderAsc
+                    ? q.OrderBy(r => r.Status == EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2)
+                       .ThenBy(u => u.Status == EmployeeStatus.Pending ? u.Email : u.LastName)
+                    : q.OrderBy(r => r.Status == EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2)
+                       .ThenByDescending(u => u.Status == EmployeeStatus.Pending ? u.Email : u.LastName);
                 break;
             case UserSortType.FirstName:
             default:
@@ -681,6 +709,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup)
     {
         q = q.Where(r => !r.Removed);
@@ -790,11 +819,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             q = q.Where(r => r.ActivationStatus == activationStatus.Value);
         }
 
-        if (!string.IsNullOrEmpty(text))
-        {
-            var splittedText = text.Trim().ToLower().Split(" ");
-            q = splittedText.Aggregate(q, (current, t) => current.Where(u => u.FirstName.ToLower().Contains(t) || u.LastName.ToLower().Contains(t) || u.Title.ToLower().Contains(t) || u.Location.ToLower().Contains(t) || u.Email.ToLower().Contains(t)));
-        }
+        q = UserQueryHelper.FilterByText(q, text, separator);
 
         q = accountLoginType switch
         {

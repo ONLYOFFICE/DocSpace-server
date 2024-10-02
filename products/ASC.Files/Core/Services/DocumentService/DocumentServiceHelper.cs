@@ -29,16 +29,19 @@ namespace ASC.Web.Files.Services.DocumentService;
 [Scope]
 public class DocumentServiceHelper(IDaoFactory daoFactory,
         UserManager userManager,
+        DisplayUserSettingsHelper displayUserSettingsHelper,
         FileSecurity fileSecurity,
         FileUtility fileUtility,
         MachinePseudoKeys machinePseudoKeys,
         Global global,
+        TenantUtil tenantUtil,
         DocumentServiceConnector documentServiceConnector,
         LockerManager lockerManager,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
         ExternalShare externalShare,
+        IHttpContextAccessor httpContextAccessor,
         AuthContext authContext,
         SecurityContext securityContext)
     {
@@ -62,7 +65,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return (file, lastVersion);
-    }
+            }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,
         bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
@@ -143,7 +146,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             {
                 throw new LinkScopeException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
             }
-            
+
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
 
@@ -173,11 +176,13 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         var locatedInPrivateRoom = false;
-
+        Options options = null;
         if (file.RootFolderType == FolderType.VirtualRooms)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
-            locatedInPrivateRoom = await DocSpaceHelper.LocatedInPrivateRoomAsync(file, folderDao);
+            var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
+            locatedInPrivateRoom = DocSpaceHelper.LocatedInPrivateRoomAsync(room);
+            options = GetOptions(room);
         }
 
         if (file.Encrypted && file.RootFolderType != FolderType.Privacy && !locatedInPrivateRoom)
@@ -264,9 +269,10 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             Download = rightToDownload,
             Copy = rightToDownload,
             Protect = authContext.IsAuthenticated,
-            Chat = file.Access != FileShare.Read
+            Chat = file.Access != FileShare.Read   
         };
-
+        
+        configuration.Document.Options = options;
         configuration.EditorConfig.ModeWrite = modeWrite;
         configuration.Error = strError;
 
@@ -321,14 +327,74 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return null;
     }
 
-    public async Task<string> GetDocKeyAsync<T>(File<T> file)
+    public Options GetOptions<T>(Folder<T> room)
     {
-        return await GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn);
+        var watermarkSettings = room?.SettingsWatermark;
+        if (watermarkSettings == null)
+        {
+            return null;
+        }
+        var runs = new List<Run>();
+        var paragrahs = new List<Paragraph>();
+        var userInfo = userManager.GetUsers(authContext.CurrentAccount.ID);
+        var ip = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
+
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserName))
+        {
+            runs.Add(new Run(userInfo.DisplayUserName(false, displayUserSettingsHelper)));
+            runs.Add(new Run(Environment.NewLine, false));
+        }
+        if(watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail))
+        {
+            runs.Add(new Run(userInfo.Email));
+            runs.Add(new Run(Environment.NewLine, false));
+        }
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserIpAdress) && !string.IsNullOrWhiteSpace(ip))
+        {
+            runs.Add(new Run(ip));
+            runs.Add(new Run(Environment.NewLine, false));
+        }
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.CurrentDate))
+        {
+            runs.Add(new Run(tenantUtil.DateTimeNow().ToString(), false));
+            runs.Add(new Run(Environment.NewLine, false));
+        }
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.RoomName))
+        {
+            runs.Add(new Run(room.Title));
+            runs.Add(new Run(Environment.NewLine, false));
+        }
+        if (!string.IsNullOrWhiteSpace(watermarkSettings.Text))
+        {
+            runs.Add(new Run(watermarkSettings.Text));
+            runs.Add(new Run(Environment.NewLine, false));
+        }
+        if (runs.Any())
+        {
+            runs.Remove(runs.Last());
+        }
+        paragrahs.Add(new Paragraph(runs));
+
+        var options = new Options()
+        {
+            WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth * watermarkSettings.ImageScale / 100, watermarkSettings.ImageHeight * watermarkSettings.ImageScale / 100 , watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
+        };
+        return options;
     }
 
-    public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified)
+    public async Task<string> GetDocKeyAsync<T>(File<T> file, string extraKey = null)
+    {
+        return await GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn, extraKey);
+    }
+
+    public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified, string extraKey = null)
     {
         var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await global.GetDocDbKeyAsync()}";
+
+        if (!string.IsNullOrEmpty(extraKey))
+        {
+            str += $"_{extraKey}";
+        }
 
         var keyDoc = Encoding.UTF8.GetBytes(str)
                              .AsEnumerable()
