@@ -1506,12 +1506,6 @@ public class EntryManager(IDaoFactory daoFactory,
 
                         var user = await userManager.GetUsersAsync(userId);
 
-                        await filesMessageService.SendAsync(
-                            MessageAction.FormSubmit,
-                            file, MessageInitiator.DocsService,
-                            user.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID) ? FilesCommonResource.Guest : user.DisplayUserName(false, displayUserSettingsHelper),
-                            file.Title);
-
                         if (tmpStream.CanSeek)
                         {
                             pdfFile.ContentLength = tmpStream.Length;
