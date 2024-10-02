@@ -283,12 +283,12 @@ public partial class Global(
 
 [Scope]
 public class GlobalStore(StorageFactory storageFactory, TenantManager tenantManager, CoreBaseSettings coreBaseSettings)
-{    
+{
     public async Task<IDataStore> GetStoreAsync(bool currentTenant = true)
     {
         return await GetStoreAsync(currentTenant ? await tenantManager.GetCurrentTenantIdAsync() : -1);
     }
-    
+
     private readonly ConcurrentDictionary<int, IDataStore> _currentTenantStore = new();
     internal async Task<IDataStore> GetStoreAsync(int tenantId)
     {
@@ -302,7 +302,7 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
 
         return result;
     }
-    
+
     public async Task<IDataStore> GetStoreTemplateAsync()
     {
         return await storageFactory.GetStorageAsync(-1, FileConstant.StorageTemplate);
@@ -314,23 +314,37 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
                 ? FileConstant.NewDocDefaultCustomModePath
                 : FileConstant.NewDocDefaultPath;
 
-        var path = $"{FileConstant.NewDocPath}{defaultPath}";
+        var path = await GetPathDependingOnCulture(storeTemplate, FileConstant.NewDocPath, defaultPath, culture);
+
+        return $"{path}{FileConstant.NewDocFileName}{extension}";
+    }
+
+    public async Task<string> GetStartDocsPath(IDataStore storeTemplate, bool my, CultureInfo culture = null)
+    {
+        var path = await GetPathDependingOnCulture(storeTemplate, FileConstant.StartDocPath, FileConstant.StartDocDefaultPath, culture);
+
+        return $"{path}{(my ? FileConstant.StartDocMyPath : FileConstant.StartDocCorporatePath)}";
+    }
+
+    private async Task<string> GetPathDependingOnCulture(IDataStore storeTemplate, string targetDir, string defaultSubDir, CultureInfo culture)
+    {
+        var path = $"{targetDir}{defaultSubDir}";
 
         if (culture != null)
         {
             var ciltureName = culture.ToString();
 
-            await foreach (var dirName in storeTemplate.ListDirectoriesRelativeAsync(FileConstant.NewDocPath, false))
+            await foreach (var dirName in storeTemplate.ListDirectoriesRelativeAsync(targetDir, false))
             {
                 if (dirName.StartsWith(ciltureName))
                 {
-                    path = $"{FileConstant.NewDocPath}{dirName}/";
+                    path = $"{targetDir}{dirName}/";
                     break;
                 }
             }
         }
 
-        return $"{path}{FileConstant.NewDocFileName}{extension}";
+        return path;
     }
 }
 
@@ -677,15 +691,8 @@ public class GlobalFolder(
 
             var globalStore = scope.ServiceProvider.GetRequiredService<GlobalStore>();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
-            
-            var path = FileConstant.StartDocPath + culture + "/";
-            
-            if (!await storeTemplate.IsDirectoryAsync(path))
-            {
-                path = FileConstant.StartDocPath + "en-US/";
-            }
-        
-            path += my ? "my/" : "corporate/";
+
+            var path = await globalStore.GetStartDocsPath(storeTemplate, my, culture);
 
             var fileMarker = scope.ServiceProvider.GetRequiredService<FileMarker>();
             var fileDao = (FileDao)scope.ServiceProvider.GetRequiredService<IFileDao<int>>();
