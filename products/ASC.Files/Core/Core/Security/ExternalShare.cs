@@ -182,6 +182,11 @@ public class ExternalShare(Global global,
 
         var stringKey = Signature.Read<string>(key, await GetDbKeyAsync());
 
+        if (string.IsNullOrEmpty(stringKey))
+        {
+            return null;
+        }
+        
         if (!stringKey.StartsWith('{') || !stringKey.EndsWith('}'))
         {
             return new TokenData
