@@ -61,4 +61,6 @@ public class CapabilitiesDto
     [SwaggerSchemaCustom(Example = "")]
     [Url]
     public string SsoUrl { get; set; }
+    
+    public bool IdentityServerEnabled { get; set; }
 }

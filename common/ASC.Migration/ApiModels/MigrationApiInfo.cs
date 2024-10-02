@@ -45,31 +45,31 @@ public class MigrationApiInfo
     /// Failed archives
     /// </summary>
     [ProtoMember(3)]
-    public List<string> FailedArchives { get; set; } = new List<string>();
+    public List<string> FailedArchives { get; set; } = [];
 
     /// <summary>
     /// Users
     /// </summary>
     [ProtoMember(4)]
-    public List<MigratingApiUser> Users { get; set; } = new List<MigratingApiUser>();
+    public List<MigratingApiUser> Users { get; set; } = [];
 
     /// <summary>
     /// Without email users
     /// </summary>
     [ProtoMember(5)]
-    public List<MigratingApiUser> WithoutEmailUsers { get; set; } = new List<MigratingApiUser>();
+    public List<MigratingApiUser> WithoutEmailUsers { get; set; } = [];
 
     /// <summary>
     /// Exist users
     /// </summary>
     [ProtoMember(6)]
-    public List<MigratingApiUser> ExistUsers { get; set; } = new List<MigratingApiUser>();
+    public List<MigratingApiUser> ExistUsers { get; set; } = [];
 
     /// <summary>
     /// Groups
     /// </summary>
     [ProtoMember(7)]
-    public List<MigratingApiGroup> Groups { get; set; } = new List<MigratingApiGroup>();
+    public List<MigratingApiGroup> Groups { get; set; } = [];
 
     /// <summary>
     /// Import personal files

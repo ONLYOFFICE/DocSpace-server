@@ -52,9 +52,16 @@ public class Logo
     /// Color
     /// </summary>
     public string Color { get; set; }
+    public LogoCover Cover { get; set; }
 
     public bool IsDefault()
     {
         return string.IsNullOrEmpty(Original);
     }
+}
+
+public class LogoCover
+{
+    public string Id { get; set; }
+    public string Data { get; set; }
 }

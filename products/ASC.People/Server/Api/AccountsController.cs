@@ -72,6 +72,7 @@ public class AccountsController<T>(
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
+        var separator = apiContext.FilterSeparator;
 
         if (string.IsNullOrEmpty(text))
         {
@@ -82,7 +83,7 @@ public class AccountsController<T>(
         var securityDao = daoFactory.GetSecurityDao<T>();
 
         var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(room, text, inDto.ExcludeShared ?? false);
-        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, text, inDto.EmployeeStatus, inDto.ActivationStatus, inDto.ExcludeShared ?? false);
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, text, inDto.EmployeeStatus, inDto.ActivationStatus, inDto.ExcludeShared ?? false, separator);
         var total = totalGroups + totalUsers;
         
         apiContext.SetCount(Math.Min(Math.Max(total - offset, 0), count)).SetTotalCount(total);
@@ -99,7 +100,7 @@ public class AccountsController<T>(
         var usersOffset = Math.Max(groupsCount > 0 ? 0 : offset - totalGroups, 0);
 
         await foreach (var item in securityDao.GetUsersWithSharedAsync(room, text, inDto.EmployeeStatus, inDto.ActivationStatus, inDto.ExcludeShared ?? false, 
-                           usersOffset, usersCount))
+                           separator, usersOffset, usersCount))
         {
             yield return await employeeFullDtoHelper.GetFullAsync(item.UserInfo, item.Shared);
         }

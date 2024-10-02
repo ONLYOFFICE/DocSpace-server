@@ -150,9 +150,11 @@ public class UserManager(
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup)
     {
-        return userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
+        return userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, 
+            quotaFilter, text, separator, withoutGroup);
     }
 
     public IAsyncEnumerable<UserInfo> GetUsers(
@@ -165,6 +167,7 @@ public class UserManager(
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup,
         string sortBy,
         bool sortOrderAsc,
@@ -188,7 +191,8 @@ public class UserManager(
             }
         }
 
-        return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup, Tenant.OwnerId, sortType, sortOrderAsc, limit, offset);
+        return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
+            text, separator, withoutGroup, Tenant.OwnerId, sortType, sortOrderAsc, limit, offset);
     }
 
     public UserInfo GetUsers(Guid id)
@@ -309,7 +313,7 @@ public class UserManager(
             return [];
         }
 
-        var words = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        var words = text.Split([' '], StringSplitOptions.RemoveEmptyEntries);
         if (words.Length == 0)
         {
             return [];
@@ -374,7 +378,7 @@ public class UserManager(
             oldUserData.Status != u.Status && notifyWebSocket)
         {
             (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
-            value = oldUserData.Status > u.Status ? ++value : --value;//crutch: data race
+            value = oldUserData.Status == EmployeeStatus.Terminated ? ++value : --value;//crutch: data race
         }
 
         var newUserData = await userService.SaveUserAsync(tenant.Id, u);
@@ -633,7 +637,7 @@ public class UserManager(
             return result;
         }
 
-        result = new List<GroupInfo>();
+        result = [];
         var distinctUserGroups = new List<GroupInfo>();
 
         var refs = await GetRefsInternalAsync();

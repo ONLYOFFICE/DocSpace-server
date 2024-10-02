@@ -283,7 +283,7 @@ public class TariffService(
 
     public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity)
     {
-        if (quantity == null || !quantity.Any()
+        if (quantity == null || quantity.Count == 0
             || !billingClient.Configured)
         {
             return false;
@@ -462,7 +462,7 @@ public class TariffService(
             }
         }
 
-        var hasQuantity = quantity != null && quantity.Any();
+        var hasQuantity = quantity != null && quantity.Count != 0;
         var keyBuilder = new StringBuilder("shopingurl_");
         keyBuilder.Append(hasQuantity ? string.Join('_', quantity.Keys.ToArray()) : "all");
         if (!string.IsNullOrEmpty(affiliateId))
@@ -691,7 +691,13 @@ public class TariffService(
         }
 
         var delay = 0;
-        var setDelay = !coreBaseSettings.Standalone;
+        var setDelay = true;
+        var lifetime = false;
+
+        if (coreBaseSettings.Standalone)
+        {
+            lifetime = await tariff.Quotas.ToAsyncEnumerable().AnyAwaitAsync(async q => (await quotaService.GetTenantQuotaAsync(q.Id)).Lifetime);
+        }
 
         if (TrialEnabled)
         {
@@ -722,7 +728,7 @@ public class TariffService(
             }
         }
 
-        if (setDelay)
+        if (setDelay && !lifetime)
         {
             delay = PaymentDelay;
         }
@@ -736,38 +742,7 @@ public class TariffService(
         if (tariff.DueDate == DateTime.MinValue ||
             tariff.DueDate != DateTime.MaxValue && tariff.DueDate.Date < DateTime.UtcNow.Date.AddDays(-delay))
         {
-            tariff.State = TariffState.NotPaid;
-
-            if (coreBaseSettings.Standalone)
-            {
-                TenantQuota updatedQuota = null;
-
-                var tenantQuotas = await quotaService.GetTenantQuotasAsync();
-
-                foreach (var quota in tariff.Quotas)
-                {
-                    var tenantQuota = tenantQuotas.SingleOrDefault(q => q.TenantId == quota.Id);
-
-                    if (tenantQuota != null)
-                    {
-                        tenantQuota *= quota.Quantity;
-                        updatedQuota += tenantQuota;
-                    }
-                }
-
-                var defaultQuota = await quotaService.GetTenantQuotaAsync(Tenant.DefaultTenant);
-                defaultQuota.Name = "overdue";
-                defaultQuota.Features = updatedQuota?.Features;
-
-                await quotaService.SaveTenantQuotaAsync(defaultQuota);
-
-                var unlimTariff = await CreateDefaultAsync();
-                unlimTariff.LicenseDate = tariff.DueDate;
-                unlimTariff.DueDate = tariff.DueDate;
-                unlimTariff.Quotas = [new(defaultQuota.TenantId, 1)];
-
-                tariff = unlimTariff;
-            }
+            tariff.State = lifetime ? TariffState.Paid : TariffState.NotPaid;
         }
 
         return tariff;

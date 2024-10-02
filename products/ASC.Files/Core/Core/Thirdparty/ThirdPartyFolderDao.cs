@@ -38,11 +38,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     IDaoSelector<TFile, TFolder, TItem> daoSelector,
     IDaoBase<TFile, TFolder, TItem> dao,
     IDbContextFactory<FilesDbContext> dbContextFactory,
-    UserManager userManager,
-    CrossDao crossDao,
-    IFileDao<int> fileDao,
-    IFolderDao<int> folderDao,
-    SetupInfo setupInfo,
+        UserManager userManager,
+        CrossDao crossDao,
+        IFileDao<int> fileDao,
+        IFolderDao<int> folderDao,
+        SetupInfo setupInfo,
     TenantManager tenantManager,
     Global global)
     : BaseFolderDao, IFolderDao<string>
@@ -239,17 +239,17 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         }
 
         folder.Title = await global.GetAvailableTitleAsync(folder.Title, dao.MakeThirdId(folder.ParentId), IsExistAsync, FileEntryType.Folder);
-        
-        var thirdFolder = await dao.CreateFolderAsync(folder.Title, folder.ParentId);
-            
-        var parentFolderId = dao.GetParentFolderId(thirdFolder);
-        if (parentFolderId != null)
-        {
-            await _providerInfo.CacheResetAsync(parentFolderId);
-        }
 
-        return dao.MakeId(thirdFolder);
-    }
+        var thirdFolder = await dao.CreateFolderAsync(folder.Title, folder.ParentId);
+
+            var parentFolderId = dao.GetParentFolderId(thirdFolder);
+            if (parentFolderId != null)
+            {
+                await _providerInfo.CacheResetAsync(parentFolderId);
+            }
+
+            return dao.MakeId(thirdFolder);
+        }
 
     public async Task DeleteFolderAsync(string folderId)
     {
@@ -315,7 +315,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(folder), newId);
-        }
+    }
 
         return newId;
     }
@@ -414,12 +414,12 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
-    
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota)
+
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark)
     {
         return await RenameFolderAsync(folder, newTitle);
     }
-
+    
     public Task<string> ChangeFolderTypeAsync(Folder<string> folder, FolderType folderType)
     {
         return Task.FromResult<string>(null);
@@ -455,7 +455,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(thirdFolder), newId);
-        }
+    }
 
         return newId;
     }
@@ -630,8 +630,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         throw new NotImplementedException();
     }
-    
-    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    public Task<Folder<string>> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
     {
         throw new NotImplementedException();
     }
@@ -663,11 +662,15 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
 
-    public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    public Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
     {
         return Task.CompletedTask;
     }
-    
+
+    public Task<string> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<string> folder)
+    {
+        throw new NotImplementedException();
+    }
     public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
     {
         throw new NotImplementedException();
@@ -677,12 +680,22 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         throw new NotImplementedException();
     }
+
+    public Task<WatermarkSettings> GetWatermarkSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
     
     public async Task<bool> IsExistAsync(string title, string folderId)
     {
         var items = await dao.GetItemsAsync(folderId, true);
 
         return items.Exists(item => dao.GetName(item).Equals(title, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
     }
 }
 
@@ -719,17 +732,7 @@ internal abstract class BaseFolderDao
             return rooms;
         }
 
-        var typeFilter = filterType switch
-        {
-            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
-            FilterType.EditingRooms => FolderType.EditingRoom,
-            FilterType.ReviewRooms => FolderType.ReviewRoom,
-            FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
-            FilterType.CustomRooms => FolderType.CustomRoom,
-            FilterType.PublicRooms => FolderType.PublicRoom,
-            FilterType.FormRooms => FolderType.FormRoom,
-            _ => FolderType.DEFAULT
-        };
+        var typeFilter = DocSpaceHelper.MapToFolderType(filterType) ?? FolderType.DEFAULT;
 
         return rooms.Where(f => f.FolderType == typeFilter);
     }

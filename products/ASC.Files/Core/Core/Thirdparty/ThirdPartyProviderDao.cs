@@ -198,16 +198,16 @@ internal abstract class ThirdPartyProviderDao
     {
         return Task.FromResult<string>(null);
     }
-    
+
     public IAsyncEnumerable<OriginData> GetOriginsDataAsync(IEnumerable<string> entriesId)
     {
         throw new NotImplementedException();
     }
-    
+
     public Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
         throw new NotImplementedException();
-    }    
+    }
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, string roomId = default)
     {
@@ -370,17 +370,7 @@ internal abstract class ThirdPartyProviderDao
     
     internal static FolderType GetRoomFolderType(FilterType filterType)
     {
-        var typeFilter = filterType switch
-        {
-            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
-            FilterType.EditingRooms => FolderType.EditingRoom,
-            FilterType.ReviewRooms => FolderType.ReviewRoom,
-            FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
-            FilterType.CustomRooms => FolderType.CustomRoom,
-            FilterType.PublicRooms => FolderType.PublicRoom,
-            _ => FolderType.DEFAULT
-        };
-        return typeFilter;
+        return DocSpaceHelper.MapToFolderType(filterType) ?? FolderType.DEFAULT;
     }
 
     #endregion
@@ -389,12 +379,12 @@ internal abstract class ThirdPartyProviderDao
 internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
     IDaoFactory daoFactory,
     IServiceProvider serviceProvider,
-    UserManager userManager,
-    TenantManager tenantManager,
-    TenantUtil tenantUtil,
-    IDbContextFactory<FilesDbContext> dbContextFactory,
-    FileUtility fileUtility,
-    RegexDaoSelectorBase<TFile, TFolder, TItem> regexDaoSelectorBase)
+        UserManager userManager,
+        TenantManager tenantManager,
+        TenantUtil tenantUtil,
+        IDbContextFactory<FilesDbContext> dbContextFactory,
+        FileUtility fileUtility,
+        RegexDaoSelectorBase<TFile, TFolder, TItem> regexDaoSelectorBase)
     : ThirdPartyProviderDao, IDisposable
     where TFile : class, TItem
     where TFolder : class, TItem
@@ -486,9 +476,9 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             return;
         }
 
-        folder.FolderType = ProviderInfo.FolderType;
+            folder.FolderType = ProviderInfo.FolderType;
         folder.Title = ProviderInfo.CustomerTitle;
-    }
+        }
 
     public bool CheckInvalidFilter(FilterType filterType)
     {
@@ -523,7 +513,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             await using var tx = await dbContext.Database.BeginTransactionAsync();
             var oldIds = Queries.IdsAsync(dbContext, tenantId, oldValue);
             var mapping = _daoFactory.GetMapping<string>();
-            
+
             await foreach (var oldId in oldIds)
             {
                 var oldHashId = await mapping.MappingIdAsync(oldId);
@@ -644,8 +634,8 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
         folder.Error = FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder;
 
         return folder;
-    }
-    
+}
+
     public bool IsRoom(string folderId)
     {
         return MakeId(folderId) == ProviderInfo.FolderId;

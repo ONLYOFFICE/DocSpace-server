@@ -336,10 +336,19 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         var ext = FileUtility.GetFileExtension(file.Title);
 
                         var outType = (context.Request.Query[FilesLinkUtility.OutType].FirstOrDefault() ?? "").Trim();
-                        if (!string.IsNullOrEmpty(outType)
-                            && (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(ext) && (await fileUtility.GetExtsConvertibleAsync())[ext].Contains(outType))
+                        var extsConvertibleAsync = await fileUtility.GetExtsConvertibleAsync();
+                        if (!string.IsNullOrEmpty(outType) && extsConvertibleAsync.TryGetValue(ext, out var value) && value.Contains(outType))
                         {
                             ext = outType;
+                        }
+
+                        if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)))
+                        {
+                            var folderDao = daoFactory.GetFolderDao<T>();
+                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+                            {
+                                ext = FileUtility.WatermarkedDocumentExt;
+                            }
                         }
 
                         long offset = 0;
@@ -460,7 +469,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
 
         return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) &&
-               file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict };
+               file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict } or { IsLink: false, Share: FileShare.Read, SubjectType: SubjectType.User  };
     }
 
     private async Task TryMarkAsRecentByLink<T>(File<T> file)
@@ -670,10 +679,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             long offset = 0;
             var length = ProcessRangeHeader(context, fullLength, ref offset);
 
-            await using (var stream = await fileDao.GetFileStreamAsync(file, offset, length))
-            {
-                await SendStreamByChunksAsync(context, length, offset, fullLength, file.Title, stream);
-            }
+            await using var stream = await fileDao.GetFileStreamAsync(file, offset, length);
+            await SendStreamByChunksAsync(context, length, offset, fullLength, file.Title, stream);
         }
         catch (Exception ex)
         {
@@ -1298,8 +1305,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     private async Task FormWriteOk<T>(HttpContext context, Folder<T> folder, File<T> file)
     {
         await context.Response.WriteAsync(
-            JsonSerializer.Serialize(new CreatedFormData<T>()
-                    {
+            JsonSerializer.Serialize(new CreatedFormData<T>
+                {
                         Message = string.Format(FilesCommonResource.MessageFileCreatedForm, folder.Title),
                         Form = await fileDtoHelper.GetAsync(file)
             },

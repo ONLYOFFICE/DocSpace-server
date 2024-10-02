@@ -222,11 +222,11 @@ public class FilesSettingsDto
     /// Keep new file name
     /// </summary>
     public bool KeepNewFileName { get; set; }
+    public bool DisplayFileExtension { get; set; }
 
     /// <summary>
     /// Convert notify
-    /// </summary>
-    public bool ConvertNotify { get; set; }
+    /// </summary>    public bool ConvertNotify { get; set; }
 
     /// <summary>
     /// HideC confirm convert save
@@ -356,7 +356,7 @@ public class FilesSettingsDtoConverter(
             ExternalShareSocialMedia = await filesSettingsHelper.GetExternalShareSocialMedia(),
             StoreOriginalFiles = await filesSettingsHelper.GetStoreOriginalFiles(),
             KeepNewFileName = await filesSettingsHelper.GetKeepNewFileName(),
-            ConvertNotify = await filesSettingsHelper.GetConvertNotify(),
+            DisplayFileExtension = await filesSettingsHelper.GetDisplayFileExtension(),
             HideConfirmConvertSave = await filesSettingsHelper.GetHideConfirmConvertSave(),
             HideConfirmConvertOpen = await filesSettingsHelper.GetHideConfirmConvertOpen(),
             DefaultOrder = await filesSettingsHelper.GetDefaultOrder(),

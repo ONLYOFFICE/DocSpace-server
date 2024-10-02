@@ -462,7 +462,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     .OrderByDescending(x => x.Created)
                     .Select(x => x.User.Name)
                     .FirstOrDefault();
-                
+
                 nameInEditor = RemoveGuestPart(nameInEditor);
                 
                 userName = string.IsNullOrEmpty(nameInEditor) 
@@ -496,7 +496,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             {
                 name = name[..index].Trim();
             }
-            
+
             return name;
         }
     }

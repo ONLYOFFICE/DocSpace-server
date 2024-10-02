@@ -40,6 +40,21 @@ public class UpdateRoomRequest
     /// Room quota
     /// </summary>
     public long? Quota { get; set; }
+    
+    /// <summary>
+    /// Indexing
+    /// </summary>
+    public bool? Indexing { get; set; }
+    
+    /// <summary>
+    /// Room quota
+    /// </summary>
+    public bool? DenyDownload { get; set; }
+    public RoomDataLifetimeDto Lifetime { get; set; }
+    public WatermarkRequestDto Watermark { get; set; }
+    public LogoRequest Logo { get; set; }
+    public string Color { get; set; }
+    public string Cover { get; set; }
 }
 
 /// <summary>

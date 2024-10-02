@@ -31,7 +31,9 @@ public class SettingsRoom
     /// <summary>
     /// Indexing
     /// </summary>
-    public bool Indexing { get; set; }
+    public bool? Indexing { get; set; }
+
+    public bool? DenyDownload { get; set; }
 }
 
 public class SettingsRoomRequestDto<T>

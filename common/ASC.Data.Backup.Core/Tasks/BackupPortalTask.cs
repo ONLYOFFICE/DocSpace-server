@@ -434,7 +434,9 @@ public class BackupPortalTask(
                         {
                             sw.Write("0x");
                             foreach (var b in byteArray)
+                            {
                                 sw.Write("{0:x2}", b);
+                            }
                         }
                         else
                         {

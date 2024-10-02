@@ -133,10 +133,11 @@ public enum Accessibility
 
 [Scope]
 public class FileUtility(
-    FileUtilityConfiguration fileUtilityConfiguration,
-    FilesLinkUtility filesLinkUtility,
-    IDbContextFactory<FilesDbContext> dbContextFactory)
-{
+        FileUtilityConfiguration fileUtilityConfiguration,
+        FilesLinkUtility filesLinkUtility,
+        IDbContextFactory<FilesDbContext> dbContextFactory,
+        DaoFactory daoFactory)
+    {
     #region method
 
     public static string GetFileExtension(string fileName)
@@ -335,6 +336,11 @@ public class FileUtility(
 
     public async Task<bool> CanConvert<T>(File<T> file)
     {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+        {
+            return false;
+        }
         var ext = GetFileExtension(file.Title);
         return (await GetExtsConvertibleAsync()).ContainsKey(ext);
     }
@@ -612,6 +618,9 @@ public class FileUtility(
                 ".xlt", ".xltm", ".xltx",
                 ".pot", ".potm", ".potx"
     }.ToImmutableList();
+
+    public const string WatermarkedDocumentExt = ".pdf";
+
     public Dictionary<FileType, string> InternalExtension => fileUtilityConfiguration.InternalExtension;
 
     public string MasterFormExtension { get => fileUtilityConfiguration.MasterFormExtension; }

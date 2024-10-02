@@ -50,7 +50,8 @@ public enum ManagementType
     WhiteLabel = 19,
     MailService = 20,
     Storage = 21,
-    PrivacyRoom = 22
+    PrivacyRoom = 22,
+    IdentityServer = 23
 }
 
 [Scope]

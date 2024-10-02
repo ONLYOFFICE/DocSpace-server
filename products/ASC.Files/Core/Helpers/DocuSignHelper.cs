@@ -298,10 +298,11 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
         logger.DebugDocuSingCreatedEnvelope(envelopeSummary.EnvelopeId);
 
         var envelopeId = envelopeSummary.EnvelopeId;
-        var url = await envelopesApi.CreateSenderViewAsync(accountId, envelopeId, new ReturnUrlRequest
+        var url = await envelopesApi.CreateSenderViewAsync(accountId, envelopeId, new EnvelopeViewRequest
         {
             ReturnUrl = baseCommonLinkUtility.GetFullAbsolutePath(DocuSignHandlerService.Path(filesLinkUtility) + "?" + FilesLinkUtility.Action + "=redirect")
         });
+
         logger.DebugDocuSingSenderView(url.Url);
 
         return url.Url;

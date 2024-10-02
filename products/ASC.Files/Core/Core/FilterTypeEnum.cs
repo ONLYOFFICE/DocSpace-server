@@ -70,24 +70,15 @@ public enum FilterType
     [SwaggerEnum("Editing rooms")]
     [EnumMember] EditingRooms = 14,
 
-    [SwaggerEnum("Review rooms")]
-    [EnumMember] ReviewRooms = 15,
-
-    [SwaggerEnum("Read only rooms")]
-    [EnumMember] ReadOnlyRooms = 16,
-
     [SwaggerEnum("Custom rooms")]
     [EnumMember] CustomRooms = 17,
 
     [SwaggerEnum("Public rooms")]
     [EnumMember] PublicRooms = 20,
 
-    [SwaggerEnum("Form rooms")]
-    [EnumMember] FormRooms = 21,
-
     [SwaggerEnum("Pdf")]
     [EnumMember] Pdf = 22,
-
     [SwaggerEnum("Pdf form")]
-    [EnumMember] PdfForm = 23
+    [EnumMember] PdfForm = 23,
+    [EnumMember] VirtualDataRooms = 24
 }

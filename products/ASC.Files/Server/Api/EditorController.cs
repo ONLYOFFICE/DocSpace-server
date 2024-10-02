@@ -145,8 +145,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     public async Task<ConfigurationDto<T>> OpenEditAsync(OpenEditRequestDto<T> inDto)
     {
         var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(inDto.FileId, inDto.Version);
-        var extension = FileUtility.GetFileExtension(file.Title);
-        var fileType = FileUtility.GetFileTypeByExtention(extension);
+        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
         bool canEdit;
         bool canFill;

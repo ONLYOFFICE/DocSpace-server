@@ -31,6 +31,7 @@ public class TenantDomainValidator
 {
     private readonly Regex _validDomain;
     private readonly Regex _validName;
+    private const string DomainContainsInvalidCharacters = "Domain contains invalid characters.";
 
     /// <summary>
     /// Regex
@@ -92,9 +93,9 @@ public class TenantDomainValidator
 
     public void ValidateDomainCharacters(string domain)
     {
-        if (!_validDomain.IsMatch(domain))
+        if (!_validDomain.IsMatch(domain) || domain.TestPunnyCode())
         {
-            throw new TenantIncorrectCharsException("Domain contains invalid characters.");
+            throw new TenantIncorrectCharsException(DomainContainsInvalidCharacters);
         }
     }
 

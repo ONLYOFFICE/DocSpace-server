@@ -259,7 +259,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Ο αριθμός των χρηστών στο δωμάτιο πρέπει να είναι ίσος ή μικρότερος από {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Επωνυμία και προσαρμογή</value>
   </data>
   <data name="ConsumersauthUser" xml:space="preserve">

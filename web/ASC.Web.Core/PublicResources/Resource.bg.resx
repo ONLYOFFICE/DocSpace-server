@@ -478,7 +478,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Броят потребители не трябва да надвишава {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Брандинг и персонализиране</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">

@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.IntegrationEvents.Events;
-using ASC.EventBus.Abstractions;
 
 namespace ASC.Web.Core.Notify;
 
@@ -65,13 +64,13 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
             item.ObjectId = objectID;
         }
 
-        if (recipients != null && recipients.Any())
+        if (recipients != null && recipients.Length != 0)
         {
-            item.Recipients = new List<Recipient>();
+            item.Recipients = [];
 
             foreach (var r in recipients)
             {
-                var recipient = new Recipient { Id = r.ID, Name = r.Name, Addresses = new List<string>() };
+                var recipient = new Recipient { Id = r.ID, Name = r.Name, Addresses = [] };
                 if (r is IDirectRecipient d)
                 {
                     recipient.Addresses.AddRange(d.Addresses);
@@ -87,17 +86,17 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
             }
         }
 
-        if (senderNames != null && senderNames.Any())
+        if (senderNames != null && senderNames.Length != 0)
         {
             item.SenderNames = senderNames.ToList();
         }
 
-        if (args != null && args.Any())
+        if (args != null && args.Length != 0)
         {
             item.Tags = args.Where(r => r.Value != null).Select(r => new Tag { Key = r.Tag, Value = r.Value.ToString() }).ToList();
         }
 
-        eventBus.Publish(item);
+        await eventBus.PublishAsync(item);
     }
     
     public async Task SendNoticeAsync(INotifyAction action, params ITagValue[] args)

@@ -37,32 +37,20 @@ public enum RoomType
     [SwaggerEnum(Description = "Collaboration room")]
     EditingRoom = 2,
 
-    [SwaggerEnum(Ignore = true)]
-    ReviewRoom = 3,
-
-    [SwaggerEnum(Ignore = true)]
-    ReadOnlyRoom = 4,
-
     [SwaggerEnum(Description = "Custom room")]
     CustomRoom = 5,
 
     [SwaggerEnum(Description = "Public room")]
     PublicRoom = 6,
-
-    [SwaggerEnum(Ignore = true)]
-    FormRoom = 7
+    [SwaggerEnum(Description = "Virtual data room")]
+    VirtualDataRoom = 8
 }
 
 /// <summary>
 /// Request parameters for creating a room
 /// </summary>
-public class CreateRoomRequestDto
+public class CreateRoomRequestDto : UpdateRoomRequest
 {
-    /// <summary>
-    /// Room name
-    /// </summary>
-    public string Title { get; set; }
-
     /// <summary>
     /// Room type
     /// </summary>
@@ -77,14 +65,4 @@ public class CreateRoomRequestDto
     /// Collection of sharing parameters
     /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
-
-    /// <summary>
-    /// Room quota
-    /// </summary>
-    public long Quota { get; set; }
-
-    /// <summary>
-    /// Indexing
-    /// </summary>
-    public bool Indexing { get; set; }
 }

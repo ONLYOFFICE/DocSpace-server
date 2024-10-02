@@ -64,7 +64,6 @@ global using Autofac.Configuration;
 global using AutoMapper;
 
 global using Confluent.Kafka;
-global using Confluent.Kafka.Admin;
 
 global using JWT;
 global using JWT.Algorithms;

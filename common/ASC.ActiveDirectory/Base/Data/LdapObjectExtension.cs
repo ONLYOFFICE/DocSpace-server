@@ -141,7 +141,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
         if (settings.LdapMapping.TryGetValue(Mapping.UserQuotaLimit, out var value8))
         {
             var quotaAttr = GetAttribute(ldapUser, value8);
-            if (int.TryParse(quotaAttr, out var resultQuota))
+            if (long.TryParse(quotaAttr, out var resultQuota))
             {
                 quota = resultQuota;
             }
@@ -211,17 +211,12 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
             }
             else
             {
-                switch (gender.ToLowerInvariant())
+                user.Sex = gender.ToLowerInvariant() switch
                 {
-                    case "male":
-                    case "m":
-                        user.Sex = true;
-                        break;
-                    case "female":
-                    case "f":
-                        user.Sex = false;
-                        break;
-                }
+                    "male" or "m" => true,
+                    "female" or "f" => false,
+                    _ => user.Sex
+                };
             }
         }
 

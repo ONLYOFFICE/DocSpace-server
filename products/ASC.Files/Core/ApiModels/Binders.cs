@@ -75,7 +75,7 @@ public static class ModelBindingContextExtension
 
         if (modelName.EndsWith("[]", StringComparison.Ordinal))
         {
-            return new List<JsonElement>();
+            return [];
         }
 
         return ParseQuery(bindingContext, $"{modelName}[]");

@@ -204,7 +204,7 @@ public class EmployeeFullDto : EmployeeDto
     /// Current login event ID
     /// </summary>
     public int? LoginEventId { get; set; }
-}
+    public EmployeeDto CreatedBy { get; set; }}
 
 [Scope]
 public class EmployeeFullDtoHelper(
@@ -395,6 +395,11 @@ public class EmployeeFullDtoHelper(
             }
         }
 
+        if (userInfo.CreatedBy.HasValue)
+        {
+            result.CreatedBy = await GetAsync(await _userManager.GetUsersAsync(userInfo.CreatedBy.Value));
+        }
+
         return result;
     }
 
@@ -406,7 +411,7 @@ public class EmployeeFullDtoHelper(
         }
 
         var groupsFromDb = (await _userManager.GetUserGroupsAsync(userInfo.Id));
-        List<GroupSummaryDto> groups = new();
+        List<GroupSummaryDto> groups = [];
 
         foreach (var g in groupsFromDb)
         {

@@ -257,9 +257,9 @@ public class TfaappController(
         void SetSettingsProperty<T>(TfaSettingsBase<T> settings) where T : class, ISettings<T>
         {
             settings.EnableSetting = true;
-            settings.TrustedIps = inDto.TrustedIps ?? new List<string>();
-            settings.MandatoryUsers = inDto.MandatoryUsers ?? new List<Guid>();
-            settings.MandatoryGroups = inDto.MandatoryGroups ?? new List<Guid>();
+            settings.TrustedIps = inDto.TrustedIps ?? [];
+            settings.MandatoryUsers = inDto.MandatoryUsers ?? [];
+            settings.MandatoryGroups = inDto.MandatoryGroups ?? [];
         }
     }
 
@@ -323,7 +323,9 @@ public class TfaappController(
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
+        if (!tfaAppAuthSettingsHelper.IsVisibleSettings ||
+            !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
+            !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
         {
             throw new Exception(Resource.TfaAppNotAvailable);
         }

@@ -37,14 +37,12 @@ public partial class SettingsController(MessageService messageService,
         WebItemManager webItemManager,
         WebItemManagerSecurity webItemManagerSecurity,
         TenantInfoSettingsHelper tenantInfoSettingsHelper,
-        TenantUtil tenantUtil,
         CoreSettings coreSettings,
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         IConfiguration configuration,
         SetupInfo setupInfo,
         GeolocationHelper geolocationHelper,
-        StatisticManager statisticManager,
         ConsumerFactory consumerFactory,
         TimeZoneConverter timeZoneConverter,
         CustomNamingPeople customNamingPeople,
@@ -295,7 +293,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (!inDto.DefaultQuota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
@@ -304,7 +302,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
 
         if (coreBaseSettings.Standalone)
@@ -314,7 +312,7 @@ public partial class SettingsController(MessageService messageService,
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.QuotaGreaterPortalError);
+                    throw new Exception(Resource.UserQuotaGreaterPortalError);
                 }
             }
         }
@@ -366,7 +364,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (!inDto.DefaultQuota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.RoomQuotaGreaterPortalError);
         }
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
@@ -375,7 +373,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.RoomQuotaGreaterPortalError);
         }
         if (coreBaseSettings.Standalone)
         {
@@ -384,7 +382,7 @@ public partial class SettingsController(MessageService messageService,
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.QuotaGreaterPortalError);
+                    throw new Exception(Resource.RoomQuotaGreaterPortalError);
                 }
             }
         }
@@ -872,7 +870,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (webitem == null)
         {
-            return new List<UsageSpaceStatItemDto>();
+            return [];
         }
 
         var statData = await webitem.Context.SpaceUsageStatManager.GetStatDataAsync();
@@ -885,69 +883,6 @@ public partial class SettingsController(MessageService messageService,
             Size = FileSizeComment.FilesSizeToString(it.SpaceUsage),
             Url = it.Url
         });
-    }
-
-    /// <summary>
-    /// Returns the user visit statistics for the period specified in the request.
-    /// </summary>
-    /// <short>Get the visit statistics</short>
-    /// <path>api/2.0/settings/statistics/visit</path>
-    /// <collection>list</collection>
-    [Tags("Settings / Statistics")]
-    [SwaggerResponse(200, "List of point charts", typeof(ChartPointDto))]
-    [HttpGet("statistics/visit")]
-    public async Task<List<ChartPointDto>> GetVisitStatisticsAsync(VisitStatisticsRequestDto inDto)
-    {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        var from = tenantUtil.DateTimeFromUtc(inDto.FromDate);
-        var to = tenantUtil.DateTimeFromUtc(inDto.ToDate);
-
-        var points = new List<ChartPointDto>();
-
-        if (from.CompareTo(to) >= 0)
-        {
-            return points;
-        }
-
-        for (var d = new DateTime(from.Ticks); d.Date.CompareTo(to.Date) <= 0; d = d.AddDays(1))
-        {
-            points.Add(new ChartPointDto
-            {
-                DisplayDate = d.Date.ToShortDateString(),
-                Date = d.Date,
-                Hosts = 0,
-                Hits = 0
-            });
-        }
-
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-        var hits = await statisticManager.GetHitsByPeriodAsync(tenant.Id, from, to);
-        var hosts = await statisticManager.GetHostsByPeriodAsync(tenant.Id, from, to);
-
-        if (hits.Count == 0 || hosts.Count == 0)
-        {
-            return points;
-        }
-
-        hits.Sort((x, y) => x.VisitDate.CompareTo(y.VisitDate));
-        hosts.Sort((x, y) => x.VisitDate.CompareTo(y.VisitDate));
-
-        for (int i = 0, n = points.Count, hitsNum = 0, hostsNum = 0; i < n; i++)
-        {
-            while (hitsNum < hits.Count && points[i].Date.CompareTo(hits[hitsNum].VisitDate.Date) == 0)
-            {
-                points[i].Hits += hits[hitsNum].VisitCount;
-                hitsNum++;
-            }
-            while (hostsNum < hosts.Count && points[i].Date.CompareTo(hosts[hostsNum].VisitDate.Date) == 0)
-            {
-                points[i].Hosts++;
-                hostsNum++;
-            }
-        }
-
-        return points;
     }
 
     /// <summary>

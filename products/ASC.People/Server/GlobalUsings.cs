@@ -65,7 +65,6 @@ global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.VirtualRooms;
-global using ASC.Web.Files.Helpers;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.People;

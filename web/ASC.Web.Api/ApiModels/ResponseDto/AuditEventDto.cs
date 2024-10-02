@@ -117,11 +117,11 @@ public class AuditEventDto
     /// Context
     /// </summary>
     public string Context { get; set; }
-
-    public AuditEventDto(AuditEvent auditEvent, AuditActionMapper auditActionMapper)
+    
+    public AuditEventDto(AuditEvent auditEvent, AuditActionMapper auditActionMapper, ApiDateTimeHelper apiDateTimeHelper)
     {
         Id = auditEvent.Id;
-        Date = new ApiDateTime(auditEvent.Date, TimeSpan.Zero);
+        Date = apiDateTimeHelper.Get(auditEvent.Date);
         User = auditEvent.UserName;
         UserId = auditEvent.UserId;
         Action = auditEvent.ActionText;

@@ -29,7 +29,7 @@ namespace ASC.Data.Storage.Configuration;
 [Singleton]
 public class StorageConfigExtension(IConfiguration configuration)
 {
-    public Storage Storage { get; init; } = configuration.GetSection($"storage").Get<Storage>();
+    public Storage Storage { get; init; } = configuration.GetSection("storage").Get<Storage>();
 }
 
 

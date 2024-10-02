@@ -128,7 +128,7 @@ public class CommonChunkedUploadSessionHolder(
         return (Path.GetFileName(path), eTag);
     }
 
-    public virtual async Task StoreChunkAsync(CommonChunkedUploadSession uploadSession, int chunkNumber, string eTag, long length)
+    public async Task StoreChunkAsync(CommonChunkedUploadSession uploadSession, int chunkNumber, string eTag, long length)
     {
         var chunk = new Chunk
         {

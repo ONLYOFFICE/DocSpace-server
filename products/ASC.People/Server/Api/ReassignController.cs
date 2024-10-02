@@ -70,7 +70,7 @@ public class ReassignController(
         var toUser = await userManager.GetUsersAsync(inDto.ToUserId);
 
         var toUserType = await userManager.GetUserTypeAsync(toUser);
-        var toUserIsAdmin = toUserType is EmployeeType.DocSpaceAdmin || toUserType is EmployeeType.RoomAdmin;
+        var toUserIsAdmin = toUserType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin;
 
         if (userManager.IsSystemUser(toUser.Id) ||
             !toUserIsAdmin ||

@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Constants = ASC.Common.Security.Authorizing.Constants;
+using AuthConstants = ASC.Common.Security.Authorizing.AuthConstants;
 
 namespace ASC.Core;
 
@@ -35,10 +35,10 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
     private static readonly SemaphoreSlim _semaphore = new(1);
     public static readonly List<Guid> Groups = Groups =
     [
-        Constants.DocSpaceAdmin.ID,
-        Constants.Everyone.ID,
-        Constants.RoomAdmin.ID,
-        Constants.Collaborator.ID
+        AuthConstants.DocSpaceAdmin.ID,
+        AuthConstants.Everyone.ID,
+        AuthConstants.RoomAdmin.ID,
+        AuthConstants.Collaborator.ID
     ];
 
     public async Task SubscribeAsync(string sourceID, string actionID, string objectID, string recipientID)

@@ -394,6 +394,7 @@ public enum MessageAction
 
     [SwaggerEnum("Documents keep new file name settings updated")]
     DocumentsKeepNewFileNameSettingsUpdated = 5083,
+    DocumentsDisplayFileExtensionUpdated = 5101,
 
     [SwaggerEnum("File converted")]
     FileConverted = 5035,
@@ -441,7 +442,7 @@ public enum MessageAction
     RoomDeleted = 5074,
 
     [SwaggerEnum("Room copied")]
-    RoomCopied = 5100, // last
+    RoomCopied = 5100,
 
     [SwaggerEnum("Room update access for user")]
     RoomUpdateAccessForUser = 5075,
@@ -487,6 +488,12 @@ public enum MessageAction
 
     [SwaggerEnum("Room logo deleted")]
     RoomLogoDeleted = 5081,
+
+    RoomColorChanged = 5102,
+    RoomCoverChanged = 5103, 
+    
+    RoomIndexingChanged = 5104,
+    RoomDenyDownloadChanged = 5105,//last
 
     [SwaggerEnum("Room external link created")]
     RoomExternalLinkCreated = 5088,

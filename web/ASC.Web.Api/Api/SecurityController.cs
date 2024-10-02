@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Cors.Enums;
+
+using Microsoft.AspNetCore.Cors;
+
 namespace ASC.Web.Api.Controllers;
 
 /// <summary>
@@ -45,7 +49,8 @@ public class SecurityController(PermissionContext permissionContext,
         AuditActionMapper auditActionMapper,
         CoreBaseSettings coreBaseSettings,
         ApiContext apiContext,
-        CspSettingsHelper cspSettingsHelper)
+        CspSettingsHelper cspSettingsHelper, 
+        ApiDateTimeHelper apiDateTimeHelper)
     : ControllerBase
 {
     /// <summary>
@@ -65,7 +70,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         DemandBaseAuditPermission();
 
-        return (await loginEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new LoginEventDto(x));
+        return (await loginEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -85,7 +90,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         DemandBaseAuditPermission();
 
-        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new AuditEventDto(x, auditActionMapper));
+        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -116,7 +121,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         await DemandAuditPermissionAsync();
 
-        return (await loginEventsRepository.GetByFilterAsync(inDto.UserId, inDto.Action, inDto.From, inDto.To, startIndex, limit)).Select(x => new LoginEventDto(x));
+        return (await loginEventsRepository.GetByFilterAsync(inDto.UserId, inDto.Action, inDto.From, inDto.To, startIndex, limit)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -147,7 +152,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         await DemandAuditPermissionAsync();
 
-        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.ProductType, inDto.ModuleType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, startIndex, limit)).Select(x => new AuditEventDto(x, auditActionMapper));
+        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.ProductType, inDto.ModuleType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, startIndex, limit)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -330,6 +335,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
+    [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName )]
     [HttpPost("csp")]
     public async Task<CspDto> Csp(CspRequestsDto request)
     {
@@ -373,6 +379,7 @@ public class SecurityController(PermissionContext permissionContext,
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
     [AllowAnonymous]
+    [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpGet("csp")]
     public async Task<CspDto> GetCsp()
     {

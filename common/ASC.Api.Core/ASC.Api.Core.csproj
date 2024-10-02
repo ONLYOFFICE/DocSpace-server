@@ -17,20 +17,21 @@
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="8.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="8.0.1" />
-    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.1" />
-    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="8.0.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.2" />
+    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="8.0.2" />
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="8.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.0.2" />
     <PackageReference Include="NLog.Targets.ElasticSearch" Version="7.7.0" />
-    <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.11" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.13" />
     <PackageReference Include="RedisRateLimiting" Version="1.2.0" />
     <PackageReference Include="RedisRateLimiting.AspNetCore" Version="1.2.0" />
     <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore" Version="10.2.0" />
     <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" Version="10.2.0" />
-	<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+	<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
 	<PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.1" />
 	<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.1" />
   </ItemGroup>

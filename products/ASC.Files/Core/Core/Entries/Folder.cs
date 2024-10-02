@@ -72,12 +72,6 @@ public enum FolderType
     [SwaggerEnum(Description = "Editing room")]
     EditingRoom = 16,
 
-    [SwaggerEnum(Description = "Review room", Ignore = true)]
-    ReviewRoom = 17,
-
-    [SwaggerEnum(Description = "Read only room", Ignore = true)]
-    ReadOnlyRoom = 18,
-
     [SwaggerEnum(Description = "Custom room")]
     CustomRoom = 19,
 
@@ -90,9 +84,6 @@ public enum FolderType
     [SwaggerEnum(Description = "Public room")]
     PublicRoom = 22,
 
-    [SwaggerEnum(Description = "Form room", Ignore = true)]
-    FormRoom = 24,
-
     [SwaggerEnum(Description = "Ready form folder")]
     ReadyFormFolder = 25,
 
@@ -101,9 +92,11 @@ public enum FolderType
 
     [SwaggerEnum(Description = "Form filling folder done")]
     FormFillingFolderDone = 27,
-
     [SwaggerEnum(Description = "Form filling folder in progress")]
-    FormFillingFolderInProgress = 28
+    FormFillingFolderInProgress = 28,
+
+    [SwaggerEnum(Description = "Virtual Data Room")]
+    VirtualDataRoom = 29
 }
 
 public interface IFolder
@@ -133,8 +126,12 @@ public class Folder<T> : FileEntry<T>, IFolder
     public bool SettingsPrivate { get; set; }
     public bool SettingsHasLogo { get; set; }
     public string SettingsColor { get; set; }
+    public string SettingsCover { get; set; }
+    public WatermarkSettings SettingsWatermark { get; set; }
     public bool SettingsIndexing { get; set; }
     public long SettingsQuota { get; set; }
+    public RoomDataLifetime SettingsLifetime { get; set; }
+    public bool SettingsDenyDownload { get; set; }
     public long Counter { get; set; }
     public override bool IsNew
     {

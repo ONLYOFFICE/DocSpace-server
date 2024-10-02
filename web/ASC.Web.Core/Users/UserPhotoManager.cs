@@ -110,7 +110,7 @@ public class UserPhotoManagerCache
         try
         {
             _photoFiles = new ConcurrentDictionary<Guid, ConcurrentDictionary<CacheSize, string>>();
-            _tenantDiskCache = new HashSet<int>();
+            _tenantDiskCache = [];
             _cacheNotify = notify;
 
             _cacheNotify.Subscribe(data =>
@@ -561,7 +561,7 @@ public class UserPhotoManager(UserManager userManager,
 
     private byte[] TryParseImage(byte[] data, long maxFileSize, Size maxsize, out IImageFormat imgFormat, out int width, out int height)
     {
-        if (data == null || data.Length <= 0)
+        if (data is not { Length: > 0 })
         {
             throw new UnknownImageFormatException();
         }
@@ -644,7 +644,7 @@ public class UserPhotoManager(UserManager userManager,
 
     private async Task<string> SizePhoto(Guid userID, byte[] data, long maxFileSize, Size size, bool now)
     {
-        if (data == null || data.Length <= 0)
+        if (data is not { Length: > 0 })
         {
             throw new UnknownImageFormatException();
         }

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
@@ -86,7 +88,7 @@ public class MemberRequestDto : MemberBaseRequestDto
     /// Specifies if this is a guest or a user
     /// </summary>
     public bool? IsUser { get; set; }
-
+    
     /// <summary>
     /// First name
     /// </summary>

@@ -24,8 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Constants = ASC.Common.Security.Authorizing.Constants;
 using UserConstants = ASC.Core.Users.Constants;
+using AuthConstants = ASC.Common.Security.Authorizing.AuthConstants;
 
 namespace ASC.Core.Common.Security;
 
@@ -34,23 +34,23 @@ public static class Security
     public static readonly Dictionary<Guid, Dictionary<Guid, HashSet<Rule>>> Rules = new()
     {
         {
-            Constants.RoomAdmin.ID, new Dictionary<Guid, HashSet<Rule>>
+            AuthConstants.RoomAdmin.ID, new Dictionary<Guid, HashSet<Rule>>
             {
                 {
-                    Constants.User.ID, [
-                        new(UserConstants.Action_EditGroups.ID, Constants.User),
+                    AuthConstants.User.ID, [
+                        new(UserConstants.Action_EditGroups.ID, AuthConstants.User),
                         new(UserConstants.Action_AddRemoveUser.ID)
                     ]
                 },
                 {
-                    Constants.RoomAdmin.ID, [
-                        new(UserConstants.Action_EditGroups.ID, Constants.User),
+                    AuthConstants.RoomAdmin.ID, [
+                        new(UserConstants.Action_EditGroups.ID, AuthConstants.User),
                         new(UserConstants.Action_AddRemoveUser.ID)
                     ]
                 },
                 {
-                    Constants.Collaborator.ID, [
-                        new(UserConstants.Action_EditGroups.ID, Constants.Collaborator),
+                    AuthConstants.Collaborator.ID, [
+                        new(UserConstants.Action_EditGroups.ID, AuthConstants.Collaborator),
                         new(UserConstants.Action_AddRemoveUser.ID)
                     ]
                 }

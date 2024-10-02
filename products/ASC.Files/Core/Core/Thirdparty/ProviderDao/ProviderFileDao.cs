@@ -92,14 +92,12 @@ internal class ProviderFileDao(
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> fileIds)
     {
-        foreach (var group in _selectorFactory.GetSelectors(fileIds))
+        foreach (var (selectorLocal, matchedIds) in _selectorFactory.GetSelectors(fileIds))
         {
-            var selectorLocal = group.Key;
             if (selectorLocal == null)
             {
                 continue;
             }
-            var matchedIds = group.Value;
 
             foreach (var matchedId in matchedIds.GroupBy(selectorLocal.GetIdCode))
             {
@@ -116,17 +114,14 @@ internal class ProviderFileDao(
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool checkShared = false)
+    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent, bool checkShared = false)
     {
-        foreach (var group in _selectorFactory.GetSelectors(fileIds))
+        foreach (var (selectorLocal, matchedIds) in _selectorFactory.GetSelectors(fileIds))
         {
-            var selectorLocal = group.Key;
             if (selectorLocal == null)
             {
                 continue;
             }
-            var matchedIds = group.Value;
 
             foreach (var matchedId in matchedIds.GroupBy(selectorLocal.GetIdCode))
             {
@@ -545,7 +540,7 @@ internal class ProviderFileDao(
         await fileDao.SetCustomOrder(fileId, parentFolderId, order);
     }
 
-    public async Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    public async Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)
     {
         var selector = _selectorFactory.GetSelector(parentFolderId);
         var fileDao = selector.GetFileDao(parentFolderId);

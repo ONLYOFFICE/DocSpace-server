@@ -14,10 +14,10 @@
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Box.V2.Core" Version="5.7.0" />
-    <PackageReference Include="DocuSign.eSign.dll" Version="6.9.0" />
+    <PackageReference Include="Box.V2.Core" Version="5.8.0" />
+    <PackageReference Include="DocuSign.eSign.dll" Version="7.0.0" />
     <PackageReference Include="Dropbox.Api" Version="7.0.0" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.68.0.3428" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.68.0.3533" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="5.0.0" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
@@ -163,6 +163,248 @@
     </EmbeddedResource>
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.ru.resx">
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <None Remove="Covers\1.svg" />
+    <None Remove="Covers\2.svg" />
+    <None Remove="Covers\3.svg" />
+    <None Remove="Covers\4.svg" />
+    <None Remove="Covers\5.svg" />
+    <None Remove="Covers\6.svg" />
+    <None Remove="Covers\7.svg" />
+    <None Remove="Covers\8.svg" />
+    <None Remove="Covers\9.svg" />
+    <None Remove="Covers\10.svg" />
+    <None Remove="Covers\11.svg" />
+    <None Remove="Covers\12.svg" />
+    <None Remove="Covers\13.svg" />
+    <None Remove="Covers\14.svg" />
+    <None Remove="Covers\15.svg" />
+    <None Remove="Covers\16.svg" />
+    <None Remove="Covers\17.svg" />
+    <None Remove="Covers\18.svg" />
+    <None Remove="Covers\anchor.svg" />
+    <EmbeddedResource Include="Covers\anchor.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\archive.svg" />
+    <EmbeddedResource Include="Covers\archive.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\bell.svg" />
+    <EmbeddedResource Include="Covers\bell.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\book_open.svg" />
+    <EmbeddedResource Include="Covers\book_open.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\bookmark.svg" />
+    <EmbeddedResource Include="Covers\bookmark.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\calendar.svg" />
+    <EmbeddedResource Include="Covers\calendar.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\camera.svg" />
+    <EmbeddedResource Include="Covers\camera.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\cart.svg" />
+    <EmbeddedResource Include="Covers\cart.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\check mark.svg" />
+    <EmbeddedResource Include="Covers\check mark.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\clipboard.svg" />
+    <EmbeddedResource Include="Covers\clipboard.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\cloud.svg" />
+    <EmbeddedResource Include="Covers\cloud.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\comment_1.svg" />
+    <EmbeddedResource Include="Covers\comment_1.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\comment_2.svg" />
+    <EmbeddedResource Include="Covers\comment_2.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\dollar.svg" />
+    <EmbeddedResource Include="Covers\dollar.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\face_1.svg" />
+    <EmbeddedResource Include="Covers\face_1.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\face_2.svg" />
+    <EmbeddedResource Include="Covers\face_2.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\face_3.svg" />
+    <EmbeddedResource Include="Covers\face_3.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\feather.svg" />
+    <EmbeddedResource Include="Covers\feather.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\file_1.svg" />
+    <EmbeddedResource Include="Covers\file_1.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\file_2.svg" />
+    <EmbeddedResource Include="Covers\file_2.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\file_3.svg" />
+    <EmbeddedResource Include="Covers\file_3.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\file_empty.svg" />
+    <EmbeddedResource Include="Covers\file_empty.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\film.svg" />
+    <EmbeddedResource Include="Covers\film.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\flag.svg" />
+    <EmbeddedResource Include="Covers\flag.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\folder.svg" />
+    <EmbeddedResource Include="Covers\folder.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\gift.svg" />
+    <EmbeddedResource Include="Covers\gift.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\hash.svg" />
+    <EmbeddedResource Include="Covers\hash.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\headphones.svg" />
+    <EmbeddedResource Include="Covers\headphones.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\heart.svg" />
+    <EmbeddedResource Include="Covers\heart.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\house.svg" />
+    <EmbeddedResource Include="Covers\house.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\human.svg" />
+    <EmbeddedResource Include="Covers\human.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\img.svg" />
+    <EmbeddedResource Include="Covers\img.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\label.svg" />
+    <EmbeddedResource Include="Covers\label.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\layers.svg" />
+    <EmbeddedResource Include="Covers\layers.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\life_buoy.svg" />
+    <EmbeddedResource Include="Covers\life_buoy.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\lock_security.svg" />
+    <EmbeddedResource Include="Covers\lock_security.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\loupe.svg" />
+    <EmbeddedResource Include="Covers\loupe.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\mail.svg" />
+    <EmbeddedResource Include="Covers\mail.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\map.svg" />
+    <EmbeddedResource Include="Covers\map.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\medal.svg" />
+    <EmbeddedResource Include="Covers\medal.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\package.svg" />
+    <EmbeddedResource Include="Covers\package.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\pen.svg" />
+    <EmbeddedResource Include="Covers\pen.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\percent.svg" />
+    <EmbeddedResource Include="Covers\percent.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\planet.svg" />
+    <EmbeddedResource Include="Covers\planet.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\schedule.svg" />
+    <EmbeddedResource Include="Covers\schedule.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\share.svg" />
+    <EmbeddedResource Include="Covers\share.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\shield.svg" />
+    <EmbeddedResource Include="Covers\shield.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\sliders.svg" />
+    <EmbeddedResource Include="Covers\sliders.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\star.svg" />
+    <EmbeddedResource Include="Covers\star.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\suitcase.svg" />
+    <EmbeddedResource Include="Covers\suitcase.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\telephone.svg" />
+    <EmbeddedResource Include="Covers\telephone.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\truck.svg" />
+    <EmbeddedResource Include="Covers\truck.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\umbrella.svg" />
+    <EmbeddedResource Include="Covers\umbrella.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\video_camera.svg" />
+    <EmbeddedResource Include="Covers\video_camera.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\watch.svg" />
+    <EmbeddedResource Include="Covers\watch.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Covers\zap.svg" />
+    <EmbeddedResource Include="Covers\zap.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

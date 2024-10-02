@@ -313,7 +313,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
                         }
                     });
 
-        destination.GetType().GetProperties().Where(p => p.CanWrite && !p.GetIndexParameters().Any())
+        destination.GetType().GetProperties().Where(p => p.CanWrite && p.GetIndexParameters().Length == 0)
                     .ToList()
                     .ForEach(prop =>
                     {

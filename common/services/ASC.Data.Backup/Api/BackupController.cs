@@ -88,7 +88,7 @@ public class BackupController(
             Hour = inDto.CronParams.Hour,
             Day = inDto.CronParams.Day
         };
-        if(backupStored > 30 || backupStored < 1)
+        if(backupStored is > 30 or < 1)
         {
             throw new ArgumentException("backupStored must be 1 - 30");
         }
@@ -144,9 +144,9 @@ public class BackupController(
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
         var canParse = false;
-        if (storageParams.ContainsKey("folderId"))
+        if (storageParams.TryGetValue("folderId", out var param))
         {
-            canParse = int.TryParse(storageParams["folderId"], out _);
+            canParse = int.TryParse(param, out _);
         }
         if (storageType == BackupStorageType.Documents && !canParse
             || storageType == BackupStorageType.ThridpartyDocuments && canParse)
@@ -180,7 +180,7 @@ public class BackupController(
         var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         
-        eventBus.Publish(new BackupRequestIntegrationEvent(
+        await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
              tenantId: tenantId,
              storageParams: storageParams,
              storageType: storageType,
@@ -270,7 +270,7 @@ public class BackupController(
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)(inDto.StorageType.Value);
-        if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
+        if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments && storageParams.ContainsKey("filePath"))
         {
             if (int.TryParse(storageParams["filePath"], out var fId))
             {
@@ -282,7 +282,7 @@ public class BackupController(
             }
         }
         
-        eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
+        await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
                              createBy: CurrentUserId,
                              storageParams: storageParams,

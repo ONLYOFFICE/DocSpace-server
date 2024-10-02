@@ -124,12 +124,6 @@ public class FileDto<T> : FileEntryDto<T>
     public string LockedBy { get; set; }
 
     /// <summary>
-    /// Denies file downloading or not
-    /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
-    public bool DenyDownload { get; set; }
-
-    /// <summary>
     /// Is there a draft or not
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
@@ -163,12 +157,6 @@ public class FileDto<T> : FileEntryDto<T>
     public DraftLocation<T> DraftLocation { get; set; }
 
     /// <summary>
-    /// Denies file sharing or not
-    /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
-    public bool DenySharing { get; set; }
-
-    /// <summary>
     /// File accessibility
     /// </summary>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
@@ -187,6 +175,7 @@ public class FileDto<T> : FileEntryDto<T>
     /// Last opened
     /// </summary>
     public ApiDateTime LastOpened { get; set; }
+    public ApiDateTime Expired { get; set; }
     
     public override FileEntryType FileEntryType { get => FileEntryType.File; }
 }
@@ -207,15 +196,16 @@ public class FileDtoHelper(
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime,
         ExternalShare externalShare,
+        BreadCrumbsManager breadCrumbsManager,
         FileSharing fileSharing,
         FileChecker fileChecker)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, int foldersCount = 0, string order = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null)
     {
-        var result = await GetFileWrapperAsync(file, foldersCount, order);
+        var result = await GetFileWrapperAsync(file, order, expiration);
 
         result.FolderId = file.ParentId;
         
@@ -232,7 +222,7 @@ public class FileDtoHelper(
     }
 
     private Dictionary<string, AceWrapper> shareCache = new();
-    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, int foldersCount, string order)
+    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
@@ -337,14 +327,32 @@ public class FileDtoHelper(
         result.Encrypted = file.Encrypted.NullIfDefault();
         result.Locked = file.Locked.NullIfDefault();
         result.LockedBy = file.LockedBy;
-        result.DenyDownload = file.DenyDownload;
-        result.DenySharing = file.DenySharing;
         result.Access = file.Access;
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
 
+        if (file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
+            var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+            if (room.SettingsLifetime != null)
+            {
+                expiration = DateTime.UtcNow - room.SettingsLifetime.GetExpirationUtc();
+            }
+        }
+
+        if (expiration.HasValue && expiration.Value != TimeSpan.MaxValue)
+        {
+            result.Expired = new ApiDateTime(result.Updated.UtcTime + expiration.Value, result.Updated.TimeZoneOffset);
+        }
+
         if (file.Order != 0)
         {
-            file.Order += foldersCount;
+            if (string.IsNullOrEmpty(order))
+            {
+                order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(file.ParentId);
+            }
+            
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, file.Order) : file.Order.ToString();
         }
 

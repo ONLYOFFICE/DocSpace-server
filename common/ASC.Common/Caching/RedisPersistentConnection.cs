@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Net.Sockets;
-
-using Polly;
-
 namespace ASC.Api.Core.Core;
 public class RedisPersistentConnection : IDisposable
 {
@@ -45,7 +41,7 @@ public class RedisPersistentConnection : IDisposable
     // ConnectionMultiplexer instance
     private readonly TimeSpan _reconnectErrorThreshold = TimeSpan.FromSeconds(30);
     private readonly TimeSpan _restartConnectionTimeout = TimeSpan.FromSeconds(15);
-    private const int RetryMaxAttempts = 5;
+    //private const int RetryMaxAttempts = 5;
 
     private readonly SemaphoreSlim _reconnectSemaphore = new(initialCount: 1, maxCount: 1);
     private readonly ConfigurationOptions _configurationOptions;
@@ -70,23 +66,23 @@ public class RedisPersistentConnection : IDisposable
         return _connection;
     }
 
-    public async Task<T> BasicRetryAsync<T>(Func<IDatabase, Task<T>> func)
-    {
-        var policy = Policy.Handle<RedisConnectionException>()
-          .Or<SocketException>()
-          .Or<ObjectDisposedException>()
-          .WaitAndRetry(RetryMaxAttempts, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-          onRetry: async (exception, sleepDuration, attemptNumber, context) =>
-          {
-              try
-              {
-                  await ForceReconnectAsync();
-              }
-              catch (ObjectDisposedException) { }
-          });
-
-         return await policy.Execute(async () => await func(_database));
-    }
+    // public async Task<T> BasicRetryAsync<T>(Func<IDatabase, Task<T>> func)
+    // {
+    //     var policy = Policy.Handle<RedisConnectionException>()
+    //       .Or<SocketException>()
+    //       .Or<ObjectDisposedException>()
+    //       .WaitAndRetry(RetryMaxAttempts, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+    //       onRetry: async (exception, sleepDuration, attemptNumber, context) =>
+    //       {
+    //           try
+    //           {
+    //               await ForceReconnectAsync();
+    //           }
+    //           catch (ObjectDisposedException) { }
+    //       });
+    //
+    //      return await policy.Execute(async () => await func(_database));
+    // }
 
     /// <summary>
     /// Force a new ConnectionMultiplexer to be created.

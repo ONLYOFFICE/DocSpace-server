@@ -60,7 +60,7 @@ public class DbWorker(
             return objForCreate;
         }
 
-        var restrictions = configuration.GetSection("webhooks:blacklist").Get<List<string>>() ?? new List<string>();
+        var restrictions = configuration.GetSection("webhooks:blacklist").Get<List<string>>() ?? [];
         
         if (Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) &&         
             System.Net.IPAddress.TryParse(parsedUri.Host, out _) && 

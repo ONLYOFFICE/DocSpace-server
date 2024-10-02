@@ -239,7 +239,7 @@ public class SsoController(TenantManager tenantManager,
     {
         var ssoUsers = (await userManager.GetUsersAsync()).Where(u => u.IsSSO()).ToList();
 
-        if (!ssoUsers.Any())
+        if (ssoUsers.Count == 0)
         {
             return;
         }

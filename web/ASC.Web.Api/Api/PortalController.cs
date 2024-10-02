@@ -86,8 +86,13 @@ public class PortalController(
     [HttpGet("")]
     public async Task<TenantDto> Get()
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await tenantManager.GetCurrentTenantAsync();   
+
+        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            return new TenantDto { TenantId = tenant.Id };
+        }
+
         return mapper.Map<TenantDto>(tenant);
     }
 
@@ -453,7 +458,8 @@ public class PortalController(
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
-        var massageDate = DateTime.UtcNow;
+        var now = DateTime.UtcNow;
+        var messageDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
         if (!string.Equals(newAlias, oldAlias, StringComparison.InvariantCultureIgnoreCase))
         {
             if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
@@ -470,7 +476,7 @@ public class PortalController(
             tenant = await tenantManager.SaveTenantAsync(tenant);
             tenantManager.SetCurrentTenant(tenant);
             
-            await messageService.SendAsync(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias, dateTime: massageDate);
+            await messageService.SendAsync(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias, dateTime: messageDate);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
@@ -494,7 +500,7 @@ public class PortalController(
                                 Uri.SchemeDelimiter,
                                 tenant.GetTenantDomain(coreSettings),
                                 rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
-                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth, massageDate.ToString(CultureInfo.InvariantCulture))
+                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth, messageDate.ToString(CultureInfo.InvariantCulture))
                );
 
         cookiesManager.ClearCookies(CookiesType.AuthKey);
@@ -537,7 +543,7 @@ public class PortalController(
         }
         finally
         {
-            eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
+            await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
             securityContext.Logout();
         }
     }
@@ -672,8 +678,7 @@ public class PortalController(
         await messageService.SendAsync(MessageAction.PortalDeleted);
 
         await cspSettingsHelper.UpdateBaseDomain();
-
-        eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
+        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
 
         return redirectLink;
     }

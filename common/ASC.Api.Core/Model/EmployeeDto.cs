@@ -102,11 +102,11 @@ public class EmployeeDtoHelper(
 {
     private readonly ConcurrentDictionary<Guid, EmployeeDto> _dictionary = new();
     protected readonly ApiContext _httpContext = httpContext;
-    protected  readonly UserPhotoManager _userPhotoManager = userPhotoManager;
-    protected  readonly UserManager _userManager = userManager;
-    protected  readonly AuthContext _authContext = authContext;
-    protected  readonly DisplayUserSettingsHelper _displayUserSettingsHelper = displayUserSettingsHelper;
-    
+    protected readonly UserPhotoManager _userPhotoManager = userPhotoManager;
+    protected readonly UserManager _userManager = userManager;
+    protected readonly AuthContext _authContext = authContext;
+    protected readonly DisplayUserSettingsHelper _displayUserSettingsHelper = displayUserSettingsHelper;
+
     public async Task<EmployeeDto> GetAsync(UserInfo userInfo)
     {
         if (!_dictionary.TryGetValue(userInfo.Id, out var employee))

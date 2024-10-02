@@ -90,6 +90,13 @@ public class FolderDto<T> : FileEntryDto<T>
     /// Specifies if a folder is private or not
     /// </summary>
     public bool Private { get; set; }
+    public bool Indexing { get; set; }
+    public bool DenyDownload { get; set; }
+
+    /// <summary>Room data lifetime settings</summary>
+    public RoomDataLifetimeDto Lifetime { get; set; }
+
+    public WatermarkDto Watermark { get; set; }
 
     /// <summary>
     /// Folder type
@@ -120,7 +127,8 @@ public class FolderDto<T> : FileEntryDto<T>
 }
 
 [Scope]
-public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
+public class FolderDtoHelper(
+    ApiDateTimeHelper apiDateTimeHelper,
         EmployeeDtoHelper employeeWrapperHelper,
         AuthContext authContext,
         IDaoFactory daoFactory,
@@ -134,14 +142,17 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         FileDateTime fileDateTime,
         SettingsManager settingsManager,
         CoreBaseSettings coreBaseSettings,
-        TenantManager tenantManager)
+    BreadCrumbsManager breadCrumbsManager,
+    TenantManager tenantManager,
+    WatermarkManager watermarkManager,
+    WatermarkDtoHelper watermarkHelper,
+    IMapper mapper)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null)
     {
         var result = await GetFolderWrapperAsync(folder);
-
         result.ParentId = folder.ParentId;
 
         if (DocSpaceHelper.IsRoom(folder.FolderType))
@@ -149,7 +160,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             if (folder.Tags == null)
             {
                 var tagDao = daoFactory.GetTagDao<T>();
-                result.Tags = await tagDao.GetTagsAsync(TagType.Custom, new[] { folder }).Select(t => t.Name).ToListAsync();
+                result.Tags = await tagDao.GetTagsAsync(TagType.Custom, [folder]).Select(t => t.Name).ToListAsync();
             }
             else
             {
@@ -200,10 +211,18 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                     result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaRoomSettings.DefaultQuota;
                 }
             }
+            
+            var watermarkSettings = await watermarkManager.GetWatermarkAsync(folder);
+            result.Watermark = watermarkHelper.Get(watermarkSettings);
         }
 
         if (folder.Order != 0)
         {
+            if (string.IsNullOrEmpty(order))
+            {
+                order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(folder.ParentId);
+            }
+            
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
         }
 
@@ -212,6 +231,8 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             result.Type = folder.FolderType;
         }
 
+        result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
+        
         return result;
     }
 
@@ -237,6 +258,8 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         result.New = newBadges;
         result.Pinned = folder.Pinned;
         result.Private = folder.SettingsPrivate;
+        result.Indexing = folder.SettingsIndexing;
+        result.DenyDownload = folder.SettingsDenyDownload;
 
         return result;
     }

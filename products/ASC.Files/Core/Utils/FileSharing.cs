@@ -368,12 +368,6 @@ public class FileSharingAceHelper(
             }
         }
 
-        if (advancedSettings != null && entryType == FileEntryType.File && ownerId == authContext.CurrentAccount.ID && fileUtility.CanWebView(entry.Title) && !entry.ProviderEntry)
-        {
-            await fileSecurity.ShareAsync(entry.Id, entryType, FileConstant.DenyDownloadId, advancedSettings.DenyDownload ? FileShare.Restrict : FileShare.None);
-            await fileSecurity.ShareAsync(entry.Id, entryType, FileConstant.DenySharingId, advancedSettings.DenySharing ? FileShare.Restrict : FileShare.None);
-        }
-
         foreach (var userId in usersWithoutRight)
         {
             await fileMarker.RemoveMarkAsNewAsync(entry, userId);
@@ -601,11 +595,6 @@ public class FileSharing(
                 continue;
             }
 
-            if (r.Subject == FileConstant.DenyDownloadId || r.Subject == FileConstant.DenySharingId)
-            {
-                continue;
-            }
-
             var ace = await ToAceAsync(entry, r, canEditAccess);
             
             if (ace.SubjectType == SubjectType.Group && ace.Id == Constants.LostGroupInfo.ID)
@@ -804,17 +793,19 @@ public class FileSharing(
 
         var securityDao = daoFactory.GetSecurityDao<T>();
         var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
+        var userId = authContext.CurrentAccount.ID;
 
         await foreach (var member in securityDao.GetGroupMembersWithSecurityAsync(entry, groupId, text, offset, count))
         {
             var isOwner = entry.CreateBy == member.UserId;
+            var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(member.UserId);
             
             yield return new GroupMemberSecurity
             {
                 User = await userManager.GetUsersAsync(member.UserId),
                 GroupShare = member.GroupShare,
-                UserShare = member.UserShare,
-                CanEditAccess = canEditAccess && !isOwner,
+                UserShare = isOwner || isDocSpaceAdmin ? FileShare.RoomAdmin : member.UserShare,
+                CanEditAccess = canEditAccess && !isOwner && userId != member.UserId && !isDocSpaceAdmin,
                 Owner = isOwner
             };
         }
@@ -952,7 +943,7 @@ public class FileSharing(
     }
 }
 
-public record AceProcessingResult<T>(bool Changed, string Warning, IReadOnlyList<ProcessedItem<T>> ProcessedItems);
+public record AceProcessingResult<T>(bool Changed, string Warning, List<ProcessedItem<T>> ProcessedItems);
 public record ProcessedItem<T>(EventType EventType, FileShareRecord<T> PastRecord, AceWrapper Ace);
 
 public enum EventType

@@ -424,7 +424,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Počet používateľov v miestnosti by nemal presahovať {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding a personalizácia</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">

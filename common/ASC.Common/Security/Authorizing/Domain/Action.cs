@@ -33,10 +33,7 @@ public class Action : IAction
     public bool AdministratorAlwaysAllow { get; private set; }
     public bool Conjunction { get; private set; }
 
-    public Action(Guid id, string name)
-        : this(id, name, true, true) { }
-
-    public Action(Guid id, string name, bool administratorAlwaysAllow, bool conjunction)
+    public Action(Guid id, string name, bool administratorAlwaysAllow = true, bool conjunction = true)
     {
         if (id == Guid.Empty)
         {

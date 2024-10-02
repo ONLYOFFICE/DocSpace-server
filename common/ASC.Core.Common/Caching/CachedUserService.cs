@@ -102,7 +102,7 @@ public class UserServiceCache
         if (groupRef != null && r.Removed)
         {
             Cache.Remove(groupRef);
-    }
+        }
     }
 
     public static string GetUserPhotoCacheKey(int tenant, Guid userId)
@@ -181,9 +181,11 @@ public class CachedUserService : IUserService, ICachedService
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup)
     {
-        return _service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
+        return _service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
+            text, separator, withoutGroup);
     }
 
     public IAsyncEnumerable<UserInfo> GetUsers(
@@ -197,6 +199,7 @@ public class CachedUserService : IUserService, ICachedService
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup,
         Guid ownerId,
         UserSortType sortBy,
@@ -204,8 +207,8 @@ public class CachedUserService : IUserService, ICachedService
         long limit,
         long offset)
     {
-        return _service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup, ownerId, sortBy, 
-            sortOrderAsc, limit, offset);
+        return _service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, 
+            separator, withoutGroup, ownerId, sortBy, sortOrderAsc, limit, offset);
     }
 
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id)

@@ -58,8 +58,8 @@ public static class OpenApiExtension
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.EnableAnnotations();
-            var serverUrls = new List<string>(configuration.GetSection("openApi:servers").Get<List<string>>()) ?? [];
-            var serverDescription = new List<string>(configuration.GetSection("openApi:serversDescription").Get<List<string>>()) ?? [];
+            var serverUrls = configuration.GetSection("openApi:servers").Get<List<string>>() ?? [];
+            var serverDescription = configuration.GetSection("openApi:serversDescription").Get<List<string>>() ?? [];
 
             for (var i = 0; i < serverUrls.Count; i++)
             {
@@ -169,7 +169,7 @@ public static class OpenApiExtension
                         {
                             Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = CookiesManager.AuthCookiesName }
                         },
-                        new[] { "read", "write" }
+                        ["read", "write"]
                     }
                 });
 

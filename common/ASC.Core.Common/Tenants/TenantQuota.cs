@@ -89,7 +89,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         }
         set
         {
-            _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : new List<string>();
+            _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : [];
         }
     }
 
@@ -260,17 +260,6 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _statisticFeature.Value = value;
     }
 
-    private readonly TenantQuotaFeatureFlag _whiteLabelFeature;
-
-    /// <summary>
-    /// Specifies if the white label settings are available or not
-    /// </summary>
-    public bool WhiteLabel
-    {
-        get => _whiteLabelFeature.Value;
-        set => _whiteLabelFeature.Value = value;
-    }
-
     private readonly TenantQuotaFeatureFlag _customizationFeature;
 
     /// <summary>
@@ -280,6 +269,16 @@ public class TenantQuota : IMapFrom<DbQuota>
     {
         get => _customizationFeature.Value;
         set => _customizationFeature.Value = value;
+    }
+
+    private readonly TenantQuotaFeatureFlag _lifetimeFeature;
+
+    /// <summary>Specifies if the license is lifetime or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Lifetime
+    {
+        get => _lifetimeFeature.Value;
+        set => _lifetimeFeature.Value = value;
     }
 
     private readonly TenantQuotaFeatureFlag _customFeature;
@@ -355,8 +354,8 @@ public class TenantQuota : IMapFrom<DbQuota>
         _docsEditionFeature = new TenantQuotaFeatureFlag(this) { Name = "docs", Visible = false };
         _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Order = 3 };
         _ssoFeature = new TenantQuotaFeatureFlag(this) { Name = "sso", Order = 5 };
-        _whiteLabelFeature = new TenantQuotaFeatureFlag(this) { Name = "whitelabel", Order = 4 };
-        _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Visible = false };
+        _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Order = 4 };
+        _lifetimeFeature = new TenantQuotaFeatureFlag(this) { Name = "lifetime", Standalone = true };
         _customFeature = new TenantQuotaFeatureFlag(this) { Name = "custom", Visible = false };
         _autoBackupRestoreFeature = new TenantQuotaFeatureFlag(this) { Name = "restore", Order = 6 };
         _oauthFeature = new TenantQuotaFeatureFlag(this) { Name = "oauth" };
@@ -380,8 +379,8 @@ public class TenantQuota : IMapFrom<DbQuota>
             _docsEditionFeature,
             _ldapFeature,
             _ssoFeature,
-            _whiteLabelFeature,
             _customizationFeature,
+            _lifetimeFeature,
             _customFeature,
             _autoBackupRestoreFeature,
             _oauthFeature,

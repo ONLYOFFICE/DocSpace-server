@@ -159,7 +159,7 @@ public class WebPluginsController(ApiContext apiContext,
 
         var domains = plugin.CspDomains.Split(',');
 
-        var currentDomains = settings.Domains?.ToList() ?? new List<string>();
+        var currentDomains = settings.Domains?.ToList() ?? [];
 
         if (enabled)
         {
