@@ -3772,11 +3772,20 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
+        Dictionary<Guid, UserRelation> userRelations = null;
+        var currentUserId = authContext.CurrentAccount.ID;
+        
+        var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(currentUserId);
+
         if (!resendAll)
         {
             await foreach (var ace in fileSharing.GetPureSharesAsync(room, usersIds))
             {
                 var user = await userManager.GetUsersAsync(ace.Id);
+                if (!await HasAccessInviteAsync(user))
+                {
+                    continue;
+                }
                 
                 var link = await invitationService.GetInvitationLinkAsync(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
                 await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, await urlShortener.GetShortenLinkAsync(link));
@@ -3805,6 +3814,10 @@ public class FileStorageService //: IFileStorageService
                 }
                 
                 var user = await userManager.GetUsersAsync(ace.Id);
+                if (!await HasAccessInviteAsync(user))
+                {
+                    continue;
+                }
                 
                 var link = await invitationService.GetInvitationLinkAsync(user.Email, ace.Access, authContext.CurrentAccount.ID, id.ToString());
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
@@ -3816,6 +3829,25 @@ public class FileStorageService //: IFileStorageService
             {
                 finish = true;
             }
+        }
+
+        return;
+
+        async Task<bool> HasAccessInviteAsync(UserInfo user)
+        {
+            if (isDocSpaceAdmin)
+            {
+                return true;
+            }
+
+            var type = await userManager.GetUserTypeAsync(user);
+            if (type != EmployeeType.Guest || (user.CreatedBy.HasValue && user.CreatedBy.Value == currentUserId))
+            {
+                return true;
+            }
+
+            userRelations ??= await userManager.GetUserRelationsAsync(currentUserId);
+            return userRelations.ContainsKey(user.Id);
         }
     }
 

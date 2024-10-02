@@ -694,6 +694,16 @@ public class EFUserService(
         await userDbContext.SaveChangesAsync();
     }
 
+    public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(int tenantId, Guid sourceUserId)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        var q = userDbContext.UserRelations
+            .Where(r => r.TenantId == tenantId && r.SourceUserId == sourceUserId);
+        
+        return await q.ToDictionaryAsync(r => r.TargetUserId, mapper.Map<UserRelation>);
+    }
+
     private IQueryable<User> GetUserQuery(UserDbContext userDbContext, int tenant)
     {
         var q = userDbContext.Users.AsQueryable();

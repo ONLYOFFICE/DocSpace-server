@@ -1001,6 +1001,8 @@ public class UserController(
                 .ToListAsync();
         }
 
+        Dictionary<Guid, UserRelation> userRelations = null;
+
         foreach (var user in users)
         {
             if (user.IsActive)
@@ -1031,7 +1033,7 @@ public class UserController(
             if (user.ActivationStatus == EmployeeActivationStatus.Pending)
             {
                 var type = await _userManager.GetUserTypeAsync(user.Id);
-                if (currentUser.Id != user.Id && !HasAccessInvite(type, currentUser))
+                if (currentUser.Id != user.Id && !await HasAccessInviteAsync(type, currentUser, user))
                 {
                     continue;
                 }
@@ -1046,7 +1048,7 @@ public class UserController(
                 if (currentUser.Id != user.Id)
                 {
                     var type = await _userManager.GetUserTypeAsync(user.Id);
-                    if (!HasAccessInvite(type, currentUser))
+                    if (!await HasAccessInviteAsync(type, currentUser, user))
                     {
                         continue;
                     }
@@ -1066,12 +1068,31 @@ public class UserController(
 
         yield break;
 
-        bool HasAccessInvite(EmployeeType type, UserInfo currentUser)
+        async Task<bool> HasAccessInviteAsync(EmployeeType type, UserInfo currentUser, UserInfo user)
         {
+            if (currentUserType == EmployeeType.Guest)
+            {
+                return false;
+            }
+            
+            if (currentUserType != EmployeeType.DocSpaceAdmin && 
+                type == EmployeeType.Guest && 
+                user.CreatedBy.HasValue && 
+                user.CreatedBy.Value != currentUser.Id)
+            {
+                userRelations ??= await _userManager.GetUserRelationsAsync(currentUser.Id);
+                if (!userRelations.ContainsKey(user.Id))
+                {
+                    return false;
+                }
+            }
+            
             switch (type)
             {
-                case EmployeeType.RoomAdmin when currentUserType is EmployeeType.DocSpaceAdmin:
                 case EmployeeType.DocSpaceAdmin when currentUser.IsOwner(tenant):
+                case EmployeeType.RoomAdmin when currentUserType is EmployeeType.DocSpaceAdmin:
+                case EmployeeType.User when currentUserType != EmployeeType.User:
+                case EmployeeType.Guest:
                     return true;
             }
 

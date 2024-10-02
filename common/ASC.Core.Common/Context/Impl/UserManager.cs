@@ -790,6 +790,11 @@ public class UserManager(
         }
     }
     
+    public Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(Guid sourceUserId)
+    {
+        return userService.GetUserRelationsAsync(Tenant.Id, sourceUserId);
+    }
+    
     #endregion Users
 
 
