@@ -261,8 +261,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     break;
 
                 default:
-                    canEdit = edit;
-                    canFill = !edit;
+                    canEdit = true;
+                    canFill = false;
                     break;
             }
         }
