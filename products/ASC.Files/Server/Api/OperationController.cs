@@ -235,6 +235,7 @@ public class OperationController(
             }
         }
     }
+
     /// <summary>
     /// Checks a batch of files and folders for conflicts when moving or copying them to the folder with the ID specified in the request.
     /// </summary>
@@ -266,6 +267,7 @@ public class OperationController(
             yield return await GetFileEntryWrapperAsync(e);
         }
     }
+
     /// <summary>
     /// Finishes an operation with the ID specified in the request or all the active operations.
     /// </summary>

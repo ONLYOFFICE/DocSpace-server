@@ -124,7 +124,9 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
             }
         }
 
-        swaggerDoc.Tags = customTags.Select(tag => new OpenApiTag
+        swaggerDoc.Tags = customTags
+            .Where(tag => _tagDescriptions.ContainsKey(tag))
+            .Select(tag => new OpenApiTag
         {
             Name = tag,
             Description = _tagDescriptions[tag]

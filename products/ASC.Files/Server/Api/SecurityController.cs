@@ -161,6 +161,9 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
         return await fileStorageService.SendEditorNotifyAsync(inDto.FileId, inDto.MentionMessage);
     }
 
+    /// <summary>
+    /// Gets groups memebers with folder security
+    /// </summary>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]

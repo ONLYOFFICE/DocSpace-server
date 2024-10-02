@@ -81,7 +81,12 @@ public class UserController(
     EmailValidationKeyModelHelper emailValidationKeyModelHelper)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
-
+    /// <summary>
+    /// Gets claims
+    /// </summary>
+    /// <path>api/2.0/people/tokendiagnostics</path>
+    [Tags("People / Profiles")]
+    [SwaggerResponse(200, "Claims", typeof(object))]
     [HttpGet("tokendiagnostics")]
     public object GetClaims()
     {

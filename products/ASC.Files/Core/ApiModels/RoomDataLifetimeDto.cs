@@ -32,19 +32,42 @@ namespace ASC.Files.Core.ApiModels;
 /// </summary>
 public class RoomDataLifetimeDto : IMapFrom<RoomDataLifetime>
 {
-    /// <summary>Specifies action</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies action
+    /// </summary>
     public bool DeletePermanently { get; set; }
 
-    /// <summary>Specifies time period type</summary>
-    /// <type>ASC.Files.Core.VirtualRooms.RoomDataLifetimePeriod, ASC.Files.Core</type>
+    /// <summary>
+    /// Specifies time period type
+    /// </summary>
     public RoomDataLifetimePeriod Period { get; set; }
 
-    /// <summary>Specifies time period value</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Specifies time period value
+    /// </summary>
     [Range(1, 9999)]
     public int? Value { get; set; }
     
+    /// <summary>
+    /// Enabled
+    /// </summary>
     public bool? Enabled { get; set; }
 }
 
+/// <summary>
+/// Request parameters for room data lifetime
+/// </summary>
+public class RoomDataLifetimeDto<T>
+{
+    /// <summary>
+    /// Room ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// Room data lifetime
+    /// </summary>
+    [FromBody]
+    public RoomDataLifetimeDto RoomDataLifetime { get; set; }
+}

@@ -54,9 +54,7 @@ public class FilesControllerInternal(
     /// <summary>
     /// Get the list of actions performed on the file with the specified identifier
     /// </summary>
-    /// <short>
-    /// Get file history
-    /// </short>
+    /// <short>Get file history</short>
     /// <path>api/2.0/files/file/{fileId}/log</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]

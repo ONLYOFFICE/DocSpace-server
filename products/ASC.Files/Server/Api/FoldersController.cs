@@ -102,9 +102,7 @@ public abstract class FoldersController<T>(
     /// <summary>
     /// Creates a new folder with the title specified in the request. The parent folder ID can be also specified.
     /// </summary>
-    /// <short>
-    /// Create a folder
-    /// </short>
+    /// <short>Create a folder</short>
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "New folder parameters", typeof(FolderDto<int>))]
@@ -243,9 +241,7 @@ public abstract class FoldersController<T>(
     /// <summary>
     /// Renames the selected folder with a new title specified in the request.
     /// </summary>
-    /// <short>
-    /// Rename a folder
-    /// </short>
+    /// <short>Rename a folder</short>
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<int>))]

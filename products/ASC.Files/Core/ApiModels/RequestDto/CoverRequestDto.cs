@@ -30,6 +30,28 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class CoverRequestDto
 {
+    /// <summary>
+    /// Color
+    /// </summary>
     public string Color { get; set; }
+
+    /// <summary>
+    /// Cover
+    /// </summary>
     public string Cover { get; set; }
+}
+
+public class CoverRequestDto<T>
+{
+    /// <summary>
+    /// Room ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// Cover
+    /// </summary>
+    [FromBody]
+    public CoverRequestDto Cover { get; set; } = null;
 }

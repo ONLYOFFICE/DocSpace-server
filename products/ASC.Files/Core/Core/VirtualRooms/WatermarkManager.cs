@@ -74,6 +74,10 @@ public class WatermarkManager
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
+        if(watermarkRequestDto == null)
+        {
+            return new WatermarkSettings();
+        }
 
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
         {
