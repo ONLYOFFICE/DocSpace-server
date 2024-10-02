@@ -3404,7 +3404,9 @@ public class FileStorageService //: IFileStorageService
             room.SettingsIndexing = indexing.Value;
             await folderDao.SaveFolderAsync(room);
 
-            await filesMessageService.SendAsync(indexing ? MessageAction.RoomIndexingEnabled : MessageAction.RoomIndexingDisabled, room);
+            await filesMessageService.SendAsync(indexing.Value 
+                ? MessageAction.RoomIndexingEnabled 
+                : MessageAction.RoomIndexingDisabled, room);
         }
             
         if (denyDownload.HasValue && room.SettingsDenyDownload != denyDownload)
@@ -3412,7 +3414,9 @@ public class FileStorageService //: IFileStorageService
             room.SettingsDenyDownload = denyDownload.Value;
             await folderDao.SaveFolderAsync(room);
                 
-            await filesMessageService.SendAsync(denyDownload ? MessageAction.RoomDenyDownloadEnabled : MessageAction.RoomDenyDownloadDisabled, room, room.Title);
+            await filesMessageService.SendAsync(denyDownload.Value 
+                ? MessageAction.RoomDenyDownloadEnabled 
+                : MessageAction.RoomDenyDownloadDisabled, room, room.Title);
         }
 
         return room;

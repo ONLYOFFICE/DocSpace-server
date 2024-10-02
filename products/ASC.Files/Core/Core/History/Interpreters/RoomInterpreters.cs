@@ -252,15 +252,14 @@ public class RoomWatermarkSetInterpreter : ActionInterpreter
     {
         var desc = GetAdditionalDescription(description);
 
-        if (entry is not Folder<int> folder || !DocSpaceHelper.IsRoom(folder.FolderType) || string.IsNullOrEmpty(folder.SettingsWatermark))
+        if (entry is not Folder<int> folder || !DocSpaceHelper.IsRoom(folder.FolderType) || folder.SettingsWatermark == null)
         {
             return ValueTask.FromResult<HistoryData>(new WatermarkData(false, target, desc.RoomTitle));
         }
-
-        var settings = JsonSerializer.Deserialize<WatermarkSettings>(folder.SettingsWatermark);
+        
         var hash = int.Parse(description[1]);
             
-        var currentWatermark = settings.Created.GetHashCode() == hash;
+        var currentWatermark = folder.SettingsWatermark.Created.GetHashCode() == hash;
 
         return ValueTask.FromResult<HistoryData>(new WatermarkData(currentWatermark, target, desc.RoomTitle));
     }

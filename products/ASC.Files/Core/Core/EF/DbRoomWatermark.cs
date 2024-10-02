@@ -35,4 +35,5 @@ public class DbRoomWatermark : IMapFrom<WatermarkSettings>
     public double ImageHeight { get; set; }
     public string ImageUrl { get; set; }
     public int ImageScale { get; set; }
+    public DateTime Created { get; set; }
 }

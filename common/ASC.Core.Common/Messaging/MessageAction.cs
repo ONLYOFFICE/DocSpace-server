@@ -236,7 +236,7 @@ public enum MessageAction
     RoomCoverChanged = 5103, 
     
     RoomIndexingChanged = 5104,
-    RoomDenyDownloadChanged = 5105,//last
+    RoomDenyDownloadChanged = 5105,
     
     RoomExternalLinkCreated = 5088,
     RoomExternalLinkUpdated = 5089,
@@ -248,11 +248,11 @@ public enum MessageAction
     FileExternalLinkUpdated = 5092,
     FileExternalLinkDeleted = 5093,
     
-    RoomIndexingEnabled = 5102,
-    RoomIndexingDisabled = 5103,
+    RoomIndexingEnabled = 5114,
+    RoomIndexingDisabled = 5115,
     
-    RoomLifeTimeSet = 5104,
-    RoomLifeTimeDisabled = 5105,
+    RoomLifeTimeSet = 5116,
+    RoomLifeTimeDisabled = 5117, //last
     
     RoomDenyDownloadEnabled = 5109,
     RoomDenyDownloadDisabled = 5110,
@@ -260,7 +260,7 @@ public enum MessageAction
     PrimaryExternalLinkCopied = 5111,
     
     RoomWatermarkSet = 5112,
-    RoomWatermarkDisabled = 5113,
+    RoomWatermarkDisabled = 5113, 
 
     #endregion
 

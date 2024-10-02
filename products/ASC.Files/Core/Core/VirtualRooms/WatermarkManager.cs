@@ -65,7 +65,7 @@ public class WatermarkManager(
 
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
 
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
         {
@@ -97,13 +97,13 @@ public class WatermarkManager(
 
         await folderDao.SetWatermarkSettings(watermarkSettings, room);
 
-        if (watermarkSettings.Enabled)
+        if (watermarkRequestDto.Enabled.HasValue && !watermarkRequestDto.Enabled.Value)
         {
-            await filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, room, room.Title, watermarkSettings.Created.GetHashCode().ToString());
+            await filesMessageService.SendAsync(MessageAction.RoomWatermarkDisabled, room, room.Title);
         }
         else
         {
-            await filesMessageService.SendAsync(MessageAction.RoomWatermarkDisabled, room, room.Title);
+            await filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, room, room.Title, watermarkSettings.Created.GetHashCode().ToString());
         }
 
         return watermarkSettings;
@@ -121,7 +121,7 @@ public class WatermarkManager(
             }
             else
             {
-                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(folder, imageUrlFromDto);
+                imageUrl = await roomLogoManager.CreateWatermarkImageAsync(folder, imageUrlFromDto);
             }
         }
 
@@ -130,7 +130,7 @@ public class WatermarkManager(
 
     public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
     {
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType) || room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
+        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType) || room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
         {
             return null;
         }
