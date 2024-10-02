@@ -178,9 +178,23 @@ public class ExternalShare(Global global,
     
     public async Task<TokenData> ParseShareKeyAsync(string key)
     {
-        ArgumentException.ThrowIfNullOrEmpty(key);
+        if (string.IsNullOrEmpty(key))
+        {
+            return new TokenData
+            {
+                Id = Guid.Empty
+            };
+        }
 
         var stringKey = Signature.Read<string>(key, await GetDbKeyAsync());
+
+        if (string.IsNullOrEmpty(stringKey))
+        {
+            return new TokenData
+            {
+                Id = Guid.Empty
+            };
+        }
 
         if (!stringKey.StartsWith('{') || !stringKey.EndsWith('}'))
         {
