@@ -1243,6 +1243,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             DefaultCommonShare;
 
         e.ShareRecord = ace;
+        logger.LogDebug("35. FilterEntryAsync. fileId: {fildeId} KEY: {key}", e.Id, externalShare.GetKey());
         e.Access = ace?.Share ?? defaultShare;
         e.Access = e.RootFolderType is FolderType.ThirdpartyBackup ? FileShare.Restrict : e.Access;
 
