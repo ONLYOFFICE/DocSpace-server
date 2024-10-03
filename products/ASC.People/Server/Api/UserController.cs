@@ -2105,20 +2105,18 @@ public class UserControllerAdditional<T>(
         EmployeeStatus? employeeStatus,
         EmployeeActivationStatus? activationStatus,
         bool? excludeShared,
-        Area? area,
-        bool includeStrangers = false)
+        bool? invitedByMe,
+        Guid? inviterId,
+        Area area = Area.All)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
 
         if (!await fileSecurity.CanEditAccessAsync(room))
         {
-            throw new SecurityException();
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        
-        if (includeStrangers && !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
-        {
-            includeStrangers = false;
-        }
+
+        var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
@@ -2134,7 +2132,9 @@ public class UserControllerAdditional<T>(
             excludeShared ?? false,
             filterSeparator,
             includeStrangers,
-            area ?? Area.All);
+            area,
+            invitedByMe,
+            inviterId);
 
         apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
 
@@ -2145,7 +2145,9 @@ public class UserControllerAdditional<T>(
                            excludeShared ?? false,
                            filterSeparator,
                            includeStrangers,
-                           area ?? Area.All,
+                           area,
+                           invitedByMe,
+                           inviterId,
                            offset,
                            count))
         {

@@ -586,7 +586,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, 
-        bool excludeShared, string separator, bool excludeStrangers, Area area = Area.All, int offset = 0, int count = -1)
+        bool excludeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, int offset = 0, int count = -1)
     {
         if (entry == null || count == 0)
         {
@@ -597,7 +597,8 @@ internal abstract class SecurityBaseDao<T>(
         var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator, excludeStrangers, area);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator, 
+            includeStrangers, area, invitedByMe, inviterId);
 
         if (offset > 0)
         {
@@ -616,7 +617,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, string separator, bool excludeStrangers, Area area)
+        bool excludeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId)
     {
         if (entry == null)
         {
@@ -627,13 +628,25 @@ internal abstract class SecurityBaseDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator, excludeStrangers, area);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator, includeStrangers, area, invitedByMe, inviterId);
 
         return await q1.CountAsync();
     }
 
-    private IQueryable<UserWithShared> GetUsersWithSharedQuery(int tenantId, string entryId, FileEntry entry, string text, EmployeeStatus? employeeStatus, 
-        EmployeeActivationStatus? activationStatus, bool excludeShared, FilesDbContext filesDbContext, string separator, bool includeStrangers, Area area)
+    private IQueryable<UserWithShared> GetUsersWithSharedQuery(
+        int tenantId,
+        string entryId,
+        FileEntry entry,
+        string text,
+        EmployeeStatus? employeeStatus,
+        EmployeeActivationStatus? activationStatus,
+        bool excludeShared,
+        FilesDbContext filesDbContext,
+        string separator,
+        bool includeStrangers,
+        Area area,
+        bool? invitedByMe,
+        Guid? inviterId)
     {
         var q = filesDbContext.Users
             .AsNoTracking()
@@ -648,6 +661,8 @@ internal abstract class SecurityBaseDao<T>(
         {
             q = q.Where(u => u.ActivationStatus == activationStatus.Value);
         }
+
+        q = UserQueryHelper.FilterByInviter(q, invitedByMe, inviterId, _authContext.CurrentAccount.ID);
 
         switch (area)
         {
@@ -683,12 +698,11 @@ internal abstract class SecurityBaseDao<T>(
 
                     if (!includeStrangers)
                     {
-                        var currentUserId = _authContext.CurrentAccount.ID;
                         q = q.Join(filesDbContext.UserRelations,
                             u => new
                             {
                                 TenantId = tenantId, 
-                                SourceUserId = currentUserId, 
+                                SourceUserId = _authContext.CurrentAccount.ID, 
                                 TargetUserId = u.Id
                             },
                             ur => new
@@ -744,13 +758,11 @@ internal abstract class SecurityBaseDao<T>(
 
         if (area == Area.All && !includeStrangers)
         {
-            var currentUserId = _authContext.CurrentAccount.ID;
-            
             q1 = q1.GroupJoin(filesDbContext.UserRelations,
                     us => new
                     {
                         TenantId = tenantId,
-                        SourceUserId = currentUserId, 
+                        SourceUserId = authContext.CurrentAccount.ID, 
                         TargetUserId = us.User.Id
                     },
                     ur => new
