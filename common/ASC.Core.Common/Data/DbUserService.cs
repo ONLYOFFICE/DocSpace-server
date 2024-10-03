@@ -847,14 +847,7 @@ public class EFUserService(
             q = q.Where(r => r.ActivationStatus == filter.ActivationStatus.Value);
         }
 
-        if (filter.InvitedByMe.HasValue && filter.InvitedByMe.Value)
-        {
-            q = q.Where(r => r.CreatedBy == authContext.CurrentAccount.ID);
-        }
-        else if (filter.InviterId.HasValue)
-        {
-            q = q.Where(r => r.CreatedBy == filter.InviterId.Value);
-        }
+        q = UserQueryHelper.FilterByInviter(q, filter.InvitedByMe, filter.InviterId, authContext.CurrentAccount.ID);
 
         switch (filter.Area)
         {
