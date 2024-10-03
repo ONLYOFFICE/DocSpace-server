@@ -721,7 +721,7 @@ public class UserController(
             _apiContext.SetDataFiltered();
         }
 
-        return GetFullByFilter(status, groupId, null, null, null, null, null, null, null, false, false);
+        return GetFullByFilter(status, groupId, null, null, null, null, null, null, null, false, false, invitedByMe: false, inviterId: null);
     }
 
     /// <summary>
@@ -743,7 +743,8 @@ public class UserController(
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified ID</param>
     /// <param type="ASC.Core.Common.Core.Area, ASC.Core.Common.Core" name="area">Search area (All = 0, People = 1, Guests = 2)</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="includeStrangers">Specifies whether to include stranger guests</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="invitedByMe">Specifies whether to include only users that I have invited</param>
+    /// <param type="System.Nullable{System.Guid}, System" name="inviterId">Specifies whether to include only users invited by the user with the given id</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/filter</path>
     /// <httpMethod>GET</httpMethod>
@@ -760,8 +761,9 @@ public class UserController(
         QuotaFilter? quotaFilter,
         bool? withoutGroup,
         bool? excludeGroup,
-        Area area = Area.All,
-        bool includeStrangers = false)
+        bool? invitedByMe,
+        Guid? inviterId,
+        Area area = Area.All)
     {
         var filter = new UserFilter
         {
@@ -777,7 +779,8 @@ public class UserController(
             WithoutGroup = withoutGroup,
             ExcludeGroup = excludeGroup,
             Area = area,
-            IncludeStrangers = includeStrangers
+            InvitedByMe = invitedByMe,
+            InviterId = inviterId
         };
         
         var users = GetByFilterAsync(filter);
@@ -868,7 +871,8 @@ public class UserController(
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified ID</param>
     /// <param type="ASC.Core.Common.Core.Area, ASC.Core.Common.Core" name="area">Search area (All = 0, People = 1, Guests = 2)</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="includeStrangers">Specifies whether to include stranger guests</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="invitedByMe">Specifies whether to include only users that I have invited</param>
+    /// <param type="System.Nullable{System.Guid}, System" name="inviterId">Specifies whether to include only users invited by the user with the given id</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
     /// <path>api/2.0/people/simple/filter</path>
     /// <httpMethod>GET</httpMethod>
@@ -885,8 +889,9 @@ public class UserController(
         QuotaFilter? quotaFilter,
         bool? withoutGroup,
         bool? excludeGroup,
-        Area area = Area.All,
-        bool includeStrangers = false)
+        bool? invitedByMe,
+        Guid? inviterId,
+        Area area = Area.All)
     {
         var filter = new UserFilter
         {
@@ -902,7 +907,8 @@ public class UserController(
             WithoutGroup = withoutGroup,
             ExcludeGroup = excludeGroup,
             Area = area,
-            IncludeStrangers = includeStrangers
+            InvitedByMe = invitedByMe,
+            InviterId = inviterId
         };
         
         var users = GetByFilterAsync(filter);
@@ -1880,11 +1886,6 @@ public class UserController(
         var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
                       await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
-        if (filter.IncludeStrangers && !isDocSpaceAdmin)
-        {
-            filter.IncludeStrangers = false;
-        }
-
         var excludeGroups = new List<Guid>();
         var includeGroups = new List<List<Guid>>();
         var combinedGroups = new List<Tuple<List<List<Guid>>, List<Guid>>>();
@@ -1942,7 +1943,8 @@ public class UserController(
 
             includeGroups.Add(adminGroups);
         }
-
+        
+        
         var queryFilter = new UserQueryFilter(isDocSpaceAdmin,
             filter.EmployeeStatus,
             includeGroups,
@@ -1952,12 +1954,14 @@ public class UserController(
             filter.AccountLoginType,
             filter.QuotaFilter,
             filter.Area,
+            filter.InvitedByMe,
+            filter.InviterId,
             _apiContext.FilterValue,
             _apiContext.FilterSeparator,
             filter.WithoutGroup ?? false,
             _apiContext.SortBy,
             !_apiContext.SortDescending,
-            filter.IncludeStrangers,
+            isDocSpaceAdmin,
             _apiContext.Count,
             _apiContext.StartIndex);
 

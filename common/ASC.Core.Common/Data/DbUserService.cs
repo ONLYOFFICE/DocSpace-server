@@ -847,17 +847,24 @@ public class EFUserService(
             q = q.Where(r => r.ActivationStatus == filter.ActivationStatus.Value);
         }
 
+        if (filter.InvitedByMe.HasValue && filter.InvitedByMe.Value)
+        {
+            q = q.Where(r => r.CreatedBy == authContext.CurrentAccount.ID);
+        }
+        else if (filter.InviterId.HasValue)
+        {
+            q = q.Where(r => r.CreatedBy == filter.InviterId.Value);
+        }
+
         switch (filter.Area)
         {
             case Area.Guests when !filter.IncludeStrangers:
                 {
-                    var currentUserId = authContext.CurrentAccount.ID;
-            
                     q = q.Join(userDbContext.UserRelations,
                         u => new
                         {
                             filter.TenantId,
-                            SourceUserId = currentUserId, 
+                            SourceUserId = authContext.CurrentAccount.ID, 
                             TargetUserId = u.Id
                         },
                         ur => new
@@ -871,13 +878,11 @@ public class EFUserService(
                 }
             case Area.All when !filter.IncludeStrangers:
                 {
-                    var currentUserId = authContext.CurrentAccount.ID;
-            
                     q = q.GroupJoin(userDbContext.UserRelations,
                             u => new
                             {
                                 filter.TenantId,
-                                SourceUserId = currentUserId, 
+                                SourceUserId = authContext.CurrentAccount.ID, 
                                 TargetUserId = u.Id
                             },
                             ur => new

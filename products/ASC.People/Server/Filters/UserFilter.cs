@@ -40,5 +40,6 @@ public record UserFilter
     public bool? WithoutGroup { get; set; }
     public bool? ExcludeGroup { get; set; }
     public Area Area { get; set; } = Area.All;
-    public bool IncludeStrangers { get; set; }
+    public bool? InvitedByMe { get; set; }
+    public Guid? InviterId { get; set; }
 }

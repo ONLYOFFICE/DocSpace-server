@@ -47,6 +47,8 @@ public record UserQueryFilter
     public long Offset { get; set; }
     public int TenantId { get; set; }
     public Guid OwnerId { get; set; }
+    public bool? InvitedByMe { get; set; }
+    public Guid? InviterId { get; set; }
     
     public UserQueryFilter() { }
     
@@ -60,6 +62,8 @@ public record UserQueryFilter
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         Area? area,
+        bool? invitedByMe,
+        Guid? inviterId,
         string text,
         string separator,
         bool withoutGroup,
@@ -85,6 +89,8 @@ public record UserQueryFilter
         IncludeStrangers = includeStrangers;
         Limit = limit;
         Offset = offset;
+        InvitedByMe = invitedByMe;
+        InviterId = inviterId;
         
         SortType = !UserSortTypeExtensions.TryParse(sortBy, true, out var sortType) 
             ? UserSortType.FirstName 
