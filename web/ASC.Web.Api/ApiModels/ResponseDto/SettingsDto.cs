@@ -138,6 +138,10 @@ public class SettingsDto
     /// <type>System.String, System</type>
     public string ForumLink { get; set; }
 
+    /// <summary>Specifies whether to display the About section</summary>
+    /// <type>System.Boolean, System</type>
+    public bool DisplayAbout { get; set; }
+
     /// <summary>API documentation link</summary>
     /// <type>System.String, System</type>
     public string ApiDocsLink { get; set; }
