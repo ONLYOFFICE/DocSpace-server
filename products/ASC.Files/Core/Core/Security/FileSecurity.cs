@@ -846,15 +846,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
 
         if (file != null &&
-            action == FilesSecurityActions.Edit &&
-            fileUtility.CanWebRestrictedEditing(file.Title))
-        {
-            if (action == FilesSecurityActions.Edit)
-                logger.LogDebug("1. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, file.Id);
-            return false;
-        }
-
-        if (file != null &&
             (action == FilesSecurityActions.EditForm ||
             action == FilesSecurityActions.FillForms) &&
             !file.IsForm)
@@ -1309,6 +1300,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FilesSecurityActions.FillForms:
+                logger.LogDebug("33. FilterEntryAsync. userId: {userId} fileId:{fileId} ace:{ace} Access:{Access}", userId, e.Id, ace?.Share, e.Access);
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
