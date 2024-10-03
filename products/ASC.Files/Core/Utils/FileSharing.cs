@@ -91,7 +91,6 @@ public class FileSharingAceHelper(
                 continue;
             }
             var currentUserType = await userManager.GetUserTypeAsync(currentUser);
-            var userType = EmployeeType.User;
             var existedShare = shares.Get(w.Id);
             var eventType = existedShare != null ? w.Access == FileShare.None ? EventType.Remove : EventType.Update : EventType.Create;
 
@@ -165,43 +164,10 @@ public class FileSharingAceHelper(
 
             if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
-                var correctAccess = FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses)
-                                    && userAccesses.Contains(w.Access);
-
-                if (currentUserType == EmployeeType.DocSpaceAdmin && !correctAccess)
-                {
-                    continue;
-                }
-
-                if (existedShare != null && !correctAccess)
+                if (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) || 
+                    !userAccesses.Contains(w.Access))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
-                }
-                
-                try
-                {
-                    userType = FileSecurity.GetTypeByShare(w.Access);
-
-                    if (!emailInvite && currentUserType != EmployeeType.DocSpaceAdmin)
-                    {
-                        var user = await userManager.GetUsersAsync(w.Id);
-                        await userManagerWrapper.UpdateUserTypeAsync(user, userType);
-                    }
-                }
-                catch (TenantQuotaException e)
-                {
-                    warning ??= e.Message;
-                    w.Access = FileSecurity.GetHighFreeRole(room.FolderType);
-
-                    if (w.Access == FileShare.None)
-                    {
-                        continue;
-                    }
-                }
-                catch (Exception e)
-                {
-                    warning ??= e.Message;
-                    continue;
                 }
 
                 if (emailInvite)
@@ -210,35 +176,13 @@ public class FileSharingAceHelper(
                     if (!user.Equals(Constants.LostUser))
                     {
                         w.Id = user.Id;
-                        
-                        if (FileSecurity.PaidShares.Contains(w.Access))
-                        {
-                            try
-                            {
-                                if (!await userManagerWrapper.UpdateUserTypeAsync(user, FileSecurity.GetTypeByShare(w.Access)))
-                                {
-                                    continue;
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                warning ??= e.Message;
-                                continue;
-                            }
-                        }
-                        
                         await userManager.AddUserRelationAsync(authContext.CurrentAccount.ID, user.Id);
                     }
                     else
                     {
-                        if (!FileSecurity.PaidShares.Contains(w.Access))
-                        {
-                            userType = EmployeeType.Guest;
-                        }
-                        
                         try
                         {
-                            user = await userManagerWrapper.AddInvitedUserAsync(w.Email, userType, culture, false);
+                            user = await userManagerWrapper.AddInvitedUserAsync(w.Email, EmployeeType.Guest, culture, false);
                             w.Id = user.Id;
                         }
                         catch (Exception e)
