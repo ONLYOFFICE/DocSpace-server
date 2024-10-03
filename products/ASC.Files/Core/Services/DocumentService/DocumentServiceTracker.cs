@@ -287,6 +287,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             try
             {
+                logger.LogDebug("ProcessEditAsync. userId: {userId} fileId:{fileId} file users: {fileUsers}", userId, fileId, fileData.Users);
                 file = await entryManager.TrackEditingAsync(fileId, userId, userId, await tenantManager.GetCurrentTenantIdAsync());
             }
             catch (Exception e)

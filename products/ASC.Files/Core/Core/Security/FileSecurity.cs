@@ -50,7 +50,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         BadgesSettingsHelper badgesSettingsHelper,
         ExternalShare externalShare,
         AuthManager authManager,
-        ICache cache)
+        ICache cache,
+        ILogger<FileSecurity> logger)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -799,6 +800,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (isOutsider && action != FilesSecurityActions.Read)
         {
+            logger.LogDebug("CanAsync. isOutsider: {isOutsider} userId: {userId} entryId:{entryId}", isOutsider, userId, entry.Id);
             return false;
         }
 
@@ -808,6 +810,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isCollaborator = userType is EmployeeType.Collaborator;
         var isAuthenticated =  authContext.IsAuthenticated || (await authManager.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId)).IsAuthenticated;
 
+        logger.LogDebug("CanAsync. isAuthenticated: {isAuthenticated} userId: {userId} entryId:{entryId}", isAuthenticated, userId, entry.Id);
         var accessSnapshot = entry.Access;
         
         var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isCollaborator);
@@ -854,6 +857,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             action == FilesSecurityActions.FillForms) &&
             !file.IsForm)
         {
+            logger.LogDebug("1. FilterEntryAsync. IsForm: {IsForm} userId: {userId} fileId:{fileId}", file.IsForm, userId, file.Id);
             return false;
         }
 
@@ -1063,6 +1067,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         var fileFolder = parentFolders.LastOrDefault();
                         if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
                         {
+                            logger.LogDebug("2. FilterEntryAsync. userId: {userId} fileId:{fileId} folderType:{folderType}", userId, file.Id, fileFolder.FolderType);
                             return false;
                         }
                     }
@@ -1208,6 +1213,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     if (ace is { Share: FileShare.FillForms } && userId != file.CreateBy)
                     {
+                        logger.LogDebug("3. FilterEntryAsync. userId: {userId} fileId:{fileId} createBy:{createBy}", userId, file.Id, file.CreateBy);
                         return false;
                     }
                 }
@@ -1217,6 +1223,12 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
             await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e) != Status.Ok)
         {
+            logger.LogDebug("4. FilterEntryAsync. subject:{subject} userId: {userId} fileId:{fileId} isAuthenticated:{isAuthenticated} ValidateRecord: {ValidateRecord}", 
+                ace.Subject,
+                userId, 
+                file.Id, 
+                isAuthenticated,
+                await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e));
             return false;
         }
 
