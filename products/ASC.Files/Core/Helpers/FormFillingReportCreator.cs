@@ -31,7 +31,9 @@ public class FormFillingReportCreator(
     ExportToCSV exportToCSV,
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
-    TenantUtil tenantUtil)
+    TenantUtil tenantUtil,
+    TenantManager tenantManager,
+    FactoryIndexerForm formsItemDataSearchFactory)
 {
 
     private static readonly JsonSerializerOptions _options = new() {
@@ -41,11 +43,10 @@ public class FormFillingReportCreator(
 
     public async Task UpdateFormFillingReport<T>(T resultsFileId, int resultFormNumber, string formsDataUrl, string resultUrl)
     {
-
         if (formsDataUrl != null)
         {
             var fileDao = daoFactory.GetFileDao<T>();
-            var submitFormsData = await GetSubmitFormsData(resultFormNumber, formsDataUrl, resultUrl);
+            var submitFormsData = await GetSubmitFormsData(resultsFileId, resultFormNumber, formsDataUrl, resultUrl);
 
             if (resultsFileId != null)
             {
@@ -58,7 +59,7 @@ public class FormFillingReportCreator(
         }
     }
 
-    private async Task<SubmitFormsData> GetSubmitFormsData(int resultFormNumber, string url, string resultUrl)
+    private async Task<SubmitFormsData> GetSubmitFormsData<T>(T resultsFileId, int resultFormNumber, string url, string resultUrl)
     {
         var request = new HttpRequestMessage
         {
@@ -69,30 +70,34 @@ public class FormFillingReportCreator(
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        var formNumber = new List<FormsItemData>
+        List<FormsItemData> formNumber = 
+        [
+                new() { Key = FilesCommonResource.FormNumber, Value = resultFormNumber.ToString() }, 
+                new() { Key = FilesCommonResource.LinkToForm, Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.OpenForm}\")" },
+                new() { Key = FilesCommonResource.Date, Value = $"{tenantUtil.DateTimeNow():MM/dd/yyyy H:mm:ss}" }
+        ];
+        
+        var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+        var result = new SubmitFormsData
         {
-            new()
+            FormsData =  fromData.FormsData.Concat(formNumber).ToList()
+        };
+
+        var now = DateTime.UtcNow;
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
+        if (resultsFileId is int id)
+        {
+            var searchItems = new DbFormsItemDataSearch
             {
-                Key = FilesCommonResource.FormNumber,
-                Value = resultFormNumber
-            },
-        };
+                Id = id,
+                TenantId = tenantId,
+                CreateOn = now,
+                FormsData = fromData.FormsData
+            };
 
-        var formLink = new FormsItemData
-        {
-            Key = FilesCommonResource.LinkToForm,
-            Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.OpenForm}\")"
-        };
-        var date = new FormsItemData
-        {
-            Key = FilesCommonResource.Date,
-            Value = $"{tenantUtil.DateTimeNow():MM/dd/yyyy H:mm:ss}"
-        };
-        var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
-
-        result.FormsData = formNumber.Concat(result.FormsData);
-        result.FormsData = result.FormsData.Append(date);
-        result.FormsData = result.FormsData.Append(formLink);
+            await formsItemDataSearchFactory.IndexAsync(searchItems);
+        }
 
         return result;
     }

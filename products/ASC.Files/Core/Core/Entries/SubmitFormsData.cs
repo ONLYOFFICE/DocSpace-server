@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core;
+
 public class SubmitFormsData
 {
     public IEnumerable<FormsItemData> FormsData { get; set; }
@@ -34,6 +35,83 @@ public class FormsItemData
 {
     public string Key { get; set; }
     public string Tag { get; set; }
-    public object Value { get; set; }
+    public string Value { get; set; }
     public string Type { get; set; }
+}
+
+[Transient]
+public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
+{
+    public int Id { get; set; }
+    public int TenantId { get; set; }
+    public DateTime CreateOn { get; set; }
+
+    [Ignore] 
+    public string IndexName => "forms_data";
+
+    public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings)
+    {
+        return a => new object[] {  };
+    }
+}
+
+[Scope]
+public class BaseIndexerForm(Client client,
+    ILogger<BaseIndexerForm> log,
+    IDbContextFactory<WebstudioDbContext> dbContextManager,
+    TenantManager tenantManager,
+    BaseIndexerHelper baseIndexerHelper,
+    Settings settings,
+    IServiceProvider serviceProvider)
+    : BaseIndexer<DbFormsItemDataSearch>(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider);
+
+[Scope(typeof(IFactoryIndexer))]
+public class FactoryIndexerForm(
+    ILoggerProvider options,
+    TenantManager tenantManager,
+    SearchSettingsHelper searchSettingsHelper,
+    FactoryIndexer factoryIndexer,
+    BaseIndexerForm baseIndexer,
+    IServiceProvider serviceProvider,
+    ICache cache)
+    : FactoryIndexer<DbFormsItemDataSearch>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
+{
+    public override async Task IndexAllAsync()
+    {
+        try
+        {
+            var j = 0;
+            var now = DateTime.UtcNow;
+            
+            await foreach (var _ in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
+            {
+
+            }
+
+            await _indexer.OnComplete(now);
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorFactoryIndexerFile(e);
+            throw;
+        }
+
+        return;
+
+        List<int> GetIds(DateTime lastIndexed)
+        {
+            return [];
+        }
+
+        List<DbFormsItemDataSearch> GetData(long start, long stop, DateTime lastIndexed)
+        {
+            return [];
+
+        }
+
+        (int, int, int) GetCount(DateTime lastIndexed)
+        {
+            return new(0, 0, 0);
+        }
+    }
 }
