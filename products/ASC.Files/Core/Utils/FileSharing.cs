@@ -145,7 +145,7 @@ public class FileSharingAceHelper(
                 if (!FileSecurity.AvailableRoomAccesses.TryGetValue(room.FolderType, out var subjectAccesses)
                     || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
                 {
-                    continue;
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
 
                 if (w.FileShareOptions != null)
