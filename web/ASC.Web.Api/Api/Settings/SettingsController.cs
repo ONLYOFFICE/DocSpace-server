@@ -102,7 +102,8 @@ public partial class SettingsController(MessageService messageService,
             LicenseUrl = setupInfo.LicenseUrl,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
-            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager)
+            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager),
+            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !(await tenantManager.GetCurrentTenantQuotaAsync()).Branding
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)

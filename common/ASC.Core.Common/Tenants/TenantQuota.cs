@@ -260,6 +260,16 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _statisticFeature.Value = value;
     }
 
+    private readonly TenantQuotaFeatureFlag _brandingFeature;
+
+    /// <summary>Specifies if the branding settings are available or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Branding
+    {
+        get => _brandingFeature.Value;
+        set => _brandingFeature.Value = value;
+    }
+
     private readonly TenantQuotaFeatureFlag _customizationFeature;
 
     /// <summary>
@@ -354,6 +364,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         _docsEditionFeature = new TenantQuotaFeatureFlag(this) { Name = "docs", Visible = false };
         _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Order = 3 };
         _ssoFeature = new TenantQuotaFeatureFlag(this) { Name = "sso", Order = 5 };
+        _brandingFeature = new TenantQuotaFeatureFlag(this) { Name = "branding", Visible = false };
         _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Order = 4 };
         _lifetimeFeature = new TenantQuotaFeatureFlag(this) { Name = "lifetime", Standalone = true };
         _customFeature = new TenantQuotaFeatureFlag(this) { Name = "custom", Visible = false };
@@ -379,6 +390,7 @@ public class TenantQuota : IMapFrom<DbQuota>
             _docsEditionFeature,
             _ldapFeature,
             _ssoFeature,
+            _brandingFeature,
             _customizationFeature,
             _lifetimeFeature,
             _customFeature,

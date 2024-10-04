@@ -55,6 +55,7 @@ public class WebhooksConfigRequestsDto
     /// <summary>
     /// Secret key
     /// </summary>
+    [StringLength(50)]
     public string SecretKey { get; set; }
 
     /// <summary>
