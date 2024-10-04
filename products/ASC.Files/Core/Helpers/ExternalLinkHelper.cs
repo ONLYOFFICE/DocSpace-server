@@ -29,7 +29,7 @@ using Status = ASC.Files.Core.Security.Status;
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
-public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext securityContext, IDaoFactory daoFactory, UserManager userManager, FileSecurity fileSecurity, ILogger<ExternalLinkHelper> logger)
+public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext securityContext, IDaoFactory daoFactory, UserManager userManager, FileSecurity fileSecurity)
 {
     public async Task<ValidationInfo> ValidateAsync(string key, string password = null, string fileId = null)
     {
@@ -77,13 +77,11 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
         if (entry == null || entry.RootFolderType is FolderType.TRASH or FolderType.Archive)
         {
             result.Status = Status.Invalid;
-            logger.LogDebug(" 3. Result Validate External Link: {result}. File id: {fileId}. Record: {record}", JsonSerializer.Serialize(result), fileId, JsonSerializer.Serialize(record));
             return result;
         }
 
         if (status == Status.RequiredPassword)
         {
-            logger.LogDebug(" 4. Result Validate External Link: {result}. File id: {fileId}. Record: {record}", JsonSerializer.Serialize(result), fileId, JsonSerializer.Serialize(record));
             return result;
         }
         
@@ -112,13 +110,11 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
 
         if (securityContext.IsAuthenticated || !string.IsNullOrEmpty(externalShare.GetAnonymousSessionKey()))
         {
-            logger.LogDebug(" 5. Result Validate External Link: {result}. File id: {fileId}. Record: {record}", JsonSerializer.Serialize(result), fileId, JsonSerializer.Serialize(record));
             return result;
         }
 
         await externalShare.SetAnonymousSessionKeyAsync();
-
-        logger.LogDebug(" 6. Result Validate External Link: {result}. File id: {fileId}. Record: {record}", JsonSerializer.Serialize(result), fileId, JsonSerializer.Serialize(record));
+        
         return result;
     }
 
