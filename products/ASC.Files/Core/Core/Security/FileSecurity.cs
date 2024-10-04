@@ -1301,7 +1301,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FilesSecurityActions.FillForms:
-                logger.LogDebug("33. FilterEntryAsync. userId: {userId} fileId:{fileId} ace:{ace} Access:{Access}", userId, e.Id, ace?.Share, e.Access);
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
