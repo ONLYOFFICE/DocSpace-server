@@ -33,9 +33,15 @@ public static class FileConstant
     public static readonly string StorageModule = "files";
     public static readonly string StorageDomainTmp = "files_temp";
     public static readonly string StorageTemplate = "files_template";
-    
+
     public const string StartDocPath = "sample/";
+    public const string StartDocDefaultPath = "en-US/";
+    public const string StartDocMyPath = "my/";
+    public const string StartDocCorporatePath = "corporate/";
     public const string NewDocPath = "new/";
+    public const string NewDocDefaultPath = "default/";
+    public const string NewDocDefaultCustomModePath = "ru-RU/";
+    public const string NewDocFileName = "new";
 
     public const string DownloadTitle = "download";
 }
