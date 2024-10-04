@@ -56,9 +56,9 @@ public class RoomLogoManager(
     private static readonly SemaphoreSlim _semaphore = new(1);
 
     private static readonly (SizeName, Size) _originalLogoSize = (SizeName.Original, new Size(1280, 1280));
-    private static readonly (SizeName, Size) _largeLogoSize = (SizeName.Large, new Size(96, 96));
-    private static readonly (SizeName, Size) _mediumLogoSize = (SizeName.Medium, new Size(32, 32));
-    private static readonly (SizeName, Size) _smallLogoSize = (SizeName.Small, new Size(16, 16));
+    private static readonly (SizeName, Size) _largeLogoSize = (SizeName.Large, new Size(192, 192));
+    private static readonly (SizeName, Size) _mediumLogoSize = (SizeName.Medium, new Size(64, 64));
+    private static readonly (SizeName, Size) _smallLogoSize = (SizeName.Small, new Size(32, 32));
 
     private IDataStore _logoStore;
     public bool EnableAudit { get; set; } = true;
