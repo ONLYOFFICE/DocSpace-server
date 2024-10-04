@@ -1840,7 +1840,7 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<FileEntry>>>> GetNewFilesAsync<T>(T folderId)
+    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<FileEntry>>>> GetNewRoomFilesAsync<T>(T folderId)
     {
         try
         {
@@ -1859,6 +1859,30 @@ public class FileStorageService //: IFileStorageService
                 .Select(x => 
                     new KeyValuePair<DateTime, IEnumerable<FileEntry>>(
                         x.Key, x.OrderByDescending(y => y.ModifiedOn)));
+        }
+        catch (Exception e)
+        {
+            throw GenerateException(e);
+        }
+    }
+
+    public async Task<List<FileEntry>> GetNewItemsAsync<T>(T folderId)
+    {
+        try
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var folder = await folderDao.GetFolderAsync(folderId);
+
+            var result = await fileMarker.MarkedItemsAsync(folder).Where(e => e.FileEntryType == FileEntryType.File).ToListAsync();
+
+            result = [..await entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false))];
+
+            if (result.Count == 0)
+            {
+                await fileOperationsManager.PublishMarkAsRead([JsonSerializer.SerializeToElement(folderId)], []);
+            }
+
+            return result;
         }
         catch (Exception e)
         {

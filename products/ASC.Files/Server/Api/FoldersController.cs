@@ -37,8 +37,7 @@ public class FoldersControllerInternal(
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
-    HistoryApiHelper historyApiHelper,
-    ApiDateTimeHelper apiDateTimeHelper)
+    HistoryApiHelper historyApiHelper)
     : FoldersController<int>(breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
@@ -47,8 +46,7 @@ public class FoldersControllerInternal(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper,
-        apiDateTimeHelper)
+        fileShareDtoHelper)
 {
     /// <summary>
     /// Get the activity history of a folder with a specified identifier
@@ -78,8 +76,7 @@ public class FoldersControllerThirdparty(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
-    FileShareDtoHelper fileShareDtoHelper,
-    ApiDateTimeHelper apiDateTimeHelper)
+    FileShareDtoHelper fileShareDtoHelper)
     : FoldersController<string>(breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
@@ -88,8 +85,7 @@ public class FoldersControllerThirdparty(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper,
-        apiDateTimeHelper);
+        fileShareDtoHelper);
 
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
@@ -100,8 +96,7 @@ public abstract class FoldersController<T>(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
-    FileShareDtoHelper fileShareDtoHelper,
-    ApiDateTimeHelper apiDateTimeHelper)
+    FileShareDtoHelper fileShareDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -256,17 +251,13 @@ public abstract class FoldersController<T>(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("{folderId}/news")]
-    public async IAsyncEnumerable<NewItemsDto<FileEntryDto>> GetNewItemsAsync(T folderId)
+    public async IAsyncEnumerable<FileEntryDto> GetNewItemsAsync(T folderId)
     {
-        var newItems = await fileStorageService.GetNewFilesAsync(folderId);
-        
-        foreach (var item in newItems)
+        var newItems = await fileStorageService.GetNewItemsAsync(folderId);
+
+        foreach (var e in newItems)
         {
-            yield return new NewItemsDto<FileEntryDto>
-            {
-                Date = apiDateTimeHelper.Get(item.Key), 
-                Items = await Task.WhenAll(item.Value.Select(GetFileEntryWrapperAsync))
-            };
+            yield return await GetFileEntryWrapperAsync(e);
         }
     }
 
