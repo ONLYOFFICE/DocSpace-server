@@ -1267,12 +1267,16 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
             await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e) != Status.Ok)
         {
-            logger.LogDebug("30. FilterEntryAsync. subject:{subject} userId: {userId} fileId:{fileId} isAuthenticated:{isAuthenticated} ValidateRecord: {ValidateRecord}",
-                ace.Subject,
-                userId, 
-                file.Id, 
-                isAuthenticated,
-                await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e));
+            if (file != null)
+            {
+                logger.LogDebug("30. FilterEntryAsync. subject:{subject} userId: {userId} fileId:{fileId} isAuthenticated:{isAuthenticated} ValidateRecord: {ValidateRecord}",
+                    ace.Subject,
+                    userId, 
+                    file.Id, 
+                    isAuthenticated,
+                    await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e));
+            }
+            
             return false;
         }
 
