@@ -207,8 +207,7 @@ public class EditorConfiguration<T>(
     EntryManager entryManager,
     DocumentServiceTrackerHelper documentServiceTrackerHelper, 
     ExternalShare externalShare,
-    UserPhotoManager userPhotoManager,
-    ILogger<FileSecurity> logger)
+    UserPhotoManager userPhotoManager)
 {
     public PluginsConfig Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
@@ -260,15 +259,11 @@ public class EditorConfiguration<T>(
 
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
         {
-            var t = externalShare.GetUrlWithShare(callbackUrl);
-            logger.LogDebug("1. GetCallbackUrl. fileId: {fileId} url: {url}", file.Id, t);
-            return t;
+            return externalShare.GetUrlWithShare(callbackUrl);
         }
 
         var key = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject, file.ShareRecord.Options?.Password);
-        var url = externalShare.GetUrlWithShare(callbackUrl, key);
-        logger.LogDebug("2. GetCallbackUrl. fileId: {fileId} url: {url}", file.Id, url);
-        return url;
+        return externalShare.GetUrlWithShare(callbackUrl, key);
     }
 
     public async Task<CoEditingConfig> GetCoEditingAsync()
