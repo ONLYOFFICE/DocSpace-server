@@ -850,30 +850,21 @@ public class FileSecurity(IDaoFactory daoFactory,
             action == FilesSecurityActions.FillForms) &&
             !file.IsForm)
         {
-            logger.LogDebug("2. FilterEntryAsync. IsForm: {IsForm} userId: {userId} fileId:{fileId}", file.IsForm, userId, file.Id);
-            if (action == FilesSecurityActions.Edit)
-                logger.LogDebug("3. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, file.Id);
             return false;
         }
 
         if (action is FilesSecurityActions.ReadHistory or FilesSecurityActions.EditHistory && e.ProviderEntry)
         {
-            if (action == FilesSecurityActions.Edit)
-                logger.LogDebug("4. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
             return false;
         }
         
         if (file != null && action == FilesSecurityActions.SubmitToFormGallery && !file.IsForm)
         {
-            if (action == FilesSecurityActions.Edit)
-                logger.LogDebug("5. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
             return false;
         }
         
         if (action == FilesSecurityActions.Duplicate && folder is { FolderType: FolderType.FillingFormsRoom})
         {
-            if (action == FilesSecurityActions.Edit)
-                logger.LogDebug("6. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
             return false;
         }
 
@@ -897,22 +888,16 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             if (e.RootFolderType != FolderType.VirtualRooms)
             {
-                if (action == FilesSecurityActions.Edit)
-                    logger.LogDebug("7. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                 return false;
             }
 
             if (folder != null && !(isRoom && folder.Shared))
             {
-                if (action == FilesSecurityActions.Edit)
-                    logger.LogDebug("8. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                 return false;
             }
 
             if (file != null && !(file.Shared && fileUtility.CanWebView(file.Title)))
             {
-                if (action == FilesSecurityActions.Edit)
-                    logger.LogDebug("9. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                 return false;
             }
         }
@@ -921,15 +906,11 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             if (folder == null)
             {
-                if (action == FilesSecurityActions.Edit)
-                    logger.LogDebug("10. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                 return false;
             }
 
             if (folder.FolderType == FolderType.Recent && isUser)
             {
-                if (action == FilesSecurityActions.Edit)
-                    logger.LogDebug("11. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                 return false;
             }
 
@@ -938,8 +919,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     folder.FolderType == FolderType.FormFillingFolderDone ||
                     folder.FolderType == FolderType.FormFillingFolderInProgress))
             {
-                if (action == FilesSecurityActions.Edit)
-                    logger.LogDebug("12. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                 return false;
             }
 
@@ -949,8 +928,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     (folder.FolderType == FolderType.ReadyFormFolder ||
                     folder.FolderType == FolderType.InProcessFormFolder))
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("13. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
                 if (action is FilesSecurityActions.Duplicate or
@@ -965,51 +942,37 @@ public class FileSecurity(IDaoFactory daoFactory,
                     folder.FolderType == FolderType.FormFillingFolderDone ||
                     folder.FolderType == FolderType.FormFillingFolderInProgress))
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("14. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
                 
                 if (action is FilesSecurityActions.Pin or FilesSecurityActions.EditAccess or FilesSecurityActions.Mute &&
                     !isRoom)
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("15. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
 
                 if (action == FilesSecurityActions.Mute && isRoom && await IsAllGeneralNotificationSettingsOffAsync())
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("16. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
 
                 if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom or FolderType.FillingFormsRoom))
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("17. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
 
                 if (action == FilesSecurityActions.CopyLink && DocSpaceHelper.IsFormsFillingSystemFolder(folder.FolderType))
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("18. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
                 
                 if (action is FilesSecurityActions.Copy or FilesSecurityActions.Duplicate && isRoom && folder.ProviderEntry)
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("19. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
                 
                 if (folder.FolderType == FolderType.Recent)
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("20. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
 
@@ -1063,8 +1026,6 @@ public class FileSecurity(IDaoFactory daoFactory,
             case FolderType.TRASH:
                 if (action != FilesSecurityActions.Read && action != FilesSecurityActions.Delete && action != FilesSecurityActions.Move)
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("21. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
 
@@ -1077,8 +1038,6 @@ public class FileSecurity(IDaoFactory daoFactory,
             case FolderType.USER:
                 if (isOutsider || action == FilesSecurityActions.Lock || (isUser && !e.Shared))
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("22. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
                 if (e.RootCreateBy == userId)
@@ -1090,8 +1049,6 @@ public class FileSecurity(IDaoFactory daoFactory,
             case FolderType.VirtualRooms:
                 if (action == FilesSecurityActions.Delete && isRoom)
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("23. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
                 if (action == FilesSecurityActions.FillForms && file != null)
@@ -1102,7 +1059,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                         var fileFolder = parentFolders.LastOrDefault();
                         if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
                         {
-                            logger.LogDebug("24. FilterEntryAsync. userId: {userId} fileId:{fileId} folderType:{folderType}", userId, file.Id, fileFolder.FolderType);
                             return false;
                         }
                     }
@@ -1121,8 +1077,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                         var fileFolder = parentFolders.LastOrDefault();
                         if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
                         {
-                            if (action == FilesSecurityActions.Edit)
-                                logger.LogDebug("25. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                             return false;
                         }
                     }  
@@ -1133,8 +1087,6 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                     if (parentFolders.Exists(parent => DocSpaceHelper.IsFormsFillingSystemFolder(parent.FolderType)))
                     {
-                        if (action == FilesSecurityActions.Edit)
-                            logger.LogDebug("26. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                         return false;
                     };
                 }
@@ -1153,16 +1105,12 @@ public class FileSecurity(IDaoFactory daoFactory,
                     action != FilesSecurityActions.ReadLinks
                     )
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("27. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
 
                 if (action is FilesSecurityActions.Delete or FilesSecurityActions.Move &&
                     !isRoom)
                 {
-                    if (action == FilesSecurityActions.Edit)
-                        logger.LogDebug("28. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
                     return false;
                 }
 
@@ -1256,7 +1204,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     if (ace is { Share: FileShare.FillForms } && userId != file.CreateBy)
                     {
-                        logger.LogDebug("29. FilterEntryAsync. userId: {userId} fileId:{fileId} createBy:{createBy}", userId, file.Id, file.CreateBy);
                         return false;
                     }
                 }
@@ -1646,7 +1593,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             e.Access = FileShare.None; //HACK: for client
         }
-        logger.LogDebug("31. FilterEntryAsync. userId: {userId} fileId:{fileId}", userId, e.Id);
         return false;
         
         bool MustConvert(FileEntry entry)
