@@ -703,7 +703,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/news</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("rooms/{id}/news")]
+    [HttpGet("{id}/news")]
     public async IAsyncEnumerable<NewItemsDto<FileEntryDto>> GetNewItemsAsync(T id)
     {
         var newItems = await _fileStorageService.GetNewRoomFilesAsync(id);
