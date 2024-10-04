@@ -50,8 +50,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         BadgesSettingsHelper badgesSettingsHelper,
         ExternalShare externalShare,
         AuthManager authManager,
-        ICache cache,
-        ILogger<FileSecurity> logger)
+        ICache cache)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -800,7 +799,6 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (isOutsider && action != FilesSecurityActions.Read)
         {
-            logger.LogDebug("CanAsync. isOutsider: {isOutsider} userId: {userId} entryId:{entryId}", isOutsider, userId, entry.Id);
             return false;
         }
 
@@ -810,7 +808,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isCollaborator = userType is EmployeeType.Collaborator;
         var isAuthenticated =  authContext.IsAuthenticated || (await authManager.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId)).IsAuthenticated;
 
-        logger.LogDebug("CanAsync. isAuthenticated: {isAuthenticated} userId: {userId} entryId:{entryId}", isAuthenticated, userId, entry.Id);
         var accessSnapshot = entry.Access;
         
         var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isCollaborator);
@@ -1213,16 +1210,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
             await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e) != Status.Ok)
         {
-            if (file != null)
-            {
-                logger.LogDebug("30. FilterEntryAsync. subject:{subject} userId: {userId} fileId:{fileId} isAuthenticated:{isAuthenticated} ValidateRecord: {ValidateRecord}",
-                    ace.Subject,
-                    userId, 
-                    file.Id, 
-                    isAuthenticated,
-                    await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e));
-            }
-            
             return false;
         }
 
