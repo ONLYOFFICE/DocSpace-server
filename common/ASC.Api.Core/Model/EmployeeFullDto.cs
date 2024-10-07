@@ -156,6 +156,7 @@ public class EmployeeFullDto : EmployeeDto
     public int? LoginEventId { get; set; }
     
     public EmployeeDto CreatedBy { get; set; }
+    public ApiDateTime RegistrationDate { get; set; }
 
     public static new EmployeeFullDto GetSample()
     {
@@ -381,11 +382,18 @@ public class EmployeeFullDtoHelper(
                 result.ListAdminModules = listAdminModules;
             }
         }
-        
-        if (userInfo.CreatedBy.HasValue && isDocSpaceAdmin)
+
+        if (!isDocSpaceAdmin)
+        {
+            return result;
+        }
+
+        if (userInfo.CreatedBy.HasValue)
         {
             result.CreatedBy = await GetAsync(await _userManager.GetUsersAsync(userInfo.CreatedBy.Value));
         }
+            
+        result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
 
         return result;
     }
