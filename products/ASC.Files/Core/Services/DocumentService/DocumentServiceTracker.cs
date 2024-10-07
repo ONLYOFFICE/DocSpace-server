@@ -314,8 +314,15 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             {
                 await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
             }
-
-            await filesMessageService.SendAsync(isFillingSession ? MessageAction.FormOpenedForFilling : MessageAction.FileOpenedForChange, file, file.Title);
+            if (isFillingSession)
+            {
+                var user = await userManager.GetUsersAsync(userId);
+                await filesMessageService.SendAsync(MessageAction.FormOpenedForFilling, file, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), file.Title);
+            }
+            else
+            {
+                await filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
+            }
 
             securityContext.Logout();
         }
@@ -475,7 +482,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             }
         }
         
-        await filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
+        await filesMessageService.SendAsync(forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
 
         if (!forceSave)
         {

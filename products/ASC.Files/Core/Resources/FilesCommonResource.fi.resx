@@ -482,9 +482,6 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>Linkki lomakkeeseen</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Avaa lomake</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Lomakkeen numero</value>
   </data>

@@ -108,6 +108,7 @@ public class SetupInfo
     public string HcaptchaPrivateKey { get; private set; }
     public string HcaptchaVerifyUrl { get; private set; }
     public string AmiMetaUrl { get; private set; }
+    public string AmiTokenUrl { get; private set; }
     public int InvitationLimit { get; private set; }
 
     private readonly IConfiguration _configuration;
@@ -178,6 +179,7 @@ public class SetupInfo
         TfaAppSender = GetAppSettings("web.tfaapp.backup.title", "ONLYOFFICE");
 
         AmiMetaUrl = GetAppSettings("web:ami:meta", "");
+        AmiTokenUrl = GetAppSettings("web:ami:token", "");
 
         InvitationLimit = GetAppSettings("web:invitation-limit", int.MaxValue);
     }

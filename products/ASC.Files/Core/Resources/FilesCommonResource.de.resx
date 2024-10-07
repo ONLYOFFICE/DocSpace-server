@@ -482,9 +482,6 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="LinkToForm" xml:space="preserve">
     <value>Link zum Formular</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Formular öffnen</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Formularnummer</value>
   </data>

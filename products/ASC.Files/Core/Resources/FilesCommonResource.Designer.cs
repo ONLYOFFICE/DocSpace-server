@@ -1077,7 +1077,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Open form.
+        ///   Looks up a localized string similar to Open file.
         /// </summary>
         public static string OpenForm {
             get {

@@ -802,7 +802,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
 
         if (file != null &&
-            action is FilesSecurityActions.EditForm or FilesSecurityActions.FillForms &&
+            (action == FilesSecurityActions.EditForm ||
+            action == FilesSecurityActions.FillForms) &&
             !file.IsForm)
         {
             return false;
@@ -1182,6 +1183,22 @@ public class FileSecurity(IDaoFactory daoFactory,
         e.ShareRecord = ace;
         e.Access = ace?.Share ?? defaultShare;
         e.Access = e.RootFolderType is FolderType.ThirdpartyBackup ? FileShare.Restrict : e.Access;
+
+        if (file != null)
+        {
+            var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+            if (fileType is FileType.Pdf or FileType.Spreadsheet)
+            {
+                var parentFolders = await GetFileParentFolders(file.ParentId);
+                if (parentFolders.Exists(parent => parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder))
+                {
+                    if (ace is { Share: FileShare.FillForms } && userId != file.CreateBy)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
 
         if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
             await externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e) != Status.Ok)
@@ -1569,7 +1586,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             e.Access = FileShare.None; //HACK: for client
         }
-
         return false;
 
         bool MustConvert(FileEntry entry)

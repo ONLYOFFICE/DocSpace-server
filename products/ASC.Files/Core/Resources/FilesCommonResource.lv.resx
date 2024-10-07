@@ -482,9 +482,6 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>Saite uz veidlapu</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Atvērt formu</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Veidlapas numurs</value>
   </data>

@@ -541,9 +541,6 @@
   <data name="LinkToForm" xml:space="preserve">
     <value>Линк ка формулару</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Отвори формулар</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Број формулара</value>
   </data>
