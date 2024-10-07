@@ -106,6 +106,7 @@ public class FolderDto<T> : FileEntryDto<T>
     
     public bool? External { get; set; }
     public bool? PasswordProtected { get; set; }
+    public bool? Expired { get; set; }
 
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
 
@@ -151,7 +152,8 @@ public class FolderDtoHelper(
     TenantManager tenantManager,
     WatermarkManager watermarkManager,
     WatermarkDtoHelper watermarkHelper,
-    IMapper mapper)
+    IMapper mapper,
+    ExternalShare externalShare)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
@@ -220,10 +222,16 @@ public class FolderDtoHelper(
             var watermarkSettings = await watermarkManager.GetWatermarkAsync(folder);
             result.Watermark = watermarkHelper.Get(watermarkSettings);
 
-            result.External = folder.ShareRecord?.IsLink;
-            result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord?.Options?.Password) && 
-                                       folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
-                                       !canRead;
+            if (folder.ShareRecord is { IsLink: true })
+            {
+                result.External = true;
+                result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
+                                           folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
+                                           !canRead;
+
+                result.Expired = folder.ShareRecord.Options?.IsExpired;
+                result.RequestToken = await externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
+            }
         }
 
         if (folder.Order != 0)
