@@ -491,9 +491,6 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Povezava za izpolnitev</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Odpri obrazec</value>
-  </data>
   <data name="LinkToForm" xml:space="preserve">
     <value>Povezava do obrazca</value>
   </data>

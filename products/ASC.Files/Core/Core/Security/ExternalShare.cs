@@ -121,6 +121,15 @@ public class ExternalShare(Global global,
         if (string.IsNullOrEmpty(passwordKey))
         {
             passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, record.Subject.ToString(), true);
+            if (string.IsNullOrEmpty(passwordKey))
+            {
+                var key = GetKey();
+                if (!string.IsNullOrEmpty(key))
+                {
+                    var data = await ParseShareKeyAsync(key);
+                    passwordKey = data.Password;
+                }
+            }
         }
         
         if (passwordKey == record.Options.Password)
@@ -167,11 +176,36 @@ public class ExternalShare(Global global,
         return string.IsNullOrEmpty(key) ? null : key;
     }
     
-    public async Task<Guid> ParseShareKeyAsync(string key)
+    public async Task<TokenData> ParseShareKeyAsync(string key)
     {
-        ArgumentException.ThrowIfNullOrEmpty(key);
-        
-        return Signature.Read<Guid>(key, await GetDbKeyAsync());
+        if (string.IsNullOrEmpty(key))
+        {
+            return new TokenData
+            {
+                Id = Guid.Empty
+            };
+        }
+
+        var stringKey = Signature.Read<string>(key, await GetDbKeyAsync());
+
+        if (string.IsNullOrEmpty(stringKey))
+        {
+            return new TokenData
+            {
+                Id = Guid.Empty
+            };
+        }
+
+        if (!stringKey.StartsWith('{') || !stringKey.EndsWith('}'))
+        {
+            return new TokenData
+            {
+                Id = Guid.TryParse(stringKey, out var id) ? id : Guid.Empty
+            };
+        }
+
+        var token = JsonSerializer.Deserialize<TokenData>(stringKey);
+        return token;
     }
 
     public async Task<Guid> GetLinkIdAsync()
@@ -187,8 +221,8 @@ public class ExternalShare(Global global,
             return Guid.Empty;
         }
         
-        var linkId = await ParseShareKeyAsync(key);
-        return linkId == Guid.Empty ? Guid.Empty : linkId;
+        var data = await ParseShareKeyAsync(key);
+        return data?.Id ?? Guid.Empty;
     }
 
     public Guid GetSessionId()
@@ -275,9 +309,20 @@ public class ExternalShare(Global global,
         _snapshot = snapshot;
     }
     
-    public async Task<string> CreateShareKeyAsync(Guid linkId)
+    public async Task<string> CreateShareKeyAsync(Guid linkId, string password = null)
     {
-        return Signature.Create(linkId, await GetDbKeyAsync());
+        if (string.IsNullOrEmpty(password))
+        {
+            return Signature.Create(linkId, await GetDbKeyAsync());
+        }
+
+        var data = new TokenData
+        {
+            Id = linkId, 
+            Password = password
+        };
+        
+        return Signature.Create(JsonSerializer.Serialize(data), await GetDbKeyAsync());
     }
 
     private async Task<string> GetDbKeyAsync()
@@ -372,4 +417,10 @@ public enum Status
     RequiredPassword,
     InvalidPassword,
     ExternalAccessDenied
+}
+
+public record TokenData
+{
+    public Guid Id { get; set; }
+    public string Password { get; set; }
 }

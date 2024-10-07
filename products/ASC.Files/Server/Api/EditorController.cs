@@ -201,7 +201,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         canEdit = false;
                         canFill = true;
                         isSubmitOnly = true;
-                        editorType = EditorType.Embedded;
+                        editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
                         fillingSessionId = Guid.NewGuid().ToString("N");
                         break;
                     }
@@ -231,7 +231,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
                                 canEdit = false;
                                 canFill = true;
-                                editorType = EditorType.Embedded;
+                                editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
 
                                 file = formDraft;
                                 fillingSessionId = Guid.NewGuid().ToString("N");
@@ -249,19 +249,19 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 case FolderType.FormFillingFolderInProgress:
                     canEdit = false;
                     canFill = true;
-                    editorType = EditorType.Embedded;
+                    editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
                     fillingSessionId = Guid.NewGuid().ToString("N");
                     break;
 
                 case FolderType.FormFillingFolderDone:
-                    editorType = EditorType.Embedded;
+                    editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
                     break;
 
                 default:
-                    canEdit = edit;
-                    canFill = !edit;
+                    canEdit = true;
+                    canFill = false;
                     break;
             }
         }
