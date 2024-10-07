@@ -33,7 +33,10 @@ public class FormFillingReportCreator(
     IHttpClientFactory clientFactory,
     TenantUtil tenantUtil,
     TenantManager tenantManager,
-    FactoryIndexerForm formsItemDataSearchFactory)
+    FactoryIndexerForm formsItemDataSearchFactory,
+    CommonLinkUtility commonLinkUtility,
+    FilesLinkUtility filesLinkUtility,
+    FileUtility fileUtility)
 {
 
     private static readonly JsonSerializerOptions _options = new() {
@@ -41,20 +44,23 @@ public class FormFillingReportCreator(
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task UpdateFormFillingReport<T>(T resultsFileId, int resultFormNumber, string formsDataUrl, string resultUrl)
+    public async Task UpdateFormFillingReport<T>(T resultsFileId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile)
     {
         if (formsDataUrl != null)
         {
             var fileDao = daoFactory.GetFileDao<T>();
+            var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
             var submitFormsData = await GetSubmitFormsData(resultsFileId, resultFormNumber, formsDataUrl, resultUrl);
 
             if (resultsFileId != null)
             {
                 var resultsFile = await fileDao.GetFileAsync(resultsFileId);
-
-                var updateDt = exportToCSV.CreateDataTable(submitFormsData.FormsData);
-                await exportToCSV.UpdateCsvReport(resultsFile, updateDt);
-
+                
+                await exportToCSV.UpdateCsvReport(resultsFile, submitFormsData.FormsData);
+                
+                var formsFile = await fileDao.GetFileAsync(formsDataFile.Id);
+                formsFile.FormsItemData = submitFormsData.FormsData;
+                await fileDao.SaveFileAsync(formsFile, null);
             }
         }
     }
