@@ -121,8 +121,8 @@ public class ExternalLinkHelper(
             {
                 result.Shared = entry switch
                 {
-                    Folder<int> folderInt => await MarkAsync(folderInt, linkId, userId),
-                    Folder<string> folderString => await MarkAsync(folderString, linkId, userId),
+                    Folder<int> folderInt => await MarkAsync(folderInt, data.Id, userId),
+                    Folder<string> folderString => await MarkAsync(folderString, data.Id, userId),
                     _ => false
                 };
             }
