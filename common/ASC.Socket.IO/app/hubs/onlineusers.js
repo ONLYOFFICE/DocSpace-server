@@ -285,11 +285,11 @@ module.exports = async (io) => {
         }
         if(user.offlineSessions.size != 0)
         {
-          await redisClient.set(redisKey, JSON.stringify(Array.from(user.offlineSessions)));
+          redisClient.set(redisKey, JSON.stringify(Array.from(user.offlineSessions)));
         }
         else
         {
-          await redisClient.del(redisKey);
+          redisClient.del(redisKey);
         }
         if(user.sessions.size == 1)
         {
@@ -306,7 +306,7 @@ module.exports = async (io) => {
           var array = Array.from(user.sessions, ([name, value]) => {
             return value;
           });
-          if(array.filter(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip).size != 1)
+          if(array.filter(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip).length != 1)
           {
             return id;
           }
