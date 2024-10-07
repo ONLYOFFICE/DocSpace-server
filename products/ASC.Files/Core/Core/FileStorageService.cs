@@ -2836,16 +2836,20 @@ public class FileStorageService //: IFileStorageService
         await tagDao.RemoveTagsAsync(tags);
     }
 
-    public async Task DeleteFromRecentAsync<T>(IEnumerable<T> filesIds, bool recentByLinks)
+    public async Task DeleteFromRecentAsync<T>(IEnumerable<T> foldersIds, IEnumerable<T> filesIds, bool recentByLinks)
     {
-        var tagDao = daoFactory.GetTagDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var tagDao = daoFactory.GetTagDao<T>();
+        
+        var folders = await folderDao.GetFoldersAsync(foldersIds).Cast<FileEntry<T>>().ToListAsync();
+        var files = await fileDao.GetFilesAsync(filesIds).Cast<FileEntry<T>>().ToListAsync();
+        
+        var entries = files.Concat(folders);
 
-        var files = await fileDao.GetFilesAsync(filesIds).ToListAsync();
-
-        var tags = recentByLinks
-            ? await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.RecentByLink, files).ToListAsync()
-            : files.Select(f => Tag.Recent(authContext.CurrentAccount.ID, f));
+        var tags = recentByLinks 
+            ? await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.RecentByLink, entries).ToListAsync()
+            : entries.Select(f => Tag.Recent(authContext.CurrentAccount.ID, f));
 
         await tagDao.RemoveTagsAsync(tags);
     }
