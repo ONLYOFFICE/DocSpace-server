@@ -27,38 +27,41 @@
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelper,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        CustomTagsService customTagsService,
-        WatermarkManager watermarkManager,
-        RoomLogoManager roomLogoManager,
-        FileOperationsManager fileOperationsManager,
-        FileStorageService fileStorageService,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        FileShareDtoHelper fileShareDtoHelper,
-        WatermarkDtoHelper watermarkDtoHelper,
-        IMapper mapper,
-        SocketManager socketManager,
-        ApiContext apiContext,
-        FilesMessageService filesMessageService,
-        SettingsManager settingsManager)
+public class VirtualRoomsInternalController(
+    GlobalFolderHelper globalFolderHelper,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    CustomTagsService customTagsService,
+    WatermarkManager watermarkManager,
+    RoomLogoManager roomLogoManager,
+    FileOperationsManager fileOperationsManager,
+    FileStorageService fileStorageService,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileShareDtoHelper fileShareDtoHelper,
+    WatermarkDtoHelper watermarkDtoHelper,
+    IMapper mapper,
+    SocketManager socketManager,
+    ApiContext apiContext,
+    FilesMessageService filesMessageService,
+    SettingsManager settingsManager,
+    ApiDateTimeHelper apiDateTimeHelper)
     : VirtualRoomsController<int>(globalFolderHelper,
-            fileOperationDtoHelper,
-            customTagsService,
-            watermarkManager,
-            roomLogoManager,
-    fileOperationsManager,
-            fileStorageService,
-            folderDtoHelper,
-            fileDtoHelper,
-            fileShareDtoHelper,
-            watermarkDtoHelper,
-            mapper,
-            socketManager,
-    apiContext,
-    filesMessageService,
-    settingsManager)
+        fileOperationDtoHelper,
+        customTagsService,
+        watermarkManager,
+        roomLogoManager,
+        fileOperationsManager,
+        fileStorageService,
+        folderDtoHelper,
+        fileDtoHelper,
+        fileShareDtoHelper,
+        watermarkDtoHelper,
+        mapper,
+        socketManager,
+        apiContext,
+        filesMessageService,
+        settingsManager,
+        apiDateTimeHelper)
     {
     /// <summary>
     /// Creates a room in the "Rooms" section.
@@ -80,38 +83,41 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     }
 }
 
-public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHelper,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        CustomTagsService customTagsService,
-        WatermarkManager watermarkManager,
-        RoomLogoManager roomLogoManager,
-        FileOperationsManager fileOperationsManager,
-        FileStorageService fileStorageService,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        FileShareDtoHelper fileShareDtoHelper,
-        WatermarkDtoHelper watermarkDtoHelper,
-        IMapper mapper,
-        SocketManager socketManager,
-        ApiContext apiContext,
-        FilesMessageService filesMessageService,
-        SettingsManager settingsManager)
+public class VirtualRoomsThirdPartyController(
+    GlobalFolderHelper globalFolderHelper,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    CustomTagsService customTagsService,
+    WatermarkManager watermarkManager,
+    RoomLogoManager roomLogoManager,
+    FileOperationsManager fileOperationsManager,
+    FileStorageService fileStorageService,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileShareDtoHelper fileShareDtoHelper,
+    WatermarkDtoHelper watermarkDtoHelper,
+    IMapper mapper,
+    SocketManager socketManager,
+    ApiContext apiContext,
+    FilesMessageService filesMessageService,
+    SettingsManager settingsManager,
+    ApiDateTimeHelper apiDateTimeHelper)
     : VirtualRoomsController<string>(globalFolderHelper,
-            fileOperationDtoHelper,
-            customTagsService,
-            watermarkManager,
-            roomLogoManager,
-    fileOperationsManager,
-            fileStorageService,
-            folderDtoHelper,
-            fileDtoHelper,
-            fileShareDtoHelper,
-            watermarkDtoHelper,
-            mapper,
-            socketManager,
-    apiContext,
-    filesMessageService,
-    settingsManager)
+        fileOperationDtoHelper,
+        customTagsService,
+        watermarkManager,
+        roomLogoManager,
+        fileOperationsManager,
+        fileStorageService,
+        folderDtoHelper,
+        fileDtoHelper,
+        fileShareDtoHelper,
+        watermarkDtoHelper,
+        mapper,
+        socketManager,
+        apiContext,
+        filesMessageService,
+        settingsManager,
+        apiDateTimeHelper)
     {
     /// <summary>
     /// Creates a room in the "Rooms" section stored in a third-party storage.
@@ -135,21 +141,22 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
 [DefaultRoute("rooms")]
 public abstract class VirtualRoomsController<T>(
     GlobalFolderHelper globalFolderHelper,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        CustomTagsService customTagsService,
-        WatermarkManager watermarkManager,
-        RoomLogoManager roomLogoManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    CustomTagsService customTagsService,
+    WatermarkManager watermarkManager,
+    RoomLogoManager roomLogoManager,
     FileOperationsManager fileOperationsManager,
-        FileStorageService fileStorageService,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        FileShareDtoHelper fileShareDtoHelper,
-        WatermarkDtoHelper watermarkDtoHelper,
-        IMapper mapper,
-        SocketManager socketManager,
+    FileStorageService fileStorageService,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileShareDtoHelper fileShareDtoHelper,
+    WatermarkDtoHelper watermarkDtoHelper,
+    IMapper mapper,
+    SocketManager socketManager,
     ApiContext apiContext,
     FilesMessageService filesMessageService,
-    SettingsManager settingsManager)
+    SettingsManager settingsManager,
+    ApiDateTimeHelper apiDateTimeHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
     {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
@@ -685,7 +692,32 @@ public abstract class VirtualRoomsController<T>(
 
         return await _folderDtoHelper.GetAsync(room);
     }
+    
+    /// <summary>
+    /// Returns a list of all the new items from a room with the ID specified in the request.
+    /// </summary>
+    /// <short>Get new room items</short>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <category>Rooms</category>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core">List of file entry information</returns>
+    /// <path>api/2.0/files/rooms/{id}/news</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("{id}/news")]
+    public async IAsyncEnumerable<NewItemsDto<FileEntryDto>> GetNewItemsAsync(T id)
+    {
+        var newItems = await _fileStorageService.GetNewRoomFilesAsync(id);
+        
+        foreach (var item in newItems)
+        {
+            yield return new NewItemsDto<FileEntryDto>
+            {
+                Date = apiDateTimeHelper.Get(item.Key), 
+                Items = await Task.WhenAll(item.Value.Select(GetFileEntryWrapperAsync))
+            };
         }
+    }
+}
 
 public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         FolderContentDtoHelper folderContentDtoHelper,
@@ -700,7 +732,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         TenantManager tenantManager,
         IEventBus eventBus,
         UserManager userManager,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        ApiDateTimeHelper apiDateTimeHelper,
+        RoomNewItemsDtoHelper roomNewItemsDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
     {
     /// <summary>
@@ -920,5 +954,22 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, 0, null, true);
 
         await eventBus.PublishAsync(evt);
+    }
+
+    [HttpGet("rooms/news")]
+    public async IAsyncEnumerable<NewItemsDto<RoomNewItemsDto>> GetRoomsNewItems()
+    {
+        var newItems = await fileStorageService.GetNewRoomFilesAsync();
+
+        foreach (var item in newItems)
+        {
+            yield return new NewItemsDto<RoomNewItemsDto>
+            {
+                Date = apiDateTimeHelper.Get(item.Key), 
+                Items = await Task.WhenAll(item.Value
+                    .Select(s => 
+                        roomNewItemsDtoHelper.GetAsync(s.Key, s.Value.AsEnumerable())))
+            };
+        }
     }
 }

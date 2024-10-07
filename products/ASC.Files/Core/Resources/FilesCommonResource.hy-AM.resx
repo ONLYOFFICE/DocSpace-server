@@ -553,9 +553,6 @@
   <data name="LinkToForm" xml:space="preserve">
     <value>Հղում դեպի ձև</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Բացել ձևը</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Ձևի համարը</value>
   </data>

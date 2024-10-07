@@ -47,10 +47,10 @@ public class ExternalLinkHelper(
             Access = FileShare.Restrict
         };
 
-        var linkId = await externalShare.ParseShareKeyAsync(key);
+        var data = await externalShare.ParseShareKeyAsync(key);
         var securityDao = daoFactory.GetSecurityDao<string>();
 
-        var record = await securityDao.GetSharesAsync([linkId]).FirstOrDefaultAsync();
+        var record = await securityDao.GetSharesAsync([data.Id]).FirstOrDefaultAsync();
         if (record == null)
         {
             return result;
@@ -97,7 +97,7 @@ public class ExternalLinkHelper(
         
         result.Access = record.Share;
         result.TenantId = record.TenantId;
-        result.LinkId = linkId;
+        result.LinkId = data.Id;
 
         if (isAuth)
         {

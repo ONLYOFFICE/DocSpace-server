@@ -494,9 +494,6 @@
   <data name="LinkToForm" xml:space="preserve">
     <value>Odkaz na formulár</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Otvoriť formulár</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Číslo formulára</value>
   </data>

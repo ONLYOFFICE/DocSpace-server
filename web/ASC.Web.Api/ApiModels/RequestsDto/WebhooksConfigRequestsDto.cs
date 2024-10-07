@@ -48,6 +48,7 @@ public class WebhooksConfigRequestsDto
 
     /// <summary>Secret key</summary>
     /// <type>System.String, System</type>
+    [StringLength(50)]
     public string SecretKey { get; set; }
 
     /// <summary>Enabled or not</summary>

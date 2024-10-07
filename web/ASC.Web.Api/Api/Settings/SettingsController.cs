@@ -95,6 +95,7 @@ public partial class SettingsController(MessageService messageService,
             GreetingSettings = tenant.Name == "" ? Resource.PortalName : tenant.Name,
             DocSpace = true,
             Standalone = coreBaseSettings.Standalone,
+            IsAmi = coreBaseSettings.Standalone && !string.IsNullOrEmpty(setupInfo.AmiMetaUrl),
             BaseDomain = coreBaseSettings.Standalone ? await coreSettings.GetSettingAsync("BaseDomain") ?? coreBaseSettings.Basedomain : coreBaseSettings.Basedomain,
             Version = configuration["version:number"] ?? "",
             TenantStatus = tenant.Status,
@@ -104,7 +105,8 @@ public partial class SettingsController(MessageService messageService,
             LicenseUrl = setupInfo.LicenseUrl,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
-            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager)
+            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager),
+            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !(await tenantManager.GetCurrentTenantQuotaAsync()).Branding
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)

@@ -494,9 +494,6 @@
   <data name="LinkToForm" xml:space="preserve">
     <value>Посилання на форму</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Відкрити форму</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Номер форми</value>
   </data>

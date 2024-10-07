@@ -494,9 +494,6 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>Form bağlantısı</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Açık form</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Form numarası</value>
   </data>
