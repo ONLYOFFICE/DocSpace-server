@@ -190,9 +190,14 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         return callbackUrl;
     }
 
-    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack)
+    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack, string token = null)
     {
         var callbackUrl = await GetCallbackUrlAsync(fileId);
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.ShareKey, token);
+        }
 
         return await documentServiceConnector.CommandAsync(CommandMethod.Info, docKeyForTrack, fileId, callbackUrl);
     }
