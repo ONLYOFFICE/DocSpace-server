@@ -500,4 +500,7 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Deschidere formular</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Utilizator extern</value>
+  </data>
 </root>

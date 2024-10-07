@@ -500,4 +500,7 @@
   <data name="FormNumber" xml:space="preserve">
     <value>Número de formulario</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Usuario externo</value>
+  </data>
 </root>

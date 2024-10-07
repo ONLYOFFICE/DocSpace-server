@@ -1763,4 +1763,43 @@ $TrulyYours</value>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>ONLYOFFICE DocSpaceのルームに招待されました</value>
   </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developerの猶予期間が有効になりました</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developerライセンスがまもなく期限切れになります</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developerの猶予期間がまもなく終了します</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developerはご利用いただけなくなりました</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterpriseの猶予期間が開始されました </value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterpriseライセンスはまもなく期限切れになります</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterpriseの猶予期間はまもなく終了します</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterpriseはご利用いただけなくなりました</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterpriseライセンスはまもなく期限切れになります</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterpriseライセンスは本日期限切れになります</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>ONLYOFFICE DocSpaceにパスワードを設定</value>
+  </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>今すぐ購入</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>パスワードの設定</value>
+  </data>
 </root>

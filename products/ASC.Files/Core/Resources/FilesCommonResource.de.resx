@@ -500,4 +500,7 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="FormNumber" xml:space="preserve">
     <value>Formularnummer</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Externer Benutzer</value>
+  </data>
 </root>
