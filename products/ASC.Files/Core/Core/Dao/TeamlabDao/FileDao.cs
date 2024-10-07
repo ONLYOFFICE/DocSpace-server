@@ -32,6 +32,7 @@ namespace ASC.Files.Core.Data;
 internal class FileDao(
         ILogger<FileDao> logger,
         FactoryIndexerFile factoryIndexer,
+        FactoryIndexerForm factoryIndexerFormData,
         UserManager userManager,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
@@ -189,13 +190,14 @@ internal class FileDao(
                 var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
 
                 (success, var result) = await factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
+                
                 if(!success)
                 {
                     break;
                 }
                 searchIds = searchIds.Concat(result).ToList();
             }
-
+            
             if (success)
             {
                 query = query.Where(r => searchIds.Contains(r.Id));
@@ -526,8 +528,7 @@ internal class FileDao(
                             Encrypted = file.Encrypted,
                             Forcesave = file.Forcesave,
                             ThumbnailStatus = file.ThumbnailStatus,
-                            TenantId = tenantId,
-                            FormsItemData = file.FormsItemData
+                            TenantId = tenantId
                         };
 
                         if (isNew)
@@ -1858,6 +1859,20 @@ internal class FileDao(
             return result;
         };
     }
+    private Func<Selector<DbFormsItemDataSearch>, Selector<DbFormsItemDataSearch>> GetFuncForSearchInFormsData(string searchText)
+    {
+        return s =>
+        {
+            Selector<DbFormsItemDataSearch> result = null;
+
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                result = s.InAll(r => r.FormsData.Select(a => a.Value), [searchText]);
+            }
+
+            return result;
+        };
+    }
 
     private IQueryable<DbFileQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles)
     {
@@ -2002,8 +2017,19 @@ internal class FileDao(
         return dbFile;
     }
 
-    private async Task<IQueryable<DbFile>> GetFilesQueryWithFilters(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent,
-        bool withSubfolders, bool excludeSubject, int roomId, string[] extension, FilesDbContext filesDbContext)
+    private async Task<IQueryable<DbFile>> GetFilesQueryWithFilters(
+        int parentId, 
+        OrderBy orderBy, 
+        FilterType filterType, 
+        bool subjectGroup, 
+        Guid subjectID, 
+        string searchText, 
+        bool searchInContent,
+        bool withSubfolders, 
+        bool excludeSubject, 
+        int roomId, 
+        string[] extension, 
+        FilesDbContext filesDbContext)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();        
         var q = await GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
@@ -2028,6 +2054,7 @@ internal class FileDao(
         {
             var searchIds = new List<int>();
             var success = false;
+            
             foreach (var e in extension)
             {
                 var func = GetFuncForSearch(parentId, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
@@ -2040,6 +2067,18 @@ internal class FileDao(
                     break;
                 }
                 searchIds = searchIds.Concat(result).ToList();
+            }
+
+            if (searchInContent)
+            {
+                var funcForSearchInFormsData = GetFuncForSearchInFormsData(searchText);
+                Expression<Func<Selector<DbFormsItemDataSearch>, Selector<DbFormsItemDataSearch>>> expressionSearchText = s => funcForSearchInFormsData(s);
+
+                (success, var resultForm) = await factoryIndexerFormData.TrySelectIdsAsync(expressionSearchText);
+                if (success)
+                {
+                    searchIds = searchIds.Concat(resultForm).ToList();
+                }
             }
 
             if (success)

@@ -218,8 +218,5 @@ public class File<T> : FileEntry<T>
         }
     }
     
-    [JsonIgnore]
-    public IEnumerable<FormsItemData> FormsItemData { get; set; }
-    
     public DateTime? LastOpened { get; set; }
 }

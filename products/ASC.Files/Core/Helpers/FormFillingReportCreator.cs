@@ -50,22 +50,18 @@ public class FormFillingReportCreator(
         {
             var fileDao = daoFactory.GetFileDao<T>();
             var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
-            var submitFormsData = await GetSubmitFormsData(resultsFileId, resultFormNumber, formsDataUrl, resultUrl);
+            var submitFormsData = await GetSubmitFormsData(formsDataFile.Id, resultFormNumber, formsDataUrl, resultUrl);
 
             if (resultsFileId != null)
             {
                 var resultsFile = await fileDao.GetFileAsync(resultsFileId);
                 
                 await exportToCSV.UpdateCsvReport(resultsFile, submitFormsData.FormsData);
-                
-                var formsFile = await fileDao.GetFileAsync(formsDataFile.Id);
-                formsFile.FormsItemData = submitFormsData.FormsData;
-                await fileDao.SaveFileAsync(formsFile, null);
             }
         }
     }
 
-    private async Task<SubmitFormsData> GetSubmitFormsData<T>(T resultsFileId, int resultFormNumber, string url, string resultUrl)
+    private async Task<SubmitFormsData> GetSubmitFormsData<T>(T resultFormId, int resultFormNumber, string url, string resultUrl)
     {
         var request = new HttpRequestMessage
         {
@@ -92,7 +88,7 @@ public class FormFillingReportCreator(
         var now = DateTime.UtcNow;
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        if (resultsFileId is int id)
+        if (resultFormId is int id)
         {
             var searchItems = new DbFormsItemDataSearch
             {

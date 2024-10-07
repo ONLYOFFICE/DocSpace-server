@@ -28,6 +28,7 @@ namespace ASC.Files.Core;
 
 public class SubmitFormsData
 {
+    [Nested]
     public IEnumerable<FormsItemData> FormsData { get; set; }
 }
 
@@ -46,7 +47,7 @@ public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
     public int TenantId { get; set; }
     public DateTime CreateOn { get; set; }
 
-    [Ignore] 
+    [OpenSearch.Client.Ignore] 
     public string IndexName => "forms_data";
 
     public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings)
