@@ -252,7 +252,8 @@ public class EntryManager(IDaoFactory daoFactory,
     TenantManager tenantManager,
     FileChecker fileChecker,
     IDistributedCache distributedCache,
-    NotifyClient notifyClient)
+    NotifyClient notifyClient,
+    ExternalShare externalShare)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1503,9 +1504,6 @@ public class EntryManager(IDaoFactory daoFactory,
                         pdfFile.Category = (int)FilterType.Pdf;
 
                         File<T> result;
-
-                        var user = await userManager.GetUsersAsync(userId);
-
                         if (tmpStream.CanSeek)
                         {
                             pdfFile.ContentLength = tmpStream.Length;
@@ -1612,10 +1610,12 @@ public class EntryManager(IDaoFactory daoFactory,
 
     public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
     {
+        var token = externalShare.GetKey();
+        
         bool checkRight;
         if ((await fileTracker.GetEditingByAsync(fileId)).Contains(userId))
         {
-            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
+            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone, token);
             if (!checkRight)
             {
                 return null;
@@ -1643,7 +1643,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
+        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone, token);
         if (checkRight)
         {
             await fileTracker.ChangeRight(fileId, userId, false);
