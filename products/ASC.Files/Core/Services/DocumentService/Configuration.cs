@@ -244,7 +244,7 @@ public class EditorConfiguration<T>(
         return _user;
     }
 
-    public async Task<string> GetCallbackUrl(File<T> file, string fillingSessionId)
+    public async Task<string> GetCallbackUrl(File<T> file)
     {
         if (!ModeWrite)
         {
@@ -252,10 +252,6 @@ public class EditorConfiguration<T>(
         }
 
         var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(file.Id.ToString());
-
-        callbackUrl = !string.IsNullOrEmpty(fillingSessionId) 
-            ? QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId) 
-            : callbackUrl;
 
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
         {

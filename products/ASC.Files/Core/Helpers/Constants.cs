@@ -41,4 +41,6 @@ public static class FileConstant
     public const string NewDocPath = "new/";
 
     public const string DownloadTitle = "download";
+
+    public const string AnonFillingSession = "anon_";
 }
