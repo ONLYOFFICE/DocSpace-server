@@ -230,7 +230,7 @@ public class FileSharingAceHelper(
                     }
                 }
 
-                await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions);
+                await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions, owner: existedShare?.Owner);
             }
             finally
             {

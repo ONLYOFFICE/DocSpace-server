@@ -567,6 +567,43 @@ public class UserController(
     }
 
     /// <summary>
+    /// Removes a guest from the list and excludes them from the rooms you invited them to
+    /// </summary>
+    /// <short>
+    /// Removes the guest from the list and your rooms
+    /// </short>
+    /// <category>Guests</category>
+    /// <param type="System.Guid, System" method="url" name="userId">User ID</param>
+    /// <path>api/2.0/people/guests/{userId}</path>
+    /// <httpMethod>DELETE</httpMethod>
+    [HttpDelete("guests/{userId:guid}")]
+    public async Task DeleteGuestAsync(Guid userId)
+    {
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        
+        var type = await _userManager.GetUserTypeAsync(currentUser.Id);
+        if (type != EmployeeType.RoomAdmin)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
+        var user = await _userManager.GetUsersAsync(userId);
+        if (user.Status == EmployeeStatus.Terminated || !await userManager.IsGuestAsync(user))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var relations = await userManager.GetUserRelationsAsync(currentUser.Id);
+        if (!relations.ContainsKey(user.Id))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
+        await userManager.DeleteUserRelationAsync(currentUser.Id, user.Id);
+        await fileSecurity.RemoveSecuritiesAsync(user.Id, currentUser.Id, SubjectType.User);
+    }
+
+    /// <summary>
     /// Returns a list of users matching the status filter and search query.
     /// </summary>
     /// <short>

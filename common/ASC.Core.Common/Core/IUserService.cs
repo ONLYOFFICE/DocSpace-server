@@ -57,4 +57,5 @@ public interface IUserService
     Task SetUserPhotoAsync(int tenant, Guid id, byte[] photo);
     Task SaveUsersRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId);
     Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(int tenantId, Guid sourceUserId);
+    Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId);
 }

@@ -239,6 +239,12 @@ public partial class UserDbContext
     {
         return Queries.DeleteUserRelationsAsync(this, tenantId, userId);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    public Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
+    {
+        return Queries.DeleteUserRelationAsync(this, tenantId, sourceUserId, targetUserId);
+    }
 }
 
 static file class Queries
@@ -496,5 +502,15 @@ static file class Queries
                 ctx.UserRelations
                     .Where(r => r.TenantId == tenantId && 
                                 (r.SourceUserId == userId || r.TargetUserId == userId))
+                    .ExecuteDelete());
+    
+    public static readonly Func<UserDbContext, int, Guid, Guid, Task<int>> DeleteUserRelationAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid sourceUserId, Guid targetUserId) =>
+                ctx.UserRelations
+                    .Where(r => 
+                        r.TenantId == tenantId && 
+                        r.SourceUserId == sourceUserId && 
+                        r.TargetUserId == targetUserId)
                     .ExecuteDelete());
 }

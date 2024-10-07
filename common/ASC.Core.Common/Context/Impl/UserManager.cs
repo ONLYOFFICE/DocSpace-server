@@ -800,6 +800,11 @@ public class UserManager(
     {
         return userService.GetUserRelationsAsync(Tenant.Id, sourceUserId);
     }
+
+    public Task DeleteUserRelationAsync(Guid sourceUserId, Guid targetUserId)
+    {
+        return userService.DeleteUserRelationAsync(Tenant.Id, sourceUserId, targetUserId);
+    }
     
     #endregion Users
 

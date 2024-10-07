@@ -53,6 +53,14 @@ internal abstract class SecurityBaseDao<T>(
         serviceProvider,
         distributedLockProvider)
 {
+    public async Task RemoveSecuritiesAsync(Guid subject, Guid ownerId, SubjectType subjectType)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await filesDbContext.RemoveSecuritiesAsync(tenantId, subject, ownerId, subjectType);
+    }
+    
     public async Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord<T>> records)
     {
         var mapping = daoFactory.GetMapping<T>();

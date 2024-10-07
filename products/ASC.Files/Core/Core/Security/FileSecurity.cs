@@ -1578,7 +1578,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     }
     }
 
-    public async Task ShareAsync<T>(T entryId, FileEntryType entryType, Guid @for, FileShare share, SubjectType subjectType = default, FileShareOptions options = null)
+    public async Task ShareAsync<T>(T entryId, FileEntryType entryType, Guid @for, FileShare share, SubjectType subjectType = default, FileShareOptions options = null, Guid? owner = null)
     {
         var securityDao = daoFactory.GetSecurityDao<T>();
         var r = new FileShareRecord<T>
@@ -1587,7 +1587,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             EntryId = entryId,
             EntryType = entryType,
             Subject = @for,
-            Owner = authContext.CurrentAccount.ID,
+            Owner = owner ?? authContext.CurrentAccount.ID,
             Share = share,
             SubjectType = subjectType,
             Options = options
@@ -2147,6 +2147,11 @@ public class FileSecurity(IDaoFactory daoFactory,
     public Task RemoveSubjectAsync(Guid subject, bool withoutOwner)
     {
         return daoFactory.GetSecurityDao<int>().RemoveBySubjectAsync(subject, withoutOwner);
+    }
+    
+    public Task RemoveSecuritiesAsync(Guid subject, Guid owner, SubjectType subjectType)
+    {
+        return daoFactory.GetSecurityDao<int>().RemoveSecuritiesAsync(subject, owner, subjectType);
     }
 
     public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId)

@@ -704,6 +704,12 @@ public class EFUserService(
         
         return await q.ToDictionaryAsync(r => r.TargetUserId, mapper.Map<UserRelation>);
     }
+    
+    public async Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.DeleteUserRelationAsync(tenantId, sourceUserId, targetUserId);
+    }
 
     private IQueryable<User> GetUserQuery(UserDbContext userDbContext, int tenant)
     {

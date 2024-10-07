@@ -303,6 +303,12 @@ public class CachedUserService : IUserService, ICachedService
         return relations;
     }
 
+    public async Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
+    {
+        await _service.DeleteUserRelationAsync(tenantId, sourceUserId, targetUserId);
+        await _cacheUserRelationItem.PublishAsync(new UserRelationCacheItem { TenantId = tenantId, SourceUserId = sourceUserId.ToString() }, CacheNotifyAction.Any);
+    }
+
     public async Task<DateTime> GetUserPasswordStampAsync(int tenant, Guid id)
     {
         return await _service.GetUserPasswordStampAsync(tenant, id);
