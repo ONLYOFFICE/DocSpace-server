@@ -233,6 +233,12 @@ public partial class UserDbContext
     {
         return Queries.EmailsAsync(this, tenantId);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task DeleteUserRelationsAsync(int tenantId, Guid userId)
+    {
+        return Queries.DeleteUserRelationsAsync(this, tenantId, userId);
+    }
 }
 
 static file class Queries
@@ -483,4 +489,12 @@ static file class Queries
                  where usersDav.TenantId == tenantId
                  select users.Email)
                 .Distinct());
+
+    public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteUserRelationsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid userId) =>
+                ctx.UserRelations
+                    .Where(r => r.TenantId == tenantId && 
+                                (r.SourceUserId == userId || r.TargetUserId == userId))
+                    .ExecuteDelete());
 }

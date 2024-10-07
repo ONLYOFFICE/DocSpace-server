@@ -480,6 +480,7 @@ public class EFUserService(
             await userDbContext.DeleteDbSubscriptionMethodsAsync(tenant, id.ToString());
             await userDbContext.DeleteUserPhotosAsync(tenant, id);
             await userDbContext.DeleteAccountLinksAsync(id.ToString());
+            await userDbContext.DeleteUserRelationsAsync(tenant, id);
 
             if (immediate)
             {
