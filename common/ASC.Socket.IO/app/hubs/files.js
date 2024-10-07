@@ -168,6 +168,8 @@ module.exports = (io) => {
         socket.leave(room);
       }
     }
+
+    filesIO.to(socket.id).emit("connection-init");
   });
 
   function startEdit({ fileId, room } = {}) {
