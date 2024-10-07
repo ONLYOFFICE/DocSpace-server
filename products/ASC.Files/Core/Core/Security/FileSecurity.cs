@@ -1766,7 +1766,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var thirdPartyRoomsRecords = new Dictionary<string, FileShareRecord<string>>();
 
         await foreach (var record in securityDao.GetSharesAsync(currentUserSubjects)
-                           .Where(r => r.Share != FileShare.Restrict && (!r.IsLink || !r.Options.IsExpired)))
+                           .Where(r => r.Share != FileShare.Restrict))
         {
             if (record.EntryType != FileEntryType.Folder)
             {
@@ -1791,7 +1791,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             else
             {
                 thirdPartyRoomsRecords.TryAdd(record.EntryId, record);
-        }
+            }
         }
 
         var rootFoldersIds = searchArea switch
