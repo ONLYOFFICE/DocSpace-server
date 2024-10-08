@@ -302,6 +302,7 @@ public class EventDescription<T>
     public T ParentId { get; set; }
     public string ParentTitle { get; set; }
     public int? ParentType { get; set; }
+    public int? Type { get; set; }
     public string ToParentTitle { get; set; }
     public int? ToParentType { get; set; }
     public string FromParentTitle { get; set; }
