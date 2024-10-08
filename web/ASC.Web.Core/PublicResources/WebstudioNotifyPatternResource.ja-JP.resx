@@ -1802,4 +1802,159 @@ $TrulyYours</value>
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>パスワードの設定</value>
   </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>$UserName 様
+
+いつもONLYOFFICEをご利用いただきありがとうございます。
+
+ONLYOFFICE DocSpace Developerのライセンスは本日で期限切れとなりますので、お知らせいたします。
+
+お客様のために $PaymentDelay 日間の猶予期間を設定いたしました。この期間中は、ドキュメントの編集へのアクセスは20の同時接続に制限されます。なお、サポートおよびアップデートは提供されませんので、ご了承ください。
+
+ライセンスを更新するには、担当営業マネージャーに直接ご連絡いただくか、または"${__SalesEmail}":"mailto:${__SalesEmail}"までお問い合わせください。
+
+お支払いに関するお問い合わせは、"${__SalesEmail}":"mailto:${__SalesEmail}"までご連絡ください。技術的な問題の解決については、"${__SupportLink}":"${__SupportLink}"をご利用ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>$UserName 様
+
+いつもONLYOFFICEをご利用いただきありがとうございます。
+
+ONLYOFFICE DocSpace Developerのライセンスは7日後に期限切れになりますので、お知らせいたします。
+
+ライセンスを更新するには、担当営業マネージャーに直接ご連絡いただくか、または"${__SalesEmail}":"mailto:${__SalesEmail}"までお問い合わせください。
+
+お支払いに関するお問い合わせは、"${__SalesEmail}":"mailto:${__SalesEmail}"までご連絡ください。技術的な問題の解決については、"${__SupportLink}":"${__SupportLink}"をご利用ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>$UserName 様
+
+ONLYOFFICE DocSpace Developerライセンスの猶予期間は7日後に終了しますので、お知らせいたします。なお、DocSpaceはご利用いただけなくなりますので、ご了承ください。
+
+ライセンスを更新するには、担当営業マネージャーに直接ご連絡いただくか、または"${__SalesEmail}":"mailto:${__SalesEmail}"までお問い合わせください。
+
+お支払いに関するお問い合わせは、"${__SalesEmail}":"mailto:${__SalesEmail}"までご連絡ください。技術的な問題の解決については、"${__SupportLink}":"${__SupportLink}"をご利用ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>$UserName 様
+
+ONLYOFFICE DocSpace Developerライセンスの猶予期間は本日で終了しますので、お知らせいたします。なお、DocSpaceはご利用いただけなくなりますので、ご了承ください。
+
+ライセンスを更新するには、担当営業マネージャーに直接ご連絡いただくか、または"${__SalesEmail}":"mailto:${__SalesEmail}"までお問い合わせください。
+
+お支払いに関するお問い合わせは、"${__SalesEmail}":"mailto:${__SalesEmail}"までご連絡ください。技術的な問題の解決については、"${__SupportLink}":"${__SupportLink}"をご利用ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>$UserName 様
+
+いつもONLYOFFICEをご利用いただきありがとうございます。
+
+ONLYOFFICE DocSpace Enterpriseのライセンスは本日で期限切れとなります。
+
+お客様のために*$PaymentDelay 日の猶予期間*を設定しました。この期間中は、DocSpaceへのアクセスは3名の指定ユーザー*に提供されます。なお、サポートおよびアップデートは提供されません。
+
+購入時に利用可能であったすべての機能を無期限で利用できるようにするため、ONLYOFFICE DocSpace EnterpriseのLIFETIMEライセンス（3 年間のサポートとアップデート付き）をご購入いただくことをお勧めします。
+
+$OrangeButton
+
+ライセンスの更新については、担当営業マネージャーに直接お問い合わせください。
+
+お支払いに関するご質問は、"${__SalesEmail}":"mailto:${__SalesEmail}"までお問い合わせください。技術的な問題の解決には、"${__SupportLink}":"${__SupportLink}"をご利用ください。
+
+* 最初に3人のユーザーがファイルを編集用に開いた際の記録されたID。同時に編集できるドキュメントの数に制限はありません。他のユーザーは、ドキュメントを閲覧用に開くことができます。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>$UserName 様
+
+いつもONLYOFFICEをご利用いただきありがとうございます。
+
+ONLYOFFICE DocSpace Enterpriseのライセンスは7日後に期限切れになります。
+
+購入時に利用可能であったすべての機能を無期限で利用できるようにするため、ONLYOFFICE DocSpace EnterpriseのLIFETIMEライセンス（3 年間のサポートとアップデート付き）をご購入いただくことをお勧めします。
+
+$OrangeButton
+
+ライセンスの更新については、担当営業マネージャーに直接お問い合わせください。
+
+お支払いに関するご質問は、"${__SalesEmail}":"mailto:${__SalesEmail}"までお問い合わせください。技術的な問題の解決には、"${__SupportLink}":"${__SupportLink}"をご利用ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>$UserName 様
+
+いつもONLYOFFICEをご利用いただきありがとうございます。
+
+ONLYOFFICE DocSpace Enterpriseライセンスの猶予期間は7日後に終了します。 猶予期間がすぎると、DocSpaceが利用できなくなりますので、ご注意ください。
+
+購入時に利用可能であったすべての機能を無期限で利用できるようにするには、ONLYOFFICE DocSpace EnterpriseのLIFETIMEライセンス（3年間のサポートとアップデート付き）を取得することをお勧めします。
+
+$OrangeButton
+
+ライセンス更新については、担当営業マネージャーに直接お問い合わせください。
+
+お支払いに関するご質問は、"${__SalesEmail}":"mailto:${__SalesEmail}"までお問い合わせください。技術的な問題の解決には、"${__SupportLink}":"${__SupportLink}"をご利用ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>$UserName 様
+
+いつもONLYOFFICEをご利用いただきありがとうございます。
+
+ONLYOFFICE DocSpace Enterpriseライセンスの猶予期間は本日で終了します。 猶予期間がすぎると、DocSpaceが利用できなくなりますので、ご注意ください。
+
+購入時に利用可能であったすべての機能を無期限で利用できるようにするには、ONLYOFFICE DocSpace EnterpriseのLIFETIMEライセンス（3年間のサポートとアップデート付き）を取得することをお勧めします。
+
+$OrangeButton
+
+ライセンス更新については、担当営業マネージャーに直接お問い合わせください。
+
+お支払いに関するご質問は、"${__SalesEmail}":"mailto:${__SalesEmail}"までお問い合わせください。技術的な問題の解決には、"${__SupportLink}":"${__SupportLink}"をご利用ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>$UserName 様
+
+ONLYOFFICE DocSpace Enterpriseのライセンスは7日後に期限切れになります。7日後にアップデートとサポートは利用できなくなります。*
+
+ライセンスを更新するには、担当営業マネージャーに直接連絡するか、または「${__SalesEmail}「:」mailto:${__SalesEmail}"」からお問い合わせください
+
+お支払いに関するご質問は、"${__SalesEmail}":"mailto:${__SalesEmail}"までお問い合わせください。技術的な問題の解決には、"${__SupportLink}":"${__SupportLink}"をご利用ください。
+
+* ライセンス購入時に利用可能となったすべての機能は、無期限でご利用いただけます。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>$UserName 様
+
+ONLYOFFICE DocSpace Enterpriseのライセンスは本日で期限切れとなります。 明日以降、アップデートとサポートは利用できなくなります。*
+
+ライセンスを更新するには、担当営業マネージャーに直接連絡するか、または"${__SalesEmail}":"mailto:${__SalesEmail}"からお問い合わせください
+
+お支払いに関するご質問は、"${__SalesEmail}":"mailto:${__SalesEmail}"までお問い合わせください。技術的な問題の解決には、"${__SupportLink}":"${__SupportLink}"をご利用ください。
+
+* ライセンス購入時に利用可能となったすべての機能は、無期限でご利用いただけます。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>こんにちは！ONLYOFFICE DocSpaceアカウントにパスワードを設定してください。以下のボタンをクリックしてください。
+
+$OrangeButton
+
+リンクは7日間有効です。</value>
+  </data>
 </root>

@@ -500,4 +500,7 @@
   <data name="FormNumber" xml:space="preserve">
     <value>Номер на формуляра</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Външен потребител</value>
+  </data>
 </root>

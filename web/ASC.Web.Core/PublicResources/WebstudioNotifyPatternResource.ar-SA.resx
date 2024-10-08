@@ -1924,4 +1924,186 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>اشترى الآن</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>إعداد كلمة المرور</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>تم تفعيل فترة السماح لـ "ONLYOFFICE DocSpace Developer" الخاص بك</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ترخيص "ONLYOFFICE DocSpace Developer" الخاص بك سينتهي قريبًا</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>فترة السماح لـ"ONLYOFFICE DocSpace Developer" الخاص بك ستنتهي قريبًا</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>ترخيص "ONLYOFFICE DocSpace Developer" الخاص بك لم يعد متوفرًا</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>تم تفعيل فترة السماح لـ"ONLYOFFICE DocSpace Enterprise" الخاص بك </value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ترخيص "ONLYOFFICE DocSpace Enterprise" الخاص بك سينتهي قريبًا</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>فترة السماح لـ "ONLYOFFICE DocSpace Enterprise" الخاص بك ستنتهي قريبًا</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>ترخيص "ONLYOFFICE DocSpace Enterprise" الخاص بك لم يعد متوفرًا</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>ترخيص "ONLYOFFICE DocSpace Enterprise" الخاص بك سينتهي قريبًا</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>ترخيص "ONLYOFFICE DocSpace Enterprise" الخاص بك ينتهي اليوم</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>إعداد كلمة مرور لـ "ONLYOFFICE DocSpace"</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>مرحبًا، $UserName!
+
+ينتهي ترخيص "ONLYOFFICE DocSpace Developer" الخاص بك اليوم.
+
+لقد قمنا بتفعيل فترة سماح لمدة $PaymentDelay يومًا لك. خلال هذه الفترة، سيكون الوصول إلى تحرير المستندات محدودًا بـ 20 اتصالًا متزامنًا (لن يتم تقديم الدعم والتحديثات بعد الآن).
+
+لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}.
+
+للاستفسارات المتعلقة بالدفع، يمكنك التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}. ولحل أي مشاكل تقنية، يُرجى استخدام رابط الدعم أدناه: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>مرحبًا، $UserName!
+
+سينتهي ترخيص "ONLYOFFICE DocSpace Developer" الخاص بك خلال 7 أيام.
+
+لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}.
+
+للاستفسارات المتعلقة بالدفع، يمكنك التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}. ولحل أي مشاكل تقنية، يُرجى استخدام رابط الدعم أدناه: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>مرحبًا، $UserName!
+
+ستَنتهي فترة السماح لترخيص"ONLYOFFICE DocSpace Developer" الخاص بك خلال 7 أيام، مما يعني أن "DocSpace" سيصبح غير متاح.
+
+لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}.
+
+للاستفسارات المتعلقة بالدفع، يمكنك التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}. ولحل أي مشاكل تقنية، يُرجى استخدام رابط الدعم أدناه: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>مرحبًا، $UserName!
+
+تنتهي اليوم فترة السماح لترخيص "ONLYOFFICE DocSpace Developer" الخاص بك، مما يعني أن "DocSpace" لن يكون متاحًا بعد الآن.
+
+لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}.
+
+للاستفسارات المتعلقة بالدفع، يمكنك التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}. ولحل أي مشاكل تقنية، يُرجى استخدام رابط الدعم أدناه: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>مرحبًا، $UserName!
+
+ينتهي ترخيص "ONLYOFFICE DocSpace Enterprise" الخاص بك اليوم.
+
+لقد قمنا بتفعيل *فترة سماح لمدة $PaymentDelay يومًا* لك. خلال هذه الفترة، سيكون الوصول إلى "DocSpace" متاحًا لثلاثة مستخدمين معينين فقط* (لن يتم تقديم الدعم والتحديثات بعد الآن).
+
+للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على ترخيص *مدى الحياة* لـ "ONLYOFFICE DocSpace Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
+
+$OrangeButton
+
+يمكنك أيضًا التواصل مباشرةً مع مدير المبيعات المخصص لك لتحديث الترخيص.
+
+للاستفسارات المتعلقة بالدفع، يمكنك التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}.ولحل أي مشاكل تقنية، يُرجى استخدام رابط الدعم أدناه: "${__SupportLink}":"${__SupportLink}".
+
+*المعرفات المسجلة لأول ثلاثة مستخدمين سيقومون بفتح أي ملف للتعديل. عدد المستندات التي يمكن تعديلها في الوقت نفسه غير محدود. سيتمكن المستخدمون الآخرون من فتح المستندات للعرض فقط.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>مرحبًا، $UserName!
+
+سينتهي ترخيص "ONLYOFFICE DocSpace Enterprise" الخاص بك خلال 7 أيام.
+
+للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على *ترخيص مدى الحياة* لـ "ONLYOFFICE DocSpace Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
+
+$OrangeButton
+
+يمكنك أيضًا التواصل مباشرةً مع مدير المبيعات المخصص لك لتحديث الترخيص.
+
+للاستفسارات المتعلقة بالدفع، يمكنك التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}. لحل أي مشاكل تقنية، يُرجى استخدام رابط الدعم أدناه: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>مرحبًا، $UserName!
+
+ستنتهي فترة السماح لترخيص "ONLYOFFICE DocSpace Enterprise" الخاص بك خلال 7 أيام، مما يعني أن "DocSpace" سيصبح غير متاح.
+
+للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على *ترخيص مدى الحياة* لـ "ONLYOFFICE DocSpace Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
+
+$OrangeButton
+
+يمكنك أيضًا التواصل مباشرةً مع مدير المبيعات المخصص لك لتحديث الترخيص.
+
+للاستفسارات المتعلقة بالدفع، يمكنك التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}. لحل أي مشاكل تقنية، يُرجى استخدام رابط الدعم أدناه: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>مرحبًا، $UserName!
+
+تنتهي فترة السماح لترخيص "ONLYOFFICE DocSpace Enterprise" الخاص بك اليوم، مما يعني أن "DocSpace" لن يكون متاحًا بعد الآن.
+
+للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على *ترخيص مدى الحياة* لـ "ONLYOFFICE DocSpace Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
+
+$OrangeButton
+
+يمكنك أيضًا التواصل مباشرةً مع مدير المبيعات المخصص لك لتحديث الترخيص.
+
+للاستفسارات المتعلقة بالدفع، يمكنك التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}. لحل أي مشاكل تقنية، يُرجى استخدام رابط الدعم أدناه: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>مرحبًا، $UserName!
+
+سينتهي ترخيص "ONLYOFFICE DocSpace Enterprise" الخاص بك خلال 7 أيام، مما يعني أن التحديثات والدعم لن يكونا متاحين.*
+
+لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}.
+
+للاستفسارات المتعلقة بالدفع، يمكنك التواصل معنا عبر sales@onlyoffice.com. ولحل أي مشاكل تقنية، يُرجى استخدام رابط الدعم أدناه: "${__SupportLink}":"${__SupportLink}".
+
+*يمكنك استخدام جميع الميزات المتاحة عند شراء الترخيص لفترة غير محدودة.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>مرحبًا، $UserName!
+
+ينتهي ترخيص "ONLYOFFICE DocSpace Enterprise" الخاص بك اليوم، مما يعني أن التحديثات والدعم لن يعودوا متاحين.*
+
+لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":mailto:${__SalesEmail}.
+
+للاستفسارات المتعلقة بالدفع، يمكنك التواصل معنا عبر sales@onlyoffice.com. ولحل أي مشاكل تقنية، يُرجى استخدام رابط الدعم أدناه: "${__SupportLink}":"${__SupportLink}".
+
+*يمكنك استخدام جميع الميزات المتاحة عند شراء الترخيص لفترة غير محدودة.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>مرحبًا! يُرجى إعداد كلمة مرور لحسابك في "ONLYOFFICE DocSpace". فقط اضغط على الزر أدناه:
+
+$OrangeButton
+
+الرابط صالح لمدة 7 أيام.</value>
+  </data>
 </root>

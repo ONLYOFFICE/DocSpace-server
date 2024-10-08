@@ -500,4 +500,7 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Ouvrir le formulaire</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Utilisateur externe</value>
+  </data>
 </root>
