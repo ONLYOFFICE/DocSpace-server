@@ -86,16 +86,20 @@ public class ExportToCSV(
     {
         var dataTable = new DataTable();
         dataTable.TableName = typeof(FormsItemData).FullName;
-        var values = new object[list.Count()];
 
-        var i = 0;
+        var values = new List<object>();
+
         foreach (var entity in list)
         {
+            if (entity.Type != null && entity.Type == "picture")
+            {
+                continue;
+            }
             dataTable.Columns.Add(new DataColumn(entity.Key));
 
-            values[i] = entity.Value; i++;
+            values.Add(entity.Type != null ? $"=\"{entity.Value}\"" : entity.Value);
         }
-        dataTable.Rows.Add(values);
+        dataTable.Rows.Add(values.ToArray());
 
         return dataTable;
     }
