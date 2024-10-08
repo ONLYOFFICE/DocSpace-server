@@ -37,8 +37,10 @@ public class FoldersControllerInternal(
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
-    HistoryApiHelper historyApiHelper)
-    : FoldersController<int>(breadCrumbsManager,
+    HistoryApiHelper historyApiHelper,
+    FormFillingReportCreator formFillingReportCreator)
+    : FoldersController<int>(
+        breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
         fileOperationsManager,
@@ -64,6 +66,13 @@ public class FoldersControllerInternal(
     public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int folderId)
     {
         return historyApiHelper.GetFolderHistoryAsync(folderId);
+    }
+    
+    [AllowAnonymous]
+    [HttpGet("{folderId:int}/formfilter")]
+    public async Task<IEnumerable<FormsItemDto>> GetFolderAsync(int folderId)
+    {
+        return (await formFillingReportCreator.GetFormsFields(folderId)).Select(r => new FormsItemDto(r.Key, r.Type));
     }
 }
 
@@ -170,8 +179,17 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("{folderId}")]
-    public async Task<FolderContentDto<T>> GetFolderAsync(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withsubfolders, bool? excludeSubject,
-        ApplyFilterOption? applyFilterOption, string extension, SearchArea searchArea)
+    public async Task<FolderContentDto<T>> GetFolderAsync(
+        T folderId,
+        Guid? userIdOrGroupId,
+        FilterType? filterType,
+        T roomId,
+        bool? searchInContent,
+        bool? withsubfolders,
+        bool? excludeSubject,
+        ApplyFilterOption? applyFilterOption,
+        string extension,
+        SearchArea searchArea)
     {
 
         var split = extension == null ? [] : extension.Split(",");

@@ -33,7 +33,7 @@ public class FormFillingReportCreator(
     IHttpClientFactory clientFactory,
     TenantUtil tenantUtil,
     TenantManager tenantManager,
-    FactoryIndexerForm formsItemDataSearchFactory,
+    FactoryIndexerForm factoryIndexerForm,
     CommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility)
@@ -61,6 +61,27 @@ public class FormFillingReportCreator(
         }
     }
 
+    public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var folder = await folderDao.GetFolderAsync(folderId);
+        if (folder?.FolderType != FolderType.FormFillingFolderDone)
+        {
+            return [];
+        }
+        
+        var fileDao = daoFactory.GetFileDao<int>();
+        var file = await fileDao.GetFilesAsync([folderId], FilterType.Pdf, false, Guid.Empty, null, null, false).FirstOrDefaultAsync();
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.Id, file.Id));
+
+        if (success)
+        {
+            return result.SelectMany(r => r.FormsData);
+        }
+
+        return [];
+    }
+    
     private async Task<SubmitFormsData> GetSubmitFormsData<T>(T resultFormId, int resultFormNumber, string url, string resultUrl)
     {
         var request = new HttpRequestMessage
@@ -98,7 +119,7 @@ public class FormFillingReportCreator(
                 FormsData = fromData.FormsData
             };
 
-            await formsItemDataSearchFactory.IndexAsync(searchItems);
+            await factoryIndexerForm.IndexAsync(searchItems);
         }
 
         return result;
