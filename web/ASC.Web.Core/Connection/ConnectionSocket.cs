@@ -40,12 +40,18 @@ public class ConnectionSocket(ITariffService tariffService,
     public async Task LogoutUserAsync(Guid userId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await MakeRequest("leave-in-portal", new { userId, tenantId });
+        await MakeRequest("logout-user", new { userId, tenantId });
     }
 
     public async Task LogoutExceptThisAsync(int id, Guid userId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await MakeRequest("leave-expect-this-portal", new { id, userId, tenantId });
+        await MakeRequest("logout-expect-this", new { id, userId, tenantId });
+    }
+
+    public async Task LogoutSessionAsync(Guid userId, int loginEventId = 0)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await MakeRequest("logout-session", new { room = $"{tenantId}-{userId}", loginEventId });
     }
 }

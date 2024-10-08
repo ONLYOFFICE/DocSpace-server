@@ -27,7 +27,6 @@ module.exports = async (io) => {
       const browser = parser.browser.name + " " + browserVersion
   
       const userId = socket.handshake.session?.user?.id;
-      const userName = (socket.handshake.session?.user?.userName || "").toLowerCase();
       const tenantId = socket.handshake.session?.portal?.tenantId;
       let id;
       let idInRoom = -1;
@@ -251,7 +250,6 @@ module.exports = async (io) => {
 
           user = {
             id: userId,
-            displayName: userName,
             sessions: sessions,
             status: "online",
             offlineSessions: offSess
@@ -362,7 +360,7 @@ module.exports = async (io) => {
       }
     }
 
-    function leaveInPortal({userId, tenantId} = {}) 
+    function logoutUser({userId, tenantId} = {}) 
     {
       var user = getUser(portalUsers, userId, tenantId);
       if (user) 
@@ -375,7 +373,7 @@ module.exports = async (io) => {
       }
     }
 
-    async function leaveExceptThisInPortal({id, userId, tenantId} = {}) 
+    async function logoutExpectThis({id, userId, tenantId} = {}) 
     {
       var user = getUser(portalUsers, userId, tenantId);
       if (user) 
@@ -389,6 +387,11 @@ module.exports = async (io) => {
             }
           });
       }
+    }
+
+    function logoutSession({ room, loginEventId } = {}) {
+      logger.info(`logout user ${room} session ${loginEventId}`);
+      onlineIO.to(room).emit("s:logout-session", loginEventId);
     }
 
     function getUser(list, userId, id){
@@ -410,8 +413,9 @@ module.exports = async (io) => {
     
     return {
       startAsync,
-      leaveInPortal,
-      leaveExceptThisInPortal
+      logoutUser,
+      logoutSession,
+      logoutExpectThis
     };
 };
   

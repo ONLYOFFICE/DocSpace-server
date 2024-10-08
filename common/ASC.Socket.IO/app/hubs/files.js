@@ -306,11 +306,6 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:update-history", { id, type });
   }
 
-  function logoutSession({ room, loginEventId } = {}) {
-    logger.info(`logout user ${room} session ${loginEventId}`);
-    filesIO.to(room).emit("s:logout-session", loginEventId);
-  }
-
   return {
     start,
     startEdit,
@@ -328,7 +323,6 @@ module.exports = (io) => {
     markAsNewFiles,
     markAsNewFolders,
     changeInvitationLimitValue,
-    updateHistory,
-    logoutSession
+    updateHistory
   };
 };

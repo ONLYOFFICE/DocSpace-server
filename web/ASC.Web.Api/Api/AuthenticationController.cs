@@ -65,7 +65,7 @@ public class AuthenticationController(
     ApiContext apiContext,
     AuthContext authContext,
     CookieStorage cookieStorage,
-    QuotaSocketManager quotaSocketManager,
+    ConnectionSocket connectionSocketManager,
     DbLoginEventsManager dbLoginEventsManager,
     BruteForceLoginManager bruteForceLoginManager,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
@@ -296,7 +296,7 @@ public class AuthenticationController(
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         await dbLoginEventsManager.LogOutEventAsync(tenantId, loginEventId);
-        await quotaSocketManager.LogoutSession(securityContext.CurrentAccount.ID, loginEventId);
+        await connectionSocketManager.LogoutSessionAsync(securityContext.CurrentAccount.ID, loginEventId);
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var loginName = user.DisplayUserName(false, displayUserSettingsHelper);

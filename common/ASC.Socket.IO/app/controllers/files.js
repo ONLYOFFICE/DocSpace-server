@@ -107,10 +107,5 @@ module.exports = (files) => {
     res.end();
   });
 
-  router.post("/logout-session", (req, res) => {
-    files.logoutSession(req.body);
-    res.end();
-  });
-
   return router;
 };

@@ -46,13 +46,12 @@ public class ConnectionsController(
     MessageService messageService,
     CookiesManager cookiesManager,
     CookieStorage cookieStorage,
-    QuotaSocketManager quotaSocketManager,
     GeolocationHelper geolocationHelper,
     ApiDateTimeHelper apiDateTimeHelper,
     TenantManager tenantManager,
     UserPhotoManager userPhotoManager,
     DisplayUserSettingsHelper displayUserSettings,
-    ConnectionSocket socketManager,
+    ConnectionSocket connectionSocketManager,
     StudioNotifyService studioNotifyService)
     : ControllerBase
 {
@@ -304,13 +303,8 @@ public class ConnectionsController(
 
             var loginEvents = await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
 
-            foreach (var loginEvent in loginEvents)
-            {
-                await quotaSocketManager.LogoutSession(user.Id, loginEvent.Id);
-            }
-
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
-            await socketManager.LogoutExceptThisAsync(loginEventFromCookie, user.Id);
+            await connectionSocketManager.LogoutExceptThisAsync(loginEventFromCookie, user.Id);
             return userName;
         }
         catch (Exception ex)
@@ -342,7 +336,7 @@ public class ConnectionsController(
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
-            await socketManager.LogoutExceptThisAsync(loginEventId, userId);
+            await connectionSocketManager.LogoutExceptThisAsync(loginEventId, userId);
             return userName;
         }
         catch (Exception ex)
@@ -406,7 +400,7 @@ public class ConnectionsController(
 
             if (loginEvent.UserId.HasValue)
             {
-                await quotaSocketManager.LogoutSession(loginEvent.UserId.Value, loginEvent.Id);
+                await connectionSocketManager.LogoutSessionAsync(loginEvent.UserId.Value, loginEvent.Id);
             }
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
@@ -428,7 +422,7 @@ public class ConnectionsController(
 
         await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
         await cookiesManager.ResetUserCookieAsync(user.Id, false);
-        await socketManager.LogoutUserAsync(user.Id);
+        await connectionSocketManager.LogoutUserAsync(user.Id);
         if (changePassword)
         {
             await messageService.SendAsync(MessageAction.UserResetPassword, MessageTarget.Create(user.Id));
