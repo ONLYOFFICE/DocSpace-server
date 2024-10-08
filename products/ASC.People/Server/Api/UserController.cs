@@ -503,6 +503,8 @@ public class UserController(
             throw new SecurityException();
         }
         
+        var isGuest = await userManager.IsGuestAsync(user);
+        
         await CheckReassignProcessAsync([user.Id]);
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -510,7 +512,7 @@ public class UserController(
         await _userManager.DeleteUserAsync(user.Id);
         await fileSecurity.RemoveSubjectAsync(user.Id, true);
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
+        await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
 
         await messageService.SendAsync(MessageAction.UserDeleted, MessageTarget.Create(user.Id), userName);
 
@@ -987,11 +989,13 @@ public class UserController(
             {
                 continue;
             }
+            
+            var isGuest = await userManager.IsGuestAsync(user);
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
             await fileSecurity.RemoveSubjectAsync(user.Id, true);
-            await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
+            await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
         }
 
         await messageService.SendAsync(MessageAction.UsersDeleted, MessageTarget.Create(users.Select(x => x.Id)), userNames);

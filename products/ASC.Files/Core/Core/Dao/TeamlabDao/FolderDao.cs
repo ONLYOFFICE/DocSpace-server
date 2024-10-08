@@ -1100,6 +1100,19 @@ internal class FolderDao(
             await filesDbContext.ReassignFoldersPartiallyAsync(tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
         }
     }
+    
+    public async Task ReassignRoomFoldersAsync(Guid oldOwnerId)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var items = await filesDbContext.GetRoomsFoldersReassignInfoAsync(tenantId, oldOwnerId).ToListAsync();
+
+        foreach (var group in items.GroupBy(x => x.RoomOwnerId))
+        {
+            await filesDbContext.ReassignSpecificFoldersAsync(tenantId, group.Select(f => f.FolderId), group.Key);
+        }
+    }
 
     public async IAsyncEnumerable<Folder<int>> SearchFoldersAsync(string text, bool bunch = false)
     {
@@ -1841,6 +1854,12 @@ public class OriginData
     public DbFolder OriginRoom { get; init; }
     public DbFolder OriginFolder { get; init; }
     public HashSet<KeyValuePair<string, FileEntryType>> Entries { get; init; }
+}
+
+public record FolderReassignInfo
+{
+    public int FolderId { get; init; }
+    public Guid RoomOwnerId { get; init; }
 }
 
 [Scope(typeof(ICacheFolderDao<int>))]

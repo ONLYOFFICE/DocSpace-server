@@ -2537,12 +2537,6 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UserNotFound);
         }
-
-        //check user have personal data
-        if (await userManager.IsGuestAsync(userFrom))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
     }
 
     public async Task<List<T>> GetPersonalFolderIdsAsync<T>(Guid userId)
@@ -2618,6 +2612,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         await fileSecurity.RemoveSubjectAsync(userFromId, true);
+        return;
 
         async Task DeleteFilesAsync(IEnumerable<T> fileIds)
         {
@@ -2681,6 +2676,26 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    public async Task ReassignRoomsFoldersAsync(Guid userFromId, bool checkPermission = false)
+    {
+        if (checkPermission)
+        {
+            await DemandPermissionToDeletePersonalDataAsync(userFromId);
+        }
+        
+        if (daoFactory.GetFolderDao<int>() is not FolderDao folderDao)
+        {
+            return;
+        }
+
+        await folderDao.ReassignRoomFoldersAsync(userFromId);
+
+        var folderIdVirtualRooms = await folderDao.GetFolderIDVirtualRooms(false);
+        var folderVirtualRooms = await folderDao.GetFolderAsync(folderIdVirtualRooms);
+        
+        await fileMarker.RemoveMarkAsNewAsync(folderVirtualRooms, userFromId);
+    }
+
     public async Task ReassignFoldersAsync<T>(Guid userFromId, Guid userToId, IEnumerable<T> exceptFolderIds, bool checkPermission = false)
     {
         if (checkPermission)
@@ -2720,6 +2735,21 @@ public class FileStorageService //: IFileStorageService
         _logger.InformationReassignFiles(userFromId, userToId);
 
         await fileDao.ReassignFilesAsync(userFromId, userToId, exceptFolderIds);
+    }
+    
+    public async Task ReassignRoomsFilesAsync(Guid userFromId, bool checkPermission = false)
+    {
+        if (checkPermission)
+        {
+            await DemandPermissionToDeletePersonalDataAsync(userFromId);
+        }
+        
+        if (daoFactory.GetFileDao<int>() is not FileDao fileDao)
+        {
+            return;
+        }
+
+        await fileDao.ReassignRoomsFilesAsync(userFromId);
     }
 
     #endregion
