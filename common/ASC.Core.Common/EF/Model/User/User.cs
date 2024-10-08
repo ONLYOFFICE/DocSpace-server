@@ -54,6 +54,7 @@ public class User : BaseEntity, IMapFrom<UserInfo>
     public DateTime CreateDate { get; set; }
     public DateTime LastModified { get; set; }
     public Guid? CreatedBy { get; set; }
+    public bool? Spam { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -255,6 +256,11 @@ public static class DbUserExtension
                 .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+
+            entity.Property(e => e.Spam)
+                .HasColumnName("spam")
+                .HasDefaultValueSql("'1'")
+                .HasColumnType("tinyint(1)");
         });
     }
 
@@ -273,7 +279,7 @@ public static class DbUserExtension
 
             entity.HasIndex(e => new { e.UserName, e.TenantId })
                 .HasDatabaseName("username");
-            
+
             entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.FirstName })
                 .HasDatabaseName("tenant_activation_status_firstname");
 
@@ -381,6 +387,10 @@ public static class DbUserExtension
             entity.Property(e => e.CreatedBy)
                 .HasColumnName("created_by")
                 .HasMaxLength(36);
+
+            entity.Property(e => e.Spam)
+                .HasColumnName("spam")
+                .HasDefaultValueSql("true");
         });
     }
 }

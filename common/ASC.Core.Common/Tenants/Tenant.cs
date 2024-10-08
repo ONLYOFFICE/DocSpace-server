@@ -89,7 +89,6 @@ public class Tenant : IMapFrom<DbTenant>
     public Guid OwnerId { get; set; }
     public string PartnerId { get; set; }
     public string PaymentId { get; set; }
-    public bool Spam { get; set; }
     public TenantStatus Status { get; internal set; }
     public DateTime StatusChangeDate { get; internal set; }
     public string TimeZone { get; set; }
