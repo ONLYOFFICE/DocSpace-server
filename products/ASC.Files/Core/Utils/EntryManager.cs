@@ -421,7 +421,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId);
 
             var containingMyFiles = false;
-            if (parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder)
+            if (parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder or FolderType.FillingFormsRoom)
             {
                 if (parent.ShareRecord is { Share: FileShare.FillForms })
                 {
@@ -429,7 +429,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
             
-            var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles)
+            var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType)
                 .ToListAsync();
 
             if (containingMyFiles)
@@ -441,7 +441,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
             var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
-                excludeSubject, filesOffset, filesCount, roomId, withShared);
+                excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType);
 
             var shared = await sharedTask;
 
@@ -460,7 +460,7 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 for (var i = folders.Count - 1; i >= 0; i--)
                 {
-                    if (folders[i].FolderType == FolderType.ReadyFormFolder || folders[i].FolderType == FolderType.InProcessFormFolder)
+                    if (DocSpaceHelper.IsFormsFillingSystemFolder(folders[i].FolderType))
                     {
                         folders.Remove(folders[i]);
                     }
