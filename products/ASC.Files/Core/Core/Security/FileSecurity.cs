@@ -226,7 +226,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Download,
                     FilesSecurityActions.Convert,
                     FilesSecurityActions.CreateRoomFrom,
-                    FilesSecurityActions.EditForm,
                     FilesSecurityActions.CopyLink,
                     FilesSecurityActions.Embed,
 
@@ -843,8 +842,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
 
         if (file != null &&
-            (action == FilesSecurityActions.EditForm ||
-            action == FilesSecurityActions.FillForms) &&
+            action == FilesSecurityActions.FillForms &&
             !file.IsForm)
         {
             return false;
@@ -1248,23 +1246,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                         break;
                     default:
                         if (e.Access is FileShare.FillForms or FileShare.RoomAdmin or FileShare.Editing or FileShare.PowerUser)
-                        {
-                            return true;
-                        }
-                        break;
-                }
-                break;
-            case FilesSecurityActions.EditForm:
-                switch (e.RootFolderType)
-                {
-                    case FolderType.USER:
-                        if (e.Access is FileShare.Editing or FileShare.Review or FileShare.FillForms)
-                        {
-                            return true;
-                        }
-                        break;
-                    default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Editing or FileShare.PowerUser)
                         {
                             return true;
                         }
@@ -2417,7 +2398,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         ReadLinks,
         Reconnect,
         CreateRoomFrom,
-        EditForm,
         CopyLink,
         Embed
     }
