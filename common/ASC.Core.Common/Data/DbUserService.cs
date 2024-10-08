@@ -307,6 +307,11 @@ public class EFUserService(
 
         switch (filter.SortType)
         {
+            case UserSortType.RegistrationDate:
+                q = filter.SortOrderAsc 
+                    ? q.OrderBy(r => r.CreateDate) 
+                    : q.OrderByDescending(r => r.CreateDate);
+                break;
             case UserSortType.CreatedBy:
                 {
                     var q1 = q.GroupJoin(userDbContext.Users,
