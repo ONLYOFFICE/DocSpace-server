@@ -1,11 +1,6 @@
 module.exports = (onlineusers) => {
     const router = require("express").Router()
 
-    router.post("/leave-session-in-portal", (req, res) => {
-      onlineusers.leaveSessionInPortal(req.body);
-      res.end();
-    });
-
     router.post("/leave-in-portal", (req, res) => {
       onlineusers.leaveInPortal(req.body);
       res.end();

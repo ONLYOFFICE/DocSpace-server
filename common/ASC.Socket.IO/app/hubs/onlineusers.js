@@ -210,7 +210,7 @@ module.exports = async (io) => {
                 date: new Date().toString()
             });
             
-            await redisClient.set(redisKey, JSON.stringify(Array.from(user.offlineSessions)));
+            redisClient.set(redisKey, JSON.stringify(Array.from(user.offlineSessions)));
           }
           var date = new Date().toString();
             if(user.sessions.size <= 0)
@@ -278,7 +278,7 @@ module.exports = async (io) => {
   
         for (let k of user.offlineSessions.keys()) {
           var value = user.offlineSessions.get(k);
-          if (!(value.id == ipAddress && value.browser == browser && value.platform == operationSystem))
+          if (value.id == sessionId || (value.ip == ipAddress && value.browser == browser && value.platform == operationSystem))
           {
             user.offlineSessions.delete(k);
           }
@@ -362,30 +362,16 @@ module.exports = async (io) => {
       }
     }
 
-    async function leaveSessionInPortal({id, userId, tenantId} = {}) 
-    {
-      var user = getUser(portalUsers, userId, tenantId);
-      if (user) 
-      {
-        Object.values(user.sessions).forEach(function(entry) {
-          if(entry.id == id)
-          {
-            onlineIO.to(`${tenantId}-${userId}`).emit("s:logout-session", entry.id);
-          }
-        });
-      }
-    }
-
     function leaveInPortal({userId, tenantId} = {}) 
     {
       var user = getUser(portalUsers, userId, tenantId);
       if (user) 
       {
         user.sessions.forEach(
-        function(entry) 
-        {
-          onlineIO.to(`${tenantId}-${userId}`).emit("s:logout-session", entry.id);
-        });
+          function(entry) 
+          {
+            onlineIO.to(`${tenantId}-${userId}`).emit("s:logout-session", entry.id);
+          });
       }
     }
 
@@ -394,12 +380,14 @@ module.exports = async (io) => {
       var user = getUser(portalUsers, userId, tenantId);
       if (user) 
       {
-        Object.values(user.sessions).forEach(function(entry) {
-          if(entry.id != id)
+        user.sessions.forEach(
+          function(entry) 
           {
-            onlineIO.to(`${tenantId}-${userId}`).emit("s:logout-session", entry.id);
-          }
-        });
+            if(entry.id != id)
+            {
+              onlineIO.to(`${tenantId}-${userId}`).emit("s:logout-session", entry.id);
+            }
+          });
       }
     }
 
@@ -422,7 +410,6 @@ module.exports = async (io) => {
     
     return {
       startAsync,
-      leaveSessionInPortal,
       leaveInPortal,
       leaveExceptThisInPortal
     };

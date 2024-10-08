@@ -37,12 +37,6 @@ public class ConnectionSocket(ITariffService tariffService,
 {
     protected override string Hub => "onlineusers";
 
-    public async Task LogoutSessionAsync(int id, Guid userId)
-    {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await MakeRequest("leave-session-in-portal", new { id, userId, tenantId });
-    }
-
     public async Task LogoutUserAsync(Guid userId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();

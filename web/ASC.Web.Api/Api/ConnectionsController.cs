@@ -410,7 +410,6 @@ public class ConnectionsController(
             }
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
-            await socketManager.LogoutSessionAsync(loginEventId, loginEvent.UserId.Value);
             return true;
         }
         catch (Exception ex)
