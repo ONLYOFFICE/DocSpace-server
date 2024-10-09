@@ -602,7 +602,7 @@ internal class FileDao(
 
                 if (isNew)
                 {
-                    await SetCustomOrder(filesDbContext, file.Id, file.ParentId);
+                    file.Order = await SetCustomOrder(filesDbContext, file.Id, file.ParentId);
                 }
             }
 
@@ -1417,7 +1417,7 @@ internal class FileDao(
             file.Comment = FilesCommonResource.CommentUpload;
             file.Encrypted = uploadSession.Encrypted;
             file.ThumbnailStatus = Thumbnail.Waiting;
-
+            //file.Order = uploadSession.Order;
             return file;
         }
 
@@ -1803,9 +1803,9 @@ internal class FileDao(
         await InitCustomOrder(fileIds, parentFolderId, FileEntryType.File);
     }
     
-    private async Task SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, int order = 0)
+    private async Task<int> SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, int order = 0)
     {
-        await SetCustomOrder(filesDbContext, fileId, parentFolderId, FileEntryType.File, order);
+        return await SetCustomOrder(filesDbContext, fileId, parentFolderId, FileEntryType.File, order);
     }
 
     private async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId)
