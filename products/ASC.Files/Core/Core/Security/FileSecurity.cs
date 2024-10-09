@@ -732,7 +732,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             FolderType.FillingFormsRoom => FileShare.ContentCreator,
             FolderType.EditingRoom => FileShare.ContentCreator,
             FolderType.PublicRoom => FileShare.ContentCreator,
-            FolderType.VirtualDataRoom => FileShare.Read,
+            FolderType.VirtualDataRoom => FileShare.ContentCreator,
             _ => FileShare.None
         };
     }
