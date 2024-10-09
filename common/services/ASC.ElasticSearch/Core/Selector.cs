@@ -367,6 +367,11 @@ public class Selector<T>(IServiceProvider serviceProvider)
             return null;
         }
 
+        if (lambdaExpression.Body is MemberExpression memberExpression && memberExpression.Member.GetCustomAttributes(false).OfType<NestedAttribute>().Any())
+        {
+            return memberExpression.Member.Name;
+        }
+        
         if (lambdaExpression.Body is MethodCallExpression { Arguments.Count: > 1 } methodCallExpression)
         {
             return methodCallExpression.Arguments[0] is not MemberExpression pathMember

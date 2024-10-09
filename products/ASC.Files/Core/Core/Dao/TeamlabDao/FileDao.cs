@@ -266,7 +266,8 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool withShared = false)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool withShared = false,
+        FormsItemDto formsItemDto = null)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -275,7 +276,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext);
+        var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
 
         q = q.Skip(offset);
 
@@ -635,26 +636,26 @@ internal class FileDao(
                 finally
                 {
                     await cloneStreamForSave.DisposeAsync();
-        }
+                }
             }
-        else
-        {
-            if (uploadSession != null)
+            else
             {
-                await chunkedUploadSessionHolder.MoveAsync(uploadSession, GetUniqFilePath(file), file.GetFileQuotaOwner());
+                if (uploadSession != null)
+                {
+                    await chunkedUploadSessionHolder.MoveAsync(uploadSession, GetUniqFilePath(file), file.GetFileQuotaOwner());
 
-                await folderDao.ChangeTreeFolderSizeAsync(currentFolder.Id, file.ContentLength);
+                    await folderDao.ChangeTreeFolderSizeAsync(currentFolder.Id, file.ContentLength);
+                }
             }
+
+            _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toInsert));
+
+            return await GetFileAsync(file.Id);
         }
-
-        _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toInsert));
-
-        return await GetFileAsync(file.Id);
-    }
     }
 
     public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = default)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = default, FormsItemDto formsItemDto = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -663,7 +664,7 @@ internal class FileDao(
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        return await (await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext))
+        return await (await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto))
             .CountAsync();
     }
 
@@ -1859,18 +1860,25 @@ internal class FileDao(
             return result;
         };
     }
-    private Func<Selector<DbFormsItemDataSearch>, Selector<DbFormsItemDataSearch>> GetFuncForSearchInFormsData(string searchText)
+    private Func<Selector<DbFormsItemDataSearch>, Selector<DbFormsItemDataSearch>> GetFuncForSearchInFormsData(int parentId, string searchText, FormsItemDto formsItemDto)
     {
         return s =>
         {
-            Selector<DbFormsItemDataSearch> result = null;
-
-            if (!string.IsNullOrEmpty(searchText))
+            s.Where(r => r.ParentId, parentId);
+            
+            if (formsItemDto != null)
             {
-                result = s.InAll(r => r.FormsData.Select(a => a.Value), [searchText]);
+                s.InAll(r => r.FormsData, [formsItemDto]);
             }
-
-            return result;
+            else
+            {
+                if (!string.IsNullOrEmpty(searchText))
+                {
+                    s.InAll(r => r.FormsData.Select(a => a.Value), [searchText]);
+                }
+            }
+            
+            return s;
         };
     }
 
@@ -2029,7 +2037,8 @@ internal class FileDao(
         bool excludeSubject, 
         int roomId, 
         string[] extension, 
-        FilesDbContext filesDbContext)
+        FilesDbContext filesDbContext,
+        FormsItemDto formsItemDto)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();        
         var q = await GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
@@ -2071,7 +2080,7 @@ internal class FileDao(
 
             if (searchInContent)
             {
-                var funcForSearchInFormsData = GetFuncForSearchInFormsData(searchText);
+                var funcForSearchInFormsData = GetFuncForSearchInFormsData(parentId, searchText, formsItemDto);
                 Expression<Func<Selector<DbFormsItemDataSearch>, Selector<DbFormsItemDataSearch>>> expressionSearchText = s => funcForSearchInFormsData(s);
 
                 (success, var resultForm) = await factoryIndexerFormData.TrySelectIdsAsync(expressionSearchText);

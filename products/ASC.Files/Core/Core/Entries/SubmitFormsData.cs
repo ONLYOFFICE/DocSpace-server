@@ -45,6 +45,7 @@ public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
 {
     public int Id { get; set; }
     public int TenantId { get; set; }
+    public int ParentId { get; set; }
     public DateTime CreateOn { get; set; }
 
     [OpenSearch.Client.Ignore] 
@@ -81,7 +82,6 @@ public class FactoryIndexerForm(
     {
         try
         {
-            var j = 0;
             var now = DateTime.UtcNow;
             
             await foreach (var _ in _indexer.IndexAllAsync(GetCount, GetIds, GetData))

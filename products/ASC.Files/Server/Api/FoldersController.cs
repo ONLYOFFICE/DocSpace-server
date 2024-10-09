@@ -173,6 +173,8 @@ public abstract class FoldersController<T>(
     /// <param type="System.Nullable{ASC.Files.Core.Core.ApplyFilterOption}, System" name="applyFilterOption">Specifies whether to return only files, only folders or all elements from the specified folder</param>
     /// <param type="System.String, System" name="extension">Specifies whether to search for a specific file extension</param>
     /// <param type="ASC.Files.Core.VirtualRooms.SearchArea, ASC.Files.Core" name="searchArea" optional="true" remark="Allowed values: Active (0), Archive (1), Any (2), RecentByLinks (3)">Search area</param>
+    /// <param type="System.String, System" name="formsItemKey" optional="true"></param>
+    /// <param type="System.String, System" name="formsItemType" optional="true"></param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">Folder contents</returns>
     /// <path>api/2.0/files/{folderId}</path>
     /// <httpMethod>GET</httpMethod>
@@ -189,11 +191,19 @@ public abstract class FoldersController<T>(
         bool? excludeSubject,
         ApplyFilterOption? applyFilterOption,
         string extension,
-        SearchArea searchArea)
+        SearchArea searchArea,
+        string formsItemKey,
+        string formsItemType)
     {
 
         var split = extension == null ? [] : extension.Split(",");
-        var folder = await folderContentDtoHelper.GetAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, searchArea, split);
+        FormsItemDto formsItemDto = null;
+        if (!string.IsNullOrEmpty(formsItemKey) || string.IsNullOrEmpty(formsItemType))
+        {
+            formsItemDto = new FormsItemDto(formsItemKey, formsItemType);
+        }
+
+        var folder = await folderContentDtoHelper.GetAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, searchArea, split, formsItemDto);
 
         return folder.NotFoundIfNull();
     }

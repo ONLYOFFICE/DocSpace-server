@@ -209,7 +209,7 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = default)
+        bool excludeSubject = false, string roomId = default, FormsItemDto formsItemDto = null)
     {
         throw new NotImplementedException();
     }

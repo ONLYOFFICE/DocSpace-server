@@ -49,8 +49,7 @@ public class FormFillingReportCreator(
         if (formsDataUrl != null)
         {
             var fileDao = daoFactory.GetFileDao<T>();
-            var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
-            var submitFormsData = await GetSubmitFormsData(formsDataFile.Id, resultFormNumber, formsDataUrl, resultUrl);
+            var submitFormsData = await GetSubmitFormsData(formsDataFile, resultFormNumber, formsDataUrl);
 
             if (resultsFileId != null)
             {
@@ -82,8 +81,9 @@ public class FormFillingReportCreator(
         return [];
     }
     
-    private async Task<SubmitFormsData> GetSubmitFormsData<T>(T resultFormId, int resultFormNumber, string url, string resultUrl)
+    private async Task<SubmitFormsData> GetSubmitFormsData<T>(File<T> formsDataFile, int resultFormNumber, string url)
     {
+        var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(url),
@@ -109,12 +109,13 @@ public class FormFillingReportCreator(
         var now = DateTime.UtcNow;
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        if (resultFormId is int id)
+        if (formsDataFile.Id is int id &&  formsDataFile.ParentId is int parentId)
         {
             var searchItems = new DbFormsItemDataSearch
             {
                 Id = id,
                 TenantId = tenantId,
+                ParentId = parentId,
                 CreateOn = now,
                 FormsData = fromData.FormsData
             };
