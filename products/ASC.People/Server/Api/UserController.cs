@@ -1924,6 +1924,11 @@ public class UserController(
 
     private async IAsyncEnumerable<UserInfo> GetByFilterAsync(UserFilter filter)
     {
+        if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
         var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
                       await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
