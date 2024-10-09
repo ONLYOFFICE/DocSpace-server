@@ -177,6 +177,11 @@ public class FileSharingAceHelper(
                     {
                         w.Id = user.Id;
                         await userManager.AddUserRelationAsync(authContext.CurrentAccount.ID, user.Id);
+
+                        if (user.ActivationStatus != EmployeeActivationStatus.Pending)
+                        {
+                            emailInvite = false;
+                        }
                     }
                     else
                     {
