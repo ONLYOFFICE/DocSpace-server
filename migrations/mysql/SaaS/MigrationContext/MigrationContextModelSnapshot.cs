@@ -1514,6 +1514,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<bool>("Spam")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("spam")
+                        .HasDefaultValueSql("'1'");
+
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -1582,6 +1588,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Web Office",
                             OwnerId = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
+                            Spam = false,
                             Status = 0,
                             TrustedDomainsEnabled = 0,
                             Version = 0
@@ -1596,6 +1603,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Web Office",
                             OwnerId = "00000000-0000-0000-0000-000000000000",
+                            Spam = false,
                             Status = 1,
                             TrustedDomainsEnabled = 0,
                             Version = 0
@@ -5082,12 +5090,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("sid")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<bool?>("Spam")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("spam")
-                        .HasDefaultValueSql("'1'");
 
                     b.Property<string>("SsoNameId")
                         .HasColumnType("varchar(512)")
