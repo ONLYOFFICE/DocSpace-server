@@ -264,7 +264,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool withShared = false)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -274,6 +274,52 @@ internal class FileDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext);
+
+        if (containingMyFiles)
+        {
+            switch (parentType)
+            {
+                case FolderType.FillingFormsRoom:
+                case FolderType.InProcessFormFolder:
+                case FolderType.ReadyFormFolder:
+                    FolderType[] systemfolders = [
+                        FolderType.FormFillingFolderDone,
+                        FolderType.FormFillingFolderInProgress,
+                        FolderType.InProcessFormFolder,
+                        FolderType.ReadyFormFolder 
+                    ];
+
+                    var folderIds = filesDbContext.Folders
+                        .Join(filesDbContext.Tree, r => r.Id, b => b.FolderId, (folder, tree) => new { folder, tree })
+                        .Where(r => r.tree.ParentId == parentId)
+                        .Select(r => new
+                        {
+                            r.folder.Id,
+                            IsSystemFolder = systemfolders.Contains(r.folder.FolderType)
+                        })
+                        .ToList();
+
+                    var roomSystemFolderIds = folderIds
+                        .Where(r => r.IsSystemFolder)
+                        .Select(r => r.Id)
+                        .ToList();
+
+                    var roomDefaultFolderIds = folderIds
+                        .Where(r => !r.IsSystemFolder)
+                        .Select(r => r.Id)
+                        .ToList();
+
+                    q = q.Where(r =>
+                        (roomSystemFolderIds.Contains(r.ParentId) &&
+                         r.CreateBy == securityContext.CurrentAccount.ID &&
+                         r.CreateBy != ASC.Core.Configuration.Constants.Guest.ID) ||
+                        roomDefaultFolderIds.Contains(r.ParentId));
+                    break;
+                default:
+                    q = q.Where(r => r.CreateBy == securityContext.CurrentAccount.ID);
+                    break;
+            }
+        }
 
         q = q.Skip(offset);
 
