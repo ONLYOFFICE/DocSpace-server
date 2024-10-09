@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20240930140158_MigrationContext_Upgrade33")]
-    partial class MigrationContext_Upgrade33
+    [Migration("20241009091807_MigrationContext_Upgrade34")]
+    partial class MigrationContext_Upgrade34
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -6789,6 +6789,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<string>("TermsUrl")
                         .HasColumnType("tinytext")
                         .HasColumnName("terms_url");
+
+                    b.Property<int>("Version")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("version")
+                        .HasDefaultValueSql("0");
 
                     b.Property<string>("WebsiteUrl")
                         .HasColumnType("tinytext")
