@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20240903101313_MigrationContext_Upgrade28")]
-    partial class MigrationContext_Upgrade28
+    [Migration("20241007103500_MigrationContext_Upgrade33")]
+    partial class MigrationContext_Upgrade33
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -720,7 +720,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -1,
-                            Features = "trial,audit,ldap,sso,whitelabel,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
+                            Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
                             Name = "trial",
                             Price = 0m,
                             Visible = false
@@ -729,7 +729,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -2,
                             Description = "until 01.04.2024",
-                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
                             Name = "admin",
                             Price = 15m,
                             ProductId = "1002",
@@ -764,7 +764,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -6,
-                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
                             Name = "subscription",
                             Price = 0m,
                             ProductId = "1001",
@@ -790,7 +790,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -9,
                             Description = "since 01.04.2024",
-                            Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
                             Name = "admin",
                             Price = 20m,
                             ProductId = "1006",
@@ -6291,6 +6291,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<string>("Cover")
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("cover")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("DenyDownload")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("deny_download")
+                        .HasDefaultValueSql("0");
+
                     b.Property<bool>("HasLogo")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
@@ -6303,6 +6315,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("indexing")
                         .HasDefaultValueSql("0");
 
+                    b.Property<string>("Lifetime")
+                        .HasColumnType("json")
+                        .HasColumnName("lifetime")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<bool>("Private")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
@@ -6314,6 +6332,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("quota")
                         .HasDefaultValueSql("'-2'");
+
+                    b.Property<string>("Watermark")
+                        .HasColumnType("json")
+                        .HasColumnName("watermark")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.HasKey("TenantId", "RoomId")
                         .HasName("primary");
@@ -6733,6 +6757,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<string>("TermsUrl")
                         .HasColumnType("tinytext")
                         .HasColumnName("terms_url");
+
+                    b.Property<int>("Version")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("version")
+                        .HasDefaultValueSql("0");
 
                     b.Property<string>("WebsiteUrl")
                         .HasColumnType("tinytext")

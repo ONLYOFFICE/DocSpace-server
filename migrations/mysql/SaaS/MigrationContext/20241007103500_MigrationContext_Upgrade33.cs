@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationContext_Upgrade28 : Migration
+    public partial class MigrationContext_Upgrade33 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -63,7 +63,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     modified_on = table.Column<DateTime>(type: "datetime(6)", maxLength: 6, nullable: true),
                     modified_by = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    version = table.Column<int>(type: "int", nullable: false, defaultValueSql: "0")
                 },
                 constraints: table =>
                 {

@@ -196,6 +196,10 @@ public static class IdentityExtension
                 .HasColumnType("tinytext")
                 .HasColumnName("website_url");
 
+            entity.Property(e => e.Version)
+                .HasColumnName("version")
+                .HasDefaultValueSql("0");
+
             entity.HasOne(e => e.Tenant)
                    .WithMany()
                    .HasForeignKey(b => b.TenantId)
