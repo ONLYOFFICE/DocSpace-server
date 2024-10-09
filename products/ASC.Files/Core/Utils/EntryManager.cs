@@ -252,7 +252,8 @@ public class EntryManager(IDaoFactory daoFactory,
     TenantManager tenantManager,
     FileChecker fileChecker,
     IDistributedCache distributedCache,
-    NotifyClient notifyClient)
+    NotifyClient notifyClient,
+    ExternalShare externalShare)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -446,7 +447,7 @@ public class EntryManager(IDaoFactory daoFactory,
             else
             {
                 var containingMyFiles = false;
-                if (parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder)
+                if (parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder or FolderType.FillingFormsRoom)
                 {
                 if (parent.ShareRecord is { Share: FileShare.FillForms })
                     {
@@ -454,7 +455,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     }
                 }
                 
-                var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles)
+                var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType)
                     .ToListAsync();
 
                 if (containingMyFiles)
@@ -466,7 +467,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
                 
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
-                    excludeSubject, filesOffset, filesCount, roomId, withShared);
+                excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType);
 
                 var shared = await sharedTask;
 
@@ -485,7 +486,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     for (var i = folders.Count - 1; i >= 0; i--)
                     {
-                        if (folders[i].FolderType == FolderType.ReadyFormFolder || folders[i].FolderType == FolderType.InProcessFormFolder)
+                        if (DocSpaceHelper.IsFormsFillingSystemFolder(folders[i].FolderType))
                         {
                             folders.Remove(folders[i]);
                         }
@@ -1525,9 +1526,6 @@ public class EntryManager(IDaoFactory daoFactory,
                         pdfFile.Category = (int)FilterType.Pdf;
 
                         File<T> result;
-
-                        var user = await userManager.GetUsersAsync(userId);
-
                         if (tmpStream.CanSeek)
             {
                             pdfFile.ContentLength = tmpStream.Length;
@@ -1634,10 +1632,12 @@ public class EntryManager(IDaoFactory daoFactory,
 
     public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
     {
+        var token = externalShare.GetKey();
+        
         bool checkRight;
         if ((await fileTracker.GetEditingByAsync(fileId)).Contains(userId))
         {
-            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
+            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone, token);
             if (!checkRight)
             {
                 return null;
@@ -1665,7 +1665,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
+        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone, token);
         if (checkRight)
         {
             await fileTracker.ChangeRight(fileId, userId, false);

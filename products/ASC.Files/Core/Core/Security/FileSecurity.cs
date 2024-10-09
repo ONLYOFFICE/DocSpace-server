@@ -197,7 +197,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Download,
                     FilesSecurityActions.Convert,
                     FilesSecurityActions.CreateRoomFrom,
-                    FilesSecurityActions.EditForm,
                     FilesSecurityActions.CopyLink,
                     FilesSecurityActions.Embed
                 }
@@ -802,8 +801,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
 
         if (file != null &&
-            (action == FilesSecurityActions.EditForm ||
-            action == FilesSecurityActions.FillForms) &&
+            action == FilesSecurityActions.FillForms &&
             !file.IsForm)
         {
             return false;
@@ -1241,23 +1239,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                         break;
                     default:
                         if (e.Access is FileShare.FillForms or FileShare.RoomManager or FileShare.Editing or FileShare.ContentCreator)
-                        {
-                            return true;
-                        }
-                        break;
-                }
-                break;
-            case FilesSecurityActions.EditForm:
-                switch (e.RootFolderType)
-                {
-                    case FolderType.USER:
-                        if (e.Access is FileShare.Editing or FileShare.Review or FileShare.FillForms)
-                        {
-                            return true;
-                        }
-                        break;
-                    default:
-                        if (e.Access is FileShare.RoomManager or FileShare.Editing or FileShare.ContentCreator)
                         {
                             return true;
                         }
@@ -2415,7 +2396,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         ReadLinks,
         Reconnect,
         CreateRoomFrom,
-        EditForm,
         CopyLink,
         Embed,
         ChangeOwner

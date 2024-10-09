@@ -253,7 +253,7 @@ internal class FolderDao(
     }
 
     public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
-        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool containingMyFiles = false)
+        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         if (CheckInvalidFilter(filterType) || count == 0)
         {
@@ -266,11 +266,29 @@ internal class FolderDao(
 
         if (containingMyFiles)
         {
-            q = q.Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
-            .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
-            .Select(r => r.folder);
-        }
+            switch (parentType)
+            {
+                case FolderType.FillingFormsRoom:
+                    var foldersContainingMyFiles = filesDbContext.Folders
+                       .Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
+                       .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
+                       .Select(r => r.folder.Id);
 
+                    var parentFolderIds = filesDbContext.Folders
+                        .Join(filesDbContext.Tree, r => r.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
+                        .Where(r => foldersContainingMyFiles.Contains(r.tree.FolderId))
+                        .Select(r => r.folder.Id);
+
+                    q = q.Where(r => parentFolderIds.Contains(r.Id) || r.FolderType == FolderType.DEFAULT);
+                    break;
+                default:
+                    q = q.Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
+                       .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
+                       .Select(r => r.folder);
+                    break;
+
+            }
+        }
         q = q.Skip(offset);
 
         if (count > 0)
