@@ -6787,6 +6787,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("tinytext")
                         .HasColumnName("terms_url");
 
+                    b.Property<int>("Version")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("version")
+                        .HasDefaultValueSql("0");
+
                     b.Property<string>("WebsiteUrl")
                         .HasColumnType("tinytext")
                         .HasColumnName("website_url");
