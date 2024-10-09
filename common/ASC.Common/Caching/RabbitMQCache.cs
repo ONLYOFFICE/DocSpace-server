@@ -89,7 +89,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
         await channel.QueueBindAsync(_queueName, _exchangeName, string.Empty);
 
-        channel.CallbackException += async (_, ea) =>
+        channel.CallbackExceptionAsync += async (_, ea) =>
         {
             _logger.WarningRecreatingRabbitMQ(ea.Exception);
 
@@ -111,7 +111,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         {
             var consumer = new AsyncEventingBasicConsumer(_consumerChannel);
 
-            consumer.Received += AsyncConsumerOnReceived;
+            consumer.ReceivedAsync += AsyncConsumerOnReceived;
 
             await _consumerChannel.BasicConsumeAsync(queue: _queueName, autoAck: true, consumer: consumer);
         }
@@ -129,9 +129,9 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         }
 
         _connection = await _factory.CreateConnectionAsync();
-        _connection.ConnectionShutdown += async (_, _) => await TryConnect();
-        _connection.CallbackException += async (_, _) =>  await TryConnect();
-        _connection.ConnectionBlocked += async (_, _) => await TryConnect();
+        _connection.ConnectionShutdownAsync += async (_, _) => await TryConnect();
+        _connection.CallbackExceptionAsync += async (_, _) =>  await TryConnect();
+        _connection.ConnectionBlockedAsync += async (_, _) => await TryConnect();
 
     }
 
