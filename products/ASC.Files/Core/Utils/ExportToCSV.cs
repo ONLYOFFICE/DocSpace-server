@@ -91,13 +91,20 @@ public class ExportToCSV(
 
         foreach (var entity in list)
         {
-            if (entity.Type != null && entity.Type == "picture")
+            if (entity.Type == "picture")
             {
                 continue;
             }
+
             dataTable.Columns.Add(new DataColumn(entity.Key));
 
-            values.Add(entity.Type != null ? $"=\"{entity.Value}\"" : entity.Value);
+            var formattedValue = (entity.Type == null)
+                ? entity.Value
+                : (entity.Type == "dateTime"
+                    ? $"=\"{entity.Value}\""
+                    : entity.Value);
+
+            values.Add(formattedValue);
         }
         dataTable.Rows.Add(values.ToArray());
 

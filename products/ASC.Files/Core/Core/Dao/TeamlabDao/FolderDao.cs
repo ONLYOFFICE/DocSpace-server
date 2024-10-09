@@ -258,14 +258,14 @@ internal class FolderDao(
             switch (parentType)
             {
                 case FolderType.FillingFormsRoom:
-                    var foldersÑontainingMyFiles = filesDbContext.Folders
+                    var foldersContainingMyFiles = filesDbContext.Folders
                        .Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
                        .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
                        .Select(r => r.folder.Id);
 
                     var parentFolderIds = filesDbContext.Folders
                         .Join(filesDbContext.Tree, r => r.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
-                        .Where(r => foldersÑontainingMyFiles.Contains(r.tree.FolderId))
+                        .Where(r => foldersContainingMyFiles.Contains(r.tree.FolderId))
                         .Select(r => r.folder.Id);
 
                     q = q.Where(r => parentFolderIds.Contains(r.Id) || r.FolderType == FolderType.DEFAULT);
