@@ -742,7 +742,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         return share switch
         {
             FileShare.RoomManager => EmployeeType.RoomAdmin,
-            _ => EmployeeType.User
+            _ => EmployeeType.Guest
         };
     }
 
