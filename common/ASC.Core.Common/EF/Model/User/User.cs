@@ -259,7 +259,6 @@ public static class DbUserExtension
 
             entity.Property(e => e.Spam)
                 .HasColumnName("spam")
-                .HasDefaultValueSql("'1'")
                 .HasColumnType("tinyint(1)");
         });
     }
@@ -388,9 +387,7 @@ public static class DbUserExtension
                 .HasColumnName("created_by")
                 .HasMaxLength(36);
 
-            entity.Property(e => e.Spam)
-                .HasColumnName("spam")
-                .HasDefaultValueSql("true");
+            entity.Property(e => e.Spam).HasColumnName("spam");
         });
     }
 }
