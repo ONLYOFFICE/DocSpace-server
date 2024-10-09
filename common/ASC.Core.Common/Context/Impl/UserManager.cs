@@ -774,12 +774,6 @@ public class UserManager(
             return;
         }
 
-        var type = await this.GetUserTypeAsync(sourceUser);
-        if (type == EmployeeType.DocSpaceAdmin)
-        {
-            return;
-        }
-
         var targetUser = await GetUsersAsync(targetUserId);
         if (!IsValidUser(targetUser))
         {
