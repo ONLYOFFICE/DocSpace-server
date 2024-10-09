@@ -30,7 +30,9 @@ package com.asc.registration.container;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import io.swagger.v3.oas.annotations.servers.Server;
@@ -40,8 +42,12 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+@EnableRetry
 @EnableCaching
+@EnableTransactionManagement
 @EntityScan(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
 @EnableJpaRepositories(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
 @SpringBootApplication(scanBasePackages = {"com.asc.registration", "com.asc.common"})
@@ -51,7 +57,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         @Info(
             title = "Registered Clients API",
             version = "1.0.0",
-            description = "ASC.Identity Clients Registration API"),
+            description = "ASC.Identity Clients Registration API",
+            contact =
+                @Contact(
+                    name = "ONLYOFFICE Support",
+                    email = "support@onlyoffice.com",
+                    url = "https://onlyoffice.com"),
+            license = @License(name = "Apache 2.0")),
     servers = {@Server(description = "ASC.Identity Clients Registration API")})
 @SecuritySchemes({
   @SecurityScheme(

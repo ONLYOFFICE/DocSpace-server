@@ -27,7 +27,7 @@
 
 package com.asc.authorization.application.exception.authorization;
 
-import static com.asc.authorization.application.security.oauth.errors.AuthorizationError.ASC_IDENTITY_PERSISTENCE_ERROR;
+import static com.asc.authorization.application.security.error.AuthorizationError.ASC_IDENTITY_PERSISTENCE_ERROR;
 
 import org.springframework.security.oauth2.core.OAuth2Error;
 

@@ -77,6 +77,13 @@
     </appender>
     <!-- ###### -->
 
+    <!-- Suppress Hibernate batch processing logs -->
+    <logger name="org.hibernate.orm.jdbc.batch" level="OFF" />
+
+    <!-- Suppress Deadlock logs -->
+    <logger name="java.sql.BatchUpdateException" level="OFF" />
+    <logger name="org.hibernate.engine" level="OFF" />
+
     <!-- ### Loggers ### -->
     <springProfile name="development,dev,d">
         <if condition='isDefined("LOG_FILE_PATH")'>
