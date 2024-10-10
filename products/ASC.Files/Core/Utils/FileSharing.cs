@@ -45,7 +45,8 @@ public class FileSharingAceHelper(
     IUrlShortener urlShortener,
     IDistributedLockProvider distributedLockProvider,
     SocketManager socketManager,
-    FilesLinkUtility filesLinkUtility)
+    FilesLinkUtility filesLinkUtility,
+    IDaoFactory daoFactory)
 {
     private const int MaxInvitationLinks = 1;
     private const int MaxAdditionalExternalLinks = 5;
@@ -235,6 +236,26 @@ public class FileSharingAceHelper(
                     }
                 }
 
+                if (share == FileShare.None && w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
+                {
+                    var tagDao = daoFactory.GetTagDao<T>();
+                    var tags = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink, null, w.Id.ToString())
+                        .ToListAsync();
+
+                    if (tags.Count > 0)
+                    {
+                        switch (entry)
+                        {
+                            case File<T> file:
+                                await socketManager.DeleteFileAsync(file, users: tags.Select(t => t.Owner));
+                                break;
+                            case Folder<T> folder1:
+                                await socketManager.DeleteFolder(folder1, users: tags.Select(t => t.Owner));
+                                break;
+                        }
+                    }
+                }
+
                 await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions, owner: existedShare?.Owner);
             }
             finally
@@ -245,7 +266,7 @@ public class FileSharingAceHelper(
                 }
             }
 
-            if (socket && room != null)
+            if (socket && room != null && !w.IsLink)
             {
                 if (share == FileShare.None && !await userManager.IsDocSpaceAdminAsync(w.Id))
                 {

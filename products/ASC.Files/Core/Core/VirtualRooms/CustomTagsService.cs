@@ -80,7 +80,7 @@ public class CustomTagsService(
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsInfo = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+        var tagsInfo = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
         var tags = tagsInfo.Select(tagInfo => new Tag { EntryId = tagInfo.EntryId, Id = tagInfo.Id, Owner = tagInfo.Owner, Type = tagInfo.Type, Name = tagInfo.Name, EntryType = tagInfo.EntryType});
 
         await tagDao.RemoveTagsAsync(tags);
@@ -104,7 +104,7 @@ public class CustomTagsService(
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+        var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
 
         if (tagsInfos.Count == 0)
         {
@@ -136,7 +136,7 @@ public class CustomTagsService(
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+        var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
 
         await tagDao.RemoveTagsAsync(folder, tagsInfos.Select(t => t.Id).ToList());
 
