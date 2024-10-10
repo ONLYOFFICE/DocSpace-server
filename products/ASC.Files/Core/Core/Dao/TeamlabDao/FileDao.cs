@@ -282,32 +282,30 @@ internal class FileDao(
                 case FolderType.FillingFormsRoom:
                 case FolderType.InProcessFormFolder:
                 case FolderType.ReadyFormFolder:
-                    FolderType[] systemfolders = [
+                    var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+                    var systemfolders = new HashSet<FolderType> {
                         FolderType.FormFillingFolderDone,
                         FolderType.FormFillingFolderInProgress,
                         FolderType.InProcessFormFolder,
-                        FolderType.ReadyFormFolder 
-                    ];
-
+                        FolderType.ReadyFormFolder
+                    };
                     var folderIds = filesDbContext.Folders
                         .Join(filesDbContext.Tree, r => r.Id, b => b.FolderId, (folder, tree) => new { folder, tree })
+                        .Where(r => r.folder.TenantId == tenantId)
                         .Where(r => r.tree.ParentId == parentId)
                         .Select(r => new
                         {
                             r.folder.Id,
                             IsSystemFolder = systemfolders.Contains(r.folder.FolderType)
-                        })
-                        .ToList();
+                        });
 
                     var roomSystemFolderIds = folderIds
                         .Where(r => r.IsSystemFolder)
-                        .Select(r => r.Id)
-                        .ToList();
+                        .Select(r => r.Id);
 
                     var roomDefaultFolderIds = folderIds
                         .Where(r => !r.IsSystemFolder)
-                        .Select(r => r.Id)
-                        .ToList();
+                        .Select(r => r.Id);
 
                     q = q.Where(r =>
                         (roomSystemFolderIds.Contains(r.ParentId) &&
