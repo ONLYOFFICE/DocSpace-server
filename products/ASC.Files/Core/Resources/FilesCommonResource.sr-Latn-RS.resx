@@ -147,9 +147,6 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Pregled</value>
   </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator sobe</value>
-  </data>
   <data name="Admin" xml:space="preserve">
     <value>Administrator</value>
   </data>
@@ -466,9 +463,6 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Pregledač</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator sobe</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Korisnik</value>
   </data>
@@ -528,12 +522,6 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Korisnik</value>
-  </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Napredni korisnik</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Napredni korisnik</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
     <value>Pomeranje nekoliko datoteka u prostoriju za Popunjavanje Formulara nije podržano. Pomerajte jedan po jedan ONLYOFFICE PDF.</value>

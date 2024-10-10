@@ -38,7 +38,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
         AuthConstants.DocSpaceAdmin.ID,
         AuthConstants.Everyone.ID,
         AuthConstants.RoomAdmin.ID,
-        AuthConstants.Collaborator.ID
+        AuthConstants.User.ID
     ];
 
     public async Task SubscribeAsync(string sourceID, string actionID, string objectID, string recipientID)

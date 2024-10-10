@@ -35,7 +35,8 @@ public class WebhooksController(ApiContext context,
         IHttpContextAccessor httpContextAccessor,
         IMapper mapper,
         WebhookPublisher webhookPublisher,
-        SettingsManager settingsManager)
+        SettingsManager settingsManager,
+        PasswordSettingsManager passwordSettingsManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -79,7 +80,11 @@ public class WebhooksController(ApiContext context,
         ArgumentNullException.ThrowIfNull(inDto.Uri);
         ArgumentNullException.ThrowIfNull(inDto.SecretKey);
         ArgumentNullException.ThrowIfNull(inDto.Name);
+        
+        var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
 
+        passwordSettingsManager.CheckPassword(inDto.SecretKey, passwordSettings);
+        
         var webhook = await dbWorker.AddWebhookConfig(inDto.Uri, inDto.Name, inDto.SecretKey, inDto.Enabled, inDto.SSL);
 
         return mapper.Map<WebhooksConfig, WebhooksConfigDto>(webhook);

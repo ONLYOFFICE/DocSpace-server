@@ -28,14 +28,20 @@ namespace ASC.Files.Core.Helpers;
 
 public static class DocSpaceHelper
 {
+    private static readonly HashSet<FolderType> _roomTypes =
+    [
+        FolderType.CustomRoom,
+        FolderType.EditingRoom,
+        FolderType.FillingFormsRoom,
+        FolderType.PublicRoom,
+        FolderType.VirtualDataRoom
+    ];
+
+    public static IEnumerable<FolderType> RoomTypes => _roomTypes;
+    
     public static bool IsRoom(FolderType folderType)
     {
-        return folderType is 
-            FolderType.CustomRoom or 
-            FolderType.EditingRoom or 
-            FolderType.FillingFormsRoom or
-            FolderType.PublicRoom or 
-            FolderType.VirtualDataRoom;
+        return _roomTypes.Contains(folderType);
     }
 
     public static bool IsFormsFillingSystemFolder(FolderType folderType)

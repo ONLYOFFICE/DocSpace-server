@@ -602,7 +602,7 @@ internal class FileDao(
 
                 if (isNew)
                 {
-                    await SetCustomOrder(filesDbContext, file.Id, file.ParentId);
+                    file.Order = await SetCustomOrder(filesDbContext, file.Id, file.ParentId);
                 }
             }
 
@@ -1417,7 +1417,7 @@ internal class FileDao(
             file.Comment = FilesCommonResource.CommentUpload;
             file.Encrypted = uploadSession.Encrypted;
             file.ThumbnailStatus = Thumbnail.Waiting;
-
+            //file.Order = uploadSession.Order;
             return file;
         }
 
@@ -1461,6 +1461,19 @@ internal class FileDao(
         }
 
         return InternalGetFilesAsync(parentIds, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+    }
+
+    public async Task ReassignRoomsFilesAsync(Guid fromOwner)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var items = await filesDbContext.GetRoomsFilesReassignInfoAsync(tenantId, fromOwner).ToListAsync();
+
+        foreach (var group in items.GroupBy(x => x.RoomOwnerId))
+        {
+            await filesDbContext.ReassignSpecificFilesAsync(tenantId, group.Select(f => f.FileId), group.Key);
+        }
     }
 
     private async IAsyncEnumerable<File<int>> InternalGetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
@@ -1803,9 +1816,9 @@ internal class FileDao(
         await InitCustomOrder(fileIds, parentFolderId, FileEntryType.File);
     }
     
-    private async Task SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, int order = 0)
+    private async Task<int> SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, int order = 0)
     {
-        await SetCustomOrder(filesDbContext, fileId, parentFolderId, FileEntryType.File, order);
+        return await SetCustomOrder(filesDbContext, fileId, parentFolderId, FileEntryType.File, order);
     }
 
     private async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId)
@@ -2381,4 +2394,10 @@ public class DbFileQueryWithSecurity
 {
     public DbFileQuery DbFileQuery { get; init; }
     public DbFilesSecurity Security { get; init; }
+}
+
+public record FileReassignInfo 
+{
+    public int FileId { get; init; }
+    public Guid RoomOwnerId { get; init; }
 }

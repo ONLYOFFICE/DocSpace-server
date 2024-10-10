@@ -120,6 +120,7 @@ public class MigrationContext : DbContext
     public DbSet<IdentityScope> IdentityScopes { get; set; }
 
     public DbSet<IdentityShedlock> IdentityShedlocks { get; set; }
+    public DbSet<DbUserRelation> UserRelations { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -182,6 +183,7 @@ public class MigrationContext : DbContext
             .AddDbRoomSettings()
             .AddFilesAuditReference()
             .AddIdentity()
+            .AddUserRelation()
             .AddDbFunctions();
     }
 }

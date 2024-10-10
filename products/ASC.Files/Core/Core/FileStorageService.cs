@@ -879,7 +879,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
         }
 
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
         }
@@ -1572,7 +1572,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await fileSecurity.CanLockAsync(file) || lockfile && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (!await fileSecurity.CanLockAsync(file) || lockfile && await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -2168,7 +2168,7 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<bool> SaveDocuSignAsync(string code)
     {
-        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty() || !thirdpartyConfiguration.SupportDocuSignInclusion)
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty() || !thirdpartyConfiguration.SupportDocuSignInclusion)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -2189,7 +2189,7 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            if (await userManager.IsUserAsync(authContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty() || !thirdpartyConfiguration.SupportDocuSignInclusion)
+            if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty() || !thirdpartyConfiguration.SupportDocuSignInclusion)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
             }
@@ -2511,7 +2511,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         //check user can have personal data
-        if (await userManager.IsUserAsync(userTo))
+        if (await userManager.IsGuestAsync(userTo))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -2536,12 +2536,6 @@ public class FileStorageService //: IFileStorageService
         if (Equals(userFrom, Constants.LostUser))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UserNotFound);
-        }
-
-        //check user have personal data
-        if (await userManager.IsUserAsync(userFrom))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
     }
 
@@ -2618,6 +2612,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         await fileSecurity.RemoveSubjectAsync(userFromId, true);
+        return;
 
         async Task DeleteFilesAsync(IEnumerable<T> fileIds)
         {
@@ -2681,6 +2676,26 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    public async Task ReassignRoomsFoldersAsync(Guid userFromId, bool checkPermission = false)
+    {
+        if (checkPermission)
+        {
+            await DemandPermissionToDeletePersonalDataAsync(userFromId);
+        }
+        
+        if (daoFactory.GetFolderDao<int>() is not FolderDao folderDao)
+        {
+            return;
+        }
+
+        await folderDao.ReassignRoomFoldersAsync(userFromId);
+
+        var folderIdVirtualRooms = await folderDao.GetFolderIDVirtualRooms(false);
+        var folderVirtualRooms = await folderDao.GetFolderAsync(folderIdVirtualRooms);
+        
+        await fileMarker.RemoveMarkAsNewAsync(folderVirtualRooms, userFromId);
+    }
+
     public async Task ReassignFoldersAsync<T>(Guid userFromId, Guid userToId, IEnumerable<T> exceptFolderIds, bool checkPermission = false)
     {
         if (checkPermission)
@@ -2721,6 +2736,21 @@ public class FileStorageService //: IFileStorageService
 
         await fileDao.ReassignFilesAsync(userFromId, userToId, exceptFolderIds);
     }
+    
+    public async Task ReassignRoomsFilesAsync(Guid userFromId, bool checkPermission = false)
+    {
+        if (checkPermission)
+        {
+            await DemandPermissionToDeletePersonalDataAsync(userFromId);
+        }
+        
+        if (daoFactory.GetFileDao<int>() is not FileDao fileDao)
+        {
+            return;
+        }
+
+        await fileDao.ReassignRoomsFilesAsync(userFromId);
+    }
 
     #endregion
 
@@ -2742,7 +2772,7 @@ public class FileStorageService //: IFileStorageService
 
     public async ValueTask<List<FileEntry<T>>> AddToFavoritesAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId)
     {
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -2805,7 +2835,7 @@ public class FileStorageService //: IFileStorageService
 
     public async ValueTask<List<FileEntry<T>>> AddToTemplatesAsync<T>(IEnumerable<T> filesId)
     {
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -3349,11 +3379,9 @@ public class FileStorageService //: IFileStorageService
     private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
     {
         var whoCanReadTask = (await fileSecurity.WhoCanReadAsync(entry, true)).ToList();
-        whoCanReadTask.AddRange(await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
-                null, null, null, null, false, null, true, 0, 0)
-            .Select(r=> r.Id)
-            .ToListAsync());
-
+        whoCanReadTask.AddRange((await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
+            .Select(x => x.Id));
+        
         whoCanReadTask.Add((await tenantManager.GetCurrentTenantAsync()).OwnerId);
         
         var userIds = whoCanReadTask
@@ -3363,6 +3391,7 @@ public class FileStorageService //: IFileStorageService
 
         return userIds;
     }
+    
     public async Task<Folder<T>> SetPinnedStatusAsync<T>(T folderId, bool pin)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -3625,8 +3654,8 @@ public class FileStorageService //: IFileStorageService
         var userInfo = await userManager.GetUsersAsync(userId);
         if (Equals(userInfo, Constants.LostUser) ||
             userInfo.Status != EmployeeStatus.Active ||
-            await userManager.IsUserAsync(userInfo) ||
-            await userManager.IsCollaboratorAsync(userInfo))
+            await userManager.IsGuestAsync(userInfo) ||
+            await userManager.IsUserAsync(userInfo))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ChangeOwner);
         }
@@ -3641,8 +3670,8 @@ public class FileStorageService //: IFileStorageService
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            if (!await fileSecurity.CanEditAsync(folder))
-            {
+            if (!await fileSecurity.CanChangeOwnerAsync(folder))
+            { 
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
@@ -3665,7 +3694,7 @@ public class FileStorageService //: IFileStorageService
                     Aces =
                     [
                         new AceWrapper { Access = FileShare.None, Id = userInfo.Id },
-                        new AceWrapper { Access = FileShare.RoomAdmin, Id = createBy }
+                        new AceWrapper { Access = FileShare.RoomManager, Id = createBy }
                     ]
                 }, false, socket: false, beforeOwnerChange: true);
 
@@ -3700,7 +3729,7 @@ public class FileStorageService //: IFileStorageService
 
         await foreach (var file in files)
         {
-            if (!await fileSecurity.CanEditAsync(file))
+            if (!await fileSecurity.CanChangeOwnerAsync(file))
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
@@ -3776,7 +3805,6 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-
     public async Task<IEnumerable<JsonElement>> CreateThumbnailsAsync(List<JsonElement> fileIds)
     {
         if (!authContext.IsAuthenticated && (await externalShare.GetLinkIdAsync()) == Guid.Empty)
@@ -3813,11 +3841,20 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
+        Dictionary<Guid, UserRelation> userRelations = null;
+        var currentUserId = authContext.CurrentAccount.ID;
+        
+        var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(currentUserId);
+
         if (!resendAll)
         {
             await foreach (var ace in fileSharing.GetPureSharesAsync(room, usersIds))
             {
                 var user = await userManager.GetUsersAsync(ace.Id);
+                if (!await HasAccessInviteAsync(user))
+                {
+                    continue;
+                }
                 
                 var link = await invitationService.GetInvitationLinkAsync(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
                 await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, await urlShortener.GetShortenLinkAsync(link));
@@ -3846,6 +3883,10 @@ public class FileStorageService //: IFileStorageService
                 }
                 
                 var user = await userManager.GetUsersAsync(ace.Id);
+                if (!await HasAccessInviteAsync(user))
+                {
+                    continue;
+                }
                 
                 var link = await invitationService.GetInvitationLinkAsync(user.Email, ace.Access, authContext.CurrentAccount.ID, id.ToString());
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
@@ -3857,6 +3898,25 @@ public class FileStorageService //: IFileStorageService
             {
                 finish = true;
             }
+        }
+
+        return;
+
+        async Task<bool> HasAccessInviteAsync(UserInfo user)
+        {
+            if (isDocSpaceAdmin)
+            {
+                return true;
+            }
+
+            var type = await userManager.GetUserTypeAsync(user);
+            if (type != EmployeeType.Guest || (user.CreatedBy.HasValue && user.CreatedBy.Value == currentUserId))
+            {
+                return true;
+            }
+
+            userRelations ??= await userManager.GetUserRelationsAsync(currentUserId);
+            return userRelations.ContainsKey(user.Id);
         }
     }
 
