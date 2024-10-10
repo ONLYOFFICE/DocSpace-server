@@ -569,17 +569,17 @@ public class UserController(
     }
 
     /// <summary>
-    /// Removes a guest from the list and excludes them from the rooms you invited them to
+    /// Removes guests from the list and excludes them from rooms to which you have invited them
     /// </summary>
     /// <short>
-    /// Removes the guest from the list and your rooms
+    /// Removes guests from the list and from rooms
     /// </short>
     /// <category>Guests</category>
-    /// <param type="System.Guid, System" method="url" name="userId">User ID</param>
-    /// <path>api/2.0/people/guests/{userId}</path>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for deleting guests</param>
+    /// <path>api/2.0/people/guests</path>
     /// <httpMethod>DELETE</httpMethod>
-    [HttpDelete("guests/{userId:guid}")]
-    public async Task DeleteGuestAsync(Guid userId)
+    [HttpDelete("guests")]
+    public async Task DeleteGuestsAsync(UpdateMembersRequestDto inDto)
     {
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         
@@ -589,20 +589,24 @@ public class UserController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
         
-        var user = await _userManager.GetUsersAsync(userId);
-        if (user.Status == EmployeeStatus.Terminated || !await _userManager.IsGuestAsync(user))
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
-
         var relations = await _userManager.GetUserRelationsAsync(currentUser.Id);
-        if (!relations.ContainsKey(user.Id))
+
+        foreach (var userId in inDto.UserIds)
         {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
+            var user = await _userManager.GetUsersAsync(userId);
+            if (user.Equals(Constants.LostUser) || 
+                user.Status == EmployeeStatus.Terminated || 
+                !await _userManager.IsGuestAsync(user) ||       
+                !relations.ContainsKey(user.Id))
+            {
+                continue;
+            }
         
-        await _userManager.DeleteUserRelationAsync(currentUser.Id, user.Id);
-        await fileSecurity.RemoveSecuritiesAsync(user.Id, currentUser.Id, SubjectType.User);
+            var t1 = _userManager.DeleteUserRelationAsync(currentUser.Id, user.Id);
+            var t2 = fileSecurity.RemoveSecuritiesAsync(user.Id, currentUser.Id, SubjectType.User);
+            
+            await Task.WhenAll(t1, t2);
+        }
     }
 
     /// <summary>
