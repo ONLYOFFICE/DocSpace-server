@@ -282,7 +282,7 @@ public class EditorConfiguration<T>(
             return null;
         }
 
-        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return null;
         }
@@ -320,7 +320,7 @@ public class EditorConfiguration<T>(
     
     public async IAsyncEnumerable<RecentConfig> GetRecent(FileType fileType, T fileId)
     {
-        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             yield break;
         }
@@ -361,7 +361,7 @@ public class EditorConfiguration<T>(
 
     public async Task<List<TemplatesConfig>> GetTemplates(FileType fileType, string title)
     {
-            if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+            if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
             {
                 return null;
             }
@@ -415,7 +415,7 @@ public class InfoConfig<T>(
             return _favorite;
         }
 
-        if (!securityContext.IsAuthenticated || await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
+        if (!securityContext.IsAuthenticated || await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             return null;
         }

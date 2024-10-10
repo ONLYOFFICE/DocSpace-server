@@ -87,6 +87,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Content Creator.
+        /// </summary>
+        public static string AceStatusEnum_ContentCreator {
+            get {
+                return ResourceManager.GetString("AceStatusEnum_ContentCreator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Custom Filter.
         /// </summary>
         public static string AceStatusEnum_CustomFilter {
@@ -110,15 +119,6 @@ namespace ASC.Files.Core.Resources {
         public static string AceStatusEnum_FillForms {
             get {
                 return ResourceManager.GetString("AceStatusEnum_FillForms", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Power User.
-        /// </summary>
-        public static string AceStatusEnum_PowerUser {
-            get {
-                return ResourceManager.GetString("AceStatusEnum_PowerUser", resourceCulture);
             }
         }
         
@@ -159,11 +159,11 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Room Administrator.
+        ///   Looks up a localized string similar to Room Manager.
         /// </summary>
-        public static string AceStatusEnum_RoomAdmin {
+        public static string AceStatusEnum_RoomManager {
             get {
-                return ResourceManager.GetString("AceStatusEnum_RoomAdmin", resourceCulture);
+                return ResourceManager.GetString("AceStatusEnum_RoomManager", resourceCulture);
             }
         }
         
@@ -1159,6 +1159,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Content Creator.
+        /// </summary>
+        public static string RoleEnum_ContentCreator {
+            get {
+                return ResourceManager.GetString("RoleEnum_ContentCreator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DocSpace Administrator.
         /// </summary>
         public static string RoleEnum_DocSpaceAdmin {
@@ -1186,15 +1195,6 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Power User.
-        /// </summary>
-        public static string RoleEnum_PowerUser {
-            get {
-                return ResourceManager.GetString("RoleEnum_PowerUser", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Viewer.
         /// </summary>
         public static string RoleEnum_Read {
@@ -1213,11 +1213,11 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Room Administrator.
+        ///   Looks up a localized string similar to Room Manager.
         /// </summary>
-        public static string RoleEnum_RoomAdmin {
+        public static string RoleEnum_RoomManager {
             get {
-                return ResourceManager.GetString("RoleEnum_RoomAdmin", resourceCulture);
+                return ResourceManager.GetString("RoleEnum_RoomManager", resourceCulture);
             }
         }
         

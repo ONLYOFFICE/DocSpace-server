@@ -289,9 +289,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Edytujący</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator pokoju</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Użytkownik</value>
   </data>
@@ -312,9 +309,6 @@
   </data>
   <data name="AceStatusEnum_Collaborator" xml:space="preserve">
     <value>Współpracownik</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator pokoju</value>
   </data>
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>Wysłano formularz</value>
@@ -466,12 +460,6 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   </data>
   <data name="Date" xml:space="preserve">
     <value>Data</value>
-  </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Użytkownik z większą liczbą uprawnień</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Użytkownik z większą liczbą uprawnień</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Użytkownik</value>

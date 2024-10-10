@@ -1463,6 +1463,19 @@ internal class FileDao(
         return InternalGetFilesAsync(parentIds, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
     }
 
+    public async Task ReassignRoomsFilesAsync(Guid fromOwner)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var items = await filesDbContext.GetRoomsFilesReassignInfoAsync(tenantId, fromOwner).ToListAsync();
+
+        foreach (var group in items.GroupBy(x => x.RoomOwnerId))
+        {
+            await filesDbContext.ReassignSpecificFilesAsync(tenantId, group.Select(f => f.FileId), group.Key);
+        }
+    }
+
     private async IAsyncEnumerable<File<int>> InternalGetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
         bool searchInContent)
     {
@@ -2381,4 +2394,10 @@ public class DbFileQueryWithSecurity
 {
     public DbFileQuery DbFileQuery { get; init; }
     public DbFilesSecurity Security { get; init; }
+}
+
+public record FileReassignInfo 
+{
+    public int FileId { get; init; }
+    public Guid RoomOwnerId { get; init; }
 }
