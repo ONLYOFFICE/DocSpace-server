@@ -258,13 +258,17 @@ internal class FolderDao(
             switch (parentType)
             {
                 case FolderType.FillingFormsRoom:
+                    var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
                     var foldersContainingMyFiles = filesDbContext.Folders
                        .Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
+                       .Where(r => r.folder.TenantId == tenantId)
                        .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
                        .Select(r => r.folder.Id);
 
                     var parentFolderIds = filesDbContext.Folders
                         .Join(filesDbContext.Tree, r => r.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
+                        .Where(r => r.folder.TenantId == tenantId)
                         .Where(r => foldersContainingMyFiles.Contains(r.tree.FolderId))
                         .Select(r => r.folder.Id);
 
