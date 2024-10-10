@@ -48,6 +48,10 @@ public static class DocSpaceHelper
             FolderType.InProcessFormFolder or
             FolderType.ReadyFormFolder;
     }
+    public static bool IsFormsFillingFolder<T>(FileEntry<T> entry)
+    {
+        return entry is Folder<T> f && (f.FolderType == FolderType.FillingFormsRoom || IsFormsFillingSystemFolder(f.FolderType));
+    }
 
     public static RoomType? MapToRoomType(FolderType folderType)
     {
