@@ -1567,24 +1567,13 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FilesSecurityActions.ReadLog:
-                switch (e.RootFolderType)
+                if (e.Access != FileShare.Restrict && isAuthenticated)
                 {
-                    case FolderType.USER:
-                        if (e.Access != FileShare.Restrict && isAuthenticated)
-                        {
-                            return true;
-                        }
-                        break;
-                    default:
-                        if (e.Access != FileShare.Restrict && !ace.IsLink)
-                        {
-                            return true;
-                        }
-                        break;
+                    return true;
                 }
                 break;
             case FilesSecurityActions.ReadMembers:
-                if (e.Access != FileShare.Restrict && !ace.IsLink)
+                if (e.Access != FileShare.Restrict && isAuthenticated)
                 {
                     return true;
                 }
