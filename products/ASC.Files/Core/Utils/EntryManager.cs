@@ -1201,7 +1201,10 @@ public class EntryManager(IDaoFactory daoFactory,
                         };
                         foreach (var formFolder in systemFormFillingFolders)
                         {
-                            await socketManager.CreateFolderAsync(formFolder);
+                            var a = await fileSharing.GetSharedInfoAsync(formFolder);
+                            var u = a.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
+
+                            await socketManager.CreateFolderAsync(formFolder, u);
                             await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
                         }
                     }
