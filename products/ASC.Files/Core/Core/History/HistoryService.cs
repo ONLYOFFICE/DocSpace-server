@@ -74,7 +74,9 @@ public class HistoryService(
         MessageAction.RoomExternalLinkCreated,
         MessageAction.RoomExternalLinkRenamed,
         MessageAction.RoomExternalLinkDeleted,
-        MessageAction.RoomExternalLinkRevoked
+        MessageAction.RoomExternalLinkRevoked,
+        MessageAction.FormSubmit,
+        MessageAction.FormOpenedForFilling
     ];
     
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count)
@@ -106,6 +108,49 @@ public class HistoryService(
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         var events = messageDbContext.GetAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count);
+
+        if (await events.CountAsync() > 0 &&
+            entryType == FileEntryType.Folder &&
+            DocSpaceHelper.IsFormsFillingFolder(entry) &&
+            entry.ShareRecord is { Share: FileShare.FillForms })
+        {
+            var folderActions = new HashSet<int> {
+                    (int)MessageAction.FolderCreated,
+                    (int)MessageAction.FolderMovedWithOverwriting,
+                    (int)MessageAction.FolderMovedToTrash,
+                    (int)MessageAction.FolderRenamed
+                };
+            var fileActions = new HashSet<int> {
+                    (int)MessageAction.FileCopied,
+                    (int)MessageAction.FileUploaded,
+                    (int)MessageAction.FileMoved,
+                    (int)MessageAction.FileRenamed,
+                    (int)MessageAction.FormSubmit,
+                    (int)MessageAction.FormOpenedForFilling
+                };
+
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var fileDao = daoFactory.GetFileDao<int>();
+
+            var f = entry as Folder<int>;
+            var folders = await folderDao.GetFoldersAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, true, false, 0, -1, default, true, f.FolderType).Select(r => r.Id).ToListAsync();
+            var files = await fileDao.GetFilesAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, null, false, true, false, 0, -1, default, false, true, f.FolderType).Select(r => r.Id).ToListAsync();
+
+            var list = new List<DbAuditEvent>();
+            await foreach (var auditEvent in events)
+            {
+                var target = auditEvent.Target;
+                if (target != null && int.TryParse(target.Split(',')[0], out var eventEntryId))
+                {
+                    if ((folders.Contains(eventEntryId) && folderActions.Contains(auditEvent.Action ?? 0)) ||
+                    (files.Contains(eventEntryId) && fileActions.Contains(auditEvent.Action ?? 0)))
+                    {
+                        list.Add(auditEvent);
+                    }
+                }
+            }
+            events = list.ToAsyncEnumerable();
+        }
 
         await foreach (var hEntry in events.SelectAwait(interpreter.ToHistoryAsync).Where(x => x != null))
         {

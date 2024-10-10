@@ -28,14 +28,20 @@ namespace ASC.Files.Core.Helpers;
 
 public static class DocSpaceHelper
 {
+    private static readonly HashSet<FolderType> _roomTypes =
+    [
+        FolderType.CustomRoom,
+        FolderType.EditingRoom,
+        FolderType.FillingFormsRoom,
+        FolderType.PublicRoom,
+        FolderType.VirtualDataRoom
+    ];
+
+    public static IEnumerable<FolderType> RoomTypes => _roomTypes;
+    
     public static bool IsRoom(FolderType folderType)
     {
-        return folderType is 
-            FolderType.CustomRoom or 
-            FolderType.EditingRoom or 
-            FolderType.FillingFormsRoom or
-            FolderType.PublicRoom or 
-            FolderType.VirtualDataRoom;
+        return _roomTypes.Contains(folderType);
     }
 
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
@@ -45,6 +51,10 @@ public static class DocSpaceHelper
             FolderType.FormFillingFolderInProgress or
             FolderType.InProcessFormFolder or
             FolderType.ReadyFormFolder;
+    }
+    public static bool IsFormsFillingFolder<T>(FileEntry<T> entry)
+    {
+        return entry is Folder<T> f && (f.FolderType == FolderType.FillingFormsRoom || IsFormsFillingSystemFolder(f.FolderType));
     }
 
     public static RoomType? MapToRoomType(FolderType folderType)

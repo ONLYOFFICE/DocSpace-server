@@ -93,11 +93,13 @@ public class FormFillingReportCreator(
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
+        
+        var tenantCulture = (await tenantManager.GetCurrentTenantAsync()).GetCulture();
         List<FormsItemData> formNumber = 
         [
-                new() { Key = FilesCommonResource.FormNumber, Value = resultFormNumber.ToString() }, 
-                new() { Key = FilesCommonResource.LinkToForm, Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.OpenForm}\")" },
-                new() { Key = FilesCommonResource.Date, Value = $"{tenantUtil.DateTimeNow():MM/dd/yyyy H:mm:ss}" }
+                new() { Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture), Value = resultFormNumber.ToString() }, 
+                new() { Key = FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture), Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture)}\")" },
+                new() { Key = FilesCommonResource.ResourceManager.GetString("Date", tenantCulture), Value = $"=\"{tenantUtil.DateTimeNow().ToString("G", tenantCulture)}\"" }
         ];
         
         var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);

@@ -44,8 +44,8 @@ public class FileShareRecord<T>
         private static readonly int[] _roomShareOrder =
         [
             (int)FileShare.None,
-            (int)FileShare.RoomAdmin,
-            (int)FileShare.PowerUser,
+            (int)FileShare.RoomManager,
+            (int)FileShare.ContentCreator,
             (int)FileShare.Editing,
             (int)FileShare.FillForms,
             (int)FileShare.Review,
@@ -73,8 +73,8 @@ public class FileShareRecord<T>
             
             // Not used
             (int)FileShare.ReadWrite,
-            (int)FileShare.RoomAdmin,
-            (int)FileShare.PowerUser,
+            (int)FileShare.RoomManager,
+            (int)FileShare.ContentCreator,
             (int)FileShare.Varies
         ];
         

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
@@ -38,6 +40,7 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// <summary>Port</summary>
     /// <type>System.Nullable{System.Int32}, System</type>
     /// <example>25</example>
+    [Range(1, 65535)]
     public int? Port { get; set; }
 
     /// <summary>Sender address</summary>

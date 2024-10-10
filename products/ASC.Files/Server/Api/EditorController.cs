@@ -201,8 +201,9 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         canEdit = false;
                         canFill = true;
                         isSubmitOnly = true;
-                        editorType = EditorType.Embedded;
-                        fillingSessionId = Guid.NewGuid().ToString("N");
+                        editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
+
+                        fillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
                         break;
                     }
 
@@ -231,10 +232,10 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
                                 canEdit = false;
                                 canFill = true;
-                                editorType = EditorType.Embedded;
+                                editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
 
                                 file = formDraft;
-                                fillingSessionId = Guid.NewGuid().ToString("N");
+                                fillingSessionId = string.Format("{0}_{1}", formDraft.Id, securityContext.CurrentAccount.ID);
                             }
                             else
                             {
@@ -249,19 +250,19 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 case FolderType.FormFillingFolderInProgress:
                     canEdit = false;
                     canFill = true;
-                    editorType = EditorType.Embedded;
-                    fillingSessionId = Guid.NewGuid().ToString("N");
+                    editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
+                    fillingSessionId = string.Format("{0}_{1}", file.Id, securityContext.CurrentAccount.ID);
                     break;
 
                 case FolderType.FormFillingFolderDone:
-                    editorType = EditorType.Embedded;
+                    editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
                     break;
 
                 default:
-                    canEdit = edit;
-                    canFill = !edit;
+                    canEdit = true;
+                    canFill = false;
                     break;
             }
         }
@@ -288,7 +289,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
 
-        var result = await configurationConverter.Convert(configuration, file, fillingSessionId);
+        var result = await configurationConverter.Convert(configuration, file);
         
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
@@ -313,6 +314,13 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         if (!string.IsNullOrEmpty(fillingSessionId))
         {
             result.FillingSessionId = fillingSessionId;
+            if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+            {
+                result.EditorConfig.User = new UserConfig
+                {
+                    Id = fillingSessionId
+                };
+            }
         }
        
         return result;

@@ -95,6 +95,7 @@ public partial class SettingsController(MessageService messageService,
             GreetingSettings = tenant.Name == "" ? Resource.PortalName : tenant.Name,
             DocSpace = true,
             Standalone = coreBaseSettings.Standalone,
+            IsAmi = coreBaseSettings.Standalone && !string.IsNullOrEmpty(setupInfo.AmiMetaUrl),
             BaseDomain = coreBaseSettings.Standalone ? await coreSettings.GetSettingAsync("BaseDomain") ?? coreBaseSettings.Basedomain : coreBaseSettings.Basedomain,
             Version = configuration["version:number"] ?? "",
             TenantStatus = tenant.Status,
@@ -639,7 +640,7 @@ public partial class SettingsController(MessageService messageService,
 
         var collaboratorPopupSettings = await settingsManager.LoadForCurrentUserAsync<CollaboratorSettings>();
 
-        if (!(await userManager.IsUserAsync(currentUser) && collaboratorPopupSettings.FirstVisit && !await userManager.IsOutsiderAsync(currentUser)))
+        if (!(await userManager.IsGuestAsync(currentUser) && collaboratorPopupSettings.FirstVisit && !await userManager.IsOutsiderAsync(currentUser)))
         {
             throw new NotSupportedException("Not available.");
         }

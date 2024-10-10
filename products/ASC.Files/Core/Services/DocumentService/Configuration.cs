@@ -246,18 +246,22 @@ public class EditorConfiguration<T>(
         return _user;
     }
 
-    public async Task<string> GetCallbackUrl(string fileId, string fillingSessionId)
+    public async Task<string> GetCallbackUrl(File<T> file)
     {
         if (!ModeWrite)
         {
             return null;
         }
 
-        var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(fileId);
+        var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(file.Id.ToString());
 
-        callbackUrl = !string.IsNullOrEmpty(fillingSessionId) ? QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId) : callbackUrl;
+        if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
+        {
+            return externalShare.GetUrlWithShare(callbackUrl);
+        }
 
-        return externalShare.GetUrlWithShare(callbackUrl);
+        var key = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject, file.ShareRecord.Options?.Password);
+        return externalShare.GetUrlWithShare(callbackUrl, key);
     }
 
     public async Task<CoEditingConfig> GetCoEditingAsync()
@@ -278,7 +282,7 @@ public class EditorConfiguration<T>(
             return null;
         }
 
-        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return null;
         }
@@ -316,7 +320,7 @@ public class EditorConfiguration<T>(
     
     public async IAsyncEnumerable<RecentConfig> GetRecent(FileType fileType, T fileId)
     {
-        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             yield break;
         }
@@ -357,7 +361,7 @@ public class EditorConfiguration<T>(
 
     public async Task<List<TemplatesConfig>> GetTemplates(FileType fileType, string title)
     {
-            if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+            if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
             {
                 return null;
             }
@@ -411,7 +415,7 @@ public class InfoConfig<T>(
             return _favorite;
         }
 
-        if (!securityContext.IsAuthenticated || await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
+        if (!securityContext.IsAuthenticated || await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             return null;
         }
