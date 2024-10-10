@@ -772,8 +772,10 @@ public class FileStorageService //: IFileStorageService
         var denyDownloadChanged = updateData.DenyDownload.HasValue && folder.SettingsDenyDownload != updateData.DenyDownload;
         var lifetimeChanged = updateData.Lifetime != null;
         var watermarkChanged = updateData.Watermark != null;
+        var colorChanged = updateData.Color != null && folder.SettingsColor != updateData.Color;
+        var coverChanged = updateData.Cover != null && folder.SettingsCover != updateData.Cover;
         
-        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged)
+        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged || colorChanged || coverChanged)
         {                
             var oldTitle = folder.Title;
             WatermarkSettings watermark = null;
@@ -791,11 +793,12 @@ public class FileStorageService //: IFileStorageService
                 indexingChanged ? updateData.Indexing.Value : folder.SettingsIndexing,
                 denyDownloadChanged ? updateData.DenyDownload.Value : folder.SettingsDenyDownload,
                 lifetimeChanged ? mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(updateData.Lifetime) : folder.SettingsLifetime,
-                watermarkChanged ? 
-                    (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark) : 
-                    folder.SettingsWatermark);
+                watermarkChanged ? (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark) : folder.SettingsWatermark,
+                colorChanged ? updateData.Color : folder.SettingsColor,
+                coverChanged ? updateData.Cover : folder.SettingsCover);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
+            
             folder.Access = folderAccess;
             
             if (isRoom)
@@ -813,6 +816,16 @@ public class FileStorageService //: IFileStorageService
                 if (denyDownloadChanged)
                 {
                     _ = filesMessageService.SendAsync(MessageAction.RoomDenyDownloadChanged, folder, folder.Title);
+                }
+                
+                if (colorChanged)
+                {
+                    _ = filesMessageService.SendAsync(MessageAction.RoomColorChanged, folder, folder.Title);
+                }
+
+                if (coverChanged)
+                {
+                    _ = filesMessageService.SendAsync(MessageAction.RoomCoverChanged, folder, folder.Title);
                 }
             }
             

@@ -955,7 +955,7 @@ internal class FolderDao(
         return folder.Id;
     }
 
-    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark)
+    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -971,6 +971,7 @@ internal class FolderDao(
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         toUpdate.Settings.Indexing = indexing;
         toUpdate.Settings.DenyDownload = denyDownload;
+        
         if (lifeTime != null)
         {
             if (lifeTime.Enabled.HasValue && !lifeTime.Enabled.Value)
@@ -984,6 +985,22 @@ internal class FolderDao(
         }
 
         toUpdate.Settings.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermark);
+
+        if (color != null)
+        {
+            if (RoomLogoManager.ColorChanged(color, folder))
+            {
+                toUpdate.Settings.Color = color;
+            }
+        }
+
+        if (cover != null)
+        {
+            if (await RoomLogoManager.CoverChanged(cover, folder))
+            {
+                toUpdate.Settings.Cover = cover;
+            }
+        }
 
         filesDbContext.Update(toUpdate);
 
