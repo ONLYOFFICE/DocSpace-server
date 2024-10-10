@@ -340,7 +340,7 @@ public class UserController(
                     continue;
             }
 
-            var user = await userManager.GetUserByEmailAsync(invite.Email);
+            var user = await _userManager.GetUserByEmailAsync(invite.Email);
             if (!user.Equals(Constants.LostUser))
             {
                 if (user.Status == EmployeeStatus.Terminated)
@@ -359,7 +359,7 @@ public class UserController(
                     }
                 }
 
-                await userManager.AddUserRelationAsync(currentUser.Id, user.Id);
+                await _userManager.AddUserRelationAsync(currentUser.Id, user.Id);
                 continue;
             }
 
@@ -503,7 +503,7 @@ public class UserController(
             throw new SecurityException();
         }
         
-        var isGuest = await userManager.IsGuestAsync(user);
+        var isGuest = await _userManager.IsGuestAsync(user);
         
         await CheckReassignProcessAsync([user.Id]);
 
@@ -590,18 +590,18 @@ public class UserController(
         }
         
         var user = await _userManager.GetUsersAsync(userId);
-        if (user.Status == EmployeeStatus.Terminated || !await userManager.IsGuestAsync(user))
+        if (user.Status == EmployeeStatus.Terminated || !await _userManager.IsGuestAsync(user))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var relations = await userManager.GetUserRelationsAsync(currentUser.Id);
+        var relations = await _userManager.GetUserRelationsAsync(currentUser.Id);
         if (!relations.ContainsKey(user.Id))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
         
-        await userManager.DeleteUserRelationAsync(currentUser.Id, user.Id);
+        await _userManager.DeleteUserRelationAsync(currentUser.Id, user.Id);
         await fileSecurity.RemoveSecuritiesAsync(user.Id, currentUser.Id, SubjectType.User);
     }
 
@@ -990,7 +990,7 @@ public class UserController(
                 continue;
             }
             
-            var isGuest = await userManager.IsGuestAsync(user);
+            var isGuest = await _userManager.IsGuestAsync(user);
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
@@ -1924,7 +1924,7 @@ public class UserController(
 
     private async IAsyncEnumerable<UserInfo> GetByFilterAsync(UserFilter filter)
     {
-        if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
+        if (await _userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
