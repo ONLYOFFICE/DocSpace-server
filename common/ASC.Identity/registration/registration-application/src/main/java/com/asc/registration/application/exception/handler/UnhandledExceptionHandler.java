@@ -52,7 +52,7 @@ public class UnhandledExceptionHandler {
       Exception ex, HttpServletRequest request) {
     log.error("Could not perform an action. Unknown exception", ex);
     return new ResponseEntity<>(
-        ErrorResponse.builder().reason("Something went wrong").build(),
+        ErrorResponse.builder().reason("something went wrong").build(),
         HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

@@ -202,7 +202,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         canFill = true;
                         isSubmitOnly = true;
                         editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
-                        fillingSessionId = Guid.NewGuid().ToString("N");
+
+                        fillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
                         break;
                     }
 
@@ -234,7 +235,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                                 editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
 
                                 file = formDraft;
-                                fillingSessionId = Guid.NewGuid().ToString("N");
+                                fillingSessionId = string.Format("{0}_{1}", formDraft.Id, securityContext.CurrentAccount.ID);
                             }
                             else
                             {
@@ -250,7 +251,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     canEdit = false;
                     canFill = true;
                     editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
-                    fillingSessionId = Guid.NewGuid().ToString("N");
+                    fillingSessionId = string.Format("{0}_{1}", file.Id, securityContext.CurrentAccount.ID);
                     break;
 
                 case FolderType.FormFillingFolderDone:
@@ -288,7 +289,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
 
-        var result = await configurationConverter.Convert(configuration, file, fillingSessionId);
+        var result = await configurationConverter.Convert(configuration, file);
         
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
@@ -313,6 +314,13 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         if (!string.IsNullOrEmpty(fillingSessionId))
         {
             result.FillingSessionId = fillingSessionId;
+            if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+            {
+                result.EditorConfig.User = new UserConfig
+                {
+                    Id = fillingSessionId
+                };
+            }
         }
        
         return result;

@@ -267,9 +267,9 @@ public class FileDtoHelper(
                 result.IsForm = file.IsForm;
             }
 
-            if (ace is { Access: FileShare.FillForms } || result.IsForm == false || currentFolder.FolderType == FolderType.FormFillingFolderInProgress)
+            if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType) || currentFolder.FolderType == FolderType.FillingFormsRoom)
             {
-                result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
+                result.Security[FileSecurity.FilesSecurityActions.Edit] = false;
             }
 
             result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
