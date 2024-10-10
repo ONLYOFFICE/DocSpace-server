@@ -128,7 +128,7 @@ public class WebItemSecurity(UserManager userManager,
             if ((
                 webItem.ID == WebItemManager.PeopleProductID ||
                 webItem.ID == WebItemManager.BirthdaysProductID) &&
-                await userManager.IsUserAsync(@for))
+                await userManager.IsGuestAsync(@for))
             {
                 // hack: people and birthday products not visible for collaborators
                 result = false;
@@ -247,10 +247,17 @@ public class WebItemSecurity(UserManager userManager,
 
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
             {
-                if (await userManager.IsUserInGroupAsync(userid, Constants.GroupUser.ID))
+                var type = await userManager.GetUserTypeAsync(userid);
+                switch (type)
                 {
-                    await countPaidUserChecker.CheckAppend();
-                    await userManager.RemoveUserFromGroupAsync(userid, Constants.GroupUser.ID);
+                    case EmployeeType.Guest:
+                        await countPaidUserChecker.CheckAppend();
+                        await userManager.RemoveUserFromGroupAsync(userid, Constants.GroupGuest.ID);
+                        break;
+                    case EmployeeType.User:
+                        await countPaidUserChecker.CheckAppend();
+                        await userManager.RemoveUserFromGroupAsync(userid, Constants.GroupUser.ID);
+                        break;
                 }
 
                 if (productId == WebItemManager.PeopleProductID)

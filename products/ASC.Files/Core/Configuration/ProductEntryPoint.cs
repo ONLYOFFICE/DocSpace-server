@@ -276,7 +276,7 @@ public class ProductEntryPoint : Product
 
         foreach (var record in currentUsersRecords)
         {
-            if (record.Owner == userId || record.Share == FileShare.RoomAdmin)
+            if (record.Owner == userId || record.Share == FileShare.RoomManager)
             {
                 result.TryAdd(record.EntryId, true);
             }
@@ -355,10 +355,10 @@ public class ProductEntryPoint : Product
     {
         return employeeType switch
         {
-            EmployeeType.User or 
+            EmployeeType.Guest or 
             EmployeeType.RoomAdmin or 
             EmployeeType.DocSpaceAdmin or 
-            EmployeeType.Collaborator => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + employeeType.ToStringFast()),
+            EmployeeType.User => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + employeeType.ToStringFast()),
             _ => string.Empty
         };
     }
@@ -371,9 +371,9 @@ public class ProductEntryPoint : Product
             FileShare.Review or 
             FileShare.Comment or 
             FileShare.FillForms or 
-            FileShare.RoomAdmin or 
+            FileShare.RoomManager or 
             FileShare.Editing or 
-            FileShare.PowerUser => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + userRoomRole.ToStringFast()),
+            FileShare.ContentCreator => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + userRoomRole.ToStringFast()),
             _ => string.Empty
         };
     }

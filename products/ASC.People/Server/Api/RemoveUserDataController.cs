@@ -110,8 +110,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         {
             throw new ArgumentException("Can not delete user with id = " + inDto.UserId);
         }
+        
+        var isGuest = await userManager.IsGuestAsync(user);
 
-        var progressItem = await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, true, true);
+        var progressItem = await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, true, true, isGuest);
 
         return TaskProgressResponseDto.Get(progressItem);
     }

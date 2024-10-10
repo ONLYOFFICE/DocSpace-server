@@ -193,9 +193,9 @@ public abstract class Migrator(
                     saved = await UserManager.SaveUserInfo(user.Info, user.UserType);
                     var groupId = user.UserType switch
                     {
-                        EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
+                        EmployeeType.User => Constants.GroupUser.ID,
                         EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
-                        EmployeeType.RoomAdmin => Constants.GroupManager.ID,
+                        EmployeeType.RoomAdmin => Constants.GroupRoomAdmin.ID,
                         _ => Guid.Empty
                     };
 
@@ -454,10 +454,19 @@ public abstract class Migrator(
                         }
                         else
                         {
-                            var users = UserManager.GetUsers(false, EmployeeStatus.Active,
-                                [[MigrationInfo.Groups[security.Subject].Info.ID]],
-                                [], [], null, null, null, "", null, false, "firstname",
-                                true, 100000, 0).Where(u => u.Id != user.Info.Id);
+                            var filter = new UserQueryFilter
+                            {
+                                EmployeeStatus = EmployeeStatus.Active,
+                                IncludeGroups = [[MigrationInfo.Groups[security.Subject].Info.ID]],
+                                SortType = UserSortType.FirstName,
+                                SortOrderAsc = true,
+                                IncludeStrangers = true,
+                                Limit = 100000,
+                                Offset = 0,
+                                Area = Area.All
+                            };
+                            
+                            var users = UserManager.GetUsers(filter).Where(u => u.Id != user.Info.Id);
                             await foreach (var u in users)
                             {
                                 await SecurityContext.AuthenticateMeAsync(u.Id);
@@ -483,7 +492,7 @@ public abstract class Migrator(
                             user = MigrationInfo.Users[owner];
                         }
 
-                        if (user.UserType == EmployeeType.Collaborator)
+                        if (user.UserType == EmployeeType.User)
                         {
                             await SecurityContext.AuthenticateMeAsync(_currentUser);
                         }
@@ -498,13 +507,13 @@ public abstract class Migrator(
                         localMatchingRoomIds.Add(security.EntryId, room);
                         Log(string.Format(MigrationResource.CreateShareRoom, room.Title));
 
-                        if (user.UserType == EmployeeType.Collaborator)
+                        if (user.UserType == EmployeeType.User)
                         {
                             var aceList = new List<AceWrapper>
                             {
                                 new()
                                 {
-                                    Access = Files.Core.Security.FileShare.PowerUser,
+                                    Access = Files.Core.Security.FileShare.ContentCreator,
                                     Id = user.Info.Id
                                 }
                             };

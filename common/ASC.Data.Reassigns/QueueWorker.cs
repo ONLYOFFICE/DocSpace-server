@@ -110,11 +110,11 @@ public class QueueWorkerRemove(IHttpContextAccessor httpContextAccessor,
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "user_data_remove";
 
-    public async Task<RemoveProgressItem> StartAsync(int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile)
+    public async Task<RemoveProgressItem> StartAsync(int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile, bool isGuest)
     {
         var result = _serviceProvider.GetService<RemoveProgressItem>();
 
-        result.Init(_httpHeaders, tenantId, user, currentUserId, notify, deleteProfile);
+        result.Init(_httpHeaders, tenantId, user, currentUserId, notify, deleteProfile, isGuest);
 
         return await StartAsync(tenantId, user.Id, result);
     }
