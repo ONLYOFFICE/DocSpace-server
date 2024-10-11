@@ -42,13 +42,16 @@ public static class DocSpaceHelper
         return RoomTypes.Contains(folderType);
     }
 
+    public static HashSet<FolderType> FormsFillingSystemFolders => [
+        FolderType.FormFillingFolderDone,
+        FolderType.FormFillingFolderInProgress,
+        FolderType.InProcessFormFolder,
+        FolderType.ReadyFormFolder
+    ];
+
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
     {
-        return folderType is
-            FolderType.FormFillingFolderDone or
-            FolderType.FormFillingFolderInProgress or
-            FolderType.InProcessFormFolder or
-            FolderType.ReadyFormFolder;
+        return FormsFillingSystemFolders.Contains(folderType);
     }
     
     public static bool IsFormsFillingFolder<T>(FileEntry<T> entry)

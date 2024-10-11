@@ -65,7 +65,7 @@ public class HistoryDtoHelper(EmployeeFullDtoHelper employeeFullDtoHelper, UserM
 }
 
 [Scope]
-public class HistoryApiHelper(HistoryService historyService, HistoryDtoHelper historyDtoHelper, ApiContext apiContext)
+public class HistoryApiHelper(HistoryService historyService, HistoryDtoHelper historyDtoHelper, ApiContext apiContext, IDaoFactory daoFactory, FileSecurity fileSecurity)
 {
     public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId)
     {
@@ -82,9 +82,48 @@ public class HistoryApiHelper(HistoryService historyService, HistoryDtoHelper hi
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         
-        var totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType);
+        var filterFolderIds = new List<int>();
+        var filterFileIds = new List<int>();
+        var needFiltering = false;
+        FileEntry<int> entry = entryType switch
+        {
+            FileEntryType.File => await daoFactory.GetFileDao<int>().GetFileAsync(entryId),
+            FileEntryType.Folder => await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId),
+            _ => throw new ArgumentOutOfRangeException(nameof(entryType), entryType, null)
+        };
 
-        var histories = historyService.GetHistoryAsync(entryId, entryType, offset, count)
+        if (entry == null)
+        {
+            throw new ItemNotFoundException(entryType == FileEntryType.File
+                ? FilesCommonResource.ErrorMessage_FileNotFound
+                : FilesCommonResource.ErrorMessage_FolderNotFound
+                );
+        }
+
+        if (!await fileSecurity.CanReadAsync(entry))
+        {
+            throw new SecurityException(entryType == FileEntryType.File
+                ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile
+                : FilesCommonResource.ErrorMessage_SecurityException_ReadFolder
+                );
+        }
+
+        if (entryType == FileEntryType.Folder &&
+            DocSpaceHelper.IsFormsFillingFolder(entry) &&
+            entry.ShareRecord is { Share: FileShare.FillForms })
+        {
+            needFiltering = true;
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var fileDao = daoFactory.GetFileDao<int>();
+
+            var f = entry as Folder<int>;
+            filterFolderIds = await folderDao.GetFoldersAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, true, false, 0, -1, default, true, f.FolderType).Select(r => r.Id).ToListAsync();
+            filterFileIds = await fileDao.GetFilesAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, null, false, true, false, 0, -1, default, false, true, f.FolderType).Select(r => r.Id).ToListAsync();
+        }
+
+        var totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType, needFiltering, filterFolderIds, filterFileIds);
+
+        var histories = historyService.GetHistoryAsync(entryId, entryType, offset, count, needFiltering, filterFolderIds, filterFileIds)
             .GroupByAwait(x => ValueTask.FromResult(x.GetGroupId()),
                 async (_, group) =>
                 {
