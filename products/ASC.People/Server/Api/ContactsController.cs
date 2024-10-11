@@ -44,10 +44,12 @@ public class ContactsController(UserManager userManager,
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Deleted user profile with the detailed information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "User not found")]
     [HttpDelete("{userid}/contacts")]
     public async Task<EmployeeFullDto> DeleteMemberContacts(ContactsRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(inDto.UserId);
+        var user = await  GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
@@ -69,6 +71,8 @@ public class ContactsController(UserManager userManager,
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "User not found")]
     [HttpPost("{userid}/contacts")]
     public async Task<EmployeeFullDto> SetMemberContacts(ContactsRequestDto inDto)
     {
@@ -95,6 +99,8 @@ public class ContactsController(UserManager userManager,
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "User not found")]
     [HttpPut("{userid}/contacts")]
     public async Task<EmployeeFullDto> UpdateMemberContacts(ContactsRequestDto inDto)
     {

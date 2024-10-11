@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using DocuSign.eSign.Model;
+
 namespace ASC.People.Api;
 
 public class NotificationController    : ApiControllerBase
@@ -44,6 +46,7 @@ public class NotificationController    : ApiControllerBase
     /// <path>api/2.0/people/phone</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Notification", typeof(object))]
+    [SwaggerResponse(501, "Not Implemented")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [HttpPost("phone")]
     public Task<object> SendNotificationToChangeAsync(UpdateMemberSimpleRequestDto inDto)

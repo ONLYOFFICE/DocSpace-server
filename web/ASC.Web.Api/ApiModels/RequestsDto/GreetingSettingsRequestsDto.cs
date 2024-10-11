@@ -34,5 +34,6 @@ public class GreetingSettingsRequestsDto
     /// <summary>
     /// Tenant name
     /// </summary>
+    [StringLength(255)]
     public string Title { get; set; }
 }

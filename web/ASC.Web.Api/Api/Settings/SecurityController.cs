@@ -160,6 +160,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
+    [SwaggerResponse(400, "MinLength")]
     [HttpPut("password")]
     public async Task<PasswordSettingsDto> UpdatePasswordSettingsAsync(PasswordSettingsRequestsDto inDto)
     {
@@ -194,6 +195,7 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
+    [SwaggerResponse(403, "Security settings are disabled for an open portal")]
     [HttpPut("")]
     public async Task<IEnumerable<SecurityDto>> SetWebItemSecurity(WebItemSecurityRequestsDto inDto)
     {
@@ -244,6 +246,7 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
+    [SwaggerResponse(403, "Security settings are disabled for an open portal")]
     [HttpPut("access")]
     public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemsSecurityRequestsDto inDto)
     {
@@ -336,6 +339,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(object))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("administrator")]
     public async Task<object> SetProductAdministrator(SecurityRequestsDto inDto)
     {

@@ -62,6 +62,7 @@ public class ReassignController(
     /// <path>api/2.0/people/reassign/start</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(400, "Can not reassign data to user or from user")]
     [HttpPost("start")]
     public async Task<TaskProgressResponseDto> StartReassignAsync(StartReassignRequestDto inDto)
     {

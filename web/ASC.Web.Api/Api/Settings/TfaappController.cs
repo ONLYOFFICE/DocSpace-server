@@ -171,6 +171,7 @@ public class TfaappController(
     ///<path>api/2.0/settings/tfaapp</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "True if the operation is successful", typeof(bool))]
+    [SwaggerResponse(405, "SMS settings are not available/TFA application settings are not available")]
     [HttpPut("tfaapp")]
     public async Task<bool> TfaSettingsAsync(TfaRequestsDto inDto)
     {
@@ -288,6 +289,7 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaapp/setup</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Setup code", typeof(SetupCode))]
+    [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaapp/setup")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation")]
     public async Task<SetupCode> TfaAppGenerateSetupCodeAsync()
@@ -318,6 +320,7 @@ public class TfaappController(
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "List of TFA application codes", typeof(object))]
+    [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaappcodes")]
     public async Task<IEnumerable<object>> TfaAppGetCodesAsync()
     {
@@ -346,6 +349,7 @@ public class TfaappController(
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "New backup codes", typeof(object))]
+    [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewcodes")]
     public async Task<IEnumerable<object>> TfaAppRequestNewCodesAsync()
     {
@@ -373,6 +377,8 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappnewapp</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Login URL", typeof(object))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewapp")]
     public async Task<object> TfaAppNewAppAsync(TfaRequestsDto inDto)
     {

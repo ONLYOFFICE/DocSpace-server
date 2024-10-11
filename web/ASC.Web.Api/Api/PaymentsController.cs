@@ -208,6 +208,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/quota</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaAsync(PaymentInformationRequestDto inDto)
     {
@@ -227,6 +228,9 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/request</path>
     [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(400, "Incorrect email or message text is empty")]
+    [SwaggerResponse(429, "Request limit is exceeded")]
     [HttpPost("request")]
     public async Task SendSalesRequestAsync(SalesRequestsDto inDto)
     {

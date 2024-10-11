@@ -169,6 +169,11 @@ public class SettingsDto
     public string ForumLink { get; set; }
 
     /// <summary>
+    /// Specifies whether to display the About section
+    /// </summary>
+    public bool DisplayAbout { get; set; }
+
+    /// <summary>
     /// API documentation link
     /// </summary>
     public string ApiDocsLink { get; set; }

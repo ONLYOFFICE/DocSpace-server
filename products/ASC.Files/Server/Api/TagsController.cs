@@ -71,6 +71,7 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Boolean value: true - the file is favorite, false - the file is not favorite", typeof(bool))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpGet("favorites/{fileId}")]
     public async Task<bool> ToggleFileFavoriteAsync(ToggleFileFavoriteRequestDto<T> inDto)
     {
@@ -91,6 +92,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("favorites")]
     public async Task<bool> AddFavoritesAsync(BaseBatchRequestDto inDto)
     {

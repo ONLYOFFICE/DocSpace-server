@@ -279,6 +279,7 @@ public class PortalController(
     /// <path>api/2.0/portal/quota</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Current portal quota", typeof(TenantQuota))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpGet("quota")]
     public async Task<TenantQuota> GetQuotaAsync()
@@ -433,6 +434,8 @@ public class PortalController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "Confirmation email about authentication to the portal with a new name", typeof(object))]
+    [SwaggerResponse(400, "Alias is empty")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("portalrename")]
     public async Task<object> UpdatePortalName(PortalRenameRequestsDto inDto)
     {
@@ -690,6 +693,8 @@ public class PortalController(
     /// <path>api/2.0/portal/sendcongratulations</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowAnonymous]
     [HttpPost("sendcongratulations")]
     public async Task SendCongratulationsAsync([FromQuery] SendCongratulationsDto inDto)

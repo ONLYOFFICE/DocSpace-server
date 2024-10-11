@@ -84,6 +84,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/saveediting")]
     public async Task<FileDto<T>> SaveEditingFromFormAsync(SaveEditingRequestDto<T> inDto)
     {
@@ -99,6 +101,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/startedit</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File key for Document Service", typeof(object))]
+    [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [HttpPost("{fileId}/startedit")]
     public async Task<object> StartEditAsync(StartEditRequestDto<T> inDto)
     {
@@ -111,6 +114,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Starts filling</short>
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/startfilling")]
     public async Task StartFillingAsync(StartFillingRequestDto<T> inDto)
     {
@@ -124,6 +129,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/trackeditfile</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File changes", typeof(KeyValuePair<bool, string>))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(TrackEditFileRequestDto<T> inDto)
     {
@@ -138,6 +144,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Configuration parameters", typeof(ConfigurationDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
@@ -387,6 +394,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <collection>list</collection>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Document service information: the Document Server address, the Document Server address in the local private network, the Community Server address", typeof(DocServiceUrlDto))]
+    [SwaggerResponse(400, "Invalid input urls/Mixed Active Content is not allowed. HTTPS address for Document Server is required")]
+    //[SwaggerResponse(503, "Unable to establish a connection with the Document Server")]
     [HttpPut("docservice")]
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {

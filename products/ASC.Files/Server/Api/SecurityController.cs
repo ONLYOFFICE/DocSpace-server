@@ -140,6 +140,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of encryption key pairs: encrypted private key, public key, user ID", typeof(List<EncryptionKeyPairDto>))]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpGet("file/{fileId}/publickeys")]
     public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccess(FileIdRequestDto<T> inDto)
     {
@@ -323,6 +324,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "External data", typeof(ExternalShareDto))]
+    [SwaggerResponse(429, "Too many requests")]
     [AllowAnonymous]
     [HttpPost("share/{key}/password")]
     public async Task<ExternalShareDto> ApplyExternalSharePasswordAsync(ExternalShareRequestDto inDto)

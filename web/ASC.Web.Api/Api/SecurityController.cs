@@ -63,6 +63,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <collection>list</collection>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "List of login events", typeof(LoginEventDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/last")]
     public async Task<IEnumerable<LoginEventDto>> GetLastLoginEventsAsync()
     {
@@ -83,6 +84,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "List of audit trail data", typeof(AuditEventDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/last")]
     public async Task<IEnumerable<AuditEventDto>> GetLastAuditEventsAsync()
     {
@@ -103,6 +105,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <collection>list</collection>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "List of filtered login events", typeof(LoginEventDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/filter")]
     public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilterAsync(LoginEventRequestDto inDto)
     {
@@ -134,6 +137,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "List of filtered audit trail data", typeof(AuditEventDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/filter")]
     public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilterAsync(AuditEventRequestDto inDto)
     {
@@ -222,6 +226,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/login/report</path>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(object))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("audit/login/report")]
     public async Task<object> CreateLoginHistoryReport()
     {
@@ -253,6 +258,8 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/events/report</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(object))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("audit/events/report")]
     public async Task<object> CreateAuditTrailReport()
     {
@@ -287,6 +294,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit settings", typeof(TenantAuditSettings))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/settings/lifetime")]
     public async Task<TenantAuditSettings> GetAuditSettingsAsync()
     {
@@ -306,6 +314,8 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit trail settings", typeof(TenantAuditSettings))]
+    [SwaggerResponse(400, "Exception in LoginHistoryLifeTime or AuditTrailLifeTime")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("audit/settings/lifetime")]
     public async Task<TenantAuditSettings> SetAuditSettings(TenantAuditSettingsWrapper inDto)
     {
@@ -335,6 +345,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
+    [SwaggerResponse(400, "Exception in Domains")]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName )]
     [HttpPost("csp")]
     public async Task<CspDto> Csp(CspRequestsDto request)

@@ -27,18 +27,6 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Link parameters
-/// </summary>
-public class GetRoomLinksRequest
-{
-    /// <summary>
-    /// Link type
-    /// </summary>
-    [FromQuery(Name = "type")]
-    public LinkType? Type { get; set; }
-}
-
-/// <summary>
 /// Link request parameters
 /// </summary>
 public class GetRoomLinksRequestDto<T>
@@ -50,7 +38,8 @@ public class GetRoomLinksRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// Room links
+    /// Link type
     /// </summary>
-    public GetRoomLinksRequest RoomLinks { get; set; }
+    [FromQuery(Name = "type")]
+    public LinkType? Type { get; set; }
 }

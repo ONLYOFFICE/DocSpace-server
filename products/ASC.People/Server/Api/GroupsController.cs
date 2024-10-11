@@ -98,6 +98,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
+    [SwaggerResponse(404, "Group not found")]
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(DetailedInformationRequestDto inDto)
     {
@@ -171,6 +172,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Updated group with the detailed information", typeof(GroupDto))]
+    [SwaggerResponse(404, "Group not found")]
     [HttpPut("{id:guid}")]
     public async Task<GroupDto> UpdateGroupAsync(UpdateGroupRequestDto inDto)
     {
@@ -213,6 +215,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "No content", typeof(NoContentResult))]
+    [SwaggerResponse(404, "Group not found")]
     [HttpDelete("{id:guid}")]
     public async Task<NoContentResult> DeleteGroupAsync(GetGroupByIdRequestDto inDto)
     { 
@@ -237,6 +240,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{fromId}/members/{toId}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
+    [SwaggerResponse(404, "Group not found")]
     [HttpPut("{fromId:guid}/members/{toId:guid}")]
     public async Task<GroupDto> TransferMembersToAsync(MoveGroupMemebersRequestDto inDto)
     {
@@ -282,6 +286,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
+    [SwaggerResponse(404, "Group not found")]
     [HttpPut("{id:guid}/members")]
     public async Task<GroupDto> AddMembersToAsync(MembersRequestDto inDto)
     {
@@ -306,6 +311,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}/manager</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
+    [SwaggerResponse(404, "User not found")]
     [HttpPut("{id:guid}/manager")]
     public async Task<GroupDto> SetManagerAsync(SetManagerRequestDto inDto)
     {
@@ -332,6 +338,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
+    [SwaggerResponse(404, "Group not found")]
     [HttpDelete("{id:guid}/members")]
     public async Task<GroupDto> RemoveMembersFromAsync(MembersRequestDto inDto)
     {
@@ -417,6 +424,8 @@ public class GroupControllerAdditional<T>(
     /// </summary>
     /// <path>api/2.0/group/room/{id}</path>
     [Tags("Group / Rooms")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<GroupDto> GetGroupsWithSharedAsync(GetGroupsWithSharedRequestDto<T> inDto)
     {

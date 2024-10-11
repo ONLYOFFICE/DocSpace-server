@@ -55,6 +55,7 @@ public class OwnerController(
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
     [SwaggerResponse(200, "Message about changing the portal owner", typeof(object))]
+    [SwaggerResponse(403, "Collaborator can not be an owner")]
     [HttpPost("")]
     public async Task<object> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
     {
@@ -93,6 +94,9 @@ public class OwnerController(
     /// </short>
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(400, "The user could not be found")]
+    [SwaggerResponse(409, "")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
     public async Task OwnerAsync(OwnerIdSettingsRequestDto inDto)

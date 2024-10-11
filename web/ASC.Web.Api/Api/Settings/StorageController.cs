@@ -66,6 +66,7 @@ public class StorageController(ILoggerProvider option,
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of storages with the following parameters", typeof(StorageDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("storage")]
     public async Task<List<StorageDto>> GetAllStoragesAsync()
     {
@@ -112,6 +113,9 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/encryption/start</path>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(405, "Method not allowed")]
     [HttpPost("encryption/start")]
     public async Task<bool> StartStorageEncryptionAsync(StorageEncryptionRequestsDto inDto)
     {
@@ -242,6 +246,8 @@ public class StorageController(ILoggerProvider option,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Storage encryption settings", typeof(EncryptionSettings))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(405, "Method not allowed")]
     [HttpGet("encryption/settings")]
     public async Task<EncryptionSettings> GetStorageEncryptionSettingsAsync()
     {
@@ -281,6 +287,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/encryption/progress</path>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Storage encryption progress", typeof(double?))]
+    [SwaggerResponse(405, "Method not allowed")]
     [HttpGet("encryption/progress")]
     public async Task<double?> GetStorageEncryptionProgress()
     {
@@ -309,6 +316,8 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Updated storage settings", typeof(StorageSettings))]
+    [SwaggerResponse(400, "Module")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("storage")]
     public async Task<StorageSettings> UpdateStorageAsync(StorageRequestsDto inDto)
     {
@@ -349,6 +358,8 @@ public class StorageController(ILoggerProvider option,
     /// <short>Reset the storage settings</short>
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("storage")]
     public async Task ResetStorageToDefaultAsync()
     {
@@ -381,6 +392,7 @@ public class StorageController(ILoggerProvider option,
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of the CDN storages with the following parameters", typeof(StorageDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("storage/cdn")]
     public async Task<List<StorageDto>> GetAllCdnStoragesAsync()
     {
@@ -405,6 +417,8 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Updated CDN storage", typeof(CdnStorageSettings))]
+    [SwaggerResponse(400, "Module")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("storage/cdn")]
     public async Task<CdnStorageSettings> UpdateCdnAsync(StorageRequestsDto inDto)
     {
@@ -447,6 +461,8 @@ public class StorageController(ILoggerProvider option,
     /// <short>Reset the CDN storage settings</short>
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("storage/cdn")]
     public async Task ResetCdnToDefaultAsync()
     {
@@ -465,6 +481,7 @@ public class StorageController(ILoggerProvider option,
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(StorageDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("storage/backup")]
     public async Task<List<StorageDto>> GetAllBackupStorages()
     {

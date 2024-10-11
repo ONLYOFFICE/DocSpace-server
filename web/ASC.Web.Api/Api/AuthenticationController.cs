@@ -101,6 +101,10 @@ public class AuthenticationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
     [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(400, "userName, password or passworHash is empty")]
+    [SwaggerResponse(401, "User authentication failed")]
+    [SwaggerResponse(403, "Auth code is not available")]
+    [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
@@ -174,6 +178,10 @@ public class AuthenticationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
     [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(400, "userName, password or passworHash is empty")]
+    [SwaggerResponse(401, "User authentication failed")]
+    [SwaggerResponse(404, "The user could not be found")]
+    [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment]
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
@@ -392,6 +400,8 @@ public class AuthenticationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
     [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(400, "userName, password or passworHash is empty")]
+    [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment]
     [HttpPost("sendsms")]
     public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)

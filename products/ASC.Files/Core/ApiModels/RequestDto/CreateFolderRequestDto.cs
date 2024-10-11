@@ -34,6 +34,7 @@ public class CreateFolder
     /// <summary>
     /// Folder title
     /// </summary>
+    [StringLength(165)]
     public string Title { get; set; }
 }
 

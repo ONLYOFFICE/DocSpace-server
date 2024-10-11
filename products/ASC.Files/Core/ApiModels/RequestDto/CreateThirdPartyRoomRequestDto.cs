@@ -56,9 +56,19 @@ public class CreateThirdPartyRoom
     /// </summary>
     public bool Indexing { get; set; }
     
+    /// <summary>
+    /// Deny download
+    /// </summary>
     public bool DenyDownload { get; set; }
     
+    /// <summary>
+    /// Color
+    /// </summary>
     public string Color { get; set; }
+
+    /// <summary>
+    /// Cover
+    /// </summary>
     public string Cover { get; set; }
 }
 

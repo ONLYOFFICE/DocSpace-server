@@ -95,6 +95,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
     [SwaggerResponse(200, "Message about the result of saving new settings", typeof(object))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("cookiesettings")]
     public async Task<object> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
     {
@@ -122,6 +123,8 @@ public class MessageSettingsController(MessageService messageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "Message about the result of sending a message", typeof(object))]
+    [SwaggerResponse(400, "Incorrect email or message text is empty")]
+    [SwaggerResponse(429, "Request limit is exceeded")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
     public async Task<object> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
@@ -164,6 +167,9 @@ public class MessageSettingsController(MessageService messageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "Message about sending a link to confirm joining the DocSpace", typeof(object))]
+    [SwaggerResponse(400, "Incorrect email or email already exists")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(429, "Request limit is exceeded")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
     public async Task<object> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)

@@ -45,6 +45,8 @@ public class WebPluginsController(ApiContext apiContext,
     /// <exception cref="CustomHttpException"></exception>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
+    [SwaggerResponse(400, "bad request")]
+    [SwaggerResponse(403, "Plugins disabled")]
     [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(WebPluginFromFileRequestDto inDto)
     {
@@ -79,6 +81,7 @@ public class WebPluginsController(ApiContext apiContext,
     /// <path>api/2.0/settings/webplugins</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
+    [SwaggerResponse(403, "Plugins disabled")]
     [HttpGet("")]
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(GetWebPluginsRequestDto inDto)
     {
@@ -102,6 +105,7 @@ public class WebPluginsController(ApiContext apiContext,
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
+    [SwaggerResponse(403, "Plugins disabled")]
     [HttpGet("{name}")]
     public async Task<WebPluginDto> GetWebPluginAsync(WebPluginNameRequestDto inDto)
     {
@@ -119,6 +123,8 @@ public class WebPluginsController(ApiContext apiContext,
     /// </summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "Plugins disabled")]
     [HttpPut("{name}")]
     public async Task UpdateWebPluginAsync(WebPluginRequestsDto inDto)
     {
@@ -136,6 +142,8 @@ public class WebPluginsController(ApiContext apiContext,
     /// </summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "Plugins disabled")]
     [HttpDelete("{name}")]
     public async Task DeleteWebPluginAsync(WebPluginNameRequestDto inDto)
     {

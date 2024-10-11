@@ -58,6 +58,7 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup schedule", typeof(BackupAjaxHandler.Schedule))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackupschedule")]
     public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule()
     {
@@ -71,6 +72,10 @@ public class BackupController(
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(400, "BackupStored must be 1 - 30 or backup can not start as dump")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupScheduleAsync(BackupScheduleDto inDto)
     {
@@ -116,6 +121,7 @@ public class BackupController(
     /// <path>api/2.0/backup/deletebackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule()
     {
@@ -131,6 +137,10 @@ public class BackupController(
     /// <path>api/2.0/backup/startbackup</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
+    [SwaggerResponse(400, "Wrong folder type or backup can`t start as dump")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
     public async Task<BackupProgress> StartBackupAsync(BackupDto inDto)
@@ -200,6 +210,7 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackupprogress</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
     public async Task<BackupProgress> GetBackupProgressAsync()
@@ -215,6 +226,7 @@ public class BackupController(
     /// <collection>list</collection>
     [Tags("Backup")]
     [SwaggerResponse(200, "List of backup history records", typeof(BackupHistoryRecord))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
     {
@@ -228,6 +240,7 @@ public class BackupController(
     /// <path>api/2.0/backup/deletebackup/{id}</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup([FromRoute] DeleteBackupDto inDto)
     {
@@ -242,6 +255,7 @@ public class BackupController(
     /// <path>api/2.0/backup/deletebackuphistory</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory()
     {
@@ -256,6 +270,10 @@ public class BackupController(
     /// <path>api/2.0/backup/startrestore</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
+    [SwaggerResponse(400, "Backup can not start as dump")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "The required file or folder was not found")]
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
     {

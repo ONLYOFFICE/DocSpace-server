@@ -186,6 +186,8 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     [Tags("Security / Active connections")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "Method not available")]
     [HttpPut("logoutall/{userId:guid}")]
     public async Task LogOutAllActiveConnectionsForUserAsync(UserIdRequestDto inDto)
     {
@@ -244,6 +246,7 @@ public class ConnectionsController(
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
     [Tags("Security / Active connections")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(403, "Method not available")]
     [HttpPut("logout/{loginEventId:int}")]
     public async Task<bool> LogOutActiveConnection(LoginEvenrIdRequestDto inDto)
     {

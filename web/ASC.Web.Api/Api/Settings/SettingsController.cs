@@ -287,6 +287,7 @@ public partial class SettingsController(MessageService messageService,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Message about the result of saving the user quota settings", typeof(TenantUserQuotaSettings))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
@@ -358,6 +359,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/roomquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Tenant room quota settings", typeof(TenantRoomQuotaSettings))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("roomquotasettings")]
     public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
@@ -415,6 +417,8 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/tenantquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Tenant quota settings", typeof(TenantQuotaSettings))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(405, "Not available")]
     [HttpPut("tenantquotasettings")]
     public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(TenantQuotaSettingsRequestsDto inDto)
     {
@@ -531,6 +535,9 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/dns</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about changing DNS", typeof(object))]
+    [SwaggerResponse(400, "Invalid domain name/incorrect length of doman name")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(405, "Method not allowed")]
     [HttpPut("dns")]
     public async Task<object> SaveDnsSettingsAsync(DnsSettingsRequestsDto inDto)
     {
@@ -595,6 +602,8 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/wizard/complete</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Wizard settings", typeof(WizardSettings))]
+    [SwaggerResponse(400, "Incorrect email address/The password is empty")]
+    [SwaggerResponse(402, "You must enter a license key or license key is not correct or license expired or user quota does not match the license")]
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
@@ -614,6 +623,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/welcome/close</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(405, "Not available")]
     [HttpPut("welcome/close")]
     public async Task CloseWelcomePopupAsync()
     {
@@ -755,6 +765,8 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Close the admin helper notification</short>
     /// <path>api/2.0/settings/closeadminhelper</path>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(405, "Not available")]
     [HttpPut("closeadminhelper")]
     public async Task CloseAdminHelperAsync()
     {
@@ -950,6 +962,8 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/authservice</path>
     [Tags("Settings / Authorization")]
     [SwaggerResponse(200, "Boolean value: true if the authorization keys are changed", typeof(bool))]
+    [SwaggerResponse(400, "Bad keys")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("authservice")]
     public async Task<bool> SaveAuthKeys(AuthServiceRequestsDto inDto)
     {

@@ -392,14 +392,13 @@ public abstract class VirtualRoomsController<T>(
     [HttpGet("{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetRoomLinksAsync(GetRoomLinksRequestDto<T> inDto)
     {
-        var filterType = inDto.RoomLinks.Type.HasValue ? inDto.RoomLinks.Type.Value switch
+        var filterType = inDto.Type.HasValue ? inDto.Type.Value switch
         {
             LinkType.Invitation => ShareFilterType.InvitationLink,
             LinkType.External => ShareFilterType.ExternalLink,
             _ => ShareFilterType.Link
         }
             : ShareFilterType.Link;
-
         var counter = 0;
 
         await foreach (var ace in _fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, filterType, null, 0, 100))
@@ -419,6 +418,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/link</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
+    [SwaggerResponse(404, "Not Found")]
     [HttpGet("{id}/link")]
     public async Task<FileShareDto> GetRoomsPrimaryExternalLinkAsync(RoomIdRequestDto<T> inDto)
     {
@@ -434,6 +434,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(403, "You don't have permission to edit the room")]
     [HttpPut("{id}/tags")]
     public async Task<FolderDto<T>> AddTagsAsync(BatchTagsRequestDto<T> inDto)
     {
@@ -449,6 +450,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(403, "You don't have permission to edit the room")]
     [HttpDelete("{id}/tags")]
     public async Task<FolderDto<T>> DeleteTagsAsync(BatchTagsRequestDto<T> inDto)
     {
@@ -464,6 +466,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Watermark information", typeof(WatermarkDto))]
+    [SwaggerResponse(404, "The required room was not found")]
     [HttpPut("{id}/watermark")]
     public async Task<WatermarkDto> AddWaterMarksAsync(WatermarkRequestDto<T> inDto)
     {
@@ -495,6 +498,9 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Remove room watermarks</short>
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "You don't have permission to edit the room")]
+    [SwaggerResponse(404, "The required room was not found")]
     [HttpDelete("{id}/watermark")]
     public async Task DeleteWatermarkAsync(RoomIdRequestDto<T> inDto)
     {
@@ -508,6 +514,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(404, "The required room was not found")]
     [HttpPost("{id}/logo")]
     public async Task<FolderDto<T>> CreateRoomLogoAsync(LogoRequest<T> inDto)
     {
@@ -523,6 +530,9 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <path>api/2.0/files/rooms/{id}/cover</path>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room cover", typeof(FolderDto<int>))]
+    [SwaggerResponse(403, "You don't have permission to change cover")]
+    [SwaggerResponse(404, "The required room was not found")]
     [HttpPost("{id}/cover")]
     public async Task<FolderDto<T>> ChangeRoomCoverAsync(CoverRequestDto<T> inDto)
     {
@@ -538,6 +548,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <path>api/2.0/files/rooms/covers</path>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Gets room cover", typeof(IAsyncEnumerable<CoversResultDto>))]
     [HttpGet("covers")]
     public async IAsyncEnumerable<CoversResultDto> GetCovers()
     {
@@ -674,6 +685,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <path>api/2.0/files/rooms</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Returns the contents of the \"Rooms\" section", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the room content")]
     [HttpGet("rooms")]
     public async Task<FolderContentDto<int>> GetRoomsFolderAsync([FromQuery] RoomContentRequestDto inDto)
     {
@@ -721,6 +733,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <path>api/2.0/files/tags</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "New tag name", typeof(object))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("tags")]
     public async Task<object> CreateTagAsync(CreateTagRequestDto inDto)
     {
@@ -753,6 +766,8 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <short>Delete tags</short>
     /// <path>api/2.0/files/tags</path>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpDelete("tags")]
     public async Task DeleteCustomTagsAsync(BatchTagsRequestDto inDto)
     {
@@ -766,6 +781,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <path>api/2.0/files/logos</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Upload result", typeof(UploadResultDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("logos")]
     public async Task<UploadResultDto> UploadRoomLogo(UploadRoomLogoRequestDto inDto)
     {
@@ -808,6 +824,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <exception cref="NotSupportedException"></exception>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(501, "Folder indexing is turned off")]
     [HttpPost("rooms/{id:int}/indexexport")]
     public async Task<DocumentBuilderTaskDto> StartRoomIndexExportAsync(RoomIdRequestDto<int> inDto)
     {

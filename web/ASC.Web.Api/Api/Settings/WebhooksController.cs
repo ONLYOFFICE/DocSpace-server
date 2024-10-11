@@ -154,6 +154,8 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook/{id}/retry</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
+    [SwaggerResponse(400, "Id incorrect")]
+    [SwaggerResponse(404, "Item not found")]
     [HttpPut("webhook/{id:int}/retry")]
     public async Task<WebhooksLogDto> RetryWebhook(IdRequestDto<int> inDto)
     {

@@ -86,6 +86,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// <path>api/2.0/thirdparty/{provider}/code</path>
     [Tags("ThirdParty")]
     [SwaggerResponse(200, "Confirmation code", typeof(object))]
+    [SwaggerResponse(400, "Error")]
     [HttpGet("{provider}/code")]
     public object GetCode(ConfirmationCodeRequestDto inDto)
     {

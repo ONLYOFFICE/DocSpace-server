@@ -43,6 +43,7 @@ public class WatermarkRequestDto
     /// <summary>
     /// Watermark Text
     /// </summary>
+    [StringLength(265)]
     public string Text { get; set; }
 
     /// <summary>

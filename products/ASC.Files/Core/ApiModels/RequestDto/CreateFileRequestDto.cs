@@ -34,6 +34,7 @@ public class CreateFile<T>
     /// <summary>
     /// File title
     /// </summary>
+    [StringLength(165)]
     public string Title { get; set; }
 
     /// <summary>

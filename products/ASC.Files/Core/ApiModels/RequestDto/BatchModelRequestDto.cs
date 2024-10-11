@@ -36,6 +36,7 @@ public class FileBaseBatchRequestDto
     /// </summary>
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
+
 /// <summary>
 /// Base batch request parameters
 /// </summary>
@@ -138,6 +139,7 @@ public class BatchRequestDto : BaseBatchRequestDto
     /// </summary>
     public bool Content { get; set; }
 }
+
 /// <summary>
 /// Request parameters for checking files and folders for conflicts
 /// </summary>

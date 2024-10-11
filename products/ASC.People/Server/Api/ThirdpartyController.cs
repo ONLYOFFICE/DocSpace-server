@@ -111,6 +111,8 @@ public class ThirdpartyController(
     /// </short>
     /// <path>api/2.0/people/thirdparty/linkaccount</path>
     [Tags("People / Third-party accounts")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(405, "Error not allowed option")]
     [HttpPut("linkaccount")]
     public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
@@ -145,6 +147,9 @@ public class ThirdpartyController(
     /// <path>api/2.0/people/thirdparty/signup</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Third-party accounts")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(400, "Incorrect email")]
+    [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
     [AllowAnonymous]
     [HttpPost("signup")]
     public async Task SignupAccountAsync(SignupAccountRequestDto inDto)

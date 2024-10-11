@@ -103,6 +103,8 @@ public class SettingsController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [SwaggerResponse(401, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("settings/favorites")]
     public async Task<bool> DisplayFavorite(DisplayRequestDto inDto)
     {
@@ -118,6 +120,8 @@ public class SettingsController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [SwaggerResponse(401, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("displayRecent")]
     public async Task<bool> DisplayRecent(DisplayRequestDto inDto)
     {
@@ -133,6 +137,8 @@ public class SettingsController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [SwaggerResponse(401, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("settings/templates")]
     public async Task<bool> DisplayTemplates(DisplayRequestDto inDto)
     {        

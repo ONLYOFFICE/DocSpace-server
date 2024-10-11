@@ -42,6 +42,7 @@ public enum RoomType
 
     [SwaggerEnum(Description = "Public room")]
     PublicRoom = 6,
+
     [SwaggerEnum(Description = "Virtual data room")]
     VirtualDataRoom = 8
 }

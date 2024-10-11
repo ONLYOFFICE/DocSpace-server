@@ -104,6 +104,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <path>api/2.0/settings/customschemas</path>
     [Tags("Settings / Team templates")]
     [SwaggerResponse(200, "Custom team template with the following parameters", typeof(SchemaRequestsDto))]
+    [SwaggerResponse(400, "Please fill in all fields")]
     [HttpPut("")]
     public async Task<SchemaRequestsDto> SaveCustomNamingSettingsAsync(SchemaRequestsDto inDto)
     {

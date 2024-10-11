@@ -45,6 +45,7 @@ public class OperationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(403, "You don't have enough permission to download")]
     [AllowAnonymous]
     [HttpPut("bulkdownload")]
     public async IAsyncEnumerable<FileOperationDto> BulkDownload(DownloadRequestDto inDto)
@@ -68,6 +69,7 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(403, "You don't have enough permission to copy")]
     [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
@@ -87,6 +89,7 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(403, "You don't have enough permission to delete")]
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
@@ -165,6 +168,7 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(403, "You don't have enough permission to move")]
     [HttpPut("move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
@@ -182,6 +186,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/duplicate</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(403, "You don't have enough permission to duplicate")]
     [HttpPut("duplicate")]
     public async IAsyncEnumerable<FileOperationDto> DuplicateBatchItems(DuplicateRequestDto inDto)
     {
@@ -199,8 +204,9 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/checkdestfolder</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Result", typeof(CheckDestFolderDto))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpGet("checkdestfolder")]
-    public async Task<CheckDestFolderDto> MoveOrCopyDestFolderCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchSimpleRequestDto inDto)
+    public async Task<CheckDestFolderDto> MoveOrCopyDestFolderCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
         List<object> checkedFiles;
 
@@ -244,8 +250,9 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpGet("move")]
-    public async IAsyncEnumerable<FileEntryDto> MoveOrCopyBatchCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchSimpleRequestDto inDto)
+    public async IAsyncEnumerable<FileEntryDto> MoveOrCopyBatchCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
         List<object> checkedFiles;
         List<object> checkedFolders;

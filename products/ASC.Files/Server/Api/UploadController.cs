@@ -43,7 +43,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-    {
+{
     /// <summary>
     /// Creates a session to upload large files in multiple chunks to the folder with the ID specified in the request.
     /// </summary>
@@ -71,6 +71,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session", typeof(object))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("{folderId}/upload/create_session")]
     public async Task<object> CreateUploadSessionAsync(SessionRequestDto<T> inDto)
     {
@@ -95,6 +96,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Information about created session", typeof(object))]
+    [SwaggerResponse(403, "You don't have enough permission to edit the file")]
     [HttpPost("file/{fileId}/edit_session")]
     public async Task<object> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
     {
@@ -120,6 +122,8 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <path>api/2.0/files/{folderId}/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "Folder not found")]
     [HttpPost("{folderId}/insert", Order = 1)]
     public async Task<FileDto<T>> InsertFileAsync(InsertWithFileRequestDto<T> inDto)
     {
@@ -142,6 +146,8 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <path>api/2.0/files/{folderId}/upload</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(object))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "Folder not found")]
     [HttpPost("{folderId}/upload", Order = 1)]
     public async Task<object> UploadFileAsync(UploadWithFolderRequestDto<T> inDto)
     {
@@ -154,7 +160,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-    {
+{
     /// <summary>
     /// Inserts a file specified in the request to the "Common" section by single file uploading.
     /// </summary>
@@ -163,6 +169,8 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "Folder not found")]
     [HttpPost("@common/insert")]
     public async Task<FileDto<int>> InsertFileToCommonFromBodyAsync([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -176,6 +184,8 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <path>api/2.0/files/@my/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "Folder not found")]
     [HttpPost("@my/insert")]
     public async Task<FileDto<int>> InsertFileToMyFromBodyAsync([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -198,6 +208,8 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Uploaded file(s)", typeof(object))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "File not found")]
     [HttpPost("@common/upload")]
     public async Task<object> UploadFileToCommonAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
@@ -221,6 +233,8 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <path>api/2.0/files/@my/upload</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Uploaded file(s)", typeof(object))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "File not found")]
     [HttpPost("@my/upload")]
     public async Task<object> UploadFileToMyAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {

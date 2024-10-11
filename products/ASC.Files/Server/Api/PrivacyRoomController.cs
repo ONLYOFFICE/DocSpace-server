@@ -57,6 +57,7 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [SwaggerResponse(200, "List of encryption key pairs", typeof(EncryptionKeyPairDto))]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpGet("access/{fileId}")]
     public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(FileIdRequestDto<T> inDto)
     {
@@ -91,6 +92,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [SwaggerResponse(200, "Encryption key pair: private key, public key, user ID", typeof(EncryptionKeyPairDto))]
+    [SwaggerResponse(403, "You don't have enough permission to this operation")]
     [HttpGet("keys")]
     public async Task<EncryptionKeyPairDto> GetKeysAsync()
     {
@@ -129,6 +131,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [SwaggerResponse(200, "Boolean value: true - the key pair is set", typeof(object))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("keys")]
     public async Task<object> SetKeysAsync(PrivacyRoomRequestDto inDto)
     {
@@ -166,6 +169,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("")]
     public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomEnableRequestDto inDto)
     {

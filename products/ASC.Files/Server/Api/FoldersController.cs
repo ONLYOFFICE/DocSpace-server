@@ -60,6 +60,8 @@ public class FoldersControllerInternal(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of actions in the folder", typeof(HistoryDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("folder/{folderId:int}/log")]
     public IAsyncEnumerable<HistoryDto> GetHistoryAsync(FolderIdRequestDto<int> inDto)
     {
@@ -154,6 +156,8 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [AllowAnonymous]
     [HttpGet("{folderId}")]
     public async Task<FolderContentDto<T>> GetFolderAsync(GetFolderRequestDto<T> inDto)
@@ -209,6 +213,7 @@ public abstract class FoldersController<T>(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [HttpGet("{folderId}/subfolders")]
     public async IAsyncEnumerable<FileEntryDto> GetFoldersAsync(FolderIdRequestDto<T> inDto)
     {
@@ -227,6 +232,7 @@ public abstract class FoldersController<T>(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [HttpGet("{folderId}/news")]
     public async IAsyncEnumerable<FileEntryDto> GetNewItemsAsync(FolderIdRequestDto<T> inDto)
     {
@@ -245,6 +251,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to rename the folder")]
     [HttpPut("folder/{folderId}")]
     public async Task<FolderDto<T>> RenameFolderAsync(CreateFolderRequestDto<T> inDto)
     {        
@@ -275,6 +282,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{id}/link</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder security information", typeof(FileShareDto))]
+    [SwaggerResponse(404, "Not Found")]
     [AllowAnonymous]
     [HttpGet("folder/{id}/link")]
     public async Task<FileShareDto> GetFolderPrimaryExternalLinkAsync(FolderPrimaryIdRequestDto<T> inDto)
@@ -302,6 +310,8 @@ public class FoldersControllerCommon(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Common\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@common")]
     public async Task<FolderContentDto<int>> GetCommonFolderAsync(GetCommonFolderRequestDto inDto)
     {
@@ -317,6 +327,8 @@ public class FoldersControllerCommon(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Favorites\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@favorites")]
     public async Task<FolderContentDto<int>> GetFavoritesFolderAsync(GetCommonFolderRequestDto inDto)
     {
@@ -331,6 +343,8 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@my</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"My documents\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@my")]
     public async Task<FolderContentDto<int>> GetMyFolderAsync(GetMyTrashFolderRequestDto inDto)
     {
@@ -345,6 +359,8 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@privacy</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Private Room\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@privacy")]
     public async Task<FolderContentDto<int>> GetPrivacyFolderAsync(GetCommonFolderRequestDto inDto)
     {
@@ -365,6 +381,8 @@ public class FoldersControllerCommon(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"In projects\" section contents", typeof(FolderContentDto<string>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@projects")]
     public async Task<FolderContentDto<string>> GetProjectsFolderAsync(GetCommonFolderRequestDto inDto)
     {
@@ -380,6 +398,8 @@ public class FoldersControllerCommon(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Recent\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("recent")]
     public async Task<FolderContentDto<int>> GetRecentFolderAsync(GetRecentFolderRequestDto inDto)
     {
@@ -395,6 +415,8 @@ public class FoldersControllerCommon(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of section contents with the following parameters", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@root")]
     public async IAsyncEnumerable<FolderContentDto<int>> GetRootFoldersAsync(GetRootFolderRequestDto inDto)
     {
@@ -414,6 +436,8 @@ public class FoldersControllerCommon(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Shared with me\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@share")]
     public async Task<FolderContentDto<int>> GetShareFolderAsync(GetCommonFolderRequestDto inDto)
     {
@@ -429,6 +453,8 @@ public class FoldersControllerCommon(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Templates\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@templates")]
     public async Task<FolderContentDto<int>> GetTemplatesFolderAsync(GetCommonFolderRequestDto inDto)
     {
@@ -443,6 +469,8 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@trash</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Trash\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@trash")]
     public async Task<FolderContentDto<int>> GetTrashFolderAsync(GetMyTrashFolderRequestDto inDto)
     {

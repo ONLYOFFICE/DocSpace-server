@@ -121,6 +121,7 @@ public class LicenseController(ILoggerProvider option,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / License")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("trial")]
     public async Task<bool> ActivateTrialAsync()
     {
@@ -206,6 +207,9 @@ public class LicenseController(ILoggerProvider option,
     /// <path>api/2.0/settings/license</path>
     [Tags("Settings / License")]
     [SwaggerResponse(200, "License", typeof(object))]
+    [SwaggerResponse(400, "The uploaded file could not be found")]
+    [SwaggerResponse(403, "Portal Access")]
+    [SwaggerResponse(405, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]

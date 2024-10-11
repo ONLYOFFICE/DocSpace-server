@@ -52,6 +52,7 @@ public class SmtpSettingsController(
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("")]
     public async Task<SmtpSettingsDto> GetSmtpSettingsAsync()
     {
@@ -79,6 +80,7 @@ public class SmtpSettingsController(
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("")]
     public async Task<SmtpSettingsDto> SaveSmtpSettingsAsync(SmtpSettingsDto inDto)
     {
@@ -129,6 +131,7 @@ public class SmtpSettingsController(
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "Default SMTP settings", typeof(SmtpSettingsDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("")]
     public async Task<SmtpSettingsDto> ResetSmtpSettingsAsync()
     {
@@ -161,6 +164,7 @@ public class SmtpSettingsController(
     /// <path>api/2.0/smtpsettings/smtp/test</path>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP operation status", typeof(SmtpOperationStatusRequestsDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("test")]
     public async Task<SmtpOperationStatusRequestsDto> TestSmtpSettings()
     {
@@ -184,6 +188,7 @@ public class SmtpSettingsController(
     /// <path>api/2.0/smtpsettings/smtp/test/status</path>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP operation status", typeof(SmtpOperationStatusRequestsDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("test/status")]
     public async Task<SmtpOperationStatusRequestsDto> GetSmtpOperationStatus()
     {

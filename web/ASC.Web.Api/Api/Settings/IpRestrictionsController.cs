@@ -61,6 +61,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <collection>list</collection>
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "List of IP restrictions parameters", typeof(IpRestrictionBase))]
+    [SwaggerResponse(400, "Exception in IpRestrictions")]
     [HttpPut("")]
     public async Task<IEnumerable<IpRestrictionBase>> SaveIpRestrictionsAsync(IpRestrictionsBaseRequestsDto inDto)
     {

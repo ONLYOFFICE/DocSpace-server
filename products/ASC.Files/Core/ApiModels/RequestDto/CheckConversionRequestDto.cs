@@ -56,6 +56,9 @@ public class CheckConversionRequestDto<T>
     /// </summary>
     public string Password { get; set; }
     
+    /// <summary>
+    /// Output type
+    /// </summary>
     public string OutputType { get; set; }
 
     /// <summary>

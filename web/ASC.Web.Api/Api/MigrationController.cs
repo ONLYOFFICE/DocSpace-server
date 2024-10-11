@@ -42,6 +42,8 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/list</path>
     [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("list")]
     public async Task<string[]> List()
     {
@@ -54,6 +56,8 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/init/{migratorName}</path>
     [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("init/{migratorName}")]
     public async Task UploadAndInitAsync(MigratorNameRequestDto inDto)
     {
@@ -68,6 +72,7 @@ public class MigrationController(
     /// <path>api/2.0/migration/status</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok", typeof(MigrationStatusDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("status")]
     public async Task<MigrationStatusDto> Status()
     {
@@ -99,6 +104,8 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/cancel</path>
     [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("cancel")]
     public async Task CancelAsync()
     {
@@ -112,6 +119,8 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/clear</path>
     [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("clear")]
     public async Task ClearAsync()
     {
@@ -125,6 +134,8 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/migrate</path>
     [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("migrate")]
     public async Task MigrateAsync(MigrationApiInfo info)
     {
@@ -138,6 +149,8 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/logs</path>
     [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("logs")]
     public async Task LogsAsync()
     {
@@ -161,6 +174,8 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/finish</path>
     [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("finish")]
     public async Task FinishAsync(FinishDto inDto)
     {

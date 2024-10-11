@@ -133,6 +133,7 @@ public class SsoController(TenantManager tenantManager,
     /// <path>api/2.0/settings/ssov2</path>
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "SSO settings", typeof(SsoSettingsV2))]
+    [SwaggerResponse(400, "Settings could not be null")]
     [HttpPost("")]
     public async Task<SsoSettingsV2> SaveSsoSettingsV2Async(SsoSettingsRequestsDto inDto)
     {

@@ -88,15 +88,17 @@ public class MemberRequestDto : MemberBaseRequestDto
     /// Specifies if this is a guest or a user
     /// </summary>
     public bool? IsUser { get; set; }
-    
+
     /// <summary>
     /// First name
     /// </summary>
+    [StringLength(255)]
     public string FirstName { get; set; }
 
     /// <summary>
     /// Last name
     /// </summary>
+    [StringLength(255)]
     public string LastName { get; set; }
 
     /// <summary>
@@ -107,6 +109,7 @@ public class MemberRequestDto : MemberBaseRequestDto
     /// <summary>
     /// Title
     /// </summary>
+    [StringLength(255)]
     public string Title { get; set; }
 
     /// <summary>

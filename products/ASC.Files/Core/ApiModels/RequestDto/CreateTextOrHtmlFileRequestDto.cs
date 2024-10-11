@@ -35,6 +35,7 @@ public class CreateTextOrHtmlFile
     /// File title
     /// </summary>
     [Required]
+    [StringLength(165)]
     public string Title { get; set; }
 
     /// <summary>

@@ -153,20 +153,26 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             {
                 checkType = checkType.GetGenericArguments().FirstOrDefault();
             }
-            else
+            else if(checkType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
             {
                 checkType = checkType.GetInterfaces()
                     .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                     ?.GetGenericArguments()
                     .FirstOrDefault() ?? typeof(object);
             }
+            else
+            {
+                return result;
+            }
 
             var arraySchema = UpdateSchema(checkType, new OpenApiSchema());
+
             if (arraySchema?.Example != null)
             {
                 array.Add(arraySchema.Example);
                 result.Example = array;
             }
+
             if(arraySchema.OneOf != null)
             {
                 result.Items = new OpenApiSchema { AnyOf = arraySchema.OneOf };

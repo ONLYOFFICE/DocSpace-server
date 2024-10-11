@@ -49,7 +49,8 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Link to the form", typeof(object))] 
+    [SwaggerResponse(200, "Link to the form", typeof(object))]
+    [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<object> CheckFillFormDraftAsync(CheckFillFormDraftRequestDto<T> inDto)
