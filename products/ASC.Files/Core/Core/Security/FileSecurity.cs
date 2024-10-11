@@ -471,11 +471,15 @@ public class FileSecurity(IDaoFactory daoFactory,
     private async Task<IEnumerable<Guid>> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action, bool includeLinks = false)
     {
         var shares = await GetSharesAsync(entry);
-
+        
         if (!includeLinks)
         {
             shares = shares.Where(r => !r.IsLink);
         }
+        
+        var linksUsersTask = includeLinks ? 
+            GetLinksUsersAsync(shares.Where(r => r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)) 
+            : Task.FromResult(Enumerable.Empty<Guid>());
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var copyShares = shares.GroupBy(k => k.Subject).ToDictionary(k => k.Key);
@@ -654,7 +658,41 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
+        var linkUsers = await linksUsersTask;
+        if (linkUsers.Any())
+        {
+            result.AddRange(linkUsers);
+        }
+
         return result;
+
+        async Task<IEnumerable<Guid>> GetLinksUsersAsync(IEnumerable<FileShareRecord<T>> linksRecords)
+        {
+            if (!linksRecords.Any())
+            {
+                return [];
+            }
+            
+            var tagDao = daoFactory.GetTagDao<T>();
+            var users = new List<Guid>();
+
+            foreach (var record in linksRecords)
+            {
+                var entryId = record.EntryId;
+                var entryType = record.EntryType;
+
+                if (entry.FileEntryType == FileEntryType.Folder)
+                {
+                    entryId = record.ParentId;
+                }
+
+                users.AddRange(await tagDao.GetTagsAsync(entryId, entryType, TagType.RecentByLink, null, record.Subject.ToString())
+                    .Select(x => x.Owner)
+                    .ToListAsync());
+            }
+
+            return users;
+        }
     }
 
     private async ValueTask<IAsyncEnumerable<Guid>> ToGuidAsync<T>(FileShareRecord<T> x)
