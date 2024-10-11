@@ -689,7 +689,7 @@ public class UserController(
 
         if (isInvite)
         {
-            return await employeeFullDtoHelper.GetSimple(user);
+            return await employeeFullDtoHelper.GetSimple(user, false);
         }
         
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -736,7 +736,7 @@ public class UserController(
 
         if (isInvite)
         {
-            return await employeeFullDtoHelper.GetSimple(user);
+            return await employeeFullDtoHelper.GetSimple(user, false);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
