@@ -71,6 +71,7 @@ public class UpdateRoomRequest
     /// Color
     /// </summary>
     [StringLength(6)]
+    public IEnumerable<string> Tags { get; set; }
     public string Color { get; set; }
 
     /// <summary>

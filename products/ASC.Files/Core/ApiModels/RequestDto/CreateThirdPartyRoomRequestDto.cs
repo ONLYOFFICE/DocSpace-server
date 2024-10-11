@@ -70,6 +70,11 @@ public class CreateThirdPartyRoom
     /// Cover
     /// </summary>
     public string Cover { get; set; }
+
+    /// <summary>
+    /// Tags
+    /// </summary>
+    public IEnumerable<string> Tags { get; set; }
 }
 
 

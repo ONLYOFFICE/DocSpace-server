@@ -27,8 +27,8 @@
 
 package com.asc.authorization.application.mapper;
 
-import com.asc.authorization.application.configuration.security.AscOAuth2RegisteredClientConfiguration;
-import com.asc.authorization.application.security.oauth.AscAuthorizationGrantType;
+import com.asc.authorization.application.configuration.security.RegisteredClientConfiguration;
+import com.asc.authorization.application.security.grant.ExtendedAuthorizationGrantType;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.data.client.entity.ClientEntity;
 import com.asc.common.data.scope.entity.ScopeEntity;
@@ -50,7 +50,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ClientMapper {
 
-  private final AscOAuth2RegisteredClientConfiguration configuration;
+  private final RegisteredClientConfiguration configuration;
 
   /**
    * Converts a {@link ClientEntity} to a {@link RegisteredClient}.
@@ -156,7 +156,7 @@ public class ClientMapper {
                 methods.add(new ClientAuthenticationMethod(method));
               }
             })
-        .authorizationGrantType(AscAuthorizationGrantType.PERSONAL_ACCESS_TOKEN)
+        .authorizationGrantType(ExtendedAuthorizationGrantType.PERSONAL_ACCESS_TOKEN)
         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
         .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
         .redirectUris(uris -> uris.addAll(clientResponse.getRedirectUris()))

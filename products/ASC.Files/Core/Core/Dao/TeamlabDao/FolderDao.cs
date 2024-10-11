@@ -253,7 +253,7 @@ internal class FolderDao(
     }
 
     public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
-        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool containingMyFiles = false)
+        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         if (CheckInvalidFilter(filterType) || count == 0)
         {
@@ -266,11 +266,33 @@ internal class FolderDao(
 
         if (containingMyFiles)
         {
-            q = q.Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
-            .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
-            .Select(r => r.folder);
-        }
+            switch (parentType)
+            {
+                case FolderType.FillingFormsRoom:
+                    var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
+                    var foldersContainingMyFiles = filesDbContext.Folders
+                       .Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
+                       .Where(r => r.folder.TenantId == tenantId)
+                       .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
+                       .Select(r => r.folder.Id);
+
+                    var parentFolderIds = filesDbContext.Folders
+                        .Join(filesDbContext.Tree, r => r.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
+                        .Where(r => r.folder.TenantId == tenantId)
+                        .Where(r => foldersContainingMyFiles.Contains(r.tree.FolderId))
+                        .Select(r => r.folder.Id);
+
+                    q = q.Where(r => parentFolderIds.Contains(r.Id) || r.FolderType == FolderType.DEFAULT);
+                    break;
+                default:
+                    q = q.Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
+                       .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
+                       .Select(r => r.folder);
+                    break;
+
+            }
+        }
         q = q.Skip(offset);
 
         if (count > 0)
@@ -933,7 +955,7 @@ internal class FolderDao(
         return folder.Id;
     }
 
-    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark)
+    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -949,6 +971,7 @@ internal class FolderDao(
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         toUpdate.Settings.Indexing = indexing;
         toUpdate.Settings.DenyDownload = denyDownload;
+        
         if (lifeTime != null)
         {
             if (lifeTime.Enabled.HasValue && !lifeTime.Enabled.Value)
@@ -962,6 +985,22 @@ internal class FolderDao(
         }
 
         toUpdate.Settings.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermark);
+
+        if (color != null)
+        {
+            if (RoomLogoManager.ColorChanged(color, folder))
+            {
+                toUpdate.Settings.Color = color;
+            }
+        }
+
+        if (cover != null)
+        {
+            if (await RoomLogoManager.CoverChanged(cover, folder))
+            {
+                toUpdate.Settings.Cover = cover;
+            }
+        }
 
         filesDbContext.Update(toUpdate);
 
@@ -1098,6 +1137,19 @@ internal class FolderDao(
         else
         {
             await filesDbContext.ReassignFoldersPartiallyAsync(tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
+        }
+    }
+    
+    public async Task ReassignRoomFoldersAsync(Guid oldOwnerId)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var items = await filesDbContext.GetRoomsFoldersReassignInfoAsync(tenantId, oldOwnerId).ToListAsync();
+
+        foreach (var group in items.GroupBy(x => x.RoomOwnerId))
+        {
+            await filesDbContext.ReassignSpecificFoldersAsync(tenantId, group.Select(f => f.FolderId), group.Key);
         }
     }
 
@@ -1841,6 +1893,12 @@ public class OriginData
     public DbFolder OriginRoom { get; init; }
     public DbFolder OriginFolder { get; init; }
     public HashSet<KeyValuePair<string, FileEntryType>> Entries { get; init; }
+}
+
+public record FolderReassignInfo
+{
+    public int FolderId { get; init; }
+    public Guid RoomOwnerId { get; init; }
 }
 
 [Scope(typeof(ICacheFolderDao<int>))]

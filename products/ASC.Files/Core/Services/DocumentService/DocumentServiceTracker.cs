@@ -190,9 +190,14 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         return callbackUrl;
     }
 
-    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack)
+    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack, string token = null)
     {
         var callbackUrl = await GetCallbackUrlAsync(fileId);
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.ShareKey, token);
+        }
 
         return await documentServiceConnector.CommandAsync(CommandMethod.Info, docKeyForTrack, fileId, callbackUrl);
     }
@@ -208,7 +213,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 break;
 
             case TrackerStatus.Editing:
-                await ProcessEditAsync(fileId, fileData, !string.IsNullOrEmpty(fillingSessionId) );
+                await ProcessEditAsync(fileId, fileData);
                 break;
 
             case TrackerStatus.MustSave:
@@ -250,7 +255,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         return null;
     }
 
-    private async Task ProcessEditAsync<T>(T fileId, TrackerData fileData, bool isFillingSession)
+    private async Task ProcessEditAsync<T>(T fileId, TrackerData fileData)
     {
         var users = await fileTracker.GetEditingByAsync(fileId);
         var usersDrop = new List<string>();
@@ -315,7 +320,16 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
             }
 
-            await filesMessageService.SendAsync(isFillingSession ? MessageAction.FormOpenedForFilling : MessageAction.FileOpenedForChange, file, file.Title);
+            var parentFolder = file.IsForm ? await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId) : null;
+            if (parentFolder != null && parentFolder.FolderType == FolderType.FormFillingFolderInProgress)
+            {
+                var user = await userManager.GetUsersAsync(userId);
+                await filesMessageService.SendAsync(MessageAction.FormOpenedForFilling, file, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), file.Title);
+            }
+            else
+            {
+                await filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
+            }
 
             securityContext.Logout();
         }
@@ -475,7 +489,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             }
         }
         
-        await filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
+        await filesMessageService.SendAsync(forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
 
         if (!forceSave)
         {

@@ -212,7 +212,7 @@ public class PaymentController(UserManager userManager,
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaAsync(PaymentInformationRequestDto inDto)
     {
-        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }

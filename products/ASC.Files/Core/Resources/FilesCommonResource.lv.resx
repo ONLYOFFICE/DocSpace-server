@@ -287,9 +287,6 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redaktors</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Telpas administrators</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Lietotājs</value>
   </data>
@@ -355,9 +352,6 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Jūs nevarat piespraust telpu</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Telpas administrators</value>
   </data>
   <data name="AceStatusEnum_Collaborator" xml:space="preserve">
     <value>Līdzstrādnieks</value>
@@ -467,12 +461,6 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="Date" xml:space="preserve">
     <value>Datums</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Prasmīgs lietotājs</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Prasmīgs lietotājs</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Lietotājs</value>
   </data>
@@ -493,9 +481,6 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   </data>
   <data name="LinkToForm" xml:space="preserve">
     <value>Saite uz veidlapu</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Atvērt formu</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Veidlapas numurs</value>

@@ -118,8 +118,8 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
 
             object used = null;
             var currentUserId = authContext.CurrentAccount.ID;
-            var isUsedAvailable = !await userManager.IsUserAsync(currentUserId) && 
-                                  (!await userManager.IsCollaboratorAsync(currentUserId) || feature.Name == MaxTotalSizeFeature.MaxTotalSizeFeatureName);
+            var isUsedAvailable = !await userManager.IsGuestAsync(currentUserId) && 
+                                  (!await userManager.IsUserAsync(currentUserId) || feature.Name == MaxTotalSizeFeature.MaxTotalSizeFeatureName);
 
             if (feature is TenantQuotaFeatureSize size)
             {

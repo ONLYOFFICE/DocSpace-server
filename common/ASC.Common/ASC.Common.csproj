@@ -37,13 +37,13 @@
     <PackageReference Include="DistributedLock.Redis" Version="1.0.3" />
     <PackageReference Include="DistributedLock.ZooKeeper" Version="1.0.0" />
     <PackageReference Include="JWT" Version="10.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="8.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="8.0.10" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.8" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.10" />
     <PackageReference Include="EtaEmre.NetEscapades.EnumGenerators" Version="1.0.0-beta07" />
 <!-- <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.9.4">
       <PrivateAssets>all</PrivateAssets>
@@ -56,9 +56,9 @@
     <PackageReference Include="NLog" Version="5.3.4" />
     <PackageReference Include="NLog.Targets.Syslog" Version="7.0.0" />
     <PackageReference Include="NVelocity" Version="1.2.0" />
-    <PackageReference Include="Polly" Version="8.4.1" />
+    <PackageReference Include="Polly" Version="8.4.2" />
     <PackageReference Include="protobuf-net" Version="3.2.30" />
-    <PackageReference Include="RabbitMQ.Client" Version="7.0.0-rc.11" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.0.0-rc.12" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="10.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.1" />

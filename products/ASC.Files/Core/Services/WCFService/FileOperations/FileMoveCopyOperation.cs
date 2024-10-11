@@ -990,6 +990,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties<TTo> { FormFilling = new FormFillingProperties<TTo>()};
                                     properties.FormFilling.StartFilling = true;
                                     properties.FormFilling.CollectFillForm = true;
+                                    properties.FormFilling.OriginalFormId = newFile.Id;
+
                                     await fileDao.SaveProperties(newFile.Id, properties);
                                     await socketManager.CreateFormAsync(newFile, securityContext.CurrentAccount.ID, numberRoomMembers <= 1);
                                 }

@@ -26,7 +26,6 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
 /// 
 /// </summary>
@@ -55,4 +54,22 @@ public class UsersWithRoomSharedRequestDto<T>
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
+
+    /// <summary>
+    /// Invited by me
+    /// </summary>
+    [FromQuery(Name = "invitedByMe")]
+    public bool? InvitedByMe { get; set; }
+
+    /// <summary>
+    /// Inviter Id
+    /// </summary>
+    [FromQuery(Name = "inviterId")]
+    public Guid? InviterId { get; set; }
+
+    /// <summary>
+    /// Area
+    /// </summary>
+    [FromQuery(Name = "area")]
+    public Area Area { get; set; } = Area.All;
 }

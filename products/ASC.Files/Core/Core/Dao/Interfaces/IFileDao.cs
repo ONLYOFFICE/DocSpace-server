@@ -116,12 +116,14 @@ public interface IFileDao<T>
     /// <param name="count"></param>
     /// <param name="roomId"></param>
     /// <param name="withShared"></param>
+    /// <param name="containingMyFiles"></param>
+    /// <param name="parentType"></param>
     /// <returns>list of files</returns>
     /// <remarks>
     ///    Return only the latest versions of files of a folder
     /// </remarks>
     IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool withShared = false);
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT);
 
     /// <summary>
     /// Get stream of file

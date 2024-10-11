@@ -86,7 +86,7 @@ public class ReassignController(
         if (userManager.IsSystemUser(fromUser.Id) || 
             fromUser.IsOwner(tenant) || 
             fromUser.IsMe(authContext) || 
-            await userManager.IsUserAsync(toUser) || 
+            await userManager.IsGuestAsync(toUser) || 
             fromUser.Status != EmployeeStatus.Terminated || 
             ((await userManager.IsDocSpaceAdminAsync(inDto.FromUserId) || await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, inDto.FromUserId)) && tenant.OwnerId != authContext.CurrentAccount.ID))
         {

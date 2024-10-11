@@ -368,7 +368,7 @@ public class GroupController(
     private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager)
     {
         var user = await userManager.GetUsersAsync(userId);
-        if (userId == Guid.Empty || !userManager.UserExists(user) || user.Status == EmployeeStatus.Terminated)
+        if (userId == Guid.Empty || !userManager.UserExists(user) || user.Status == EmployeeStatus.Terminated || await userManager.IsGuestAsync(userId))
         {
             return;
         }

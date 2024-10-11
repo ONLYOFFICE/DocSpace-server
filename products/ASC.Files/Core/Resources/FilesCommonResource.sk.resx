@@ -290,9 +290,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redaktor</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrátor miestnosti</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Používateľ</value>
   </data>
@@ -367,9 +364,6 @@
   </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Vlastný filter</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrátor miestnosti</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Hľadať v obsahu dokumentov</value>
@@ -467,12 +461,6 @@
   <data name="Date" xml:space="preserve">
     <value>Dátum</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Pokročilý používateľ</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Pokročilý používateľ</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Používateľ</value>
   </data>
@@ -493,9 +481,6 @@
   </data>
   <data name="LinkToForm" xml:space="preserve">
     <value>Odkaz na formulár</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Otvoriť formulár</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Číslo formulára</value>

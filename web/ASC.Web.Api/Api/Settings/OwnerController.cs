@@ -65,7 +65,7 @@ public class OwnerController(
         var owner = await userManager.GetUsersAsync(curTenant.OwnerId);
         var newOwner = await userManager.GetUsersAsync(inDto.OwnerId);
 
-        if (await userManager.IsUserAsync(newOwner))
+        if (await userManager.IsGuestAsync(newOwner))
         {
             throw new SecurityException("Collaborator can not be an owner");
         }
@@ -116,7 +116,7 @@ public class OwnerController(
             throw new Exception(Resource.ErrorUserNotFound);
         }
 
-        if (await userManager.IsUserInGroupAsync(newOwner.Id, Constants.GroupUser.ID))
+        if (await userManager.IsUserInGroupAsync(newOwner.Id, Constants.GroupGuest.ID))
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }

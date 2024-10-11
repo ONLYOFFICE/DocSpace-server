@@ -103,6 +103,10 @@ public class SettingsDto
     /// </summary>
     public bool Standalone { get; set; }
 
+    /// <summary>Specifies if this is a AMI instance or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsAmi { get; set; }
+
     /// <summary>
     /// Base domain
     /// </summary>

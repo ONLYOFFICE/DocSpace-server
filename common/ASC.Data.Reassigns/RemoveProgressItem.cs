@@ -40,6 +40,8 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
     /// <summary>The user whose data is deleted</summary>
     /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
     public UserInfo User { get; private set; }
+    
+    public bool IsGuest { get; private set; }
 
     //private readonly IFileStorageService _docService;
     //private readonly MailGarbageEngine _mailEraser;
@@ -53,7 +55,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
     //_docService = Web.Files.Classes.Global.FileStorageService;
     //_mailEraser = new MailGarbageEngine();
 
-    public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile)
+    public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile, bool isGuest)
     {
         _httpHeaders = httpHeaders;
         _tenantId = tenantId;
@@ -67,6 +69,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
         Exception = null;
         Percentage = 0;
         IsCompleted = false;
+        IsGuest = isGuest;
     }
 
     protected override async Task DoJob()
@@ -99,6 +102,19 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
             await PublishChanges();
 
             await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
+
+            if (IsGuest)
+            {
+                Percentage = 50;
+                await PublishChanges();
+
+                await fileStorageService.ReassignRoomsFilesAsync(FromUser);
+                
+                Percentage = 70;
+                await PublishChanges();
+                
+                await fileStorageService.ReassignRoomsFoldersAsync(FromUser);
+            }
 
             Percentage = 95;
             await PublishChanges();

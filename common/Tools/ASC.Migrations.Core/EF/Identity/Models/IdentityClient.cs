@@ -39,6 +39,8 @@ public partial class IdentityClient
 
     public string? ModifiedBy { get; set; }
 
+    public int Version { get; set; }
+
     public virtual ICollection<IdentityAuthorization> IdentityAuthorizations { get; set; } = new List<IdentityAuthorization>();
 
     public virtual ICollection<IdentityConsent> IdentityConsents { get; set; } = new List<IdentityConsent>();

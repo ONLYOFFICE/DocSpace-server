@@ -346,6 +346,6 @@ public class ThirdpartyController(
     
     private async Task<bool> CheckAccessAsync()
     {
-        return !await userManager.IsUserAsync(securityContext.CurrentAccount.ID) && await filesSettingsHelper.GetEnableThirdParty();
+        return !await userManager.IsGuestAsync(securityContext.CurrentAccount.ID) && await filesSettingsHelper.GetEnableThirdParty();
     }
 }
