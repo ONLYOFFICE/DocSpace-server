@@ -759,7 +759,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <httpMethod>GET</httpMethod>
     [HttpGet("rooms")]
     public async Task<FolderContentDto<int>> GetRoomsFolderAsync(
-        RoomType? type,
+        [FromQuery] IEnumerable<RoomType> type,
         string subjectId,
         bool? searchInContent,
         bool? withSubfolders,
@@ -776,15 +776,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             ? await globalFolderHelper.GetFolderVirtualRooms()
             : await globalFolderHelper.GetFolderArchive();
 
-        var filter = type switch
-        {
-            RoomType.FillingFormsRoom => FilterType.FillingFormsRooms,
-            RoomType.EditingRoom => FilterType.EditingRooms,
-            RoomType.CustomRoom => FilterType.CustomRooms,
-            RoomType.PublicRoom => FilterType.PublicRooms,
-            RoomType.VirtualDataRoom => FilterType.VirtualDataRooms,
-            _ => FilterType.None
-        };
+        var filter = RoomTypeExtensions.MapToFilterType(type);
 
         var tagNames = !string.IsNullOrEmpty(tags) 
             ? JsonSerializer.Deserialize<IEnumerable<string>>(tags) 
@@ -800,9 +792,27 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var count = Convert.ToInt32(apiContext.Count);
         var filterValue = apiContext.FilterValue;
 
-        var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue,
-            [], searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false, 
-            provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner, quotaFilter: quotaFilter ?? QuotaFilter.All, storageFilter: storageFilter ?? StorageFilter.None);
+        var content = await fileStorageService.GetFolderItemsAsync(
+            parentId,
+            startIndex,
+            count,
+            filter,
+            false,
+            subjectId,
+            filterValue,
+            [],
+            searchInContent ?? false,
+            withSubfolders ?? false,
+            orderBy,
+            searchArea ?? SearchArea.Active,
+            default,
+            withoutTags ?? false,
+            tagNames,
+            excludeSubject ?? false,
+            provider ?? ProviderFilter.None,
+            subjectFilter ?? SubjectFilter.Owner,
+            quotaFilter: quotaFilter ?? QuotaFilter.All,
+            storageFilter: storageFilter ?? StorageFilter.None);
 
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
 
