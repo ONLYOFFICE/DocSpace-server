@@ -282,12 +282,7 @@ internal class FileDao(
                 case FolderType.InProcessFormFolder:
                 case FolderType.ReadyFormFolder:
                     var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-                    var systemfolders = new HashSet<FolderType> {
-                        FolderType.FormFillingFolderDone,
-                        FolderType.FormFillingFolderInProgress,
-                        FolderType.InProcessFormFolder,
-                        FolderType.ReadyFormFolder
-                    };
+
                     var folderIds = filesDbContext.Folders
                         .Join(filesDbContext.Tree, r => r.Id, b => b.FolderId, (folder, tree) => new { folder, tree })
                         .Where(r => r.folder.TenantId == tenantId)
@@ -295,7 +290,7 @@ internal class FileDao(
                         .Select(r => new
                         {
                             r.folder.Id,
-                            IsSystemFolder = systemfolders.Contains(r.folder.FolderType)
+                            IsSystemFolder = DocSpaceHelper.FormsFillingSystemFolders.Contains(r.folder.FolderType)
                         });
 
                     var roomSystemFolderIds = folderIds
