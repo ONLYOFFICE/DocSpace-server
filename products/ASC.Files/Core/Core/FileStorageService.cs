@@ -147,7 +147,7 @@ public class FileStorageService //: IFileStorageService
                     parent;
             }
 
-            (entries, _) = await entryManager.GetEntriesAsync(parent, parentRoom, 0, -1, FilterType.FoldersOnly, false, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
+            (entries, _) = await entryManager.GetEntriesAsync(parent, parentRoom, 0, -1, [FilterType.FoldersOnly], false, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
         }
         catch (Exception e)
         {
@@ -161,7 +161,7 @@ public class FileStorageService //: IFileStorageService
         T parentId,
         int from,
         int count,
-        FilterType filterType,
+        IEnumerable<FilterType> filterTypes,
         bool subjectGroup,
         string subject,
         string searchText,
@@ -225,16 +225,12 @@ public class FileStorageService //: IFileStorageService
 
             throw GenerateException(e);
         }
-        
-        if (!await fileSecurity.CanReadAsync(parent))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
-        }
 
         if (parent.RootFolderType == FolderType.TRASH && !Equals(parent.Id, await globalFolderHelper.FolderTrashAsync))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
+        
         if (parent.FolderType is FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress)
         {
             if (parent.ShareRecord is { Share: FileShare.FillForms })
@@ -242,6 +238,7 @@ public class FileStorageService //: IFileStorageService
                 subjectId = authContext.CurrentAccount.ID;
             }
         }
+        
         if (orderBy != null)
         {
             await filesSettingsHelper.SetDefaultOrder(orderBy);
@@ -250,6 +247,7 @@ public class FileStorageService //: IFileStorageService
         {
             orderBy = await filesSettingsHelper.GetDefaultOrder();
         }
+        
         if (Equals(parent.Id, await globalFolderHelper.FolderShareAsync) && orderBy.SortedBy == SortedByType.DateAndTime)
         {
             orderBy.SortedBy = SortedByType.New;
@@ -259,10 +257,32 @@ public class FileStorageService //: IFileStorageService
 
         int total;
         IEnumerable<FileEntry> entries;
+        
         try
         {
-            (entries, total) = await entryManager.GetEntriesAsync(parent, parentRoom, from, count, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders, orderBy, roomId, searchArea,
-                withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption, quotaFilter, storageFilter);
+            (entries, total) = await entryManager.GetEntriesAsync(
+                parent,
+                parentRoom,
+                from,
+                count,
+                filterTypes,
+                subjectGroup,
+                subjectId,
+                searchText,
+                extension,
+                searchInContent,
+                withSubfolders,
+                orderBy,
+                roomId,
+                searchArea,
+                withoutTags,
+                tagNames,
+                excludeSubject,
+                provider,
+                subjectFilter,
+                applyFilterOption,
+                quotaFilter,
+                storageFilter);
         }
         catch (Exception e)
         {
@@ -296,6 +316,7 @@ public class FileStorageService //: IFileStorageService
             parent.FolderType == FolderType.SHARE ||
             parent.RootFolderType == FolderType.Privacy ||
             await shareableTask;
+        
         entries = entries.ToAsyncEnumerable().WhereAwait(async x =>
         {
             if (x.FileEntryType == FileEntryType.Folder)
@@ -348,6 +369,7 @@ public class FileStorageService //: IFileStorageService
             New = await newTask,
             ParentRoom = parentRoom
         };
+        
         return result;
     }
 
