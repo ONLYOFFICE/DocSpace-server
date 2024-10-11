@@ -225,6 +225,11 @@ public class FileStorageService //: IFileStorageService
 
             throw GenerateException(e);
         }
+        
+        if (!await fileSecurity.CanReadAsync(parent))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
 
         if (parent.RootFolderType == FolderType.TRASH && !Equals(parent.Id, await globalFolderHelper.FolderTrashAsync))
         {
