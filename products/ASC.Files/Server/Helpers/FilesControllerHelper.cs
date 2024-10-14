@@ -188,6 +188,11 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return null;
     }
 
+    public async Task<bool> IsProtectedFileAsync<T>(T fileId)
+    {
+        return await _fileStorageService.IsProtectedFileAsync(fileId);
+    }
+
     public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
     {
         await foreach (var f in _fileStorageService.GetEditHistoryAsync(fileId))

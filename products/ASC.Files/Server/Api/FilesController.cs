@@ -276,6 +276,12 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
     }
 
+    [HttpGet("file/{fileId}/isprotected")]
+    public async Task<bool> IsProtectedFile(T fileId)
+    {
+        return await filesControllerHelper.IsProtectedFileAsync(fileId);
+    }
+
     /// <summary>
     /// Returns a URL to the changes of a file version specified in the request.
     /// </summary>

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using PdfSharp.Pdf.IO;
+
 namespace ASC.Web.Files.Services.WCFService;
 
 [Scope]
@@ -1634,6 +1636,33 @@ public class FileStorageService //: IFileStorageService
         await socketManager.UpdateFileAsync(file);
 
         return file;
+    }
+
+    public async Task<bool> IsProtectedFileAsync<T>(T fileId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+        var stream = await fileDao.GetFileStreamAsync(file);
+        if (file.ConvertedExtension.Equals(".pdf")) 
+        {
+            try
+            {
+                var pdfDoc = PdfReader.Open(stream);
+                return false;
+            }
+            catch (PdfReaderException)
+            {
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        else
+        {
+            return IsPasswordProtected(stream);
+        }
     }
 
     public async IAsyncEnumerable<EditHistory> GetEditHistoryAsync<T>(T fileId)
@@ -4018,6 +4047,176 @@ public class FileStorageService //: IFileStorageService
         }
 
         return (await fileSharing.GetPureSharesAsync(entry, [linkId]).FirstOrDefaultAsync());
+    }
+
+    private bool IsPasswordProtected(Stream stream)
+    {
+        if (stream.Length < 4096)
+        {
+            return false;
+        }
+
+        stream.Seek(0, SeekOrigin.Begin);
+        var compObjHeader = new byte[0x20];
+        ReadFromStream(stream, compObjHeader);
+
+        if (compObjHeader[0] == 'P' && compObjHeader[1] == 'K')
+        {
+            return false;
+        }
+
+        if (compObjHeader[0] != 0xD0 || compObjHeader[1] != 0xCF)
+        {
+            return false;
+        }
+
+        var sectionSizePower = compObjHeader[0x1E];
+        if (sectionSizePower < 8 || sectionSizePower > 16)
+        {
+            return false;
+        }
+        var sectionSize = 2 << (sectionSizePower - 1);
+
+        const int defaultScanLength = 32768;
+        var scanLength = Math.Min(defaultScanLength, stream.Length);
+
+        stream.Seek(0, SeekOrigin.Begin);
+        var header = new byte[scanLength];
+        ReadFromStream(stream, header);
+
+        if (ScanForPassword(stream, header, sectionSize))
+        {
+            return true;
+        }
+
+        stream.Seek(-scanLength, SeekOrigin.End);
+        var footer = new byte[scanLength];
+        ReadFromStream(stream, footer);
+
+        return ScanForPassword(stream, footer, sectionSize);
+    }
+
+    private void ReadFromStream(Stream stream, byte[] buffer)
+    {
+        int bytesRead, count = buffer.Length;
+        while (count > 0 && (bytesRead = stream.Read(buffer, 0, count)) > 0)
+        {
+            count -= bytesRead;
+        }
+        if (count > 0)
+        {
+            throw new EndOfStreamException();
+        }
+    }
+
+    private bool ScanForPassword(Stream stream, byte[] buffer, int sectionSize)
+    {
+        const string afterNamePadding = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+
+        try
+        {
+            var bufferString = Encoding.ASCII.GetString(buffer, 0, buffer.Length);
+
+            const string encryptedPackageName = "E\0n\0c\0r\0y\0p\0t\0e\0d\0P\0a\0c\0k\0a\0g\0e" + afterNamePadding;
+            const string encryptedSummaryName = "E\0n\0c\0r\0y\0p\0t\0e\0d\0S\0u\0m\0m\0a\0r\0y" + afterNamePadding;
+            if (bufferString.Contains(encryptedPackageName) ||
+                bufferString.Contains(encryptedSummaryName))
+            {
+                return true;
+            }
+
+            const int coBaseOffset = 0x200;
+            const int sectionIdOffset = 0x74;
+
+            const string wordDocumentName = "W\0o\0r\0d\0D\0o\0c\0u\0m\0e\0n\0t" + afterNamePadding;
+            var headerOffset = bufferString.IndexOf(wordDocumentName, StringComparison.InvariantCulture);
+            int sectionId;
+            if (headerOffset >= 0)
+            {
+                sectionId = BitConverter.ToInt32(buffer, headerOffset + sectionIdOffset);
+                var sectionOffset = coBaseOffset + sectionId * sectionSize;
+                const int fibScanSize = 0x10;
+                if (sectionOffset < 0 || sectionOffset + fibScanSize > stream.Length)
+                {
+                    return false;
+                }
+                var fibHeader = new byte[fibScanSize];
+                stream.Seek(sectionOffset, SeekOrigin.Begin);
+                ReadFromStream(stream, fibHeader);
+                var properties = BitConverter.ToInt16(fibHeader, 0x0A);
+                const short fEncryptedBit = 0x0100;
+                return (properties & fEncryptedBit) == fEncryptedBit;
+            }
+
+            const string workbookName = "W\0o\0r\0k\0b\0o\0o\0k" + afterNamePadding;
+            headerOffset = bufferString.IndexOf(workbookName, StringComparison.InvariantCulture);
+            if (headerOffset >= 0)
+            {
+                sectionId = BitConverter.ToInt32(buffer, headerOffset + sectionIdOffset);
+                var sectionOffset = coBaseOffset + sectionId * sectionSize;
+                const int streamScanSize = 0x100;
+                if (sectionOffset < 0 || sectionOffset + streamScanSize > stream.Length)
+                {
+                    return false;
+                }
+                var workbookStream = new byte[streamScanSize];
+                stream.Seek(sectionOffset, SeekOrigin.Begin);
+                ReadFromStream(stream, workbookStream);
+                var record = BitConverter.ToInt16(workbookStream, 0);
+                var recordSize = BitConverter.ToInt16(workbookStream, sizeof(short));
+                const short bofMagic = 0x0809;
+                const short eofMagic = 0x000A;
+                const short filePassMagic = 0x002F;
+                if (record != bofMagic)
+                {
+                    return false;
+                }
+                var offset = sizeof(short) * 2 + recordSize;
+                var recordsLeft = 16;
+                do
+                {
+                    record = BitConverter.ToInt16(workbookStream, offset);
+                    if (record == filePassMagic)
+                    {
+                        return true;
+                    }
+                    recordSize = BitConverter.ToInt16(workbookStream, sizeof(short) + offset);
+                    offset += sizeof(short) * 2 + recordSize;
+                    recordsLeft--;
+                } 
+                while (record != eofMagic && recordsLeft > 0);
+            }
+
+            const string currentUserName = "C\0u\0r\0r\0e\0n\0t\0 \0U\0s\0e\0r" + afterNamePadding;
+            headerOffset = bufferString.IndexOf(currentUserName, StringComparison.InvariantCulture);
+            if (headerOffset >= 0)
+            {
+                sectionId = BitConverter.ToInt32(buffer, headerOffset + sectionIdOffset);
+                var sectionOffset = coBaseOffset + sectionId * sectionSize;
+                const int userAtomScanSize = 0x10;
+                if (sectionOffset < 0 || sectionOffset + userAtomScanSize > stream.Length)
+                {
+                    return false;
+                }
+                var userAtom = new byte[userAtomScanSize];
+                stream.Seek(sectionOffset, SeekOrigin.Begin);
+                ReadFromStream(stream, userAtom);
+                const int headerTokenOffset = 0x0C;
+                var headerToken = BitConverter.ToUInt32(userAtom, headerTokenOffset);
+                const uint encryptedToken = 0xF3D1C4DF;
+                return headerToken == encryptedToken;
+            }
+        }
+        catch (Exception ex)
+        {
+            if (ex is ArgumentException)
+            {
+                return false;
+            }
+            throw;
+        }
+
+        return false;
     }
 
     private async Task<ProcessedItem<T>> SetAceLinkAsync<T>(FileEntry<T> entry, SubjectType subjectType, Guid linkId, FileShare share, FileShareOptions options)
