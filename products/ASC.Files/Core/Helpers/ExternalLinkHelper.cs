@@ -126,6 +126,19 @@ public class ExternalLinkHelper(
                     _ => false
                 };
             }
+
+            if (!string.IsNullOrEmpty(password) && entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                switch (entry)
+                {
+                    case Folder<int> folderInt: 
+                        await socketManager.UpdateFolderAsync(folderInt, [userId]);
+                        break;
+                    case Folder<string> folderString:
+                        await socketManager.UpdateFolderAsync(folderString, [userId]);
+                        break;
+                }
+            }
         }
 
         if (isAuth || !string.IsNullOrEmpty(externalShare.GetAnonymousSessionKey()))
