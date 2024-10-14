@@ -816,13 +816,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             return false;
         }
-        
-        if (action == FilesSecurityActions.Duplicate && folder is { FolderType: FolderType.FillingFormsRoom})
-        {
-            return false;
-        }
 
-        
         if (e.ProviderEntry && folder is { ProviderMapped: false } && e.CreateBy == userId)
         {
             return true;
