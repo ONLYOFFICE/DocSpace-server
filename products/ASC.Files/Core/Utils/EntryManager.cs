@@ -254,7 +254,7 @@ public class EntryManager(IDaoFactory daoFactory,
         Folder<T> room,
         int from,
         int count,
-        FilterType filterType,
+        IEnumerable<FilterType> filterTypes,
         bool subjectGroup,
         Guid subjectId,
         string searchText,
@@ -292,6 +292,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
 
         var entries = new List<FileEntry>();
+        var filterType = filterTypes?.FirstOrDefault() ?? FilterType.None;
 
         searchInContent = searchInContent && filterType != FilterType.ByExtension && !Equals(parent.Id, await globalFolderHelper.FolderTrashAsync);
 
@@ -322,12 +323,8 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         
         var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, new string[] {});
-
-        if (parent.FolderType == FolderType.Projects && parent.Id.Equals(await globalFolderHelper.FolderProjectsAsync))
-        {
-
-        }
-        else if (parent.FolderType == FolderType.SHARE)
+        
+        if (parent.FolderType == FolderType.SHARE)
         {
             //share
             var shared = await fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders).ToListAsync();
@@ -400,7 +397,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive && !parent.ProviderEntry)
         {
-            entries = await fileSecurity.GetVirtualRoomsAsync(filterType, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, 
+            entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, 
                 provider, subjectFilter, quotaFilter, storageFilter);
 
             CalculateTotal();
@@ -441,7 +438,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 var containingMyFiles = false;
                 if (parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder or FolderType.FillingFormsRoom)
                 {
-                if (parent.ShareRecord is { Share: FileShare.FillForms })
+                    if (parent.ShareRecord is { Share: FileShare.FillForms })
                     {
                         containingMyFiles = true;
                     }
@@ -1193,7 +1190,10 @@ public class EntryManager(IDaoFactory daoFactory,
                         };
                         foreach (var formFolder in systemFormFillingFolders)
                         {
-                            await socketManager.CreateFolderAsync(formFolder);
+                            var a = await fileSharing.GetSharedInfoAsync(formFolder);
+                            var u = a.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
+
+                            await socketManager.CreateFolderAsync(formFolder, u);
                             await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
                         }
                     }

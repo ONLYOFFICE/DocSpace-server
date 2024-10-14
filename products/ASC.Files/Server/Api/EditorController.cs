@@ -201,7 +201,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         canEdit = false;
                         canFill = true;
                         isSubmitOnly = true;
-                        editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
+                        editorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
 
                         fillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
                         break;
@@ -232,7 +232,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
                                 canEdit = false;
                                 canFill = true;
-                                editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
+                                editorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
 
                                 file = formDraft;
                                 fillingSessionId = string.Format("{0}_{1}", formDraft.Id, securityContext.CurrentAccount.ID);
@@ -250,12 +250,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 case FolderType.FormFillingFolderInProgress:
                     canEdit = false;
                     canFill = true;
-                    editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
+                    editorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
                     fillingSessionId = string.Format("{0}_{1}", file.Id, securityContext.CurrentAccount.ID);
                     break;
 
                 case FolderType.FormFillingFolderDone:
-                    editorType = HttpContext.Request.MobileApp() ? editorType : EditorType.Embedded;
+                    editorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
                     break;

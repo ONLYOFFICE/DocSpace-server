@@ -776,7 +776,7 @@ internal abstract class SecurityBaseDao<T>(
                     us => new
                     {
                         TenantId = tenantId,
-                        SourceUserId = authContext.CurrentAccount.ID, 
+                        SourceUserId = _authContext.CurrentAccount.ID, 
                         TargetUserId = us.User.Id
                     },
                     ur => new

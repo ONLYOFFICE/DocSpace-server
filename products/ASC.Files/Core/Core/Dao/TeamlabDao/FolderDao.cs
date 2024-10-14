@@ -149,7 +149,7 @@ internal class FolderDao(
 
     public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(
         IEnumerable<int> parentsIds, 
-        FilterType filterType, 
+        IEnumerable<FilterType> filterTypes, 
         IEnumerable<string> tags, 
         Guid subjectId, 
         string searchText, 
@@ -161,15 +161,15 @@ internal class FolderDao(
         IEnumerable<string> subjectEntriesIds,
         QuotaFilter quotaFilter = QuotaFilter.All)
     {
-        if (CheckInvalidFilter(filterType) || (provider != ProviderFilter.None && provider != ProviderFilter.Storage))
+        if (CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != ProviderFilter.Storage))
         {
             yield break;
         }
 
-        var filter = GetRoomTypeFilter(filterType);
+        var filter = DocSpaceHelper.MapToFolderTypes(filterTypes);
 
         var searchByTags = tags != null && tags.Any() && !withoutTags;
-        var searchByTypes = filterType != FilterType.None && filterType != FilterType.FoldersOnly;
+        var searchByTypes = filterTypes != null && filterTypes.Any() && !filterTypes.Contains(FilterType.FoldersOnly) && !filterTypes.Contains(FilterType.None);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = await GetFolderQuery(filesDbContext, r => parentsIds.Contains(r.ParentId));
@@ -191,7 +191,7 @@ internal class FolderDao(
 
     public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(
         IEnumerable<int> roomsIds, 
-        FilterType filterType, 
+        IEnumerable<FilterType> filterTypes, 
         IEnumerable<string> tags, 
         Guid subjectId, 
         string searchText, 
@@ -203,15 +203,15 @@ internal class FolderDao(
         IEnumerable<string> subjectEntriesIds, 
         IEnumerable<int> parentsIds)
     {
-        if (CheckInvalidFilter(filterType) || provider != ProviderFilter.None)
+        if (CheckInvalidFilters(filterTypes) || provider != ProviderFilter.None)
         {
             yield break;
         }
 
-        var filter = GetRoomTypeFilter(filterType);
+        var filter = DocSpaceHelper.MapToFolderTypes(filterTypes);
 
         var searchByTags = tags != null && tags.Any() && !withoutTags;
-        var searchByTypes = filterType != FilterType.None && filterType != FilterType.FoldersOnly;
+        var searchByTypes = filterTypes != null && filterTypes.Any() && !filterTypes.Contains(FilterType.FoldersOnly) && !filterTypes.Contains(FilterType.None);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = await GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id) || (f.CreateBy == _authContext.CurrentAccount.ID && parentsIds != null && parentsIds.Contains(f.ParentId)));
@@ -269,13 +269,17 @@ internal class FolderDao(
             switch (parentType)
             {
                 case FolderType.FillingFormsRoom:
+                    var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
                     var foldersContainingMyFiles = filesDbContext.Folders
                        .Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
+                       .Where(r => r.folder.TenantId == tenantId)
                        .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
                        .Select(r => r.folder.Id);
 
                     var parentFolderIds = filesDbContext.Folders
                         .Join(filesDbContext.Tree, r => r.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
+                        .Where(r => r.folder.TenantId == tenantId)
                         .Where(r => foldersContainingMyFiles.Contains(r.tree.FolderId))
                         .Select(r => r.folder.Id);
 
@@ -951,7 +955,7 @@ internal class FolderDao(
         return folder.Id;
     }
 
-    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark)
+    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -967,6 +971,7 @@ internal class FolderDao(
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         toUpdate.Settings.Indexing = indexing;
         toUpdate.Settings.DenyDownload = denyDownload;
+        
         if (lifeTime != null)
         {
             if (lifeTime.Enabled.HasValue && !lifeTime.Enabled.Value)
@@ -980,6 +985,22 @@ internal class FolderDao(
         }
 
         toUpdate.Settings.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermark);
+
+        if (color != null)
+        {
+            if (RoomLogoManager.ColorChanged(color, folder))
+            {
+                toUpdate.Settings.Color = color;
+            }
+        }
+
+        if (cover != null)
+        {
+            if (await RoomLogoManager.CoverChanged(cover, folder))
+            {
+                toUpdate.Settings.Cover = cover;
+            }
+        }
 
         filesDbContext.Update(toUpdate);
 
@@ -1566,17 +1587,18 @@ internal class FolderDao(
         return await filesDbContext.RightNodeAsync(tenantId, folderID.ToString());
     }
 
-    public IAsyncEnumerable<Folder<int>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
+    public IAsyncEnumerable<Folder<int>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, 
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<int>>();
     }
 
-    public IAsyncEnumerable<Folder<int>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<int> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId,
+    public IAsyncEnumerable<Folder<int>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<int> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId,
         string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<int>>();
     }
+    
     public async Task<Folder<int>> GetFirstParentTypeFromFileEntryAsync(FileEntry<int> entry)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -1650,7 +1672,7 @@ internal class FolderDao(
         await DeleteCustomOrder(filesDbContext, folderId, FileEntryType.Folder);
     }
 
-    private IQueryable<DbFolder> BuildRoomsQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> query, FolderType filterByType, IEnumerable<string> tags, Guid subjectId, bool searchByTags, bool withoutTags,
+    private IQueryable<DbFolder> BuildRoomsQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> query, IEnumerable<FolderType> folderTypes, IEnumerable<string> tags, Guid subjectId, bool searchByTags, bool withoutTags,
         bool searchByFilter, bool withSubfolders, bool excludeSubject, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All)
     {
         if (subjectId != Guid.Empty)
@@ -1668,7 +1690,7 @@ internal class FolderDao(
 
         if (searchByFilter)
         {
-            query = query.Where(f => f.FolderType == filterByType);
+            query = query.Where(f => folderTypes.Contains(f.FolderType));
         }
 
         if (quotaFilter != QuotaFilter.All)
@@ -1695,12 +1717,12 @@ internal class FolderDao(
         return query;
     }
 
-    private async Task<IQueryable<DbFolder>> BuildRoomsWithSubfoldersQuery(FilesDbContext filesDbContext, IEnumerable<int> roomsIds, FolderType filterByType, IEnumerable<string> tags, bool searchByTags, bool searchByFilter, bool withoutTags,
+    private async Task<IQueryable<DbFolder>> BuildRoomsWithSubfoldersQuery(FilesDbContext filesDbContext, IEnumerable<int> roomsIds, IEnumerable<FolderType> folderTypes, IEnumerable<string> tags, bool searchByTags, bool searchByFilter, bool withoutTags,
         bool withoutMe, Guid ownerId, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         var q1 = await GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id));
 
-        q1 = BuildRoomsQuery(filesDbContext, q1, filterByType, tags, ownerId, searchByTags, withoutTags, searchByFilter, true, withoutMe, subjectFilter, subjectEntriesIds);
+        q1 = BuildRoomsQuery(filesDbContext, q1, folderTypes, tags, ownerId, searchByTags, withoutTags, searchByFilter, true, withoutMe, subjectFilter, subjectEntriesIds);
 
         if (searchByTags)
         {
@@ -1728,8 +1750,13 @@ internal class FolderDao(
                     .Where(r => q1.Select(f => f.Id).Contains(r.tree.ParentId))
                     .Select(r => r.folder);
     }
+    
+    private static bool CheckInvalidFilters(IEnumerable<FilterType> filterTypes)
+    {
+        return filterTypes != null && filterTypes.Any(CheckInvalidFilter);
+    }
 
-    private bool CheckInvalidFilter(FilterType filterType)
+    private static bool CheckInvalidFilter(FilterType filterType)
     {
         return filterType is
             FilterType.FilesOnly or
@@ -1742,11 +1769,6 @@ internal class FolderDao(
             FilterType.MediaOnly or
             FilterType.Pdf or
             FilterType.PdfForm;
-    }
-
-    private FolderType GetRoomTypeFilter(FilterType filterType)
-    {
-        return DocSpaceHelper.MapToFolderType(filterType) ?? FolderType.CustomRoom;
     }
 
     public async Task<IDataWriteOperator> CreateDataWriteOperatorAsync(

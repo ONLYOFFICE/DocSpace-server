@@ -446,7 +446,9 @@ public class PortalController(
                 {
                     var quotaUsage = await quotaUsageManager.Get(t);
                     var owner = owners.FirstOrDefault(o => o.Id == t.OwnerId);
-                    tenantsWrapper.Add(commonMethods.ToTenantWrapper(t, quotaUsage, owner));
+                    var wizardSettings = await settingsManager.LoadAsync<WizardSettings>(t.Id);
+
+                    tenantsWrapper.Add(commonMethods.ToTenantWrapper(t, quotaUsage, owner, wizardSettings));
                 }
                 else
                 {
