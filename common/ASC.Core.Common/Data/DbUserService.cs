@@ -750,7 +750,14 @@ public class EFUserService(
                 filter.IncludeGroups.Add([Constants.GroupGuest.ID]);
                 break;
             case Area.People:
-                filter.ExcludeGroups.Add(Constants.GroupGuest.ID);
+                if (filter.CombinedGroups.Count == 0)
+                {
+                    filter.ExcludeGroups.Add(Constants.GroupGuest.ID);
+                }
+                else
+                {
+                    filter.CombinedGroups.Add(new Tuple<List<List<Guid>>, List<Guid>>([[]], [Constants.GroupGuest.ID]));
+                }
                 break;
         }
 
