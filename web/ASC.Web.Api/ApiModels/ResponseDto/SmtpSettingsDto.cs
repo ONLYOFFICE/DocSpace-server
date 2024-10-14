@@ -54,6 +54,7 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// <summary>Credentials username</summary>
     /// <type>System.String, System</type>
     /// <example>notify@example.com</example>
+    [StringLength(255)]
     public string CredentialsUserName { get; set; }
 
     /// <summary>Credentials user password</summary>
