@@ -61,7 +61,7 @@ namespace ASC.Data.Backup.Core {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The backup file is invalid. Please, use a file created in ONLYOFFICE v11.5 or later..
+        ///   Looks up a localized string similar to The backup file is invalid. Please use the file created in the same portal..
         /// </summary>
         internal static string BackupNotFound {
             get {

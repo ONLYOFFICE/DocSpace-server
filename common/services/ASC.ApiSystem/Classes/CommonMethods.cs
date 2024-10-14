@@ -43,7 +43,7 @@ public class CommonMethods(
     TenantManager tenantManager,
     IHttpClientFactory clientFactory)
 {
-    public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null)
+    public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null, WizardSettings wizardSettings = null)
     {
         var tenantQuotaSettings = hostedSolution.GetTenantQuotaSettings(t.Id).Result;
         var tariffMaxTotalSize = hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize;
@@ -66,7 +66,8 @@ public class CommonMethods(
             customQuota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ? 
                     tenantQuotaSettings.Quota :
                     tariffMaxTotalSize == long.MaxValue ? -1 : tariffMaxTotalSize,
-            owner
+            owner,
+            wizardSettings
         };
     }
 

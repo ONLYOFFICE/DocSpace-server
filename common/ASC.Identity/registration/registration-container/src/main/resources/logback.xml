@@ -77,7 +77,10 @@
     </appender>
     <!-- ###### -->
 
-    <!-- ### Loggers ### -->
+    <!-- Suppress Hibernate batch processing logs -->
+    <logger name="org.hibernate.orm.jdbc.batch" level="OFF" />
+
+    <!-- ### Log Levels for Development and Production ### -->
     <springProfile name="development,dev,d">
         <if condition='isDefined("LOG_FILE_PATH")'>
             <then>

@@ -65,47 +65,94 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
         return SupportBoxInclusion || SupportDropboxInclusion || SupportDocuSignInclusion || SupportGoogleDriveInclusion || SupportOneDriveInclusion || SupportSharePointInclusion || SupportWebDavInclusion || SupportNextcloudInclusion || SupportOwncloudInclusion || SupportkDriveInclusion || SupportYandexInclusion;
     }
 
-    public bool SupportBoxInclusion => ThirdPartyProviders.Contains("box") && BoxLoginProvider.IsEnabled;
+    public bool SupportBoxInclusion => ThirdPartyProviders.Contains(BoxKey) && BoxLoginProvider.IsEnabled;
 
-    public bool SupportDropboxInclusion => ThirdPartyProviders.Contains("dropboxv2") && DropboxLoginProvider.IsEnabled;
+    public bool SupportDropboxInclusion => ThirdPartyProviders.Contains(DropboxKey) && DropboxLoginProvider.IsEnabled;
 
-    public bool SupportOneDriveInclusion => ThirdPartyProviders.Contains("onedrive") && OneDriveLoginProvider.IsEnabled;
+    public bool SupportOneDriveInclusion => ThirdPartyProviders.Contains(OneDriveKey) && OneDriveLoginProvider.IsEnabled;
 
-    public bool SupportSharePointInclusion => ThirdPartyProviders.Contains("sharepoint");
+    public bool SupportSharePointInclusion => ThirdPartyProviders.Contains(SharePointKey);
 
-    public bool SupportWebDavInclusion => ThirdPartyProviders.Contains("webdav");
+    public bool SupportWebDavInclusion => ThirdPartyProviders.Contains(WebDavKey);
 
-    public bool SupportNextcloudInclusion => ThirdPartyProviders.Contains("nextcloud");
+    public bool SupportNextcloudInclusion => ThirdPartyProviders.Contains(NextcloudKey);
 
-    public bool SupportOwncloudInclusion => ThirdPartyProviders.Contains("owncloud");
+    public bool SupportOwncloudInclusion => ThirdPartyProviders.Contains(OwncloudKey);
 
-    public bool SupportkDriveInclusion => ThirdPartyProviders.Contains("kdrive");
+    public bool SupportkDriveInclusion => ThirdPartyProviders.Contains(KDriveKey);
 
-    public bool SupportYandexInclusion => ThirdPartyProviders.Contains("yandex");
+    public bool SupportYandexInclusion => ThirdPartyProviders.Contains(YandexKey);
     
-    public bool SupportDocuSignInclusion => ThirdPartyProviders.Contains("docusign") && DocuSignLoginProvider.IsEnabled;
+    public bool SupportDocuSignInclusion => ThirdPartyProviders.Contains(DocuSignKey) && DocuSignLoginProvider.IsEnabled;
 
-    public bool SupportGoogleDriveInclusion => ThirdPartyProviders.Contains("google") && GoogleLoginProvider.IsEnabled;
+    public bool SupportGoogleDriveInclusion => ThirdPartyProviders.Contains(GoogleDriveKey) && GoogleLoginProvider.IsEnabled;
+
+    private static string BoxKey => "box";
+    private static string DropboxKey => "dropboxv2";
+    private static string GoogleDriveKey => "google";
+    private static string OneDriveKey => "onedrive";
+    private static string SharePointKey => "sharepoint";
+    private static string WebDavKey => "webdav";
+    private static string NextcloudKey => "nextcloud";
+    private static string OwncloudKey => "owncloud";
+    private static string KDriveKey => "kdrive";
+    private static string YandexKey => "yandex";
+    private static string DocuSignKey => "docusign";
     
     public List<ProviderDto> GetAllProviders()
     {
         var webDavKey = ProviderTypes.WebDav.ToStringFast();
 
-        var providers = new List<ProviderDto>
+        var providers = new List<ProviderDto>(ThirdPartyProviders.Count);
+
+        if (ThirdPartyProviders.Contains(BoxKey))
         {
-            new("Box", ProviderTypes.Box.ToStringFast(), BoxLoginProvider.IsEnabled, true, BoxLoginProvider.RedirectUri, 
-                ClientId: BoxLoginProvider.ClientID),
-            new("Dropbox", ProviderTypes.DropboxV2.ToStringFast(), DropboxLoginProvider.IsEnabled, true, DropboxLoginProvider.RedirectUri, 
-                ClientId: DropboxLoginProvider.ClientID),
-            new("GoogleDrive", ProviderTypes.GoogleDrive.ToStringFast(), GoogleLoginProvider.IsEnabled, true, GoogleLoginProvider.RedirectUri, 
-                ClientId: GoogleLoginProvider.ClientID),
-            new("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri, 
-                ClientId: OneDriveLoginProvider.ClientID),
-            new("kDrive", webDavKey, true),
-            new("WebDav", webDavKey, true, RequiredConnectionUrl: true),
-            new("Nextcloud", webDavKey, true, RequiredConnectionUrl: true),
-            new("ownCloud", webDavKey, true, RequiredConnectionUrl: true)
-        };
+            providers.Add(new ProviderDto("Box", ProviderTypes.Box.ToStringFast(), BoxLoginProvider.IsEnabled, true, BoxLoginProvider.RedirectUri, 
+                ClientId: BoxLoginProvider.ClientID));
+        }
+        
+        if (ThirdPartyProviders.Contains(DropboxKey))
+        {
+            providers.Add(new ProviderDto("Dropbox", ProviderTypes.DropboxV2.ToStringFast(), DropboxLoginProvider.IsEnabled, true, DropboxLoginProvider.RedirectUri, 
+                ClientId: DropboxLoginProvider.ClientID));
+        }
+        
+        if (ThirdPartyProviders.Contains(GoogleDriveKey))
+        {
+            providers.Add(new ProviderDto("GoogleDrive", ProviderTypes.GoogleDrive.ToStringFast(), GoogleLoginProvider.IsEnabled, true, GoogleLoginProvider.RedirectUri, 
+                ClientId: GoogleLoginProvider.ClientID));
+        }
+        
+        if (ThirdPartyProviders.Contains(OneDriveKey))
+        {
+            providers.Add(new ProviderDto("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri, 
+                ClientId: OneDriveLoginProvider.ClientID));
+        }
+        
+        if (ThirdPartyProviders.Contains(KDriveKey))
+        {
+            providers.Add(new ProviderDto("kDrive", webDavKey, true));
+        }
+        
+        if (ThirdPartyProviders.Contains(YandexKey))
+        {
+            providers.Add(new ProviderDto("Yandex", webDavKey, true));
+        }
+        
+        if (ThirdPartyProviders.Contains(WebDavKey))
+        {
+            providers.Add(new ProviderDto("WebDav", webDavKey, true, RequiredConnectionUrl: true));
+        }
+        
+        if (ThirdPartyProviders.Contains(NextcloudKey))
+        {
+            providers.Add(new ProviderDto("Nextcloud", webDavKey, true, RequiredConnectionUrl: true));
+        }
+        
+        if (ThirdPartyProviders.Contains(OwncloudKey))
+        {
+            providers.Add(new ProviderDto("ownCloud", webDavKey, true, RequiredConnectionUrl: true));
+        }
 
         return providers;
     }

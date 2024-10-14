@@ -27,7 +27,7 @@
 
 package com.asc.authorization.application.mapper;
 
-import com.asc.authorization.application.security.oauth.services.AscAuthorizationService;
+import com.asc.authorization.application.security.service.AscAuthorizationService;
 import com.asc.authorization.data.authorization.entity.AuthorizationEntity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

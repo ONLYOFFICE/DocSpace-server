@@ -43,6 +43,7 @@ import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
 import java.util.LinkedHashSet;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
@@ -176,13 +177,26 @@ public class ClientQueryHandler {
     var result =
         clientQueryRepository.findAllByTenantId(
             new TenantId(query.getTenantId()), query.getPage(), query.getLimit());
+
+    var futures =
+        StreamSupport.stream(result.getData().spliterator(), false)
+            .map(clientDataMapper::toClientResponse)
+            .map(
+                clientResponse ->
+                    CompletableFuture.supplyAsync(
+                        () -> {
+                          clientResponse.setClientSecret(
+                              encryptionService.decrypt(clientResponse.getClientSecret()));
+                          return clientResponse;
+                        }))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
     return PageableResponse.<ClientResponse>builder()
         .page(result.getPage())
         .limit(result.getLimit())
         .data(
-            StreamSupport.stream(result.getData().spliterator(), false)
-                .map(clientDataMapper::toClientResponse)
-                .peek(c -> c.setClientSecret(encryptionService.decrypt(c.getClientSecret())))
+            futures.stream()
+                .map(CompletableFuture::join)
                 .collect(Collectors.toCollection(LinkedHashSet::new)))
         .next(result.getNext())
         .previous(result.getPrevious())

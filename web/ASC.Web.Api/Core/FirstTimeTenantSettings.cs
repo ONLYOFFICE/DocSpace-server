@@ -59,7 +59,7 @@ public class FirstTimeTenantSettings(
 
             if (!string.IsNullOrEmpty(setupInfo.AmiMetaUrl) && await IncorrectAmiId(amiid))
             {
-                //throw new Exception(Resource.EmailAndPasswordIncorrectAmiId); TODO
+                throw new Exception(Resource.EmailAndPasswordIncorrectAmiId);
             }
 
             if (tenant.OwnerId == Guid.Empty)
@@ -169,8 +169,6 @@ public class FirstTimeTenantSettings(
         }
     }
 
-    private static string _amiId;
-
     private async Task<bool> IncorrectAmiId(string customAmiId)
     {
         customAmiId = (customAmiId ?? "").Trim();
@@ -179,31 +177,56 @@ public class FirstTimeTenantSettings(
             return true;
         }
 
-        if (string.IsNullOrEmpty(_amiId))
+        try
         {
-            var getAmiIdUrl = setupInfo.AmiMetaUrl + "instance-id";
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(getAmiIdUrl)
-            };
+            var httpClient = clientFactory.CreateClient();
 
-            try
-            {
-                var httpClient = clientFactory.CreateClient();
-                using (var response = await httpClient.SendAsync(request))
-                {
-                    _amiId = await response.Content.ReadAsStringAsync();
-                }
+            var amiToken = await GetResponseString(httpClient, setupInfo.AmiTokenUrl, null);
+            var amiId = await GetResponseString(httpClient, setupInfo.AmiMetaUrl, amiToken);
 
-                logger.DebugInstanceId(_amiId);
-            }
-            catch (Exception e)
-            {
-                logger.ErrorRequestAMIId(e);
-            }
+            return string.IsNullOrEmpty(amiId) || amiId != customAmiId;
+        }
+        catch (Exception e)
+        {
+            logger.ErrorRequestAMI(e);
+            return true;
+        }
+    }
+
+    private async Task<string> GetResponseString(HttpClient httpClient, string requestUrl, string token)
+    {
+        string responseString = null;
+
+        if (string.IsNullOrEmpty(requestUrl))
+        {
+            return responseString;
         }
 
-        return string.IsNullOrEmpty(_amiId) || _amiId != customAmiId;
+        var request = new HttpRequestMessage
+        {
+            RequestUri = new Uri(requestUrl)
+        };
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            request.Headers.Add("X-aws-ec2-metadata-token", token);
+        }
+
+        try
+        {
+            using (var response = await httpClient.SendAsync(request))
+            {
+                responseString = await response.Content.ReadAsStringAsync();
+            }
+
+            logger.DebugRequestAMI(requestUrl, responseString);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorRequestAMI(e);
+        }
+
+        return responseString;
     }
 
     private async Task SubscribeFromSite(UserInfo user)

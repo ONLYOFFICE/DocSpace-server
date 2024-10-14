@@ -37,11 +37,11 @@ internal static partial class FirstTimeTenantSettingsLogger
     [LoggerMessage(Level = LogLevel.Error, Message = "TrySetLanguage")]
     public static partial void ErrorTrySetLanguage(this ILogger<FirstTimeTenantSettings> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Instance id: {amiId}")]
-    public static partial void DebugInstanceId(this ILogger<FirstTimeTenantSettings> logger, string amiId);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Request AMI {requestUrl} {responseString}")]
+    public static partial void DebugRequestAMI(this ILogger<FirstTimeTenantSettings> logger, string requestUrl, string responseString);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Request AMI id")]
-    public static partial void ErrorRequestAMIId(this ILogger<FirstTimeTenantSettings> logger, Exception exception);
+    [LoggerMessage(Level = LogLevel.Error, Message = "Request AMI")]
+    public static partial void ErrorRequestAMI(this ILogger<FirstTimeTenantSettings> logger, Exception exception);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Subscribe response: {response}")]
     public static partial void DebugSubscribeResponse(this ILogger<FirstTimeTenantSettings> logger, HttpResponseMessage response);

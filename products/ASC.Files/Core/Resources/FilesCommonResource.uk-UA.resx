@@ -280,9 +280,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Адміністратор кімнати</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Користувач</value>
   </data>
@@ -357,9 +354,6 @@
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Адміністратор кімнати</value>
   </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Коментар</value>
@@ -467,12 +461,6 @@
   <data name="Date" xml:space="preserve">
     <value>Дата</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Досвідчений користувач</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Досвідчений користувач</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Користувач</value>
   </data>
@@ -493,9 +481,6 @@
   </data>
   <data name="LinkToForm" xml:space="preserve">
     <value>Посилання на форму</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Відкрити форму</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Номер форми</value>

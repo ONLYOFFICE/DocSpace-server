@@ -68,6 +68,24 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
   }
 
   /**
+   * Updates an existing client entity in the database.
+   *
+   * <p>This method retrieves the existing client entity from the database using its ID and then
+   * merges the new values from the provided {@link Client} domain object into the existing entity.
+   * The updated entity is then saved back to the database.
+   *
+   * @param client the {@link Client} domain object containing the updated values
+   * @return the updated {@link Client} domain object after being persisted
+   */
+  public Client updateClient(Client client) {
+    log.debug("Updating an existing client");
+
+    var entity = clientDataAccessMapper.toEntity(client);
+    var reference = jpaClientRepository.getReferenceById(entity.getClientId());
+    return clientDataAccessMapper.toDomain(clientDataAccessMapper.merge(entity, reference));
+  }
+
+  /**
    * Regenerates the secret for a client identified by tenant ID and client ID.
    *
    * @param tenantId the tenant ID

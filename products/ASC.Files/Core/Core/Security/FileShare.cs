@@ -41,9 +41,9 @@ public enum FileShare
     Comment,
     FillForms,
     CustomFilter,
-    RoomAdmin,
+    RoomManager,
     Editing,
-    PowerUser
+    ContentCreator
 }
 
 public class FileShareConverter : System.Text.Json.Serialization.JsonConverter<FileShare>
@@ -84,9 +84,9 @@ public static partial class FileShareExtensions
             case FileShare.FillForms:
             case FileShare.Comment:
             case FileShare.Restrict:
-            case FileShare.RoomAdmin:
+            case FileShare.RoomManager:
             case FileShare.Editing:
-            case FileShare.PowerUser:
+            case FileShare.ContentCreator:
             case FileShare.Varies:
             case FileShare.None:
                 return FilesCommonResource.ResourceManager.GetString(prefix + fileShare.ToStringFast(), cultureInfo);

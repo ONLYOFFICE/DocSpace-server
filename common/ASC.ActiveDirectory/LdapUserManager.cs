@@ -118,13 +118,13 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
             var settings = await settingsManager.LoadAsync<LdapSettings>();
 
-            portalUserInfo = await userManager.SaveUserInfo(ldapUserInfo, EmployeeType.Collaborator);
+            portalUserInfo = await userManager.SaveUserInfo(ldapUserInfo, EmployeeType.User);
 
             var groupId = settings.UsersType switch
             {
-                EmployeeType.User => Constants.GroupUser.ID,
+                EmployeeType.Guest => Constants.GroupGuest.ID,
                 EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
-                EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
+                EmployeeType.User => Constants.GroupUser.ID,
                 _ => Guid.Empty
             };
 

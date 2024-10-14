@@ -142,7 +142,7 @@ public class ClientUpdateCommandHandlerTest {
         .thenReturn(Optional.of(client));
     when(clientDomainService.regenerateClientSecret(any(Audit.class), any(Client.class)))
         .thenReturn(clientUpdatedEvent);
-    when(clientCommandRepository.saveClient(any(Client.class))).thenReturn(client);
+    when(clientCommandRepository.updateClient(any(Client.class))).thenReturn(client);
     when(encryptionService.encrypt(anyString())).thenReturn("encryptedSecret");
     when(clientDataMapper.toClientSecret(any(Client.class))).thenReturn(clientSecretResponse);
 
@@ -153,7 +153,7 @@ public class ClientUpdateCommandHandlerTest {
     verify(clientDomainService, times(1))
         .regenerateClientSecret(any(Audit.class), any(Client.class));
     verify(encryptionService, times(1)).encrypt(anyString());
-    verify(clientCommandRepository, times(1)).saveClient(any(Client.class));
+    verify(clientCommandRepository, times(1)).updateClient(any(Client.class));
     verify(messagePublisher, times(1)).publish(any(ClientEvent.class));
     verify(clientDataMapper, times(1)).toClientSecret(any(Client.class));
 
@@ -196,7 +196,7 @@ public class ClientUpdateCommandHandlerTest {
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
     verify(clientDomainService, times(1)).makeClientPublic(any(Audit.class), any(Client.class));
-    verify(clientCommandRepository, times(1)).saveClient(any(Client.class));
+    verify(clientCommandRepository, times(1)).updateClient(any(Client.class));
     verify(messagePublisher, times(1)).publish(any(ClientEvent.class));
   }
 
@@ -220,7 +220,7 @@ public class ClientUpdateCommandHandlerTest {
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
     verify(clientDomainService, times(1)).makeClientPrivate(any(Audit.class), any(Client.class));
-    verify(clientCommandRepository, times(1)).saveClient(any(Client.class));
+    verify(clientCommandRepository, times(1)).updateClient(any(Client.class));
     verify(messagePublisher, times(1)).publish(any(ClientEvent.class));
   }
 
@@ -262,7 +262,7 @@ public class ClientUpdateCommandHandlerTest {
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
     verify(clientDomainService, times(1)).enableClient(any(Audit.class), any(Client.class));
-    verify(clientCommandRepository, times(1)).saveClient(any(Client.class));
+    verify(clientCommandRepository, times(1)).updateClient(any(Client.class));
     verify(messagePublisher, times(1)).publish(any(ClientEvent.class));
   }
 
@@ -324,7 +324,7 @@ public class ClientUpdateCommandHandlerTest {
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
     verify(clientDomainService, times(1)).invalidateClient(any(Audit.class), any(Client.class));
-    verify(clientCommandRepository, times(1)).saveClient(any(Client.class));
+    verify(clientCommandRepository, times(1)).updateClient(any(Client.class));
     verify(messagePublisher, times(1)).publish(any(ClientEvent.class));
   }
 

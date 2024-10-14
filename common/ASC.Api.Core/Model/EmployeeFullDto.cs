@@ -156,6 +156,7 @@ public class EmployeeFullDto : EmployeeDto
     public int? LoginEventId { get; set; }
     
     public EmployeeDto CreatedBy { get; set; }
+    public ApiDateTime RegistrationDate { get; set; }
 
     public static new EmployeeFullDto GetSample()
     {
@@ -245,7 +246,7 @@ public class EmployeeFullDtoHelper(
         return lambda;
     }
     
-    public async Task<EmployeeFullDto> GetSimple(UserInfo userInfo)
+    public async Task<EmployeeFullDto> GetSimple(UserInfo userInfo, bool withGroups = true)
     {
         var result = new EmployeeFullDto
         {
@@ -253,7 +254,10 @@ public class EmployeeFullDtoHelper(
             LastName = userInfo.LastName
         };
 
-        await FillGroupsAsync(result, userInfo);
+        if (withGroups)
+        {
+            await FillGroupsAsync(result, userInfo);
+        }
 
         var photoData = await _userPhotoManager.GetUserPhotoData(userInfo.Id, UserPhotoManager.BigFotoSize);
 
@@ -291,11 +295,11 @@ public class EmployeeFullDtoHelper(
             Terminated = apiDateTimeHelper.Get(userInfo.TerminatedDate),
             WorkFrom = apiDateTimeHelper.Get(userInfo.WorkFromDate),
             Email = userInfo.Email,
-            IsVisitor = await _userManager.IsUserAsync(userInfo),
+            IsVisitor = await _userManager.IsGuestAsync(userInfo),
             IsAdmin = currentType is EmployeeType.DocSpaceAdmin,
             IsRoomAdmin = currentType is EmployeeType.RoomAdmin,
             IsOwner = userInfo.IsOwner(tenant),
-            IsCollaborator = currentType is EmployeeType.Collaborator,
+            IsCollaborator = currentType is EmployeeType.User,
             IsLDAP = userInfo.IsLDAP(),
             IsSSO = userInfo.IsSSO(),
             Shared = shared
@@ -303,7 +307,9 @@ public class EmployeeFullDtoHelper(
 
         await InitAsync(result, userInfo);
 
-        if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && (await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID) || userInfo.Id == _authContext.CurrentAccount.ID))
+        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID);
+
+        if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && (isDocSpaceAdmin || userInfo.Id == _authContext.CurrentAccount.ID))
         {
             var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
@@ -379,11 +385,18 @@ public class EmployeeFullDtoHelper(
                 result.ListAdminModules = listAdminModules;
             }
         }
-        
+
+        if (!isDocSpaceAdmin)
+        {
+            return result;
+        }
+
         if (userInfo.CreatedBy.HasValue)
         {
             result.CreatedBy = await GetAsync(await _userManager.GetUsersAsync(userInfo.CreatedBy.Value));
         }
+            
+        result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
 
         return result;
     }

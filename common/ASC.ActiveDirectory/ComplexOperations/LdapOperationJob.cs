@@ -562,7 +562,7 @@ public class LdapOperationJob(
 
                 foreach (var user in users)
                 {
-                    if (!user.Equals(Core.Users.Constants.LostUser) && !await _userManager.IsUserAsync(user))
+                    if (!user.Equals(Core.Users.Constants.LostUser) && !await _userManager.IsGuestAsync(user))
                     {
                         if (!usersWithRightsFlat.Contains(user.Id.ToString()))
                         {
