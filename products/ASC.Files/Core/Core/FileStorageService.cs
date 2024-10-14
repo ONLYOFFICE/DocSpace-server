@@ -650,7 +650,7 @@ public class FileStorageService //: IFileStorageService
             
             var tagDao = daoFactory.GetTagDao<T>();
 
-            var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+            var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
 
             if (tagsInfos.Count != 0)
             {
@@ -894,7 +894,7 @@ public class FileStorageService //: IFileStorageService
 
         if (updateData.Tags != null && updateData.Tags.Any())
         {
-            var tagsInfos = await tagDao.GetTagsInfoAsync(updateData.Tags).ToListAsync();
+            var tagsInfos = await tagDao.GetTagsInfoAsync(updateData.Tags, TagType.Custom).ToListAsync();
 
             if (tagsInfos.Count != 0)
             {
@@ -903,7 +903,6 @@ public class FileStorageService //: IFileStorageService
                 await tagDao.SaveTagsAsync(tags);
             }
         }
-        
 
         var newTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder);
         var tag = await newTags.FirstOrDefaultAsync();

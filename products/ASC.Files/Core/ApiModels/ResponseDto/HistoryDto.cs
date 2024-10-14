@@ -85,6 +85,7 @@ public class HistoryApiHelper(HistoryService historyService, HistoryDtoHelper hi
         var filterFolderIds = new List<int>();
         var filterFileIds = new List<int>();
         var needFiltering = false;
+        
         FileEntry<int> entry = entryType switch
         {
             FileEntryType.File => await daoFactory.GetFileDao<int>().GetFileAsync(entryId),
@@ -100,7 +101,7 @@ public class HistoryApiHelper(HistoryService historyService, HistoryDtoHelper hi
                 );
         }
 
-        if (!await fileSecurity.CanReadAsync(entry))
+        if (!await fileSecurity.CanReadLogAsync(entry))
         {
             throw new SecurityException(entryType == FileEntryType.File
                 ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile
