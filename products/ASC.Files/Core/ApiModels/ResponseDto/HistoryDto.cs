@@ -101,7 +101,7 @@ public class HistoryApiHelper(HistoryService historyService, HistoryDtoHelper hi
                 );
         }
 
-        if (!await fileSecurity.CanReadLogAsync(entry))
+        if (!await fileSecurity.CanReadAsync(entry))
         {
             throw new SecurityException(entryType == FileEntryType.File
                 ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile

@@ -448,16 +448,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.ReadLinks);
     }
     
-    public async Task<bool> CanReadMembersAsync<T>(FileEntry<T> entry)
-    {
-        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.ReadMembers);
-    }
-    
-    public async Task<bool> CanReadLogAsync<T>(FileEntry<T> entry)
-    {
-        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.ReadLog);
-    }
-    
     public async Task<bool> CanChangeOwnerAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.ChangeOwner);
@@ -1052,22 +1042,12 @@ public class FileSecurity(IDaoFactory daoFactory,
                 
                 if (isDocSpaceAdmin)
                 {
-                    if (action is 
-                        FilesSecurityActions.Read or 
-                        FilesSecurityActions.Download or 
-                        FilesSecurityActions.Copy or 
-                        FilesSecurityActions.ReadHistory or 
-                        FilesSecurityActions.ReadLog)
+                    if (action is FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory)
                     {
                         return true;
                     }
 
-                    if (isRoom && action is 
-                            FilesSecurityActions.Move or 
-                            FilesSecurityActions.Pin or 
-                            FilesSecurityActions.Duplicate or 
-                            FilesSecurityActions.ChangeOwner or 
-                            FilesSecurityActions.ReadMembers)
+                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.Duplicate or FilesSecurityActions.ChangeOwner)
                     {
                         return true;
                     }
@@ -1606,18 +1586,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                             return true;
                         }
                         break;
-                }
-                break;
-            case FilesSecurityActions.ReadLog:
-                if (e.Access != FileShare.Restrict && isAuthenticated)
-                {
-                    return true;
-                }
-                break;
-            case FilesSecurityActions.ReadMembers:
-                if (e.Access != FileShare.Restrict && isAuthenticated)
-                {
-                    return true;
                 }
                 break;
         }
@@ -2463,8 +2431,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         CreateRoomFrom,
         CopyLink,
         Embed,
-        ChangeOwner,
-        ReadMembers,
-        ReadLog
+        ChangeOwner
     }
 }
