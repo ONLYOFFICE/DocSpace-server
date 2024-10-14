@@ -1058,12 +1058,22 @@ public class FileSecurity(IDaoFactory daoFactory,
                 
                 if (isDocSpaceAdmin)
                 {
-                    if (action is FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory)
+                    if (action is 
+                        FilesSecurityActions.Read or 
+                        FilesSecurityActions.Download or 
+                        FilesSecurityActions.Copy or 
+                        FilesSecurityActions.ReadHistory or 
+                        FilesSecurityActions.ReadLog)
                     {
                         return true;
                     }
 
-                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.Duplicate or FilesSecurityActions.ChangeOwner)
+                    if (isRoom && action is 
+                            FilesSecurityActions.Move or 
+                            FilesSecurityActions.Pin or 
+                            FilesSecurityActions.Duplicate or 
+                            FilesSecurityActions.ChangeOwner or 
+                            FilesSecurityActions.ReadMembers)
                     {
                         return true;
                     }
