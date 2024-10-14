@@ -1925,7 +1925,7 @@ internal class FileDao(
             
             if (formsItemDto != null)
             {
-                s.InAll(r => r.FormsData, [formsItemDto]);
+                s.Nested(a => a.FormsData, b => b.Term(c => c.FormsData.Select(r=> r.Key), char.ToLower(formsItemDto.Key[0]) + formsItemDto.Key[1..]) && b.Term(c => c.FormsData.Select(r=> r.Value), char.ToLower(searchText[0]) + searchText[1..]));
             }
             else
             {
@@ -2143,7 +2143,7 @@ internal class FileDao(
                 (success, var resultForm) = await factoryIndexerFormData.TrySelectIdsAsync(expressionSearchText);
                 if (success)
                 {
-                    searchIds = searchIds.Concat(resultForm).ToList();
+                    searchIds = searchIds.Intersect(resultForm).ToList();
                 }
             }
 

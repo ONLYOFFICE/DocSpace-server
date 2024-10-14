@@ -168,7 +168,15 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
         return this;
     }
-
+    
+    public Selector<T> Nested(Expression<Func<T, object>> fieldSelector, Func<QueryContainerDescriptor<T>, QueryContainer> selector)
+    {
+        var path = IsNested(fieldSelector);
+        _queryContainer &= _queryContainerDescriptor.Nested(a => a.Query(selector).Path(char.ToLower(path[0]) + path[1..]));
+        
+        return this;
+    }
+    
     public Selector<T> Sort(Expression<Func<T, object>> selector, bool asc)
     {
         _sortContainerDescriptor = _sortContainerDescriptor.Field(selector, asc ? SortOrder.Ascending : SortOrder.Descending);
