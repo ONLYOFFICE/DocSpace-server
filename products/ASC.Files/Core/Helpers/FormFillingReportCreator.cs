@@ -95,18 +95,26 @@ public class FormFillingReportCreator(
 
         
         var tenantCulture = (await tenantManager.GetCurrentTenantAsync()).GetCulture();
-        List<FormsItemData> formNumber = 
+        var formNumber = new List<FormsItemData>
+        {
+            new()
+            {
+                Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture),
+                Value = resultFormNumber.ToString()
+            },
+        };
+        List<FormsItemData> formInfo = 
         [
-                new() { Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture), Value = resultFormNumber.ToString() }, 
-                new() { Key = FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture), Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture)}\")" },
-                new() { Key = FilesCommonResource.ResourceManager.GetString("Date", tenantCulture), Value = $"=\"{tenantUtil.DateTimeNow().ToString("G", tenantCulture)}\"" }
+                new() { Key = FilesCommonResource.ResourceManager.GetString("Date", tenantCulture), Value = $"=\"{tenantUtil.DateTimeNow().ToString("G", tenantCulture)}\"" },
+                new() { Key = FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture), Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture)}\")" }
         ];
         
         var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
         var result = new SubmitFormsData
         {
-            FormsData =  fromData.FormsData.Concat(formNumber).ToList()
+            FormsData =  formNumber.Concat(fromData.FormsData).ToList()
         };
+        result.FormsData = result.FormsData.Concat(formInfo).ToList();
 
         var now = DateTime.UtcNow;
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
