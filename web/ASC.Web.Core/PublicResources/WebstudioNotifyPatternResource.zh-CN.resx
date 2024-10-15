@@ -1916,7 +1916,7 @@ $TrulyYours</value>
 
 若需要更新许可证，请直接联系您的专属销售经理或通过"${__SalesEmail}":"mailto:${__SalesEmail}"与我们联系。
 
-如有付款相关问题，请联系sales@onlyoffice.com。如需解决任何技术问题，请使用"${__SupportLink}":"${__SupportLink}"。
+如有付款相关问题，请联系"${__SalesEmail}":"mailto:${__SalesEmail}"。如需解决任何技术问题，请使用"${__SupportLink}":"${__SupportLink}"。
 
 *您可以无限期使用购买的所有功能。
 
@@ -1929,7 +1929,7 @@ $TrulyYours</value>
 
 若需要更新许可证，请直接联系您的专属销售经理或通过"${__SalesEmail}":"mailto:${__SalesEmail}"与我们联系。
 
-如有付款相关问题，请联系sales@onlyoffice.com。如需解决任何技术问题，请使用"${__SupportLink}":"${__SupportLink}"。
+如有付款相关问题，请联系"${__SalesEmail}":"mailto:${__SalesEmail}"。如需解决任何技术问题，请使用"${__SupportLink}":"${__SupportLink}"。
 
 您可以无限期使用购买的所有功能。
 

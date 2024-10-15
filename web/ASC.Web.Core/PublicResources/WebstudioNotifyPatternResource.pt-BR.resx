@@ -1887,7 +1887,7 @@ Sua licença do ONLYOFFICE DocSpace Enterprise expirará em 7 dias. Isso signifi
 
 Para atualizar a licença, entre em contato diretamente com seu gerente de vendas dedicado ou entre em contato conosco via "${__SalesEmail}":"mailto:${__SalesEmail}".
 
-Para questões de pagamento, entre em contato conosco pelo e-mail sales@onlyoffice.com. Para resolver qualquer problema técnico, use "${__SupportLink}":"${__SupportLink}".
+Para questões de pagamento, entre em contato conosco pelo e-mail "${__SalesEmail}":"mailto:${__SalesEmail}". Para resolver qualquer problema técnico, use "${__SupportLink}":"${__SupportLink}".
 
 *Você pode usar todos os recursos disponíveis no momento da compra da licença por um período ilimitado de tempo.
 
@@ -1900,7 +1900,7 @@ Sua licença do ONLYOFFICE DocSpace Enterprise expira hoje. Isso significa que a
 
 Para atualizar a licença, entre em contato diretamente com seu gerente de vendas dedicado ou entre em contato conosco via "${__SalesEmail}":"mailto:${__SalesEmail}".
 
-Para questões de pagamento, entre em contato conosco pelo e-mail sales@onlyoffice.com. Para resolver quaisquer problemas técnicos
+Para questões de pagamento, entre em contato conosco pelo e-mail "${__SalesEmail}":"mailto:${__SalesEmail}". Para resolver quaisquer problemas técnicos
 
 use "${__SupportLink}":"${__SupportLink}".
 

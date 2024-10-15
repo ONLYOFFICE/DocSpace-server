@@ -1929,7 +1929,7 @@ $TrulyYours</value>
 
 ONLYOFFICE DocSpace Enterpriseのライセンスは7日後に期限切れになります。7日後にアップデートとサポートは利用できなくなります。*
 
-ライセンスを更新するには、担当営業マネージャーに直接連絡するか、または「${__SalesEmail}「:」mailto:${__SalesEmail}"」からお問い合わせください
+ライセンスを更新するには、担当営業マネージャーに直接連絡するか、または"${__SalesEmail}":"mailto:${__SalesEmail}"からお問い合わせください
 
 お支払いに関するご質問は、"${__SalesEmail}":"mailto:${__SalesEmail}"までお問い合わせください。技術的な問題の解決には、"${__SupportLink}":"${__SupportLink}"をご利用ください。
 
