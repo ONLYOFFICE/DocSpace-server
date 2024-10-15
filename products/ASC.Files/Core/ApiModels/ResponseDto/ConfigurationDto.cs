@@ -205,9 +205,10 @@ public class ConfigurationConverter<T>(
     FileDtoHelper fileDtoHelper,
     EditorConfigurationConverter<T> editorConfigurationConverter,
     DocumentConfigConverter<T> documentConfigConverter,
-    DocumentServiceHelper documentServiceHelper)
+    DocumentServiceHelper documentServiceHelper,
+    ExternalShare externalShare)
 {
-    public async Task<ConfigurationDto<T>> Convert(Configuration<T> source, File<T> file, string fillingSessionId = "")
+    public async Task<ConfigurationDto<T>> Convert(Configuration<T> source, File<T> file)
     {   
         if (source == null)
         {
@@ -218,7 +219,7 @@ public class ConfigurationConverter<T>(
         {
             Document = await documentConfigConverter.Convert(source.Document, file),
             DocumentType = source.GetDocumentType(file),
-            EditorConfig = await editorConfigurationConverter.Convert(source, file, fillingSessionId),
+            EditorConfig = await editorConfigurationConverter.Convert(source, file),
             EditorType = source.EditorType,
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
             ErrorMessage = source.Error
@@ -231,6 +232,15 @@ public class ConfigurationConverter<T>(
         result.Token = documentServiceHelper.GetSignature(result);
         result.File = await fileDtoHelper.GetAsync(file);
         result.Type = source.Type;
+
+        if (source.EditorType == EditorType.Embedded)
+        {
+            var shareParam = file.ShareRecord != null
+                ? $"&{FilesLinkUtility.ShareKey}={await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject)}"
+                : "";
+
+            result.EditorConfig.Embedded.ShareLinkParam = $"&{FilesLinkUtility.FileId}={file.Id}{shareParam}";
+        }
         return result;
     }
 }
@@ -239,7 +249,7 @@ public class ConfigurationConverter<T>(
 [Scope(GenericArguments = [typeof(string)])]
 public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> configConverter)
 {
-    public async Task<EditorConfigurationDto> Convert(Configuration<T> configuration, File<T> file, string fillingSessionId)
+    public async Task<EditorConfigurationDto> Convert(Configuration<T> configuration, File<T> file)
     {
         var source = configuration.EditorConfig;
         
@@ -251,7 +261,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         var fileType = configuration.GetFileType(file);
         var result = new EditorConfigurationDto
         {
-            CallbackUrl = await source.GetCallbackUrl(file.Id.ToString(), fillingSessionId),
+            CallbackUrl = await source.GetCallbackUrl(file),
             CoEditing = await source.GetCoEditingAsync(),
             CreateUrl = await source.GetCreateUrl(configuration.EditorType, fileType),
             Customization = await configConverter.Convert(configuration, file),

@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>බලවත් පරිශ්‍රීලකයා</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>බලවත් පරිශ්‍රීලකයා</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>පරිශ්‍රීලකයා</value>
   </data>

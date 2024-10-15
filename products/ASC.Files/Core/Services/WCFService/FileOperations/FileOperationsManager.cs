@@ -203,7 +203,7 @@ public class FileOperationsManager(
         bool holdResult, 
         bool content = false)
     {        
-        if (resolveType == FileConflictResolveType.Overwrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (resolveType == FileConflictResolveType.Overwrite && await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }

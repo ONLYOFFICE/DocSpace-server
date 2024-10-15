@@ -241,8 +241,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
             var consumer = new AsyncEventingBasicConsumer(_consumerChannel);
 
-            consumer.Received += Consumer_Received;
-            consumer.Shutdown += Consumer_Shutdown;
+            consumer.ReceivedAsync += Consumer_Received;
+            consumer.ShutdownAsync += Consumer_Shutdown;
             _consumerTag = await _consumerChannel.BasicConsumeAsync(
                 queue: _queueName,
                 autoAck: false,
@@ -374,12 +374,12 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
                                 autoDelete: false,
                                 arguments: arguments);
 
-        channel.CallbackException += RecreateChannel;
+        channel.CallbackExceptionAsync += RecreateChannel;
 
         return channel;
     }
 
-    private async void RecreateChannel(object sender, CallbackExceptionEventArgs e)
+    private async Task RecreateChannel(object sender, CallbackExceptionEventArgs e)
     {
         _logger.WarningCallbackException(e.Exception);
 

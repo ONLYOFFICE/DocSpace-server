@@ -114,7 +114,7 @@ public class SmtpJob(UserManager userManager,
             using var client = GetSmtpClient();
             await SetProgress(40, "Connect to host");
 
-            await client.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port.GetValueOrDefault(25),
+            await client.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port.GetValueOrDefault(SmtpSettings.DefaultSmtpPort),
                 _smtpSettings.EnableSSL ? SecureSocketOptions.Auto : SecureSocketOptions.None);
 
             if (_smtpSettings.EnableAuth)

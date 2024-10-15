@@ -320,9 +320,6 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>編集者</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>ルームの管理者</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>ユーザー</value>
   </data>
@@ -346,9 +343,6 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>編集者</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>ルームの管理者</value>
   </data>
   <data name="CommentCreateFillFormDraft" xml:space="preserve">
     <value>フォームに入力するために作成されました</value>
@@ -464,14 +458,8 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>タイプ</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>パワーユーザー</value>
-  </data>
   <data name="Date" xml:space="preserve">
     <value>日付</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>パワーユーザー</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>ユーザー</value>
@@ -493,9 +481,6 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   </data>
   <data name="LinkToForm" xml:space="preserve">
     <value>フォームへのリンク</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>フォームを開く</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>フォーム番号</value>

@@ -29,37 +29,8 @@ namespace ASC.Core;
 public interface IUserService
 {
     Task<IEnumerable<UserInfo>> GetUsersAsync(int tenant);
-    Task<int> GetUsersCountAsync(
-        int tenant,
-        bool isDocSpaceAdmin,
-        EmployeeStatus? employeeStatus,
-        List<List<Guid>> includeGroups,
-        List<Guid> excludeGroups,
-        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
-        EmployeeActivationStatus? activationStatus,
-        AccountLoginType? accountLoginType,
-        QuotaFilter? quotaFilter,
-        string text,
-        string separatorm,
-        bool withoutGroup);
-    IAsyncEnumerable<UserInfo> GetUsers(
-        int tenant,
-        bool isDocSpaceAdmin,
-        EmployeeStatus? employeeStatus,
-        List<List<Guid>> includeGroups,
-        List<Guid> excludeGroups,
-        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
-        EmployeeActivationStatus? activationStatus,
-        AccountLoginType? accountLoginType,
-        QuotaFilter? quotaFilter,
-        string text,
-        string separator,
-        bool withoutGroup,
-        Guid ownerId,
-        UserSortType sortBy,
-        bool sortOrderAsc,
-        long limit,
-        long offset);
+    Task<int> GetUsersCountAsync(UserQueryFilter filter);
+    IAsyncEnumerable<UserInfo> GetUsers(UserQueryFilter filter);
     Task<byte[]> GetUserPhotoAsync(int tenant, Guid id);
     Task<DateTime> GetUserPasswordStampAsync(int tenant, Guid id);
     Task<Group> GetGroupAsync(int tenant, Guid id);
@@ -84,4 +55,7 @@ public interface IUserService
     Task RemoveUserGroupRefAsync(int tenant, Guid userId, Guid groupId, UserGroupRefType refType);
     Task SetUserPasswordHashAsync(int tenant, Guid id, string passwordHash);
     Task SetUserPhotoAsync(int tenant, Guid id, byte[] photo);
+    Task SaveUsersRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId);
+    Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(int tenantId, Guid sourceUserId);
+    Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId);
 }
