@@ -91,7 +91,7 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
         var outputFileName = $"{room.Title}_{FilesCommonResource.RoomIndex_Index.ToLowerInvariant()}.xlsx";
 
         //TODO: think about loop by N
-        var (entries, _) = await entryManager.GetEntriesAsync(room, room, 0, -1, FilterType.None, false, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
+        var (entries, _) = await entryManager.GetEntriesAsync(room, room, 0, -1, null, false, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
 
         var typedEntries = entries.OfType<FileEntry<T>>().ToList();
 

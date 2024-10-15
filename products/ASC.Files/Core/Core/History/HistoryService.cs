@@ -31,9 +31,7 @@ namespace ASC.Files.Core.Core.History;
 [Scope]
 public class HistoryService(
     IDbContextFactory<MessagesContext> dbContextFactory, 
-    TenantManager tenantManager, 
-    IDaoFactory daoFactory, 
-    FileSecurity fileSecurity, 
+    TenantManager tenantManager,
     AuditInterpreter interpreter)
 {
     public static HashSet<MessageAction> TrackedActions => [
@@ -78,78 +76,35 @@ public class HistoryService(
         MessageAction.FormSubmit,
         MessageAction.FormOpenedForFilling
     ];
-    
-    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count)
-    {
-        FileEntry<int> entry = entryType switch
-        {
-            FileEntryType.File => await daoFactory.GetFileDao<int>().GetFileAsync(entryId),
-            FileEntryType.Folder => await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId),
-            _ => throw new ArgumentOutOfRangeException(nameof(entryType), entryType, null)
-        };
-        
-        if (entry == null)
-        {
-            throw new ItemNotFoundException(entryType == FileEntryType.File 
-                ? FilesCommonResource.ErrorMessage_FileNotFound 
-                : FilesCommonResource.ErrorMessage_FolderNotFound
-                );
-        }
+    public static HashSet<int> FilterFolderActions => [
+        (int)MessageAction.FolderCreated,
+        (int)MessageAction.FolderMovedWithOverwriting,
+        (int)MessageAction.FolderMovedToTrash,
+        (int)MessageAction.FolderRenamed
+    ];
+    public static HashSet<int> FilterFileActions => [
+        (int)MessageAction.FileCopied,
+        (int)MessageAction.FileUploaded,
+        (int)MessageAction.FileMoved,
+        (int)MessageAction.FileRenamed,
+        (int)MessageAction.FormSubmit,
+        (int)MessageAction.FormOpenedForFilling
+    ];
 
-        if (!await fileSecurity.CanReadAsync(entry))
-        {
-            throw new SecurityException(entryType == FileEntryType.File 
-                ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile 
-                : FilesCommonResource.ErrorMessage_SecurityException_ReadFolder
-                );
-        }
-        
+    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count, bool needFiltering, List<int> filterFolderIds, List<int> filterFilesIds)
+    {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        var events = messageDbContext.GetAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count);
+        IAsyncEnumerable<DbAuditEvent> events;
 
-        if (await events.CountAsync() > 0 &&
-            entryType == FileEntryType.Folder &&
-            DocSpaceHelper.IsFormsFillingFolder(entry) &&
-            entry.ShareRecord is { Share: FileShare.FillForms })
+        if (needFiltering)
         {
-            var folderActions = new HashSet<int> {
-                    (int)MessageAction.FolderCreated,
-                    (int)MessageAction.FolderMovedWithOverwriting,
-                    (int)MessageAction.FolderMovedToTrash,
-                    (int)MessageAction.FolderRenamed
-                };
-            var fileActions = new HashSet<int> {
-                    (int)MessageAction.FileCopied,
-                    (int)MessageAction.FileUploaded,
-                    (int)MessageAction.FileMoved,
-                    (int)MessageAction.FileRenamed,
-                    (int)MessageAction.FormSubmit,
-                    (int)MessageAction.FormOpenedForFilling
-                };
-
-            var folderDao = daoFactory.GetFolderDao<int>();
-            var fileDao = daoFactory.GetFileDao<int>();
-
-            var f = entry as Folder<int>;
-            var folders = await folderDao.GetFoldersAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, true, false, 0, -1, default, true, f.FolderType).Select(r => r.Id).ToListAsync();
-            var files = await fileDao.GetFilesAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, null, false, true, false, 0, -1, default, false, true, f.FolderType).Select(r => r.Id).ToListAsync();
-
-            var list = new List<DbAuditEvent>();
-            await foreach (var auditEvent in events)
-            {
-                var target = auditEvent.Target;
-                if (target != null && int.TryParse(target.Split(',')[0], out var eventEntryId))
-                {
-                    if ((folders.Contains(eventEntryId) && folderActions.Contains(auditEvent.Action ?? 0)) ||
-                    (files.Contains(eventEntryId) && fileActions.Contains(auditEvent.Action ?? 0)))
-                    {
-                        list.Add(auditEvent);
-                    }
-                }
-            }
-            events = list.ToAsyncEnumerable();
+            events = messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions);
+        }
+        else
+        {
+            events = messageDbContext.GetAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count);
         }
 
         await foreach (var hEntry in events.SelectAwait(interpreter.ToHistoryAsync).Where(x => x != null))
@@ -158,11 +113,15 @@ public class HistoryService(
         }
     }
 
-    public async Task<int> GetHistoryCountAsync(int entryId, FileEntryType entryType)
+    public async Task<int> GetHistoryCountAsync(int entryId, FileEntryType entryType, bool needFiltering, List<int> filterFolderIds, List<int> filterFilesIds)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
+        if (needFiltering)
+        {
+            return await messageDbContext.GetFilteredAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions);
+        }
         return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType);
     }
 }

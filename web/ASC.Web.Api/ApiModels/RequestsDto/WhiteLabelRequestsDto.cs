@@ -32,6 +32,7 @@ public class WhiteLabelRequestsDto
 {
     /// <summary>Logo text</summary>
     /// <type>System.String, System</type>
+    [StringLength(30)]
     public string LogoText { get; set; }
 
     /// <summary>Tenant IDs with their logos (light or dark)</summary>
