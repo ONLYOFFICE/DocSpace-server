@@ -1922,18 +1922,7 @@ internal class FileDao(
         return s =>
         {
             s.Where(r => r.ParentId, parentId);
-            
-            if (formsItemDto != null)
-            {
-                s.Nested(a => a.FormsData, b => b.Term(c => c.FormsData.Select(r=> r.Key), char.ToLower(formsItemDto.Key[0]) + formsItemDto.Key[1..]) && b.Term(c => c.FormsData.Select(r=> r.Value), char.ToLower(searchText[0]) + searchText[1..]));
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(searchText))
-                {
-                    s.InAll(r => r.FormsData.Select(a => a.Value), [searchText]);
-                }
-            }
+            s.Nested(a => a.FormsData, b => b.Term(c => c.FormsData.Select(r=> r.Key), char.ToLower(formsItemDto.Key[0]) + formsItemDto.Key[1..]) && b.Term(c => c.FormsData.Select(r=> r.Value), char.ToLower(searchText[0]) + searchText[1..]));
             
             return s;
         };
@@ -2135,7 +2124,7 @@ internal class FileDao(
                 searchIds = searchIds.Concat(result).ToList();
             }
 
-            if (searchInContent)
+            if (searchInContent && formsItemDto != null)
             {
                 var funcForSearchInFormsData = GetFuncForSearchInFormsData(parentId, searchText, formsItemDto);
                 Expression<Func<Selector<DbFormsItemDataSearch>, Selector<DbFormsItemDataSearch>>> expressionSearchText = s => funcForSearchInFormsData(s);

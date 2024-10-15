@@ -198,7 +198,7 @@ public abstract class FoldersController<T>(
 
         var split = extension == null ? [] : extension.Split(",");
         FormsItemDto formsItemDto = null;
-        if (!string.IsNullOrEmpty(formsItemKey) || string.IsNullOrEmpty(formsItemType))
+        if (!string.IsNullOrEmpty(formsItemKey) || !string.IsNullOrEmpty(formsItemType))
         {
             formsItemDto = new FormsItemDto(formsItemKey, formsItemType);
         }
