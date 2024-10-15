@@ -831,7 +831,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpPost("tags")]
     public async Task<object> CreateTagAsync(CreateTagRequestDto inDto)
     {
-        return await customTagsService.CreateTagAsync(inDto.Name);
+        return (await customTagsService.CreateTagAsync(inDto.Name)).Name;
     }
 
     /// <summary>

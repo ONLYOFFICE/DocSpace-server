@@ -95,6 +95,7 @@ public class FileStorageService //: IFileStorageService
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
     PasswordSettingsManager passwordSettingsManager,
     WatermarkManager watermarkManager,
+    CustomTagsService customTagsService,
     IMapper mapper)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
@@ -656,7 +657,13 @@ public class FileStorageService //: IFileStorageService
             var tagDao = daoFactory.GetTagDao<T>();
 
             var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+            var notFoundTags = names.Where(x => tagsInfos.All(r => r.Name != x));
 
+            foreach (var tagInfo in notFoundTags)
+            {
+                tagsInfos.Add(await customTagsService.CreateTagAsync(tagInfo));
+            }
+            
             if (tagsInfos.Count != 0)
             {
                 var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
@@ -896,16 +903,27 @@ public class FileStorageService //: IFileStorageService
         {
             await roomLogoManager.SaveLogo(updateData.Logo.TmpFile, updateData.Logo.X, updateData.Logo.Y, updateData.Logo.Width, updateData.Logo.Height, folder, folderDao);
         }
-
-        if (updateData.Tags != null && updateData.Tags.Any())
-        {
-            var tagsInfos = await tagDao.GetTagsInfoAsync(updateData.Tags).ToListAsync();
-
-            if (tagsInfos.Count != 0)
+        
+        if (updateData.Tags != null)
+        { 
+            await tagDao.RemoveTagLinksAsync(folder.Id, FileEntryType.Folder, TagType.Custom);
+            
+            if (updateData.Tags.Any())
             {
-                var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
+                var tagsInfos = await tagDao.GetTagsInfoAsync(updateData.Tags).ToListAsync();
+                var notFoundTags = updateData.Tags.Where(x => tagsInfos.All(r => r.Name != x));
 
-                await tagDao.SaveTagsAsync(tags);
+                foreach (var tagInfo in notFoundTags)
+                {
+                    tagsInfos.Add(await customTagsService.CreateTagAsync(tagInfo));
+                }
+                
+                if (tagsInfos.Count != 0)
+                {
+                    var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
+
+                    await tagDao.SaveTagsAsync(tags);
+                }
             }
         }
         
