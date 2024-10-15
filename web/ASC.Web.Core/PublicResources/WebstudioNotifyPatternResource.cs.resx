@@ -1810,7 +1810,7 @@ Chcete-li licenci aktualizovat, obraťte se prosím přímo na svého specializo
 
 V případě dotazů týkajících se plateb nás kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}". Pro řešení technických problémů použijte "${__SupportLink}":"${__SupportLink}".
 
-$TrulyYou</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Dobrý den, $UserName!

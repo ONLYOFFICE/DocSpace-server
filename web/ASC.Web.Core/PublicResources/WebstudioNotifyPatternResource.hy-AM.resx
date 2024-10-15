@@ -1902,7 +1902,7 @@ $OrangeButton
 
 Դուք նաև կարող եք անմիջապես կապվել ձեր վաճառքի մենեջերի հետ լիցենզիայի թարմացման համար:
 
-Վճարման հարցերի համար կապվեք մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}. Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
+Վճարման հարցերի համար կապվեք մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}". Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>
