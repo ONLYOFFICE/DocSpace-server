@@ -1786,12 +1786,19 @@ public class FileSecurity(IDaoFactory daoFactory,
         var entries = new List<FileEntry>();
 
         var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any);
+        var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects).ToListAsync();
 
         var internalRoomsRecords = new Dictionary<int, FileShareRecord<int>>();
         var thirdPartyRoomsRecords = new Dictionary<string, FileShareRecord<string>>();
 
-        await foreach (var record in securityDao.GetSharesAsync(currentUserSubjects)
-                           .Where(r => r.Share != FileShare.Restrict))
+        var recordGroup = currentUsersRecords.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
+        {
+            firstRecord = group.OrderBy(r => r, new SubjectComparer<string>(currentUserSubjects))
+                .ThenByDescending(r => r.Share, new FileShareRecord<string>.ShareComparer(FolderType.VirtualRooms))
+                .First()
+        });
+
+        foreach (var record in recordGroup.Select(r=> r.firstRecord).Where(r => r.Share != FileShare.Restrict))
         {
             if (record.EntryType != FileEntryType.Folder)
             {
