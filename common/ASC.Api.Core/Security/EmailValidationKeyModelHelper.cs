@@ -157,6 +157,16 @@ public class EmailValidationKeyModelHelper(
 
                 checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + postfix, key, provider.ValidEmailKeyInterval);
                 break;
+
+            case ConfirmType.EmailActivation:
+                if (authContext.CurrentAccount.ID != uiD.GetValueOrDefault())
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
+                
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type, key, provider.ValidEmailKeyInterval);
+                break;
             case ConfirmType.PasswordChange:
                 userInfo = await userManager.GetUserByEmailAsync(email);
                 if(Equals(userInfo, Constants.LostUser) || userInfo.Id != uiD || userInfo.Status == EmployeeStatus.Terminated)
