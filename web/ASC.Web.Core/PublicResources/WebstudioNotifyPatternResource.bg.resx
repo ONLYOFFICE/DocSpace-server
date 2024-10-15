@@ -1756,4 +1756,186 @@ $TrulyYours</value>
   <data name="subject_migration_personal_to_docspace" xml:space="preserve">
     <value>Миграцията на данни към ONLYOFFICE DocSpace приключи успешно</value>
   </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Задайте парола за ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Купи сега</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Задай парола</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Гратисният период за вашия ONLYOFFICE DocSpace Developer е активиран</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Вашият ONLYOFFICE DocSpace Developer лиценз ще изтече скоро</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Гратисният период за вашия ONLYOFFICE DocSpace Developer ще изтече скоро</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Вашият ONLYOFFICE DocSpace Developer вече не е наличен</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Гратисният период за вашия ONLYOFFICE DocSpace Enterprise е активиран </value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Вашият ONLYOFFICE DocSpace Enterprise лиценз ще изтече скоро</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Гратисният период за вашия ONLYOFFICE DocSpace Enterprise ще изтече скоро</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Вашият ONLYOFFICE DocSpace Enterprise вече не е наличен</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Вашият ONLYOFFICE DocSpace Enterprise лиценз ще изтече скоро</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Вашият ONLYOFFICE DocSpace Enterprise лиценз изтича днес</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Вашият лиценз за ONLYOFFICE DocSpace Developer изтича днес.
+
+Активирахме гратисен период от $PaymentDelay дни за вас. През това време достъпът до редактиране на документи е ограничен до 20 едновременни връзки (вече без поддръжка и актуализации).
+
+За да актуализирате лиценза, моля, свържете се директно с вашия посветен мениджър по продажбите или с нас на "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+За въпроси относно плащането се свържете с нас на "${__SalesEmail}":"mailto:${__SalesEmail}". За разрешаване на технически проблеми използвайте "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Вашият ONLYOFFICE DocSpace Developer лиценз ще изтече след 7 дни.
+
+За да актуализирате лиценза, моля, свържете се директно с вашия посветен мениджър по продажбите или с нас на "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+За въпроси относно плащането се свържете с нас на "${__SalesEmail}":"mailto:${__SalesEmail}". За разрешаване на технически проблеми използвайте "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Гратисният период за вашия ONLYOFFICE DocSpace Developer лиценз ще изтече след 7 дни. Това означава, че DocSpace ще стане недостъпен.
+
+За да актуализирате лиценза, моля, свържете се директно с вашия посветен мениджър по продажбите или с нас на "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+За въпроси относно плащането се свържете с нас на "${__SalesEmail}":"mailto:${__SalesEmail}". За разрешаване на технически проблеми използвайте "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Гратисният период за вашия ONLYOFFICE DocSpace Developer лиценз изтича днес. Това означава, че DocSpace вече няма да бъде достъпен.
+
+За да актуализирате лиценза, моля, свържете се директно с вашия посветен мениджър по продажбите или с нас на "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+За въпроси относно плащането се свържете с нас на "${__SalesEmail}":"mailto:${__SalesEmail}". За разрешаване на технически проблеми използвайте "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Вашият ONLYOFFICE DocSpace Enterprise лиценз изтича днес.
+
+Активирахме *гратисен период от $PaymentDelay‎ дни* за вас. През това време достъпът до DocSpace е осигурен за трима посочени потребители* (вече не се осигурява поддръжка и актуализации).
+
+За да можете да използвате всички функции, налични в момента на покупката за *неограничен период от време*, ви препоръчваме *да вземете ДОЖИВОТЕН лиценз* за ONLYOFFICE DocSpace Enterprise (с включени 3 години поддръжка и актуализации):
+
+$OrangeButton
+
+Можете също така да се свържете директно с вашия посветен мениджър по продажбите за актуализацията на лиценза.
+
+За въпроси относно плащането се свържете с нас на "${__SalesEmail}":"mailto:${__SalesEmail}". За разрешаване на технически проблеми използвайте "${__SupportLink}":"${__SupportLink}".
+
+*Записаните идентификатори на първите трима потребители, които ще отворят произволен файл за редактиране. Броят на документите, които могат да се редактират едновременно, не е ограничен. Други потребители ще могат да отварят документи само за преглед.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Вашият ONLYOFFICE DocSpace Enterprise лиценз ще изтече след 7 дни.
+
+За да можете да използвате всички функции, налични в момента на покупката за *неограничен период от време*, ви препоръчваме *да вземете ДОЖИВОТЕН лиценз* за ONLYOFFICE DocSpace Enterprise (с включени 3 години поддръжка и актуализации).
+
+$OrangeButton
+
+Можете също така да се свържете директно с вашия посветен мениджър по продажбите за актуализацията на лиценза.
+
+За въпроси относно плащането се свържете с нас на "${__SalesEmail}":"mailto:${__SalesEmail}". За разрешаване на технически проблеми използвайте "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Гратисният период за вашия ONLYOFFICE DocSpace Enterprise лицензще изтече след 7 дни. Това означава, че DocSpace ще стане недостъпен.
+
+За да можете да използвате всички функции, налични в момента на покупката за *неограничен период от време*, ви препоръчваме *да вземете ДОЖИВОТЕН лиценз* за ONLYOFFICE DocSpace Enterprise (с включени 3 години поддръжка и актуализации):
+
+$OrangeButton
+
+Можете също така да се свържете директно с вашия посветен мениджър по продажбите за актуализацията на лиценза.
+
+За въпроси относно плащането се свържете с нас на "${__SalesEmail}":"mailto:${__SalesEmail}". За разрешаване на технически проблеми използвайте "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Гратисният период за вашия ONLYOFFICE DocSpace Enterprise лиценз изтича днес. Това означава, че DocSpace вече няма да бъде достъпен.
+
+За да можете да използвате всички функции, налични в момента на покупката за *неограничен период от време*, ви препоръчваме *да вземете ДОЖИВОТЕН лиценз* за ONLYOFFICE DocSpace Enterprise (с включени 3 години поддръжка и актуализации):
+
+$OrangeButton
+
+Можете също така да се свържете директно с вашия посветен мениджър по продажбите за актуализацията на лиценза.
+
+За въпроси относно плащането се свържете с нас на "${__SalesEmail}":"mailto:${__SalesEmail}". За разрешаване на технически проблеми използвайте "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Вашият ONLYOFFICE DocSpace Enterprise лиценз ще изтече след 7 дни. Това означава, че актуализациите и поддръжката вече няма да бъдат налични.*
+
+За да актуализирате лиценза, моля, свържете се директно с вашия посветен мениджър по продажбите или с нас на "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+За въпроси относно плащането се свържете с нас на "${__SalesEmail}":"mailto:${__SalesEmail}". За разрешаване на технически проблеми използвайте "${__SupportLink}":"${__SupportLink}".
+
+*Можете да използвате всички функции, налични в момента на купуване на лиценза, за неограничен период от време.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Вашият ONLYOFFICE DocSpace Enterprise лиценз изтича днес. Това означава, че актуализациите и поддръжката вече не са налични.*
+
+За да актуализирате лиценза, моля, свържете се директно с вашия посветен мениджър по продажбите или с нас на "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+За въпроси относно плащането се свържете с нас на "${__SalesEmail}":"mailto:${__SalesEmail}". За разрешаване на технически проблеми използвайте "${__SupportLink}":"${__SupportLink}".
+
+*Можете да използвате всички функции, налични в момента на купуване на лиценза, за неограничен период от време.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Здравейте! Моля, задайте парола за вашия ONLYOFFICE DocSpace профил. Просто кликнете върху бутона по-долу:
+
+$OrangeButton
+
+Линкът е валиден 7 дни.</value>
+  </data>
 </root>
