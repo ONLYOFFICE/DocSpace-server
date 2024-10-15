@@ -689,7 +689,7 @@ public class UserController(
 
         if (isInvite)
         {
-            return await employeeFullDtoHelper.GetSimple(user);
+            return await employeeFullDtoHelper.GetSimple(user, false);
         }
         
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -736,7 +736,7 @@ public class UserController(
 
         if (isInvite)
         {
-            return await employeeFullDtoHelper.GetSimple(user);
+            return await employeeFullDtoHelper.GetSimple(user, false);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -2035,18 +2035,18 @@ public class UserController(
         {
             switch (eType)
             {
-                case EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when filter.Area is not Area.Guests:
                     iGroups.Add([Constants.GroupAdmin.ID]);
                     break;
-                case EmployeeType.RoomAdmin:
+                case EmployeeType.RoomAdmin when filter.Area is not Area.Guests:
                     eGroups.Add(Constants.GroupGuest.ID);
                     eGroups.Add(Constants.GroupAdmin.ID);
                     eGroups.Add(Constants.GroupUser.ID);
                     break;
-                case EmployeeType.User:
+                case EmployeeType.User when filter.Area is not Area.Guests:
                     iGroups.Add([Constants.GroupUser.ID]);
                     break;
-                case EmployeeType.Guest:
+                case EmployeeType.Guest when filter.Area is not Area.People:
                     iGroups.Add([Constants.GroupGuest.ID]);
                     break;
             }

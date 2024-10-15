@@ -96,7 +96,9 @@ public class FolderContentDtoHelper(
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension = null, FormsItemDto formsItemDto = null)
     {
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, filterType ?? FilterType.None, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension, searchArea ?? SearchArea.Active, formsItemDto);
+        var types = filterType.HasValue ? new[] { filterType.Value } : null;
+
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension, searchArea ?? SearchArea.Active, formsItemDto);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -231,7 +233,7 @@ public class FolderContentDtoHelper(
         }
     }
     
-    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, FilterType filterType, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension, SearchArea searchArea, FormsItemDto formsItemDto)
+    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, IEnumerable<FilterType> filterTypes, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension, SearchArea searchArea, FormsItemDto formsItemDto)
     {
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
@@ -240,7 +242,7 @@ public class FolderContentDtoHelper(
         }
 
         var startIndex = Convert.ToInt32(apiContext.StartIndex);
-        var items = await fileStorageService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(apiContext.Count), filterType, filterType == FilterType.ByUser, userIdOrGroupId.ToString(), apiContext.FilterValue, extension, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
+        var items = await fileStorageService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(apiContext.Count), filterTypes, filterTypes?.FirstOrDefault() == FilterType.ByUser, userIdOrGroupId.ToString(), apiContext.FilterValue, extension, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
             roomId: roomId, applyFilterOption: applyFilterOption, searchArea: searchArea, formsItemDto: formsItemDto);
 
         return await GetAsync(folderId, items, startIndex);
