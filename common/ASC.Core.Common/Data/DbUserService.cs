@@ -756,7 +756,10 @@ public class EFUserService(
                 }
                 else
                 {
-                    filter.CombinedGroups.Add(new Tuple<List<List<Guid>>, List<Guid>>([[]], [Constants.GroupGuest.ID]));
+                    foreach (var (_, excludeGroups) in filter.CombinedGroups)
+                    {
+                        excludeGroups?.Add(Constants.GroupGuest.ID);
+                    }
                 }
                 break;
         }
