@@ -820,11 +820,17 @@ public class FileStorageService //: IFileStorageService
         {                
             var oldTitle = folder.Title;
             WatermarkSettings watermark = null;
+            RoomDataLifetime lifetime = null;
             
             if (watermarkChanged)
             {
                 watermark = mapper.Map<WatermarkRequestDto, WatermarkSettings>(updateData.Watermark);
                 watermark.ImageUrl = await watermarkManager.GetWatermarkImageUrlAsync(folder, watermark.ImageUrl);
+            }
+
+            if (lifetimeChanged)
+            {
+                lifetime = mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(updateData.Lifetime);
             }
 
             var newFolderId = await folderDao.UpdateFolderAsync(
@@ -833,7 +839,7 @@ public class FileStorageService //: IFileStorageService
                 quotaChanged ? (long)updateData.Quota : folder.SettingsQuota,
                 indexingChanged ? updateData.Indexing.Value : folder.SettingsIndexing,
                 denyDownloadChanged ? updateData.DenyDownload.Value : folder.SettingsDenyDownload,
-                lifetimeChanged ? mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(updateData.Lifetime) : folder.SettingsLifetime,
+                lifetimeChanged ? lifetime : folder.SettingsLifetime,
                 watermarkChanged ? (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark) : folder.SettingsWatermark,
                 colorChanged ? updateData.Color : folder.SettingsColor,
                 coverChanged ? updateData.Cover : folder.SettingsCover);
@@ -844,19 +850,37 @@ public class FileStorageService //: IFileStorageService
             
             if (isRoom)
             {
+                if (watermarkChanged)
+                {
+                    if (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value)
+                    {
+                        await filesMessageService.SendAsync(MessageAction.RoomWatermarkDisabled, folder, folder.Title);
+                    }
+                    else
+                    {
+                        await filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, folder, folder.Title, watermark.Created.GetHashCode().ToString());
+                    }
+                }
+                
                 if (indexingChanged)
                 {
                     if (updateData.Indexing.Value)
                     {
                         await ReOrderAsync(folder.Id, true, true);
+                        _ = filesMessageService.SendAsync(MessageAction.RoomIndexingEnabled, folder);
                     }
-                    
-                    _ = filesMessageService.SendAsync(MessageAction.RoomIndexingChanged, folder, folder.Title);
+                    else
+                    {
+                        _ = filesMessageService.SendAsync(MessageAction.RoomIndexingDisabled, folder);
+                    }
                 }
             
                 if (denyDownloadChanged)
                 {
-                    _ = filesMessageService.SendAsync(MessageAction.RoomDenyDownloadChanged, folder, folder.Title);
+                    _ = filesMessageService.SendAsync(updateData.DenyDownload.Value 
+                        ? MessageAction.RoomDenyDownloadEnabled 
+                        : MessageAction.RoomDenyDownloadDisabled, 
+                        folder, folder.Title);
                 }
                 
                 if (colorChanged)
@@ -867,6 +891,20 @@ public class FileStorageService //: IFileStorageService
                 if (coverChanged)
                 {
                     _ = filesMessageService.SendAsync(MessageAction.RoomCoverChanged, folder, folder.Title);
+                }
+
+                if (lifetimeChanged)
+                {
+                    if (updateData.Lifetime.Enabled.HasValue && !updateData.Lifetime.Enabled.Value)
+                    {
+                        _ = filesMessageService.SendAsync(MessageAction.RoomLifeTimeDisabled, folder);
+                        
+                    }
+                    else
+                    {
+                        _ = filesMessageService.SendAsync(MessageAction.RoomLifeTimeSet, folder, lifetime.Value.ToString(), lifetime.Period.ToStringFast(), 
+                            lifetime.DeletePermanently.ToString());
+                    }
                 }
             }
             
