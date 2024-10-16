@@ -485,4 +485,7 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="FormNumber" xml:space="preserve">
     <value>フォーム番号</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>外部ユーザー</value>
+  </data>
 </root>
