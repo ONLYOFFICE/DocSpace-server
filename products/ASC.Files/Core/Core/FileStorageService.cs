@@ -637,16 +637,20 @@ public class FileStorageService //: IFileStorageService
             _ = await RoomLogoManager.CoverChanged(cover, newFolder);
 
             var folderId = await folderDao.SaveFolderAsync(newFolder);
-            try
+            if (watermark != null)
             {
+                try
+                {
 
-                await watermarkManager.SetWatermarkAsync(newFolder, watermark);
-            }
-            catch (Exception)
-            {
+                    await watermarkManager.SetWatermarkAsync(newFolder, watermark);
+                }
+                catch (Exception)
+                {
 
+                }
             }
             
+
             var folder = await folderDao.GetFolderAsync(folderId);
             
             if (logo != null)
@@ -656,19 +660,22 @@ public class FileStorageService //: IFileStorageService
             
             var tagDao = daoFactory.GetTagDao<T>();
 
-            var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
-            var notFoundTags = names.Where(x => tagsInfos.All(r => r.Name != x));
-
-            foreach (var tagInfo in notFoundTags)
+            if (names != null)
             {
-                tagsInfos.Add(await customTagsService.CreateTagAsync(tagInfo));
-            }
-            
-            if (tagsInfos.Count != 0)
-            {
-                var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
+                var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+                var notFoundTags = names.Where(x => tagsInfos.All(r => r.Name != x));
 
-                await tagDao.SaveTagsAsync(tags);
+                foreach (var tagInfo in notFoundTags)
+                {
+                    tagsInfos.Add(await customTagsService.CreateTagAsync(tagInfo));
+                }
+
+                if (tagsInfos.Count != 0)
+                {
+                    var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
+
+                    await tagDao.SaveTagsAsync(tags);
+                }
             }
 
             if (!isRoom)
