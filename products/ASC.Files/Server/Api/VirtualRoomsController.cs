@@ -689,6 +689,7 @@ public abstract class VirtualRoomsController<T>(
     public async Task<FolderDto<T>> ReorderAsync(T id)
     {
         var room = await _fileStorageService.ReOrderAsync(id);
+        await _filesMessageService.SendAsync(MessageAction.FolderIndexReordered, room, room.Title);
 
         return await _folderDtoHelper.GetAsync(room);
     }

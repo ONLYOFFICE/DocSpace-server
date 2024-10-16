@@ -3733,9 +3733,7 @@ public class FileStorageService //: IFileStorageService
                 await ReOrderAsync(t.Key, true, init);
             }
         }
-
-        await filesMessageService.SendAsync(MessageAction.FolderIndexReordered, room, room.Title);
-
+        
         return room;
     }
     
