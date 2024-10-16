@@ -533,7 +533,7 @@ internal class ProviderFileDao(
         return fileDao.GetThumbnailAsync(file, width, height);
     }
 
-    public async Task<bool> SetCustomOrder(string fileId, string parentFolderId, int order)
+    public async Task<int> SetCustomOrder(string fileId, string parentFolderId, int order)
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);

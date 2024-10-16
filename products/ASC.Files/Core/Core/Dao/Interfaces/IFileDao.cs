@@ -346,7 +346,7 @@ public interface IFileDao<T>
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
         bool withSubfolders = false, bool excludeSubject = false, T roomId = default);
 
-    Task<bool> SetCustomOrder(T fileId, T parentFolderId, int order);
+    Task<int> SetCustomOrder(T fileId, T parentFolderId, int order);
 
     Task InitCustomOrder(Dictionary<T, int> fileIds, T parentFolderId);
 

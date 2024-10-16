@@ -1869,7 +1869,8 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (await fileDao.SetCustomOrder(fileId, file.ParentId, order))
+        var newOrder = await fileDao.SetCustomOrder(fileId, file.ParentId, order);
+        if (newOrder != 0 && newOrder != file.Order)
         {
             await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), order.ToString());
         }
@@ -1885,7 +1886,9 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (await folderDao.SetCustomOrder(folderId, folder.ParentId, order))
+        var newOrder = await folderDao.SetCustomOrder(folderId, folder.ParentId, order);
+
+        if (newOrder != 0 && newOrder != folder.Order)
         {
             await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), order.ToString());
         }

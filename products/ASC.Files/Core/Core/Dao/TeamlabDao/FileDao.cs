@@ -1798,7 +1798,7 @@ internal class FileDao(
         await filesDbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> SetCustomOrder(int fileId, int parentFolderId, int order = 0)
+    public async Task<int> SetCustomOrder(int fileId, int parentFolderId, int order = 0)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await SetCustomOrder(filesDbContext, fileId, parentFolderId, order);

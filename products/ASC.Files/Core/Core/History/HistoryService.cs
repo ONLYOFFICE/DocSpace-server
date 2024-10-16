@@ -47,10 +47,7 @@ public class HistoryService(
         MessageAction.FileCopiedWithOverwriting, 
         MessageAction.FileDeleted, 
         MessageAction.FileConverted, 
-        MessageAction.FileRestoreVersion,
-        MessageAction.FileIndexChanged,
-        MessageAction.FileLocked,
-        MessageAction.FileUnlocked,
+        MessageAction.FileRestoreVersion, 
         MessageAction.FolderCreated,
         MessageAction.FolderRenamed,
         MessageAction.FolderMoved,
@@ -59,8 +56,6 @@ public class HistoryService(
         MessageAction.FolderCopiedWithOverwriting,
         MessageAction.FolderMovedToTrash,
         MessageAction.FolderDeleted,
-        MessageAction.FolderIndexChanged,
-        MessageAction.FolderIndexReordered,
         MessageAction.RoomCreateUser,
         MessageAction.RoomUpdateAccessForUser,
         MessageAction.RoomRemoveUser,
@@ -92,14 +87,15 @@ public class HistoryService(
         MessageAction.RoomWatermarkDisabled,
         MessageAction.PrimaryExternalLinkCopied
     ];
-    
-    public static HashSet<int> FilterFolderActions => [
+
+    private static HashSet<int> FilterFolderActions => [
         (int)MessageAction.FolderCreated,
         (int)MessageAction.FolderMovedWithOverwriting,
         (int)MessageAction.FolderMovedToTrash,
         (int)MessageAction.FolderRenamed
     ];
-    public static HashSet<int> FilterFileActions => [
+
+    private static HashSet<int> FilterFileActions => [
         (int)MessageAction.FileCopied,
         (int)MessageAction.FileUploaded,
         (int)MessageAction.FileMoved,
@@ -108,92 +104,46 @@ public class HistoryService(
         (int)MessageAction.FormOpenedForFilling
     ];
 
-    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count, bool needFiltering, List<int> filterFolderIds, List<int> filterFilesIds, DateTime? fromDate, DateTime? toDate)
+    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(
+        FileEntry<int> entry,
+        int offset,
+        int count,
+        bool needFiltering,
+        List<int> filterFolderIds,
+        List<int> filterFilesIds,
+        DateTime? fromDate,
+        DateTime? toDate)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        IAsyncEnumerable<DbAuditEvent> events;
+        var events = needFiltering 
+            ? messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate) 
+            : messageDbContext.GetAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, fromDate, toDate);
 
-        if (needFiltering)
-        {
-            events = messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions);
-        }
-        else
-        {
-            events = messageDbContext.GetAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count);
-        }
-        
-        var query = GetHistoryEventQuery(entryId, entryType, fromDate, toDate, messageDbContext, tenantId);
-
-        query = query.OrderByDescending(x => x.Event.Date);
-        
-        if (offset > 0)
-        {
-            query = query.Skip(offset);
-        }
-        
-        if (count > 0)
-        {
-            query = query.Take(count);
-        }
-
-        var history = query
-            .Select(x => x.Event)
-            .ToAsyncEnumerable()
-            .SelectAwait(x => interpreter.ToHistoryAsync(x, entry));
-
-        await foreach (var hEntry in history)
+        await foreach (var hEntry in events.SelectAwait(e => interpreter.ToHistoryAsync(e, entry)).Where(x => x != null))
         {
             yield return hEntry;
         }
     }
 
-    public async Task<int> GetHistoryCountAsync(int entryId, FileEntryType entryType, bool needFiltering, List<int> filterFolderIds, List<int> filterFilesIds, DateTime? fromDate, DateTime? toDate)
+    public async Task<int> GetHistoryCountAsync(
+        int entryId,
+        FileEntryType entryType,
+        bool needFiltering,
+        List<int> filterFolderIds,
+        List<int> filterFilesIds,
+        DateTime? fromDate,
+        DateTime? toDate)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-        
-        var query = GetHistoryEventQuery(entryId, entryType, fromDate, toDate, messageDbContext, tenantId);
-        
-        return await query.CountAsync();
-    }
-    
-    private static IQueryable<HistoryEvent> GetHistoryEventQuery(
-        int entryId,
-        FileEntryType entryType,
-        DateTime? fromDate,
-        DateTime? toDate,
-        MessagesContext messageDbContext,
-        int tenantId)
-    {
-        var query = messageDbContext.AuditEvents.Join(
-                messageDbContext.FilesAuditReferences,
-                e => e.Id,
-                r => r.AuditEventId, (@event, reference) => new HistoryEvent { Event = @event, Reference = reference })
-            .Where(x => x.Event.TenantId == tenantId && x.Reference.EntryId == entryId && x.Reference.EntryType == (byte)entryType);
-        
-        if (fromDate.HasValue)
-        {
-            query = query.Where(x => x.Event.Date >= fromDate.Value);
-        }
-        
-        if (toDate.HasValue)
-        {
-            query = query.Where(x => x.Event.Date <= toDate.Value);
-        }
 
         if (needFiltering)
         {
-            return await messageDbContext.GetFilteredAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions);
+            return await messageDbContext.GetFilteredAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate);
         }
         
-        return query;
-    }
-
-    private record HistoryEvent
-    {
-        public DbAuditEvent Event { get; init; }
-        public DbFilesAuditReference Reference { get; init; }
+        return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, fromDate, toDate);
     }
 }
