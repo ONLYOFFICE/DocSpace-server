@@ -252,7 +252,8 @@ public class EntryManager(IDaoFactory daoFactory,
     TenantManager tenantManager,
     FileChecker fileChecker,
     IDistributedCache distributedCache,
-    NotifyClient notifyClient)
+    NotifyClient notifyClient,
+    ExternalShare externalShare)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -261,7 +262,7 @@ public class EntryManager(IDaoFactory daoFactory,
         Folder<T> room,
         int from,
         int count,
-        FilterType filterType,
+        IEnumerable<FilterType> filterTypes,
         bool subjectGroup,
         Guid subjectId,
         string searchText,
@@ -299,6 +300,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
 
         var entries = new List<FileEntry>();
+        var filterType = filterTypes?.FirstOrDefault() ?? FilterType.None;
 
         searchInContent = searchInContent && filterType != FilterType.ByExtension && !Equals(parent.Id, await globalFolderHelper.FolderTrashAsync);
 
@@ -329,12 +331,8 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         
         var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, new string[] {});
-
-        if (parent.FolderType == FolderType.Projects && parent.Id.Equals(await globalFolderHelper.FolderProjectsAsync))
-        {
-
-        }
-        else if (parent.FolderType == FolderType.SHARE)
+        
+        if (parent.FolderType == FolderType.SHARE)
         {
             //share
             var shared = await fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders).ToListAsync();
@@ -407,7 +405,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive && !parent.ProviderEntry)
         {
-            entries = await fileSecurity.GetVirtualRoomsAsync(filterType, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, 
+            entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, 
                 provider, subjectFilter, quotaFilter, storageFilter);
 
             CalculateTotal();
@@ -446,15 +444,15 @@ public class EntryManager(IDaoFactory daoFactory,
             else
             {
                 var containingMyFiles = false;
-                if (parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder)
+                if (parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder or FolderType.FillingFormsRoom)
                 {
-                if (parent.ShareRecord is { Share: FileShare.FillForms })
+                    if (parent.ShareRecord is { Share: FileShare.FillForms })
                     {
                         containingMyFiles = true;
                     }
                 }
                 
-                var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles)
+                var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType)
                     .ToListAsync();
 
                 if (containingMyFiles)
@@ -466,7 +464,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
                 
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
-                    excludeSubject, filesOffset, filesCount, roomId, withShared);
+                excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType);
 
                 var shared = await sharedTask;
 
@@ -485,7 +483,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     for (var i = folders.Count - 1; i >= 0; i--)
                     {
-                        if (folders[i].FolderType == FolderType.ReadyFormFolder || folders[i].FolderType == FolderType.InProcessFormFolder)
+                        if (DocSpaceHelper.IsFormsFillingSystemFolder(folders[i].FolderType))
                         {
                             folders.Remove(folders[i]);
                         }
@@ -1200,7 +1198,10 @@ public class EntryManager(IDaoFactory daoFactory,
                         };
                         foreach (var formFolder in systemFormFillingFolders)
                         {
-                            await socketManager.CreateFolderAsync(formFolder);
+                            var a = await fileSharing.GetSharedInfoAsync(formFolder);
+                            var u = a.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
+
+                            await socketManager.CreateFolderAsync(formFolder, u);
                             await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
                         }
                     }
@@ -1525,9 +1526,6 @@ public class EntryManager(IDaoFactory daoFactory,
                         pdfFile.Category = (int)FilterType.Pdf;
 
                         File<T> result;
-
-                        var user = await userManager.GetUsersAsync(userId);
-
                         if (tmpStream.CanSeek)
             {
                             pdfFile.ContentLength = tmpStream.Length;
@@ -1634,10 +1632,12 @@ public class EntryManager(IDaoFactory daoFactory,
 
     public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
     {
+        var token = externalShare.GetKey();
+        
         bool checkRight;
         if ((await fileTracker.GetEditingByAsync(fileId)).Contains(userId))
         {
-            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
+            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone, token);
             if (!checkRight)
             {
                 return null;
@@ -1665,7 +1665,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
+        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone, token);
         if (checkRight)
         {
             await fileTracker.ChangeRight(fileId, userId, false);
@@ -1953,7 +1953,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_RenameFile);
         }
 
-        if (!await fileSecurity.CanDeleteAsync(file) && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (!await fileSecurity.CanDeleteAsync(file) && await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_RenameFile);
         }

@@ -1337,7 +1337,7 @@ public class S3Storage(TempStream tempStream,
 
     private async ValueTask RecycleAsync(IAmazonS3 client, string domain, string key)
     {
-        if (string.IsNullOrEmpty(_recycleDir) || string.IsNullOrEmpty(domain) || domain.EndsWith("_temp") || !_recycleUse)
+        if (string.IsNullOrEmpty(_recycleDir) || (!string.IsNullOrEmpty(domain) && domain.EndsWith("_temp")) || !_recycleUse)
         {
             return;
         }

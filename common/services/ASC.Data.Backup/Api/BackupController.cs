@@ -168,6 +168,10 @@ public class BackupController(
                 await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
+        if (storageType is BackupStorageType.ThirdPartyConsumer)
+        {
+            storageParams.Add("subdir", "backup");
+        }
         
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null

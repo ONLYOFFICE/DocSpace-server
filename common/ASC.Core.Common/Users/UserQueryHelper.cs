@@ -28,6 +28,21 @@ namespace ASC.Core.Common.Users;
 
 public static class UserQueryHelper
 {
+    public static T FilterByInviter<T>(T query, bool? invitedByMe, Guid? inviterId, Guid currentId) where T : IQueryable<User>, IEnumerable<User>
+    {
+        if (invitedByMe.HasValue && invitedByMe.Value)
+        {
+            return (T)query.Where(u => u.CreatedBy == currentId);
+        }
+
+        if (inviterId.HasValue)
+        { 
+            return (T)query.Where(u => u.CreatedBy == inviterId);
+        }
+
+        return query;
+    }
+    
     public static T FilterByText<T>(T query, string text, string separator) where T : IQueryable<User>, IEnumerable<User>
     {
         if (string.IsNullOrEmpty(text))

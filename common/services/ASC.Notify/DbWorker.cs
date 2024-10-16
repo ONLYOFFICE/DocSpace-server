@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 namespace ASC.Notify;
 
 [Singleton]
@@ -46,7 +48,7 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
             await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
             var notifyQueue = mapper.Map<NotifyMessage, NotifyQueue>(m);
-            notifyQueue.Attachments = JsonConvert.SerializeObject(m.Attachments);
+            notifyQueue.Attachments = JsonSerializer.Serialize(m.Attachments);
 
             notifyQueue = (await dbContext.NotifyQueue.AddAsync(notifyQueue)).Entity;
             await dbContext.SaveChangesAsync();
@@ -96,7 +98,7 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
 
                         try
                         {
-                            res.Attachments = JsonConvert.DeserializeObject<NotifyMessageAttachment[]>(r.queue.Attachments);
+                            res.Attachments = JsonSerializer.Deserialize<NotifyMessageAttachment[]>(r.queue.Attachments);
                         }
                         catch (Exception)
                         {

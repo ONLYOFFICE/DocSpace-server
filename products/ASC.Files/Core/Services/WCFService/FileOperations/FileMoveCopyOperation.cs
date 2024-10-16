@@ -574,8 +574,20 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             && FolderDao.UseRecursiveOperation(folder.Id, toFolderId))
                         {
                             var toNewFolderParents = await folderDao.GetParentFoldersAsync(newFolder.Id).ToListAsync();
+
+                            var foldersForCopyIds = new List<T>();
+                            if (folder.FolderType == FolderType.FillingFormsRoom)
+                            {
+                                var foldersForCopy = await FolderDao.GetFoldersAsync(folder.Id).ToListAsync();
+                                foldersForCopyIds = foldersForCopy.Where(f => !DocSpaceHelper.IsFormsFillingSystemFolder(f.FolderType)).Select(f => f.Id).ToList();
+                            }
+                            else
+                            {
+                                foldersForCopyIds = await FolderDao.GetFoldersAsync(folder.Id).Select(f => f.Id).ToListAsync();
+                            }
+
                             await MoveOrCopyFilesAsync(scope, await FileDao.GetFilesAsync(folder.Id).ToListAsync(), newFolder, copy, toNewFolderParents, checkPermissions);
-                            await MoveOrCopyFoldersAsync(scope, await FolderDao.GetFoldersAsync(folder.Id).Select(f => f.Id).ToListAsync(), newFolder, copy, toNewFolderParents, checkPermissions);
+                            await MoveOrCopyFoldersAsync(scope, foldersForCopyIds, newFolder, copy, toNewFolderParents, checkPermissions);
 
                             if (!copy)
                             {

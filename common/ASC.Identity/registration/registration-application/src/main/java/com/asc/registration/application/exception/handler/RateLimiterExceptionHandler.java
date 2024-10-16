@@ -53,6 +53,6 @@ public class RateLimiterExceptionHandler {
       RequestNotPermitted ex, HttpServletRequest request) {
     log.warn("Rate limiter has blocked current call", ex);
     return new ResponseEntity<>(
-        ErrorResponse.builder().reason("Too many requests").build(), HttpStatus.TOO_MANY_REQUESTS);
+        ErrorResponse.builder().reason("too many requests").build(), HttpStatus.TOO_MANY_REQUESTS);
   }
 }
