@@ -656,11 +656,14 @@ public class FileStorageService //: IFileStorageService
             var tagDao = daoFactory.GetTagDao<T>();
 
             var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
-            var notFoundTags = names.Where(x => tagsInfos.All(r => r.Name != x));
+            var notFoundTags = names?.Where(x => tagsInfos.All(r => r.Name != x));
 
-            foreach (var tagInfo in notFoundTags)
+            if (notFoundTags != null)
             {
-                tagsInfos.Add(await customTagsService.CreateTagAsync(tagInfo));
+                foreach (var tagInfo in notFoundTags)
+                {
+                    tagsInfos.Add(await customTagsService.CreateTagAsync(tagInfo));
+                }
             }
             
             if (tagsInfos.Count != 0)
