@@ -913,11 +913,12 @@ public class FileStorageService //: IFileStorageService
         
         if (updateData.Tags != null)
         { 
-            await tagDao.RemoveTagLinksAsync(folder.Id, FileEntryType.Folder, TagType.Custom);
+            var currentTags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.Custom).ToListAsync();
+            var tagsInfos = new List<TagInfo>();
             
             if (updateData.Tags.Any())
             {
-                var tagsInfos = await tagDao.GetTagsInfoAsync(updateData.Tags).ToListAsync();
+                tagsInfos = await tagDao.GetTagsInfoAsync(updateData.Tags).ToListAsync();
                 var notFoundTags = updateData.Tags.Where(x => tagsInfos.All(r => r.Name != x));
 
                 foreach (var tagInfo in notFoundTags)
@@ -932,6 +933,9 @@ public class FileStorageService //: IFileStorageService
                     await tagDao.SaveTagsAsync(tags);
                 }
             }
+            
+            var toDelete = currentTags.Where(r => tagsInfos.All(b => b.Name != r.Name)).ToList();
+            await tagDao.RemoveTagsAsync(folder, toDelete.Select(t => t.Id).ToList());
         }
         
 
