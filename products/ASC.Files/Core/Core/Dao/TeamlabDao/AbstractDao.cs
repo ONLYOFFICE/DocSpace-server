@@ -219,14 +219,14 @@ public class AbstractDao
 
     internal static string GetSearchText(string text) => (text ?? "").ToLower().Trim();
 
-    internal async Task<bool> SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, FileEntryType fileEntryType, int order = 0)
+    internal async Task<int> SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, FileEntryType fileEntryType, int order = 0)
     {            
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var indexing = await filesDbContext.IsIndexingAsync(tenantId, parentFolderId, fileEntryType);
         
         if(!indexing)
         {
-            return false;
+            return 0;
         }
 
         await using (await _distributedLockProvider.TryAcquireFairLockAsync(GetCustomOrderLockKey(tenantId, parentFolderId)))
@@ -246,7 +246,7 @@ public class AbstractDao
                     var currentOrder = fileOrder.Order;
                     if (currentOrder == order)
                     {
-                        return false;
+                        return currentOrder;
                     }
 
                     if (currentOrder > order)
@@ -275,8 +275,7 @@ public class AbstractDao
             }
 
             await filesDbContext.SaveChangesAsync();
-
-            return true;
+            return order;
         }
     }
 

@@ -32,6 +32,7 @@ CREATE TABLE identity_clients (
     created_by varchar(255),
     modified_on datetime(6),
     modified_by varchar(255),
+    version integer not null default 0,
     primary key (client_id),
     index idx_identity_clients_tenant_id (tenant_id),
     index idx_identity_clients_is_invalidated (is_invalidated)
@@ -176,40 +177,3 @@ ON SCHEDULE EVERY 1 hour
 ON COMPLETION PRESERVE
     DO
 DELETE FROM identity_authorizations ia WHERE ia.is_invalidated = 1;
-
--- Drop and create triggers to ensure modified dates are updated correctly
-DROP TRIGGER IF EXISTS identity_update_entry_clients;
-
-CREATE TRIGGER identity_update_entry_clients
-    BEFORE UPDATE ON identity_clients
-    FOR EACH ROW
-BEGIN
-    IF new.modified_on <= old.modified_on
-  THEN
-   SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Warning: updated date can not be before than existing date!';
-END IF;
-END;
-
-DROP TRIGGER IF EXISTS identity_update_entry_authorizations;
-
-CREATE TRIGGER identity_update_entry_authorizations
-    BEFORE UPDATE ON identity_authorizations
-    FOR EACH ROW
-BEGIN
-    IF new.modified_at <= old.modified_at
-  THEN
-   SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Warning: updated date can not be before than existing date!';
-END IF;
-END;
-
-DROP TRIGGER IF EXISTS identity_update_entry_consents;
-
-CREATE TRIGGER identity_update_entry_consents
-    BEFORE UPDATE ON identity_consents
-    FOR EACH ROW
-BEGIN
-    IF new.modified_at <= old.modified_at
-  THEN
-   SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Warning: updated date can not be before than existing date!';
-END IF;
-END;

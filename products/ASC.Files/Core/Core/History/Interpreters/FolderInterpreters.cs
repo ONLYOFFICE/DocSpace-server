@@ -32,7 +32,7 @@ public class FolderCreatedInterpreter : ActionInterpreter
     {
         var desc = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new EntryData(target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType));
+        return new ValueTask<HistoryData>(new EntryData(target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType, desc.Type));
     }
 }
 

@@ -70,17 +70,17 @@ public class WordpressHelper(ILogger<WordpressHelper> logger, RequestHelper requ
         publish = 1
     }
 
-    public string GetWordpressMeInfo(string token)
+    public WordpressMeInfo GetWordpressMeInfo(string token)
     {
         try
         {
-            return WordpressLoginProvider.GetWordpressMeInfo(requestHelper, token);
+            return JsonSerializer.Deserialize<WordpressMeInfo>(WordpressLoginProvider.GetWordpressMeInfo(requestHelper, token));
         }
         catch (Exception ex)
         {
             logger.ErrorGetWordpressInfo(ex);
 
-            return string.Empty;
+            return new WordpressMeInfo();
         }
 
     }
@@ -101,4 +101,13 @@ public class WordpressHelper(ILogger<WordpressHelper> logger, RequestHelper requ
             return false;
         }
     }
+}
+
+public class WordpressMeInfo
+{
+    [JsonPropertyName("token_site_id")]
+    public string TokenSiteId { get; set; }
+    
+    [JsonPropertyName("username")]
+    public string UserName { get; set; }
 }

@@ -822,9 +822,9 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
-        ///For payment questions, contact us at sales@onlyoffice.com. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
         ///
-        ///*You can use all the features available at the moment of the license pu [rest of string was truncated]&quot;;.
+        ///*You can use all the features available at the mo [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_lifetime_before_expiration {
             get {
@@ -839,9 +839,9 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
-        ///For payment questions, contact us at sales@onlyoffice.com. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
         ///
-        ///*You can use all the features available at the moment of the license purchase for a [rest of string was truncated]&quot;;.
+        ///*You can use all the features available at the moment of the  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_lifetime_expiration {
             get {

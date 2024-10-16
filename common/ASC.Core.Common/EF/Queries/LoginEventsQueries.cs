@@ -63,6 +63,18 @@ public partial class MessagesContext
     {
         return Queries.LoginEventsExceptThisAsync(this, tenantId, userId, loginEventId);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0])]
+    public IAsyncEnumerable<DbAuditEvent> GetFilteredAuditEventsByReferences(int tenantId, int entryId, byte entryType, int offset, int count, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions)
+    {
+        return Queries.GetFilteredAuditEventsByReferences(this, tenantId, entryId, entryType, offset, count, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0])]
+    public Task<int> GetFilteredAuditEventsByReferencesTotalCount(int tenantId, int entryId, byte entryType, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions)
+    {
+        return Queries.GetFilteredAuditEventsByReferencesTotalCount(this, tenantId, entryId, entryType, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions);
+    }
 }
 
 static file class Queries
@@ -110,4 +122,42 @@ static file class Queries
                                 && r.UserId == userId
                                 && r.Id != loginEventId
                                 && r.Active));
+
+    public static readonly Func<MessagesContext, int, int, byte, int, int, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, IAsyncEnumerable<DbAuditEvent>> GetFilteredAuditEventsByReferences =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (MessagesContext ctx, int tenantId, int entryId, byte entryType, int offset, int count, IEnumerable<int> folders, IEnumerable<int> files, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions) =>
+             ctx.AuditEvents
+                    .Join(ctx.FilesAuditReferences,
+                        e => e.Id,
+                        r => r.AuditEventId, (@event, reference) => new { @event, reference })
+                    .Where(x => x.@event.TenantId == tenantId &&
+                             (x.reference.EntryId == entryId ||
+                             (folders.Contains(x.reference.EntryId) && filterFolderActions.Contains(x.@event.Action ?? 0) && x.reference.EntryType == 1) ||
+                             (files.Contains(x.reference.EntryId) && filterFileActions.Contains(x.@event.Action ?? 0) && x.reference.EntryType == 2)))
+                .OrderByDescending(x => x.@event.Date)
+                .GroupBy(x => x.@event.Id)
+                .Where(g => g.Count() > 1)
+                .Skip(offset)
+                .Take(count)
+                .Select(g => g.FirstOrDefault().@event));
+
+    public static readonly Func<MessagesContext, int, int, byte, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, Task<int>> GetFilteredAuditEventsByReferencesTotalCount =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (MessagesContext ctx, int tenantId, int entryId, byte entryType, IEnumerable<int> folders, IEnumerable<int> files, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions) =>
+                ctx.AuditEvents
+                    .Join(ctx.FilesAuditReferences,
+                        e => e.Id,
+                        r => r.AuditEventId, (@event, reference) => new { @event, reference })
+                    .Where(x => x.@event.TenantId == tenantId &&
+                             (x.reference.EntryId == entryId ||
+                             (folders.Contains(x.reference.EntryId) && filterFolderActions.Contains(x.@event.Action ?? 0) && x.reference.EntryType == 1) ||
+                             (files.Contains(x.reference.EntryId) && filterFileActions.Contains(x.@event.Action ?? 0) && x.reference.EntryType == 2)))
+                    .GroupBy(x => x.@event.Id)
+                    .Select(g => new
+                        {
+                            Id = g.Key,
+                            UniqueEntryCount = g.Select(x => x.reference.EntryId).Distinct().Count()
+                        })
+                    .Where(g => g.UniqueEntryCount > 1)
+                    .Count());
 }

@@ -1760,4 +1760,186 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Zakoupit nyní</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Nastavení hesla</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Dobrý den, $UserName,
+
+dnes končí platnost vaší licence pro ONLYOFFICE DocSpace Developer.
+
+Aktivovali jsme pro vás karenční dobu $PaymentDelay dnů. Během této doby je přístup k úpravám dokumentů omezen na 20 současných připojení (podpora a aktualizace již nejsou poskytovány).
+
+Chcete-li licenci aktualizovat, obraťte se přímo na svého specializovaného manažera prodeje nebo nás kontaktujte prostřednictvím "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+V případě dotazů týkajících se plateb nás kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}". Pro řešení jakýchkoli technických problémů použijte "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Dobrý den, $UserName!
+
+Vaše licence pro ONLYOFFICE DocSpace Developer vyprší za 7 dní.
+
+Chcete-li licenci aktualizovat, obraťte se prosím přímo na svého specializovaného manažera prodeje nebo nás kontaktujte prostřednictvím "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+V případě dotazů týkajících se plateb nás kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}". Pro řešení technických problémů použijte "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Dobrý den, $UserName,
+
+odkladná lhůta pro vaši licenci ONLYOFFICE DocSpace Developer vyprší za 7 dní. To znamená, že DocSpace se stane nedostupným.
+
+Chcete-li licenci aktualizovat, obraťte se přímo na svého specializovaného manažera prodeje nebo nás kontaktujte prostřednictvím "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+V případě dotazů týkajících se plateb nás kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}". Pro řešení jakýchkoli technických problémů použijte "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Dobrý den, $UserName,
+
+odkladná lhůta pro vaši licenci ONLYOFFICE DocSpace Developer vyprší dnes. To znamená, že DocSpace již nebude k dispozici.
+
+Chcete-li licenci aktualizovat, obraťte se prosím přímo na svého specializovaného manažera prodeje nebo nás kontaktujte prostřednictvím "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+V případě dotazů týkajících se plateb nás kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}". Pro řešení technických problémů použijte "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Dobrý den, $UserName!
+
+Vaše licence pro ONLYOFFICE DocSpace Enterprise vyprší dnes.
+
+Aktivovali jsme pro vás *odkladnou lhůtu $PaymentDelay days*. Během této doby je přístup do DocSpace poskytován 3 jmenovaným uživatelům* (podpora a aktualizace již nejsou poskytovány.
+
+Abyste mohli využívat všechny funkce dostupné v okamžiku nákupu po *neomezenou dobu*, doporučujeme vám *pořídit si DOŽIVOTNÍ licenci* na ONLYOFFICE DocSpace Enterprise (s 3 roky podpory a aktualizací v ceně).
+
+$OrangeButton
+
+Pro aktualizaci licence se můžete obrátit také přímo na svého specializovaného manažera prodeje.
+
+V případě dotazů týkajících se platby nás kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}". Pro řešení jakýchkoli technických problémů použijte "${__SupportLink}":"${__SupportLink}".
+
+*Zaznamenaná ID prvních 3 uživatelů, kteří otevřou jakýkoli soubor pro editaci. Počet dokumentů, které lze současně upravovat, není omezen. Ostatní uživatelé budou moci otevřít dokumenty k prohlížení pouze.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Dobrý den, $UserName,
+
+Vaše licence pro ONLYOFFICE DocSpace Enterprise vyprší za 7 dní.
+
+Abyste mohli využívat všechny funkce dostupné v okamžiku nákupu po *neomezenou dobu*, doporučujeme vám *pořídit si DOŽIVOTNÍ licenci* pro ONLYOFFICE DocSpace Enterprise (s 3 roky podpory a aktualizací v ceně).
+
+$OrangeButton
+
+Pro aktualizaci licence se můžete obrátit také přímo na svého specializovaného manažera prodeje
+
+V případě dotazů týkajících se platby nás kontaktujte na adrese"${__SalesEmail}":"mailto:${__SalesEmail}". Pro řešení jakýchkoli technických problémů použijte "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Dobrý den, $UserName,
+
+odkladná lhůta pro vaši licenci ONLYOFFICE DocSpace Enterprise vyprší za 7 dní. To znamená, že DocSpace se stane nedostupným.
+
+Abyste mohli využívat všechny funkce dostupné v okamžiku nákupu po *neomezenou dobu*, doporučujeme vám *pořídit si DOŽIVOTNÍ licenci* pro ONLYOFFICE DocSpace Enterprise (s 3 roky podpory a aktualizací v ceně).
+
+$OrangeButton
+
+Pro aktualizaci licence se můžete obrátit také přímo na svého specializovaného manažera prodeje.
+
+V případě dotazů týkajících se platby nás kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}". Pro řešení jakýchkoli technických problémů použijte "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Dobrý den, $UserName,
+
+odkladná lhůta pro vaši licenci ONLYOFFICE DocSpace Enterprise vyprší dnes. To znamená, že DocSpace se stane nedostupným.
+
+Abyste mohli využívat všechny funkce dostupné v okamžiku nákupu po *neomezenou dobu*, doporučujeme vám *pořídit si DOŽIVOTNÍ licenci* pro ONLYOFFICE DocSpace Enterprise (s 3 roky podpory a aktualizací v ceně).
+
+$OrangeButton
+
+Pro aktualizaci licence se můžete obrátit také přímo na svého specializovaného manažera prodeje.
+
+V případě dotazů týkajících se platby nás kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}". Pro řešení jakýchkoli technických problémů použijte "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Dobrý den, $UserName!
+
+Platnost vaší licence pro ONLYOFFICE DocSpace Enterprise vyprší za 7 dní. To znamená, že aktualizace a podpora již nebudou k dispozici.*
+
+Chcete-li licenci aktualizovat, obraťte se přímo na svého specializovaného manažera prodeje nebo nás kontaktujte prostřednictvím "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+V případě dotazů týkajících se platby nás kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}". Pro řešení jakýchkoli technických problémů použijte "${__SupportLink}":"${__SupportLink}".
+
+*Všechny funkce dostupné v okamžiku zakoupení licence můžete používat po neomezenou dobu.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Dobrý den, $UserName!
+
+Platnost vaší licence pro ONLYOFFICE DocSpace Enterprise vyprší dnes. To znamená, že aktualizace a podpora již nejsou k dispozici.*
+
+Chcete-li licenci aktualizovat, obraťte se přímo na svého specializovaného manažera prodeje nebo nás kontaktujte prostřednictvím "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+V případě dotazů týkajících se platby nás kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}". Pro řešení jakýchkoli technických problémů použijte "${__SupportLink}":"${__SupportLink}".
+
+*Všechny funkce dostupné v okamžiku zakoupení licence můžete používat po neomezenou dobu.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Dobrý den! Nastavte si prosím heslo pro svůj účet ONLYOFFICE DocSpace. Stačí kliknout na tlačítko níže:
+
+$OrangeButton
+
+Odkaz je platný po dobu 7 dní.</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Období odkladu pro aktivovanou službu ONLYOFFICE DocSpace Developer</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Platnost vaší licence ONLYOFFICE DocSpace Developer brzy vyprší</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Doba odkladu pro váš ONLYOFFICE DocSpace Developer brzy vyprší</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Vaše licence ONLYOFFICE DocSpace Developer již není k dispozici</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Doba odkladu pro váš ONLYOFFICE DocSpace Enterprise aktivován </value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Vaše licence ONLYOFFICE DocSpace Enterprise brzy vyprší</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Období odkladu pro váš ONLYOFFICE DocSpace Enterprise brzy vyprší</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Vaše licence ONLYOFFICE DocSpace Enterprise již není k dispozici</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Vaše licence ONLYOFFICE DocSpace Enterprise brzy vyprší</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Platnost vaší licence ONLYOFFICE DocSpace Enterprise končí dnes</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Nastavení hesla pro ONLYOFFICE DocSpace</value>
+  </data>
 </root>

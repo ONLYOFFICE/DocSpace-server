@@ -86,14 +86,16 @@ public record EntryData : HistoryData
     public string ParentTitle { get; }
     public int? ParentId { get; }
     public int? ParentType { get; }
-    
-    public EntryData(string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null)
+    public int? Type { get; }
+
+    public EntryData(string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null, int? currentType = null)
     {
         Id = int.Parse(id);
         Title = title;
         ParentId = parentId;
         ParentTitle = parentTitle;
         ParentType = parentType;
+        Type = currentType;
     }
     
     public override int GetId() => ParentId ?? 0;

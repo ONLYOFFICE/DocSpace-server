@@ -332,9 +332,6 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editör</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Oda Yöneticisi</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Kullanıcı</value>
   </data>
@@ -407,9 +404,6 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Editör</value>
   </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Oda Yöneticisi</value>
-  </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
     <value>Paylaşılan bağlantı</value>
   </data>
@@ -467,12 +461,6 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="Date" xml:space="preserve">
     <value>Tarih</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Uzman kullanıcı</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Uzman kullanıcı</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Kullanıcı</value>
   </data>
@@ -493,9 +481,6 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   </data>
   <data name="LinkToForm" xml:space="preserve">
     <value>Form bağlantısı</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Açık form</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Form numarası</value>

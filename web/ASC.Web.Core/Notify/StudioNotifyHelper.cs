@@ -67,7 +67,7 @@ public class StudioNotifyHelper(
             if (toguests)
             {
                 return (await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
-                               .Concat(await userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.User));
+                               .Concat(await userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.Guest));
             }
 
             return await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
@@ -87,7 +87,7 @@ public class StudioNotifyHelper(
 
         if (toguests)
         {
-            return await userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.User);
+            return await userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.Guest);
         }
 
         return new List<UserInfo>();

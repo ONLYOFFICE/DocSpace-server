@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.Collections.Specialized;
+global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.Mail;
@@ -167,6 +168,6 @@ global using Microsoft.Extensions.Hosting.WindowsServices;
 global using MimeKit;
 
 global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
-global using static ASC.Security.Cryptography.EmailValidationKeyProvider;
 
 global using SecurityContext = ASC.Core.SecurityContext;
+global using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult;

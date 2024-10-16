@@ -32,6 +32,7 @@ public interface ISecurityDao<T>
     IAsyncEnumerable<FileShareRecord<T>> GetSharesAsync(IEnumerable<Guid> subjects);
     Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects = null);
     Task RemoveBySubjectAsync(Guid subject, bool withoutOwner);
+    Task RemoveSecuritiesAsync(Guid subject, Guid ownerId, SubjectType subjectType);
     IAsyncEnumerable<FileShareRecord<T>> GetPureShareRecordsAsync(IEnumerable<FileEntry<T>> entries);
     IAsyncEnumerable<FileShareRecord<T>> GetPureShareRecordsAsync(FileEntry<T> entry);
     Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord<T>> records);
@@ -40,8 +41,8 @@ public interface ISecurityDao<T>
     Task<int> GetPureSharesCountAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text);
     IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset = 0, int count = -1);
     IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects);
-    IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, string separator, int offset = 0, int count = -1);
-    Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, string separator);
+    IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, int offset = 0, int count = -1);
+    Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId);
     IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, int offset, int count);
     Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared);
     IAsyncEnumerable<GroupMemberSecurityRecord> GetGroupMembersWithSecurityAsync(FileEntry<T> entry, Guid groupId, string text, int offset, int count);

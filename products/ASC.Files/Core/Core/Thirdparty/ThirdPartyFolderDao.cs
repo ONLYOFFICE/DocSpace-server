@@ -97,17 +97,17 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return dao.GetRootFolderAsync();
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider,
+    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider,
         SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null)
     {
-        if (dao.CheckInvalidFilter(filterType) || (provider != ProviderFilter.None && provider != _providerInfo.ProviderFilter))
+        if (dao.CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != _providerInfo.ProviderFilter))
         {
             yield break;
         }
 
         var rooms = roomsIds.ToAsyncEnumerable().SelectAwait(async e => await GetFolderAsync(e).ConfigureAwait(false));
 
-        rooms = FilterByRoomType(rooms, filterType);
+        rooms = FilterByRoomType(rooms, filterTypes);
         rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectEntriesIds);
 
         if (!string.IsNullOrEmpty(searchText))
@@ -137,7 +137,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         if (dao.CheckInvalidFilter(filterType))
         {
@@ -415,7 +415,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
 
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark)
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
     {
         return await RenameFolderAsync(folder, newTitle);
     }
@@ -603,19 +603,19 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText,
+    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
         bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
+    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, 
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
+    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
@@ -725,16 +725,16 @@ internal abstract class BaseFolderDao
         return filtered;
     }
 
-    protected IAsyncEnumerable<Folder<string>> FilterByRoomType(IAsyncEnumerable<Folder<string>> rooms, FilterType filterType)
+    protected IAsyncEnumerable<Folder<string>> FilterByRoomType(IAsyncEnumerable<Folder<string>> rooms, IEnumerable<FilterType> filterTypes)
     {
-        if (filterType is FilterType.None or FilterType.FoldersOnly)
+        if (filterTypes == null || !filterTypes.Any() || filterTypes.Contains(FilterType.None) || filterTypes.Contains(FilterType.FoldersOnly))
         {
             return rooms;
         }
 
-        var typeFilter = DocSpaceHelper.MapToFolderType(filterType) ?? FolderType.DEFAULT;
+        var typeFilter = DocSpaceHelper.MapToFolderTypes(filterTypes);
 
-        return rooms.Where(f => f.FolderType == typeFilter);
+        return rooms.Where(f => typeFilter.Contains(f.FolderType));
     }
 
     protected IAsyncEnumerable<Folder<string>> FilterBySubject(IAsyncEnumerable<Folder<string>> rooms, Guid subjectId, bool excludeSubject, SubjectFilter subjectFilter,

@@ -1057,4 +1057,10 @@
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Этот адрес электронной почты прикреплен к пользователю {0} в качестве стороннего провайдера</value>
   </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не удалось установить квоту на комнату. Введенное значение превышает объем хранилища DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не удалось установить квоту на пользователя. Введенное значение превышает объем хранилища DocSpace.</value>
+  </data>
 </root>

@@ -34,6 +34,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -43,7 +44,7 @@ import org.springframework.data.repository.query.Param;
  * JPA repository interface for performing CRUD operations on {@link ClientEntity} objects. This
  * interface extends {@link CrudRepository}, providing basic CRUD functionality.
  */
-public interface JpaClientRepository extends CrudRepository<ClientEntity, String> {
+public interface JpaClientRepository extends JpaRepository<ClientEntity, String> {
 
   /**
    * Finds a client entity by its ID, provided it is not invalidated.

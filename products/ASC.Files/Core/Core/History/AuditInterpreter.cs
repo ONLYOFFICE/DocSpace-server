@@ -84,6 +84,8 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomExternalLinkRenamed, new RoomExternalLinkRenamedInterpreter() },
         { (int)MessageAction.RoomExternalLinkDeleted, new RoomExternalLinkDeletedInterpreter() },
         { (int)MessageAction.RoomExternalLinkRevoked, new RoomExternalLinkRevokedInterpreter() },
+        { (int)MessageAction.FormSubmit, new UserFileUpdatedInterpreter() },
+        { (int)MessageAction.FormOpenedForFilling, new UserFileUpdatedInterpreter() },
         { (int)MessageAction.RoomIndexingEnabled, _roomIndexingInterpreter },
         { (int)MessageAction.RoomIndexingDisabled, _roomIndexingInterpreter },
         { (int)MessageAction.RoomLifeTimeSet, new RoomLifeTimeSetInterpreter() },

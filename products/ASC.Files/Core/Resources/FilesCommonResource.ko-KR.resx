@@ -194,9 +194,6 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>편집자</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>방 관리자</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>사용자</value>
   </data>
@@ -274,9 +271,6 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>방을 고정할 수 없습니다</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>방 관리자</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>이름</value>
@@ -467,12 +461,6 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="Date" xml:space="preserve">
     <value>날짜</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>고급 사용자</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>고급 사용자</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>사용자</value>
   </data>
@@ -493,9 +481,6 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   </data>
   <data name="LinkToForm" xml:space="preserve">
     <value>양식 링크</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>양식 열기</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>양식 번호</value>

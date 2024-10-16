@@ -88,6 +88,7 @@ public class ClientDataAccessMapper {
             modified == null
                 ? client.getClientCreationInfo().getCreatedBy()
                 : modified.getModifiedBy())
+        .version(client.getVersion())
         .build();
   }
 
@@ -133,6 +134,64 @@ public class ClientDataAccessMapper {
                 : entity.isEnabled() ? ClientStatus.ENABLED : ClientStatus.DISABLED)
         .clientVisibility(
             entity.isAccessible() ? ClientVisibility.PUBLIC : ClientVisibility.PRIVATE)
+        .clientVersion(entity.getVersion() != null ? entity.getVersion() : 0)
         .build();
+  }
+
+  /**
+   * Merges changes from an origin {@link ClientEntity} into a destination {@link ClientEntity}.
+   *
+   * @param origin the source entity with new values
+   * @param destination the existing entity to be updated
+   * @return the updated destination entity with merged values
+   */
+  public ClientEntity merge(ClientEntity origin, ClientEntity destination) {
+    destination.setName(origin.getName() != null ? origin.getName() : destination.getName());
+    destination.setDescription(
+        origin.getDescription() != null ? origin.getDescription() : destination.getDescription());
+    destination.setClientSecret(
+        origin.getClientSecret() != null
+            ? origin.getClientSecret()
+            : destination.getClientSecret());
+    destination.setLogo(origin.getLogo() != null ? origin.getLogo() : destination.getLogo());
+    destination.setAuthenticationMethods(
+        origin.getAuthenticationMethods() != null
+            ? origin.getAuthenticationMethods()
+            : destination.getAuthenticationMethods());
+    destination.setTenantId(origin.getTenantId());
+    destination.setWebsiteUrl(
+        origin.getWebsiteUrl() != null ? origin.getWebsiteUrl() : destination.getWebsiteUrl());
+    destination.setTermsUrl(
+        origin.getTermsUrl() != null ? origin.getTermsUrl() : destination.getTermsUrl());
+    destination.setPolicyUrl(
+        origin.getPolicyUrl() != null ? origin.getPolicyUrl() : destination.getPolicyUrl());
+    destination.setRedirectUris(
+        origin.getRedirectUris() != null
+            ? origin.getRedirectUris()
+            : destination.getRedirectUris());
+    destination.setAllowedOrigins(
+        origin.getAllowedOrigins() != null
+            ? origin.getAllowedOrigins()
+            : destination.getAllowedOrigins());
+    destination.setLogoutRedirectUri(
+        origin.getLogoutRedirectUri() != null
+            ? origin.getLogoutRedirectUri()
+            : destination.getLogoutRedirectUri());
+    destination.setAccessible(origin.isAccessible());
+    destination.setEnabled(origin.isEnabled());
+    destination.setInvalidated(origin.isInvalidated());
+    if (origin.getScopes() != null && !origin.getScopes().isEmpty()) {
+      destination.setScopes(
+          origin.getScopes().stream()
+              .map(s -> ScopeEntity.builder().name(s.getName()).build())
+              .collect(Collectors.toSet()));
+    }
+    destination.setModifiedOn(
+        origin.getModifiedOn() != null ? origin.getModifiedOn() : destination.getModifiedOn());
+    destination.setModifiedBy(
+        origin.getModifiedBy() != null ? origin.getModifiedBy() : destination.getModifiedBy());
+    destination.setVersion(
+        origin.getVersion() != null ? origin.getVersion() : destination.getVersion());
+    return destination;
   }
 }

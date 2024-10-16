@@ -31,9 +31,7 @@ namespace ASC.Files.Core.Core.History;
 [Scope]
 public class HistoryService(
     IDbContextFactory<MessagesContext> dbContextFactory, 
-    TenantManager tenantManager, 
-    IDaoFactory daoFactory, 
-    FileSecurity fileSecurity, 
+    TenantManager tenantManager,
     AuditInterpreter interpreter)
 {
     public static HashSet<MessageAction> TrackedActions => [
@@ -80,6 +78,8 @@ public class HistoryService(
         MessageAction.RoomExternalLinkRenamed,
         MessageAction.RoomExternalLinkDeleted,
         MessageAction.RoomExternalLinkRevoked,
+        MessageAction.FormSubmit,
+        MessageAction.FormOpenedForFilling,
         MessageAction.RoomIndexingEnabled,
         MessageAction.RoomIndexingDisabled,
         MessageAction.RoomLifeTimeSet,
@@ -93,34 +93,37 @@ public class HistoryService(
         MessageAction.PrimaryExternalLinkCopied
     ];
     
-    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, DateTime? fromDate, DateTime? toDate, int offset, int count)
-    {
-        FileEntry<int> entry = entryType switch
-        {
-            FileEntryType.File => await daoFactory.GetFileDao<int>().GetFileAsync(entryId),
-            FileEntryType.Folder => await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId),
-            _ => throw new ArgumentOutOfRangeException(nameof(entryType), entryType, null)
-        };
-        
-        if (entry == null)
-        {
-            throw new ItemNotFoundException(entryType == FileEntryType.File 
-                ? FilesCommonResource.ErrorMessage_FileNotFound 
-                : FilesCommonResource.ErrorMessage_FolderNotFound
-                );
-        }
+    public static HashSet<int> FilterFolderActions => [
+        (int)MessageAction.FolderCreated,
+        (int)MessageAction.FolderMovedWithOverwriting,
+        (int)MessageAction.FolderMovedToTrash,
+        (int)MessageAction.FolderRenamed
+    ];
+    public static HashSet<int> FilterFileActions => [
+        (int)MessageAction.FileCopied,
+        (int)MessageAction.FileUploaded,
+        (int)MessageAction.FileMoved,
+        (int)MessageAction.FileRenamed,
+        (int)MessageAction.FormSubmit,
+        (int)MessageAction.FormOpenedForFilling
+    ];
 
-        if (!await fileSecurity.CanReadAsync(entry))
-        {
-            throw new SecurityException(entryType == FileEntryType.File 
-                ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile 
-                : FilesCommonResource.ErrorMessage_SecurityException_ReadFolder
-                );
-        }
-        
+    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count, bool needFiltering, List<int> filterFolderIds, List<int> filterFilesIds, DateTime? fromDate, DateTime? toDate)
+    {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
+        IAsyncEnumerable<DbAuditEvent> events;
+
+        if (needFiltering)
+        {
+            events = messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions);
+        }
+        else
+        {
+            events = messageDbContext.GetAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count);
+        }
+        
         var query = GetHistoryEventQuery(entryId, entryType, fromDate, toDate, messageDbContext, tenantId);
 
         query = query.OrderByDescending(x => x.Event.Date);
@@ -146,7 +149,7 @@ public class HistoryService(
         }
     }
 
-    public async Task<int> GetHistoryCountAsync(int entryId, FileEntryType entryType, DateTime? fromDate, DateTime? toDate)
+    public async Task<int> GetHistoryCountAsync(int entryId, FileEntryType entryType, bool needFiltering, List<int> filterFolderIds, List<int> filterFilesIds, DateTime? fromDate, DateTime? toDate)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -180,6 +183,11 @@ public class HistoryService(
             query = query.Where(x => x.Event.Date <= toDate.Value);
         }
 
+        if (needFiltering)
+        {
+            return await messageDbContext.GetFilteredAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions);
+        }
+        
         return query;
     }
 

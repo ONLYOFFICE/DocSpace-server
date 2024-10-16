@@ -86,6 +86,10 @@ public class SettingsDto
     /// <type>System.Boolean, System</type>
     public bool Standalone { get; set; }
 
+    /// <summary>Specifies if this is a AMI instance or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsAmi { get; set; }
+
     /// <summary>Base domain</summary>
     /// <type>System.String, System</type>
     public string BaseDomain { get; set; }
@@ -137,6 +141,10 @@ public class SettingsDto
     /// <summary>Link to the forum</summary>
     /// <type>System.String, System</type>
     public string ForumLink { get; set; }
+
+    /// <summary>Specifies whether to display the About section</summary>
+    /// <type>System.Boolean, System</type>
+    public bool DisplayAbout { get; set; }
 
     /// <summary>API documentation link</summary>
     /// <type>System.String, System</type>
