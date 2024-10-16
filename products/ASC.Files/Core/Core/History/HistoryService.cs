@@ -49,6 +49,8 @@ public class HistoryService(
         MessageAction.FileConverted, 
         MessageAction.FileRestoreVersion,
         MessageAction.FileIndexChanged,
+        MessageAction.FileLocked,
+        MessageAction.FileUnlocked,
         MessageAction.FolderCreated,
         MessageAction.FolderRenamed,
         MessageAction.FolderMoved,
