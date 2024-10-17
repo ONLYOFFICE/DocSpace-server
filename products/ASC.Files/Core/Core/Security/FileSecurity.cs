@@ -1681,8 +1681,10 @@ public class FileSecurity(IDaoFactory daoFactory,
         var subjectEntries = subjectFilter is SubjectFilter.Member
             ? await securityDao.GetSharesAsync([subjectId]).Where(r => r.EntryType == FileEntryType.Folder).Select(r => r.EntryId.ToString()).ToListAsync()
             : null;
+
+        var isAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
         
-        var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
+        var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any && !isAdmin);
         var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects)
             .Where(x => x.EntryType == FileEntryType.Folder)
             .ToListAsync();
@@ -1720,7 +1722,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
-        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+        if (isAdmin)
         {
             return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, 
                 subjectFilter, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);
@@ -1812,12 +1814,12 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
             else
             {
-                folder.Access = FileShare.Restrict;
+                folder.Access = FileShare.None;
                 folder.ShareRecord = new FileShareRecord<T>
                 {
                     EntryId = folder.Id,
                     EntryType = FileEntryType.Folder,
-                    Share = FileShare.Restrict,
+                    Share = FileShare.None,
                     SubjectType = SubjectType.User,
                     Subject = authContext.CurrentAccount.ID
                 };
