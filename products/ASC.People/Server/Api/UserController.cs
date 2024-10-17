@@ -193,7 +193,7 @@ public class UserController(
         {
             await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
             var tenant = await tenantManager.GetCurrentTenantAsync();
-            var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+            var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
             var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
             
             switch (inDto.Type)
@@ -997,7 +997,7 @@ public class UserController(
 
         var userNames = users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList();
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
         
         foreach (var user in users)
@@ -1467,7 +1467,7 @@ public class UserController(
 
         var changed = false;
         var self = securityContext.CurrentAccount.ID.Equals(user.Id);
-        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
+        var currentUserIsDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
         
         //Update it
         if (self)
@@ -1491,7 +1491,7 @@ public class UserController(
                 user.LastName = lastName;
                 user.Location = inDto.Location ?? user.Location;
 
-                if (isDocSpaceAdmin)
+                if (currentUserIsDocSpaceAdmin)
                 {
                     user.Title = inDto.Title ?? user.Title;
                 }
@@ -1537,10 +1537,12 @@ public class UserController(
         }
         
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var owner = user.IsOwner(tenant);
+        var userIsOwner = user.IsOwner(tenant);
+        var currentUserIsOwner = securityContext.CurrentAccount.ID.IsOwner(tenant);
+        var userType = await _userManager.GetUserTypeAsync(user.Id); 
         var statusChanged = false;
         
-        if ((self || isDocSpaceAdmin && !owner) && inDto.Disable.HasValue)
+        if ((self || currentUserIsOwner || currentUserIsDocSpaceAdmin && !userIsOwner && userType != EmployeeType.DocSpaceAdmin) && inDto.Disable.HasValue)
         {
             user.Status = inDto.Disable.Value ? EmployeeStatus.Terminated : EmployeeStatus.Active;
             user.TerminatedDate = inDto.Disable.Value ? DateTime.UtcNow : null;
@@ -1550,7 +1552,7 @@ public class UserController(
 
 
         // change user type
-        var canBeGuestFlag = !owner && 
+        var canBeGuestFlag = !userIsOwner && 
                              !await _userManager.IsDocSpaceAdminAsync(user) && 
                              (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 && 
                              !self;
