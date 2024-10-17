@@ -43,13 +43,14 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     private static readonly RoomArchivingInterpreter _roomArchivingInterpreter = new();
     private static readonly FileLockInterpreter _fileLockInterpreter = new();
     private static readonly RoomDenyDownloadInterpreter _roomDenyDownloadInterpreter = new();
+    private static readonly UserFileUpdatedInterpreter _userFileUpdatedInterpreter = new();
     
     private static readonly FrozenDictionary<int, ActionInterpreter> _interpreters = new Dictionary<int, ActionInterpreter>
     {
         { (int)MessageAction.FileCreated, new FileCreateInterpreter() },
         { (int)MessageAction.FileUploaded, new FileUploadedInterpreter() },
         { (int)MessageAction.FileUploadedWithOverwriting, new FileUploadedInterpreter() },
-        { (int)MessageAction.UserFileUpdated, new UserFileUpdatedInterpreter() },
+        { (int)MessageAction.UserFileUpdated, _userFileUpdatedInterpreter },
         { (int)MessageAction.FileRenamed, new FileRenamedInterpreter() },
         { (int)MessageAction.FileMoved, _fileMovedInterpreter },
         { (int)MessageAction.FileMovedWithOverwriting, _fileMovedInterpreter },
@@ -84,8 +85,8 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomExternalLinkRenamed, new RoomExternalLinkRenamedInterpreter() },
         { (int)MessageAction.RoomExternalLinkDeleted, new RoomExternalLinkDeletedInterpreter() },
         { (int)MessageAction.RoomExternalLinkRevoked, new RoomExternalLinkRevokedInterpreter() },
-        { (int)MessageAction.FormSubmit, new UserFileUpdatedInterpreter() },
-        { (int)MessageAction.FormOpenedForFilling, new UserFileUpdatedInterpreter() },
+        { (int)MessageAction.FormSubmit, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormOpenedForFilling, _userFileUpdatedInterpreter },
         { (int)MessageAction.RoomIndexingEnabled, _roomIndexingInterpreter },
         { (int)MessageAction.RoomIndexingDisabled, _roomIndexingInterpreter },
         { (int)MessageAction.RoomLifeTimeSet, new RoomLifeTimeSetInterpreter() },
@@ -101,7 +102,9 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomDenyDownloadDisabled, _roomDenyDownloadInterpreter },
         { (int)MessageAction.PrimaryExternalLinkCopied, new PrimaryLinkCopiedInterpreter() },
         { (int)MessageAction.RoomWatermarkSet, new RoomWatermarkSetInterpreter() },
-        { (int)MessageAction.RoomWatermarkDisabled, new RoomWatermarkDisabledInterpreter() }
+        { (int)MessageAction.RoomWatermarkDisabled, new RoomWatermarkDisabledInterpreter() },
+        { (int)MessageAction.RoomColorChanged, _roomLogoChangedInterpreter },
+        { (int)MessageAction.RoomCoverChanged, _roomLogoChangedInterpreter }
     }.ToFrozenDictionary();
     
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event, FileEntry<int> entry)

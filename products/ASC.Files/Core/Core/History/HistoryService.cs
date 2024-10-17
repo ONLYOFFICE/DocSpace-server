@@ -90,7 +90,9 @@ public class HistoryService(
         MessageAction.RoomDenyDownloadDisabled,
         MessageAction.RoomWatermarkSet,
         MessageAction.RoomWatermarkDisabled,
-        MessageAction.PrimaryExternalLinkCopied
+        MessageAction.PrimaryExternalLinkCopied,
+        MessageAction.RoomColorChanged,
+        MessageAction.RoomCoverChanged
     ];
 
     private static HashSet<int> FilterFolderActions => [
