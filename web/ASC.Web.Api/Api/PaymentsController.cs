@@ -45,7 +45,8 @@ public class PaymentController(UserManager userManager,
         IMemoryCache memoryCache,
         IHttpContextAccessor httpContextAccessor,
         MessageService messageService,
-        StudioNotifyService studioNotifyService)
+        StudioNotifyService studioNotifyService,
+        PermissionContext permissionContext)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -205,6 +206,7 @@ public class PaymentController(UserManager userManager,
     [HttpGet("quotas")]
     public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return await tariffHelper.GetQuotasAsync().ToListAsync();
     }
 
