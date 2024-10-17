@@ -192,6 +192,17 @@ public class UserController(
         else
         {
             await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+            var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
+            
+            switch (inDto.Type)
+            {
+                case EmployeeType.Guest:
+                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                    throw new SecurityException(Resource.ErrorAccessDenied);
+            }
         }
 
         inDto.Type = linkData?.EmployeeType ?? inDto.Type;
