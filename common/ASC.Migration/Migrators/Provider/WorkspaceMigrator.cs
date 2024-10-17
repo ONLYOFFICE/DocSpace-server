@@ -459,7 +459,7 @@ public class WorkspaceMigrator : Migrator
                     Subject = row["participant_id"].ToString(),
                     EntryId = int.Parse(mapper[row["project_id"].ToString()]),
                     EntryType = 1,
-                    Security = (int)Files.Core.Security.FileShare.PowerUser
+                    Security = (int)Files.Core.Security.FileShare.ContentCreator
                 };
                 storage.Securities.Add(security);
             }

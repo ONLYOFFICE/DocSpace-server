@@ -79,12 +79,10 @@ public class ThirdpartyController(
         {
             var token = await wordpressToken.GetTokenAsync();
             var meInfo = wordpressHelper.GetWordpressMeInfo(token.AccessToken);
-            var parser = JObject.Parse(meInfo);
-            var blogId = parser.Value<string>("token_site_id");
 
-            if (blogId != null)
+            if (!string.IsNullOrEmpty(meInfo.TokenSiteId))
             {
-                var createPost = wordpressHelper.CreateWordpressPost(inDto.Title, inDto.Content, inDto.Status, blogId, token);
+                var createPost = wordpressHelper.CreateWordpressPost(inDto.Title, inDto.Content, inDto.Status, meInfo.TokenSiteId, token);
 
                 return createPost;
             }
@@ -213,8 +211,8 @@ public class ThirdpartyController(
         if (token != null)
         {
             var meInfo = wordpressHelper.GetWordpressMeInfo(token.AccessToken);
-            var blogId = JObject.Parse(meInfo).Value<string>("token_site_id");
-            var wordpressUserName = JObject.Parse(meInfo).Value<string>("username");
+            var blogId = meInfo.TokenSiteId;
+            var wordpressUserName = meInfo.UserName;
 
             var blogInfo = requestHelper.PerformRequest(WordpressLoginProvider.WordpressSites + blogId);
             var jsonBlogInfo = JObject.Parse(blogInfo);
@@ -316,9 +314,9 @@ public class ThirdpartyController(
         {
             var token = await wordpressToken.SaveTokenFromCodeAsync(inDto.Code);
             var meInfo = wordpressHelper.GetWordpressMeInfo(token.AccessToken);
-            var blogId = JObject.Parse(meInfo).Value<string>("token_site_id");
+            var blogId = meInfo.TokenSiteId;
 
-            var wordpressUserName = JObject.Parse(meInfo).Value<string>("username");
+            var wordpressUserName = meInfo.UserName;
 
             var blogInfo = requestHelper.PerformRequest(WordpressLoginProvider.WordpressSites + blogId);
             var jsonBlogInfo = JObject.Parse(blogInfo);
@@ -363,6 +361,6 @@ public class ThirdpartyController(
     
     private async Task<bool> CheckAccessAsync()
     {
-        return !await userManager.IsUserAsync(securityContext.CurrentAccount.ID) && await filesSettingsHelper.GetEnableThirdParty();
+        return !await userManager.IsGuestAsync(securityContext.CurrentAccount.ID) && await filesSettingsHelper.GetEnableThirdParty();
     }
 }

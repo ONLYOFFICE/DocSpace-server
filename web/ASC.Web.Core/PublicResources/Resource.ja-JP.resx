@@ -1057,4 +1057,10 @@
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>このメールアドレスはサードパーティプロバイダとしてユーザー {0} に添付されます</value>
   </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>ルームごとの容量制限の設定に失敗しました。入力された値はDocSpaceストレージの合計容量を超えています。</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>ユーザーごとの容量制限の設定に失敗しました。入力された値はDocSpaceストレージの合計容量を超えています。</value>
+  </data>
 </root>

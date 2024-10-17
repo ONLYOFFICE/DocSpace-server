@@ -143,9 +143,6 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator sală</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Utilizator</value>
   </data>
@@ -178,9 +175,6 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   </data>
   <data name="AceStatusEnum_Read" xml:space="preserve">
     <value>Doar în citire</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator Sală</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Pentru a lucra cu fișierul trebuie să acordați accesul</value>
@@ -467,12 +461,6 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="Date" xml:space="preserve">
     <value>Data</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Utilizator avansat</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Utilizator avansat</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Utilizator</value>
   </data>
@@ -496,5 +484,8 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   </data>
   <data name="LinkToForm" xml:space="preserve">
     <value>Linkul către formular</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Utilizator extern</value>
   </data>
 </root>

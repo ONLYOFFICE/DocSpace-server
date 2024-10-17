@@ -335,9 +335,6 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Éditeur</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrateur de la salle</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Utilisateur</value>
   </data>
@@ -361,9 +358,6 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Éditeur</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrateur de la salle</value>
   </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>La nouvelle version ne peut pas être identique à la version actuelle</value>
@@ -467,12 +461,6 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="Date" xml:space="preserve">
     <value>Date</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Utilisateur avancé</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Utilisateur avancé</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Utilisateur</value>
   </data>
@@ -496,5 +484,8 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Numéro de formulaire</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Utilisateur externe</value>
   </data>
 </root>

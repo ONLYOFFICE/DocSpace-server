@@ -28,7 +28,6 @@ namespace ASC.Core.Common.Notify;
 
 class FirebaseApiKey(IConfiguration configuration)
 {
-    [JsonProperty("type")]
     public string Type
     {
         get
@@ -37,7 +36,7 @@ class FirebaseApiKey(IConfiguration configuration)
         }
     }
 
-    [JsonProperty("project_id")]
+    [JsonPropertyName("project_id")]
     public string ProjectId
     {
         get
@@ -45,7 +44,8 @@ class FirebaseApiKey(IConfiguration configuration)
             return configuration["firebase-mobile:projectId"] ?? "";
         }
     }
-    [JsonProperty("private_key_id")]
+    
+    [JsonPropertyName("private_key_id")]
     public string PrivateKeyId
     {
         get
@@ -53,7 +53,8 @@ class FirebaseApiKey(IConfiguration configuration)
             return configuration["firebase-mobile:privateKeyId"] ?? "";
         }
     }
-    [JsonProperty("private_key")]
+    
+    [JsonPropertyName("private_key")]
     public string PrivateKey
     {
         get
@@ -61,7 +62,8 @@ class FirebaseApiKey(IConfiguration configuration)
             return configuration["firebase-mobile:privateKey"] ?? "";
         }
     }
-    [JsonProperty("client_email")]
+    
+    [JsonPropertyName("client_email")]
     public string ClientEmail
     {
         get
@@ -69,7 +71,8 @@ class FirebaseApiKey(IConfiguration configuration)
             return configuration["firebase-mobile:clientEmail"] ?? "";
         }
     }
-    [JsonProperty("client_id")]
+    
+    [JsonPropertyName("client_id")]
     public string ClientId
     {
         get
@@ -77,7 +80,8 @@ class FirebaseApiKey(IConfiguration configuration)
             return configuration["firebase-mobile:clientId"] ?? "";
         }
     }
-    [JsonProperty("auth_uri")]
+    
+    [JsonPropertyName("auth_uri")]
     public string AuthUri
     {
         get
@@ -85,7 +89,8 @@ class FirebaseApiKey(IConfiguration configuration)
             return "https://accounts.google.com/o/oauth2/auth";
         }
     }
-    [JsonProperty("token_uri")]
+    
+    [JsonPropertyName("token_uri")]
     public string TokenUri
     {
         get
@@ -93,7 +98,8 @@ class FirebaseApiKey(IConfiguration configuration)
             return "https://oauth2.googleapis.com/token";
         }
     }
-    [JsonProperty("auth_provider_x509_cert_url")]
+    
+    [JsonPropertyName("auth_provider_x509_cert_url")]
     public string AuthProviderX509CertUrl
     {
         get
@@ -101,7 +107,8 @@ class FirebaseApiKey(IConfiguration configuration)
             return "https://www.googleapis.com/oauth2/v1/certs";
         }
     }
-    [JsonProperty("client_x509_cert_url")]
+    
+    [JsonPropertyName("client_x509_cert_url")]
     public string ClientX509CertUrl
     {
         get

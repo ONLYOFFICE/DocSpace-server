@@ -108,9 +108,9 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         if (IsConnected)
         {
-            _connection.ConnectionShutdown += async (s,e) => { await OnConnectionShutdownAsync(s, e); };
-            _connection.CallbackException += async (s, e) => { await OnCallbackExceptionAsync(s, e); };
-            _connection.ConnectionBlocked += async (s, e) => { await OnConnectionBlockedAsync(s, e); };
+            _connection.ConnectionShutdownAsync += OnConnectionShutdownAsync;
+            _connection.CallbackExceptionAsync += OnCallbackExceptionAsync;
+            _connection.ConnectionBlockedAsync += OnConnectionBlockedAsync;
 
             _logger.InformationRabbitMQAcquiredPersistentConnection(_connection.Endpoint.HostName);
 

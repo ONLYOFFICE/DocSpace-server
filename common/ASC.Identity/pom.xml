@@ -71,7 +71,7 @@
 
         <!-- Maven and Java Versions -->
         <maven.compiler.plugin.vesrion>3.13.0</maven.compiler.plugin.vesrion>
-        <maven.formatter.plugin.version>2.23</maven.formatter.plugin.version>
+        <maven.formatter.plugin.version>2.24</maven.formatter.plugin.version>
         <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
     </properties>
 

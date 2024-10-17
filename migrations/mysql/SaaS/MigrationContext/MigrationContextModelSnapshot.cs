@@ -602,6 +602,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Action = "3e74aff2-7c0c-4089-b209-6495b8643471",
                             Object = "",
                             AceType = 0
+                        },
+                        new
+                        {
+                            TenantId = -1,
+                            Subject = "88f11e7c-7407-4bea-b4cb-070010cdbb6b",
+                            Action = "3e74aff2-7c0c-4089-b209-6495b8643471",
+                            Object = "",
+                            AceType = 0
                         });
                 });
 
@@ -1202,6 +1210,30 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("tenants_tariffrow", (string)null);
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.DbUserRelation", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant");
+
+                    b.Property<string>("SourceUserId")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("source_user_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("TargetUserId")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("target_user_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasKey("TenantId", "SourceUserId", "TargetUserId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("core_user_relations", (string)null);
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.FireBaseUser", b =>
@@ -6751,6 +6783,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("tinytext")
                         .HasColumnName("terms_url");
 
+                    b.Property<int>("Version")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("version")
+                        .HasDefaultValueSql("0");
+
                     b.Property<string>("WebsiteUrl")
                         .HasColumnType("tinytext")
                         .HasColumnName("website_url");
@@ -7227,6 +7265,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.DbTariffRow", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.DbUserRelation", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()

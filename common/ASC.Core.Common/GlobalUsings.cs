@@ -26,6 +26,7 @@
 
 global using System.Collections;
 global using System.Collections.Concurrent;
+global using System.Collections.Frozen;
 global using System.Configuration;
 global using System.Data.Common;
 global using System.Diagnostics;
@@ -155,8 +156,6 @@ global using Microsoft.Net.Http.Headers;
 global using MimeKit;
 
 global using NetEscapades.EnumGenerators;
-
-global using Newtonsoft.Json;
 
 global using NVelocity;
 global using NVelocity.App.Events;

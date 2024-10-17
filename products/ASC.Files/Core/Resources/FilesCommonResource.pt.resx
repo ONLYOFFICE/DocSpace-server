@@ -167,9 +167,6 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrador da Sala</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Utilizador</value>
   </data>
@@ -244,9 +241,6 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Não pode afixar a sala</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrador da Sala</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Primeiro nome</value>
@@ -466,12 +460,6 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   </data>
   <data name="Date" xml:space="preserve">
     <value>Data</value>
-  </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Utilizador com poder</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Utilizador com poder</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Utilizador</value>

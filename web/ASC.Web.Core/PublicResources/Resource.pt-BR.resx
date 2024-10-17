@@ -1057,4 +1057,10 @@
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Este e-mail está anexado ao usuário {0} como um provedor terceirizado</value>
   </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota por sala. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota por usuário. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+  </data>
 </root>

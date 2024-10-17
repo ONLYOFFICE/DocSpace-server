@@ -51,6 +51,7 @@ internal interface IDaoBase<TFile, TFolder, TItem>
     Task<IEnumerable<string>> GetChildrenAsync(string folderId);
     Task<List<TItem>> GetItemsAsync(string parentId, bool? folder = null);
     bool CheckInvalidFilter(FilterType filterType);
+    bool CheckInvalidFilters(IEnumerable<FilterType> filterTypes);
     Task UpdateIdAsync(string oldValue, string newValue);
     Folder<string> GetErrorRoom();
     bool IsRoom(string folderId);

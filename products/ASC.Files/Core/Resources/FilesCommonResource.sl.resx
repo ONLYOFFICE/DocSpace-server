@@ -202,9 +202,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Urednik</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Skrbnik sobe</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Uporabnik</value>
   </data>
@@ -279,9 +276,6 @@
   </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Filter po meri</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Skrbnik sobe</value>
   </data>
   <data name="AceShareLink" xml:space="preserve">
     <value>Zunanji portal</value>
@@ -466,12 +460,6 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   </data>
   <data name="Date" xml:space="preserve">
     <value>Datum</value>
-  </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Napredni uporabnik</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Napredni uporabnik</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Uporabnik</value>

@@ -31,7 +31,8 @@ public class FormFillingReportCreator(
     ExportToCSV exportToCSV,
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
-    TenantUtil tenantUtil)
+    TenantUtil tenantUtil,
+    TenantManager tenantManager)
 {
 
     private static readonly JsonSerializerOptions _options = new() {
@@ -69,24 +70,25 @@ public class FormFillingReportCreator(
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
+        var tenantCulture = (await tenantManager.GetCurrentTenantAsync()).GetCulture();
         var formNumber = new List<FormsItemData>
         {
             new()
             {
-                Key = FilesCommonResource.FormNumber,
+                Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture),
                 Value = resultFormNumber
             },
         };
 
         var formLink = new FormsItemData
         {
-            Key = FilesCommonResource.LinkToForm,
-            Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.OpenForm}\")"
+            Key = FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture),
+            Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture)}\")"
         };
         var date = new FormsItemData
         {
-            Key = FilesCommonResource.Date,
-            Value = $"{tenantUtil.DateTimeNow():MM/dd/yyyy H:mm:ss}"
+            Key = FilesCommonResource.ResourceManager.GetString("Date", tenantCulture),
+            Value = $"=\"{tenantUtil.DateTimeNow().ToString("G", tenantCulture)}\""
         };
         var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
 

@@ -36,7 +36,7 @@ public class Signature(MachinePseudoKeys machinePseudoKeys)
 
     public static string Create<T>(T obj, string secret)
     {
-        var str = JsonConvert.SerializeObject(obj);
+        var str = JsonSerializer.Serialize(obj);
         var payload = GetHashBase64(str + secret) + "?" + str;
 
         return WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(payload));
@@ -57,7 +57,7 @@ public class Signature(MachinePseudoKeys machinePseudoKeys)
 
             if (GetHashBase64(payloadParts[1].Trim() + secret) == payloadParts[0])
             {
-                return JsonConvert.DeserializeObject<T>(payloadParts[1].Trim()); //Sig correct
+                return JsonSerializer.Deserialize<T>(payloadParts[1].Trim()); //Sig correct
             }
         }
         catch (Exception) { }
