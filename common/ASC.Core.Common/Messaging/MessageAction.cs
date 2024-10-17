@@ -260,7 +260,9 @@ public enum MessageAction
     PrimaryExternalLinkCopied = 5111,
     
     RoomWatermarkSet = 5112,
-    RoomWatermarkDisabled = 5113, 
+    RoomWatermarkDisabled = 5113,
+    
+    RoomIndexReportSaved = 5118,
 
     #endregion
 

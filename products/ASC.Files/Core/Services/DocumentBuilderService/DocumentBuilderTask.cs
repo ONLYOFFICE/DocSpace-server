@@ -25,30 +25,24 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
-
-[Transient(GenericArguments = [typeof(int)])]
-public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : DistributedTaskProgress
+public abstract class DocumentBuilderTask<TId, TData>(IServiceScopeFactory serviceProvider) : DistributedTaskProgress
 {
     private string _baseUri;
     private int _tenantId;
-    private Guid _userId;
-    private string _script;
-    private string _tempFileName;
-    private string _outputFileName;
-
-    public void Init(string baseUri, int tenantId, Guid userId, string script, string tempFileName, string outputFileName)
+    protected Guid _userId;
+    protected TData _data;
+    
+    public void Init(string baseUri, int tenantId, Guid userId, TData data)
     {
         _baseUri = baseUri;
         _tenantId = tenantId;
         _userId = userId;
-        _script = script;
-        _tempFileName = tempFileName;
-        _outputFileName = outputFileName;
-
+        _data = data;
+        
         Id = DocumentBuilderTaskManager.GetTaskId(tenantId, userId);
         Status = DistributedTaskStatus.Created;
 
-        this["ResultFileId"] = default(T);
+        this["ResultFileId"] = default(TId);
         this["ResultFileName"] = string.Empty;
         this["ResultFileUrl"] = string.Empty;
     }
@@ -73,17 +67,21 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
             await tenantManager.SetCurrentTenantAsync(_tenantId);
 
             var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
-            logger = scope.ServiceProvider.GetService<ILogger<DocumentBuilderTask<T>>>();
+            logger = scope.ServiceProvider.GetService<ILogger<DocumentBuilderTask<TId, TData>>>();
 
             var documentBuilderTask = scope.ServiceProvider.GetService<DocumentBuilderTask>();
 
             CancellationToken.ThrowIfCancellationRequested();
+            
+            var inputData = await GetDocumentBuilderInputDataAsync(scope.ServiceProvider);
 
             Percentage = 30;
 
             await PublishChanges();
+            
+            CancellationToken.ThrowIfCancellationRequested();
 
-            var fileUri = await documentBuilderTask.BuildFileAsync(_script, _tempFileName, CancellationToken);
+            var fileUri = await documentBuilderTask.BuildFileAsync(inputData.Script, inputData.TempFileName, CancellationToken);
 
             Percentage = 60;
 
@@ -91,12 +89,14 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
 
             CancellationToken.ThrowIfCancellationRequested();
 
-            var file = scope.ServiceProvider.GetService<File<T>>();
-            file = await documentBuilderTask.SaveFileFromUriAsync(file, new Uri(fileUri), _userId, _outputFileName);
+            var file = scope.ServiceProvider.GetService<File<TId>>();
+            file = await documentBuilderTask.SaveFileFromUriAsync(file, new Uri(fileUri), _userId, inputData.OutputFileName);
             
             this["ResultFileId"] = file.Id;
             this["ResultFileName"] = file.Title;
             this["ResultFileUrl"] = filesLinkUtility.GetFileWebEditorUrl(file.Id);
+            
+            await OnCompleteAsync(scope.ServiceProvider);
 
             Percentage = 100;
 
@@ -119,7 +119,12 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
             await PublishChanges();
         }
     }
+    
+    protected abstract Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider);
+    protected abstract Task OnCompleteAsync(IServiceProvider serviceProvider);
 }
+
+public record DocumentBuilderInputData(string Script, string TempFileName, string OutputFileName);
 
 [Scope]
 public class DocumentBuilderTask(
