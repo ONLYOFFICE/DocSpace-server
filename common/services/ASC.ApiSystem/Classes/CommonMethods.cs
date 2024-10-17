@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
@@ -325,17 +327,19 @@ public class CommonMethods(
 
             var httpClient = clientFactory.CreateClient();
             using var httpClientResponse = await httpClient.SendAsync(request);
-            var resp =  await httpClientResponse.Content.ReadAsStringAsync();
-            var resObj = JObject.Parse(resp);
+            var resp = await httpClientResponse.Content.ReadAsStringAsync();
+            var recaptchData = JsonSerializer.Deserialize<Web.Core.RecaptchData>(resp, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (resObj["success"] != null && resObj.Value<bool>("success"))
+            if (recaptchData.Success.GetValueOrDefault())
             {
                 return true;
             }
+            
+
 
             log.LogDebug("Recaptcha error: {0}", resp);
-
-            if (resObj["error-codes"] != null && resObj["error-codes"].HasValues)
+            
+            if (recaptchData.ErrorCodes is { Count: > 0 })
             {
                 log.LogDebug("Recaptcha api returns errors: {0}", resp);
             }
@@ -346,5 +350,13 @@ public class CommonMethods(
         }
         return false;
     }
+}
+
+public class RecaptchData
+{
+    public bool? Success { get; set; }
+    
+    [JsonPropertyName("error-codes")]
+    public List<string> ErrorCodes { get; set; }
 }
 

@@ -485,4 +485,7 @@
   <data name="FormNumber" xml:space="preserve">
     <value>表单编号</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>外部用户</value>
+  </data>
 </root>

@@ -121,7 +121,7 @@
     <value>Установка пароля</value>
   </data>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Файл резервной копии недействителен. Пожалуйста, используйте файл, созданный в ONLYOFFICE v11.5 или в более поздней версии.</value>
+    <value>Файл резервной копии недействителен. Пожалуйста, используйте файл, созданный на том же портале.</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Размер резервной копии превышает общий размер портала</value>

@@ -35,7 +35,7 @@ public class CustomTagsService(
     UserManager userManager,
     FileSecurityCommon fileSecurityCommon)
 {
-    public async Task<string> CreateTagAsync(string name)
+    public async Task<TagInfo> CreateTagAsync(string name)
     {
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
@@ -49,7 +49,7 @@ public class CustomTagsService(
 
         if (existedTag != null)
         {
-            return existedTag.Name;
+            return existedTag;
         }
 
         var tagInfo = new TagInfo
@@ -63,7 +63,7 @@ public class CustomTagsService(
 
         await filesMessageService.SendAsync(MessageAction.TagCreated, savedTag.Name);
 
-        return savedTag.Name;
+        return savedTag;
     }
 
     public async Task DeleteTagsAsync<T>(IEnumerable<string> names)
