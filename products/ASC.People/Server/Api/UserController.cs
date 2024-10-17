@@ -997,6 +997,8 @@ public class UserController(
 
         var userNames = users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList();
         var tenant = await tenantManager.GetCurrentTenantAsync();
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
         
         foreach (var user in users)
         {
@@ -1005,7 +1007,15 @@ public class UserController(
                 continue;
             }
             
-            var isGuest = await _userManager.IsGuestAsync(user);
+            var userType = await _userManager.GetUserTypeAsync(user.Id);
+            switch (userType)
+            {
+                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                    continue;
+            }
+            
+            var isGuest = userType == EmployeeType.Guest;
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
