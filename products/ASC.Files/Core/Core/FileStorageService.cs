@@ -662,7 +662,7 @@ public class FileStorageService //: IFileStorageService
 
             if (names != null)
             {
-                var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+                var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
                 var notFoundTags = names.Where(x => tagsInfos.All(r => r.Name != x));
 
                 foreach (var tagInfo in notFoundTags)
@@ -918,7 +918,7 @@ public class FileStorageService //: IFileStorageService
             
             if (updateData.Tags.Any())
             {
-                tagsInfos = await tagDao.GetTagsInfoAsync(updateData.Tags).ToListAsync();
+                tagsInfos = await tagDao.GetTagsInfoAsync(updateData.Tags, TagType.Custom).ToListAsync();
                 var notFoundTags = updateData.Tags.Where(x => tagsInfos.All(r => r.Name != x));
 
                 foreach (var tagInfo in notFoundTags)
@@ -937,7 +937,6 @@ public class FileStorageService //: IFileStorageService
             var toDelete = currentTags.Where(r => tagsInfos.All(b => b.Name != r.Name)).ToList();
             await tagDao.RemoveTagsAsync(folder, toDelete.Select(t => t.Id).ToList());
         }
-        
 
         var newTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder);
         var tag = await newTags.FirstOrDefaultAsync();
@@ -2965,18 +2964,46 @@ public class FileStorageService //: IFileStorageService
         await tagDao.RemoveTagsAsync(tags);
     }
 
-    public async Task DeleteFromRecentAsync<T>(IEnumerable<T> filesIds, bool recentByLinks)
+    public async Task DeleteFromRecentAsync<T>(List<T> foldersIds, List<T> filesIds, bool recentByLinks)
     {
-        var tagDao = daoFactory.GetTagDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var tagDao = daoFactory.GetTagDao<T>();
 
-        var files = await fileDao.GetFilesAsync(filesIds).ToListAsync();
+        var entries = new List<FileEntry<T>>(foldersIds.Count + filesIds.Count);
+        
+        var folders = folderDao.GetFoldersAsync(foldersIds).Cast<FileEntry<T>>().ToListAsync().AsTask();
+        var files = fileDao.GetFilesAsync(filesIds).Cast<FileEntry<T>>().ToListAsync().AsTask();
 
-        var tags = recentByLinks
-            ? await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.RecentByLink, files).ToListAsync()
-            : files.Select(f => Tag.Recent(authContext.CurrentAccount.ID, f));
+        foreach (var items in await Task.WhenAll(folders, files))
+        {
+            entries.AddRange(items);
+        }
+
+        var tags = recentByLinks 
+            ? await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.RecentByLink, entries).ToListAsync()
+            : entries.Select(f => Tag.Recent(authContext.CurrentAccount.ID, f));
 
         await tagDao.RemoveTagsAsync(tags);
+        
+        var users = new[] { authContext.CurrentAccount.ID };
+        
+        var tasks = new List<Task>(entries.Count);
+
+        foreach (var e in entries)
+        {
+            switch (e)
+            {
+                case File<T> file:
+                    tasks.Add(socketManager.DeleteFileAsync(file, users: users));
+                    break;
+                case Folder<T> folder:
+                    tasks.Add(socketManager.DeleteFolder(folder, users: users));
+                    break;
+            }
+        }
+        
+        await Task.WhenAll(tasks);
     }
 
     public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(FilterType filter, int from, int count, bool subjectGroup, Guid? subjectId, string searchText, string[] extension,
@@ -2998,10 +3025,9 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<AceWrapper>> GetSharedInfoAsync<T>(
         IEnumerable<T> fileIds,
-        IEnumerable<T> folderIds,
-        IEnumerable<SubjectType> subjectTypes = null)
+        IEnumerable<T> folderIds)
     {
-        return await fileSharing.GetSharedInfoAsync(fileIds, folderIds, subjectTypes);
+        return await fileSharing.GetSharedInfoAsync(fileIds, folderIds);
     }
 
     public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, string text, int offset, int count)
