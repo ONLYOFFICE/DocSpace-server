@@ -33,7 +33,9 @@ public class DbIPLookup
     public string AddrType { get; set; } //ipv4, ipv6
     public byte[] IPStart { get; set; }
     public byte[] IPEnd { get; set; }
+    [MaxLength(2)]
     public string Continent { get; set; }
+    [MaxLength(2)]
     public string Country { get; set; }
     [MaxLength(15)]
     public string StateProvCode { get; set; }
@@ -94,12 +96,12 @@ public static class DbIPLookupExtension
             entity.Property(e => e.Continent)
                 .IsRequired()
                 .HasColumnName("continent")
-                .HasColumnType("char(2)");
+                .HasColumnType("char");
 
             entity.Property(e => e.Country)
                 .IsRequired()
                 .HasColumnName("country")
-                .HasColumnType("char(2)");
+                .HasColumnType("char");
 
             entity.Property(e => e.StateProvCode)
                 .HasColumnName("stateprov_code")
@@ -184,12 +186,12 @@ public static class DbIPLookupExtension
             entity.Property(e => e.Continent)
                 .IsRequired()
                 .HasColumnName("continent")
-                .HasColumnType("char(2)");
+                .HasColumnType("char");
 
             entity.Property(e => e.Country)
                 .IsRequired()
                 .HasColumnName("country")
-                .HasColumnType("char(2)");
+                .HasColumnType("char");
 
             entity.Property(e => e.StateProvCode)
                 .HasColumnName("stateprov_code")

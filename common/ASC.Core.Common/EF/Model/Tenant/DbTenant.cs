@@ -46,6 +46,7 @@ public class DbTenant : IMapFrom<Tenant>
         get => Version_Changed ?? DateTime.MinValue;
         set => Version_Changed = value;
     }
+    [MaxLength(10)]
     public string Language { get; set; }
     [MaxLength(50)]
     public string TimeZone { get; set; }
@@ -179,7 +180,7 @@ public static class DbTenantExtension
             entity.Property(e => e.Language)
                 .IsRequired()
                 .HasColumnName("language")
-                .HasColumnType("char(10)")
+                .HasColumnType("char")
                 .HasDefaultValueSql("'en-US'")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");

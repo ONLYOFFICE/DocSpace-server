@@ -34,6 +34,7 @@ public class DbRoomSettings
     public int TenantId { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
+    [MaxLength(6)]
     public string Color { get; set; }
     [MaxLength(50)]
     public string Cover { get; set; }
@@ -88,7 +89,7 @@ public static class DbRoomSettingsExtension
 
             entity.Property(e => e.Color)
                 .HasColumnName("color")
-                .HasColumnType("char(6)")
+                .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
             

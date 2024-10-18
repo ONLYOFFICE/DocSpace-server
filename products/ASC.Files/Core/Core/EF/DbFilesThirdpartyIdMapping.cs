@@ -24,11 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.EF;
 
 public class DbFilesThirdpartyIdMapping : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    [MaxLength(32)]
     public string HashId { get; set; }
     public string Id { get; set; }
 
@@ -68,7 +71,7 @@ public static class DbFilesThirdpartyIdMappingExtension
 
             entity.Property(e => e.HashId)
                 .HasColumnName("hash_id")
-                .HasColumnType("char(32)")
+                .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

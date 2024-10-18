@@ -49,6 +49,7 @@ public class DbFilesThirdpartyAccount : BaseEntity, IDbFile, IDbSearch
     public string FolderId { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
+    [MaxLength(6)]
     public string Color { get; set; }
     public DateTime ModifiedOn { get; set; }
 
@@ -155,7 +156,7 @@ public static class DbFilesThirdpartyAccountExtension
             
             entity.Property(e => e.Color)
                 .HasColumnName("color")
-                .HasColumnType("char(6)")
+                .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

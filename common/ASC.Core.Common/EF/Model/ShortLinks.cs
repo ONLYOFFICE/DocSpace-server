@@ -24,11 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF.Model;
 public class ShortLink
 {
     public ulong Id { get; set; }
     public int TenantId { get; set; }
+    [MaxLength(15)]
     public string Short { get; set; }
     public string Link { get; set; }
 
@@ -69,7 +72,7 @@ public static class ShortLinksExtension
 
             entity.Property(e => e.Short)
                 .HasColumnName("short")
-                .HasColumnType("char(15)")
+                .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
                 .IsRequired(false);
@@ -110,7 +113,7 @@ public static class ShortLinksExtension
 
             entity.Property(e => e.Short)
                 .HasColumnName("short")
-                .HasColumnType("char(15)")
+                .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
                 .IsRequired(false);

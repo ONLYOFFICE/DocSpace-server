@@ -34,6 +34,7 @@ public class AccountLinks : BaseEntity
     public string Id { get; set; }
     [MaxLength(200)]
     public string UId { get; set; }
+    [MaxLength(60)]
     public string Provider { get; set; }
     public string Profile { get; set; }
     public DateTime Linked { get; set; }
@@ -93,7 +94,7 @@ public static class AccountLinksExtension
 
             entity.Property(e => e.Provider)
                 .HasColumnName("provider")
-                .HasColumnType("char(60)")
+                .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });
