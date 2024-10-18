@@ -252,7 +252,7 @@ public enum MessageAction
     RoomIndexingDisabled = 5115,
     
     RoomLifeTimeSet = 5116,
-    RoomLifeTimeDisabled = 5117, //last
+    RoomLifeTimeDisabled = 5117, 
     
     RoomDenyDownloadEnabled = 5109,
     RoomDenyDownloadDisabled = 5110,
@@ -262,7 +262,7 @@ public enum MessageAction
     RoomWatermarkSet = 5112,
     RoomWatermarkDisabled = 5113,
     
-    RoomIndexReportSaved = 5118,
+    RoomIndexExportSaved = 5118, //last
 
     #endregion
 

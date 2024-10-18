@@ -897,4 +897,7 @@
   <data name="RoomWatermarkDisabled" xml:space="preserve">
     <value>Room: {0}. Watermark disabled</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Export of the room index saved to Documents</value>
+  </data>
 </root>

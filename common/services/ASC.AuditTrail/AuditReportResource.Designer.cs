@@ -1671,6 +1671,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export of the room index saved to Documents.
+        /// </summary>
+        public static string RoomIndexExportSaved {
+            get {
+                return ResourceManager.GetString("RoomIndexExportSaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Room indexing disabled.
         /// </summary>
         public static string RoomIndexingDisabled {

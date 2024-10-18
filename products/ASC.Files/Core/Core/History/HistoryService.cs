@@ -92,7 +92,8 @@ public class HistoryService(
         MessageAction.RoomWatermarkDisabled,
         MessageAction.PrimaryExternalLinkCopied,
         MessageAction.RoomColorChanged,
-        MessageAction.RoomCoverChanged
+        MessageAction.RoomCoverChanged,
+        MessageAction.RoomIndexExportSaved
     ];
 
     private static HashSet<int> FilterFolderActions => [

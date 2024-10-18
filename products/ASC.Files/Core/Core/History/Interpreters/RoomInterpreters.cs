@@ -275,6 +275,15 @@ public class RoomWatermarkDisabledInterpreter : RoomWatermarkSetInterpreter
     }
 }
 
+public class RoomIndexExportSavedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {
+        var desc = GetAdditionalDescription(description);
+        return ValueTask.FromResult<HistoryData>(new EntryData(target, desc.RoomTitle));
+    }
+}
+
 public record UserHistoryData : HistoryData
 {
     public EmployeeDto User { get; set; }

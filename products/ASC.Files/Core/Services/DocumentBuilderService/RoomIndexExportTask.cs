@@ -56,7 +56,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         
         var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(_data.RoomId);
         
-        await filesMessageService.SendAsync(MessageAction.RoomIndexReportSaved, room, headers: headers);
+        await filesMessageService.SendAsync(MessageAction.RoomIndexExportSaved, room, headers: headers);
     }
 
     private static async Task<(object data, string outputFileName)> GetRoomIndexExportData<T>(IServiceProvider serviceProvider, Guid userId, T roomId)

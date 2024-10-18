@@ -104,7 +104,8 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomWatermarkSet, new RoomWatermarkSetInterpreter() },
         { (int)MessageAction.RoomWatermarkDisabled, new RoomWatermarkDisabledInterpreter() },
         { (int)MessageAction.RoomColorChanged, _roomLogoChangedInterpreter },
-        { (int)MessageAction.RoomCoverChanged, _roomLogoChangedInterpreter }
+        { (int)MessageAction.RoomCoverChanged, _roomLogoChangedInterpreter },
+        { (int)MessageAction.RoomIndexExportSaved, new RoomIndexExportSavedInterpreter() }
     }.ToFrozenDictionary();
     
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event, FileEntry<int> entry)
