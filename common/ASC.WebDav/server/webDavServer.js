@@ -105,6 +105,10 @@ app.use("/isLife", (req, res) => {
     res.sendStatus(200);
 });
 
+app.use("/health", (req, res) => {
+    res.status(200).json({status: "Healthy"});
+});
+
 app.use(webdav.extensions.express('/', server));
 
 app.listen(options.port,() => {
