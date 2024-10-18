@@ -1384,7 +1384,11 @@ public class UserController(
     public async IAsyncEnumerable<EmployeeFullDto> UpdateEmployeeActivationStatus(EmployeeActivationStatus activationstatus, UpdateMembersRequestDto inDto)
     {
         await _apiContext.AuthByClaimAsync();
-
+        
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
+        
         foreach (var id in inDto.UserIds.Where(userId => !_userManager.IsSystemUser(userId)))
         {
             await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(id), Constants.Action_EditUser);
@@ -1393,7 +1397,15 @@ public class UserController(
             {
                 continue;
             }
+            var userType = await _userManager.GetUserTypeAsync(u.Id); 
 
+            switch (userType)
+            {
+                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                    continue;
+            }
+            
             u.ActivationStatus = activationstatus;
             await _userManager.UpdateUserInfoAsync(u);
 
