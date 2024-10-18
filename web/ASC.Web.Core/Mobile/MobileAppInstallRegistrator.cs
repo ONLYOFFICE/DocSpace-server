@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.EF;
+
 namespace ASC.Web.Core.Mobile;
 
 [Scope(typeof(IMobileAppInstallRegistrator), typeof(CachedMobileAppInstallRegistrator))]
@@ -41,7 +43,7 @@ public class MobileAppInstallRegistrator(IDbContextFactory<CustomDbContext> dbCo
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         await dbContext.MobileAppInstall.AddAsync(mai);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesWithValidateAsync();
     }
 
     public async Task<bool> IsInstallRegisteredAsync(string userEmail, MobileAppType? appType)

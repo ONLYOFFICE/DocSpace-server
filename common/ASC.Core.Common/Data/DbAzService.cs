@@ -108,7 +108,7 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper map
         if (record != null)
         {
             userDbContext.Acl.Remove(record);
-            await userDbContext.SaveChangesAsync();
+            await userDbContext.SaveChangesWithValidateAsync();
         }
     }
 
@@ -116,6 +116,6 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper map
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         await userDbContext.AddOrUpdateAsync(q => q.Acl, mapper.Map<AzRecord, Acl>(r));
-        await userDbContext.SaveChangesAsync();
+        await userDbContext.SaveChangesWithValidateAsync();
     }
 }

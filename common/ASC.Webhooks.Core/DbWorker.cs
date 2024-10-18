@@ -80,7 +80,7 @@ public class DbWorker(
         };
 
         toAdd = await webhooksDbContext.AddOrUpdateAsync(r => r.WebhooksConfigs, toAdd);
-        await webhooksDbContext.SaveChangesAsync();
+        await webhooksDbContext.SaveChangesWithValidateAsync();
 
         return toAdd;
     }
@@ -149,7 +149,7 @@ public class DbWorker(
             }
 
             webhooksDbContext.WebhooksConfigs.Update(updateObj);
-            await webhooksDbContext.SaveChangesAsync();
+            await webhooksDbContext.SaveChangesWithValidateAsync();
         }
 
         return updateObj;
@@ -166,7 +166,7 @@ public class DbWorker(
         if (removeObj != null)
         {
             webhooksDbContext.WebhooksConfigs.Remove(removeObj);
-            await webhooksDbContext.SaveChangesAsync();
+            await webhooksDbContext.SaveChangesWithValidateAsync();
         }
 
         return removeObj;
@@ -220,7 +220,7 @@ public class DbWorker(
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var entity = await webhooksDbContext.WebhooksLogs.AddAsync(webhook);
-        await webhooksDbContext.SaveChangesAsync();
+        await webhooksDbContext.SaveChangesWithValidateAsync();
 
         return entity.Entity;
     }
@@ -239,7 +239,7 @@ public class DbWorker(
             webhook.Delivery = delivery;
 
             webhooksDbContext.WebhooksLogs.Update(webhook);
-            await webhooksDbContext.SaveChangesAsync();
+            await webhooksDbContext.SaveChangesWithValidateAsync();
         }
 
         return webhook;
@@ -258,7 +258,7 @@ public class DbWorker(
                 try
                 {
                     await webhooksDbContext.Webhooks.AddAsync(mapper.Map<DbWebhook>(webhook));
-                    await webhooksDbContext.SaveChangesAsync();
+                    await webhooksDbContext.SaveChangesWithValidateAsync();
                 }
                 catch (Exception)
                 {

@@ -27,6 +27,7 @@
 using System.Threading.Channels;
 
 using ASC.Common.Threading;
+using ASC.Core.Common.EF;
 using ASC.EventBus.Abstractions;
 
 using Microsoft.Extensions.Hosting;
@@ -109,7 +110,7 @@ public class MessagesRepository(
         var loginEvent = mapper.Map<EventMessage, DbLoginEvent>(message);
 
         await dbContext.LoginEvents.AddAsync(loginEvent);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesWithValidateAsync();
 
         return loginEvent.Id;
     }
@@ -119,7 +120,7 @@ public class MessagesRepository(
         var auditEvent = mapper.Map<EventMessage, DbAuditEvent>(message);
 
         await dbContext.AuditEvents.AddAsync(auditEvent);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesWithValidateAsync();
 
         if (auditEvent.FilesReferences == null || auditEvent.FilesReferences.Count == 0)
         {

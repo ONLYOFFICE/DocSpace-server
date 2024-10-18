@@ -576,9 +576,7 @@ internal class FileDao(
                     {                    
                         await filesDbContext.AddOrUpdateAsync(r => r.Files, toInsert);
                     }
-                    
-                    await filesDbContext.SaveChangesAsync();
-
+                    await filesDbContext.SaveChangesWithValidateAsync();
                     await tx.CommitAsync();
                 });
 
@@ -769,7 +767,7 @@ internal class FileDao(
                 toUpdate.ThumbnailStatus = file.ThumbnailStatus;
 
                 context.Update(toUpdate);
-                await context.SaveChangesAsync();
+                await context.SaveChangesWithValidateAsync();
 
                 await tx.CommitAsync();
             });
@@ -903,7 +901,7 @@ internal class FileDao(
 
             await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesWithValidateAsync();
             await tx.CommitAsync();
 
             foreach (var folderId in fromFolders)
@@ -1224,7 +1222,7 @@ internal class FileDao(
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         filesDbContext.Update(toUpdate);
 
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
 
         await factoryIndexer.UpdateAsync(toUpdate, true, r => r.Title, r => r.ModifiedBy, r => r.ModifiedOn);
 
@@ -1627,7 +1625,6 @@ internal class FileDao(
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
         await foreach (var r in filesDbContext.DbFilesByVersionAndWithoutForcesaveAsync(tenantId, fileId, fileVersion))
         {
             var item = _serviceProvider.GetService<EditHistory>();
@@ -1795,7 +1792,7 @@ internal class FileDao(
         }
 
         await filesDbContext.AddOrUpdateAsync(r => r.FilesProperties, new DbFilesProperties { TenantId = tenantId, EntryId = fileId.ToString(), Data = data });
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
     }
 
     public async Task SetCustomOrder(int fileId, int parentFolderId, int order = 0)

@@ -33,7 +33,7 @@ public class DbRadicale(IDbContextFactory<UserDbContext> dbContextFactory)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         await userDbContext.AddOrUpdateAsync(q => q.UsersDav, new UserDav { TenantId = tenant, UserId = id });
-        await userDbContext.SaveChangesAsync();
+        await userDbContext.SaveChangesWithValidateAsync();
     }
 
     public async Task RemoveCardDavUserAsync(int tenant, Guid id)
@@ -43,7 +43,7 @@ public class DbRadicale(IDbContextFactory<UserDbContext> dbContextFactory)
         if (userDav != null)
         {
             userDbContext.UsersDav.Remove(userDav);
-            await userDbContext.SaveChangesAsync();
+            await userDbContext.SaveChangesWithValidateAsync();
         }
     }
 

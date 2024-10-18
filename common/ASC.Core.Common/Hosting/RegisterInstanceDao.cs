@@ -54,7 +54,7 @@ public class RegisterInstanceDao<T>(
 
             try
             {
-                await _instanceRegistrationContext.SaveChangesAsync();
+                await _instanceRegistrationContext.SaveChangesWithValidateAsync();
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -91,7 +91,7 @@ public class RegisterInstanceDao<T>(
 
         try
         {
-            await _instanceRegistrationContext.SaveChangesAsync();
+            await _instanceRegistrationContext.SaveChangesWithValidateAsync();
         }
         catch (DbUpdateConcurrencyException ex)
         {

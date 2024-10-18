@@ -116,7 +116,7 @@ public abstract class BaseIndexer<T>(Client client,
                 LastModified = lastModified
         });
 
-            await webStudioDbContext.SaveChangesAsync();
+            await webStudioDbContext.SaveChangesWithValidateAsync();
         }
 
         _logger.DebugIndexCompleted(Wrapper.IndexName);
@@ -421,7 +421,7 @@ public abstract class BaseIndexer<T>(Client client,
         if (index != null)
         {
             webstudioDbContext.WebstudioIndex.Remove(index);
-            await webstudioDbContext.SaveChangesAsync();
+            await webstudioDbContext.SaveChangesWithValidateAsync();
         }
 
         _logger.DebugIndexDeleted(Wrapper.IndexName);

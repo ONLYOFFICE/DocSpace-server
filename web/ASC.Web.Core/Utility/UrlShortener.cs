@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.EF;
+
 namespace ASC.Web.Core.Utility;
 
 public interface IUrlShortener
@@ -99,7 +101,7 @@ public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFact
                         TenantId = tenantId
                     };
                     await context.ShortLinks.AddAsync(newShortLink);
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesWithValidateAsync();
                     return commonLinkUtility.GetFullAbsolutePath(UrlShortRewriter.BasePath + key);
                 }
             }

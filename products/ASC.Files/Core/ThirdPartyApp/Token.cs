@@ -54,7 +54,7 @@ public class TokenHelper(IDbContextFactory<FilesDbContext> dbContextFactory,
 
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         await filesDbContext.AddOrUpdateAsync(q => q.ThirdpartyApp, dbFilesThirdpartyApp);
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
     }
 
     public async Task<Token> GetTokenAsync(string app)

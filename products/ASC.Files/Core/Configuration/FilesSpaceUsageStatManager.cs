@@ -138,7 +138,7 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
             filesDbContext.Update(item.Folder);
         }
 
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
 
     }
     public async Task RecalculateQuota(int tenantId)

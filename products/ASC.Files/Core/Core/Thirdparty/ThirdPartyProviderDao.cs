@@ -593,7 +593,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
                 dbContext.RemoveRange(filesLinkedForDelete);
                 await dbContext.AddRangeAsync(filesLinkedForInsert);
 
-                await dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesWithValidateAsync();
             }
 
             await tx.CommitAsync();

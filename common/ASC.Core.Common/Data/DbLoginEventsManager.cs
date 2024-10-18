@@ -182,6 +182,6 @@ public class DbLoginEventsManager(
         }
 
         loginEventContext.UpdateRange(loginEvents);
-        await loginEventContext.SaveChangesAsync();
+        await loginEventContext.SaveChangesWithValidateAsync();
     }
 }

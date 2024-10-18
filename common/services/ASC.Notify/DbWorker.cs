@@ -51,7 +51,7 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
             notifyQueue.Attachments = JsonSerializer.Serialize(m.Attachments);
 
             notifyQueue = (await dbContext.NotifyQueue.AddAsync(notifyQueue)).Entity;
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesWithValidateAsync();
 
             var id = notifyQueue.NotifyId;
 
@@ -65,7 +65,7 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
             };
 
             await dbContext.NotifyInfo.AddAsync(info);
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesWithValidateAsync();
 
             await tx.CommitAsync();
         });
@@ -131,7 +131,7 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
             var d = await Queries.NotifyInfoAsync(dbContext, id);
 
             dbContext.NotifyInfo.Remove(d);
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesWithValidateAsync();
         }
         else
         {

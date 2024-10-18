@@ -34,7 +34,7 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
     {
         await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         await backupContext.AddOrUpdateAsync(b => b.Backups, backupRecord);
-        await backupContext.SaveChangesAsync();
+        await backupContext.SaveChangesWithValidateAsync();
     }
 
     public async Task<BackupRecord> GetBackupRecordAsync(Guid id)
@@ -81,7 +81,7 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
 
         var backupContextByNewTenant = creatorDbContext.CreateDbContext<BackupsContext>(region);
         await backupContextByNewTenant.Backups.AddRangeAsync(backups);
-        await backupContextByNewTenant.SaveChangesAsync();
+        await backupContextByNewTenant.SaveChangesWithValidateAsync();
     }
 
     public async Task DeleteBackupRecordAsync(Guid id)
@@ -93,7 +93,7 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
         {
             backup.Removed = true;
             backupContext.Update(backup);
-            await backupContext.SaveChangesAsync();
+            await backupContext.SaveChangesWithValidateAsync();
         }
     }
 
@@ -101,7 +101,7 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
     {
         await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         await backupContext.AddOrUpdateAsync(q => q.Schedules, schedule);
-        await backupContext.SaveChangesAsync();
+        await backupContext.SaveChangesWithValidateAsync();
     }
 
     public async Task DeleteBackupScheduleAsync(int tenantId)

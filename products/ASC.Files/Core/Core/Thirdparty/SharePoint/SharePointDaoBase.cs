@@ -120,7 +120,7 @@ internal class SharePointDaoBase(
                 dbContext.RemoveRange(linkForDelete);
                 await dbContext.AddRangeAsync(linkForInsert);
 
-                await dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesWithValidateAsync();
             }
 
             await tx.CommitAsync();

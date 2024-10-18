@@ -114,7 +114,7 @@ public class ClearEventsService(ILogger<ClearEventsService> logger, IServiceScop
             }
 
             table.RemoveRange(ids);
-            await ef.SaveChangesAsync();
+            await ef.SaveChangesWithValidateAsync();
 
         } while (ids.Count != 0);
     }

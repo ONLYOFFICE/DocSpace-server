@@ -640,7 +640,7 @@ public class TariffService(
                     });
                 }
 
-                await dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesWithValidateAsync();
 
                 inserted = true;
             }

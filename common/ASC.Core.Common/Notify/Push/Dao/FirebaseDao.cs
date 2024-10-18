@@ -46,7 +46,7 @@ public class FirebaseDao(IDbContextFactory<FirebaseDbContext> dbContextFactory)
                 Application = application
             };
             await dbContext.AddAsync(newUser);
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesWithValidateAsync();
 
             return newUser;
         }
@@ -73,7 +73,7 @@ public class FirebaseDao(IDbContextFactory<FirebaseDbContext> dbContextFactory)
         };
 
         dbContext.Update(user);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesWithValidateAsync();
 
         return user;
     }

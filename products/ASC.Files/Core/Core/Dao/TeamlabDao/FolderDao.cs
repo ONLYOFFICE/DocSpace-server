@@ -490,7 +490,7 @@ internal class FolderDao(
 
             filesDbContext.Update(toUpdate);
 
-            await filesDbContext.SaveChangesAsync();
+            await filesDbContext.SaveChangesWithValidateAsync();
 
             if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH)
             {
@@ -533,7 +533,7 @@ internal class FolderDao(
             
             var entityEntry = await filesDbContext.Folders.AddAsync(newFolder);
             newFolder = entityEntry.Entity;
-            await filesDbContext.SaveChangesAsync();
+            await filesDbContext.SaveChangesWithValidateAsync();
 
             if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH)
             {
@@ -551,7 +551,7 @@ internal class FolderDao(
             //full path to root
             treeToAdd.AddRange(await filesDbContext.FolderTreeAsync(folder.Id, folder.ParentId).ToListAsync());
             await filesDbContext.AddRangeAsync(treeToAdd);
-            await filesDbContext.SaveChangesAsync();
+            await filesDbContext.SaveChangesWithValidateAsync();
         }
 
         if (isNew)
@@ -576,7 +576,7 @@ internal class FolderDao(
 
         filesDbContext.Update(toUpdate);
 
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
 
         return room.Id;
     }
@@ -589,7 +589,7 @@ internal class FolderDao(
         var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
         roomSettings.Watermark = null;
         filesDbContext.Update(roomSettings);
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
         return room;
     }
 
@@ -647,7 +647,7 @@ internal class FolderDao(
 
             await filesDbContext.DeleteAuditReferencesAsync(folderId, FileEntryType.Folder);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesWithValidateAsync();
             await tx.CommitAsync();
             await RecalculateFoldersCountAsync(parent, tenantId);
         });
@@ -769,7 +769,7 @@ internal class FolderDao(
                     await DeleteCustomOrder(context, folderId);
                 }
 
-                await context.SaveChangesAsync();
+                await context.SaveChangesWithValidateAsync();
                 await tx.CommitAsync();
                 await ChangeTreeFolderSizeAsync(toFolderId, folder.Counter);
                 await ChangeTreeFolderSizeAsync(folder.ParentId, (-1)*folder.Counter);
@@ -781,7 +781,7 @@ internal class FolderDao(
                  f.FilesCount = await filesDbContext.FilesCountAsync(f.TenantId, f.Id);
              }
              
-            await filesDbContext.SaveChangesAsync();
+            await filesDbContext.SaveChangesWithValidateAsync();
         });
 
         return folderId;
@@ -948,7 +948,7 @@ internal class FolderDao(
         }
         
         filesDbContext.Update(toUpdate);
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
 
         _ = factoryIndexer.IndexAsync(toUpdate);
 
@@ -1004,7 +1004,7 @@ internal class FolderDao(
 
         filesDbContext.Update(toUpdate);
 
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
 
         _ = factoryIndexer.IndexAsync(toUpdate);
 
@@ -1022,7 +1022,7 @@ internal class FolderDao(
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         filesDbContext.Update(toUpdate);
 
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
 
         _ = factoryIndexer.IndexAsync(toUpdate);
 
@@ -1041,7 +1041,7 @@ internal class FolderDao(
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         filesDbContext.Update(toUpdate);
 
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
 
         _ = factoryIndexer.IndexAsync(toUpdate);
 
@@ -1294,7 +1294,7 @@ internal class FolderDao(
                     };
 
                     await filesDbContext.AddOrUpdateAsync(r => r.BunchObjects, newBunch);
-                    await filesDbContext.SaveChangesAsync();
+                    await filesDbContext.SaveChangesWithValidateAsync();
 
                     await tx.CommitAsync(); //Commit changes
                 });
@@ -1406,7 +1406,7 @@ internal class FolderDao(
                 };
 
                 await filesDbContext.AddOrUpdateAsync(r => r.BunchObjects, toInsert);
-                await filesDbContext.SaveChangesAsync();
+                await filesDbContext.SaveChangesWithValidateAsync();
 
                 await tx.CommitAsync(); //Commit changes
             });

@@ -119,7 +119,7 @@ public class AccountLinker(
             throw new Exception("ErrorAccountAlreadyUse");
         }
         await accountLinkContext.AddOrUpdateAsync(a => a.AccountLinks, accountLink);
-        await accountLinkContext.SaveChangesAsync();
+        await accountLinkContext.SaveChangesWithValidateAsync();
 
         await accountLinkerStorage.RemoveFromCacheAsync(obj.ToString());
         await accountLinkerStorage.RemoveFromCacheAsync(CacheKey(tenant));
@@ -138,7 +138,7 @@ public class AccountLinker(
         var accountLink = await Queries.AccountLinkAsync(accountLinkContext, obj, provider, hashId);
 
         accountLinkContext.AccountLinks.Remove(accountLink);
-        await accountLinkContext.SaveChangesAsync();
+        await accountLinkContext.SaveChangesWithValidateAsync();
 
         await accountLinkerStorage.RemoveFromCacheAsync(obj);
         await accountLinkerStorage.RemoveFromCacheAsync(CacheKey(tenant));

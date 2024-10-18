@@ -134,7 +134,6 @@ public static class WebhooksConfigExtension
                 .HasDefaultValueSql("''");
 
             entity.Property(e => e.Name)
-                .HasMaxLength(50)
                 .HasColumnName("name")
                 .IsRequired();
 

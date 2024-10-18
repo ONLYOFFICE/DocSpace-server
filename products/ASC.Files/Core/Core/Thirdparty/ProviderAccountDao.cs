@@ -145,7 +145,7 @@ internal class ProviderAccountDao(
 
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var res = await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyAccount, dbFilesThirdpartyAccount);
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
 
         return res.Id;
     }
@@ -226,7 +226,7 @@ internal class ProviderAccountDao(
         forUpdate.ModifiedOn = DateTime.UtcNow;
         
         filesDbContext.Update(forUpdate);
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
         
         return ToProviderInfo(forUpdate);
     }
@@ -319,7 +319,7 @@ internal class ProviderAccountDao(
             toUpdateCount++;
         }
 
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
 
         return toUpdateCount == 1 ? linkId : default;
     }
@@ -377,7 +377,7 @@ internal class ProviderAccountDao(
         thirdParty.ModifiedOn = DateTime.UtcNow;
         
         filesDbContext.Update(thirdParty);
-        await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesWithValidateAsync();
 
         return thirdParty.Id;
     }
