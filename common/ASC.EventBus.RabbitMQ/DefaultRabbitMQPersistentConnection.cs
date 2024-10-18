@@ -64,9 +64,9 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         try
         {
-//            _connection.ConnectionShutdown -= OnConnectionShutdown;
-//            _connection.CallbackException -= OnCallbackException;
-//            _connection.ConnectionBlocked -= OnConnectionBlocked;
+            _connection.ConnectionShutdownAsync -= OnConnectionShutdownAsync;
+            _connection.CallbackExceptionAsync -= OnCallbackExceptionAsync;
+            _connection.ConnectionBlockedAsync -= OnConnectionBlockedAsync;
 
             _connection.Dispose();
         }
