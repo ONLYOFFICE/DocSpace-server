@@ -1225,7 +1225,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 var parentFolders = await GetFileParentFolders(file.ParentId);
                 if (parentFolders.Exists(parent => parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder))
                 {
-                    if (ace is { Share: FileShare.FillForms } && (!userId.Equals(file.CreateBy) || userId.Equals(ASC.Core.Configuration.Constants.Guest.ID)))
+                    if (ace is { Share: FileShare.FillForms } && !userId.Equals(file.CreateBy))
                     {
                         return false;
                     }
