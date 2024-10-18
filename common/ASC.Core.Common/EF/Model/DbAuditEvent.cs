@@ -153,34 +153,28 @@ public static class AuditEventExtension
 
             entity.Property(e => e.Browser)
                 .HasColumnName("browser")
-                .HasMaxLength(200)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Date).HasColumnName("date");
 
             entity.Property(e => e.DescriptionRaw)
                 .HasColumnName("description")
-                .HasMaxLength(20000)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Initiator)
                 .HasColumnName("initiator")
-                .HasMaxLength(200)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Ip)
                 .HasColumnName("ip")
-                .HasMaxLength(50)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Page)
                 .HasColumnName("page")
-                .HasMaxLength(300)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Platform)
                 .HasColumnName("platform")
-                .HasMaxLength(200)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Target).HasColumnName("target");

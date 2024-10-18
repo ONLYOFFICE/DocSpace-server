@@ -108,7 +108,6 @@ public static class DbTariffExtension
 
             entity.Property(e => e.Comment)
                 .HasColumnName("comment")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.CreateOn)
@@ -120,7 +119,6 @@ public static class DbTariffExtension
             entity.Property(e => e.CustomerId)
                 .IsRequired()
                 .HasColumnName("customer_id")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");

@@ -107,8 +107,7 @@ public static class DbFilesThirdpartyAppExtension
                 .HasMaxLength(38);
 
             entity.Property(e => e.App)
-                .HasColumnName("app")
-                .HasMaxLength(50);
+                .HasColumnName("app");
 
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")

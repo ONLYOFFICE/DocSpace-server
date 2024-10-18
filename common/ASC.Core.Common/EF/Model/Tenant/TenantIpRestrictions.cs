@@ -93,8 +93,7 @@ public static class TenantIpRestrictionsExtension
 
             entity.Property(e => e.Ip)
                 .IsRequired()
-                .HasColumnName("ip")
-                .HasMaxLength(50);
+                .HasColumnName("ip");
 
             entity.Property(e => e.ForAdmin)
                 .IsRequired()

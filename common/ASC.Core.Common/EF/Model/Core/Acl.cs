@@ -185,7 +185,6 @@ public static class AclExtension
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("''");
 
             entity.Property(e => e.AceType).HasColumnName("acetype");

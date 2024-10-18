@@ -24,12 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Webhooks.Core.EF.Model;
 
 public class DbWebhook : IMapFrom<Webhook>
 {
     public int Id { get; set; }
+    [MaxLength(200)]
     public string Route { get; set; }
+    [MaxLength(10)]
     public string Method { get; set; }
 }
 
@@ -57,12 +61,10 @@ public static class DbWebhookExtension
                 .HasColumnName("id");
 
             entity.Property(e => e.Route)
-                .HasMaxLength(200)
                 .HasColumnName("route")
                 .HasDefaultValueSql("''");
 
             entity.Property(e => e.Method)
-                .HasMaxLength(10)
                 .HasColumnName("method")
                 .HasDefaultValueSql("''");
         });
@@ -82,12 +84,10 @@ public static class DbWebhookExtension
                 .HasColumnName("id");
 
             entity.Property(e => e.Route)
-                .HasMaxLength(200)
                 .HasColumnName("route")
                 .HasDefaultValueSql("''");
 
             entity.Property(e => e.Method)
-                .HasMaxLength(10)
                 .HasColumnName("method")
                 .HasDefaultValueSql("''");
         });

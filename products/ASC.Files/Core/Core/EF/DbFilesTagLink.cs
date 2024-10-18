@@ -125,8 +125,7 @@ public static class DbFilesTagLinkExtension
             entity.Property(e => e.EntryType).HasColumnName("entry_type");
 
             entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id")
-                .HasMaxLength(32);
+                .HasColumnName("entry_id");
 
             entity.Property(e => e.CreateBy)
                 .HasColumnName("create_by")

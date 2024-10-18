@@ -123,7 +123,6 @@ public static class UserSecurityExtension
 
             entity.Property(e => e.PwdHash)
                 .HasColumnName("pwdhash")
-                .HasMaxLength(512)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");

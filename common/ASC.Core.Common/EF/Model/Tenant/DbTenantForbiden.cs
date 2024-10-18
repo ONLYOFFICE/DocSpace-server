@@ -76,8 +76,7 @@ public static class DbTenantForbidenExtension
             entity.ToTable("tenants_forbiden", "onlyoffice");
 
             entity.Property(e => e.Address)
-                .HasColumnName("address")
-                .HasMaxLength(50);
+                .HasColumnName("address");
         });
 
     }

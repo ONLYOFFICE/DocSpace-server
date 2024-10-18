@@ -100,13 +100,11 @@ public static class DbTenantVersionExtension
 
             entity.Property(e => e.Url)
                 .IsRequired()
-                .HasColumnName("url")
-                .HasMaxLength(64);
+                .HasColumnName("url");
 
             entity.Property(e => e.Version)
                 .IsRequired()
-                .HasColumnName("version")
-                .HasMaxLength(64);
+                .HasColumnName("version");
 
             entity.Property(e => e.Visible).HasColumnName("visible");
         });

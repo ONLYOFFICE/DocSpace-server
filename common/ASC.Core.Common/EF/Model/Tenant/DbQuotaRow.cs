@@ -117,8 +117,7 @@ public static class DbQuotaRowExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Path)
-                .HasColumnName("path")
-                .HasMaxLength(255);
+                .HasColumnName("path");
 
             entity.Property(e => e.Counter)
                 .HasColumnName("counter")
@@ -130,7 +129,6 @@ public static class DbQuotaRowExtension
 
             entity.Property(e => e.Tag)
                 .HasColumnName("tag")
-                .HasMaxLength(1024)
                 .HasDefaultValueSql("'0'");
 
             entity.Property(e => e.UserId)

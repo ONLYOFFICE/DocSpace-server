@@ -31,7 +31,6 @@ namespace ASC.Core.Common.EF.Model;
 public class DbWebstudioSettings : BaseEntity
 {
     public int TenantId { get; set; }
-    [MaxLength(64)]
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public string Data { get; set; }

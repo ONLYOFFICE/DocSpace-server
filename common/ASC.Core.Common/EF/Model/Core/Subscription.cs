@@ -140,20 +140,16 @@ public static class SubscriptionExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Source)
-                .HasColumnName("source")
-                .HasMaxLength(38);
+                .HasColumnName("source");
 
             entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .HasMaxLength(128);
+                .HasColumnName("action");
 
             entity.Property(e => e.Recipient)
-                .HasColumnName("recipient")
-                .HasMaxLength(38);
+                .HasColumnName("recipient");
 
             entity.Property(e => e.Object)
-                .HasColumnName("object")
-                .HasMaxLength(128);
+                .HasColumnName("object");
 
             entity.Property(e => e.Unsubscribed).HasColumnName("unsubscribed");
         });

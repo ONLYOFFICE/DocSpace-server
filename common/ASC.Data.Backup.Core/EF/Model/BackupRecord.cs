@@ -199,7 +199,6 @@ public static class BackupRecordExtension
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
-                .HasMaxLength(255)
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -211,7 +210,6 @@ public static class BackupRecordExtension
 
             entity.Property(e => e.StorageBasePath)
                 .HasColumnName("storage_base_path")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
@@ -219,7 +217,6 @@ public static class BackupRecordExtension
             entity.Property(e => e.StoragePath)
                 .IsRequired()
                 .HasColumnName("storage_path")
-                .HasMaxLength(255)
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -243,7 +240,6 @@ public static class BackupRecordExtension
             entity.Property(e => e.Hash)
                  .IsRequired()
                 .HasColumnName("hash")
-                .HasMaxLength(64)
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

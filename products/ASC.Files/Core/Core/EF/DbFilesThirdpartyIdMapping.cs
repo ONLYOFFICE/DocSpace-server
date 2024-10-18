@@ -99,7 +99,6 @@ public static class DbFilesThirdpartyIdMappingExtension
 
             entity.Property(e => e.HashId)
                 .HasColumnName("hash_id")
-                .HasMaxLength(32)
                 .IsFixedLength();
 
             entity.Property(e => e.Id)

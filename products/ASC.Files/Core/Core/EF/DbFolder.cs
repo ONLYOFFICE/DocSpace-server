@@ -199,8 +199,7 @@ public static class DbFolderExtension
 
             entity.Property(e => e.Title)
                 .IsRequired()
-                .HasColumnName("title")
-                .HasMaxLength(400);
+                .HasColumnName("title");
 
             entity.Property(e => e.Counter)
                 .HasColumnName("counter")

@@ -141,7 +141,6 @@ public static class BackupScheduleExtension
             entity.Property(e => e.Cron)
                 .IsRequired()
                 .HasColumnName("cron")
-                .HasMaxLength(255)
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -159,8 +158,7 @@ public static class BackupScheduleExtension
                 .HasColumnName("storage_base_path")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
-                .HasDefaultValueSql("NULL")
-                .HasMaxLength(255);
+                .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.LastBackupTime)
                 .IsRequired()

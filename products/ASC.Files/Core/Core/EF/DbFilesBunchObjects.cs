@@ -100,13 +100,11 @@ public static class DbFilesBunchObjectsExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.RightNode)
-                .HasColumnName("right_node")
-                .HasMaxLength(255);
+                .HasColumnName("right_node");
 
             entity.Property(e => e.LeftNode)
                 .IsRequired()
-                .HasColumnName("left_node")
-                .HasMaxLength(255);
+                .HasColumnName("left_node");
         });
     }
 }

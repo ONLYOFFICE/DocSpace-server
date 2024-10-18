@@ -219,7 +219,6 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.ProductId)
                 .HasColumnName("product_id")
-                .HasMaxLength(128)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Description)

@@ -145,21 +145,17 @@ public static class SubscriptionMethodExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Source)
-                .HasColumnName("source")
-                .HasMaxLength(38);
+                .HasColumnName("source");
 
             entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .HasMaxLength(128);
+                .HasColumnName("action");
 
             entity.Property(e => e.Recipient)
-                .HasColumnName("recipient")
-                .HasMaxLength(38);
+                .HasColumnName("recipient");
 
             entity.Property(e => e.Sender)
                 .IsRequired()
-                .HasColumnName("sender")
-                .HasMaxLength(1024);
+                .HasColumnName("sender");
         });
     }
 }

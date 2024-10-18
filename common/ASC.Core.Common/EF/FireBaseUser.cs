@@ -137,12 +137,10 @@ public static class FireBaseUserExtension
                 .HasMaxLength(36);
 
             entity.Property(e => e.FirebaseDeviceToken)
-                .HasColumnName("firebase_device_token")
-                .HasMaxLength(255);
+                .HasColumnName("firebase_device_token");
 
             entity.Property(e => e.Application)
-                .HasColumnName("application")
-                .HasMaxLength(20);
+                .HasColumnName("application");
         });
     }
 

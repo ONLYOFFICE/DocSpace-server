@@ -145,19 +145,16 @@ public static class DbGroupExtension
 
             entity.Property(e => e.Name)
                 .IsRequired()
-                .HasColumnName("name")
-                .HasMaxLength(128);
+                .HasColumnName("name");
 
             entity.Property(e => e.ParentId)
                 .HasColumnName("parentid")
-                .HasMaxLength(38)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Removed).HasColumnName("removed");
 
             entity.Property(e => e.Sid)
                 .HasColumnName("sid")
-                .HasMaxLength(512)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");

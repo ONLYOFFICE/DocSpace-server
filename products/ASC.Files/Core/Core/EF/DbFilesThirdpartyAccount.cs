@@ -180,21 +180,18 @@ public static class DbFilesThirdpartyAccountExtension
 
             entity.Property(e => e.Title)
                 .IsRequired()
-                .HasColumnName("customer_title")
-                .HasMaxLength(400);
+                .HasColumnName("customer_title");
 
             entity.Property(e => e.FolderType).HasColumnName("folder_type");
             entity.Property(e => e.RoomType).HasColumnName("room_type");
 
             entity.Property(e => e.Password)
                 .IsRequired()
-                .HasColumnName("password")
-                .HasMaxLength(100);
+                .HasColumnName("password");
 
             entity.Property(e => e.Provider)
                 .IsRequired()
                 .HasColumnName("provider")
-                .HasMaxLength(50)
                 .HasDefaultValueSql("'0'::character varying");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
@@ -210,8 +207,7 @@ public static class DbFilesThirdpartyAccountExtension
 
             entity.Property(e => e.UserName)
                 .IsRequired()
-                .HasColumnName("user_name")
-                .HasMaxLength(100);
+                .HasColumnName("user_name");
 
             entity.Property(e => e.FolderId).HasColumnName("folder_id");
 
@@ -220,8 +216,7 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.HasLogo).HasColumnName("has_logo");
 
             entity.Property(e => e.Color)
-                .HasColumnName("color")
-                .HasMaxLength(6);
+                .HasColumnName("color");
 
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")

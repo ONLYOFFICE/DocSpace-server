@@ -672,12 +672,10 @@ public static class FilesConvertsExtension
             entity.ToTable("files_converts", "onlyoffice");
 
             entity.Property(e => e.Input)
-                .HasColumnName("input")
-                .HasMaxLength(50);
+                .HasColumnName("input");
 
             entity.Property(e => e.Output)
-                .HasColumnName("output")
-                .HasMaxLength(50);
+                .HasColumnName("output");
         });
     }
 }

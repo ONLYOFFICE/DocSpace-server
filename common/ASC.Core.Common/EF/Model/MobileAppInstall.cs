@@ -88,8 +88,7 @@ public static class MobileAppInstallExtension
             entity.ToTable("mobile_app_install", "onlyoffice");
 
             entity.Property(e => e.UserEmail)
-                .HasColumnName("user_email")
-                .HasMaxLength(255);
+                .HasColumnName("user_email");
 
             entity.Property(e => e.AppType).HasColumnName("app_type");
 

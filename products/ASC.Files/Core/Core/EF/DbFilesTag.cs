@@ -100,8 +100,7 @@ public static class DbFilesTagExtension
 
             entity.Property(e => e.Name)
                 .IsRequired()
-                .HasColumnName("name")
-                .HasMaxLength(255);
+                .HasColumnName("name");
 
             entity.Property(e => e.Owner)
                 .IsRequired()

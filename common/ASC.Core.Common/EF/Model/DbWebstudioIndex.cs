@@ -81,8 +81,7 @@ public static class DbWebstudioIndexExtension
             entity.ToTable("webstudio_index", "onlyoffice");
 
             entity.Property(e => e.IndexName)
-                .HasColumnName("index_name")
-                .HasMaxLength(50);
+                .HasColumnName("index_name");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")

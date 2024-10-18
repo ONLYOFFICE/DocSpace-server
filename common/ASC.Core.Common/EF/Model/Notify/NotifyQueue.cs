@@ -155,14 +155,12 @@ public static class NotifyQueueExtension
 
             entity.Property(e => e.AutoSubmitted)
                 .HasColumnName("auto_submitted")
-                .HasMaxLength(64)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Content).HasColumnName("content");
 
             entity.Property(e => e.ContentType)
                 .HasColumnName("content_type")
-                .HasMaxLength(64)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.CreationDate).HasColumnName("creation_date");
@@ -172,27 +170,22 @@ public static class NotifyQueueExtension
 
             entity.Property(e => e.Reciever)
                 .HasColumnName("reciever")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.ReplyTo)
                 .HasColumnName("reply_to")
-                .HasMaxLength(1024)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Sender)
                 .HasColumnName("sender")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.SenderType)
                 .HasColumnName("sender_type")
-                .HasMaxLength(64)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Subject)
                 .HasColumnName("subject")
-                .HasMaxLength(1024)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");

@@ -308,7 +308,6 @@ public static class DbUserExtension
 
             entity.Property(e => e.Contacts)
                 .HasColumnName("contacts")
-                .HasMaxLength(1024)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.CreateDate)
@@ -317,39 +316,33 @@ public static class DbUserExtension
 
             entity.Property(e => e.CultureName)
                 .HasColumnName("culture")
-                .HasMaxLength(20)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Email)
                 .HasColumnName("email")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.FirstName)
                 .IsRequired()
-                .HasColumnName("firstname")
-                .HasMaxLength(64);
+                .HasColumnName("firstname");
 
-            entity.Property(e => e.LastModified).HasColumnName("last_modified");
+            entity.Property(e => e.LastModified)
+                .HasColumnName("last_modified");
 
             entity.Property(e => e.LastName)
                 .IsRequired()
-                .HasColumnName("lastname")
-                .HasMaxLength(64);
+                .HasColumnName("lastname");
 
             entity.Property(e => e.Location)
                 .HasColumnName("location")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Notes)
                 .HasColumnName("notes")
-                .HasMaxLength(512)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.MobilePhone)
                 .HasColumnName("phone")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.MobilePhoneActivation).HasColumnName("phone_activation");
@@ -360,17 +353,14 @@ public static class DbUserExtension
 
             entity.Property(e => e.Sid)
                 .HasColumnName("sid")
-                .HasMaxLength(512)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.SsoNameId)
                 .HasColumnName("sso_name_id")
-                .HasMaxLength(512)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.SsoSessionId)
                 .HasColumnName("sso_session_id")
-                .HasMaxLength(512)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Status)
@@ -383,13 +373,11 @@ public static class DbUserExtension
 
             entity.Property(e => e.Title)
                 .HasColumnName("title")
-                .HasMaxLength(64)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.UserName)
                 .IsRequired()
-                .HasColumnName("username")
-                .HasMaxLength(255);
+                .HasColumnName("username");
 
             entity.Property(e => e.WorkFromDate).HasColumnName("workfromdate");
 

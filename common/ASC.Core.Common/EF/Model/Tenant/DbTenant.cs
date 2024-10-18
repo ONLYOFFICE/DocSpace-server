@@ -281,8 +281,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.Alias)
                 .IsRequired()
-                .HasColumnName("alias")
-                .HasMaxLength(100);
+                .HasColumnName("alias");
 
             entity.Property(e => e.Calls)
                 .HasColumnName("calls")
@@ -295,7 +294,6 @@ public static class DbTenantExtension
             entity.Property(e => e.Language)
                 .IsRequired()
                 .HasColumnName("language")
-                .HasMaxLength(10)
                 .IsFixedLength()
                 .HasDefaultValueSql("'en-US'");
 
@@ -305,13 +303,11 @@ public static class DbTenantExtension
 
             entity.Property(e => e.MappedDomain)
                 .HasColumnName("mappeddomain")
-                .HasMaxLength(100)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Name)
                 .IsRequired()
-                .HasColumnName("name")
-                .HasMaxLength(255);
+                .HasColumnName("name");
 
             entity.Property(e => e.OwnerId)
                 .HasColumnName("owner_id")
@@ -333,12 +329,10 @@ public static class DbTenantExtension
 
             entity.Property(e => e.TimeZone)
                 .HasColumnName("timezone")
-                .HasMaxLength(50)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.TrustedDomainsRaw)
                 .HasColumnName("trusteddomains")
-                .HasMaxLength(1024)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.TrustedDomainsEnabled)

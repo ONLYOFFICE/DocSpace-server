@@ -93,8 +93,7 @@ public static class DbFilesPropertiesExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id")
-                .HasMaxLength(50);
+                .HasColumnName("entry_id");
 
             entity.Property(e => e.Data)
                 .IsRequired()

@@ -134,8 +134,7 @@ public static class DbFilesSecurityExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id")
-                .HasMaxLength(50);
+                .HasColumnName("entry_id");
 
             entity.Property(e => e.EntryType).HasColumnName("entry_type");
 

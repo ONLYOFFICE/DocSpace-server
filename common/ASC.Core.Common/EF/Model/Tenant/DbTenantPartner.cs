@@ -108,17 +108,14 @@ public static class DbTenantPartnerExtension
 
             entity.Property(e => e.AffiliateId)
                 .HasColumnName("affiliate_id")
-                .HasMaxLength(50)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Campaign)
                 .HasColumnName("campaign")
-                .HasMaxLength(50)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.PartnerId)
                 .HasColumnName("partner_id")
-                .HasMaxLength(36)
                 .HasDefaultValueSql("NULL");
         });
     }

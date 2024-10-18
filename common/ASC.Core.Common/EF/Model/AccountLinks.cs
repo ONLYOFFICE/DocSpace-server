@@ -112,12 +112,10 @@ public static class AccountLinksExtension
                 .HasDatabaseName("uid");
 
             entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasMaxLength(200);
+                .HasColumnName("id");
 
             entity.Property(e => e.UId)
-                .HasColumnName("uid")
-                .HasMaxLength(200);
+                .HasColumnName("uid");
 
             entity.Property(e => e.Linked).HasColumnName("linked");
 
@@ -127,7 +125,6 @@ public static class AccountLinksExtension
 
             entity.Property(e => e.Provider)
                 .HasColumnName("provider")
-                .HasMaxLength(60)
                 .IsFixedLength()
                 .HasDefaultValueSql("NULL");
         });

@@ -273,7 +273,6 @@ public static class DbFileExtension
 
             entity.Property(e => e.Comment)
                 .HasColumnName("comment")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL::character varying");
 
             entity.Property(e => e.ContentLength)
@@ -282,7 +281,6 @@ public static class DbFileExtension
 
             entity.Property(e => e.ConvertedType)
                 .HasColumnName("converted_type")
-                .HasMaxLength(10)
                 .HasDefaultValueSql("NULL::character varying");
 
             entity.Property(e => e.CreateBy)
@@ -315,8 +313,7 @@ public static class DbFileExtension
 
             entity.Property(e => e.Title)
                 .IsRequired()
-                .HasColumnName("title")
-                .HasMaxLength(400);
+                .HasColumnName("title");
 
             entity.Property(e => e.VersionGroup)
                 .HasColumnName("version_group")
