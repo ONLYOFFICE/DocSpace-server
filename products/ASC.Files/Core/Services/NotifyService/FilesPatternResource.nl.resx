@@ -119,9 +119,6 @@ $__AuthorName verwijderde de kamer: $RoomTitle</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Tekenstatus gewijzigd</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Vermeld in document</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Mailing is voltooid.</value>
   </data>

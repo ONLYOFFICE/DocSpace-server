@@ -178,9 +178,6 @@ $Message</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>اشعار DocSpace. تم ذكرك في مستند</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>تم ذكرك في مستند</value>
-  </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>المستندات. تم اكتمال ارسال البريد.</value>
   </data>

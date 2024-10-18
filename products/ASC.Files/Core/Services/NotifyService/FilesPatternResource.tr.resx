@@ -122,9 +122,6 @@ $__AuthorName şu odayı sildi: $RoomTitle</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>İmza durumu değişti</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Belgede bahsedilen</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Postalama tamamlandı.</value>
   </data>

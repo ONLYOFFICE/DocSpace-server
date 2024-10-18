@@ -134,9 +134,6 @@ $Message</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>Notificación de DocSpace. Se le ha mencionado en el documento</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Se le ha mencionado en el documento</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>El envío ha finalizado.</value>
   </data>

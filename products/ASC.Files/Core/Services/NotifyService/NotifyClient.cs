@@ -231,6 +231,7 @@ public class NotifyClient(WorkContext notifyContext,
             {
                 continue;
             }
+            var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
 
             await client.SendNoticeAsync(
                 NotifyConstants.EventEditorMentions,
@@ -239,6 +240,7 @@ public class NotifyClient(WorkContext notifyContext,
                 new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
                 new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(documentUrl)),
                 new TagValue(NotifyConstants.TagMessage, message.HtmlEncode()),
+                new TagValue(Tags.ToUserName, user.DisplayUserName(displayUserSettingsHelper)),
                 new TagValue(NotifyConstants.RoomTitle, roomTitle),
                 new TagValue(NotifyConstants.RoomUrl, roomUrl),
                 new AdditionalSenderTag("push.sender")

@@ -134,9 +134,6 @@ $__AuthorName さんが次のルームを削除しました：$RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpaceの通知です。ドキュメントにメンションされました</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>ドキュメントにメンションされました</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>郵送が完了しました。</value>
   </data>

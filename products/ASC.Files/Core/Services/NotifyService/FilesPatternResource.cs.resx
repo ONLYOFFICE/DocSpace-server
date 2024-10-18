@@ -125,9 +125,6 @@ $__AuthorName smazal místnost: $RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>Oznámení DocSpace. Zmíněno v dokumentu</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Zmíněno v doku</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Odesílání je dokončeno.</value>
   </data>

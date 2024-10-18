@@ -99,9 +99,6 @@ $__AuthorName님이 방을 삭제했습니다: $RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpace 알림. 문서에서 언급되었습니다</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>문서에서 언급되었습니다</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>메일링이 완료되었습니다.</value>
   </data>

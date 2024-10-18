@@ -178,9 +178,6 @@ $Message</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpace ծանուցում. Նշված է փաստաթղթում</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Նշված է փաստաթղթում</value>
-  </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Փաստաթղթեր. Փոստի ուղարկումն ավարտված է.</value>
   </data>

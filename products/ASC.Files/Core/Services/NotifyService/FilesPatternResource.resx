@@ -137,7 +137,7 @@ $Message</value>
     <value>Sign status changed</value>
   </data>
   <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Mentioned in document</value>
+    <value>$ToUserName mentioned you in the document $DocumentTitle</value>
   </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Mailing is complete.</value>

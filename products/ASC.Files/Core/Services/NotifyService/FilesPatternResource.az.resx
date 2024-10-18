@@ -134,9 +134,6 @@ $__AuthorName otağı sildi: $RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpace bildirişi. Sənəddə qeyd olunub</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Sənəddə qeyd olunub</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Poçt göndərişi tamamlandı.</value>
   </data>

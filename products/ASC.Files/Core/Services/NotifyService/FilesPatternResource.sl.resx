@@ -93,9 +93,6 @@ $__AuthorName je izbrisal sobo: $RoomTitle</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Status podpisa spremenjen</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Omenjeno v dokumentu</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Pošiljanje je zaključeno.</value>
   </data>

@@ -63,17 +63,15 @@ public class FirebaseDao(IDbContextFactory<FirebaseDbContext> dbContextFactory)
     public async Task<FireBaseUser> UpdateUserAsync(Guid userId, int tenantId, string fbDeviceToken, bool isSubscribed, string application)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var user = new FireBaseUser
-        {
-            UserId = userId,
-            TenantId = tenantId,
-            FirebaseDeviceToken = fbDeviceToken,
-            IsSubscribed = isSubscribed,
-            Application = application
-        };
 
-        dbContext.Update(user);
-        await dbContext.SaveChangesAsync();
+        var user = await Queries.FireBaseUserAsync(dbContext, tenantId, userId, application, fbDeviceToken);
+
+        if (user != null)
+        {
+            user.IsSubscribed = isSubscribed;
+            dbContext.Update(user);
+            await dbContext.SaveChangesAsync();
+        }
 
         return user;
     }

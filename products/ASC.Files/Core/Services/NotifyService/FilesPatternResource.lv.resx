@@ -119,9 +119,6 @@ $__AuthorName izdzēsa telpu: $RoomTitle</value>
   <data name="subject_DocuSignComplete_push" xml:space="preserve">
     <value>Visi parakstītāji pabeidza $DocumentTitle</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Minēts dokumentā</value>
-  </data>
   <data name="subject_ShareFolder_push" xml:space="preserve">
     <value>Mapei ir piešķirta piekļuve: $DocumentTitle</value>
   </data>

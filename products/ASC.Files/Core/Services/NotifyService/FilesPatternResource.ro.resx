@@ -125,9 +125,6 @@ $Message</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>Notificare DocSpace. Menționat într-un document</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Menționat într-un document</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Trimiterea finalizată.</value>
   </data>

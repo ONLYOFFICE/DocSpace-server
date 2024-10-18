@@ -128,9 +128,6 @@ $__AuthorName poisti huoneen: $RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpace-ilmoitus. Mainittu dokumentissa</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Mainittu dokumentissa</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Postitus on suoritettu.</value>
   </data>

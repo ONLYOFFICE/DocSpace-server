@@ -146,9 +146,6 @@ $__AuthorName vymazal(a) miestnosť: $RoomTitle</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Stav podpisu zmenený</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Uvedené v dokumente</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Odosielanie je ukončené.</value>
   </data>

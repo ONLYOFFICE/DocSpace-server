@@ -145,9 +145,6 @@ Prijavi se na svoj DocuSign nalog za više informacija.</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpace notifikacija. Spomenuto u dokumentu</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Spomenuto u dokumentu</value>
-  </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Dokumenti. Slanje je završeno.</value>
   </data>

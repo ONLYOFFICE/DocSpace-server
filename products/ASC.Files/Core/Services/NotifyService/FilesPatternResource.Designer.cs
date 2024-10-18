@@ -255,7 +255,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Mentioned in document.
+        ///   Looks up a localized string similar to $ToUserName mentioned you in the document $DocumentTitle.
         /// </summary>
         public static string subject_EditorMentions_push {
             get {
