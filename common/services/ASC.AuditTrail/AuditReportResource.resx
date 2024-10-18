@@ -900,4 +900,7 @@
   <data name="RoomIndexExportSaved" xml:space="preserve">
     <value>Export of the room index saved to Documents</value>
   </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Invitation sent again: {0}</value>
+  </data>
 </root>

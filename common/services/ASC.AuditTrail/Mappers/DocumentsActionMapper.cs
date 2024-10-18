@@ -176,7 +176,8 @@ internal class RoomsActionMapper : IModuleActionMapper
                             MessageAction.RoomDenyDownloadEnabled,
                             MessageAction.RoomDenyDownloadDisabled,
                             MessageAction.RoomWatermarkSet,
-                            MessageAction.RoomWatermarkDisabled
+                            MessageAction.RoomWatermarkDisabled,
+                            MessageAction.RoomInviteResend
                         ]
                     },
                     { ActionType.Delete, [MessageAction.RoomDeleted] },

@@ -50,6 +50,7 @@ public record HistoryEntry
         MessageAction.FolderIndexChanged,
         MessageAction.RoomCreateUser,
         MessageAction.RoomGroupAdded,
+        MessageAction.RoomInviteResend
     ];
     
     private int _groupId;

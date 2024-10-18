@@ -93,7 +93,8 @@ public class HistoryService(
         MessageAction.PrimaryExternalLinkCopied,
         MessageAction.RoomColorChanged,
         MessageAction.RoomCoverChanged,
-        MessageAction.RoomIndexExportSaved
+        MessageAction.RoomIndexExportSaved,
+        MessageAction.RoomInviteResend
     ];
 
     private static HashSet<int> FilterFolderActions => [

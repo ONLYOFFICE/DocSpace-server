@@ -284,6 +284,31 @@ public class RoomIndexExportSavedInterpreter : ActionInterpreter
     }
 }
 
+public class RoomInviteResendInterpreter : ActionInterpreter
+{
+    protected override async ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {
+        var userId = Guid.Parse(description[1]);
+        var userManager = serviceProvider.GetRequiredService<UserManager>();
+
+        var user = await userManager.GetUsersAsync(userId);
+        if (user == null || user.Id == Constants.LostUser.Id || user.Id == ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            return new UserHistoryData
+            {
+                User = new EmployeeDto { DisplayName = description[0] }
+            };
+        }
+
+        var employeeDtoHelper = serviceProvider.GetRequiredService<EmployeeDtoHelper>();
+        
+        return new UserHistoryData
+        {
+            User = await employeeDtoHelper.GetAsync(user)
+        };
+    }
+}
+
 public record UserHistoryData : HistoryData
 {
     public EmployeeDto User { get; set; }

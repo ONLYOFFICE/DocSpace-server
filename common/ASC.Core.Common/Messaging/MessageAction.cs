@@ -262,7 +262,8 @@ public enum MessageAction
     RoomWatermarkSet = 5112,
     RoomWatermarkDisabled = 5113,
     
-    RoomIndexExportSaved = 5118, //last
+    RoomIndexExportSaved = 5118,
+    RoomInviteResend = 5119,  //last
 
     #endregion
 

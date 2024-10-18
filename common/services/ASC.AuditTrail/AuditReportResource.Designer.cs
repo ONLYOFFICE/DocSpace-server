@@ -1725,6 +1725,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invitation sent again: {0}.
+        /// </summary>
+        public static string RoomInviteResend {
+            get {
+                return ResourceManager.GetString("RoomInviteResend", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LifeTime disabled.
         /// </summary>
         public static string RoomLifeTimeDisabled {

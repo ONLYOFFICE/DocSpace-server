@@ -4045,6 +4045,7 @@ public class FileStorageService //: IFileStorageService
                 
                 var link = await invitationService.GetInvitationLinkAsync(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
                 await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, await urlShortener.GetShortenLinkAsync(link));
+                await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
             
             return;
@@ -4079,6 +4080,7 @@ public class FileStorageService //: IFileStorageService
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
                 await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, shortenLink);
+                await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 
             if (counter <= packSize)
