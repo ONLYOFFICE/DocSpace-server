@@ -479,7 +479,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var linkId = await externalShare.GetLinkIdAsync();
             if (linkId != Guid.Empty)
             {
-                await entryManager.MarkAsRecentByLink(file, linkId);
+                await entryManager.MarkFileAsRecentByLink(file, linkId);
             }
         }
     }

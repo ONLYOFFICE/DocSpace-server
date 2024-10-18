@@ -75,14 +75,14 @@ public class SocketManager(
         await MakeRequest("update-file", file, true);
     }
 
-    public async Task UpdateFolderAsync<T>(Folder<T> folder)
+    public async Task UpdateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("update-folder", folder, true);
+        await MakeRequest("update-folder", folder, true, users: users);
     }
 
-    public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null)
+    public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("delete-file", file, action: action);
+        await MakeRequest("delete-file", file, users: users, action: action);
     }
 
     public async Task DeleteFolder<T>(Folder<T> folder, IEnumerable<Guid> users = null, Func<Task> action = null)
