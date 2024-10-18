@@ -26,6 +26,7 @@
 
 global using System.Collections.Concurrent;
 global using System.ComponentModel;
+global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
@@ -143,5 +144,5 @@ global using Twilio.Clients;
 global using Twilio.Rest.Api.V2010.Account;
 global using Twilio.Types;
 
-global using SecurityContext = ASC.Core.SecurityContext;
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
+global using SecurityContext = ASC.Core.SecurityContext;

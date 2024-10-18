@@ -24,38 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.ComponentModel.DataAnnotations;
 global using System.Net.Mail;
 global using System.Security;
 global using System.Security.Claims;
-global using System.ServiceModel.Security;
 global using System.Text.Json;
 global using System.Web;
 
 global using ASC.Api.Core;
-global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Convention;
-global using ASC.Core.Common;
+global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Model;
-global using ASC.Api.Core.Security;
 global using ASC.Api.Core.Routing;
+global using ASC.Api.Core.Security;
 global using ASC.Api.Utils;
 global using ASC.AuditTrail.Repositories;
 global using ASC.AuditTrail.Types;
 global using ASC.Common;
 global using ASC.Common.Caching;
-global using ASC.Core.Common.Core;
-global using ASC.Core.Common.Users;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
 global using ASC.Core.Billing;
+global using ASC.Core.Common;
+global using ASC.Core.Common.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Common.Users;
 global using ASC.Core.Security.Authentication;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
@@ -102,11 +102,11 @@ global using Microsoft.Extensions.Hosting.WindowsServices;
 global using SixLabors.ImageSharp;
 global using SixLabors.ImageSharp.Formats;
 
-global using Module = ASC.Api.Core.Module;
-global using SecurityContext = ASC.Core.SecurityContext;
 global using AllowAnonymousAttribute = Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute;
 global using AuthorizeAttribute = Microsoft.AspNetCore.Authorization.AuthorizeAttribute;
 global using HttpDeleteAttribute = Microsoft.AspNetCore.Mvc.HttpDeleteAttribute;
 global using HttpGetAttribute = Microsoft.AspNetCore.Mvc.HttpGetAttribute;
 global using HttpPostAttribute = Microsoft.AspNetCore.Mvc.HttpPostAttribute;
 global using HttpPutAttribute = Microsoft.AspNetCore.Mvc.HttpPutAttribute;
+global using Module = ASC.Api.Core.Module;
+global using SecurityContext = ASC.Core.SecurityContext;
