@@ -1122,6 +1122,51 @@ public class FileMarker(
             }
         }
     }
+    
+    public async Task<MarkResult> MarkAsRecentByLink<T>(FileEntry<T> entry, Guid linkId)
+    {
+        if (entry is File<T>)
+        {
+            if (entry.RootFolderType is not FolderType.USER)
+            {
+                return MarkResult.NotMarked;
+            }
+
+            if (await globalFolder.GetFolderMyAsync(daoFactory) == default)
+            {
+                return MarkResult.NotMarked;
+            }
+        }
+
+        if (entry is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType))
+        {
+            return MarkResult.NotMarked;
+        }
+        
+        var tagDao = daoFactory.GetTagDao<T>();
+        var userId = authContext.CurrentAccount.ID;
+        var linkIdString = linkId.ToString();
+
+        var tags = await tagDao.GetTagsAsync(userId, TagType.RecentByLink, [entry])
+            .ToDictionaryAsync(k => k.Name);
+
+        if (tags.Count > 0)
+        {
+            var toRemove = tags.Values.Where(t => t.Name != linkIdString);
+
+            await tagDao.RemoveTagsAsync(toRemove);
+        }
+
+        if (tags.ContainsKey(linkIdString))
+        {
+            return MarkResult.MarkExists;
+        }
+
+        var tag = Tag.RecentByLink(authContext.CurrentAccount.ID, linkId, entry);
+        await tagDao.SaveTagsAsync(tag);
+
+        return MarkResult.Marked;
+    }
 
     private async Task InsertToCacheAsync(object folderId, int count)
     {
@@ -1175,4 +1220,11 @@ public class AsyncTaskData<T> : DistributedTask
     public FileEntry<T> FileEntry { get; init; }
     public List<Guid> UserIDs { get; set; }
     public Guid CurrentAccountId { get; init; }
+}
+
+public enum MarkResult
+{
+    Marked,
+    NotMarked,
+    MarkExists,
 }
