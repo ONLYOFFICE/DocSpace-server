@@ -1891,8 +1891,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         
         return entries;
 
-        return entries;
-
         bool Filter<T>(FileEntry<T> entry, IReadOnlyDictionary<T, FileShareRecord<T>> records)
         {
             var id = entry.FileEntryType == FileEntryType.Folder ? entry.Id : entry.ParentId;
