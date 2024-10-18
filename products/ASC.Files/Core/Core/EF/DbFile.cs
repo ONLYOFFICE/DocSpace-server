@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 using Document = ASC.ElasticSearch.Document;
 
 namespace ASC.Files.Core.EF;
@@ -46,6 +48,7 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
     public int ParentId { get; set; }
 
     [Text(Analyzer = "whitespacecustom")]
+    [MaxLength(400)]
     public string Title { get; set; }
     public long ContentLength { get; set; }
     public int FileStatus { get; set; }
@@ -55,7 +58,9 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
     public Guid ModifiedBy { get; set; }
     public DateTime ModifiedOn { get; set; }
     public int TenantId { get; set; }
+    [MaxLength(10)]
     public string ConvertedType { get; set; }
+    [MaxLength(255)]
     public string Comment { get; set; }
     public string Changes { get; set; }
     public bool Encrypted { get; set; }
@@ -150,7 +155,7 @@ public static class DbFileExtension
 
             entity.Property(e => e.Comment)
                 .HasColumnName("comment")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -160,7 +165,7 @@ public static class DbFileExtension
 
             entity.Property(e => e.ConvertedType)
                 .HasColumnName("converted_type")
-                .HasColumnType("varchar(10)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -215,7 +220,7 @@ public static class DbFileExtension
             entity.Property(e => e.Title)
                 .IsRequired()
                 .HasColumnName("title")
-                .HasColumnType("varchar(400)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

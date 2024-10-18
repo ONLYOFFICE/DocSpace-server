@@ -24,12 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.EF;
 
 public class DbFilesTag : IDbFile, IMapFrom<TagInfo>
 {
     public int TenantId { get; set; }
     public int Id { get; set; }
+    [MaxLength(255)]
     public string Name { get; set; }
     public Guid Owner { get; set; }
     public TagType Type { get; set; }
@@ -68,7 +71,7 @@ public static class DbFilesTagExtension
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

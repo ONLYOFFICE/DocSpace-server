@@ -24,21 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class NotifyQueue
 {
     public int NotifyId { get; set; }
     public int TenantId { get; set; }
+    [MaxLength(255)]
     public string Sender { get; set; }
+    [MaxLength(255)]
     public string Reciever { get; set; }
+    [MaxLength(1024)]
     public string Subject { get; set; }
+    [MaxLength(64)]
     public string ContentType { get; set; }
     public string Content { get; set; }
+    [MaxLength(64)]
     public string SenderType { get; set; }
+    [MaxLength(1024)]
     public string ReplyTo { get; set; }
     public DateTime CreationDate { get; set; }
     public string Attachments { get; set; }
+    [MaxLength(64)]
     public string AutoSubmitted { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -75,7 +84,7 @@ public static class NotifyQueueExtension
 
             entity.Property(e => e.AutoSubmitted)
                 .HasColumnName("auto_submitted")
-                .HasColumnType("varchar(64)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -87,7 +96,7 @@ public static class NotifyQueueExtension
 
             entity.Property(e => e.ContentType)
                 .HasColumnName("content_type")
-                .HasColumnType("varchar(64)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -100,31 +109,31 @@ public static class NotifyQueueExtension
 
             entity.Property(e => e.Reciever)
                 .HasColumnName("reciever")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.ReplyTo)
                 .HasColumnName("reply_to")
-                .HasColumnType("varchar(1024)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Sender)
                 .HasColumnName("sender")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.SenderType)
                 .HasColumnName("sender_type")
-                .HasColumnType("varchar(64)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Subject)
                 .HasColumnName("subject")
-                .HasColumnType("varchar(1024)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

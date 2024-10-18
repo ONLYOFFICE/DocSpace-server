@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Data.Backup.EF.Model;
 
 public class BackupRecord : BaseEntity
@@ -31,10 +33,14 @@ public class BackupRecord : BaseEntity
     public Guid Id { get; set; }
     public int TenantId { get; set; }
     public bool IsScheduled { get; set; }
+    [MaxLength(255)]
     public string Name { get; set; }
+    [MaxLength(64)]
     public string Hash { get; set; }
     public BackupStorageType StorageType { get; set; }
+    [MaxLength(255)]
     public string StorageBasePath { get; set; }
+    [MaxLength(255)]
     public string StoragePath { get; set; }
     public DateTime CreatedOn { get; set; }
     public DateTime ExpiresOn { get; set; }
@@ -100,7 +106,7 @@ public static class BackupRecordExtension
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -111,7 +117,7 @@ public static class BackupRecordExtension
 
             entity.Property(e => e.StorageBasePath)
                 .HasColumnName("storage_base_path")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasDefaultValueSql("NULL")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
@@ -119,7 +125,7 @@ public static class BackupRecordExtension
             entity.Property(e => e.StoragePath)
                 .IsRequired()
                 .HasColumnName("storage_path")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -143,7 +149,7 @@ public static class BackupRecordExtension
             entity.Property(e => e.Hash)
                  .IsRequired()
                 .HasColumnName("hash")
-                .HasColumnType("varchar(64)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

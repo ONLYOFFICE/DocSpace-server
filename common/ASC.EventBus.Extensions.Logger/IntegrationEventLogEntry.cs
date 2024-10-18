@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.EventBus.Extensions.Logger;
 public class IntegrationEventLogEntry
 {
@@ -44,7 +46,7 @@ public class IntegrationEventLogEntry
         TransactionId = transactionId.ToString();
     }
     public Guid EventId { get; private set; }
-
+    [MaxLength(255)]
     public string EventTypeName { get; private set; }
 
     [NotMapped]

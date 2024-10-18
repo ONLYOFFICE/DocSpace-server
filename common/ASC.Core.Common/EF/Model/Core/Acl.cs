@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Core.Common.EF;
@@ -33,6 +35,7 @@ public class Acl : BaseEntity, IMapFrom<AzRecord>
     public int TenantId { get; set; }
     public Guid Subject { get; set; }
     public Guid Action { get; set; }
+    [MaxLength(255)]
     public string Object { get; set; }
     public AceType AceType { get; set; }
 
@@ -153,7 +156,7 @@ public static class AclExtension
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasDefaultValueSql("''")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");

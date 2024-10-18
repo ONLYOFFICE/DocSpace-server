@@ -24,12 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class TenantIpRestrictions
 {
     public int Id { get; set; }
     public int TenantId { get; set; }
+    [MaxLength(50)]
     public string Ip { get; set; }
     public bool ForAdmin { get; set; }
 
@@ -64,7 +67,7 @@ public static class TenantIpRestrictionsExtension
             entity.Property(e => e.Ip)
                 .IsRequired()
                 .HasColumnName("ip")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

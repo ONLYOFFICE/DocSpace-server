@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 using Profile = AutoMapper.Profile;
 
 namespace ASC.Core.Common.EF;
@@ -31,10 +33,13 @@ namespace ASC.Core.Common.EF;
 public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
 {
     public int TenantId { get; set; }
+    [MaxLength(128)]
     public string Name { get; set; }
+    [MaxLength(128)]
     public string Description { get; set; }
     public string Features { get; set; }
     public decimal Price { get; set; }
+    [MaxLength(128)]
     public string ProductId { get; set; }
     public bool Visible { get; set; }
 
@@ -168,13 +173,13 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.ProductId)
                 .HasColumnName("product_id")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Description)
                 .HasColumnName("description")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -184,7 +189,7 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.Name)
                 .HasColumnName("name")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

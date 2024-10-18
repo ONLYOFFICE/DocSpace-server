@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.EF;
 
 public class DbFilesTagLink : BaseEntity, IDbFile
@@ -31,6 +33,7 @@ public class DbFilesTagLink : BaseEntity, IDbFile
     public int TenantId { get; set; }
     public int TagId { get; set; }
     public FileEntryType EntryType { get; set; }
+    [MaxLength(32)]
     public string EntryId { get; set; }
     public Guid? CreateBy { get; set; }
     public DateTime? CreateOn { get; set; }
@@ -79,7 +82,7 @@ public static class DbFilesTagLinkExtension
 
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")
-                .HasColumnType("varchar(32)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

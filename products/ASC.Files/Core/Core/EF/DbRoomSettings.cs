@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.EF;
 
 public class DbRoomSettings
@@ -33,6 +35,7 @@ public class DbRoomSettings
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
     public string Color { get; set; }
+    [MaxLength(50)]
     public string Cover { get; set; }
     public bool Indexing { get; set; }
     public long Quota { get; set; }
@@ -91,7 +94,7 @@ public static class DbRoomSettingsExtension
             
             entity.Property(e => e.Cover)      
                 .HasColumnName("cover")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

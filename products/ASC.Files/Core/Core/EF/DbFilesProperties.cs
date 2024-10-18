@@ -24,10 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.EF;
 public class DbFilesProperties : BaseEntity
 {
     public int TenantId { get; set; }
+    [MaxLength(32)]
     public string EntryId { get; set; }
     public string Data { get; set; }
 
@@ -66,7 +69,7 @@ public static class DbFilesPropertiesExtension
 
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")
-                .HasColumnType("varchar(32)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

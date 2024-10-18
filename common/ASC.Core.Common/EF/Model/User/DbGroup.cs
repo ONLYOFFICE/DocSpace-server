@@ -24,15 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF;
 
 public class DbGroup : BaseEntity, IMapFrom<Group>
 {
     public int TenantId { get; set; }
     public Guid Id { get; set; }
+    [MaxLength(128)]
     public string Name { get; set; }
     public Guid? CategoryId { get; set; }
     public Guid? ParentId { get; set; }
+    [MaxLength(512)]
     public string Sid { get; set; }
     public bool Removed { get; set; }
     public DateTime LastModified { get; set; }
@@ -90,7 +94,7 @@ public static class DbGroupExtension
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -107,7 +111,7 @@ public static class DbGroupExtension
 
             entity.Property(e => e.Sid)
                 .HasColumnName("sid")
-                .HasColumnType("varchar(512)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

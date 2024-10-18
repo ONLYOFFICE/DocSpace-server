@@ -24,12 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class DbTenantVersion
 {
     public int Id { get; set; }
+    [MaxLength(64)]
     public string Version { get; set; }
+    [MaxLength(64)]
     public string Url { get; set; }
     public int DefaultVersion { get; set; }
     public bool Visible { get; set; }
@@ -71,7 +75,7 @@ public static class DbTenantVersionExtension
             entity.Property(e => e.Version)
                 .IsRequired()
                 .HasColumnName("version")
-                .HasColumnType("varchar(64)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

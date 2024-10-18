@@ -24,11 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class AccountLinks : BaseEntity
 {
+    [MaxLength(200)]
     public string Id { get; set; }
+    [MaxLength(200)]
     public string UId { get; set; }
     public string Provider { get; set; }
     public string Profile { get; set; }
@@ -66,13 +70,13 @@ public static class AccountLinksExtension
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .HasColumnType("varchar(200)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.UId)
                 .HasColumnName("uid")
-                .HasColumnType("varchar(200)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

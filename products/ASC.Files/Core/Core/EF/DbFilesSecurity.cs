@@ -24,11 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.EF;
 
 public class DbFilesSecurity : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    [MaxLength(50)]
     public string EntryId { get; set; }
     public FileEntryType EntryType { get; set; }
     public SubjectType SubjectType { get; set; }
@@ -79,7 +82,7 @@ public static class DbFilesSecurityExtension
 
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

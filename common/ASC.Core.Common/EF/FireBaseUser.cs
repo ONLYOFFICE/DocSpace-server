@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF;
 
 /// <summary>
@@ -44,10 +46,12 @@ public class FireBaseUser : BaseEntity
 
     /// <summary>Firebase device token</summary>
     /// <type>System.String, System</type>
+    [MaxLength(255)]
     public string FirebaseDeviceToken { get; set; }
 
     /// <summary>Application</summary>
     /// <type>System.String, System</type>
+    [MaxLength(20)]
     public string Application { get; set; }
 
     /// <summary>Specifies if the user is subscribed to the push notifications or not</summary>
@@ -99,13 +103,13 @@ public static class FireBaseUserExtension
 
             entity.Property(e => e.FirebaseDeviceToken)
                 .HasColumnName("firebase_device_token")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Application)
                 .HasColumnName("application")
-                .HasColumnType("varchar(20)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

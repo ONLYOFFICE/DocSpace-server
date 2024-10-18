@@ -24,12 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF;
 
 public class UserSecurity : BaseEntity
 {
     public int TenantId { get; set; }
     public Guid UserId { get; set; }
+    [MaxLength(512)]
     public string PwdHash { get; set; }
     public DateTime? LastModified { get; set; }
 

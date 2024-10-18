@@ -24,12 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.Hosting;
 
 public class InstanceRegistration
 {
+    [MaxLength(255)]
     public string InstanceRegistrationId { get; set; }
     public DateTime? LastUpdated { get; set; }
+    [MaxLength(255)]
     public string WorkerTypeName { get; set; }
     public bool IsActive { get; set; }
 }

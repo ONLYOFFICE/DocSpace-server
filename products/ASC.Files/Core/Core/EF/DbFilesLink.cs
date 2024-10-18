@@ -24,12 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.EF;
 
 public class DbFilesLink : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    [MaxLength(32)]
     public string SourceId { get; set; }
+    [MaxLength(32)]
     public string LinkedId { get; set; }
     public Guid LinkedFor { get; set; }
 
@@ -70,13 +74,13 @@ public static class DbFilesLinkExtension
 
             entity.Property(e => e.SourceId)
                 .HasColumnName("source_id")
-                .HasColumnType("varchar(32)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.LinkedId)
                 .HasColumnName("linked_id")
-                .HasColumnType("varchar(32)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

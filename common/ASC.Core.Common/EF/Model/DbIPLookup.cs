@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class DbIPLookup
@@ -33,16 +35,23 @@ public class DbIPLookup
     public byte[] IPEnd { get; set; }
     public string Continent { get; set; }
     public string Country { get; set; }
+    [MaxLength(15)]
     public string StateProvCode { get; set; }
+    [MaxLength(80)]
     public string StateProv { get; set; }
+    [MaxLength(80)]
     public string District { get; set; }
+    [MaxLength(80)]
     public string City { get; set; }
+    [MaxLength(20)]
     public string ZipCode { get; set; }
     public float Latitude { get; set; }
     public float Longitude { get; set; }
     public int? GeonameId { get; set; }
     public float TimezoneOffset { get; set; }
+    [MaxLength(64)]
     public string TimezoneName { get; set; }
+    [MaxLength(10)]
     public string WeatherCode { get; set; }
 
 }
@@ -94,27 +103,27 @@ public static class DbIPLookupExtension
 
             entity.Property(e => e.StateProvCode)
                 .HasColumnName("stateprov_code")
-                .HasColumnType("varchar(15)");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.StateProv)
                 .IsRequired()
                 .HasColumnName("stateprov")
-                .HasColumnType("varchar(80)");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.District)
                 .IsRequired()
                 .HasColumnName("district")
-                .HasColumnType("varchar(80)");
+                .HasColumnType("varchar");
 
 
             entity.Property(e => e.City)
                 .IsRequired()
                 .HasColumnName("city")
-                .HasColumnType("varchar(80)");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.ZipCode)
                 .HasColumnName("zipcode")
-                .HasColumnType("varchar(20)");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Latitude)
                 .IsRequired()
@@ -139,12 +148,12 @@ public static class DbIPLookupExtension
             entity.Property(e => e.TimezoneName)
                 .IsRequired()
                 .HasColumnName("timezone_name")
-                .HasColumnType("varchar(64)");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.WeatherCode)
                 .IsRequired()
                 .HasColumnName("weather_code")
-                .HasColumnType("varchar(10)");
+                .HasColumnType("varchar");
         });
 
     }
@@ -184,27 +193,27 @@ public static class DbIPLookupExtension
 
             entity.Property(e => e.StateProvCode)
                 .HasColumnName("stateprov_code")
-                .HasColumnType("varchar(15)");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.StateProv)
                 .IsRequired()
                 .HasColumnName("stateprov")
-                .HasColumnType("varchar(80)");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.District)
                 .IsRequired()
                 .HasColumnName("district")
-                .HasColumnType("varchar(80)");
+                .HasColumnType("varchar");
 
 
             entity.Property(e => e.City)
                 .IsRequired()
                 .HasColumnName("city")
-                .HasColumnType("varchar(80)");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.ZipCode)
                 .HasColumnName("zipcode")
-                .HasColumnType("varchar(20)");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Latitude)
                 .IsRequired()
@@ -234,7 +243,7 @@ public static class DbIPLookupExtension
             entity.Property(e => e.WeatherCode)
                 .IsRequired()
                 .HasColumnName("weather_code")
-                .HasColumnType("varchar(10)");
+                .HasColumnType("varchar");
         });
     }
 }

@@ -24,10 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class MobileAppInstall
 {
+    [MaxLength(255)]
     public string UserEmail { get; set; }
     public int AppType { get; set; }
     public DateTime RegisteredOn { get; set; }
@@ -57,7 +60,7 @@ public static class MobileAppInstallExtension
 
             entity.Property(e => e.UserEmail)
                 .HasColumnName("user_email")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

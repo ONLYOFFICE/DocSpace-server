@@ -89,7 +89,7 @@ public static class IntegrationEventLogExtension
 
             entity.Property(e => e.EventTypeName)
                   .HasColumnName("event_type_name")
-                  .HasColumnType("varchar(255)")
+                  .HasColumnType("varchar")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci")
                   .IsRequired();
@@ -152,7 +152,7 @@ public static class IntegrationEventLogExtension
 
             entity.Property(e => e.EventTypeName)
                   .HasColumnName("event_type_name")
-                  .HasColumnType("varchar(255)")
+                  .HasColumnType("varchar")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci")
                   .IsRequired();

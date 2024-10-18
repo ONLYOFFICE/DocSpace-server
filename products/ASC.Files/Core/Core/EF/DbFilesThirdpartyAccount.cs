@@ -24,14 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.EF;
 
 public class DbFilesThirdpartyAccount : BaseEntity, IDbFile, IDbSearch
 {
     public int Id { get; set; }
+    [MaxLength(50)]
     public string Provider { get; set; }
+    [MaxLength(400)]
     public string Title { get; set; }
+    [MaxLength(100)]
     public string UserName { get; set; }
+    [MaxLength(512)]
     public string Password { get; set; }
     public string Token { get; set; }
     public Guid UserId { get; set; }
@@ -85,7 +91,7 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.Title)
                 .IsRequired()
                 .HasColumnName("customer_title")
-                .HasColumnType("varchar(400)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -97,14 +103,14 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.Password)
                 .IsRequired()
                 .HasColumnName("password")
-                .HasColumnType("varchar(512)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Provider)
                 .IsRequired()
                 .HasColumnName("provider")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasDefaultValueSql("'0'")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
@@ -133,7 +139,7 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.UserName)
                 .IsRequired()
                 .HasColumnName("user_name")
-                .HasColumnType("varchar(100)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

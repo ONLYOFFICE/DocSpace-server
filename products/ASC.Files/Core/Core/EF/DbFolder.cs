@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.EF;
 
 [Transient]
@@ -34,6 +36,7 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
     public int ParentId { get; set; }
 
     [Text(Analyzer = "whitespacecustom")]
+    [MaxLength(400)]
     public string Title { get; set; }
     public FolderType FolderType { get; set; }
     public Guid CreateBy { get; set; }
@@ -139,7 +142,7 @@ public static class DbFolderExtension
             entity.Property(e => e.Title)
                 .IsRequired()
                 .HasColumnName("title")
-                .HasColumnType("varchar(400)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

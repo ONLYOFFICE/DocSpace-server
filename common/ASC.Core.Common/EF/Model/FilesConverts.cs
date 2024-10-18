@@ -24,11 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class FilesConverts
 {
+    [MaxLength(50)]
     public string Input { get; set; }
+    [MaxLength(50)]
     public string Output { get; set; }
 }
 
@@ -647,13 +651,13 @@ public static class FilesConvertsExtension
 
            entity.Property(e => e.Input)
                .HasColumnName("input")
-               .HasColumnType("varchar(50)")
+               .HasColumnType("varchar")
                .HasCharSet("utf8")
                .UseCollation("utf8_general_ci");
 
            entity.Property(e => e.Output)
                .HasColumnName("output")
-               .HasColumnType("varchar(50)")
+               .HasColumnType("varchar")
                .HasCharSet("utf8")
                .UseCollation("utf8_general_ci");
         });

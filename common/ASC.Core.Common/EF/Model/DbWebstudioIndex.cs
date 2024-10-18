@@ -24,10 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class DbWebstudioIndex : BaseEntity
 {
+    [MaxLength(50)]
     public string IndexName { get; set; }
     public DateTime LastModified { get; set; }
     public override object[] GetKeys()
@@ -59,7 +62,7 @@ public static class DbWebstudioIndexExtension
 
             entity.Property(e => e.IndexName)
                 .HasColumnName("index_name")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

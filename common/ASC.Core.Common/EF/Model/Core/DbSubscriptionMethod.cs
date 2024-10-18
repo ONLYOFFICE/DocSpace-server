@@ -24,14 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF;
 
 public class DbSubscriptionMethod : BaseEntity
 {
     public int TenantId { get; set; }
+    [MaxLength(38)]
     public string Source { get; set; }
+    [MaxLength(128)]
     public string Action { get; set; }
+    [MaxLength(38)]
     public string Recipient { get; set; }
+    [MaxLength(1024)]
     public string Sender { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -103,26 +109,26 @@ public static class SubscriptionMethodExtension
 
             entity.Property(e => e.Source)
                 .HasColumnName("source")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Action)
                 .HasColumnName("action")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Recipient)
                 .HasColumnName("recipient")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Sender)
                 .IsRequired()
                 .HasColumnName("sender")
-                .HasColumnType("varchar(1024)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });

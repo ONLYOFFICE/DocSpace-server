@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 using Profile = AutoMapper.Profile;
 
 namespace ASC.Core.Common.EF.Model;
@@ -31,8 +33,11 @@ namespace ASC.Core.Common.EF.Model;
 public class DbTenant : IMapFrom<Tenant>
 {
     public int Id { get; set; }
+    [MaxLength(255)]
     public string Name { get; set; }
+    [MaxLength(100)]
     public string Alias { get; set; }
+    [MaxLength(100)]
     public string MappedDomain { get; set; }
     public int Version { get; set; }
     public DateTime? Version_Changed { get; set; }
@@ -42,7 +47,9 @@ public class DbTenant : IMapFrom<Tenant>
         set => Version_Changed = value;
     }
     public string Language { get; set; }
+    [MaxLength(50)]
     public string TimeZone { get; set; }
+    [MaxLength(1024)]
     public string TrustedDomainsRaw { get; set; }
     public TenantTrustedDomainsType TrustedDomainsEnabled { get; set; }
     public TenantStatus Status { get; set; }
@@ -56,6 +63,7 @@ public class DbTenant : IMapFrom<Tenant>
     }
     public DateTime CreationDateTime { get; set; }
     public Guid? OwnerId { get; set; }
+    [MaxLength(38)]
     public string PaymentId { get; set; }
     public TenantIndustry Industry { get; set; }
     public DateTime LastModified { get; set; }
@@ -150,7 +158,7 @@ public static class DbTenantExtension
             entity.Property(e => e.Alias)
                 .IsRequired()
                 .HasColumnName("alias")
-                .HasColumnType("varchar(100)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -182,7 +190,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.MappedDomain)
                 .HasColumnName("mappeddomain")
-                .HasColumnType("varchar(100)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -202,7 +210,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.PaymentId)
                 .HasColumnName("payment_id")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -222,13 +230,13 @@ public static class DbTenantExtension
 
             entity.Property(e => e.TimeZone)
                 .HasColumnName("timezone")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TrustedDomainsRaw)
                 .HasColumnName("trusteddomains")
-                .HasColumnType("varchar(1024)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

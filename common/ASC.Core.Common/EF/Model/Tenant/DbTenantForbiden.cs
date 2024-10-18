@@ -24,10 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class DbTenantForbiden
 {
+    [MaxLength(50)]
     public string Address { get; set; }
 }
 
@@ -58,7 +61,7 @@ public static class DbTenantForbidenExtension
 
             entity.Property(e => e.Address)
                 .HasColumnName("address")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });

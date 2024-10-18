@@ -24,11 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class DbWebstudioSettings : BaseEntity
 {
     public int TenantId { get; set; }
+    [MaxLength(64)]
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public string Data { get; set; }

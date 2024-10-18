@@ -24,12 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.EF;
 
 public class DbFilesBunchObjects : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    [MaxLength(255)]
     public string RightNode { get; set; }
+    [MaxLength(255)]
     public string LeftNode { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -69,14 +73,14 @@ public static class DbFilesBunchObjectsExtension
 
             entity.Property(e => e.RightNode)
                 .HasColumnName("right_node")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.LeftNode)
                 .IsRequired()
                 .HasColumnName("left_node")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });
