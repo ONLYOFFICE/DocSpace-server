@@ -683,13 +683,14 @@ internal class FolderDao(
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
-                var folder = await GetFolderAsync(folderId);
-                var oldParentId = folder.ParentId;
+            var folder = await GetFolderAsync(folderId);
+            var oldParentId = folder.ParentId;
 
-            if ((folder.FolderType is not (FolderType.DEFAULT or FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)) && !DocSpaceHelper.IsRoom(folder.FolderType))
-                {
-                    throw new ArgumentException("It is forbidden to move the System folder.", nameof(folderId));
-                }
+            if (folder.FolderType is not (FolderType.DEFAULT or FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone) &&
+                !DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                throw new ArgumentException("It is forbidden to move the System folder.", nameof(folderId));
+            }
 
             await filesDbContext.UpdateFoldersAsync(tenantId, folderId, toFolderId, currentAccount);
             var subfolders = await filesDbContext.SubfolderAsync(folderId).ToDictionaryAsync(r => r.FolderId, r => r.Level);
@@ -697,92 +698,87 @@ internal class FolderDao(
             await filesDbContext.DeleteTreesBySubfoldersDictionaryAsync(subfolders.Select(r => r.Key));
             var toInsert = await filesDbContext.TreesOrderByLevel(toFolderId).ToListAsync();
 
-                foreach (var subfolder in subfolders)
-                {
+            foreach (var subfolder in subfolders)
+            {
                 foreach (var f in toInsert)
-                    {
-                        var newTree = new DbFolderTree
-                        {
-                            FolderId = subfolder.Key,
-                            ParentId = f.ParentId,
-                            Level = subfolder.Value + 1 + f.Level
-                        };
-                    await context.AddOrUpdateAsync(r => r.Tree, newTree);
-                    }
-                }
-
-                var trashId = await trashIdTask;
-                var tagDao = daoFactory.GetTagDao<int>();
-                var toFolder = await GetFolderAsync(toFolderId);
-                var (roomId, _) = await GetParentRoomInfoFromFileEntryAsync(folder);
-                var (toFolderRoomId, _) = await GetParentRoomInfoFromFileEntryAsync(toFolder);
-                if (toFolderId == trashId)
                 {
-                    var tagList = new List<Tag>();
-                    
-                    if (roomId != -1)
-                    {
+                    var newTree = new DbFolderTree { FolderId = subfolder.Key, ParentId = f.ParentId, Level = subfolder.Value + 1 + f.Level };
+                    await context.AddOrUpdateAsync(r => r.Tree, newTree);
+                }
+            }
+
+            var trashId = await trashIdTask;
+            var tagDao = daoFactory.GetTagDao<int>();
+            var toFolder = await GetFolderAsync(toFolderId);
+            var (roomId, _) = await GetParentRoomInfoFromFileEntryAsync(folder);
+            var (toFolderRoomId, _) = await GetParentRoomInfoFromFileEntryAsync(toFolder);
+            if (toFolderId == trashId)
+            {
+                var tagList = new List<Tag>();
+
+                if (roomId != -1)
+                {
                     tagList.Add(Tag.FromRoom(folder.Id, FileEntryType.Folder, currentAccount));
-                    }
+                }
 
                 var origin = Tag.Origin(folderId, FileEntryType.Folder, oldParentId, currentAccount);
-                    tagList.Add(origin);
-                    await tagDao.SaveTagsAsync(tagList);
-                }
-                else if (oldParentId == trashId || roomId != -1 || toFolderRoomId != -1)
-                {
+                tagList.Add(origin);
+                await tagDao.SaveTagsAsync(tagList);
+            }
+            else if (oldParentId == trashId || roomId != -1 || toFolderRoomId != -1)
+            {
                 var archiveId = await GetFolderIDArchive(false);
                 var fromRoomTag = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.FromRoom).FirstOrDefaultAsync();
-                    if ((folder.ParentId != archiveId && toFolder.Id != archiveId) && 
-                        toFolderRoomId == -1 && 
-                        ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))
-                    {
-                        await storageFactory.QuotaUsedAddAsync(
-                            await _tenantManager.GetCurrentTenantIdAsync(), 
-                            FileConstant.ModuleId, "", 
-                            WebItemManager.DocumentsProductID.ToString(), 
-                            folder.Counter, toFolder.RootCreateBy);
-                    }
-                
-                    if ((folder.ParentId != archiveId && toFolder.Id != archiveId) && 
-                        toFolderRoomId != -1 && 
-                        ((oldParentId == trashId && fromRoomTag == null) || (oldParentId != trashId && roomId == -1)))
-                    {
-                        await storageFactory.QuotaUsedDeleteAsync(
-                            await _tenantManager.GetCurrentTenantIdAsync(), 
-                            FileConstant.ModuleId, "", 
-                            WebItemManager.DocumentsProductID.ToString(), 
-                            folder.Counter, toFolder.RootCreateBy);
-                    }
-                
-                    if(oldParentId == trashId)
-                    {
-                        await tagDao.RemoveTagLinksAsync(folderId, FileEntryType.Folder, TagType.Origin);
-                        await tagDao.RemoveTagLinksAsync(folderId, FileEntryType.Folder, TagType.FromRoom);
-                    }
-                }
-
-                if (!trashId.Equals(toFolderId))
+                if (folder.ParentId != archiveId && toFolder.Id != archiveId &&
+                    toFolderRoomId == -1 &&
+                    ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))
                 {
-                    await SetCustomOrder(context, folderId, toFolderId);
+                    await storageFactory.QuotaUsedAddAsync(
+                        await _tenantManager.GetCurrentTenantIdAsync(),
+                        FileConstant.ModuleId, "",
+                        WebItemManager.DocumentsProductID.ToString(),
+                        folder.Counter, toFolder.RootCreateBy);
                 }
-                else
+
+                if (folder.ParentId != archiveId && toFolder.Id != archiveId &&
+                    toFolderRoomId != -1 &&
+                    ((oldParentId == trashId && fromRoomTag == null) || (oldParentId != trashId && roomId == -1)))
                 {
-                    await DeleteCustomOrder(context, folderId);
+                    await storageFactory.QuotaUsedDeleteAsync(
+                        await _tenantManager.GetCurrentTenantIdAsync(),
+                        FileConstant.ModuleId, "",
+                        WebItemManager.DocumentsProductID.ToString(),
+                        folder.Counter, toFolder.RootCreateBy);
                 }
 
-                await context.SaveChangesAsync();
-                await tx.CommitAsync();
-                await ChangeTreeFolderSizeAsync(toFolderId, folder.Counter);
-                await ChangeTreeFolderSizeAsync(folder.ParentId, (-1)*folder.Counter);
-            var recalcFolders = new HashSet<int> { toFolderId, folderId };
-            await filesDbContext.UpdateFoldersCountsAsync(tenantId, recalcFolders);
+                if (oldParentId == trashId)
+                {
+                    await tagDao.RemoveTagLinksAsync(folderId, FileEntryType.Folder, TagType.Origin);
+                    await tagDao.RemoveTagLinksAsync(folderId, FileEntryType.Folder, TagType.FromRoom);
+                }
+            }
 
-             await foreach (var f in filesDbContext.FoldersAsync(tenantId, recalcFolders))
-             {
-                 f.FilesCount = await filesDbContext.FilesCountAsync(f.TenantId, f.Id);
-             }
-             
+            if (!trashId.Equals(toFolderId))
+            {
+                await SetCustomOrder(context, folderId, toFolderId);
+            }
+            else
+            {
+                await DeleteCustomOrder(context, folderId);
+            }
+
+            await context.SaveChangesAsync();
+            await tx.CommitAsync();
+            await ChangeTreeFolderSizeAsync(toFolderId, folder.Counter);
+            await ChangeTreeFolderSizeAsync(folder.ParentId, -1 * folder.Counter);
+            var recalculateFolders = new HashSet<int> { toFolderId, folderId, folder.ParentId };
+            await filesDbContext.UpdateFoldersCountsAsync(tenantId, recalculateFolders);
+
+            await foreach (var f in filesDbContext.FoldersAsync(tenantId, recalculateFolders))
+            {
+                f.FilesCount = await filesDbContext.FilesCountAsync(f.TenantId, f.Id);
+            }
+
             await filesDbContext.SaveChangesAsync();
         });
 
