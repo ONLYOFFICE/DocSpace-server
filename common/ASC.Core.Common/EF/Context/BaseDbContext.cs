@@ -154,7 +154,7 @@ public static class BaseDbContextExtension
         return context.SaveChanges();
     }
 
-    public static async Task<int> SaveChangesWithValidateAsync(this DbContext context)
+    public static async Task<int> SaveChangesWithValidateAsync(this DbContext context, CancellationToken token = default)
     {
         var entries = context.ChangeTracker.Entries();
         foreach (var entry in entries)
@@ -165,7 +165,7 @@ public static class BaseDbContextExtension
                 throw new ArgumentException(results.First().ErrorMessage);
             }
         }
-        return await context.SaveChangesAsync();
+        return await context.SaveChangesAsync(token);
     }
 
     private static bool Validate<T>(T obj, out ICollection<ValidationResult> results)

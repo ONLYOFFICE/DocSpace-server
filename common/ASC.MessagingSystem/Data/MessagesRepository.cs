@@ -241,7 +241,7 @@ public class MessageSenderService(
                             }
                             
 
-                            await ef.SaveChangesAsync(stoppingToken);
+                            await ef.SaveChangesWithValidateAsync(stoppingToken);
 
                             if (references.Count <= 0)
                             {
