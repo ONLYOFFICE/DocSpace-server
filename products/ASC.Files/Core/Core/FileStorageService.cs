@@ -4026,6 +4026,11 @@ public class FileStorageService //: IFileStorageService
 
         async Task<bool> HasAccessInviteAsync(UserInfo user)
         {
+            if (user.Status == EmployeeStatus.Terminated)
+            {
+                return false;
+            }
+            
             if (isDocSpaceAdmin)
             {
                 return true;
