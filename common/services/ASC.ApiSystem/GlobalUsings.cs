@@ -85,3 +85,4 @@ global using Microsoft.Extensions.Options;
 global using Newtonsoft.Json.Linq;
 
 global using NLog;
+global using Swashbuckle.AspNetCore.Annotations;
