@@ -91,7 +91,7 @@ public static class UserSecurityExtension
 
             entity.Property(e => e.PwdHash)
                 .HasColumnName("pwdhash")
-                .HasColumnType("varchar(512)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

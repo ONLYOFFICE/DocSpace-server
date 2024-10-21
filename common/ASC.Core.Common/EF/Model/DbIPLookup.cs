@@ -238,7 +238,7 @@ public static class DbIPLookupExtension
             entity.Property(e => e.TimezoneName)
                 .IsRequired()
                 .HasColumnName("timezone_name")
-                .HasColumnType("varchar(64)");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.WeatherCode)
                 .IsRequired()
