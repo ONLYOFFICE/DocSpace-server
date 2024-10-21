@@ -923,6 +923,7 @@ internal class FileDao(
             if (toDeleteFile != null)
             {
                 await factoryIndexer.DeleteAsync(toDeleteFile);
+                await factoryIndexerFormData.DeleteAsync(r=> r.Where(a => a.Id, toDeleteFile.Id));
             }
         });
     }
