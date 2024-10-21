@@ -65,7 +65,9 @@ public class InvitationValidator(
         var commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType, key, emailValidationKeyProvider.ValidEmailKeyInterval);
         if (commonLinkResult == EmailValidationKeyProvider.ValidationResult.Invalid && userId.HasValue)
         {
-            commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType + userId.Value, key, emailValidationKeyProvider.ValidEmailKeyInterval);
+            var tenant = await tenantManager.GetCurrentTenantAsync();
+            
+            commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType + userId.Value + tenant.Alias, key, emailValidationKeyProvider.ValidEmailKeyInterval);
         }
         
         if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
