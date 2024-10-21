@@ -135,6 +135,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Form &quot;$DocumentTitle&quot; has been filled out in the room &quot;$RoomTitle&quot;.
+        /// </summary>
+        public static string pattern_FormSubmitted_push {
+            get {
+                return ResourceManager.GetString("pattern_FormSubmitted_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. Mailing completed
         ///
         ///This is an email notification to inform you that you have requested the mailing of $MailsCount messages and the process is now complete. $Message

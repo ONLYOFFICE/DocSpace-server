@@ -144,4 +144,10 @@ $DocumentURL
     <subject resource="|subject_FormReceived|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_FormReceived|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
   </pattern>
+
+  <pattern id="FormSubmitted" sender="push.sender">
+    <subject resource="|subject_FormSubmitted|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+    <body styler="ASC.Notify.Textile.PushStyler,ASC.Core.Common" resource="|pattern_FormSubmitted_push|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+  </pattern>
+
 </patterns>

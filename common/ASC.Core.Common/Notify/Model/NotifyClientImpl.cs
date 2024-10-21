@@ -64,6 +64,11 @@ class NotifyClientImpl(
         await SendNoticeToAsync(action, objectID, [recipient], [sendername], false, args);
     }
 
+    public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient[] recipients, string sendername, params ITagValue[] args)
+    {
+        await SendNoticeToAsync(action, objectID, recipients, [sendername], false, args);
+    }
+
     public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, bool checkSubscription, params ITagValue[] args)
     {
         await SendNoticeToAsync(action, objectID, [recipient], null, checkSubscription, args);

@@ -316,6 +316,16 @@ public class NotifyClient(WorkContext notifyContext,
             new TagValue(CommonTags.Culture, managerCulture.Name),
             TagValues.OrangeButton(managerButtonText, documentParentUrl)
             );
+        var recipientsProvider = notifySource.GetRecipientsProvider();
+        await client.SendNoticeAsync(
+            NotifyConstants.EventFormSubmitted,
+            filledForm.UniqID,
+            [await recipientsProvider.GetRecipientAsync(manager.Id.ToString()), await recipientsProvider.GetRecipientAsync(user.Id.ToString())],
+            ConfigurationConstants.NotifyPushSenderSysName,
+            new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(CommonTags.Culture, userCulture.Name)
+            );
     }
 
     public async Task SendRoomRemovedAsync<T>(FileEntry<T> folder, List<AceWrapper> aces, Guid userId)
