@@ -314,7 +314,6 @@ public static class DbTenantExtension
 
             entity.Property(e => e.PaymentId)
                 .HasColumnName("payment_id")
-                .HasMaxLength(38)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Spam)
