@@ -285,8 +285,12 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        result.FilesCount = folder.FilesCount;
-        result.FoldersCount = folder.FoldersCount;
+        if (folder.FolderType != FolderType.VirtualRooms)
+        {
+            result.FilesCount = folder.FilesCount;
+            result.FoldersCount = folder.FoldersCount;
+        }
+
         result.IsShareable = folder.Shareable.NullIfDefault();
         result.IsFavorite = folder.IsFavorite.NullIfDefault();
         result.New = newBadges;
