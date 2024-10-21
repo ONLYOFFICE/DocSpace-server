@@ -35,7 +35,11 @@ public static class UserExtensions
             return false;
         }
 
-        return tenant != null && tenant.OwnerId.Equals(ui.Id);
+        return IsOwner(ui.Id, tenant);
+    }
+    public static bool IsOwner(this Guid ui, Tenant tenant)
+    {
+        return tenant != null && tenant.OwnerId.Equals(ui);
     }
 
     public static bool IsMe(this UserInfo ui, AuthContext authContext)

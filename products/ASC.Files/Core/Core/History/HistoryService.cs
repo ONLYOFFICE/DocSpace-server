@@ -90,7 +90,7 @@ public class HistoryService(
         (int)MessageAction.FormSubmit,
         (int)MessageAction.FormOpenedForFilling
     ];
-
+    
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count, bool needFiltering, List<int> filterFolderIds, List<int> filterFilesIds)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();

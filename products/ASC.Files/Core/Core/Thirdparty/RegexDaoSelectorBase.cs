@@ -126,21 +126,22 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
         }
 
         var match = Selector.Match(objectId);
-        if (match.Success)
+        if (!match.Success)
         {
-            var providerInfo = GetProviderInfo(Convert.ToInt32(match.Groups["id"].Value));
-
-            info = new BaseProviderInfo<TFile, TFolder, TItem>
-            {
-                Path = match.Groups["path"].Value,
-                ProviderInfo = providerInfo,
-                PathPrefix = Id + "-" + match.Groups["id"].Value
-            };
-            Providers.Add(objectId, info);
-            return info;
+            throw new ArgumentException($"Id is not {Name} id");
         }
 
-        throw new ArgumentException($"Id is not {Name} id");
+        var providerInfo = GetProviderInfo(Convert.ToInt32(match.Groups["id"].Value));
+
+        info = new BaseProviderInfo<TFile, TFolder, TItem>
+        {
+            Path = match.Groups["path"].Value,
+            ProviderInfo = providerInfo,
+            PathPrefix = Id + "-" + match.Groups["id"].Value
+        };
+        
+        Providers.TryAdd(objectId, info);
+        return info;
     }
 
     public async Task RenameProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle)

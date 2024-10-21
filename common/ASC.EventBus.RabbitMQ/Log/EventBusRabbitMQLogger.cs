@@ -90,6 +90,9 @@ internal static partial class EventBusRabbitMQLogger
     [LoggerMessage(Level = LogLevel.Debug, Message = "RabbitMQ: nack event: {eventName}")]
     public static partial void DebugNackEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
 
+    [LoggerMessage(Level = LogLevel.Warning, Message = "RabbitMQ: unknown event: {eventName}. Subscription not found")]
+    public static partial void WarningUnknownEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
+
     [LoggerMessage(Level = LogLevel.Warning, Message = "RabbitMQ: model is shutdown: {cause}")]
     public static partial void WarningModelIsShutdown(this ILogger<EventBusRabbitMQ> logger, string cause, Exception exception);
 }

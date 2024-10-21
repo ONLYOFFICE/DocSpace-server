@@ -127,7 +127,6 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
-    public string RequestToken { get; set; }
     public ApiDateTime LastOpened { get; set; }
     public ApiDateTime Expired { get; set; }
 

@@ -66,7 +66,6 @@ public class DbTenant : IMapFrom<Tenant>
     public string PaymentId { get; set; }
     public TenantIndustry Industry { get; set; }
     public DateTime LastModified { get; set; }
-    public bool Spam { get; set; }
     public bool Calls { get; set; }
 
     public DbTenantPartner Partner { get; set; }
@@ -213,11 +212,6 @@ public static class DbTenantExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Spam)
-                .HasColumnName("spam")
-                .HasDefaultValueSql("'1'")
-                .HasColumnType("tinyint(1)");
-
             entity.Property(e => e.Status)
                 .HasColumnName("status")
                 .IsRequired()
@@ -315,10 +309,6 @@ public static class DbTenantExtension
             entity.Property(e => e.PaymentId)
                 .HasColumnName("payment_id")
                 .HasDefaultValueSql("NULL");
-
-            entity.Property(e => e.Spam)
-                .HasColumnName("spam")
-                .HasDefaultValueSql("true");
 
             entity.Property(e => e.Status).HasColumnName("status");
 

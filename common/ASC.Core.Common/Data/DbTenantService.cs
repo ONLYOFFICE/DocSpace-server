@@ -399,7 +399,6 @@ public class DbTenantService(
                 dbTenant.PaymentId = tenant.PaymentId;
                 dbTenant.LastModified = tenant.LastModified = DateTime.UtcNow;
                 dbTenant.Industry = tenant.Industry;
-                dbTenant.Spam = tenant.Spam;
                 dbTenant.Calls = tenant.Calls;
                 dbTenant.OwnerId = tenant.OwnerId;
 

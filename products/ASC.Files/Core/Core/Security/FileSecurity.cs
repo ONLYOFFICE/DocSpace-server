@@ -461,11 +461,15 @@ public class FileSecurity(IDaoFactory daoFactory,
     private async Task<IEnumerable<Guid>> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action, bool includeLinks = false)
     {
         var shares = await GetSharesAsync(entry);
-
+        
         if (!includeLinks)
         {
             shares = shares.Where(r => !r.IsLink);
         }
+        
+        var linksUsersTask = includeLinks ? 
+            GetLinksUsersAsync(shares.Where(r => r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)) 
+            : Task.FromResult(Enumerable.Empty<Guid>());
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var copyShares = shares.GroupBy(k => k.Subject).ToDictionary(k => k.Key);
@@ -644,7 +648,41 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
+        var linkUsers = await linksUsersTask;
+        if (linkUsers.Any())
+        {
+            result.AddRange(linkUsers);
+        }
+
         return result;
+
+        async Task<IEnumerable<Guid>> GetLinksUsersAsync(IEnumerable<FileShareRecord<T>> linksRecords)
+        {
+            if (!linksRecords.Any())
+            {
+                return [];
+            }
+            
+            var tagDao = daoFactory.GetTagDao<T>();
+            var users = new List<Guid>();
+
+            foreach (var record in linksRecords)
+            {
+                var entryId = record.EntryId;
+                var entryType = record.EntryType;
+
+                if (entry.FileEntryType == FileEntryType.Folder)
+                {
+                    entryId = record.ParentId;
+                }
+
+                users.AddRange(await tagDao.GetTagsAsync(entryId, entryType, TagType.RecentByLink, null, record.Subject.ToString())
+                    .Select(x => x.Owner)
+                    .ToListAsync());
+            }
+
+            return users;
+        }
     }
 
     private async ValueTask<IAsyncEnumerable<Guid>> ToGuidAsync<T>(FileShareRecord<T> x)
@@ -862,7 +900,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
-            if(userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && 
+            if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && 
                folder.FolderType is 
                    FolderType.ReadyFormFolder or 
                    FolderType.InProcessFormFolder or 
@@ -1126,7 +1164,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                 var subjects = new List<Guid>();
                 if (shares == null)
                 {
-                    subjects = await GetUserSubjectsAsync(userId, e);
+                    var includeAvailableLinks = e is { RootFolderType: FolderType.USER or FolderType.VirtualRooms } and not IFolder { FolderType: FolderType.USER } && 
+                                                e.RootCreateBy != userId;
+                    
+                    subjects = await GetUserSubjectsAsync(userId, includeAvailableLinks);
                     shares = await GetSharesAsync(e, subjects);
                 }
 
@@ -1184,7 +1225,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 var parentFolders = await GetFileParentFolders(file.ParentId);
                 if (parentFolders.Exists(parent => parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder))
                 {
-                    if (ace is { Share: FileShare.FillForms } && (!userId.Equals(file.CreateBy) || userId.Equals(ASC.Core.Configuration.Constants.Guest.ID)))
+                    if (ace is { Share: FileShare.FillForms } && !userId.Equals(file.CreateBy))
                     {
                         return false;
                     }
@@ -1640,8 +1681,10 @@ public class FileSecurity(IDaoFactory daoFactory,
         var subjectEntries = subjectFilter is SubjectFilter.Member
             ? await securityDao.GetSharesAsync([subjectId]).Where(r => r.EntryType == FileEntryType.Folder).Select(r => r.EntryId.ToString()).ToListAsync()
             : null;
+
+        var isAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
         
-        var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
+        var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any && !isAdmin);
         var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects)
             .Where(x => x.EntryType == FileEntryType.Folder)
             .ToListAsync();
@@ -1679,7 +1722,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
-        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+        if (isAdmin)
         {
             return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, 
                 subjectFilter, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);
@@ -1771,12 +1814,12 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
             else
             {
-                folder.Access = FileShare.Restrict;
+                folder.Access = FileShare.None;
                 folder.ShareRecord = new FileShareRecord<T>
                 {
                     EntryId = folder.Id,
                     EntryType = FileEntryType.Folder,
-                    Share = FileShare.Restrict,
+                    Share = FileShare.None,
                     SubjectType = SubjectType.User,
                     Subject = authContext.CurrentAccount.ID
                 };
@@ -1835,7 +1878,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             entries.AddRange(files.Where(f => Filter(f, internalRecords)));
             entries.AddRange(thirdPartyFiles.Where(f => Filter(f, thirdPartyRecords)));
         }
-
+        
         var t1 = SetTagsAsync(rooms);
         var t2 = SetTagsAsync(thirdPartyRooms);
         var t3 = SetPinAsync(rooms);
@@ -2174,9 +2217,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         return daoFactory.GetSecurityDao<int>().RemoveSecuritiesAsync(subject, owner, subjectType);
     }
 
-    public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId)
+    public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId, bool includeAvailableLinks = false)
     {
-        return await GetUserSubjectsAsync<int>(userId, null);
+        return await GetUserSubjectsAsync<int>(userId, includeAvailableLinks);
     }
 
     public async IAsyncEnumerable<FileShareRecord<string>> GetUserRecordsAsync()
@@ -2267,7 +2310,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                availableRolesBySubject.Contains(share);
     }
     
-    private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, FileEntry<T> entry)
+    private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, bool includeAvailableLinks = false)
     {
         // priority order
         // User, Departments, admin, everyone
@@ -2280,13 +2323,14 @@ public class FileSecurity(IDaoFactory daoFactory,
             result.Add(linkId);
         }
 
-        if (entry is { RootFolderType: FolderType.USER } and not IFolder { FolderType: FolderType.USER } &&
-            entry.RootCreateBy != userId && linkId == Guid.Empty)
+        if (includeAvailableLinks && linkId == Guid.Empty)
         {
-            var linkTag = await daoFactory.GetTagDao<T>().GetTagsAsync(userId, TagType.RecentByLink, [entry]).FirstOrDefaultAsync();
-            if (linkTag != null && Guid.TryParse(linkTag.Name, out var linkTagId))
+            await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync(userId, TagType.RecentByLink))
             {
-                result.Add(linkTagId);
+                if (Guid.TryParse(tag.Name, out var tagId))
+                {
+                    result.Add(tagId);
+                }
             }
         }
         

@@ -128,7 +128,7 @@ public static class DbQuotaExtension
                     Description = null,
                     Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
                     Price = 0,
-                    ProductId = null,
+                    ProductId = "1007",
                     Visible = false
                 },
                 new DbQuota
