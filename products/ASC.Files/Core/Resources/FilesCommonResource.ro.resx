@@ -497,7 +497,4 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>Linkul către formular</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Deschidere formular</value>
-  </data>
 </root>

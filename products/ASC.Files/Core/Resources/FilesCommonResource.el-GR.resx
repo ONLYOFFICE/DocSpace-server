@@ -494,9 +494,6 @@
   <data name="LinkToForm" xml:space="preserve">
     <value>Σύνδεσμος προς τη φόρμα</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Άνοιγμα φόρμας</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Αριθμός φόρμας</value>
   </data>

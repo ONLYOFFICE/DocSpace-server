@@ -263,7 +263,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool withShared = false)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -273,6 +273,45 @@ internal class FileDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext);
+
+        if (containingMyFiles)
+        {
+            switch (parentType)
+            {
+                case FolderType.FillingFormsRoom:
+                case FolderType.InProcessFormFolder:
+                case FolderType.ReadyFormFolder:
+                    var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+                    var folderIds = filesDbContext.Folders
+                        .Join(filesDbContext.Tree, r => r.Id, b => b.FolderId, (folder, tree) => new { folder, tree })
+                        .Where(r => r.folder.TenantId == tenantId)
+                        .Where(r => r.tree.ParentId == parentId)
+                        .Select(r => new
+                        {
+                            r.folder.Id,
+                            IsSystemFolder = DocSpaceHelper.FormsFillingSystemFolders.Contains(r.folder.FolderType)
+                        });
+
+                    var roomSystemFolderIds = folderIds
+                        .Where(r => r.IsSystemFolder)
+                        .Select(r => r.Id);
+
+                    var roomDefaultFolderIds = folderIds
+                        .Where(r => !r.IsSystemFolder)
+                        .Select(r => r.Id);
+
+                    q = q.Where(r =>
+                        (roomSystemFolderIds.Contains(r.ParentId) &&
+                         r.CreateBy == securityContext.CurrentAccount.ID &&
+                         r.CreateBy != ASC.Core.Configuration.Constants.Guest.ID) ||
+                        roomDefaultFolderIds.Contains(r.ParentId));
+                    break;
+                default:
+                    q = q.Where(r => r.CreateBy == securityContext.CurrentAccount.ID);
+                    break;
+            }
+        }
 
         q = q.Skip(offset);
 
@@ -588,6 +627,7 @@ internal class FileDao(
                                 {
                                     properties.FormFilling.StartFilling = true;
                                     properties.FormFilling.CollectFillForm = true;
+                                    properties.FormFilling.OriginalFormId = file.Id;
                                     await fileDao.SaveProperties(file.Id, properties);
                                     var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
                                     if (file.IsForm)
@@ -2237,29 +2277,77 @@ internal class FileDao(
     {
         IQueryable<FileByTagQuery> query;
         
-        var initQuery = (await GetFileQuery(filesDbContext, r => r.CurrentVersion))
-            .Join(filesDbContext.TagLink, f => f.Id.ToString(), l => l.EntryId, (file, tagLink) => new { file, tagLink })
-            .Where(r => r.tagLink.EntryType == FileEntryType.File)
-            .Join(filesDbContext.Tag, r => r.tagLink.TagId, t => t.Id,
-                (fileWithTagLink, tag) => new { fileWithTagLink.file, fileWithTagLink.tagLink, tag })
-            .Where(r => r.tag.Type == tagType);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        var initQuery = filesDbContext.Files
+            .Where(x => x.TenantId == tenantId && x.CurrentVersion)
+            .Join(filesDbContext.TagLink,
+                f => new
+                {
+                    tenantId, 
+                    entryId = f.Id.ToString(), 
+                    entryType = FileEntryType.File
+                }, 
+                l => new
+                {
+                    tenantId = l.TenantId, 
+                    entryId = l.EntryId, 
+                    entryType = l.EntryType
+                },
+                (f, l) => new { f, l })
+            .Join(filesDbContext.Tag, 
+                x => x.l.TagId, 
+                t => t.Id,
+                (x, t) => new { x.f, x.l, t })
+            .Where(x => x.t.Type == tagType);
+        
+        if (tagOwner.HasValue)
+        {
+            initQuery = initQuery.Where(x => x.t.Owner == tagOwner.Value);
+        }
 
         if (tagType == TagType.RecentByLink)
         {
-            query = initQuery .Join(filesDbContext.Security, r => r.tag.Name, s => s.Subject.ToString(), 
-                    (fileWithTag, security) => new { fileWithTag, security, 
-                        expirationDate = (DateTime)(object)DbFunctionsExtension.JsonValue(nameof(security.Options), "ExpirationDate").Trim('"')})
-                .Where(r => r.security.Share != FileShare.Restrict && (r.expirationDate == DateTime.MinValue || r.expirationDate > DateTime.UtcNow))
-                .Select(r => new FileByTagQuery { Entry = r.fileWithTag.file, Tag = r.fileWithTag.tag, TagLink = r.fileWithTag.tagLink, Security = r.security}); 
+            query = initQuery.Join(filesDbContext.Security, 
+                    x => new
+                    {
+                        tenantId,
+                        entryId = x.f.Id.ToString(),
+                        entryType = FileEntryType.File, 
+                        subject = x.t.Name
+                    },
+                    s => new
+                    {
+                        tenantId = s.TenantId,
+                        entryId = s.EntryId,
+                        entryType = s.EntryType,
+                        subject = s.Subject.ToString()
+                    },
+                    (x, s) => new
+                    { 
+                        x.f,
+                        x.t,
+                        x.l,
+                        s, 
+                        expirationDate = (DateTime)(object)DbFunctionsExtension.JsonValue(nameof(s.Options), "ExpirationDate")
+                    })
+                .Where(x => x.s.Share != FileShare.Restrict && (x.expirationDate == DateTime.MinValue || x.expirationDate > DateTime.UtcNow))
+                .Select(x => new FileByTagQuery
+                {
+                    Entry = x.f, 
+                    Tag = x.t, 
+                    TagLink = x.l, 
+                    Security = x.s
+                }); 
         }
         else
         {
-            query = initQuery.Select(r => new FileByTagQuery { Entry = r.file, Tag = r.tag, TagLink = r.tagLink});
-        }
-
-        if (tagOwner.HasValue)
-        {
-            query = query.Where(r => r.Tag.Owner == tagOwner.Value);
+            query = initQuery.Select(x => new FileByTagQuery
+            {
+                Entry = x.f, 
+                Tag = x.t, 
+                TagLink = x.l
+            });
         }
 
         return query;

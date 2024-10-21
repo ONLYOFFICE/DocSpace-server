@@ -494,9 +494,6 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>Odkaz na formulář</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Otevřený formulář</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Číslo formuláře</value>
   </data>

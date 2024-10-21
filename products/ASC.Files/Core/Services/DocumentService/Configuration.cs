@@ -244,18 +244,22 @@ public class EditorConfiguration<T>(
         return _user;
     }
 
-    public async Task<string> GetCallbackUrl(string fileId, string fillingSessionId)
+    public async Task<string> GetCallbackUrl(File<T> file)
     {
         if (!ModeWrite)
         {
             return null;
         }
 
-        var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(fileId);
+        var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(file.Id.ToString());
 
-        callbackUrl = !string.IsNullOrEmpty(fillingSessionId) ? QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId) : callbackUrl;
+        if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
+        {
+            return externalShare.GetUrlWithShare(callbackUrl);
+        }
 
-        return externalShare.GetUrlWithShare(callbackUrl);
+        var key = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject, file.ShareRecord.Options?.Password);
+        return externalShare.GetUrlWithShare(callbackUrl, key);
     }
 
     public async Task<CoEditingConfig> GetCoEditingAsync()

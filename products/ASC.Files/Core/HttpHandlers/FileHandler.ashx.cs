@@ -1485,7 +1485,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             logger.ErrorDocServiceTrackAuth(validateResult, FilesLinkUtility.AuthKey, auth);
             throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
         }
-        var fillingSessionId = context.Request.Query[FilesLinkUtility.FillingSessionId];
         TrackerData fileData;
         try
         {
@@ -1516,6 +1515,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             logger.ErrorDocServiceTrackReadBody(e);
             throw new HttpException((int)HttpStatusCode.BadRequest, e.Message);
         }
+
+        var lastfileDataAction = fileData.Actions?.LastOrDefault();
+        var fillingSessionId = lastfileDataAction != null
+            ? (lastfileDataAction.UserId.StartsWith(FileConstant.AnonFillingSession)
+                ? lastfileDataAction.UserId
+                : $"{fileId}_{lastfileDataAction.UserId}")
+            : string.Empty;
 
         if (!string.IsNullOrEmpty(fileUtility.SignatureSecret))
         {

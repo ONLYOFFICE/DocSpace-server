@@ -468,6 +468,9 @@ public class AuthenticationController(
                     }
                 }
                 var ldapSettings = await settingsManager.LoadAsync<LdapSettings>();
+                var ldapLocalization = new LdapLocalization();
+                ldapLocalization.Init(Resource.ResourceManager);
+                ldapUserManager.Init(ldapLocalization);
 
                 if (ldapSettings.EnableLdapAuthentication)
                 {
