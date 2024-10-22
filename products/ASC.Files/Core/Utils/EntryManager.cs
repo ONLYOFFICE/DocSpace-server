@@ -306,7 +306,7 @@ public class EntryManager(IDaoFactory daoFactory,
             withShared = true;
         }
 
-        var sharedTask = parent.RootFolderType is FolderType.VirtualRooms && !parent.ProviderEntry 
+        var sharedTask = parent.RootFolderType is FolderType.VirtualRooms
             ? daoFactory.GetSecurityDao<T>().IsSharedAsync(parent, [SubjectType.PrimaryExternalLink, SubjectType.ExternalLink]) 
             : Task.FromResult(false);
 
@@ -517,9 +517,25 @@ public class EntryManager(IDaoFactory daoFactory,
             var folders = daoFactory.GetFolderDao<T>().GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject);
             var files = daoFactory.GetFileDao<T>().GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, withShared: withShared);
 
+            var shared = await sharedTask;
+            if (shared)
+            {
+                files = files.Select(x =>
+                {
+                    x.Shared = true;
+                    return x;
+                });
+                
+                folders = folders.Select(x =>
+                {
+                    x.Shared = true;
+                    return x;
+                });
+            }
+            
             var task1 = fileSecurity.FilterReadAsync(folders).ToListAsync();
             var task2 = fileSecurity.FilterReadAsync(files).ToListAsync();
-
+            
             if (filterType is FilterType.None or FilterType.FoldersOnly)
             {
                 var folderList = GetThirdPartyFoldersAsync(parent, searchText);

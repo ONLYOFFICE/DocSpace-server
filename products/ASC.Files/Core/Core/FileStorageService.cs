@@ -3089,7 +3089,7 @@ public class FileStorageService //: IFileStorageService
                 throw new ItemNotFoundException();
             }
 
-            var data = await externalShare.GetLinkDataAsync(entry, linkId, entryType == FileEntryType.File);
+            var data = await externalShare.GetLinkDataAsync(entry, ace.Id, entryType == FileEntryType.File);
             ace.Link = await urlShortener.GetShortenLinkAsync(data.Url);
 
             return ace;
