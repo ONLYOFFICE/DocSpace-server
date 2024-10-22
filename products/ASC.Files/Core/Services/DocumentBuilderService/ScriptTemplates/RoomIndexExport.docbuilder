@@ -96,8 +96,12 @@ function prepareData(startColIndex, startRowIndex) {
         }
     ];
 
-    for (var i = 0; i < inputData.data.length; i++) {
-        var item = inputData.data[i];
+    var sortedData = inputData.data.sort(function(a, b) {
+        return (a.index ?? "").localeCompare(b.index ?? "")
+    });
+
+    for (var i = 0; i < sortedData.length; i++) {
+        var item = sortedData[i];
         var indexBgColor = i > 0 ? defaultBgColorGray : null;
         var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
         dataTable.push({
@@ -114,7 +118,7 @@ function prepareData(startColIndex, startRowIndex) {
         });
     }
 
-    var sizeSum = "=SUM(" + toColumnName(currentColIndex + 3) + (currentRowIndex + 1) + ":" + toColumnName(currentColIndex + 3) + (currentRowIndex + inputData.data.length) + ")";
+    var sizeSum = "=SUM(" + toColumnName(currentColIndex + 3) + (currentRowIndex + 1) + ":" + toColumnName(currentColIndex + 3) + (currentRowIndex + sortedData.length) + ")";
 
     dataTable.push({ height: 19.5, dataArray: [] });
 
