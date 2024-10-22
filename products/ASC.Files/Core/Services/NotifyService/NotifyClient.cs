@@ -380,6 +380,44 @@ public class NotifyClient(WorkContext notifyContext,
 
         }
     }
+    public async Task SendRoomMovedArchiveAsync<T>(FileEntry<T> room, IEnumerable<Guid> aces, Guid userId)
+    {
+        if (room is not { FileEntryType: FileEntryType.Folder } || aces.Count() == 0)
+        {
+            return;
+        }
+
+        var client = notifyContext.RegisterClient(serviceProvider, notifySource);
+        var recipientsProvider = notifySource.GetRecipientsProvider();
+
+        var folderId = room.Id.ToString();
+
+        foreach (var ace in aces)
+        {
+            var recepientId = ace;
+
+            if (recepientId == userId)
+            {
+                continue;
+            }
+
+            var recipient = await recipientsProvider.GetRecipientAsync(recepientId.ToString());
+
+            if (recipient == null)
+            {
+                continue;
+            }
+            var user = await userManager.GetUsersAsync(userId);
+            await client.SendNoticeAsync(
+                NotifyConstants.EventRoomMovedArchive,
+                room.UniqID,
+                recipient,
+                ConfigurationConstants.NotifyPushSenderSysName,
+                new TagValue(NotifyConstants.RoomTitle, room.Title),
+                new TagValue(Tags.FromUserName, user.DisplayUserName(displayUserSettingsHelper))
+                );
+        }
+    }
 
     private static string GetAccessString(FileShare fileShare, CultureInfo cultureInfo)
     {

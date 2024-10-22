@@ -122,8 +122,10 @@ class NotifyClientImpl(
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
 
+        var tenantManager = serviceProvider.GetService<TenantManager>();
         var request = new NotifyRequest(loggerFactory, _notifySource, action, objectID, recipient)
         {
+            _tenantId = tenantManager.GetCurrentTenant().Id,
             _senderNames = senders,
             _isNeedCheckSubscriptions = checkSubsciption
         };

@@ -333,6 +333,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var roomLogoManager = scope.ServiceProvider.GetRequiredService<RoomLogoManager>();
         var global = scope.ServiceProvider.GetRequiredService<Global>();
         var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
+        var notifyClient = scope.ServiceProvider.GetRequiredService<NotifyClient>();
+        var notifyContext = scope.ServiceProvider.GetRequiredService<NotifyContext>();
+        var dispatchEngine = scope.ServiceProvider.GetRequiredService<DispatchEngine>();
+        var notifyPushSender = scope.ServiceProvider.GetRequiredService<PushSender>();
+        var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
 
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
@@ -731,6 +736,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         }
                                         else if (toFolder.FolderType == FolderType.Archive)
                                         {
+
+                                            notifyContext.RegisterSender(dispatchEngine, "push.sender", new PushSenderSink(notifyPushSender));
+
+                                            var whoCanRead = await fileSecurity.WhoCanReadAsync(folder, true);
+                                            await notifyClient.SendRoomMovedArchiveAsync(folder, whoCanRead, securityContext.CurrentAccount.ID);
 
                                             await socketManager.DeleteFolder(folder, action: async () =>
                                             {

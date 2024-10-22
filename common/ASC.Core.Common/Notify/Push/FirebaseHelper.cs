@@ -59,11 +59,6 @@ public class FirebaseHelper(AuthContext authContext,
 
         var user = await _userManager.GetUserByUserNameAsync(msg.Reciever);
 
-        if (!Guid.TryParse(msg.ProductID, out var productID))
-        {
-            return;
-        }
-
         var fireBaseUser = new List<FireBaseUser>();
 
         fireBaseUser = await firebaseDao.GetUserDeviceTokensAsync(user.Id, msg.TenantId, PushConstants.PushDocAppName);

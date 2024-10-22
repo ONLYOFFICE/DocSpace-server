@@ -157,6 +157,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to $FromUserName moved the room &quot;$RoomTitle&quot; to the archive.
+        /// </summary>
+        public static string pattern_RoomMovedArchive_push {
+            get {
+                return ResourceManager.GetString("pattern_RoomMovedArchive_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. $__AuthorName deleted a room
         ///
         ///$__AuthorName deleted the room: $RoomTitle.

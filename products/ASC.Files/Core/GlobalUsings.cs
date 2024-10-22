@@ -77,11 +77,13 @@ global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Messaging;
+global using ASC.Core.Common.Notify;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Common.Users;
+global using ASC.Core.Notify.Senders;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
@@ -131,6 +133,7 @@ global using ASC.Files.ThumbnailBuilder;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
+global using ASC.Notify.Engine;
 global using ASC.Notify.Model;
 global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;
@@ -212,6 +215,8 @@ global using Microsoft.OneDrive.Sdk;
 global using Microsoft.SharePoint.Client;
 
 global using NetEscapades.EnumGenerators;
+
+global using NotifyContext = ASC.Notify.Context;
 
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;

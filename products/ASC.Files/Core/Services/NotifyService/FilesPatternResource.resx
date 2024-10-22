@@ -186,4 +186,7 @@ $OrangeButton</value>
   <data name="pattern_FormSubmitted_push" xml:space="preserve">
     <value>Form "$DocumentTitle" has been filled out in the room "$RoomTitle"</value>
   </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName moved the room "$RoomTitle" to the archive</value>
+  </data>
 </root>
