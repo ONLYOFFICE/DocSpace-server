@@ -734,7 +734,8 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         UserManager userManager,
         IServiceProvider serviceProvider,
         ApiDateTimeHelper apiDateTimeHelper,
-        RoomNewItemsDtoHelper roomNewItemsDtoHelper)
+        RoomNewItemsDtoHelper roomNewItemsDtoHelper,
+        IHttpContextAccessor httpContextAccessor)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
     {
     /// <summary>
@@ -927,17 +928,20 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var userId = authContext.CurrentAccount.ID;
 
-        var task = serviceProvider.GetService<DocumentBuilderTask<int>>();
+        var task = serviceProvider.GetService<RoomIndexExportTask>();
 
         var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
 
         var baseUri = commonLinkUtility.ServerRootPath;
 
-        task.Init(baseUri, tenantId, userId, null, null, null);
+        task.Init(baseUri, tenantId, userId, null);
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
-
-        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id, baseUri);
+        
+        var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id, baseUri, headers: headers != null 
+            ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
+            : []);
 
         await eventBus.PublishAsync(evt);
 

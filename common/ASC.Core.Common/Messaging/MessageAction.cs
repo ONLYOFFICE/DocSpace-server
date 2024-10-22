@@ -233,7 +233,7 @@ public enum MessageAction
     RoomCoverChanged = 5103, 
     
     RoomIndexingChanged = 5104,
-    RoomDenyDownloadChanged = 5105,//last
+    RoomDenyDownloadChanged = 5105,
     
     RoomExternalLinkCreated = 5088,
     RoomExternalLinkUpdated = 5089,
@@ -244,6 +244,8 @@ public enum MessageAction
     FileExternalLinkCreated = 5091,
     FileExternalLinkUpdated = 5092,
     FileExternalLinkDeleted = 5093,
+    
+    RoomIndexExportSaved = 5106, //last
 
     #endregion
 
