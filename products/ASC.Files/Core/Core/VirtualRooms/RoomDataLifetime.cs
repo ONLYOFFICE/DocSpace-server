@@ -58,7 +58,6 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
     }
 }
 
-[JsonConverter(typeof(JsonStringEnumConverter<RoomDataLifetimePeriod>))]
 public enum RoomDataLifetimePeriod
 {
     Day = 0,
