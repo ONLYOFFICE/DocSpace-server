@@ -811,6 +811,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (!setEntryAccess)
         {
             entry.Access = accessSnapshot;
+            entry.ShareRecord = null;
         }
     
         return haveAccess;
