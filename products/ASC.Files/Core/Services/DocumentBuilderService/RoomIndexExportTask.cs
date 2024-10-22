@@ -94,8 +94,12 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
         var tenantUtil = serviceProvider.GetService<TenantUtil>();
         var documentServiceConnector = serviceProvider.GetService<DocumentServiceConnector>();
-        
+
         var user = await userManager.GetUsersAsync(userId);
+
+        var usertCulture = user.GetCulture();
+        CultureInfo.CurrentCulture = usertCulture;
+        CultureInfo.CurrentUICulture = usertCulture;
 
         var room = await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
 
@@ -171,7 +175,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
                 total = FilesCommonResource.RoomIndex_Total,
                 sheetName = FilesCommonResource.RoomIndex_SheetName,
                 numberFormat = "0.00",
-                dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern}"
+                dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}"
             },
 
             logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath),

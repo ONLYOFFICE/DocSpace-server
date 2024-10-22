@@ -125,7 +125,7 @@ public class FileMarker(
 
         var userIDs = obj.UserIDs;
 
-        var userEntriesData = new Dictionary<Guid, List<FileEntry>>();
+        var userEntriesData = new Dictionary<Guid, Data>();
 
         if (obj.FileEntry.RootFolderType == FolderType.BUNCH)
         {
@@ -140,18 +140,18 @@ public class FileMarker(
             var entries = new List<FileEntry> { obj.FileEntry };
             entries = entries.Concat(parentFolders).ToList();
 
-            foreach (var userID in userIDs)
+            var rootId = projectsFolder.ToString();
+
+            foreach (var userId in userIDs)
             {
-                if (userEntriesData.TryGetValue(userID, out var value))
+                if (userEntriesData.TryGetValue(userId, out var value))
                 {
-                    value.AddRange(entries);
+                    value.Entries.AddRange(entries);
                 }
                 else
                 {
-                    userEntriesData.Add(userID, entries);
+                    userEntriesData.Add(userId, new Data { Entries = entries, RootId = rootId });
                 }
-
-                await RemoveFromCacheAsync(projectsFolder, userID);
             }
         }
         else
@@ -212,15 +212,14 @@ public class FileMarker(
                 {
                     if (userEntriesData.TryGetValue(id, out var value))
                     {
-                        value.Add(parentFolder);
+                        value.Entries.Add(parentFolder);
                     }
                     else
                     {
-                        userEntriesData.Add(id, [parentFolder]);
+                        userEntriesData.Add(id, new Data { Entries = [parentFolder] });
                     }
                 }
             }
-
 
             switch (obj.FileEntry.RootFolderType)
             {
@@ -240,8 +239,8 @@ public class FileMarker(
                             Folder<int> rootFolder = null;
                             if (obj.FileEntry.ProviderEntry)
                             {
-                                    rootFolder = obj.FileEntry.RootCreateBy == id
-                                    ? await folderDaoInt.GetFolderAsync(userFolderId)
+                                rootFolder = obj.FileEntry.RootCreateBy == id 
+                                    ? await folderDaoInt.GetFolderAsync(userFolderId) 
                                     : folderShare;
                             }
                             else if (!Equals(obj.FileEntry.RootId, userFolderId))
@@ -250,7 +249,14 @@ public class FileMarker(
                             }
                             else
                             {
-                                await RemoveFromCacheAsync(userFolderId, id);
+                                if (userEntriesData.TryGetValue(id, out var value1))
+                                {
+                                    value1.RootId = userFolderId.ToString();
+                                }
+                                else
+                                {
+                                    userEntriesData.Add(id, new Data { RootId = userFolderId.ToString() });
+                                }
                             }
 
                             if (rootFolder == null)
@@ -260,14 +266,12 @@ public class FileMarker(
 
                             if (userEntriesData.TryGetValue(id, out var value))
                             {
-                                value.Add(rootFolder);
+                                value.Entries.Add(rootFolder);
                             }
                             else
                             {
-                                userEntriesData.Add(id, [rootFolder]);
+                                userEntriesData.Add(id, new Data { Entries = [rootFolder], RootId = rootFolder.Id.ToString() });
                             }
-
-                            await RemoveFromCacheAsync(rootFolder.Id, id);
                         }
 
                         break;
@@ -275,9 +279,18 @@ public class FileMarker(
                 case FolderType.COMMON:
                 {
                     var commonFolderId = await globalFolder.GetFolderCommonAsync(daoFactory);
+                    var rootId = commonFolderId.ToString();
+                    
                     foreach (var id in userIDs)
                     {
-                        await RemoveFromCacheAsync(commonFolderId, id);
+                        if (userEntriesData.TryGetValue(id, out var value))
+                        {
+                            value.RootId = rootId;
+                        }
+                        else
+                        {
+                            userEntriesData.Add(id, new Data { RootId = rootId });
+                        }
                     }
 
                     if (obj.FileEntry.ProviderEntry)
@@ -288,25 +301,31 @@ public class FileMarker(
                         {
                             if (userEntriesData.TryGetValue(id, out var value))
                             {
-                                value.Add(commonFolder);
+                                value.Entries.Add(commonFolder);
                             }
                             else
                             {
-                                userEntriesData.Add(id, [commonFolder]);
+                                userEntriesData.Add(id, new Data { Entries = [commonFolder], RootId = rootId});
                             }
-
-                            await RemoveFromCacheAsync(commonFolderId, id);
                         }
                     }
-
                     break;
                 }
                 case FolderType.VirtualRooms:
                 {
                     var virtualRoomsFolderId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory);
+                    var rootId = virtualRoomsFolderId.ToString();
+                    
                     foreach (var id in userIDs)
                     {
-                        await RemoveFromCacheAsync(virtualRoomsFolderId, id);
+                        if (userEntriesData.TryGetValue(id, out var data))
+                        {
+                            data.RootId = rootId;
+                        }
+                        else
+                        {
+                            userEntriesData.Add(id, new Data { RootId = rootId });
+                        }
                     }
 
                     var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
@@ -315,16 +334,15 @@ public class FileMarker(
                     {
                         var roomOwnerEntries = parentFolders.Cast<FileEntry>().Concat([obj.FileEntry]).ToList();
 
-                        if (userEntriesData.TryGetValue(room.CreateBy, out var entries) && !entries.Contains(obj.FileEntry))
+                        if (userEntriesData.TryGetValue(room.CreateBy, out var value) && !value.Entries.Contains(obj.FileEntry))
                         {
-                            entries.Add(obj.FileEntry);
+                            value.Entries.Add(obj.FileEntry);
+                            value.RootId = rootId;
                         }
                         else
                         {
-                            userEntriesData.Add(room.CreateBy, roomOwnerEntries);
+                            userEntriesData.Add(room.CreateBy, new Data { Entries = roomOwnerEntries, RootId = rootId});
                         }
-
-                        await RemoveFromCacheAsync(virtualRoomsFolderId, room.CreateBy);
                     }
 
                     if (obj.FileEntry.ProviderEntry)
@@ -335,14 +353,13 @@ public class FileMarker(
                         {
                             if (userEntriesData.TryGetValue(id, out var value))
                             {
-                                value.Add(virtualRoomsFolder);
+                                value.Entries.Add(virtualRoomsFolder);
+                                value.RootId = rootId;
                             }
                             else
                             {
-                                userEntriesData.Add(id, [virtualRoomsFolder]);
+                                userEntriesData.Add(id, new Data { Entries = [virtualRoomsFolder], RootId = rootId });
                             }
-
-                            await RemoveFromCacheAsync(virtualRoomsFolderId, id);
                         }
                     }
 
@@ -366,14 +383,12 @@ public class FileMarker(
 
                         if (userEntriesData.TryGetValue(id, out var value))
                         {
-                            value.Add(rootFolder);
+                            value.Entries.Add(rootFolder);
                         }
                         else
                         {
-                                userEntriesData.Add(id, [rootFolder]);
+                            userEntriesData.Add(id, new Data { Entries = [rootFolder], RootId = rootFolder.Id.ToString() });
                         }
-
-                        await RemoveFromCacheAsync(rootFolder.Id, id);
                     }
 
                     break;
@@ -384,11 +399,11 @@ public class FileMarker(
             {
                 if (userEntriesData.TryGetValue(id, out var value))
                 {
-                    value.Add(obj.FileEntry);
+                    value.Entries.Add(obj.FileEntry);
                 }
                 else
                 {
-                    userEntriesData.Add(id, [obj.FileEntry]);
+                    userEntriesData.Add(id, new Data { Entries = [obj.FileEntry] });
                 }
             });
         }
@@ -407,11 +422,28 @@ public class FileMarker(
                 {
                     continue;
                 }
+                
+                var data = userEntriesData[userId];
 
-                var entries = userEntriesData[userId].Distinct().ToList();
+                var entries = data.Entries.Distinct().ToList();
+                var rootId = data.RootId;
 
                 await GetNewTagsAsync(userId, entries.OfType<FileEntry<int>>().ToList());
                 await GetNewTagsAsync(userId, entries.OfType<FileEntry<string>>().ToList());
+
+                if (string.IsNullOrEmpty(rootId))
+                {
+                    continue;
+                }
+
+                if (int.TryParse(rootId, out var id))
+                {
+                    await RemoveFromCacheAsync(id, userId);
+                }
+                else
+                {
+                    await RemoveFromCacheAsync(rootId, userId);
+                }
             }
 
             if (updateTags.Count > 0)
@@ -1211,6 +1243,12 @@ public class FileMarker(
         {
             await socketManager.ExecMarkAsNewFoldersAsync(chunk);
         }
+    }
+    
+    private record Data
+    {
+        public List<FileEntry> Entries { get; init; } = [];
+        public string RootId { get; set; }
     }
 }
 
