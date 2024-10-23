@@ -44,8 +44,29 @@ public class FileTrackerHelper
     {
         _cacheNotify = cacheNotify;
         _cache = cache;
-        _cacheNotify.Subscribe(a => _cache.Insert(GetCacheKey(a.FileId), a.FileTracker, _cacheTimeout, _callbackAction), CacheNotifyAction.InsertOrUpdate);
-        _cacheNotify.Subscribe(a => _cache.Remove(GetCacheKey(a.FileId)), CacheNotifyAction.Remove);
+        _cacheNotify.Subscribe(a =>
+        {
+            try
+            {
+                _cache.Insert(GetCacheKey(a.FileId), a.FileTracker, _cacheTimeout, _callbackAction);
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+
+        }, CacheNotifyAction.InsertOrUpdate);
+        
+        _cacheNotify.Subscribe(a =>
+        {
+            try
+            {
+                _cache.Remove(GetCacheKey(a.FileId));
+            }
+            catch (ObjectDisposedException)
+            {
+                
+            }
+        }, CacheNotifyAction.Remove);
         
         _serviceProvider = serviceProvider;
         _logger = logger;
