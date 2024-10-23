@@ -186,6 +186,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your role in the room &quot;$RoomTitle&quot; has been changed to &quot;$RoomRole&quot;.
+        /// </summary>
+        public static string pattern_RoomUpdateAccessForUser_push {
+            get {
+                return ResourceManager.GetString("pattern_RoomUpdateAccessForUser_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. Access granted to document: &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot;
         ///
         ///$__DateTime &quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; granted you the access to the &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; document with the following access rights: &quot;$AccessRights&quot;. 

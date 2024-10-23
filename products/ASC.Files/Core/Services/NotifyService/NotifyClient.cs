@@ -421,33 +421,11 @@ public class NotifyClient(WorkContext notifyContext,
 
     public async Task SendInvitedToRoom<T>(FileEntry<T> room, UserInfo user)
     {
-        if (room is not { FileEntryType: FileEntryType.Folder })
-        {
-            return;
-        }
+        if(!await CheckRoomAccess(room, user)) { return; }
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
-
         var recipientsProvider = notifySource.GetRecipientsProvider();
-
-        var folderDao = daoFactory.GetFolderDao<T>();
-
-        if (!await fileSecurity.CanReadAsync(room, user.Id))
-        {
-            return;
-        }
-
-        if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(user, Actions.RoomsActivity))
-        {
-            return;
-        }
-
         var recipient = await recipientsProvider.GetRecipientAsync(user.Id.ToString());
-
-        if (await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(room.Id, user.Id))
-        {
-            return;
-        }
 
         await client.SendNoticeAsync(
             NotifyConstants.EventInvitedToRoom,
@@ -458,6 +436,47 @@ public class NotifyClient(WorkContext notifyContext,
             );
     }
 
+    public async Task SendRoomUpdateAccessForUser<T>(FileEntry<T> room, UserInfo user, FileShare currentRole)
+    {
+        if (!await CheckRoomAccess(room, user)) { return; }
+
+        var client = notifyContext.RegisterClient(serviceProvider, notifySource);
+        var recipientsProvider = notifySource.GetRecipientsProvider();
+        var recipient = await recipientsProvider.GetRecipientAsync(user.Id.ToString());
+        var accessString = FileShareExtensions.GetAccessString(currentRole, false);
+
+        await client.SendNoticeAsync(
+            NotifyConstants.EventRoomUpdateAccessForUser,
+            room.UniqID,
+            recipient,
+            ConfigurationConstants.NotifyPushSenderSysName,
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(Tags.RoomRole, accessString)
+            );
+    }
+
+    private async Task<bool> CheckRoomAccess<T>(FileEntry<T> room, UserInfo user)
+    {
+        if (room is not { FileEntryType: FileEntryType.Folder })
+        {
+            return false;
+        }
+        if (!await fileSecurity.CanReadAsync(room, user.Id))
+        {
+            return false;
+        }
+
+        if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(user, Actions.RoomsActivity))
+        {
+            return false;
+        }
+        if (await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(room.Id, user.Id))
+        {
+            return false;
+        }
+
+        return true;
+    }
     private static string GetAccessString(FileShare fileShare, CultureInfo cultureInfo)
     {
         return fileShare switch

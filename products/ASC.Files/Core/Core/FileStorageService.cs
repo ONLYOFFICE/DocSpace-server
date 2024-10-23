@@ -3159,6 +3159,7 @@ public class FileStorageService //: IFileStorageService
                                             break;
                                         case EventType.Update:
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, pastRecord.Share, true, name);
+                                            await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
                                             break;
                                     }
                                 }

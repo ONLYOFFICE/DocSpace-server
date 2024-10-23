@@ -192,4 +192,7 @@ $OrangeButton</value>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
     <value>You have been invited to the room "$RoomTitle"</value>
   </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Your role in the room "$RoomTitle" has been changed to "$RoomRole"</value>
+  </data>
 </root>

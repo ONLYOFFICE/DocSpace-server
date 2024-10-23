@@ -41,7 +41,8 @@ public static class NotifyConstants
     public static readonly INotifyAction EventFormSubmitted = new NotifyAction("FormSubmitted", "form submitted");
     public static readonly INotifyAction EventFormReceived = new NotifyAction("FormReceived", "form received");
     public static readonly INotifyAction EventRoomMovedArchive = new NotifyAction("RoomMovedArchive", "room moved archive");
-    public static readonly INotifyAction EventInvitedToRoom = new NotifyAction("InvitedToRoom", "room moved archive");
+    public static readonly INotifyAction EventInvitedToRoom = new NotifyAction("InvitedToRoom", "invited to room");
+    public static readonly INotifyAction EventRoomUpdateAccessForUser = new NotifyAction("RoomUpdateAccessForUser", "room update access for user");
 
     #endregion
 

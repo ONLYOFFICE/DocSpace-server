@@ -71,6 +71,7 @@ public static class Tags
     public const string ToUserName = "ToUserName";
     public const string ToUserLink = "ToUserLink";
     public const string Message = "Message";
+    public const string RoomRole = "RoomRole";
 
     public const string Address = "Address";
     public const string Login = "Login";
