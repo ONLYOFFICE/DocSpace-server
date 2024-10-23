@@ -897,6 +897,11 @@ public class FileMarker(
 
         foreach (var entryTag in entryTagsInternal)
         {
+            if (entryTag.Value.CreateOn.HasValue)
+            {
+                entryTag.Key.ModifiedOn = entryTag.Value.CreateOn.Value;
+            }
+            
             var parentEntry = entryTagsInternal.Keys
                 .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, entryTag.Key.ParentId));
 
@@ -908,6 +913,11 @@ public class FileMarker(
 
         foreach (var entryTag in entryTagsProvider)
         {
+            if (entryTag.Value.CreateOn.HasValue)
+            {
+                entryTag.Key.ModifiedOn = entryTag.Value.CreateOn.Value;
+            }
+            
             if (int.TryParse(entryTag.Key.ParentId, out var fId))
             {
                 var parentEntryInt = entryTagsInternal.Keys
