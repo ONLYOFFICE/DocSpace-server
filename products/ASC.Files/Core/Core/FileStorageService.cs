@@ -3152,6 +3152,7 @@ public class FileStorageService //: IFileStorageService
                                     {
                                         case EventType.Create:
                                             await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, null, true, name);
+                                            await notifyClient.SendInvitedToRoom(folder, user);
                                             break;
                                         case EventType.Remove:
                                             await filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name);

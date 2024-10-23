@@ -189,4 +189,7 @@ $OrangeButton</value>
   <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
     <value>$FromUserName moved the room "$RoomTitle" to the archive</value>
   </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>You have been invited to the room "$RoomTitle"</value>
+  </data>
 </root>

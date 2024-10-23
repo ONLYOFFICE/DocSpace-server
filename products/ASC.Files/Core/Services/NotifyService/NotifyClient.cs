@@ -419,6 +419,45 @@ public class NotifyClient(WorkContext notifyContext,
         }
     }
 
+    public async Task SendInvitedToRoom<T>(FileEntry<T> room, UserInfo user)
+    {
+        if (room is not { FileEntryType: FileEntryType.Folder })
+        {
+            return;
+        }
+
+        var client = notifyContext.RegisterClient(serviceProvider, notifySource);
+
+        var recipientsProvider = notifySource.GetRecipientsProvider();
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+
+        if (!await fileSecurity.CanReadAsync(room, user.Id))
+        {
+            return;
+        }
+
+        if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(user, Actions.RoomsActivity))
+        {
+            return;
+        }
+
+        var recipient = await recipientsProvider.GetRecipientAsync(user.Id.ToString());
+
+        if (await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(room.Id, user.Id))
+        {
+            return;
+        }
+
+        await client.SendNoticeAsync(
+            NotifyConstants.EventInvitedToRoom,
+            room.UniqID,
+            recipient,
+            ConfigurationConstants.NotifyPushSenderSysName,
+            new TagValue(NotifyConstants.RoomTitle, room.Title)
+            );
+    }
+
     private static string GetAccessString(FileShare fileShare, CultureInfo cultureInfo)
     {
         return fileShare switch
