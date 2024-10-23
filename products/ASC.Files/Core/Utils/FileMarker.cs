@@ -156,14 +156,27 @@ public class FileMarker(
         }
         else
         {
+            var additionalSubjects = Array.Empty<Guid>();
+            
             if (userIDs.Count == 0)
             {
+                if (obj.FileEntry.RootFolderType == FolderType.VirtualRooms)
+                {
+                    var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
+                    if (room.CreateBy != obj.CurrentAccountId)
+                    {
+                        additionalSubjects = [room.CreateBy];
+                    }
+                }
+                
                 var parentFolder = parentFolders.FirstOrDefault();
                 var guids = await fileSecurity.WhoCanReadAsync(obj.FileEntry);
                 if (parentFolder.FolderType != FolderType.FormFillingFolderDone && parentFolder.FolderType != FolderType.FormFillingFolderInProgress &&
                     parentFolder.FolderType != FolderType.FillingFormsRoom)
                 {
-                    userIDs = guids.Where(x => x != obj.CurrentAccountId).ToList();
+                    userIDs = guids.Where(x => x != obj.CurrentAccountId)
+                        .Concat(additionalSubjects)
+                        .ToList();
                 }
                 else
                 {
@@ -207,7 +220,9 @@ public class FileMarker(
             {
                 var whoCanRead = await fileSecurity.WhoCanReadAsync(parentFolder);
                 var ids = whoCanRead
-                    .Where(userId => userIDs.Contains(userId) && userId != obj.CurrentAccountId);
+                    .Where(userId => userIDs.Contains(userId) && userId != obj.CurrentAccountId)
+                    .Concat(additionalSubjects);
+                
                 foreach (var id in ids)
                 {
                     if (userEntriesData.TryGetValue(id, out var value))
@@ -325,23 +340,6 @@ public class FileMarker(
                         else
                         {
                             userEntriesData.Add(id, new Data { RootId = rootId });
-                        }
-                    }
-
-                    var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
-
-                    if (room.CreateBy != obj.CurrentAccountId)
-                    {
-                        var roomOwnerEntries = parentFolders.Cast<FileEntry>().Concat([obj.FileEntry]).ToList();
-
-                        if (userEntriesData.TryGetValue(room.CreateBy, out var value) && !value.Entries.Contains(obj.FileEntry))
-                        {
-                            value.Entries.Add(obj.FileEntry);
-                            value.RootId = rootId;
-                        }
-                        else
-                        {
-                            userEntriesData.Add(room.CreateBy, new Data { Entries = roomOwnerEntries, RootId = rootId});
                         }
                     }
 
