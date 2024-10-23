@@ -416,7 +416,7 @@
     <value>管理员的数量不应超过{0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>管理员/高级用户数量</value>
+    <value>管理员数量</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>自动备份与恢复</value>
@@ -1046,7 +1046,7 @@
     <value>禁用用户</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>管理员/高级用户已添加：</value>
+    <value>管理员已添加：</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>邀请人数已超过上限</value>
