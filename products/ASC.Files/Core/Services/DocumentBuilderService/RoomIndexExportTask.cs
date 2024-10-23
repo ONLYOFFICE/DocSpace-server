@@ -150,7 +150,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
                 name = entry.Title,
                 url = commonLinkUtility.GetFullAbsolutePath(url),
                 type = isFolder ? FilesCommonResource.RoomIndex_Folder : Path.GetExtension(entry.Title),
-                size = isFolder ? null : Math.Round(((File<T>)entry).ContentLength / 1024d / 1024d, 2).ToString(CultureInfo.InvariantCulture),
+                size = isFolder ? null : Math.Round(((File<T>)entry).ContentLength / 1024d / 1024d, 3).ToString(CultureInfo.InvariantCulture),
                 author = entry.CreateByString,
                 created = entry.CreateOnString,
                 modified = entry.ModifiedOnString
@@ -174,7 +174,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
                 modified = FilesCommonResource.RoomIndex_Modified,
                 total = FilesCommonResource.RoomIndex_Total,
                 sheetName = FilesCommonResource.RoomIndex_SheetName,
-                numberFormat = "0.00",
+                numberFormat = "0.000",
                 dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}"
             },
 
