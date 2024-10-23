@@ -167,4 +167,8 @@ $DocumentURL
     <body styler="ASC.Notify.Textile.PushStyler,ASC.Core.Common" resource="|pattern_DocumentCreatedInRoom_push|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
   </pattern>
 
+  <pattern id="DocumentUploadedTo" sender="push.sender">
+    <body styler="ASC.Notify.Textile.PushStyler,ASC.Core.Common" resource="|pattern_DocumentUploadedTo_push|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+  </pattern>
+
 </patterns>

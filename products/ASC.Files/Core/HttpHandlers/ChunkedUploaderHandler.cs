@@ -49,7 +49,10 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
     ChunkedUploadSessionHelper chunkedUploadSessionHelper,
     SocketManager socketManager,
     FileDtoHelper filesWrapperHelper,
-    AuthContext authContext)
+    AuthContext authContext,
+    NotifyClient notifyClient,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity)
 {
     public async Task Invoke(HttpContext context)
     {
@@ -125,6 +128,18 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 ? MessageAction.FileUploadedWithOverwriting 
                                 : MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
+                            if(resumedSession.File.Version <= 1)
+                            {
+                                var folderDao = daoFactory.GetFolderDao<T>();
+                                var folder = await folderDao.GetFolderAsync(resumedSession.FolderId);
+
+                                if (DocSpaceHelper.IsRoom(folder.FolderType))
+                                {
+                                    var whoCanRead = await fileSecurity.WhoCanReadAsync(folder, true);
+                                    await notifyClient.SendDocumentUploadedToRoom(folder, whoCanRead, resumedSession.File.Title, authContext.CurrentAccount.ID);
+                                }
+                            }
+
                             await socketManager.CreateFileAsync(resumedSession.File);
                         }
                         else
@@ -171,6 +186,17 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         ? MessageAction.FileUploadedWithOverwriting 
                         : MessageAction.FileUploaded, session.File, session.File.Title);
 
+                    if (session.File.Version <= 1)
+                    {
+                        var folderDao = daoFactory.GetFolderDao<T>();
+                        var folder = await folderDao.GetFolderAsync(session.FolderId);
+
+                        if (DocSpaceHelper.IsRoom(folder.FolderType))
+                        {
+                            var whoCanRead = await fileSecurity.WhoCanReadAsync(folder, true);
+                            await notifyClient.SendDocumentUploadedToRoom(folder, whoCanRead, session.File.Title, authContext.CurrentAccount.ID);
+                        }
+                    }
                     await socketManager.CreateFileAsync(session.File);
                     return;
             }
