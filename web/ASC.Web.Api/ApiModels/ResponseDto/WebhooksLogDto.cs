@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
@@ -73,4 +74,35 @@ public class WebhooksLogDto : IMapFrom<WebhooksLog>
     /// <summary>Delivery time</summary>
     /// <type>System.Nullable{System.DateTime}, System</type>
     public DateTime? Delivery { get; set; }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<WebhooksLog, WebhooksLogDto>()
+              .ConvertUsing<WebhooksLogConverter>();
+    }
+}
+
+[Scope]
+public class WebhooksLogConverter(TenantUtil tenantUtil) : ITypeConverter<WebhooksLog, WebhooksLogDto>
+{
+    public WebhooksLogDto Convert(WebhooksLog source, WebhooksLogDto destination, ResolutionContext context)
+    {
+        var result = new WebhooksLogDto
+        {
+             Id = source.Id,
+             CreationTime = tenantUtil.DateTimeFromUtc(source.CreationTime),
+             Status = source.Status,
+             RequestHeaders = source.RequestHeaders,
+             RequestPayload = source.RequestPayload,
+             ResponseHeaders = source.ResponseHeaders,
+             ResponsePayload = source.ResponsePayload            
+        };
+
+        if (source.Delivery.HasValue)
+        {
+            source.Delivery = tenantUtil.DateTimeFromUtc(source.Delivery.Value);
+        }
+        
+        return result;
+    }
 }

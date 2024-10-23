@@ -38,6 +38,7 @@ public class DbWorker(
     TenantManager tenantManager,
     AuthContext authContext,
     IMapper mapper,
+    IHttpClientFactory clientFactory,
     IConfiguration configuration)
 {
     public static readonly IReadOnlyList<string> MethodList = new List<string>
@@ -68,7 +69,26 @@ public class DbWorker(
         {
             throw new SecurityException();
         }
-        
+
+        var httpClientName = "";
+
+        if (Uri.UriSchemeHttps.Equals(parsedUri.Scheme.ToLower(), StringComparison.OrdinalIgnoreCase) &&
+           ssl.HasValue && !ssl.Value)
+        {
+            httpClientName = "defaultHttpClientSslIgnore";
+        }
+
+        var httpClient = clientFactory.CreateClient(httpClientName);
+
+        // validate webhook uri 
+        var request = new HttpRequestMessage(HttpMethod.Head, uri);
+        var response = await httpClient.SendAsync(request);
+
+        if (response.StatusCode != System.Net.HttpStatusCode.OK)
+        {
+            throw new Exception($"Webhook with {uri} is not avaliable. HEAD request is not responce 200 http status.");
+        }
+
         var toAdd = new WebhooksConfig
         {
             TenantId = tenantId,

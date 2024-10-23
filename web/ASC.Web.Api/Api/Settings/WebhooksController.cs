@@ -26,6 +26,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
+[WebhookDisable]
 public class WebhooksController(ApiContext context,
         PermissionContext permissionContext,
         ApiContext apiContext,
@@ -84,7 +85,7 @@ public class WebhooksController(ApiContext context,
         var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
 
         passwordSettingsManager.CheckPassword(inDto.SecretKey, passwordSettings);
-        
+
         var webhook = await dbWorker.AddWebhookConfig(inDto.Uri, inDto.Name, inDto.SecretKey, inDto.Enabled, inDto.SSL);
 
         return mapper.Map<WebhooksConfig, WebhooksConfigDto>(webhook);

@@ -100,25 +100,24 @@ public class Startup : BaseStartup
         {
             var settings = s.GetRequiredService<Settings>();
 
-            return HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .OrResult(msg => msg.StatusCode == HttpStatusCode.NotFound)
-                .WaitAndRetryAsync(settings.RepeatCount ?? 5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+            return HttpPolicyExtensions.HandleTransientHttpError()
+                                       .WaitAndRetryAsync(settings.RepeatCount ?? 5, 
+                                                          retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
         };
 
         services.AddHttpClient(WebhookSender.WEBHOOK)
-        .SetHandlerLifetime(lifeTime)
-        .AddPolicyHandler(policyHandler);
+                .SetHandlerLifetime(lifeTime)
+                .AddPolicyHandler(policyHandler);
 
         services.AddHttpClient(WebhookSender.WEBHOOK_SKIP_SSL)
-        .SetHandlerLifetime(lifeTime)
-        .AddPolicyHandler(policyHandler)
-        .ConfigurePrimaryHttpMessageHandler(_ =>
-        {
-            return new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-            };
-        });
+                .SetHandlerLifetime(lifeTime)
+                .AddPolicyHandler(policyHandler)
+                .ConfigurePrimaryHttpMessageHandler(_ =>
+                {
+                    return new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                    };
+                });
     }
 }

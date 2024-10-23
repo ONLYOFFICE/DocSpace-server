@@ -84,6 +84,19 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
                 status = (int)e.StatusCode.Value;
             }
 
+            //
+            // Summary:
+            //     Equivalent to HTTP status 410. System.Net.HttpStatusCode.Gone indicates that
+            //     the requested resource is no longer available.
+            if (e.StatusCode == HttpStatusCode.Gone)
+            {
+                await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
+
+                return;
+            }
+
+
+
             //if (e.InnerException is SocketException se)
             //{
             //    status = (int)se.SocketErrorCode;
