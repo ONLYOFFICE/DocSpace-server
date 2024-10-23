@@ -27,9 +27,9 @@
 namespace ASC.ActiveDirectory.Log;
 internal static partial class NovellLdapObjectLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "Can't get LDAPObject Sid property")]
+    [LoggerMessage(LogLevel.Error, "Can't get LDAPObject Sid property")]
     public static partial void ErrorCanNotGetSidProperty(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Can't get LDAPUser UserAccountControl property")]
+    [LoggerMessage(LogLevel.Error, "Can't get LDAPUser UserAccountControl property")]
     public static partial void ErrorCanNotGetUserAccountControlProperty(this ILogger logger, Exception exception);
 }

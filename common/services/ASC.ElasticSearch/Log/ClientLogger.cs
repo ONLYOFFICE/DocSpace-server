@@ -27,12 +27,12 @@
 namespace ASC.ElasticSearch.Log;
 internal static partial class ClientLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Ping {ping}")]
+    [LoggerMessage(LogLevel.Debug, "Ping {ping}")]
     public static partial void DebugPing(this ILogger logger, string ping);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Response: {response}")]
+    [LoggerMessage(LogLevel.Trace, "Response: {response}")]
     public static partial void TraceResponse(this ILogger logger, string response);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Client")]
+    [LoggerMessage(LogLevel.Error, "Client")]
     public static partial void ErrorClient(this ILogger logger, Exception exception);
 }

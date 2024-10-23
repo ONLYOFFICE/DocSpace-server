@@ -27,15 +27,15 @@
 namespace ASC.Web.Core.Log;
 internal static partial class StudioWhatsNewNotifyLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "No products. Return from function")]
+    [LoggerMessage(LogLevel.Information, "No products. Return from function")]
     public static partial void InformationNoProducts(this ILogger logger); 
     
-    [LoggerMessage(Level = LogLevel.Information, Message = "Start send whats new.")]
+    [LoggerMessage(LogLevel.Information, "Start send whats new.")]
     public static partial void InformationStartSendWhatsNew(this ILogger logger); 
     
-    [LoggerMessage(Level = LogLevel.Information, Message = "Start send whats new in {domain} ({tenantId}).")]
+    [LoggerMessage(LogLevel.Information, "Start send whats new in {domain} ({tenantId}).")]
     public static partial void InformationStartSendWhatsNewIn(this ILogger logger, string domain, int tenantId);  
     
-    [LoggerMessage(Level = LogLevel.Information, Message = "Send whats new to {email}")]
+    [LoggerMessage(LogLevel.Information, "Send whats new to {email}")]
     public static partial void InformationSendWhatsNewTo(this ILogger logger, string email);
 }

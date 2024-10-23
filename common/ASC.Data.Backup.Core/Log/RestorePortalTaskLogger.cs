@@ -27,36 +27,36 @@
 namespace ASC.Data.Backup.Core.Log;
 internal static partial class RestorePortalTaskLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "begin restore portal")]
+    [LoggerMessage(LogLevel.Debug, "begin restore portal")]
     public static partial void DebugBeginRestorePortal(this ILogger<RestorePortalTask> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "begin restore data")]
+    [LoggerMessage(LogLevel.Debug, "begin restore data")]
     public static partial void DebugBeginRestoreData(this ILogger<RestorePortalTask> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "end restore data")]
+    [LoggerMessage(LogLevel.Debug, "end restore data")]
     public static partial void DebugEndRestoreData(this ILogger<RestorePortalTask> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "clear cache")]
+    [LoggerMessage(LogLevel.Debug, "clear cache")]
     public static partial void DebugClearCache(this ILogger<RestorePortalTask> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "refresh license")]
+    [LoggerMessage(LogLevel.Debug, "refresh license")]
     public static partial void DebugRefreshLicense(this ILogger<RestorePortalTask> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "end restore portal")]
+    [LoggerMessage(LogLevel.Debug, "end restore portal")]
     public static partial void DebugEndRestorePortal(this ILogger<RestorePortalTask> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "begin restore storage")]
+    [LoggerMessage(LogLevel.Debug, "begin restore storage")]
     public static partial void DebugBeginRestoreStorage(this ILogger<RestorePortalTask> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "end restore storage")]
+    [LoggerMessage(LogLevel.Debug, "end restore storage")]
     public static partial void DebugEndRestoreStorage(this ILogger<RestorePortalTask> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Restore from {fileName}")]
+    [LoggerMessage(LogLevel.Debug, "Restore from {fileName}")]
     public static partial void DebugRestoreFrom(this ILogger<RestorePortalTask> logger, string fileName);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "RunJob")]
+    [LoggerMessage(LogLevel.Error, "RunJob")]
     public static partial void ErrorRunJob(this ILogger<RestorePortalTask> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "can't restore file ({module}:{path})")]
+    [LoggerMessage(LogLevel.Warning, "can't restore file ({module}:{path})")]
     public static partial void WarningCantRestoreFile(this ILogger<RestorePortalTask> logger, string module, string path, Exception exception);
 }

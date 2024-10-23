@@ -27,18 +27,18 @@
 namespace ASC.Files.Core.Log;
 internal static partial class GlobalLogger
 {
-    [LoggerMessage(Level = LogLevel.Critical, Message = "ClearCache action")]
+    [LoggerMessage(LogLevel.Critical, "ClearCache action")]
     public static partial void CriticalClearCacheAction(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Critical, Message = "ClearCache subscribe")]
+    [LoggerMessage(LogLevel.Critical, "ClearCache subscribe")]
     public static partial void CriticalClearCacheSubscribe(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "CreateSampleDocuments")]
+    [LoggerMessage(LogLevel.Error, "CreateSampleDocuments")]
     public static partial void ErrorCreateSampleDocuments(this ILogger logger, Exception exception); 
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "SaveSampleFile")]
+    [LoggerMessage(LogLevel.Error, "SaveSampleFile")]
     public static partial void ErrorSaveSampleFile(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "SaveSampleFolder")]
+    [LoggerMessage(LogLevel.Error, "SaveSampleFolder")]
     public static partial void ErrorSaveSampleFolder(this ILogger logger, Exception exception);
 }
