@@ -1337,6 +1337,11 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(MessageAction.FileCreated, file, file.Title);
 
+        if (DocSpaceHelper.IsRoom(folder.FolderType))
+        {
+            var whoCanRead = await fileSecurity.WhoCanReadAsync(folder, true);
+            await notifyClient.SendDocumentCreatedInRoom(folder, whoCanRead, file, authContext.CurrentAccount.ID);
+        }
         await fileMarker.MarkAsNewAsync(file);
 
         await socketManager.CreateFileAsync(file);

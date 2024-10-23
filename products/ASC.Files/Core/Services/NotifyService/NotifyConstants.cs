@@ -43,6 +43,7 @@ public static class NotifyConstants
     public static readonly INotifyAction EventRoomMovedArchive = new NotifyAction("RoomMovedArchive", "room moved archive");
     public static readonly INotifyAction EventInvitedToRoom = new NotifyAction("InvitedToRoom", "invited to room");
     public static readonly INotifyAction EventRoomUpdateAccessForUser = new NotifyAction("RoomUpdateAccessForUser", "room update access for user");
+    public static readonly INotifyAction EventDocumentCreatedInRoom = new NotifyAction("DocumentCreatedInRoom", "document created in room");
 
     #endregion
 

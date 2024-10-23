@@ -195,4 +195,7 @@ $OrangeButton</value>
   <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
     <value>Your role in the room "$RoomTitle" has been changed to "$RoomRole"</value>
   </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>A new document "$DocumentTitle" has been created in the room "$RoomTitle"</value>
+  </data>
 </root>

@@ -70,6 +70,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A new document &quot;$DocumentTitle&quot; has been created in the room &quot;$RoomTitle&quot;.
+        /// </summary>
+        public static string pattern_DocumentCreatedInRoom_push {
+            get {
+                return ResourceManager.GetString("pattern_DocumentCreatedInRoom_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. All signers completed $DocumentTitle
         ///
         ///This is an email notification to inform you that all signers completed &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot;..
