@@ -806,7 +806,7 @@
     <value>Il numero di amministratori non deve superare {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Numero di amministratori/utenti esperti</value>
+    <value>Numero di amministratori</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Backup e ripristino automatici</value>
@@ -1043,7 +1043,7 @@
     <value>{0} per amministratore/utente esperto e possibilità di aggiungere spazio su richiesta</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Amministratori/utenti esperti aggiunti:</value>
+    <value>Amministratori aggiunti:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Il limite degli inviti è stato superato</value>

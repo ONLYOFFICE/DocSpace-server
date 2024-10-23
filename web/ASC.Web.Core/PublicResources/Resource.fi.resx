@@ -296,7 +296,7 @@
     <value>Ylläpitäjien määrä ei saisi ylittää {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Järjestelmänvalvojien/tehokäyttäjien määrä</value>
+    <value>Järjestelmänvalvojien määrä</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automaattinen varmuuskopiointi &amp; palautus</value>
@@ -1037,7 +1037,7 @@
     <value>Käyttäjätilakiintiö ylitetty</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Pääkäyttäjät/Tehokäyttäjät lisätty:</value>
+    <value>Pääkäyttäjät lisätty:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Kutsujen raja on ylitetty</value>

@@ -317,7 +317,7 @@
     <value>Adminlərin sayı {0}-dan çox olmamalıdır</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Admin/ekspert istifadəçilərin sayı</value>
+    <value>Admin sayı</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Avtomatik ehtiyat nüsxə və bərpa</value>
@@ -1037,7 +1037,7 @@
     <value>İstifadəçi məkanı kvota limitini keçib</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administratorlar/Güclü istifadəçilər əlavə edildi:</value>
+    <value>Administratorlar əlavə edildi:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Dəvət limiti keçib</value>

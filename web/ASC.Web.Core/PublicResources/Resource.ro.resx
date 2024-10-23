@@ -655,7 +655,7 @@
     <value>Mențiune: dimensiunea fișierului nu poate depăși {1}{0}{2}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Numărul de administratori/utilizatori avansați</value>
+    <value>Numărul de administratori</value>
   </data>
   <data name="ConsumersSkyDrive" xml:space="preserve">
     <value>OneDrive</value>
@@ -1105,7 +1105,7 @@
     <value>Utilizatorul este dezactivat</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administratori/Utilizatori avansați adăugați:</value>
+    <value>Administratori adăugați:</value>
   </data>
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>Instrucțiuni de schimbare a parolei au fost trimise la adresa de e-mail {0}.</value>

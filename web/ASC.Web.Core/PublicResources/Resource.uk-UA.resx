@@ -263,7 +263,7 @@
     <value>Кількість адміністраторів не повинна перевищувати {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Кількість адміністраторів / досвідчених користувачів</value>
+    <value>Кількість адміністраторів</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Автоматичне резервне копіювання та відновлення</value>
@@ -1037,7 +1037,7 @@
     <value>Перевищено квоту простору кімнати</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Додані адміністратори/досвідчені користувачі:</value>
+    <value>Додані адміністратори:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Ліміт запрошень перевищено</value>
