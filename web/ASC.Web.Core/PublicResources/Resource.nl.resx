@@ -371,7 +371,7 @@
     <value>Het aantal beheerders mag niet groter zijn dan {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Aantal beheerders/power users</value>
+    <value>Aantal beheerders</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatische back-up en herstel</value>
@@ -1037,7 +1037,7 @@
     <value>Gebruikersruimte quota overschreden</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Beheerders/Power users toegevoegd:</value>
+    <value>Beheerders toegevoegd:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Uitnodigingslimiet is overschreden</value>

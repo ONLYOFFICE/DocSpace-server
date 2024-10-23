@@ -380,7 +380,7 @@
     <value>Số lượng quản trị viên không được vượt quá {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Số lượng quản trị viên/người dùng cấp cao</value>
+    <value>Số lượng quản trị viên</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Tự động sao lưu &amp; khôi phục</value>
@@ -1037,7 +1037,7 @@
     <value>Đã vượt quá hạn mức không gian người dùng</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Quản trị viên/Người dùng cấp cao đã thêm:</value>
+    <value>Quản trị viên đã thêm:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Đã vượt quá giới hạn lời mời</value>
