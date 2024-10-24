@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Webhooks.Core.EF.Model;
+
 namespace ASC.Webhooks;
 
 [Singleton]
@@ -47,10 +49,11 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
         var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
 
         var entry = await dbWorker.ReadJournal(webhookRequest.WebhookId);
+        var webhooksConfig = await dbWorker.GetWebhookConfig(webhookRequest.TenantId, entry.ConfigId);
 
         var ssl = entry.Config.SSL;
 
-        var status = 0;
+        int status = 0;
         string responsePayload = null;
         string responseHeaders = null;
         string requestHeaders = null;
@@ -58,8 +61,8 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
         try
         {
             var clientName = ssl ? WEBHOOK : WEBHOOK_SKIP_SSL;
-
             var httpClient = clientFactory.CreateClient(clientName);
+
             var request = new HttpRequestMessage(HttpMethod.Post, entry.Config.Uri)
             {
                 Content = new StringContent(entry.RequestPayload, Encoding.UTF8, "application/json")
@@ -74,6 +77,8 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
             status = (int)response.StatusCode;
             responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
             responsePayload = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            webhooksConfig.LastSuccessOn = DateTime.UtcNow;
 
             _log.DebugResponse(response);
         }
@@ -95,7 +100,19 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
                 return;
             }
 
+            var lastFailureOn = DateTime.UtcNow;
+            var lastFailureContent = e.Message;
 
+            if ((webhooksConfig.LastSuccessOn.HasValue) && 
+                (lastFailureOn - webhooksConfig.LastSuccessOn.Value > TimeSpan.FromDays(3)))
+            {
+                await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
+
+                return;
+            }
+
+            webhooksConfig.LastFailureContent = lastFailureContent;
+            webhooksConfig.LastFailureOn = lastFailureOn;
 
             //if (e.InnerException is SocketException se)
             //{
@@ -108,6 +125,9 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
         }
         catch (Exception e)
         {
+            webhooksConfig.LastFailureContent = e.Message;
+            webhooksConfig.LastFailureOn = DateTime.UtcNow;
+
             status = (int)HttpStatusCode.InternalServerError;
             _log.ErrorWithException(e);
         }
@@ -115,14 +135,19 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
         var delivery = DateTime.UtcNow;
 
         await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery, requestHeaders, responsePayload, responseHeaders);
+        await dbWorker.UpdateWebhookConfig(webhooksConfig);
+
     }
 
     private string GetSecretHash(string secretKey, string body)
     {
         var secretBytes = Encoding.UTF8.GetBytes(secretKey);
+
         using var hasher = new HMACSHA256(secretBytes);
+
         var data = Encoding.UTF8.GetBytes(body);
         var hash = hasher.ComputeHash(data);
+
         return Convert.ToHexString(hash);
     }
 }

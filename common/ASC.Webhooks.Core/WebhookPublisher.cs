@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Webhooks;
+using System.Text.Json;
+
 namespace ASC.Webhooks.Core;
 
 [Scope(typeof(IWebhookPublisher))]
@@ -49,30 +52,84 @@ public class WebhookPublisher(
         }
     }
 
-    public async Task<WebhooksLog> PublishAsync(int webhookId, string requestPayload, int configId)
+    public async Task<DbWebhooksLog> PublishAsync(int webhookId, string requestResponse, int configId)
     {
-        if (string.IsNullOrEmpty(requestPayload))
+        if (string.IsNullOrEmpty(requestResponse))
         {
             return null;
         }
 
-        var webhooksLog = new WebhooksLog
+        var tenantId = (await tenantManager.GetCurrentTenantAsync()).Id;
+
+        var webhooksLog = new DbWebhooksLog
         {
             WebhookId = webhookId,
             CreationTime = DateTime.UtcNow,
-            RequestPayload = requestPayload,
-            ConfigId = configId
+            RequestPayload = requestResponse,
+            ConfigId = configId,
+            TenantId = tenantId
         };
 
+        webhooksLog = await PreProcessWebHookLog(webhooksLog);        
         var webhook = await dbWorker.WriteToJournal(webhooksLog);
 
-        await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(
-            securityContext.CurrentAccount.ID,
-            (await tenantManager.GetCurrentTenantAsync()).Id)
+        var @event = new WebhookRequestIntegrationEvent(securityContext.CurrentAccount.ID, tenantId)
         {
             WebhookId = webhook.Id
-        });
+        };
+
+        await eventBus.PublishAsync(@event);
 
         return webhook;
+    }
+
+    private async Task<DbWebhooksLog> PreProcessWebHookLog(DbWebhooksLog dbWebhooksLog)
+    {
+        var requestResponse = dbWebhooksLog.RequestPayload;
+       
+        var webhooksConfig = await dbWorker.GetWebhookConfig(dbWebhooksLog.TenantId, dbWebhooksLog.ConfigId);
+
+        using var jsonDocument = JsonDocument.Parse(requestResponse);
+        var rootElement = jsonDocument.RootElement;
+        var responseJsonElement = rootElement.GetProperty("response");
+        var responseJsonElementString = responseJsonElement.ToString();
+        var data = requestResponse;
+
+        if (!string.IsNullOrEmpty(responseJsonElementString))
+        {
+            data = responseJsonElementString;
+        }
+
+        var requestPayload = new
+        {
+            Action = new
+            {
+//                Id = entry.Id,
+                CreateOn = dbWebhooksLog.CreationTime,
+                CreateBy = securityContext.CurrentAccount.ID,
+                //                    Trigger = "*"
+            },
+            Data = responseJsonElement,
+            Webhook = new
+            {
+                Id = webhooksConfig.Id,
+                Name = webhooksConfig.Name,
+                PayloadUrl = webhooksConfig.Uri,
+                //Target = new {
+                //  Type = "room", //  room | folder | file,
+                //  Id = 111
+                //},
+                Triggers = "[*]"
+            }
+        };
+
+        var jsonSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+
+        dbWebhooksLog.RequestPayload = JsonSerializer.Serialize(requestPayload, jsonSerializerOptions);
+
+        return dbWebhooksLog;
     }
 }

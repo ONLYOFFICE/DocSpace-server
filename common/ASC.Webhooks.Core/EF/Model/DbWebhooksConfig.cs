@@ -26,7 +26,7 @@
 
 namespace ASC.Webhooks.Core.EF.Model;
 
-public class WebhooksConfig : BaseEntity
+public class DbWebhooksConfig : BaseEntity
 {
     public int Id { get; set; }
     public string Name { get; set; }
@@ -35,9 +35,10 @@ public class WebhooksConfig : BaseEntity
     public string Uri { get; set; }
     public bool Enabled { get; set; }
     public bool SSL { get; set; }
-
+    public DateTime? LastFailureOn { get; set; }
+    public string? LastFailureContent { get; set; }
+    public DateTime? LastSuccessOn { get; set; }
     public DbTenant Tenant { get; set; }
-
     public override object[] GetKeys()
     {
         return [Id];
@@ -48,7 +49,7 @@ public static class WebhooksConfigExtension
 {
     public static ModelBuilderWrapper AddWebhooksConfig(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<WebhooksConfig>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Entity<DbWebhooksConfig>().Navigation(e => e.Tenant).AutoInclude(false);
 
         modelBuilder
             .Add(MySqlAddWebhooksConfig, Provider.MySql)
@@ -57,7 +58,7 @@ public static class WebhooksConfigExtension
     }
     public static void MySqlAddWebhooksConfig(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<WebhooksConfig>(entity =>
+        modelBuilder.Entity<DbWebhooksConfig>(entity =>
         {
             entity.HasKey(e => new { e.Id })
                 .HasName("PRIMARY");
@@ -71,6 +72,20 @@ public static class WebhooksConfigExtension
             entity.Property(e => e.Id)
                 .HasColumnType("int")
                 .HasColumnName("id");
+
+            entity.Property(e => e.LastFailureOn)
+                  .HasColumnName("last_failure_on")
+                  .HasColumnType("datetime");
+
+            entity.Property(e => e.LastFailureContent)
+                  .HasColumnName("last_failure_content")
+                  .HasColumnType("varchar(200)")
+                  .HasCharSet("utf8")
+                  .UseCollation("utf8_general_ci");
+
+            entity.Property(e => e.LastSuccessOn)
+                  .HasColumnName("last_success_on")
+                  .HasColumnType("datetime");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
@@ -106,7 +121,7 @@ public static class WebhooksConfigExtension
 
     public static void PgSqlAddWebhooksConfig(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<WebhooksConfig>(entity =>
+        modelBuilder.Entity<DbWebhooksConfig>(entity =>
         {
             entity.HasKey(e => new { e.Id })
                 .HasName("PRIMARY");
@@ -119,6 +134,16 @@ public static class WebhooksConfigExtension
             entity.Property(e => e.Id)
                 .HasColumnType("int")
                 .HasColumnName("id");
+
+
+            entity.Property(e => e.LastFailureOn)
+                  .HasColumnName("last_failure_on");
+
+            entity.Property(e => e.LastFailureContent)
+                  .HasColumnName("last_failure_content");
+
+            entity.Property(e => e.LastSuccessOn)
+                  .HasColumnName("last_success_on");
 
             entity.Property(e => e.TenantId)
                  .HasColumnName("tenant_id");
@@ -150,6 +175,6 @@ public static class WebhooksConfigExtension
 
 public class WebhooksConfigWithStatus
 {
-    public WebhooksConfig WebhooksConfig { get; init; }
+    public DbWebhooksConfig WebhooksConfig { get; init; }
     public int? Status { get; set; }
 }

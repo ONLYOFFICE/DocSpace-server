@@ -26,7 +26,7 @@
 
 namespace ASC.Webhooks.Core.EF.Model;
 
-public class WebhooksLog
+public class DbWebhooksLog
 {
     public int Id { get; set; }
     public int ConfigId { get; set; }
@@ -40,8 +40,7 @@ public class WebhooksLog
     public int TenantId { get; set; }
     public Guid Uid { get; set; }
     public DateTime? Delivery { get; set; }
-
-    public WebhooksConfig Config { get; set; }
+    public DbWebhooksConfig Config { get; set; }
     public DbTenant Tenant { get; set; }
 }
 
@@ -49,7 +48,7 @@ public static class WebhooksPayloadExtension
 {
     public static ModelBuilderWrapper AddWebhooksLog(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<WebhooksLog>().Navigation(e => e.Tenant).AutoInclude();
+        modelBuilder.Entity<DbWebhooksLog>().Navigation(e => e.Tenant).AutoInclude();
 
         modelBuilder
             .Add(MySqlAddWebhooksLog, Provider.MySql)
@@ -60,7 +59,7 @@ public static class WebhooksPayloadExtension
 
     private static void MySqlAddWebhooksLog(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<WebhooksLog>(entity =>
+        modelBuilder.Entity<DbWebhooksLog>(entity =>
         {
             entity.HasKey(e => new { e.Id })
                 .HasName("PRIMARY");
@@ -131,7 +130,7 @@ public static class WebhooksPayloadExtension
 
     private static void PgSqlAddWebhooksLog(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<WebhooksLog>(entity =>
+        modelBuilder.Entity<DbWebhooksLog>(entity =>
         {
             entity.HasKey(e => new { e.Id })
                 .HasName("PRIMARY");

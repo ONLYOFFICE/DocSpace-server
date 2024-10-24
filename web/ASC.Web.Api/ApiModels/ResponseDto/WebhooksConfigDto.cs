@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
 /// </summary>
-public class WebhooksConfigDto : IMapFrom<WebhooksConfig>
+public class WebhooksConfigDto : IMapFrom<DbWebhooksConfig>
 {
     /// <summary>ID</summary>
     /// <type>System.Int32, System</type>

@@ -33,6 +33,7 @@ public class WebhooksController(ApiContext context,
         WebItemManager webItemManager,
         IMemoryCache memoryCache,
         DbWorker dbWorker,
+        TenantManager tenantManager,
         IHttpContextAccessor httpContextAccessor,
         IMapper mapper,
         WebhookPublisher webhookPublisher,
@@ -88,7 +89,7 @@ public class WebhooksController(ApiContext context,
 
         var webhook = await dbWorker.AddWebhookConfig(inDto.Uri, inDto.Name, inDto.SecretKey, inDto.Enabled, inDto.SSL);
 
-        return mapper.Map<WebhooksConfig, WebhooksConfigDto>(webhook);
+        return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
 
     /// <summary>
@@ -110,9 +111,21 @@ public class WebhooksController(ApiContext context,
         ArgumentNullException.ThrowIfNull(inDto.Uri);
         ArgumentNullException.ThrowIfNull(inDto.Name);
 
-        var webhook = await dbWorker.UpdateWebhookConfig(inDto.Id, inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        return mapper.Map<WebhooksConfig, WebhooksConfigDto>(webhook);
+        var DbWebhooksConfig = new DbWebhooksConfig
+        {
+            Id= inDto.Id,   
+            Name = inDto.Name,
+            Uri = inDto.Uri,
+            SecretKey = inDto.SecretKey,
+            Enabled = inDto.Enabled,
+            SSL = inDto.SSL    
+        };
+
+        var webhook = await dbWorker.UpdateWebhookConfig(DbWebhooksConfig);
+
+        return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
 
     /// <summary>
@@ -133,7 +146,7 @@ public class WebhooksController(ApiContext context,
 
         var webhook = await dbWorker.RemoveWebhookConfigAsync(id);
 
-        return mapper.Map<WebhooksConfig, WebhooksConfigDto>(webhook);
+        return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
 
     /// <summary>
@@ -167,7 +180,7 @@ public class WebhooksController(ApiContext context,
         await foreach (var j in dbWorker.ReadJournal(startIndex, count, deliveryFrom, deliveryTo, hookUri, webhookId, configId, eventId, groupStatus))
         {
             j.Log.Config = j.Config;
-            yield return mapper.Map<WebhooksLog, WebhooksLogDto>(j.Log);
+            yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(j.Log);
         }
     }
 
@@ -201,7 +214,7 @@ public class WebhooksController(ApiContext context,
 
         var result = await webhookPublisher.PublishAsync(item.Id, item.RequestPayload, item.ConfigId);
 
-        return mapper.Map<WebhooksLog, WebhooksLogDto>(result);
+        return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
     }
 
     /// <summary>
@@ -232,7 +245,7 @@ public class WebhooksController(ApiContext context,
 
             var result = await webhookPublisher.PublishAsync(item.Id, item.RequestPayload, item.ConfigId);
 
-            yield return mapper.Map<WebhooksLog, WebhooksLogDto>(result);
+            yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
         }
     }
 

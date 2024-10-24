@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
 /// </summary>
-public class WebhooksLogDto : IMapFrom<WebhooksLog>
+public class WebhooksLogDto : IMapFrom<DbWebhooksLog>
 {
     /// <summary>ID</summary>
     /// <type>System.Int32, System</type>
@@ -77,15 +77,15 @@ public class WebhooksLogDto : IMapFrom<WebhooksLog>
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<WebhooksLog, WebhooksLogDto>()
+        profile.CreateMap<DbWebhooksLog, WebhooksLogDto>()
               .ConvertUsing<WebhooksLogConverter>();
     }
 }
 
 [Scope]
-public class WebhooksLogConverter(TenantUtil tenantUtil) : ITypeConverter<WebhooksLog, WebhooksLogDto>
+public class WebhooksLogConverter(TenantUtil tenantUtil) : ITypeConverter<DbWebhooksLog, WebhooksLogDto>
 {
-    public WebhooksLogDto Convert(WebhooksLog source, WebhooksLogDto destination, ResolutionContext context)
+    public WebhooksLogDto Convert(DbWebhooksLog source, WebhooksLogDto destination, ResolutionContext context)
     {
         var result = new WebhooksLogDto
         {

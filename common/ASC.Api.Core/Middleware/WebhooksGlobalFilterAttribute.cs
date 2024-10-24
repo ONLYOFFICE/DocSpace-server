@@ -26,6 +26,10 @@
 
 using System.Collections.Concurrent;
 
+using ASC.Web.Webhooks;
+using ASC.Webhooks.Core.EF.Model;
+using net.openstack.Providers.Rackspace.Objects.Monitoring;
+
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
@@ -67,9 +71,9 @@ public class WebhooksGlobalFilterAttribute(
 
             try
             {
-                var resultContent = Encoding.UTF8.GetString(_stream.ToArray());
+                var requestPayload = Encoding.UTF8.GetString(_stream.ToArray());
 
-                await webhookPublisher.PublishAsync(webhook.Id, resultContent);
+                await webhookPublisher.PublishAsync(webhook.Id, requestPayload);
             }
             catch (Exception e)
             {
@@ -77,6 +81,7 @@ public class WebhooksGlobalFilterAttribute(
             }
         }
     }
+
 
     public void Dispose()
     {
