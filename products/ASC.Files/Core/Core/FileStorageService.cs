@@ -1337,10 +1337,12 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(MessageAction.FileCreated, file, file.Title);
 
-        if (DocSpaceHelper.IsRoom(folder.FolderType))
+        var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+        if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
         {
-            var whoCanRead = await fileSecurity.WhoCanReadAsync(folder, true);
-            await notifyClient.SendDocumentCreatedInRoom(folder, whoCanRead, file, authContext.CurrentAccount.ID);
+            var currentRoom = await folderDao.GetFolderAsync(roomId);
+            var whoCanRead = await fileSecurity.WhoCanReadAsync(currentRoom, true);
+            await notifyClient.SendDocumentCreatedInRoom(currentRoom, whoCanRead, file, authContext.CurrentAccount.ID);
         }
         await fileMarker.MarkAsNewAsync(file);
 
