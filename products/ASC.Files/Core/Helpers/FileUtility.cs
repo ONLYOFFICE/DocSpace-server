@@ -315,7 +315,7 @@ public class FileUtility(
 
     public async Task<bool> CanConvert<T>(File<T> file)
     {
-        var folderDao = daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetCacheFolderDao<T>();
         if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
         {
             return false;
