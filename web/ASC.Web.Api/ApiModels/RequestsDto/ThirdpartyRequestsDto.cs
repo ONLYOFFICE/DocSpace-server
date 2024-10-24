@@ -31,7 +31,14 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class ThirdpartyRequestsDto
 {
+    /// <summary>
+    /// Code
+    /// </summary>
     public string Code { get; set; }
+
+    /// <summary>
+    /// Redirect
+    /// </summary>
     public string Redirect { get; set; }
 }
 

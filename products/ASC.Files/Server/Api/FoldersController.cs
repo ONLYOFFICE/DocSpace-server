@@ -194,6 +194,7 @@ public abstract class FoldersController<T>(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [HttpGet("folder/{folderId}/path")]
     public async IAsyncEnumerable<FileEntryDto> GetFolderPathAsync(FolderIdRequestDto<T> inDto)
     {

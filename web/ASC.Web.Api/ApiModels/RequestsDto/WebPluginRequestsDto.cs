@@ -54,7 +54,7 @@ public class WebPluginRequestsDto
     public string Name { get; set; }
 
     /// <summary>
-    /// 
+    /// Web plugin
     /// </summary>
     [FromBody]
     public WebPluginRequests WebPlugin { get; set; }

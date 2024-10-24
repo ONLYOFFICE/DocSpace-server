@@ -33,6 +33,10 @@ public class SettingsRoom
     /// </summary>
     public bool? Indexing { get; set; }
 
+    /// <summary>
+    /// Deny download
+    /// </summary>
+
     public bool? DenyDownload { get; set; }
 }
 

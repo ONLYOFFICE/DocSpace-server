@@ -667,21 +667,19 @@ public abstract class VirtualRoomsController<T>(
 
         return await _folderDtoHelper.GetAsync(room);
     }
-    
+
     /// <summary>
     /// Returns a list of all the new items from a room with the ID specified in the request.
     /// </summary>
     /// <short>Get new room items</short>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <category>Rooms</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core">List of file entry information</returns>
     /// <path>api/2.0/files/rooms/{id}/news</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<NewItemsDto<FileEntryDto>>))]
     [HttpGet("{id}/news")]
-    public async IAsyncEnumerable<NewItemsDto<FileEntryDto>> GetNewItemsAsync(T id)
+    public async IAsyncEnumerable<NewItemsDto<FileEntryDto>> GetNewItemsAsync(RoomIdRequestDto<T> inDto)
     {
-        var newItems = await _fileStorageService.GetNewRoomFilesAsync(id);
+        var newItems = await _fileStorageService.GetNewRoomFilesAsync(inDto.Id);
         
         foreach (var item in newItems)
         {
@@ -923,7 +921,12 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         await eventBus.PublishAsync(evt);
     }
 
-
+    /// <summary>
+    /// Gets room new items
+    /// </summary>
+    /// <path>api/2.0/files/rooms/news</path>
+    [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "List of new items", typeof(IAsyncEnumerable<NewItemsDto<RoomNewItemsDto>>))]
     [HttpGet("rooms/news")]
     public async IAsyncEnumerable<NewItemsDto<RoomNewItemsDto>> GetRoomsNewItems()
     {

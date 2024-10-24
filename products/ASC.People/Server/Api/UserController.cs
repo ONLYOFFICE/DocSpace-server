@@ -309,6 +309,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users", typeof(EmployeeDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("invite")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
@@ -570,10 +571,10 @@ public class UserController(
     /// <short>
     /// Removes guests from the list and from rooms
     /// </short>
-    /// <category>Guests</category>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for deleting guests</param>
     /// <path>api/2.0/people/guests</path>
-    /// <httpMethod>DELETE</httpMethod>
+    [SwaggerResponse(200, "Request parameters for deleting guests")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [Tags("People / Guests")]
     [HttpDelete("guests")]
     public async Task DeleteGuestsAsync(UpdateMembersRequestDto inDto)
     {
@@ -776,6 +777,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("filter")]
     public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(SimpleByFilterRequestDto inDto)
     {
@@ -872,6 +874,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users", typeof(EmployeeDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("simple/filter")]
     public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(EmployeeStatus? employeeStatus,
         Guid? groupId,
@@ -970,6 +973,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpPut("invite")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -1170,6 +1174,7 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Message text", typeof(object))]
     [SwaggerResponse(400, "Incorrect userId or email")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "User not found")]
     [AllowNotPayment]
     [HttpPost("email")]
@@ -1259,6 +1264,7 @@ public class UserController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
     [SwaggerResponse(200, "Email with the password", typeof(object))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
@@ -1687,6 +1693,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Quota")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(402, "Failed to set quota per user. The entered value is greater than the total DocSpace storage")]
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
@@ -2074,7 +2081,7 @@ public class UserControllerAdditional<T>(
     /// <path>api/2.0/people/room/{id}</path>
     [Tags("People / Search")]
     [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(UsersWithRoomSharedRequestDto<T> inDto)
     {

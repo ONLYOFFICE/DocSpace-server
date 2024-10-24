@@ -46,10 +46,29 @@ public class HideRouteDocumentFilter : IDocumentFilter
     }
 }
 
+public class LowercaseDocumentFilter : IDocumentFilter
+{
+    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    {
+        var paths = new OpenApiPaths();
+        foreach (var (key, value) in swaggerDoc.Paths)
+        {
+            var lowerCaseKey = key.ToLowerInvariant();
+            paths.Add(lowerCaseKey, value);
+        }
+
+        swaggerDoc.Paths = paths;
+    }
+}
+
 public class TagDescriptionsDocumentFilter : IDocumentFilter
 {
     private readonly Dictionary<string, string> _tagDescriptions = new Dictionary<string, string>
     {
+        { "People", "Operations for working with people" },
+        { "Portal", "Operations for working with portal" },
+        { "Settings", "Operations for working with settings" },
+        { "Tariff", "Operations for working with tariff" },
         { "Backup", "Operations for working with backup" },
         { "Files / Files", "Operations for working with files." },
         { "Files / Folders", "Operations for working with folders." },
@@ -71,6 +90,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "People / User data", "Operations for working with user data." },
         { "People / User status", "Operations for working with user status." },
         { "People / User type", "Operations for working with user types." },
+        { "People / Guests", "Operations for workig with gursts" },
         { "Authentication", "Operations for authenticating users." },
         { "Capabilities", "Operations for getting information about portal capabilities." },
         { "Migration", "Operations for performing migration." },
