@@ -1122,4 +1122,7 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Failed to set quota per user. The entered value is greater than the total DocSpace storage.</value>
   </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>The number of admins exceeds the limit: {0} / {1}</value>
+  </data>
 </root>
