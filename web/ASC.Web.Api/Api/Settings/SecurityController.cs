@@ -420,7 +420,13 @@ public class SecurityController(
 
         return mapper.Map<LoginSettings, LoginSettingsDto>(settings);
     }
-    
+
+    /// <summary>
+    ///  Returns the portal login settings.
+    /// </summary>
+    /// <path>api/2.0/settings/security/loginsettings</path>
+    [Tags("Settings / Login settings")]
+    [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
     [HttpDelete("loginSettings")]
     public async Task<LoginSettingsDto> SetDefaultLoginSettingsAsync()
     {

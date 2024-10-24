@@ -204,7 +204,15 @@ public class EmployeeFullDto : EmployeeDto
     /// Current login event ID
     /// </summary>
     public int? LoginEventId { get; set; }
+
+    /// <summary>
+    /// Created by
+    /// </summary>
     public EmployeeDto CreatedBy { get; set; }
+
+    /// <summary>
+    /// Registration date
+    /// </summary>
     public ApiDateTime RegistrationDate { get; set; }
 
 }

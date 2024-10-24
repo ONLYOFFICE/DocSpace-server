@@ -889,37 +889,24 @@ public class UserController(
     [SwaggerResponse(200, "List of users", typeof(EmployeeDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("simple/filter")]
-    public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(EmployeeStatus? employeeStatus,
-        Guid? groupId,
-        EmployeeActivationStatus? activationStatus,
-        EmployeeType? employeeType,
-        [FromQuery] EmployeeType[] employeeTypes,
-        bool? isAdministrator,
-        Payments? payments,
-        AccountLoginType? accountLoginType,
-        QuotaFilter? quotaFilter,
-        bool? withoutGroup,
-        bool? excludeGroup,
-        bool? invitedByMe,
-        Guid? inviterId,
-        Area area = Area.All)
+    public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(SimpleByFilterRequestDto inDto)
     {
         var filter = new UserFilter
         {
-            EmployeeStatus = employeeStatus,
-            GroupId = groupId,
-            ActivationStatus = activationStatus,
-            EmployeeType = employeeType,
-            EmployeeTypes = employeeTypes,
-            IsDocSpaceAdministrator = isAdministrator,
-            Payments = payments,
-            AccountLoginType = accountLoginType,
-            QuotaFilter = quotaFilter,
-            WithoutGroup = withoutGroup,
-            ExcludeGroup = excludeGroup,
-            Area = area,
-            InvitedByMe = invitedByMe,
-            InviterId = inviterId
+            EmployeeStatus = inDto.EmployeeStatus,
+            GroupId = inDto.GroupId,
+            ActivationStatus = inDto.ActivationStatus,
+            EmployeeType = inDto.EmployeeType,
+            EmployeeTypes = inDto.EmployeeTypes,
+            IsDocSpaceAdministrator = inDto.IsAdministrator,
+            Payments = inDto.Payments,
+            AccountLoginType = inDto.AccountLoginType,
+            QuotaFilter = inDto.QuotaFilter,
+            WithoutGroup = inDto.WithoutGroup,
+            ExcludeGroup = inDto.ExcludeGroup,
+            Area = inDto.Area,
+            InvitedByMe = inDto.InvitedByMe,
+            InviterId = inDto.InviterId
         };
         
         var users = GetByFilterAsync(filter);

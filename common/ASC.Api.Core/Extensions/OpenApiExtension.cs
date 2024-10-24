@@ -89,6 +89,18 @@ public static class OpenApiExtension
 
                 c.OperationFilter<AllowAnonymousFilter>();
             }
+
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in assemblies)
+            {
+                var xmlFileName = $"{assembly.GetName().Name}.xml";
+                var xmlPathOther = Path.Combine(AppContext.BaseDirectory, xmlFileName);
+
+                if (File.Exists(xmlPathOther) && xmlPathOther != xmlPath)
+                {
+                    c.IncludeXmlComments(xmlPathOther);
+                }
+            }
         });
     }
 

@@ -69,7 +69,7 @@ public class Programm
         try
         {
             var swaggerJson = await httpClient.GetStringAsync(url);
-            var fileName = $"{name}.{extension}";
+            var fileName = $"{name}.swagger.{extension}";
             File.WriteAllText(Path.Combine(AppContext.BaseDirectory, fileName), swaggerJson);
             Console.WriteLine($"File created successfully {fileName}");
         }
@@ -88,6 +88,7 @@ public class Programm
             "asc.data.backup" => true,
             "asc.people" => true,
             "asc.web.api" => true,
+            "asc.apisystem" => true,
             _ => false
         };
     }
