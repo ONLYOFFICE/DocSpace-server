@@ -1185,6 +1185,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         ace = shares.Where(r => Equals(r.EntryId, file.ParentId) && r.EntryType == FileEntryType.Folder)
                             .OrderBy(r => r, new SubjectComparer<T>(subjects))
                             .ThenBy(r => r.Level)
+                            .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(e.RootFolderType))
                             .FirstOrDefault();
                     }
                 }
@@ -1193,7 +1194,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     ace = shares.Where(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.Folder)
                         .OrderBy(r => r, new SubjectComparer<T>(subjects))
                         .ThenBy(r => r.Level)
-                        .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(e.RootFolderType))
+                        .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(e.RootFolderType))
                         .FirstOrDefault();
                 }
             
@@ -2318,6 +2319,15 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         var result = new List<Guid> { userId };
         
+        result.AddRange((await userManager.GetUserGroupsAsync(userId)).Select(g => g.ID));
+        
+        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId))
+        {
+            result.Add(Constants.GroupAdmin.ID);
+        }
+
+        result.Add(Constants.GroupEveryone.ID);
+        
         var linkId = await externalShare.GetLinkIdAsync();
         if (linkId != Guid.Empty)
         {
@@ -2334,15 +2344,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
             }
         }
-        
-        result.AddRange((await userManager.GetUserGroupsAsync(userId)).Select(g => g.ID));
-        
-        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId))
-        {
-            result.Add(Constants.GroupAdmin.ID);
-        }
-
-        result.Add(Constants.GroupEveryone.ID);
 
         return result;
     }
