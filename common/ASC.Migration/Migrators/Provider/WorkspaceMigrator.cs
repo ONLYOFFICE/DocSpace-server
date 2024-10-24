@@ -380,6 +380,13 @@ public class WorkspaceMigrator : Migrator
                         priv = projectTitle[id].Item2;
                         owner = projectTitle[id].Item3;
                     }
+                    else
+                    {
+                        if (folderTree[id] == 0)
+                        {
+                            continue;
+                        }
+                    }
                 }
                 var folder = new MigrationFolder
                 {
@@ -391,6 +398,36 @@ public class WorkspaceMigrator : Migrator
                     Owner = owner
                 };
                 storage.Folders.Add(folder);
+            }
+        }
+        
+        if (storage.Type == FolderType.BUNCH) 
+        {
+            var remove = new List<string>();
+            foreach (var entry in folderTree)
+            {
+                var id = int.Parse(entry.Key);
+                if (!storage.Folders.Any(f=> f.Id == id))
+                {
+                    remove.Add(entry.Key);
+                }
+            }
+            var removeFolder = new List<MigrationFolder>();
+            foreach(var entry in storage.Folders)
+            {
+                if(entry.ParentId != 0 && !storage.Folders.Any(f=> f.Id == entry.ParentId))
+                {
+                    remove.Add(entry.Id.ToString());
+                    removeFolder.Add(entry);
+                }
+            }
+            foreach (var r in remove)
+            {
+                folderTree.Remove(r);
+            }
+            foreach (var rf in removeFolder)
+            {
+                storage.Folders.Remove(rf);
             }
         }
 
