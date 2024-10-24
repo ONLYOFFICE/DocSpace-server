@@ -159,24 +159,3 @@ public record EntryOperationData : HistoryData
         return FromFolderId.HasValue ? HashCode.Combine(ToFolderId, FromFolderId) : ToFolderId.GetHashCode();
     }
 }
-
-public record UserFileUpdateData : EntryData
-{
-    public string UserName { get; }
-
-    public UserFileUpdateData(string id,
-        string title,
-        int? parentId = null,
-        string parentTitle = null,
-        int? parentType = null,
-        string userName = null) : base(id,
-        title,
-        parentId,
-        parentTitle,
-        parentType)
-    {
-        UserName = userName;
-    }
-    
-    public override string InitiatorName => UserName;
-}

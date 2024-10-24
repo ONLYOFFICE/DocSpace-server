@@ -265,7 +265,7 @@ public class FileUtility(
         return ExtsMediaPreviewed.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
 
-    private bool GetWebViewAccessibility(string fileName)
+    public bool GetWebViewAccessibility(string fileName)
     {
         var ext = GetFileExtension(fileName).ToLower();
         return !ext.Equals(".pdf") && ExtsWebPreviewed.Contains(ext);
