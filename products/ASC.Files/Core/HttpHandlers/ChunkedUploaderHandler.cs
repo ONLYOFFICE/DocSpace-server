@@ -131,12 +131,11 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             if(resumedSession.File.Version <= 1)
                             {
                                 var folderDao = daoFactory.GetFolderDao<T>();
-                                var folder = await folderDao.GetFolderAsync(resumedSession.FolderId);
-
-                                if (DocSpaceHelper.IsRoom(folder.FolderType))
+                                var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                                if (room != null)
                                 {
-                                    var whoCanRead = await fileSecurity.WhoCanReadAsync(folder, true);
-                                    await notifyClient.SendDocumentUploadedToRoom(folder, whoCanRead, resumedSession.File.Title, authContext.CurrentAccount.ID);
+                                    var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
+                                    await notifyClient.SendDocumentUploadedToRoom(room, whoCanRead, resumedSession.File.Title, authContext.CurrentAccount.ID);
                                 }
                             }
 
@@ -189,12 +188,11 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     if (session.File.Version <= 1)
                     {
                         var folderDao = daoFactory.GetFolderDao<T>();
-                        var folder = await folderDao.GetFolderAsync(session.FolderId);
-
-                        if (DocSpaceHelper.IsRoom(folder.FolderType))
+                        var room = await folderDao.GetParentFoldersAsync(session.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                        if (room != null)
                         {
-                            var whoCanRead = await fileSecurity.WhoCanReadAsync(folder, true);
-                            await notifyClient.SendDocumentUploadedToRoom(folder, whoCanRead, session.File.Title, authContext.CurrentAccount.ID);
+                            var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
+                            await notifyClient.SendDocumentUploadedToRoom(room, whoCanRead, session.File.Title, authContext.CurrentAccount.ID);
                         }
                     }
                     await socketManager.CreateFileAsync(session.File);
