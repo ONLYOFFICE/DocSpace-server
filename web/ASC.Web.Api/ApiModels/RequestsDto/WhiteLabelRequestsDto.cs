@@ -34,6 +34,7 @@ public class WhiteLabelRequestsDto
     /// <summary>
     /// Logo text
     /// </summary>
+    [StringLength(30)]
     public string LogoText { get; set; }
 
     /// <summary>

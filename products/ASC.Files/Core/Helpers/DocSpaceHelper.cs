@@ -28,7 +28,7 @@ namespace ASC.Files.Core.Helpers;
 
 public static class DocSpaceHelper
 {
-    private static readonly HashSet<FolderType> _roomTypes =
+    public static readonly HashSet<FolderType> RoomTypes =
     [
         FolderType.CustomRoom,
         FolderType.EditingRoom,
@@ -36,12 +36,10 @@ public static class DocSpaceHelper
         FolderType.PublicRoom,
         FolderType.VirtualDataRoom
     ];
-
-    public static IEnumerable<FolderType> RoomTypes => _roomTypes;
     
     public static bool IsRoom(FolderType folderType)
     {
-        return _roomTypes.Contains(folderType);
+        return RoomTypes.Contains(folderType);
     }
 
     public static HashSet<FolderType> FormsFillingSystemFolders => [
@@ -55,6 +53,7 @@ public static class DocSpaceHelper
     {
         return FormsFillingSystemFolders.Contains(folderType);
     }
+    
     public static bool IsFormsFillingFolder<T>(FileEntry<T> entry)
     {
         return entry is Folder<T> f && (f.FolderType == FolderType.FillingFormsRoom || IsFormsFillingSystemFolder(f.FolderType));
@@ -85,6 +84,27 @@ public static class DocSpaceHelper
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
         };
     }
+    
+    public static IEnumerable<FolderType> MapToFolderTypes(IEnumerable<FilterType> filterTypes)
+    {
+        if (filterTypes == null)
+        {
+            return null;
+        }
+        
+        var result = new HashSet<FolderType>();
+
+        foreach (var type in filterTypes)
+        {
+            var folderType = MapToFolderType(type);
+            if (folderType.HasValue)
+            {
+                result.Add(folderType.Value);
+            }
+        }
+        
+        return result;
+    }
 
     public static FolderType? MapToFolderType(FilterType filterType)
     {
@@ -113,6 +133,11 @@ public static class DocSpaceHelper
 
     public static async Task<bool> IsWatermarkEnabled<T>(FileEntry<T> file, IFolderDao<T> folderDao)
     {
+        if (file.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive))
+        {
+            return false;
+        }
+        
         var room = await GetParentRoom(file, folderDao);
 
         return IsWatermarkEnabled(room);

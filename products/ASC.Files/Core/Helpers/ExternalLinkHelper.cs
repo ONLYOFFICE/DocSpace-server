@@ -29,7 +29,15 @@ using Status = ASC.Files.Core.Security.Status;
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
-public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext securityContext, IDaoFactory daoFactory, UserManager userManager, FileSecurity fileSecurity)
+public class ExternalLinkHelper(
+    ExternalShare externalShare,
+    SecurityContext securityContext,
+    IDaoFactory daoFactory,
+    UserManager userManager,
+    FileSecurity fileSecurity,
+    FileMarker fileMarker,
+    SocketManager socketManager,
+    GlobalFolderHelper globalFolderHelper)
 {
     public async Task<ValidationInfo> ValidateAsync(string key, string password = null, string fileId = null)
     {
@@ -47,8 +55,10 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
         {
             return result;
         }
+        
+        var isAuth = securityContext.IsAuthenticated;
 
-        var status = await externalShare.ValidateRecordAsync(record, password, securityContext.IsAuthenticated);
+        var status = await externalShare.ValidateRecordAsync(record, password, isAuth);
         result.Status = status;
 
         if (status != Status.Ok && status != Status.RequiredPassword)
@@ -89,7 +99,7 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
         result.TenantId = record.TenantId;
         result.LinkId = data.Id;
 
-        if (securityContext.IsAuthenticated)
+        if (isAuth)
         {
             var userId = securityContext.CurrentAccount.ID;
             
@@ -106,9 +116,32 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
                     _ => false
                 });
             }
+
+            if (!result.Shared && result.Status == Status.Ok)
+            {
+                result.Shared = entry switch
+                {
+                    Folder<int> folderInt => await MarkAsync(folderInt, data.Id, userId),
+                    Folder<string> folderString => await MarkAsync(folderString, data.Id, userId),
+                    _ => false
+                };
+            }
+
+            if (!string.IsNullOrEmpty(password) && entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                switch (entry)
+                {
+                    case Folder<int> folderInt: 
+                        await socketManager.UpdateFolderAsync(folderInt, [userId]);
+                        break;
+                    case Folder<string> folderString:
+                        await socketManager.UpdateFolderAsync(folderString, [userId]);
+                        break;
+                }
+            }
         }
 
-        if (securityContext.IsAuthenticated || !string.IsNullOrEmpty(externalShare.GetAnonymousSessionKey()))
+        if (isAuth || !string.IsNullOrEmpty(externalShare.GetAnonymousSessionKey()))
         {
             return result;
         }
@@ -162,5 +195,23 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
         
         info.EntityId = file.Id.ToString();
         info.EntryTitle = file.Title;
+    }
+
+    private async Task<bool> MarkAsync<T>(Folder<T> room, Guid linkId, Guid userId)
+    {
+        var result = await fileMarker.MarkAsRecentByLink(room, linkId);
+        switch (result)
+        {
+            case MarkResult.NotMarked:
+                return false;
+            case MarkResult.MarkExists:
+                return true;
+            case MarkResult.Marked:
+                room.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
+                await socketManager.CreateFolderAsync(room, [userId]);
+                return true;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 }

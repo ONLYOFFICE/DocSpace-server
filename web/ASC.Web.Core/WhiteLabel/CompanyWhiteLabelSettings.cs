@@ -100,7 +100,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
     {
         var settings = CoreSettings.GetSetting("CompanyWhiteLabelSettings");
 
-        var result = string.IsNullOrEmpty(settings) ? new CompanyWhiteLabelSettings(CoreSettings) : JsonConvert.DeserializeObject<CompanyWhiteLabelSettings>(settings);
+        var result = string.IsNullOrEmpty(settings) ? new CompanyWhiteLabelSettings(CoreSettings) : JsonSerializer.Deserialize<CompanyWhiteLabelSettings>(settings);
 
         result.CoreSettings = CoreSettings;
 

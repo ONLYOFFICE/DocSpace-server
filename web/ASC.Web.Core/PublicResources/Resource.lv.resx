@@ -380,7 +380,7 @@
     <value>Administratoru skaits nedrīkst pārsniegt {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Administratoru/prasmīgo lietotāju skaits</value>
+    <value>Administratoru skaits</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automātiska dublēšana un atkopšana</value>
@@ -1046,7 +1046,7 @@
     <value>Paroles maiņas instrukcija ir nosūtīta uz {0} e-pasta adresi.</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Pievienoti administratori/prasmīgi lietotāji:</value>
+    <value>Pievienoti administratori:</value>
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Šī e-pasta adrese ir pievienota lietotājam {0} kā trešās puses pakalpojumu sniedzējam</value>

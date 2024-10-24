@@ -27,6 +27,6 @@
 namespace ASC.Core.Common.Log;
 public static partial class NotifyRequestLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "{name} {action} {recipient}")]
+    [LoggerMessage(LogLevel.Error, "{name} {action} {recipient}")]
     public static partial void ErrorIntercept(this ILogger logger, string name, INotifyAction action, IRecipient recipient, Exception exception);
 }

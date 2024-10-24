@@ -146,6 +146,7 @@ public class UserController(
             user.Sex = inDto.Sex.Value == SexEnum.Male;
         }
         
+        user.Spam = inDto.Spam;
         user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
@@ -194,6 +195,17 @@ public class UserController(
         else
         {
             await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+            var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
+            
+            switch (inDto.Type)
+            {
+                case EmployeeType.Guest:
+                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                    throw new SecurityException(Resource.ErrorAccessDenied);
+            }
         }
 
         inDto.Type = linkData?.EmployeeType ?? inDto.Type;
@@ -252,7 +264,8 @@ public class UserController(
         {
             user.Sex = inDto.Sex.Value == SexEnum.Male;
         }
-        
+
+        user.Spam = inDto.Spam;
         user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
         user.Status = EmployeeStatus.Active;
@@ -682,7 +695,7 @@ public class UserController(
 
         if (isInvite)
         {
-            return await employeeFullDtoHelper.GetSimple(user);
+            return await employeeFullDtoHelper.GetSimple(user, false);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -729,7 +742,7 @@ public class UserController(
 
         if (isInvite)
         {
-            return await employeeFullDtoHelper.GetSimple(user);
+            return await employeeFullDtoHelper.GetSimple(user, false);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -939,6 +952,8 @@ public class UserController(
 
         var userNames = users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList();
         var tenant = await tenantManager.GetCurrentTenantAsync();
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
         
         foreach (var user in users)
         {
@@ -947,7 +962,15 @@ public class UserController(
                 continue;
             }
             
-            var isGuest = await _userManager.IsGuestAsync(user);
+            var userType = await _userManager.GetUserTypeAsync(user.Id);
+            switch (userType)
+            {
+                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                    continue;
+            }
+            
+            var isGuest = userType == EmployeeType.Guest;
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
@@ -1306,7 +1329,11 @@ public class UserController(
     public async IAsyncEnumerable<EmployeeFullDto> UpdateEmployeeActivationStatus(UpdateMemberActivationStatusRequestDto inDto)
     {
         await _apiContext.AuthByClaimAsync();
-
+        
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
+        
         foreach (var id in inDto.UpdateMembers.UserIds.Where(userId => !_userManager.IsSystemUser(userId)))
         {
             await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(id), Constants.Action_EditUser);
@@ -1315,7 +1342,15 @@ public class UserController(
             {
                 continue;
             }
+            var userType = await _userManager.GetUserTypeAsync(u.Id); 
 
+            switch (userType)
+            {
+                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                    continue;
+            }
+            
             u.ActivationStatus = inDto.ActivationStatus;
             await _userManager.UpdateUserInfoAsync(u);
 
@@ -1390,7 +1425,7 @@ public class UserController(
 
         var changed = false;
         var self = securityContext.CurrentAccount.ID.Equals(user.Id);
-        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
+        var currentUserIsDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
         
         //Update it
         if (self)
@@ -1414,7 +1449,7 @@ public class UserController(
                 user.LastName = lastName;
                 user.Location = inDto.UpdateMember.Location ?? user.Location;
 
-                if (isDocSpaceAdmin)
+                if (currentUserIsDocSpaceAdmin)
                 {
                     user.Title = inDto.UpdateMember.Title ?? user.Title;
                 }
@@ -1429,6 +1464,7 @@ public class UserController(
                 _ => user.Sex
             };
 
+            user.Spam = inDto.UpdateMember.Spam;
 
             user.BirthDate = inDto.UpdateMember.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.UpdateMember.Birthday) : user.BirthDate;
 
@@ -1460,10 +1496,12 @@ public class UserController(
         }
         
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var owner = user.IsOwner(tenant);
+        var userIsOwner = user.IsOwner(tenant);
+        var currentUserIsOwner = securityContext.CurrentAccount.ID.IsOwner(tenant);
+        var userType = await _userManager.GetUserTypeAsync(user.Id); 
         var statusChanged = false;
         
-        if ((self || isDocSpaceAdmin && !owner) && inDto.UpdateMember.Disable.HasValue)
+        if ((self || currentUserIsOwner || currentUserIsDocSpaceAdmin && !userIsOwner && userType != EmployeeType.DocSpaceAdmin) && inDto.UpdateMember.Disable.HasValue)
         {
             user.Status = inDto.UpdateMember.Disable.Value ? EmployeeStatus.Terminated : EmployeeStatus.Active;
             user.TerminatedDate = inDto.UpdateMember.Disable.Value ? DateTime.UtcNow : null;
@@ -1473,7 +1511,7 @@ public class UserController(
 
 
         // change user type
-        var canBeGuestFlag = !owner && 
+        var canBeGuestFlag = !userIsOwner && 
                              !await _userManager.IsDocSpaceAdminAsync(user) && 
                              (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 && 
                              !self;
@@ -1964,18 +2002,18 @@ public class UserController(
         {
             switch (eType)
             {
-                case EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when filter.Area is not Area.Guests:
                     iGroups.Add([Constants.GroupAdmin.ID]);
                     break;
-                case EmployeeType.RoomAdmin:
+                case EmployeeType.RoomAdmin when filter.Area is not Area.Guests:
                     eGroups.Add(Constants.GroupGuest.ID);
                     eGroups.Add(Constants.GroupAdmin.ID);
                     eGroups.Add(Constants.GroupUser.ID);
                     break;
-                case EmployeeType.User:
+                case EmployeeType.User when filter.Area is not Area.Guests:
                     iGroups.Add([Constants.GroupUser.ID]);
                     break;
-                case EmployeeType.Guest:
+                case EmployeeType.Guest when filter.Area is not Area.People:
                     iGroups.Add([Constants.GroupGuest.ID]);
                     break;
             }

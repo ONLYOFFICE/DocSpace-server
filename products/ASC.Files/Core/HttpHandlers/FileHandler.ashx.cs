@@ -335,16 +335,18 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         var ext = FileUtility.GetFileExtension(file.Title);
 
                         var outType = (context.Request.Query[FilesLinkUtility.OutType].FirstOrDefault() ?? "").Trim();
-                        var extsConvertibleAsync = await fileUtility.GetExtsConvertibleAsync();
-                        if (!string.IsNullOrEmpty(outType) && extsConvertibleAsync.TryGetValue(ext, out var value) && value.Contains(outType))
+                        var extsConvertible = await fileUtility.GetExtsConvertibleAsync();
+                        var convertible = extsConvertible.TryGetValue(ext, out var value);
+
+                        if (!string.IsNullOrEmpty(outType) && convertible && value.Contains(outType))
                         {
                             ext = outType;
                         }
 
-                        if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)))
+                        if (convertible)
                         {
                             var folderDao = daoFactory.GetFolderDao<T>();
-                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao) && value.Contains(FileUtility.WatermarkedDocumentExt))
                             {
                                 ext = FileUtility.WatermarkedDocumentExt;
                             }
@@ -479,7 +481,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var linkId = await externalShare.GetLinkIdAsync();
             if (linkId != Guid.Empty)
             {
-                await entryManager.MarkAsRecentByLink(file, linkId);
+                await entryManager.MarkFileAsRecentByLink(file, linkId);
             }
         }
     }

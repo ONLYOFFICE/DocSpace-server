@@ -166,6 +166,10 @@ public class MemberRequestDto : MemberBaseRequestDto
     /// Target
     /// </summary>
     public Guid Target { get; set; }
+
+    /// <summary>Spam</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? Spam { get; set; }
 }
 
 /// <summary>

@@ -76,6 +76,9 @@ public record HistoryEntry
 [JsonDerivedType(typeof(TagData))]
 [JsonDerivedType(typeof(UserHistoryData))]
 [JsonDerivedType(typeof(UserFileUpdateData))]
+[JsonDerivedType(typeof(FileData))]
+[JsonDerivedType(typeof(FileOperationData))]
+[JsonDerivedType(typeof(FileRenameData))]
 public abstract record HistoryData
 {
     public virtual int GetId() => 0;

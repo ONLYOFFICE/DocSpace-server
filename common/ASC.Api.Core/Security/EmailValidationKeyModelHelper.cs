@@ -147,11 +147,6 @@ public class EmailValidationKeyModelHelper(
 
             case ConfirmType.EmailChange:
                 var userId = uiD.GetValueOrDefault();
-                if (authContext.CurrentAccount.ID != userId)
-                {
-                    checkKeyResult = ValidationResult.Invalid;
-                    break;
-                }
                 var emailChangeEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentEmailChangeInstructions, entry: EntryType.User, target: MessageTarget.Create(userId).ToString(), limit: 1)).FirstOrDefault();
                 var postfix = emailChangeEvent == null ? userId.ToString() : tenantUtil.DateTimeToUtc(emailChangeEvent.Date).ToString("s", CultureInfo.InvariantCulture);
 
@@ -198,7 +193,7 @@ public class EmailValidationKeyModelHelper(
             case ConfirmType.ProfileRemove:
                 // validate UiD
                 userInfo = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
-                if (userInfo == null || Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD)
+                if (userInfo == null || Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && (authContext.CurrentAccount.ID != uiD || userInfo.Email != email))
                 {
                     return ValidationResult.Invalid;
                 }

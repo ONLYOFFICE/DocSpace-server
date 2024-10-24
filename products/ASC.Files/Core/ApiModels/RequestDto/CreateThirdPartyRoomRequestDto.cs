@@ -75,6 +75,11 @@ public class CreateThirdPartyRoom
     /// Tags
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
+
+    /// <summary>
+    /// Logo
+    /// </summary>
+    public LogoRequest Logo { get; set; }
 }
 
 

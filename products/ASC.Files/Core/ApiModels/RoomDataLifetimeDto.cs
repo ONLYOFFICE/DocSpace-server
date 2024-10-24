@@ -40,6 +40,7 @@ public class RoomDataLifetimeDto : IMapFrom<RoomDataLifetime>
     /// <summary>
     /// Specifies time period type
     /// </summary>
+    [EnumDataType(typeof(RoomDataLifetimePeriod))]
     public RoomDataLifetimePeriod Period { get; set; }
 
     /// <summary>

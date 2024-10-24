@@ -180,8 +180,10 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     /// Creation date
     /// </summary>
     public DateTime CreateDate { get; set; }
-    
+
     public Guid? CreatedBy { get; set; }
+
+    public bool? Spam { get; set; }
 
     public override string ToString()
     {

@@ -27,6 +27,6 @@
 namespace ASC.AuditTrail.Log;
 internal static partial class AuditActionMapperLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "There is no action text for \"{action}\" type of event")]
+    [LoggerMessage(LogLevel.Error, "There is no action text for \"{action}\" type of event")]
     public static partial void ErrorThereIsNoActionText(this ILogger<AuditActionMapper> logger, MessageMaps action);
 }

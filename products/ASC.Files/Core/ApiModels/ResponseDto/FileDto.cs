@@ -167,11 +167,6 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
 
     /// <summary>
-    /// Request token
-    /// </summary>
-    public string RequestToken { get; set; }
-
-    /// <summary>
     /// Last opened
     /// </summary>
     public ApiDateTime LastOpened { get; set; }

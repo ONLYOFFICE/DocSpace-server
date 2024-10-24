@@ -1030,7 +1030,7 @@
     <value>Broj admina ne bi trebalo da prekorači {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Broj admina/naprednih korisnika</value>
+    <value>Broj admina</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatska rezervna kopija i oporavak</value>
@@ -1096,7 +1096,7 @@
     <value>Šta je novo</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administratori/Napredni korisnici dodati:</value>
+    <value>Administratori dodati:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Limit za pozivnicu je prekoračen</value>

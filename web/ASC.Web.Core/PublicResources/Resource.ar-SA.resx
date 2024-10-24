@@ -976,7 +976,7 @@
     <value>لا ينبغي أن يتجاوز عدد المسؤولين {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>عدد الإداريين/مستخدمي الطاقة</value>
+    <value>عدد الإداريين</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>النسخ الاحتياطي التلقائي والاسترداد</value>
@@ -1096,7 +1096,7 @@
     <value>تم تجاوز حصة مساحة المستخدم</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>تمت إضافة المشرفين/المستخدمين المتميزين:</value>
+    <value>تمت إضافة المشرفين:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>لقد تجاوزت حد الدعوات المسموح به</value>
@@ -1115,5 +1115,11 @@
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>{0} لكل مسؤول/مستخدم مميز إمكانية إضافة مساحة عند الطلب</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>فشل في تحديد حصة لكل غرفة. القيمة المدخلة تتجاوز السعة الإجمالية لـ "DocSpace".</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>فشل في تحديد حصة لكل مستخدم. القيمة المدخلة تتجاوز السعة الإجمالية لـ "DocSpace".</value>
   </data>
 </root>

@@ -75,7 +75,7 @@ public class VirtualRoomsInternalController(
     {
         var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
 
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, inDto.Tags);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, inDto.Tags, inDto.Logo);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -127,7 +127,7 @@ public class VirtualRoomsThirdPartyController(
     [HttpPost("thirdparty/{id}")]
     public async Task<FolderDto<string>> CreateRoomThirdPartyAsync(CreateThirdPartyRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Room.Title, inDto.Room.RoomType, inDto.Id, inDto.Room.Private, inDto.Room.Indexing, inDto.Room.CreateAsNewFolder, inDto.Room.DenyDownload, inDto.Room.Color, inDto.Room.Cover, inDto.Room.Tags);
+        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Room.Title, inDto.Room.RoomType, inDto.Id, inDto.Room.Private, inDto.Room.Indexing, inDto.Room.CreateAsNewFolder, inDto.Room.DenyDownload, inDto.Room.Color, inDto.Room.Cover, inDto.Room.Tags, inDto.Room.Logo);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -707,7 +707,8 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         UserManager userManager,
         IServiceProvider serviceProvider,
         ApiDateTimeHelper apiDateTimeHelper,
-        RoomNewItemsDtoHelper roomNewItemsDtoHelper)
+        RoomNewItemsDtoHelper roomNewItemsDtoHelper,
+        IHttpContextAccessor httpContextAccessor)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -719,21 +720,13 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [SwaggerResponse(200, "Returns the contents of the \"Rooms\" section", typeof(FolderContentDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to view the room content")]
     [HttpGet("rooms")]
-    public async Task<FolderContentDto<int>> GetRoomsFolderAsync([FromQuery] RoomContentRequestDto inDto)
+    public async Task<FolderContentDto<int>> GetRoomsFolderAsync(RoomContentRequestDto inDto)
     {
         var parentId = inDto.SearchArea != SearchArea.Archive 
             ? await globalFolderHelper.GetFolderVirtualRooms()
             : await globalFolderHelper.GetFolderArchive();
 
-        var filter = inDto.Type switch
-        {
-            RoomType.FillingFormsRoom => FilterType.FillingFormsRooms,
-            RoomType.EditingRoom => FilterType.EditingRooms,
-            RoomType.CustomRoom => FilterType.CustomRooms,
-            RoomType.PublicRoom => FilterType.PublicRooms,
-            RoomType.VirtualDataRoom => FilterType.VirtualDataRooms,
-            _ => FilterType.None
-        };
+        var filter = RoomTypeExtensions.MapToFilterType(inDto.Type);
 
         var tagNames = !string.IsNullOrEmpty(inDto.Tags) 
             ? JsonSerializer.Deserialize<IEnumerable<string>>(inDto.Tags) 
@@ -749,9 +742,27 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var count = Convert.ToInt32(apiContext.Count);
         var filterValue = apiContext.FilterValue;
 
-        var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, inDto.SubjectId, filterValue,
-            [], inDto.SearchInContent ?? false, inDto.WithSubfolders ?? false, orderBy, inDto.SearchArea ?? SearchArea.Active, default, inDto.WithoutTags ?? false, tagNames, inDto.ExcludeSubject ?? false,
-            inDto.Provider ?? ProviderFilter.None, inDto.SubjectFilter ?? SubjectFilter.Owner, quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All, storageFilter: inDto.StorageFilter ?? StorageFilter.None);
+        var content = await fileStorageService.GetFolderItemsAsync(
+            parentId,
+            startIndex,
+            count,
+            filter,
+            false,
+            inDto.SubjectId,
+            filterValue,
+            [],
+            inDto.SearchInContent ?? false,
+            inDto.WithSubfolders ?? false,
+            orderBy,
+            inDto.SearchArea ?? SearchArea.Active,
+            default,
+            inDto.WithoutTags ?? false,
+            tagNames,
+            inDto.ExcludeSubject ?? false,
+            inDto.Provider ?? ProviderFilter.None,
+            inDto.SubjectFilter ?? SubjectFilter.Owner,
+            quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
+            storageFilter: inDto.StorageFilter ?? StorageFilter.None);
 
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
 
@@ -769,7 +780,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpPost("tags")]
     public async Task<object> CreateTagAsync(CreateTagRequestDto inDto)
     {
-        return await customTagsService.CreateTagAsync(inDto.Name);
+        return (await customTagsService.CreateTagAsync(inDto.Name)).Name;
     }
 
     /// <summary>
@@ -870,17 +881,20 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var userId = authContext.CurrentAccount.ID;
 
-        var task = serviceProvider.GetService<DocumentBuilderTask<int>>();
+        var task = serviceProvider.GetService<RoomIndexExportTask>();
 
         var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
 
         var baseUri = commonLinkUtility.ServerRootPath;
 
-        task.Init(baseUri, tenantId, userId, null, null, null);
+        task.Init(baseUri, tenantId, userId, null);
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
-
-        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, inDto.Id, baseUri);
+        
+        var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, inDto.Id, baseUri, headers: headers != null 
+            ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
+            : []);
 
         await eventBus.PublishAsync(evt);
 

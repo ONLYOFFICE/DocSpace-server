@@ -28,21 +28,21 @@ namespace ASC.Core.Common.Log;
 internal static partial class RegisterInstanceWorkerServiceLogger
 {
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "DbUpdateConcurrencyException: then updating {instanceName} at {time} time.")]
+    [LoggerMessage(LogLevel.Trace, "DbUpdateConcurrencyException: then updating {instanceName} at {time} time.")]
     public static partial void TraceDbUpdateConcurrencyException(this ILogger logger, string instanceName, DateTimeOffset time);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Worker running at: {time}")]
+    [LoggerMessage(LogLevel.Trace, "Worker running at: {time}")]
     public static partial void TraceWorkingRunnging(this ILogger logger, DateTimeOffset time);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Instance Worker running in singletone mode")]
+    [LoggerMessage(LogLevel.Information, "Instance Worker running in singletone mode")]
     public static partial void InformationWorkerSingletone(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "UnRegister Instance {instanceName} running at: {time}.")]
+    [LoggerMessage(LogLevel.Information, "UnRegister Instance {instanceName} running at: {time}.")]
     public static partial void InformationUnRegister(this ILogger logger, string instanceName, DateTimeOffset time);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Unable to UnRegister Instance {instanceName} running at: {time}.")]
+    [LoggerMessage(LogLevel.Error, "Unable to UnRegister Instance {instanceName} running at: {time}.")]
     public static partial void ErrorUnableToUnRegister(this ILogger logger, string instanceName, DateTimeOffset time);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Critical error forced worker to shutdown")]
+    [LoggerMessage(LogLevel.Error, "Critical error forced worker to shutdown")]
     public static partial void CriticalError(this ILogger logger, Exception exception);
 }

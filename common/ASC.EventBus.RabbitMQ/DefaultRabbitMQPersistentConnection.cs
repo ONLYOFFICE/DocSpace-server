@@ -64,9 +64,9 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         try
         {
-//            _connection.ConnectionShutdown -= OnConnectionShutdown;
-//            _connection.CallbackException -= OnCallbackException;
-//            _connection.ConnectionBlocked -= OnConnectionBlocked;
+            _connection.ConnectionShutdownAsync -= OnConnectionShutdownAsync;
+            _connection.CallbackExceptionAsync -= OnCallbackExceptionAsync;
+            _connection.ConnectionBlockedAsync -= OnConnectionBlockedAsync;
 
             _connection.Dispose();
         }
@@ -94,13 +94,13 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         var policy = Policy.Handle<SocketException>()
             .Or<BrokerUnreachableException>()
-            .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+            .WaitAndRetryAsync(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
             {
                 _logger.WarningRabbitMQCouldNotConnect(time.TotalSeconds, ex);
             }
         );
 
-        await policy.Execute(async () =>
+        await policy.ExecuteAsync(async () =>
         {
             _connection = await _connectionFactory
                     .CreateConnectionAsync();

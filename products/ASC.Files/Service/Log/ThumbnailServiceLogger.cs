@@ -27,9 +27,9 @@
 namespace ASC.Files.Service.Log;
 internal static partial class ThumbnailServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "Thumbnail Service running.")]
+    [LoggerMessage(LogLevel.Information, "Thumbnail Service running.")]
     public static partial void InformationThumbnailServiceRunning(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Thumbnail Service is stopping.")]
+    [LoggerMessage(LogLevel.Information, "Thumbnail Service is stopping.")]
     public static partial void InformationThumbnailServiceStopping(this ILogger logger);
 }

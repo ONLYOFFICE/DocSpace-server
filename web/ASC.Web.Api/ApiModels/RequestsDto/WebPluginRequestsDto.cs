@@ -39,6 +39,7 @@ public class WebPluginRequests
     /// <summary>
     /// Settings
     /// </summary>
+    [StringLength(255)]
     public string Settings { get; set; }
 }
 

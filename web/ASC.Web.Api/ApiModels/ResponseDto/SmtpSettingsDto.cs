@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
@@ -62,6 +60,7 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// Credentials username
     /// </summary>
     [SwaggerSchemaCustom(Example = "notify@example.com")]
+    [StringLength(255)]
     public string CredentialsUserName { get; set; }
 
     /// <summary>

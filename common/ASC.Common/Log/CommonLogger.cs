@@ -27,27 +27,27 @@
 namespace ASC.Common.Log;
 public static partial class CommonLogger
 {
-    [LoggerMessage(Level = LogLevel.Error)]
+    [LoggerMessage(LogLevel.Error)]
     public static partial void ErrorWithException(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error)]
+    [LoggerMessage(LogLevel.Error)]
     public static partial void ErrorWithException(this ILogger logger, string message, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "{message}")]
+    [LoggerMessage(LogLevel.Error, "{message}")]
     public static partial void Error(this ILogger logger, string message);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "{message}")]
+    [LoggerMessage(LogLevel.Debug, "{message}")]
     public static partial void Debug(this ILogger logger, string message);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "{message}")]
+    [LoggerMessage(LogLevel.Information, "{message}")]
     public static partial void Information(this ILogger logger, string message);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "{message}")]
+    [LoggerMessage(LogLevel.Warning, "{message}")]
     public static partial void Warning(this ILogger logger, string message);
 
-    [LoggerMessage(Level = LogLevel.Warning)]
+    [LoggerMessage(LogLevel.Warning)]
     public static partial void WarningWithException(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Warning)]
+    [LoggerMessage(LogLevel.Warning)]
     public static partial void WarningWithException(this ILogger logger, string message, Exception exception);
 }

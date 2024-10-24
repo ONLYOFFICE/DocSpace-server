@@ -261,7 +261,10 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var title = file.Title;
 
         var fileExt = FileUtility.GetFileExtension(title);
-        if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao) && (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(fileExt))
+        var extsConvertible = await fileUtility.GetExtsConvertibleAsync();
+        var convertible = extsConvertible.TryGetValue(fileExt, out var convertibleToExt);
+
+        if (convertible && convertibleToExt.Contains(FileUtility.WatermarkedDocumentExt) && await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
         {
             _files[file.Id] = FileUtility.WatermarkedDocumentExt;
         }
@@ -407,7 +410,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                     if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
                     {
-                        newTitle = FileUtility.ReplaceFileExtension(path, convertToExt);
+                        var sourceFileName = Path.GetFileName(path);
+                        var targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
+                        newTitle = path.Replace(sourceFileName, targetFileName);
                     }
                 }
 

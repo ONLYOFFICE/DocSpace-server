@@ -189,8 +189,9 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         canEdit = false;
                         canFill = true;
                         isSubmitOnly = true;
-                        inDto.EditorType = EditorType.Embedded;
-                        fillingSessionId = Guid.NewGuid().ToString("N");
+                        inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
+
+                        fillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
                         break;
                     }
 
@@ -219,7 +220,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
                                 canEdit = false;
                                 canFill = true;
-                                inDto.EditorType = HttpContext.Request.MobileApp() ? inDto.EditorType : EditorType.Embedded;
+                                inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
 
                                 file = formDraft;
                                 fillingSessionId = string.Format("{0}_{1}", formDraft.Id, securityContext.CurrentAccount.ID);
@@ -237,19 +238,19 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 case FolderType.FormFillingFolderInProgress:
                     canEdit = false;
                     canFill = true;
-                    inDto.EditorType = HttpContext.Request.MobileApp() ? inDto.EditorType : EditorType.Embedded;
+                    inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
                     fillingSessionId = string.Format("{0}_{1}", file.Id, securityContext.CurrentAccount.ID);
                     break;
 
                 case FolderType.FormFillingFolderDone:
-                    inDto.EditorType = HttpContext.Request.MobileApp() ? inDto.EditorType : EditorType.Embedded;
+                    inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
                     break;
 
                 default:
-                    canEdit = true;
-                    canFill = false;
+                    canEdit = !inDto.Fill;
+                    canFill = inDto.Fill;
                     break;
             }
         }
@@ -285,7 +286,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
             if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
             {
-                await entryManager.MarkAsRecentByLink(file, linkId);
+                await entryManager.MarkFileAsRecentByLink(file, linkId);
             }
             else
             {

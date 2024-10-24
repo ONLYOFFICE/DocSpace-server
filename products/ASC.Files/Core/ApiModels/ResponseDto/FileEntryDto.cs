@@ -181,6 +181,7 @@ public abstract class FileEntryDto<T> : FileEntryDto
     /// Security
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
+    public string RequestToken { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)

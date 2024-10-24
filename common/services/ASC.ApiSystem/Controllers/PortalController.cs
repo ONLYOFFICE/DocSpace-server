@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 using ASC.Web.Api.Core;
 
 namespace ASC.ApiSystem.Controllers;
@@ -95,7 +97,7 @@ public class PortalController(
 
         if (!ModelState.IsValid)
         {
-            var message = new JArray();
+            List<string> message = new();
 
             foreach (var k in ModelState.Keys)
             {
@@ -105,7 +107,7 @@ public class PortalController(
             return BadRequest(new
             {
                 error = "params",
-                message
+                message = JsonSerializer.Serialize(message.ToArray())
             });
         }
 
@@ -482,7 +484,9 @@ public class PortalController(
                 {
                     var quotaUsage = await quotaUsageManager.Get(t);
                     var owner = owners.FirstOrDefault(o => o.Id == t.OwnerId);
-                    tenantsWrapper.Add(commonMethods.ToTenantWrapper(t, quotaUsage, owner));
+                    var wizardSettings = await settingsManager.LoadAsync<WizardSettings>(t.Id);
+
+                    tenantsWrapper.Add(commonMethods.ToTenantWrapper(t, quotaUsage, owner, wizardSettings));
                 }
                 else
                 {

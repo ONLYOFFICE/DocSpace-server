@@ -394,6 +394,8 @@ public enum MessageAction
 
     [SwaggerEnum("Documents keep new file name settings updated")]
     DocumentsKeepNewFileNameSettingsUpdated = 5083,
+
+    [SwaggerEnum("Documents display file extension updated")]
     DocumentsDisplayFileExtensionUpdated = 5101,
 
     [SwaggerEnum("File converted")]
@@ -489,11 +491,17 @@ public enum MessageAction
     [SwaggerEnum("Room logo deleted")]
     RoomLogoDeleted = 5081,
 
+    [SwaggerEnum("Room color changed")]
     RoomColorChanged = 5102,
-    RoomCoverChanged = 5103, 
-    
+
+    [SwaggerEnum("Room cover changed")]
+    RoomCoverChanged = 5103,
+
+    [SwaggerEnum("Room indexing changed")]
     RoomIndexingChanged = 5104,
-    RoomDenyDownloadChanged = 5105,//last
+
+    [SwaggerEnum("Room deny download changed")]
+    RoomDenyDownloadChanged = 5105,
 
     [SwaggerEnum("Room external link created")]
     RoomExternalLinkCreated = 5088,
@@ -518,6 +526,9 @@ public enum MessageAction
 
     [SwaggerEnum("File external link deleted")]
     FileExternalLinkDeleted = 5093,
+
+    [SwaggerEnum("Room index export saved")]
+    RoomIndexExportSaved = 5106, //last
 
     #endregion
 

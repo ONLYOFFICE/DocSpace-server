@@ -88,7 +88,6 @@ global using Microsoft.Net.Http.Headers;
 
 global using NetEscapades.EnumGenerators;
 
-global using Newtonsoft.Json;
 
 global using NVelocity;
 global using NVelocity.App;

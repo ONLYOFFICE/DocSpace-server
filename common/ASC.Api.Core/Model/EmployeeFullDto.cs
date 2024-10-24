@@ -262,7 +262,7 @@ public class EmployeeFullDtoHelper(
         return lambda;
     }
     
-    public async Task<EmployeeFullDto> GetSimple(UserInfo userInfo)
+    public async Task<EmployeeFullDto> GetSimple(UserInfo userInfo, bool withGroups = true)
     {
         var result = new EmployeeFullDto
         {
@@ -270,7 +270,10 @@ public class EmployeeFullDtoHelper(
             LastName = userInfo.LastName
         };
 
-        await FillGroupsAsync(result, userInfo);
+        if (withGroups)
+        {
+            await FillGroupsAsync(result, userInfo);
+        }
 
         var photoData = await _userPhotoManager.GetUserPhotoData(userInfo.Id, UserPhotoManager.BigFotoSize);
 

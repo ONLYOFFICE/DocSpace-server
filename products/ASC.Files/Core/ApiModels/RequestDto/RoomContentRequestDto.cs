@@ -31,60 +31,72 @@ public class RoomContentRequestDto
     /// <summary>
     /// Filter by room type
     /// </summary>
-    public RoomType? Type { get; set; }
+    [FromQuery(Name = "type")]
+    public IEnumerable<RoomType> Type { get; set; }
 
     /// <summary>
     /// Filter by user ID
     /// </summary>
+    [FromQuery(Name = "subjectId")]
     public string SubjectId { get; set; }
 
     /// <summary>
     /// Specifies whether to search within the section contents or not
     /// </summary>
+    [FromQuery(Name = "searchInContent")]
     public bool? SearchInContent { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
+    [FromQuery(Name = "withSubfolders")]
     public bool? WithSubfolders { get; set; }
 
     /// <summary>
     /// Room search area (Active, Archive, Any)
     /// </summary>
+    [FromQuery(Name = "searchArea")]
     public SearchArea? SearchArea { get; set; }
 
     /// <summary>
     /// Specifies whether to search by tags or not
     /// </summary>
+    [FromQuery(Name = "withoutTags")]
     public bool? WithoutTags { get; set; }
 
     /// <summary>
     /// Tags in the serialized format
     /// </summary>
+    [FromQuery(Name = "tags")]
     public string Tags { get; set; }
 
     /// <summary>
     /// Specifies whether to exclude a subject or not
     /// </summary>
+    [FromQuery(Name = "excludeSubject")]
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
     /// Filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, WebDav)
     /// </summary>
+    [FromQuery(Name = "provider")]
     public ProviderFilter? Provider { get; set; }
 
     /// <summary>
     /// Filter by subject (Owner - 1, Member - 1)
     /// </summary>
+    [FromQuery(Name = "subjectFilter")]
     public SubjectFilter? SubjectFilter { get; set; }
 
     /// <summary>
     /// Filter by quota (Default - 1, Custom - 2)
     /// </summary>
+    [FromQuery(Name = "quotaFilter")]
     public QuotaFilter? QuotaFilter { get; set; }
 
     /// <summary>
     /// Filter by storage (Internal - 1, ThirdParty - 2)
     /// </summary>
+    [FromQuery(Name = "storageFilter")]
     public StorageFilter? StorageFilter { get; set; }
 }

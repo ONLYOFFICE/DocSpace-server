@@ -47,6 +47,27 @@ public enum RoomType
     VirtualDataRoom = 8
 }
 
+public static class RoomTypeExtensions
+{
+    public static IEnumerable<FilterType> MapToFilterType(IEnumerable<RoomType> types)
+    {
+        if (types == null || !types.Any())
+        {
+            return null;
+        }
+        
+        return types.Select(x => x switch
+        {
+            RoomType.FillingFormsRoom => FilterType.FillingFormsRooms,
+            RoomType.EditingRoom => FilterType.EditingRooms,
+            RoomType.CustomRoom => FilterType.CustomRooms,
+            RoomType.PublicRoom => FilterType.PublicRooms,
+            RoomType.VirtualDataRoom => FilterType.VirtualDataRooms,
+            _ => FilterType.CustomRooms
+        }).ToHashSet();
+    }
+}
+
 /// <summary>
 /// Request parameters for creating a room
 /// </summary>

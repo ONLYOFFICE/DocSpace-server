@@ -1089,8 +1089,8 @@ internal class FileDao(
                 {
                     var id = fileId.ToString();
                     
-                    await filesDbContext.DeleteTagLinksByTypeAsync(tenantId, id, TagType.RecentByLink);
-                    await filesDbContext.DeleteTagsAsync( tenantId);
+                    await filesDbContext.DeleteTagLinksByTypeAsync(tenantId, id, FileEntryType.File, TagType.RecentByLink);
+                    await filesDbContext.DeleteTagsAsync(tenantId);
                     await filesDbContext.DeleteLinksAsync(tenantId, id, FileEntryType.File);
                 }
 

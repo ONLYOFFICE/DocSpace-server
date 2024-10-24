@@ -141,7 +141,11 @@ public class WatermarkManager
 
     public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
     {
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType) || room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
+        if (room == null || 
+            !DocSpaceHelper.IsRoom(room.FolderType) ||
+            room.ProviderEntry ||
+            room.RootFolderType == FolderType.Archive || 
+            !await _fileSecurity.CanEditRoomAsync(room))
         {
             return null;
         }

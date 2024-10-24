@@ -65,7 +65,7 @@ public class DocumentBuilderTaskManager
         }
     }
 
-    public async Task<DistributedTaskProgress> StartTask<T>(DocumentBuilderTask<T> newTask, bool enqueueTask = true)
+    public async Task<DistributedTaskProgress> StartTask<T, TData>(DocumentBuilderTask<T, TData> newTask, bool enqueueTask = true)
     {
         try
         {

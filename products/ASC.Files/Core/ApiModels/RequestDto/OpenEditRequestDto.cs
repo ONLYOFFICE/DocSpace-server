@@ -59,4 +59,10 @@ public class OpenEditRequestDto<T>
     /// </summary>
     [FromQuery(Name = "edit")]
     public bool Edit { get; set; }
+
+    /// <summary>
+    /// Fill
+    /// </summary>
+    [FromQuery(Name = "fill")]
+    public bool Fill { get; set; }
 }

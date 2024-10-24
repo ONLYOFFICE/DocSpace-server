@@ -461,11 +461,15 @@ public class FileSecurity(IDaoFactory daoFactory,
     private async Task<IEnumerable<Guid>> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action, bool includeLinks = false)
     {
         var shares = await GetSharesAsync(entry);
-
+        
         if (!includeLinks)
         {
             shares = shares.Where(r => !r.IsLink);
         }
+        
+        var linksUsersTask = includeLinks ? 
+            GetLinksUsersAsync(shares.Where(r => r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)) 
+            : Task.FromResult(Enumerable.Empty<Guid>());
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var copyShares = shares.GroupBy(k => k.Subject).ToDictionary(k => k.Key);
@@ -644,7 +648,41 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
+        var linkUsers = await linksUsersTask;
+        if (linkUsers.Any())
+        {
+            result.AddRange(linkUsers);
+        }
+
         return result;
+
+        async Task<IEnumerable<Guid>> GetLinksUsersAsync(IEnumerable<FileShareRecord<T>> linksRecords)
+        {
+            if (!linksRecords.Any())
+            {
+                return [];
+            }
+            
+            var tagDao = daoFactory.GetTagDao<T>();
+            var users = new List<Guid>();
+
+            foreach (var record in linksRecords)
+            {
+                var entryId = record.EntryId;
+                var entryType = record.EntryType;
+
+                if (entry.FileEntryType == FileEntryType.Folder)
+                {
+                    entryId = record.ParentId;
+                }
+
+                users.AddRange(await tagDao.GetTagsAsync(entryId, entryType, TagType.RecentByLink, null, record.Subject.ToString())
+                    .Select(x => x.Owner)
+                    .ToListAsync());
+            }
+
+            return users;
+        }
     }
 
     private async ValueTask<IAsyncEnumerable<Guid>> ToGuidAsync<T>(FileShareRecord<T> x)
@@ -773,6 +811,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (!setEntryAccess)
         {
             entry.Access = accessSnapshot;
+            entry.ShareRecord = null;
         }
     
         return haveAccess;
@@ -816,13 +855,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             return false;
         }
-        
-        if (action == FilesSecurityActions.Duplicate && folder is { FolderType: FolderType.FillingFormsRoom})
-        {
-            return false;
-        }
 
-        
         if (e.ProviderEntry && folder is { ProviderMapped: false } && e.CreateBy == userId)
         {
             return true;
@@ -868,7 +901,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
-            if(userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && 
+            if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && 
                folder.FolderType is 
                    FolderType.ReadyFormFolder or 
                    FolderType.InProcessFormFolder or 
@@ -1132,7 +1165,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                 var subjects = new List<Guid>();
                 if (shares == null)
                 {
-                    subjects = await GetUserSubjectsAsync(userId, e);
+                    var includeAvailableLinks = e is { RootFolderType: FolderType.USER or FolderType.VirtualRooms } and not IFolder { FolderType: FolderType.USER } && 
+                                                e.RootCreateBy != userId;
+                    
+                    subjects = await GetUserSubjectsAsync(userId, includeAvailableLinks);
                     shares = await GetSharesAsync(e, subjects);
                 }
 
@@ -1190,7 +1226,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 var parentFolders = await GetFileParentFolders(file.ParentId);
                 if (parentFolders.Exists(parent => parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder))
                 {
-                    if (ace is { Share: FileShare.FillForms } && (!userId.Equals(file.CreateBy) || userId.Equals(ASC.Core.Configuration.Constants.Guest.ID)))
+                    if (ace is { Share: FileShare.FillForms } && !userId.Equals(file.CreateBy))
                     {
                         return false;
                     }
@@ -1623,10 +1659,11 @@ public class FileSecurity(IDaoFactory daoFactory,
         foreach (var item in shares)
         {
                 yield return item;
-            }
         }
+    }
 
-    public async Task<List<FileEntry>> GetVirtualRoomsAsync(FilterType filterType,
+    public async Task<List<FileEntry>> GetVirtualRoomsAsync(
+        IEnumerable<FilterType> filterTypes,
         Guid subjectId,
         string searchText,
         bool searchInContent,
@@ -1643,21 +1680,61 @@ public class FileSecurity(IDaoFactory daoFactory,
         var securityDao = daoFactory.GetSecurityDao<string>();
 
         var subjectEntries = subjectFilter is SubjectFilter.Member
-                ? await securityDao.GetSharesAsync([subjectId]).Where(r => r.EntryType == FileEntryType.Folder).Select(r => r.EntryId.ToString()).ToListAsync()
-                : null;
+            ? await securityDao.GetSharesAsync([subjectId]).Where(r => r.EntryType == FileEntryType.Folder).Select(r => r.EntryId.ToString()).ToListAsync()
+            : null;
 
-        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+        var isAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
+        
+        var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any && !isAdmin);
+        var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects)
+            .Where(x => x.EntryType == FileEntryType.Folder)
+            .ToListAsync();
+
+        var internalRoomsRecords = new Dictionary<int, FileShareRecord<int>>();
+        var thirdPartyRoomsRecords = new Dictionary<string, FileShareRecord<string>>();
+
+        var recordGroup = currentUsersRecords.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
-            return await GetAllVirtualRoomsAsync(filterType, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, 
-                subjectFilter, subjectEntries, quotaFilter, storageFilter);
+            firstRecord = group.OrderBy(r => r, new SubjectComparer<string>(currentUserSubjects))
+                .ThenByDescending(r => r.Share, new FileShareRecord<string>.ShareComparer(FolderType.VirtualRooms))
+                .First()
+        });
+        
+        foreach (var record in recordGroup.Select(r=> r.firstRecord))
+        {
+            if (int.TryParse(record.EntryId, out var roomId))
+            {
+                internalRoomsRecords.TryAdd(roomId, new FileShareRecord<int>
+                {
+                    TenantId = record.TenantId,
+                    EntryId = roomId,
+                    EntryType = record.EntryType,
+                    SubjectType = record.SubjectType,
+                    Subject = record.Subject,
+                    Owner = record.Owner,
+                    Share = record.Share,
+                    Options = record.Options,
+                    Level = record.Level
+                });
+            }
+            else
+            {
+                thirdPartyRoomsRecords.TryAdd(record.EntryId, record);
+            }
         }
 
-        return await GetVirtualRoomsForMeAsync(filterType, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, 
-            subjectFilter, subjectEntries, storageFilter);
+        if (isAdmin)
+        {
+            return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, 
+                subjectFilter, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);
+        }
+
+        return await GetVirtualRoomsForMeAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, 
+            subjectFilter, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);
     }
 
     private async Task<List<FileEntry>> GetAllVirtualRoomsAsync(
-        FilterType filterType,
+        IEnumerable<FilterType> filterTypes,
         Guid subjectId,
         string search,
         bool searchInContent,
@@ -1670,7 +1747,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntries,
         QuotaFilter quotaFilter,
-        StorageFilter storageFilter)
+        StorageFilter storageFilter,
+        Dictionary<int, FileShareRecord<int>> internalRecords,
+        Dictionary<string, FileShareRecord<string>> thirdPartyRecords)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
@@ -1687,18 +1766,18 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         var roomsEntries = storageFilter == StorageFilter.ThirdParty 
             ? [] 
-            : await folderDao.GetRoomsAsync(rootFoldersIds, filterType, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, 
+            : await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, 
                 subjectEntries, quotaFilter).ToListAsync();
 
         var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal ?
             []
-            : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterType, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, 
+            : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, 
                 subjectEntries).ToListAsync();
 
-        entries.AddRange(roomsEntries);
-        entries.AddRange(thirdPartyRoomsEntries);
+        entries.AddRange(roomsEntries.Select(x => SetRecord(x, internalRecords)));
+        entries.AddRange(thirdPartyRoomsEntries.Select(x => SetRecord(x, thirdPartyRecords)));
 
-        if (withSubfolders && filterType != FilterType.FoldersOnly)
+        if (withSubfolders && (filterTypes == null || !filterTypes.Contains(FilterType.FoldersOnly)))
         {
             List<File<int>> files;
             List<File<string>> thirdPartyFiles;
@@ -1718,15 +1797,41 @@ public class FileSecurity(IDaoFactory daoFactory,
             entries.AddRange(thirdPartyFiles);
         }
 
-        await SetTagsAsync(roomsEntries);
-        await SetTagsAsync(thirdPartyRoomsEntries);
-        await SetPinAsync(roomsEntries);
-        await SetPinAsync(thirdPartyRoomsEntries);
+        var t1 = SetTagsAsync(roomsEntries);
+        var t2 = SetTagsAsync(thirdPartyRoomsEntries);
+        var t3 = SetPinAsync(roomsEntries);
+        var t4 = SetPinAsync(thirdPartyRoomsEntries);
+        
+        await Task.WhenAll(t1, t2, t3, t4);
 
         return entries;
+
+        Folder<T> SetRecord<T>(Folder<T> folder, IReadOnlyDictionary<T, FileShareRecord<T>> records)
+        {
+            if (records.TryGetValue(folder.Id, out var record))
+            {
+                folder.ShareRecord = record;
+                folder.Access = record.Share;
+            }
+            else
+            {
+                folder.Access = FileShare.None;
+                folder.ShareRecord = new FileShareRecord<T>
+                {
+                    EntryId = folder.Id,
+                    EntryType = FileEntryType.Folder,
+                    Share = FileShare.None,
+                    SubjectType = SubjectType.User,
+                    Subject = authContext.CurrentAccount.ID
+                };
+            }
+            
+            return folder;
+        }
     }
 
-    private async Task<List<FileEntry>> GetVirtualRoomsForMeAsync(FilterType filterType,
+    private async Task<List<FileEntry>> GetVirtualRoomsForMeAsync(
+        IEnumerable<FilterType> filterTypes,
         Guid subjectId,
         string search,
         bool searchInContent,
@@ -1738,56 +1843,15 @@ public class FileSecurity(IDaoFactory daoFactory,
         ProviderFilter provider,
         SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntries,
-        StorageFilter storageFilter)
+        StorageFilter storageFilter,
+        Dictionary<int, FileShareRecord<int>> internalRecords,
+        Dictionary<string, FileShareRecord<string>> thirdPartyRecords)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
         var fileDao = daoFactory.GetFileDao<int>();
         var thirdPartyFileDao = daoFactory.GetFileDao<string>();
-        var securityDao = daoFactory.GetSecurityDao<string>();
-
         var entries = new List<FileEntry>();
-
-        var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
-        var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects).ToListAsync();
-
-        var internalRoomsRecords = new Dictionary<int, FileShareRecord<int>>();
-        var thirdPartyRoomsRecords = new Dictionary<string, FileShareRecord<string>>();
-
-        var recordGroup = currentUsersRecords.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
-        {
-            firstRecord = group.OrderBy(r => r, new SubjectComparer<string>(currentUserSubjects))
-            .ThenByDescending(r => r.Share, new FileShareRecord<string>.ShareComparer(FolderType.VirtualRooms))
-            .First()
-        });
-
-        foreach (var record in recordGroup.Select(r=> r.firstRecord).Where(r => r.Share != FileShare.Restrict))
-        {
-            if (record.EntryType != FileEntryType.Folder)
-            {
-                continue;
-            }
-
-            if (int.TryParse(record.EntryId, out var roomId))
-            {
-                internalRoomsRecords.TryAdd(roomId, new FileShareRecord<int>
-                {
-                    TenantId = record.TenantId,
-                    EntryId = roomId,
-                    EntryType = record.EntryType,
-                    SubjectType = record.SubjectType,
-                    Subject = record.Subject,
-                    Owner = record.Owner,
-                    Share = record.Share,
-                    Options = record.Options,
-                    Level = record.Level
-                });
-            }
-            else
-            {
-                thirdPartyRoomsRecords.TryAdd(record.EntryId, record);
-        }
-        }
 
         var rootFoldersIds = searchArea switch
         {
@@ -1796,32 +1860,37 @@ public class FileSecurity(IDaoFactory daoFactory,
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
-        var rooms = storageFilter == StorageFilter.ThirdParty 
-            ? [] 
-            : await folderDao.GetRoomsAsync(internalRoomsRecords.Keys, filterType, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, 
-                subjectFilter, subjectEntries, rootFoldersIds).Where(r => Filter(r, internalRoomsRecords)).ToListAsync();
+        var rooms = storageFilter == StorageFilter.ThirdParty
+            ? []
+            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider,
+                subjectFilter, subjectEntries, rootFoldersIds).Where(r => Filter(r, internalRecords)).ToListAsync();
 
-        var thirdPartyRooms = storageFilter == StorageFilter.Internal 
-            ? [] 
-            : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRoomsRecords.Keys, filterType, tagNames, subjectId, search, withoutTags, 
-                excludeSubject, provider, subjectFilter, subjectEntries).Where(r => Filter(r, thirdPartyRoomsRecords)).ToListAsync();
+        var thirdPartyRooms = storageFilter == StorageFilter.Internal
+            ? []
+            : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRecords.Keys, filterTypes, tagNames, subjectId, search, withoutTags,
+                excludeSubject, provider, subjectFilter, subjectEntries).Where(r => Filter(r, thirdPartyRecords)).ToListAsync();
 
-        if (withSubfolders && filterType != FilterType.FoldersOnly)
+        if (withSubfolders && (filterTypes == null || !filterTypes.Contains(FilterType.FoldersOnly)))
         {
             var files = await fileDao.GetFilesAsync(rooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
-            var thirdPartyFiles = await thirdPartyFileDao.GetFilesAsync(thirdPartyRooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
+            var thirdPartyFiles = await thirdPartyFileDao.GetFilesAsync(thirdPartyRooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent)
+                .ToListAsync();
 
-            entries.AddRange(files.Where(f => Filter(f, internalRoomsRecords)));
-            entries.AddRange(thirdPartyFiles.Where(f => Filter(f, thirdPartyRoomsRecords)));
+            entries.AddRange(files.Where(f => Filter(f, internalRecords)));
+            entries.AddRange(thirdPartyFiles.Where(f => Filter(f, thirdPartyRecords)));
         }
-
-        await SetTagsAsync(rooms);
-        await SetTagsAsync(thirdPartyRooms);
-        await SetPinAsync(rooms);
-        await SetPinAsync(thirdPartyRooms);
+        
+        var t1 = SetTagsAsync(rooms);
+        var t2 = SetTagsAsync(thirdPartyRooms);
+        var t3 = SetPinAsync(rooms);
+        var t4 = SetPinAsync(thirdPartyRooms);
+        
+        await Task.WhenAll(t1, t2, t3, t4);
 
         entries.AddRange(rooms);
         entries.AddRange(thirdPartyRooms);
+        
+        return entries;
 
         bool Filter<T>(FileEntry<T> entry, IReadOnlyDictionary<T, FileShareRecord<T>> records)
         {
@@ -1842,8 +1911,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
             }
         }
-
-        return entries;
     }
 
     private async Task SetTagsAsync<T>(IEnumerable<FileEntry<T>> entries)
@@ -1897,8 +1964,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
             firstRecord = group.OrderBy(r => r, new SubjectComparer<T>(subjects))
-               .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(FolderType.SHARE))
-               .First()
+                .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(FolderType.SHARE))
+                .First()
         });
 
         foreach (var r in recordGroup.Select(r=> r.firstRecord).Where(r => r.Share != FileShare.Restrict))
@@ -1969,9 +2036,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
 
         var data = entries.Where(f =>
-                                f.RootFolderType == FolderType.USER // show users files
-                                && f.RootCreateBy != authContext.CurrentAccount.ID // don't show my files
-            );
+                f.RootFolderType == FolderType.USER // show users files
+                && f.RootCreateBy != authContext.CurrentAccount.ID // don't show my files
+        );
 
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
@@ -2130,9 +2197,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
 
         var data = entries.Where(f =>
-                                f.RootFolderType == FolderType.Privacy // show users files
-                                && f.RootCreateBy != authContext.CurrentAccount.ID // don't show my files
-            );
+                f.RootFolderType == FolderType.Privacy // show users files
+                && f.RootCreateBy != authContext.CurrentAccount.ID // don't show my files
+        );
 
         foreach (var e in data)
         {
@@ -2151,13 +2218,13 @@ public class FileSecurity(IDaoFactory daoFactory,
         return daoFactory.GetSecurityDao<int>().RemoveSecuritiesAsync(subject, owner, subjectType);
     }
 
-    public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId)
+    public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId, bool includeAvailableLinks = false)
     {
-        return await GetUserSubjectsAsync<int>(userId, null);
-        }
+        return await GetUserSubjectsAsync<int>(userId, includeAvailableLinks);
+    }
 
     public async IAsyncEnumerable<FileShareRecord<string>> GetUserRecordsAsync()
-        {
+    {
         var securityDao = daoFactory.GetSecurityDao<string>();
         var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
 
@@ -2240,11 +2307,11 @@ public class FileSecurity(IDaoFactory daoFactory,
     public static bool IsAvailableAccess(FileShare share, SubjectType subjectType, FolderType roomType)
     {
         return AvailableRoomAccesses.TryGetValue(roomType, out var availableRoles) &&
-            availableRoles.TryGetValue(subjectType, out var availableRolesBySubject) &&
-            availableRolesBySubject.Contains(share);
+               availableRoles.TryGetValue(subjectType, out var availableRolesBySubject) &&
+               availableRolesBySubject.Contains(share);
     }
     
-    private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, FileEntry<T> entry)
+    private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, bool includeAvailableLinks = false)
     {
         // priority order
         // User, Departments, admin, everyone
@@ -2257,13 +2324,14 @@ public class FileSecurity(IDaoFactory daoFactory,
             result.Add(linkId);
         }
 
-        if (entry is { RootFolderType: FolderType.USER } and not IFolder { FolderType: FolderType.USER } &&
-            entry.RootCreateBy != userId && linkId == Guid.Empty)
+        if (includeAvailableLinks && linkId == Guid.Empty)
         {
-            var linkTag = await daoFactory.GetTagDao<T>().GetTagsAsync(userId, TagType.RecentByLink, [entry]).FirstOrDefaultAsync();
-            if (linkTag != null && Guid.TryParse(linkTag.Name, out var linkTagId))
+            await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync(userId, TagType.RecentByLink))
             {
-                result.Add(linkTagId);
+                if (Guid.TryParse(tag.Name, out var tagId))
+                {
+                    result.Add(tagId);
+                }
             }
         }
         
@@ -2336,7 +2404,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return $"{tenantId}-{userId}-{parentId}";
-        }
+    }
 
     private async Task<string> GetCacheKey<T>(T parentId)
     {
@@ -2356,7 +2424,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             var index1 = subjects.IndexOf(x.Subject);
             var index2 = subjects.IndexOf(y.Subject);
             if (index1 == 0 || index2 == 0 // UserId
-                || Constants.SystemGroups.Any(g => g.ID == x.Subject) || Constants.SystemGroups.Any(g => g.ID == y.Subject)) // System Groups
+                            || Constants.SystemGroups.Any(g => g.ID == x.Subject) || Constants.SystemGroups.Any(g => g.ID == y.Subject)) // System Groups
             {
                 return index1.CompareTo(index2);
             }

@@ -172,12 +172,16 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "No content", typeof(NoContentResult))]
     [HttpDelete("recent")]
-    public async Task<NoContentResult> DeleteRecentAsync(FileBaseBatchRequestDto inDto)
+    public async Task<NoContentResult> DeleteRecentAsync(BaseBatchRequestDto inDto)
     {
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, _) = FileOperationsManager.GetIds(inDto.FileIds);
         
-        await fileStorageService.DeleteFromRecentAsync(fileIntIds, true);
-
+        var t1 = fileStorageService.DeleteFromRecentAsync(folderIntIds, fileIntIds, true);
+        var t2 = fileStorageService.DeleteFromRecentAsync(folderStringIds, [], true);
+        
+        await Task.WhenAll(t1, t2);
+        
         return NoContent();
     }
 

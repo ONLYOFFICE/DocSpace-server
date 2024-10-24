@@ -98,8 +98,6 @@ global using Microsoft.Extensions.Logging;
 
 global using MySql.Data.MySqlClient;
 
-global using Newtonsoft.Json;
-
 global using ProtoBuf;
 
 global using ASC.Api.Core.Extensions;

@@ -95,6 +95,7 @@ public class FileStorageService //: IFileStorageService
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
     PasswordSettingsManager passwordSettingsManager,
     WatermarkManager watermarkManager,
+    CustomTagsService customTagsService,
     IMapper mapper)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
@@ -147,7 +148,7 @@ public class FileStorageService //: IFileStorageService
                     parent;
             }
 
-            (entries, _) = await entryManager.GetEntriesAsync(parent, parentRoom, 0, -1, FilterType.FoldersOnly, false, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
+            (entries, _) = await entryManager.GetEntriesAsync(parent, parentRoom, 0, -1, [FilterType.FoldersOnly], false, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
         }
         catch (Exception e)
         {
@@ -161,7 +162,7 @@ public class FileStorageService //: IFileStorageService
         T parentId,
         int from,
         int count,
-        FilterType filterType,
+        IEnumerable<FilterType> filterTypes,
         bool subjectGroup,
         string subject,
         string searchText,
@@ -235,6 +236,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
+        
         if (parent.FolderType is FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress)
         {
             if (parent.ShareRecord is { Share: FileShare.FillForms })
@@ -242,6 +244,7 @@ public class FileStorageService //: IFileStorageService
                 subjectId = authContext.CurrentAccount.ID;
             }
         }
+        
         if (orderBy != null)
         {
             await filesSettingsHelper.SetDefaultOrder(orderBy);
@@ -250,6 +253,7 @@ public class FileStorageService //: IFileStorageService
         {
             orderBy = await filesSettingsHelper.GetDefaultOrder();
         }
+        
         if (Equals(parent.Id, await globalFolderHelper.FolderShareAsync) && orderBy.SortedBy == SortedByType.DateAndTime)
         {
             orderBy.SortedBy = SortedByType.New;
@@ -259,10 +263,32 @@ public class FileStorageService //: IFileStorageService
 
         int total;
         IEnumerable<FileEntry> entries;
+        
         try
         {
-            (entries, total) = await entryManager.GetEntriesAsync(parent, parentRoom, from, count, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders, orderBy, roomId, searchArea,
-                withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption, quotaFilter, storageFilter);
+            (entries, total) = await entryManager.GetEntriesAsync(
+                parent,
+                parentRoom,
+                from,
+                count,
+                filterTypes,
+                subjectGroup,
+                subjectId,
+                searchText,
+                extension,
+                searchInContent,
+                withSubfolders,
+                orderBy,
+                roomId,
+                searchArea,
+                withoutTags,
+                tagNames,
+                excludeSubject,
+                provider,
+                subjectFilter,
+                applyFilterOption,
+                quotaFilter,
+                storageFilter);
         }
         catch (Exception e)
         {
@@ -296,6 +322,7 @@ public class FileStorageService //: IFileStorageService
             parent.FolderType == FolderType.SHARE ||
             parent.RootFolderType == FolderType.Privacy ||
             await shareableTask;
+        
         entries = entries.ToAsyncEnumerable().WhereAwait(async x =>
         {
             if (x.FileEntryType == FileEntryType.Folder)
@@ -348,6 +375,7 @@ public class FileStorageService //: IFileStorageService
             New = await newTask,
             ParentRoom = parentRoom
         };
+        
         return result;
     }
 
@@ -420,7 +448,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags)
+    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var parentId = await globalFolderHelper.GetFolderVirtualRooms();
@@ -430,12 +458,12 @@ public class FileStorageService //: IFileStorageService
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags);
+                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo);
             }
         }, privacy, share);
     }
 
-    public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool? indexing, bool createAsNewFolder, bool? denyDownload, string color, string cover, IEnumerable<string> tags)
+    public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool? indexing, bool createAsNewFolder, bool? denyDownload, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
     {
         var folderDao = daoFactory.GetFolderDao<string>();
         var providerDao = daoFactory.ProviderDao;
@@ -463,7 +491,7 @@ public class FileStorageService //: IFileStorageService
             {
                 try
                 {
-                    folder = await InternalCreateFolderAsync(parentId, title, folderType, false, indexing, denyDownload: denyDownload, color: color, cover: cover, names: tags);
+                    folder = await InternalCreateFolderAsync(parentId, title, folderType, false, indexing, denyDownload: denyDownload, color: color, cover: cover, names: tags, logo: logo);
                 }
                 catch
                 {
@@ -536,7 +564,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
@@ -609,27 +637,45 @@ public class FileStorageService //: IFileStorageService
             _ = await RoomLogoManager.CoverChanged(cover, newFolder);
 
             var folderId = await folderDao.SaveFolderAsync(newFolder);
-            try
+            if (watermark != null)
             {
+                try
+                {
 
-                await watermarkManager.SetWatermarkAsync(newFolder, watermark);
-            }
-            catch (Exception)
-            {
+                    await watermarkManager.SetWatermarkAsync(newFolder, watermark);
+                }
+                catch (Exception)
+                {
 
+                }
             }
+            
 
             var folder = await folderDao.GetFolderAsync(folderId);
             
+            if (logo != null)
+            {
+                await roomLogoManager.SaveLogo(logo.TmpFile, logo.X, logo.Y, logo.Width, logo.Height, folder, folderDao);
+            }
+            
             var tagDao = daoFactory.GetTagDao<T>();
 
-            var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
-
-            if (tagsInfos.Count != 0)
+            if (names != null)
             {
-                var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
+                var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
+                var notFoundTags = names.Where(x => tagsInfos.All(r => r.Name != x));
 
-                await tagDao.SaveTagsAsync(tags);
+                foreach (var tagInfo in notFoundTags)
+                {
+                    tagsInfos.Add(await customTagsService.CreateTagAsync(tagInfo));
+                }
+
+                if (tagsInfos.Count != 0)
+                {
+                    var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
+
+                    await tagDao.SaveTagsAsync(tags);
+                }
             }
 
             if (!isRoom)
@@ -864,19 +910,33 @@ public class FileStorageService //: IFileStorageService
         {
             await roomLogoManager.SaveLogo(updateData.Logo.TmpFile, updateData.Logo.X, updateData.Logo.Y, updateData.Logo.Width, updateData.Logo.Height, folder, folderDao);
         }
-
-        if (updateData.Tags != null && updateData.Tags.Any())
-        {
-            var tagsInfos = await tagDao.GetTagsInfoAsync(updateData.Tags).ToListAsync();
-
-            if (tagsInfos.Count != 0)
-            {
-                var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
-
-                await tagDao.SaveTagsAsync(tags);
-            }
-        }
         
+        if (updateData.Tags != null)
+        { 
+            var currentTags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.Custom).ToListAsync();
+            var tagsInfos = new List<TagInfo>();
+            
+            if (updateData.Tags.Any())
+            {
+                tagsInfos = await tagDao.GetTagsInfoAsync(updateData.Tags, TagType.Custom).ToListAsync();
+                var notFoundTags = updateData.Tags.Where(x => tagsInfos.All(r => r.Name != x));
+
+                foreach (var tagInfo in notFoundTags)
+                {
+                    tagsInfos.Add(await customTagsService.CreateTagAsync(tagInfo));
+                }
+                
+                if (tagsInfos.Count != 0)
+                {
+                    var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
+
+                    await tagDao.SaveTagsAsync(tags);
+                }
+            }
+            
+            var toDelete = currentTags.Where(r => tagsInfos.All(b => b.Name != r.Name)).ToList();
+            await tagDao.RemoveTagsAsync(folder, toDelete.Select(t => t.Id).ToList());
+        }
 
         var newTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder);
         var tag = await newTags.FirstOrDefaultAsync();
@@ -2904,18 +2964,46 @@ public class FileStorageService //: IFileStorageService
         await tagDao.RemoveTagsAsync(tags);
     }
 
-    public async Task DeleteFromRecentAsync<T>(IEnumerable<T> filesIds, bool recentByLinks)
+    public async Task DeleteFromRecentAsync<T>(List<T> foldersIds, List<T> filesIds, bool recentByLinks)
     {
-        var tagDao = daoFactory.GetTagDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var tagDao = daoFactory.GetTagDao<T>();
 
-        var files = await fileDao.GetFilesAsync(filesIds).ToListAsync();
+        var entries = new List<FileEntry<T>>(foldersIds.Count + filesIds.Count);
+        
+        var folders = folderDao.GetFoldersAsync(foldersIds).Cast<FileEntry<T>>().ToListAsync().AsTask();
+        var files = fileDao.GetFilesAsync(filesIds).Cast<FileEntry<T>>().ToListAsync().AsTask();
 
-        var tags = recentByLinks
-            ? await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.RecentByLink, files).ToListAsync()
-            : files.Select(f => Tag.Recent(authContext.CurrentAccount.ID, f));
+        foreach (var items in await Task.WhenAll(folders, files))
+        {
+            entries.AddRange(items);
+        }
+
+        var tags = recentByLinks 
+            ? await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.RecentByLink, entries).ToListAsync()
+            : entries.Select(f => Tag.Recent(authContext.CurrentAccount.ID, f));
 
         await tagDao.RemoveTagsAsync(tags);
+        
+        var users = new[] { authContext.CurrentAccount.ID };
+        
+        var tasks = new List<Task>(entries.Count);
+
+        foreach (var e in entries)
+        {
+            switch (e)
+            {
+                case File<T> file:
+                    tasks.Add(socketManager.DeleteFileAsync(file, users: users));
+                    break;
+                case Folder<T> folder:
+                    tasks.Add(socketManager.DeleteFolder(folder, users: users));
+                    break;
+            }
+        }
+        
+        await Task.WhenAll(tasks);
     }
 
     public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(FilterType filter, int from, int count, bool subjectGroup, Guid? subjectId, string searchText, string[] extension,
@@ -2937,10 +3025,9 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<AceWrapper>> GetSharedInfoAsync<T>(
         IEnumerable<T> fileIds,
-        IEnumerable<T> folderIds,
-        IEnumerable<SubjectType> subjectTypes = null)
+        IEnumerable<T> folderIds)
     {
-        return await fileSharing.GetSharedInfoAsync(fileIds, folderIds, subjectTypes);
+        return await fileSharing.GetSharedInfoAsync(fileIds, folderIds);
     }
 
     public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, string text, int offset, int count)
@@ -2984,17 +3071,28 @@ public class FileStorageService //: IFileStorageService
         if ((entry is File<T> || entry is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)) && entry.RootFolderType == FolderType.VirtualRooms)
         {
             var room = await DocSpaceHelper.GetParentRoom(entry, folderDao);
+            
+            var linkId = await externalShare.GetLinkIdAsync();
+            AceWrapper ace;
 
-            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
-            if (parentLink == null)
+            if (linkId == Guid.Empty)
+            {
+                ace = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
+            }
+            else
+            {
+                ace = await fileSharing.GetPureSharesAsync(room, [linkId]).FirstOrDefaultAsync();
+            }
+
+            if (ace == null)
             {
                 throw new ItemNotFoundException();
             }
-            
-            var data = await externalShare.GetLinkDataAsync(entry, parentLink.Id, entryType == FileEntryType.File);
-            parentLink.Link = await urlShortener.GetShortenLinkAsync(data.Url);
 
-            return parentLink;
+            var data = await externalShare.GetLinkDataAsync(entry, ace.Id, entryType == FileEntryType.File);
+            ace.Link = await urlShortener.GetShortenLinkAsync(data.Url);
+
+            return ace;
         }
 
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
@@ -3939,6 +4037,11 @@ public class FileStorageService //: IFileStorageService
 
         async Task<bool> HasAccessInviteAsync(UserInfo user)
         {
+            if (user.Status == EmployeeStatus.Terminated)
+            {
+                return false;
+            }
+            
             if (isDocSpaceAdmin)
             {
                 return true;

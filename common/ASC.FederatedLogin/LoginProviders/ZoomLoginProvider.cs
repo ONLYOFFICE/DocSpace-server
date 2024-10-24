@@ -154,7 +154,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
 
     private (LoginProfile, ZoomProfile) ProfileFromZoom(string zoomProfile)
     {
-        var jsonProfile = JsonConvert.DeserializeObject<ZoomProfile>(zoomProfile);
+        var jsonProfile = JsonSerializer.Deserialize<ZoomProfile>(zoomProfile);
 
         var profile = new LoginProfile
         {
@@ -182,76 +182,76 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
 
     public class ZoomProfile
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public string Id { get; set; }
 
-        [JsonProperty("first_name")]
+        [JsonPropertyName("first_name")]
         public string FirstName { get; set; }
 
-        [JsonProperty("last_name")]
+        [JsonPropertyName("last_name")]
         public string LastName { get; set; }
 
-        [JsonProperty("display_name")]
+        [JsonPropertyName("display_name")]
         public string DisplayName { get; set; }
 
-        [JsonProperty("email")]
+        [JsonPropertyName("email")]
         public string Email { get; set; }
 
-        [JsonProperty("role_name")]
+        [JsonPropertyName("role_name")]
         public string RoleName { get; set; }
 
-        [JsonProperty("pmi")]
+        [JsonPropertyName("pmi")]
         public long Pmi { get; set; }
 
-        [JsonProperty("use_pmi")]
+        [JsonPropertyName("use_pmi")]
         public bool UsePmi { get; set; }
 
-        [JsonProperty("personal_meeting_url")]
+        [JsonPropertyName("personal_meeting_url")]
         public Uri PersonalMeetingUrl { get; set; }
 
-        [JsonProperty("timezone")]
+        [JsonPropertyName("timezone")]
         public string Timezone { get; set; }
 
-        [JsonProperty("created_at")]
+        [JsonPropertyName("created_at")]
         public DateTimeOffset CreatedAt { get; set; }
 
-        [JsonProperty("last_login_time")]
+        [JsonPropertyName("last_login_time")]
         public DateTimeOffset LastLoginTime { get; set; }
 
-        [JsonProperty("pic_url")]
+        [JsonPropertyName("pic_url")]
         public Uri PicUrl { get; set; }
 
-        [JsonProperty("jid")]
+        [JsonPropertyName("jid")]
         public string Jid { get; set; }
 
-        [JsonProperty("account_id")]
+        [JsonPropertyName("account_id")]
         public string AccountId { get; set; }
 
-        [JsonProperty("language")]
+        [JsonPropertyName("language")]
         public string Language { get; set; }
 
-        [JsonProperty("phone_country")]
+        [JsonPropertyName("phone_country")]
         public string PhoneCountry { get; set; }
 
-        [JsonProperty("phone_number")]
+        [JsonPropertyName("phone_number")]
         public string PhoneNumber { get; set; }
 
-        [JsonProperty("status")]
+        [JsonPropertyName("status")]
         public string Status { get; set; }
 
-        [JsonProperty("job_title")]
+        [JsonPropertyName("job_title")]
         public string JobTitle { get; set; }
 
-        [JsonProperty("location")]
+        [JsonPropertyName("location")]
         public string Location { get; set; }
 
-        [JsonProperty("account_number")]
+        [JsonPropertyName("account_number")]
         public long AccountNumber { get; set; }
 
-        [JsonProperty("cluster")]
+        [JsonPropertyName("cluster")]
         public string Cluster { get; set; }
 
-        [JsonProperty("user_created_at")]
+        [JsonPropertyName("user_created_at")]
         public DateTimeOffset UserCreatedAt { get; set; }
     }
 }
