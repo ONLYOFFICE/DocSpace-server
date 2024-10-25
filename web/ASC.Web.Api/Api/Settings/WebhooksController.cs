@@ -120,7 +120,8 @@ public class WebhooksController(ApiContext context,
             Uri = inDto.Uri,
             SecretKey = inDto.SecretKey,
             Enabled = inDto.Enabled,
-            SSL = inDto.SSL    
+            SSL = inDto.SSL,
+            TenantId = tenantId
         };
 
         var webhook = await dbWorker.UpdateWebhookConfig(DbWebhooksConfig);

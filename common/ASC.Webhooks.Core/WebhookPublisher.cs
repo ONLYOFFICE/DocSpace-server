@@ -24,8 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Tenants;
 using ASC.Web.Webhooks;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace ASC.Webhooks.Core;
 
@@ -34,7 +36,8 @@ public class WebhookPublisher(
     DbWorker dbWorker,
     IEventBus eventBus,
     SecurityContext securityContext,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    TenantUtil tenantUtil)
     : IWebhookPublisher
 {
     public async Task PublishAsync(int webhookId, string requestPayload)
@@ -89,32 +92,30 @@ public class WebhookPublisher(
        
         var webhooksConfig = await dbWorker.GetWebhookConfig(dbWebhooksLog.TenantId, dbWebhooksLog.ConfigId);
 
-        using var jsonDocument = JsonDocument.Parse(requestResponse);
-        var rootElement = jsonDocument.RootElement;
-        var responseJsonElement = rootElement.GetProperty("response");
-        var responseJsonElementString = responseJsonElement.ToString();
-        var data = requestResponse;
-
-        if (!string.IsNullOrEmpty(responseJsonElementString))
-        {
-            data = responseJsonElementString;
-        }
+        var jsonNode = JsonNode.Parse(requestResponse);
+        var data = (jsonNode["response"] ?? jsonNode["data"] ?? jsonNode.Root);
 
         var requestPayload = new
         {
             Action = new
             {
-//                Id = entry.Id,
+                //                Id = entry.Id,
                 CreateOn = dbWebhooksLog.CreationTime,
                 CreateBy = securityContext.CurrentAccount.ID,
-                //                    Trigger = "*"
+                Trigger = "*"
             },
-            Data = responseJsonElement,
+            Data = data,
             Webhook = new
             {
                 Id = webhooksConfig.Id,
                 Name = webhooksConfig.Name,
                 PayloadUrl = webhooksConfig.Uri,
+                LastSuccessOn = webhooksConfig.LastSuccessOn.HasValue ? tenantUtil.DateTimeFromUtc(webhooksConfig.LastSuccessOn.Value) : new DateTime?(),
+                LastFailureOn = webhooksConfig.LastFailureOn.HasValue ? tenantUtil.DateTimeFromUtc(webhooksConfig.LastFailureOn.Value) : new DateTime?(),
+                LastFailureContent = webhooksConfig.LastFailureContent,
+                RetryOn = new DateTime?(),
+                RetryCount = 0,
+
                 //Target = new {
                 //  Type = "room", //  room | folder | file,
                 //  Id = 111
@@ -125,7 +126,7 @@ public class WebhookPublisher(
 
         var jsonSerializerOptions = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase            
         };
 
         dbWebhooksLog.RequestPayload = JsonSerializer.Serialize(requestPayload, jsonSerializerOptions);

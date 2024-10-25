@@ -146,7 +146,6 @@ public class DbWorker(
 
     public async Task<DbWebhooksConfig> UpdateWebhookConfig(DbWebhooksConfig dbWebhooksConfig)
     {
-//        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var updateObj = await webhooksDbContext.WebhooksConfigAsync(dbWebhooksConfig.TenantId, dbWebhooksConfig.Id);
@@ -236,7 +235,13 @@ public class DbWorker(
         return entity.Entity;
     }
 
-    public async Task<DbWebhooksLog> UpdateWebhookJournal(int id, int status, DateTime delivery, string requestHeaders, string responsePayload, string responseHeaders)
+    public async Task<DbWebhooksLog> UpdateWebhookJournal(int id,
+                                                          int status,
+                                                          DateTime delivery,
+                                                          string requestPayload,
+                                                          string requestHeaders, 
+                                                          string responsePayload, 
+                                                          string responseHeaders)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -245,6 +250,7 @@ public class DbWorker(
         {
             webhook.Status = status;
             webhook.RequestHeaders = requestHeaders;
+            webhook.RequestPayload = requestPayload;
             webhook.ResponsePayload = responsePayload;
             webhook.ResponseHeaders = responseHeaders;
             webhook.Delivery = delivery;
