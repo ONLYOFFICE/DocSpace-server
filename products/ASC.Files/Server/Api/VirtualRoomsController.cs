@@ -38,7 +38,6 @@ public class VirtualRoomsInternalController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    WatermarkDtoHelper watermarkDtoHelper,
     IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
@@ -55,7 +54,6 @@ public class VirtualRoomsInternalController(
         folderDtoHelper,
         fileDtoHelper,
         fileShareDtoHelper,
-        watermarkDtoHelper,
         mapper,
         socketManager,
         apiContext,
@@ -94,7 +92,6 @@ public class VirtualRoomsThirdPartyController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    WatermarkDtoHelper watermarkDtoHelper,
     IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
@@ -111,7 +108,6 @@ public class VirtualRoomsThirdPartyController(
         folderDtoHelper,
         fileDtoHelper,
         fileShareDtoHelper,
-        watermarkDtoHelper,
         mapper,
         socketManager,
         apiContext,
@@ -150,7 +146,6 @@ public abstract class VirtualRoomsController<T>(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    WatermarkDtoHelper watermarkDtoHelper,
     IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
@@ -506,43 +501,7 @@ public abstract class VirtualRoomsController<T>(
 
         return await _folderDtoHelper.GetAsync(room);
     }
-
-    /// <summary>
-    /// Adds the watermarks settings to a room with the ID specified in the request.
-    /// </summary>
-    /// <short>Add room watermarks settings</short>
-    /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarkRequestDto, ASC.Files.Core" name="inDto">Request parameters for adding watermarks</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Room information</returns>
-    /// <path>api/2.0/files/rooms/{id}/watermark</path>
-    /// <httpMethod>PUT</httpMethod>
-    [HttpPut("{id}/watermark")]
-    public async Task<WatermarkDto> AddWaterMarksAsync(T id, WatermarkRequestDto inDto)
-    {
-        var watermarkSettings = await watermarkManager.SetWatermarkAsync(id, inDto);
-
-        return watermarkDtoHelper.Get(watermarkSettings);
-    }
-
-    /// <summary>
-    /// Returns the watermark information.
-    /// </summary>
-    /// <short>Get watermark information</short>
-    /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Watermark information</returns>
-    /// <path>api/2.0/files/rooms/{id}/watermark</path>
-    /// <httpMethod>GET</httpMethod>
-    [AllowAnonymous]
-    [HttpGet("{id}/watermark")]
-    public async Task<WatermarkDto> GetWatermarkInfoAsync(T id)
-    {
-        var room = await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
-        var watermarkSettings = await watermarkManager.GetWatermarkAsync(room);
-
-        return watermarkDtoHelper.Get(watermarkSettings);
-    }
+    
 
     /// <summary>
     /// Removes the watermarks from a room with the ID specified in the request.
@@ -558,6 +517,7 @@ public abstract class VirtualRoomsController<T>(
     {
         await watermarkManager.DeleteWatermarkAsync(id);
     }
+    
     /// <summary>
     /// Creates a logo for a room with the ID specified in the request.
     /// </summary>
@@ -665,24 +625,6 @@ public abstract class VirtualRoomsController<T>(
     public async Task ResendEmailInvitationsAsync(T id, UserInvitationRequestDto inDto)
     {
         await _fileStorageService.ResendEmailInvitationsAsync(id, inDto.UsersIds, inDto.ResendAll);
-    }
-
-    [HttpPut("{id}/settings")]
-    public async Task<FolderDto<T>> UpdateSettingsAsync(T id, SettingsRoomRequestDto inDto)
-    {
-        var room = await _fileStorageService.SetRoomSettingsAsync(id, inDto.Indexing, inDto.DenyDownload);
-
-        return await _folderDtoHelper.GetAsync(room);
-    }
-
-    [HttpPut("{id}/lifetime")]
-    public async Task<FolderDto<T>> UpdateLifetimeSettingsAsync(T id, RoomDataLifetimeDto inDto = null)
-    {
-        var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto);
-
-        var room = await _fileStorageService.SetRoomLifetimeSettingsAsync(id, lifetime);
-
-        return await _folderDtoHelper.GetAsync(room);
     }
 
     [HttpPut("{id}/reorder")]
