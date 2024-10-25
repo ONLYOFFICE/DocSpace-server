@@ -109,9 +109,6 @@ public class FileMarker(
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
     private const string LockKey = "file_marker";
-    
-    private static readonly IComparer<FileEntry> _entryDateDescComparer = Comparer<FileEntry>.Create((x, y) => y.ModifiedOn.CompareTo(x.ModifiedOn));
-    private static readonly IComparer<DateTime> _dateDescComparer = Comparer<DateTime>.Create((x, y) => y.CompareTo(x));
 
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
     {
@@ -724,7 +721,7 @@ public class FileMarker(
         var (entryTagsProvider, entryTagsInternal) = await GetMarkedEntriesAsync(roomsRoot);
         if (entryTagsProvider.Count == 0 && entryTagsInternal.Count == 0)
         {
-            return new Dictionary<DateTime, Dictionary<FileEntry, List<FileEntry>>>();
+            return [];
         }
         
         var treeInternal = MakeTree(entryTagsInternal);

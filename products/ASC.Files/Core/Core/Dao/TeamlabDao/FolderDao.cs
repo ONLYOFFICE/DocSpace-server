@@ -374,7 +374,7 @@ internal class FolderDao(
                                                     ? s.MatchAll(searchText)
                                                     : s.MatchAll(searchText).In(r => r.Id, folderIds.ToArray()));
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
-            }
+        }
 
 
         if (subjectID.HasValue && subjectID != Guid.Empty)
@@ -390,7 +390,7 @@ internal class FolderDao(
             }
         }
 
-        await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable().Distinct())
+        await foreach (var e in FromQuery(filesDbContext, q).Distinct().AsAsyncEnumerable())
         {
             yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
         }
