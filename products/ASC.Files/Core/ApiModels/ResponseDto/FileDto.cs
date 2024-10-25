@@ -223,17 +223,9 @@ public class FileDtoHelper(
             var currentFolder = currentFolderTask.Result;
 
             Folder<T> currentRoom;
-            if (!DocSpaceHelper.IsRoom(currentFolder.FolderType))
+            if (!DocSpaceHelper.IsRoom(currentFolder.FolderType) && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
             {
-                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
-                if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
-                {
-                    currentRoom = await folderDao.GetFolderAsync(roomId);
-                }
-                else
-                {
-                    currentRoom = currentFolder;
-                }
+                currentRoom = await DocSpaceHelper.GetParentRoom(file, folderDao) ?? currentFolder;
             }
             else
             {
