@@ -229,7 +229,7 @@ public class FileDtoHelper(
                 if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
                 {
                     currentRoom = await folderDao.GetFolderAsync(roomId);
-        }
+                }
                 else
                 {
                     currentRoom = currentFolder;
@@ -250,9 +250,8 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            AceWrapper ace = null;
             var currentRoomId = currentRoom.Id?.ToString();
-            if (currentRoomId != null && !shareCache.TryGetValue(currentRoomId, out ace))
+            if (currentRoomId != null && !shareCache.TryGetValue(currentRoomId, out var ace))
             {
                 ace = await fileSharing.GetPureSharesAsync(currentRoom, [authContext.CurrentAccount.ID]).FirstOrDefaultAsync();
                 shareCache.TryAdd(currentRoomId, ace);
@@ -307,12 +306,11 @@ public class FileDtoHelper(
         result.Access = file.Access;
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
 
-        if (file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
+        if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
         {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
-            var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
-            if (room.SettingsLifetime != null)
+            var folderDao = daoFactory.GetCacheFolderDao<T>();
+            var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
+            if (room?.SettingsLifetime != null)
             {
                 expiration = DateTime.UtcNow - room.SettingsLifetime.GetExpirationUtc();
             }
