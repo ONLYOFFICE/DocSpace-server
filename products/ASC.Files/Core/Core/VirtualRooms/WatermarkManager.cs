@@ -62,15 +62,6 @@ public class WatermarkManager
         _roomLogoManager = roomLogoManager;
     }
 
-    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarkRequestDto)
-    {
-        var folderDao = _daoFactory.GetFolderDao<T>();
-
-        var room = await folderDao.GetFolderAsync(roomId);
-
-        return await SetWatermarkAsync(room, watermarkRequestDto);
-    }
-
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
@@ -142,28 +133,5 @@ public class WatermarkManager
         var watermarkSettings = await folderDao.GetWatermarkSettings(room);
 
         return watermarkSettings;
-    }
-
-    public async Task<Folder<T>> DeleteWatermarkAsync<T>(T roomId)
-    {
-        var folderDao = _daoFactory.GetFolderDao<T>();
-
-        var room = await folderDao.GetFolderAsync(roomId);
-
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
-        {
-            throw new ItemNotFoundException();
-        }
-
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
-        }
-
-        await folderDao.DeleteWatermarkSettings(room);
-
-        await _roomLogoManager.DeleteWatermarkImageAsync(room);
-
-        return room;
     }
 }

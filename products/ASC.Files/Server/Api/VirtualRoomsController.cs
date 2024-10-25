@@ -31,7 +31,6 @@ public class VirtualRoomsInternalController(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,
     CustomTagsService customTagsService,
-    WatermarkManager watermarkManager,
     RoomLogoManager roomLogoManager,
     FileOperationsManager fileOperationsManager,
     FileStorageService fileStorageService,
@@ -47,7 +46,6 @@ public class VirtualRoomsInternalController(
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
-        watermarkManager,
         roomLogoManager,
         fileOperationsManager,
         fileStorageService,
@@ -85,7 +83,6 @@ public class VirtualRoomsThirdPartyController(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,
     CustomTagsService customTagsService,
-    WatermarkManager watermarkManager,
     RoomLogoManager roomLogoManager,
     FileOperationsManager fileOperationsManager,
     FileStorageService fileStorageService,
@@ -101,7 +98,6 @@ public class VirtualRoomsThirdPartyController(
     : VirtualRoomsController<string>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
-        watermarkManager,
         roomLogoManager,
         fileOperationsManager,
         fileStorageService,
@@ -139,7 +135,6 @@ public abstract class VirtualRoomsController<T>(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,
     CustomTagsService customTagsService,
-    WatermarkManager watermarkManager,
     RoomLogoManager roomLogoManager,
     FileOperationsManager fileOperationsManager,
     FileStorageService fileStorageService,
@@ -501,22 +496,7 @@ public abstract class VirtualRoomsController<T>(
 
         return await _folderDtoHelper.GetAsync(room);
     }
-    
 
-    /// <summary>
-    /// Removes the watermarks from a room with the ID specified in the request.
-    /// </summary>
-    /// <short>Remove room watermarks</short>
-    /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <returns></returns>
-    /// <path>api/2.0/files/rooms/{id}/watermark</path>
-    /// <httpMethod>DELETE</httpMethod>
-    [HttpDelete("{id}/watermark")]
-    public async Task DeleteWatermarkAsync(T id)
-    {
-        await watermarkManager.DeleteWatermarkAsync(id);
-    }
     
     /// <summary>
     /// Creates a logo for a room with the ID specified in the request.
