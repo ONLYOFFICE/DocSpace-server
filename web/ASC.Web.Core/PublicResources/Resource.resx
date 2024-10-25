@@ -1122,4 +1122,7 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Failed to set quota per user. The entered value is greater than the total DocSpace storage.</value>
   </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Non-profit</value>
+  </data>
 </root>
