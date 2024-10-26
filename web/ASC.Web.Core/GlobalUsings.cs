@@ -127,9 +127,6 @@ global using Microsoft.Net.Http.Headers;
 
 global using MimeKit.Utils;
 
-global using Newtonsoft.Json;
-global using Newtonsoft.Json.Linq;
-
 global using ProtoBuf;
 
 global using SixLabors.ImageSharp;

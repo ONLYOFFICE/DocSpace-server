@@ -35,9 +35,9 @@ public class CustomTagsService(
     UserManager userManager,
     FileSecurityCommon fileSecurityCommon)
 {
-    public async Task<string> CreateTagAsync(string name)
+    public async Task<TagInfo> CreateTagAsync(string name)
     {
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -49,7 +49,7 @@ public class CustomTagsService(
 
         if (existedTag != null)
         {
-            return existedTag.Name;
+            return existedTag;
         }
 
         var tagInfo = new TagInfo
@@ -63,12 +63,12 @@ public class CustomTagsService(
 
         await filesMessageService.SendAsync(MessageAction.TagCreated, savedTag.Name);
 
-        return savedTag.Name;
+        return savedTag;
     }
 
     public async Task DeleteTagsAsync<T>(IEnumerable<string> names)
     {
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -80,7 +80,7 @@ public class CustomTagsService(
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsInfo = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+        var tagsInfo = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
         var tags = tagsInfo.Select(tagInfo => new Tag { EntryId = tagInfo.EntryId, Id = tagInfo.Id, Owner = tagInfo.Owner, Type = tagInfo.Type, Name = tagInfo.Name, EntryType = tagInfo.EntryType});
 
         await tagDao.RemoveTagsAsync(tags);
@@ -104,7 +104,7 @@ public class CustomTagsService(
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+        var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
 
         if (tagsInfos.Count == 0)
         {
@@ -136,7 +136,7 @@ public class CustomTagsService(
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+        var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
 
         await tagDao.RemoveTagsAsync(folder, tagsInfos.Select(t => t.Id).ToList());
 
@@ -149,7 +149,7 @@ public class CustomTagsService(
     {
         if (!await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
         {
-            var rooms = await fileSecurity.GetVirtualRoomsAsync(FilterType.None, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, SubjectFilter.Member, QuotaFilter.All, StorageFilter.None);
+            var rooms = await fileSecurity.GetVirtualRoomsAsync(null, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, SubjectFilter.Member, QuotaFilter.All, StorageFilter.None);
             var tags = rooms.SelectMany(r => r.Tags)
                 .Where(r => r.Type == tagType).Select(r => r.Name).Distinct();
 

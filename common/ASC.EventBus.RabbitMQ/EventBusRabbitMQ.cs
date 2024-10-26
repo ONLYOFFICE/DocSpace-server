@@ -241,8 +241,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
             var consumer = new AsyncEventingBasicConsumer(_consumerChannel);
 
-            consumer.Received += Consumer_Received;
-            consumer.Shutdown += Consumer_Shutdown;
+            consumer.ReceivedAsync += Consumer_Received;
+            consumer.ShutdownAsync += Consumer_Shutdown;
             _consumerTag = await _consumerChannel.BasicConsumeAsync(
                 queue: _queueName,
                 autoAck: false,
@@ -266,6 +266,17 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         var eventName = eventArgs.RoutingKey;
 
         var @event = GetEvent(eventName, eventArgs.Body.Span.ToArray());
+
+        if (@event == null)
+        {
+            // anti-pattern https://github.com/LeanKit-Labs/wascally/issues/36
+            await _consumerChannel.BasicNackAsync(eventArgs.DeliveryTag, multiple: false, requeue: true);
+
+            _logger.WarningUnknownEvent(eventName);
+
+            return;
+        }
+
         var message = @event.ToString();
 
         try
@@ -374,12 +385,12 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
                                 autoDelete: false,
                                 arguments: arguments);
 
-        channel.CallbackException += RecreateChannel;
+        channel.CallbackExceptionAsync += RecreateChannel;
 
         return channel;
     }
 
-    private async void RecreateChannel(object sender, CallbackExceptionEventArgs e)
+    private async Task RecreateChannel(object sender, CallbackExceptionEventArgs e)
     {
         _logger.WarningCallbackException(e.Exception);
 
@@ -399,6 +410,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
     private IntegrationEvent GetEvent(string eventName, byte[] serializedMessage)
     {
         var eventType = _subsManager.GetEventTypeByName(eventName);
+
+        if (eventType == null) return null;
 
         var integrationEvent = (IntegrationEvent)_serializer.Deserialize(serializedMessage, eventType);
 

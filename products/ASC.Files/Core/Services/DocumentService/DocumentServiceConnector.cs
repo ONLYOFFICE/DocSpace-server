@@ -136,7 +136,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 scriptUrl = await pathProvider.GetTempUrlAsync(stream, ".docbuilder");
             }
             scriptUrl = await ReplaceCommunityAddressAsync(scriptUrl);
-            requestKey = null;
+            requestKey = scriptUrl;
         }
 
         logger.DebugDocServiceBuilderRequestKey(requestKey, isAsync);

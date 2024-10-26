@@ -32,16 +32,20 @@ public class AccountsControllerInternal(
     EmployeeFullDtoHelper employeeFullDtoHelper,
     GroupFullDtoHelper groupFullDtoHelper,
     ApiContext apiContext,
-    FileSecurity fileSecurity)
-    : AccountsController<int>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity);
+    FileSecurity fileSecurity,
+    AuthContext authContext,
+    UserManager userManager)
+    : AccountsController<int>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity, authContext, userManager);
 
 public class AccountsControllerThirdParty(
     IDaoFactory daoFactory,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     GroupFullDtoHelper groupFullDtoHelper,
     ApiContext apiContext,
-    FileSecurity fileSecurity)
-    : AccountsController<string>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity);
+    FileSecurity fileSecurity,
+    AuthContext authContext,
+    UserManager userManager)
+    : AccountsController<string>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity, authContext, userManager);
 
 [Scope]
 [DefaultRoute]
@@ -52,25 +56,33 @@ public class AccountsController<T>(
     EmployeeFullDtoHelper employeeFullDtoHelper,
     GroupFullDtoHelper groupFullDtoHelper,
     ApiContext apiContext,
-    FileSecurity fileSecurity) : ControllerBase
+    FileSecurity fileSecurity,
+    AuthContext authContext,
+    UserManager userManager) : ControllerBase
 {
     [HttpGet("room/{id}/search")]
-    public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(T id,
+    public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(
+        T id,
         EmployeeStatus? employeeStatus,
         EmployeeActivationStatus? activationStatus,
-        bool? excludeShared)
+        bool? excludeShared,
+        bool? invitedByMe,
+        Guid? inviterId,
+        Area area = Area.All)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
 
         if (!await fileSecurity.CanEditAccessAsync(room))
         {
-            throw new SecurityException();
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
         var separator = apiContext.FilterSeparator;
+
+        var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
 
         if (string.IsNullOrEmpty(text))
         {
@@ -81,7 +93,17 @@ public class AccountsController<T>(
         var securityDao = daoFactory.GetSecurityDao<T>();
 
         var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(room, text, excludeShared ?? false);
-        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, text, employeeStatus, activationStatus, excludeShared ?? false, separator);
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room,
+            text,
+            employeeStatus,
+            activationStatus,
+            excludeShared ?? false,
+            separator,
+            includeStrangers,
+            area,
+            invitedByMe,
+            inviterId);
+        
         var total = totalGroups + totalUsers;
         
         apiContext.SetCount(Math.Min(Math.Max(total - offset, 0), count)).SetTotalCount(total);
@@ -97,8 +119,18 @@ public class AccountsController<T>(
         var usersCount = count - groupsCount;
         var usersOffset = Math.Max(groupsCount > 0 ? 0 : offset - totalGroups, 0);
 
-        await foreach (var item in securityDao.GetUsersWithSharedAsync(room, text, employeeStatus, activationStatus, excludeShared ?? false, 
-                           separator, usersOffset, usersCount))
+        await foreach (var item in securityDao.GetUsersWithSharedAsync(room,
+                           text,
+                           employeeStatus,
+                           activationStatus,
+                           excludeShared ?? false,
+                           separator,
+                           includeStrangers,
+                           area,
+                           invitedByMe,
+                           inviterId,
+                           usersOffset,
+                           usersCount))
         {
             yield return await employeeFullDtoHelper.GetFullAsync(item.UserInfo, item.Shared);
         }

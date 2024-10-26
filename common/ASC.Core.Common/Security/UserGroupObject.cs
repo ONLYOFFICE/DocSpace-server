@@ -48,14 +48,14 @@ public class UserGroupObject : SecurityObject
             return [AuthConstants.DocSpaceAdmin];
         }
 
+        if (_groupId == Constants.GroupGuest.ID)
+        {
+            return [AuthConstants.Guest];
+        }
+
         if (_groupId == Constants.GroupUser.ID)
         {
             return [AuthConstants.User];
-        }
-
-        if (_groupId == Constants.GroupCollaborator.ID)
-        {
-            return [AuthConstants.Collaborator];
         }
 
         return Array.Empty<IRole>();

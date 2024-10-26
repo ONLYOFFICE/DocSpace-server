@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
@@ -48,6 +46,7 @@ public class WebhooksConfigRequestsDto
 
     /// <summary>Secret key</summary>
     /// <type>System.String, System</type>
+    [StringLength(50)]
     public string SecretKey { get; set; }
 
     /// <summary>Enabled or not</summary>

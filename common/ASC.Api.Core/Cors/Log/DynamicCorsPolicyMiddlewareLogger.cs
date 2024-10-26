@@ -30,6 +30,6 @@ namespace ASC.Api.Core.Log;
 
 internal static partial class DynamicCorsPolicyMiddlewareLogger
 {
-    [LoggerMessage(Level = LogLevel.Warning, Message = "No cors policy found ")]
+    [LoggerMessage(LogLevel.Warning, "No cors policy found ")]
     public static partial void WarningNoCorsPolicyFound(this ILogger<DynamicCorsPolicyMiddleware> logger);
 }

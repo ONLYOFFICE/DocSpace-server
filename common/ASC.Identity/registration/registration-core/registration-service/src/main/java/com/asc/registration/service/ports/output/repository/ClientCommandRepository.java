@@ -47,6 +47,18 @@ public interface ClientCommandRepository {
   Client saveClient(Client client);
 
   /**
+   * Updates an existing client entity in the repository. This method replaces the current state of
+   * the client with the new values provided in the updated client entity.
+   *
+   * <p>The client is identified by its ID, and only the specified fields will be updated based on
+   * the provided {@link Client} object.
+   *
+   * @param client The client entity containing the updated values.
+   * @return The updated client entity after it has been persisted.
+   */
+  Client updateClient(Client client);
+
+  /**
    * Regenerates the secret key for a specific client identified by tenant ID and client ID.
    *
    * @param tenantId The tenant ID to which the client belongs.

@@ -135,6 +135,7 @@ public abstract class FileEntryDto<T> : FileEntryDto
     public string OriginRoomTitle { get; set; }
     public bool CanShare { get; set; }
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
+    public string RequestToken { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)

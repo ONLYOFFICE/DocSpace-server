@@ -134,9 +134,12 @@ public class PortalController(
         {
             return string.Empty;
         }
+        
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, (int)employeeType + authContext.CurrentAccount.ID.ToString(), authContext.CurrentAccount.ID)
-                + $"&emplType={employeeType:d}";
+        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, 
+                (int)employeeType + authContext.CurrentAccount.ID.ToString() + tenant.Alias, 
+                authContext.CurrentAccount.ID) + $"&emplType={employeeType:d}";
 
         return await urlShortener.GetShortenLinkAsync(link);
     }
@@ -296,7 +299,7 @@ public class PortalController(
     [HttpGet("quota")]
     public async Task<TenantQuota> GetQuotaAsync()
     {        
-        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
@@ -304,7 +307,7 @@ public class PortalController(
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var result = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
-        if (await userManager.IsCollaboratorAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
             result.MaxTotalSize = 0;
         }

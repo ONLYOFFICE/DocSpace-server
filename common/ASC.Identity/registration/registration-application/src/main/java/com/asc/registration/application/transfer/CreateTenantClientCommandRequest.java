@@ -100,6 +100,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
   private String name;
 
   /** The description of the client. */
+  @Size(max = 255, message = "client description length is expected to be less than 256 characters")
   private String description;
 
   /**

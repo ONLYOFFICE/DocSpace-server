@@ -27,30 +27,30 @@
 namespace ASC.ActiveDirectory.Log;
 internal static partial class LdapSettingsCheckerLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "CheckSettings(acceptCertificate={acceptCertificate}): NovellLdapTlsCertificateRequestedException")]
+    [LoggerMessage(LogLevel.Error, "CheckSettings(acceptCertificate={acceptCertificate}): NovellLdapTlsCertificateRequestedException")]
     public static partial void ErrorNovellLdapTlsCertificateRequestedException(this ILogger<LdapSettingsChecker> logger, bool acceptCertificate, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "CheckSettings(): NotSupportedException")]
+    [LoggerMessage(LogLevel.Error, "CheckSettings(): NotSupportedException")]
     public static partial void ErrorNotSupportedException(this ILogger<LdapSettingsChecker> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "CheckSettings(): SocketException")]
+    [LoggerMessage(LogLevel.Error, "CheckSettings(): SocketException")]
     public static partial void ErrorSocketException(this ILogger<LdapSettingsChecker> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "CheckSettings(): ArgumentException")]
+    [LoggerMessage(LogLevel.Error, "CheckSettings(): ArgumentException")]
     public static partial void ErrorArgumentException(this ILogger<LdapSettingsChecker> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "CheckSettings(): SecurityException")]
+    [LoggerMessage(LogLevel.Error, "CheckSettings(): SecurityException")]
     public static partial void ErrorSecurityException(this ILogger<LdapSettingsChecker> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "CheckSettings(): SystemException")]
+    [LoggerMessage(LogLevel.Error, "CheckSettings(): SystemException")]
     public static partial void ErrorSystemException(this ILogger<LdapSettingsChecker> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "CheckSettings(): Exception")]
+    [LoggerMessage(LogLevel.Error, "CheckSettings(): Exception")]
     public static partial void ErrorCheckSettingsException(this ILogger<LdapSettingsChecker> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Wrong User DN parameter: {userDn}")]
+    [LoggerMessage(LogLevel.Error, "Wrong User DN parameter: {userDn}")]
     public static partial void ErrorWrongUserDn(this ILogger<LdapSettingsChecker> logger, string userDn, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Wrong Group DN parameter: {groupDn}")]
+    [LoggerMessage(LogLevel.Error, "Wrong Group DN parameter: {groupDn}")]
     public static partial void ErrorWrongGroupDn(this ILogger<LdapSettingsChecker> logger, string groupDn, Exception exception);
 }

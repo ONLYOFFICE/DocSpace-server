@@ -380,7 +380,7 @@
     <value>Počet administrátorů by neměl překročit {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Počet správců/oprávněných uživatelů</value>
+    <value>Počet správců</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatické zálohování a obnovení</value>
@@ -1037,7 +1037,7 @@
     <value>Překročení kvóty uživatelského prostoru</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Přidání administrátorů/správců:</value>
+    <value>Přidání administrátorů:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Limit pozvánek je překročen</value>
@@ -1056,5 +1056,11 @@
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>{0} na správce/oprávněného uživatele a možnost přidat prostor na vyžádání</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Nepodařilo se nastavit kvótu na místnost. Zadaná hodnota je větší než celkové úložiště DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Nepodařilo se nastavit kvótu na uživatele. Zadaná hodnota je větší než celkové úložiště DocSpace.</value>
   </data>
 </root>

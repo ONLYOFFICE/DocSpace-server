@@ -822,9 +822,9 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
-        ///For payment questions, contact us at sales@onlyoffice.com. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
         ///
-        ///*You can use all the features available at the moment of the license pu [rest of string was truncated]&quot;;.
+        ///*You can use all the features available at the mo [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_lifetime_before_expiration {
             get {
@@ -839,9 +839,9 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
-        ///For payment questions, contact us at sales@onlyoffice.com. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
         ///
-        ///*You can use all the features available at the moment of the license purchase for a [rest of string was truncated]&quot;;.
+        ///*You can use all the features available at the moment of the  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_lifetime_expiration {
             get {
@@ -1600,21 +1600,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_request_tariff1 {
             get {
                 return ResourceManager.GetString("pattern_request_tariff1", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to The DocSpace administrator noticed suspicious activity from your account and disabled all active sessions. Your password was reset. 
-        ///
-        ///Please click the button below to set a new password for your DocSpace account.
-        ///
-        ///$OrangeButton
-        ///
-        ///The link is valid for 7 days..
-        /// </summary>
-        public static string pattern_reset_password {
-            get {
-                return ResourceManager.GetString("pattern_reset_password", resourceCulture);
             }
         }
         
@@ -2697,15 +2682,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_request_tariff {
             get {
                 return ResourceManager.GetString("subject_request_tariff", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Reset your password.
-        /// </summary>
-        public static string subject_reset_password {
-            get {
-                return ResourceManager.GetString("subject_reset_password", resourceCulture);
             }
         }
         

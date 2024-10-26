@@ -162,6 +162,7 @@ app.get("/", (req, res) => {
   const systemHub = require("./app/hubs/system.js")(io, filesHub, usersHub);
 
   app.use("/controller", require("./app/controllers")(filesHub, usersHub));
+  app.use("/", require("./app/controllers/healthCheck.js") ());
 
 httpServer.listen(port, () => winston.info(`Server started on port: ${port}`));
 

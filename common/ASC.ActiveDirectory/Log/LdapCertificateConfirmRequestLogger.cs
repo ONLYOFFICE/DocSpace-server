@@ -27,12 +27,12 @@
 namespace ASC.ActiveDirectory.Log;
 internal static partial class LdapCertificateConfirmRequestLogger
 {
-    [LoggerMessage(Level = LogLevel.Warning, Message = "GetLdapCertProblems: {SslPolicyErrors}")]
+    [LoggerMessage(LogLevel.Warning, "GetLdapCertProblems: {SslPolicyErrors}")]
     public static partial void WarnGetLdapCertProblems(this ILogger logger, string SslPolicyErrors);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetLdapCertProblems() failed")]
+    [LoggerMessage(LogLevel.Error, "GetLdapCertProblems() failed")]
     public static partial void ErrorGetLdapCertProblems(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "LdapCertificateConfirmRequest.FromCert() failed")]
+    [LoggerMessage(LogLevel.Error, "LdapCertificateConfirmRequest.FromCert() failed")]
     public static partial void ErrorLdapCertificateConfirmRequest(this ILogger logger, Exception exception);
 }

@@ -64,9 +64,9 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         try
         {
-//            _connection.ConnectionShutdown -= OnConnectionShutdown;
-//            _connection.CallbackException -= OnCallbackException;
-//            _connection.ConnectionBlocked -= OnConnectionBlocked;
+            _connection.ConnectionShutdownAsync -= OnConnectionShutdownAsync;
+            _connection.CallbackExceptionAsync -= OnCallbackExceptionAsync;
+            _connection.ConnectionBlockedAsync -= OnConnectionBlockedAsync;
 
             _connection.Dispose();
         }
@@ -94,13 +94,13 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         var policy = Policy.Handle<SocketException>()
             .Or<BrokerUnreachableException>()
-            .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+            .WaitAndRetryAsync(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
             {
                 _logger.WarningRabbitMQCouldNotConnect(time.TotalSeconds, ex);
             }
         );
 
-        await policy.Execute(async () =>
+        await policy.ExecuteAsync(async () =>
         {
             _connection = await _connectionFactory
                     .CreateConnectionAsync();
@@ -108,9 +108,9 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         if (IsConnected)
         {
-            _connection.ConnectionShutdown += async (s,e) => { await OnConnectionShutdownAsync(s, e); };
-            _connection.CallbackException += async (s, e) => { await OnCallbackExceptionAsync(s, e); };
-            _connection.ConnectionBlocked += async (s, e) => { await OnConnectionBlockedAsync(s, e); };
+            _connection.ConnectionShutdownAsync += OnConnectionShutdownAsync;
+            _connection.CallbackExceptionAsync += OnCallbackExceptionAsync;
+            _connection.ConnectionBlockedAsync += OnConnectionBlockedAsync;
 
             _logger.InformationRabbitMQAcquiredPersistentConnection(_connection.Endpoint.HostName);
 

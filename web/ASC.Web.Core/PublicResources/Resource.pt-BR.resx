@@ -458,7 +458,7 @@
     <value>O número de administradores não deve exceder {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Número de administradores/usuários avançados</value>
+    <value>Número de administradores</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Backup e recuperação automática</value>
@@ -1046,7 +1046,7 @@
     <value>Usuário desativado</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administradores/usuários avançados adicionados:</value>
+    <value>Administradores adicionados:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>O limite de convites foi excedido</value>
@@ -1056,5 +1056,11 @@
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Este e-mail está anexado ao usuário {0} como um provedor terceirizado</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota por sala. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota por usuário. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
   </data>
 </root>

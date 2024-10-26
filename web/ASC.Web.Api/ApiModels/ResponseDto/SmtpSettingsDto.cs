@@ -38,6 +38,7 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// <summary>Port</summary>
     /// <type>System.Nullable{System.Int32}, System</type>
     /// <example>25</example>
+    [Range(1, 65535)]
     public int? Port { get; set; }
 
     /// <summary>Sender address</summary>
@@ -53,6 +54,7 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// <summary>Credentials username</summary>
     /// <type>System.String, System</type>
     /// <example>notify@example.com</example>
+    [StringLength(255)]
     public string CredentialsUserName { get; set; }
 
     /// <summary>Credentials user password</summary>

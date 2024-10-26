@@ -27,27 +27,27 @@
 namespace ASC.Data.Storage.Log;
 internal static partial class EncryptionOperationLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Storage already {status}")]
+    [LoggerMessage(LogLevel.Debug, "Storage already {status}")]
     public static partial void DebugStorageAlready(this ILogger logger, EncryprtionStatus status); 
     
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Percentage: {percentage}")]
+    [LoggerMessage(LogLevel.Debug, "Percentage: {percentage}")]
     public static partial void DebugPercentage(this ILogger logger, double percentage);    
     
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Save new EncryptionSettings")]
+    [LoggerMessage(LogLevel.Debug, "Save new EncryptionSettings")]
     public static partial void DebugSaveNewEncryptionSettings(this ILogger logger);   
     
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Tenant {tenantAlias} SetStatus Active")]
+    [LoggerMessage(LogLevel.Debug, "Tenant {tenantAlias} SetStatus Active")]
     public static partial void DebugTenantSetStatusActive(this ILogger logger, string tenantAlias);  
     
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Tenant {tenantAlias} SendStorageEncryptionSuccess")]
+    [LoggerMessage(LogLevel.Debug, "Tenant {tenantAlias} SendStorageEncryptionSuccess")]
     public static partial void DebugTenantSendStorageEncryptionSuccess(this ILogger logger, string tenantAlias);
     
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Tenant {tenantAlias} SendStorageEncryptionError")]
+    [LoggerMessage(LogLevel.Debug, "Tenant {tenantAlias} SendStorageEncryptionError")]
     public static partial void DebugTenantSendStorageEncryptionError(this ILogger logger, string tenantAlias);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "EncryptionOperation")]
+    [LoggerMessage(LogLevel.Error, "EncryptionOperation")]
     public static partial void ErrorEncryptionOperation(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "{logItem}")]
+    [LoggerMessage(LogLevel.Error, "{logItem}")]
     public static partial void ErrorLogItem(this ILogger logger, string logItem, Exception exception);
 }

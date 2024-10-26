@@ -92,9 +92,11 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(
             }
             yield break;
         }
+        
+        var children = (await dao.GetChildrenAsync(folderId)).Select(dao.MakeId);
 
         var folderFileIds = new[] { parentFolder.Id }
-            .Concat(await dao.GetChildrenAsync(folderId));
+            .Concat(children);
 
         foreach (var e in tags.Where(tag => folderFileIds.Contains(tag.EntryId.ToString())))
         {

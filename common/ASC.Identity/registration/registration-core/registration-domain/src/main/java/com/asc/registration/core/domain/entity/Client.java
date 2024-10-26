@@ -61,6 +61,7 @@ public class Client extends AggregateRoot<ClientId> {
   private ClientModificationInfo clientModificationInfo;
   private ClientStatus clientStatus;
   private ClientVisibility clientVisibility;
+  private int version;
 
   private Client(Builder builder) {
     super.setId(builder.id);
@@ -82,6 +83,7 @@ public class Client extends AggregateRoot<ClientId> {
     this.clientStatus = builder.clientStatus;
     this.clientVisibility =
         builder.clientVisibility == null ? ClientVisibility.PRIVATE : builder.clientVisibility;
+    this.version = builder.version;
   }
 
   /**
@@ -489,6 +491,15 @@ public class Client extends AggregateRoot<ClientId> {
     return this.clientVisibility;
   }
 
+  /**
+   * Returns the client version.
+   *
+   * @return the client version
+   */
+  public int getVersion() {
+    return this.version;
+  }
+
   /** Builder class for creating instances of {@link Client}. */
   public static final class Builder {
     private ClientId id;
@@ -503,6 +514,7 @@ public class Client extends AggregateRoot<ClientId> {
     private ClientModificationInfo clientModificationInfo;
     private ClientStatus clientStatus;
     private ClientVisibility clientVisibility;
+    private int version;
 
     private Builder() {
       this.authenticationMethods = new HashSet<>();
@@ -574,6 +586,11 @@ public class Client extends AggregateRoot<ClientId> {
 
     public Builder clientVisibility(ClientVisibility val) {
       this.clientVisibility = val;
+      return this;
+    }
+
+    public Builder clientVersion(int val) {
+      this.version = val;
       return this;
     }
 

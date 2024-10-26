@@ -27,9 +27,9 @@
 
 package com.asc.registration.application.configuration;
 
-import com.asc.registration.application.security.filters.AscCookieAuthenticationFilter;
-import com.asc.registration.application.security.filters.RateLimiterFilter;
-import com.asc.registration.application.security.providers.AscAuthenticationProvider;
+import com.asc.registration.application.security.filter.AscCookieAuthenticationFilter;
+import com.asc.registration.application.security.filter.RateLimiterFilter;
+import com.asc.registration.application.security.provider.AscAuthenticationProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

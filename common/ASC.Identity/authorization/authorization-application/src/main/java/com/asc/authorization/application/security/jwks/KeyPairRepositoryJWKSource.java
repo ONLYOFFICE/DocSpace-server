@@ -27,10 +27,10 @@
 
 package com.asc.authorization.application.security.jwks;
 
-import com.asc.authorization.application.configuration.security.AscOAuth2RegisteredClientConfiguration;
+import com.asc.authorization.application.configuration.security.RegisteredClientConfiguration;
 import com.asc.authorization.application.mapper.KeyPairMapper;
-import com.asc.authorization.application.security.oauth.authorities.TenantAuthority;
-import com.asc.authorization.application.security.oauth.services.AscKeyPairService;
+import com.asc.authorization.application.security.authority.TenantAuthority;
+import com.asc.authorization.application.security.service.AscKeyPairService;
 import com.asc.authorization.data.key.entity.KeyPair;
 import com.asc.common.core.domain.value.KeyPairType;
 import com.nimbusds.jose.KeySourceException;
@@ -73,7 +73,7 @@ import org.springframework.stereotype.Component;
 public class KeyPairRepositoryJWKSource
     implements JWKSource<SecurityContext>, OAuth2TokenCustomizer<JwtEncodingContext> {
 
-  private final AscOAuth2RegisteredClientConfiguration registeredClientConfiguration;
+  private final RegisteredClientConfiguration registeredClientConfiguration;
 
   @Autowired
   @Qualifier("ec")

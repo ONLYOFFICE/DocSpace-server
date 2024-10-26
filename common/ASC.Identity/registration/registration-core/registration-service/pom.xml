@@ -33,6 +33,12 @@
             <artifactId>spring-tx</artifactId>
         </dependency>
 
+        <!-- Spring Retry Dependency -->
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+
         <!-- Testing Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>

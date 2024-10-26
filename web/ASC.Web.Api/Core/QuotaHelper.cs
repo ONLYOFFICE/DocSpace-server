@@ -29,30 +29,35 @@ using ASC.Core.Common.Quota.Features;
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class QuotaHelper(TenantManager tenantManager, IServiceProvider serviceProvider, CoreBaseSettings coreBaseSettings, SettingsManager settingsManager,
-        UserManager userManager,
-        AuthContext authContext)
+public class QuotaHelper(
+    TenantManager tenantManager,
+    IServiceProvider serviceProvider,
+    CoreBaseSettings coreBaseSettings,
+    SettingsManager settingsManager,
+    UserManager userManager, 
+    AuthContext authContext)
 {
     public async IAsyncEnumerable<QuotaDto> GetQuotasAsync()
     {
         var quotaList = await tenantManager.GetTenantQuotasAsync(false);
-
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        
         foreach (var quota in quotaList)
         {
-            yield return await ToQuotaDto(quota);
+            yield return await ToQuotaDto(quota, userType);
         }
     }
 
     public async Task<QuotaDto> GetCurrentQuotaAsync(bool refresh = false)
     {
         var quota = await tenantManager.GetCurrentTenantQuotaAsync(refresh);
-
-        return await ToQuotaDto(quota, true);
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        return await ToQuotaDto(quota, userType, true);
     }
 
-    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, bool getUsed = false)
+    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false)
     {
-        var features = await GetFeatures(quota, getUsed).ToListAsync();
+        var features = await GetFeatures(quota, employeeType, getUsed).ToListAsync();
 
         var result =  new QuotaDto
         {
@@ -88,7 +93,7 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
         return result;
     }
 
-    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, bool getUsed)
+    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, EmployeeType employeeType, bool getUsed)
     {
         var assembly = GetType().Assembly;
 
@@ -100,6 +105,11 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
                                 return coreBaseSettings.Standalone;
                             }
 
+                            if (r.EmployeeType == EmployeeType.DocSpaceAdmin && employeeType != EmployeeType.DocSpaceAdmin)
+                            {
+                                return false;
+                            }
+                            
                             return r.Visible;
                         })
                     .OrderBy(r => r.Order))
@@ -117,9 +127,9 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
             result.Id = feature.Name;
 
             object used = null;
-            var currentUserId = authContext.CurrentAccount.ID;
-            var isUsedAvailable = !await userManager.IsUserAsync(currentUserId) && 
-                                  (!await userManager.IsCollaboratorAsync(currentUserId) || feature.Name == MaxTotalSizeFeature.MaxTotalSizeFeatureName);
+            var isUsedAvailable = employeeType != EmployeeType.Guest && 
+                                  (employeeType != EmployeeType.User || 
+                                   feature.Name == MaxTotalSizeFeature.MaxTotalSizeFeatureName);
 
             if (feature is TenantQuotaFeatureSize size)
             {

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 using ASC.Data.Backup.EF.Model;
 
 namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
@@ -58,7 +60,7 @@ public class BackupRequestedIntegrationEventHandler(
                 {
                     BackupsStored = @event.BackupsStored,
                     StorageBasePath = @event.StorageBasePath,
-                    StorageParams = JsonConvert.SerializeObject(@event.StorageParams),
+                    StorageParams = JsonSerializer.Serialize(@event.StorageParams),
                     StorageType = @event.StorageType,
                     TenantId = @event.TenantId,
                     Dump = @event.Dump

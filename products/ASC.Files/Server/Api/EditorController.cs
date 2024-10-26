@@ -152,6 +152,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <param type="System.Boolean, System" name="view">Specifies if a document will be opened for viewing only or not</param>
     /// <param type="ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core" name="editorType">Editor type (Desktop, Mobile, Embedded)</param>
     /// <param type="System.Boolean, System" name="edit"></param>
+    /// <param type="System.Boolean, System" name="fill"></param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConfigurationDto, ASC.Files.Core">Configuration parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
@@ -160,7 +161,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
-    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, bool view, EditorType editorType, bool edit)
+    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, bool view, EditorType editorType, bool edit, bool fill)
     {
         var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(fileId, version);
         var fileType = FileUtility.GetFileTypeByFileName(file.Title);
@@ -201,8 +202,9 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         canEdit = false;
                         canFill = true;
                         isSubmitOnly = true;
-                        editorType = EditorType.Embedded;
-                        fillingSessionId = Guid.NewGuid().ToString("N");
+                        editorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+
+                        fillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
                         break;
                     }
 
@@ -231,10 +233,10 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
                                 canEdit = false;
                                 canFill = true;
-                                editorType = EditorType.Embedded;
+                                editorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
 
                                 file = formDraft;
-                                fillingSessionId = Guid.NewGuid().ToString("N");
+                                fillingSessionId = string.Format("{0}_{1}", formDraft.Id, securityContext.CurrentAccount.ID);
                             }
                             else
                             {
@@ -249,19 +251,19 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 case FolderType.FormFillingFolderInProgress:
                     canEdit = false;
                     canFill = true;
-                    editorType = EditorType.Embedded;
-                    fillingSessionId = Guid.NewGuid().ToString("N");
+                    editorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+                    fillingSessionId = string.Format("{0}_{1}", file.Id, securityContext.CurrentAccount.ID);
                     break;
 
                 case FolderType.FormFillingFolderDone:
-                    editorType = EditorType.Embedded;
+                    editorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
                     break;
 
                 default:
-                    canEdit = edit;
-                    canFill = !edit;
+                    canEdit = !fill;
+                    canFill = fill;
                     break;
             }
         }
@@ -288,7 +290,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
 
-        var result = await configurationConverter.Convert(configuration, file, fillingSessionId);
+        var result = await configurationConverter.Convert(configuration, file);
         
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
@@ -297,7 +299,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
             if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
             {
-                await entryManager.MarkAsRecentByLink(file, linkId);
+                await entryManager.MarkFileAsRecentByLink(file, linkId);
             }
             else
             {
@@ -313,6 +315,13 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         if (!string.IsNullOrEmpty(fillingSessionId))
         {
             result.FillingSessionId = fillingSessionId;
+            if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+            {
+                result.EditorConfig.User = new UserConfig
+                {
+                    Id = fillingSessionId
+                };
+            }
         }
        
         return result;

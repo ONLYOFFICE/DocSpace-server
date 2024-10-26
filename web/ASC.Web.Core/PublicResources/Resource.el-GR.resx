@@ -218,7 +218,7 @@
     <value>Ο αριθμός των διαχειριστών πρέπει να είναι ίσος ή μικρότερος από {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Ο αριθμός των διαχειριστών/χρηστών ισχύο</value>
+    <value>Ο αριθμός των διαχειριστών</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Αυτόματη δημιουργία αντιγράφων ασφαλείας και ανάκτηση</value>
@@ -1046,7 +1046,7 @@
     <value>Η εντολή αλλαγής κωδικού πρόσβασης έχει αποσταλεί στη διεύθυνση email {0}.</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Οι Διαχειριστές/Εξουσιοδοτημένοι χρήστες προστέθηκαν:</value>
+    <value>Οι Διαχειριστές προστέθηκαν:</value>
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Αυτό το email επισυνάπτεται στον χρήστη {0} ως πάροχος τρίτου μέρους</value>

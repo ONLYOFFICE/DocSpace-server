@@ -57,6 +57,6 @@ public class CountUserStatistic(IServiceProvider serviceProvider) : ITenantQuota
     public async Task<int> GetValueAsync()
     {
         var userManager = serviceProvider.GetService<UserManager>();
-        return (await userManager.GetUsersByGroupAsync(Constants.GroupUser.ID)).Length;
+        return (await userManager.GetUsersByGroupAsync(Constants.GroupGuest.ID)).Length;
     }
 }

@@ -380,7 +380,7 @@
     <value>Yönetici sayısı {0} değerini geçmemelidir</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Yönetici/uzman kullanıcı sayısı</value>
+    <value>Yönetici sayısı</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Otomatik yedekleme ve kurtarma</value>
@@ -1037,7 +1037,7 @@
     <value>Kullanıcı alanı kotası aşıldı</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Yöneticiler/Uzman kullanıcılar eklendi:</value>
+    <value>Yöneticiler eklendi:</value>
   </data>
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>Şifre değiştirme talimatı {0} e-posta adresine gönderildi.</value>

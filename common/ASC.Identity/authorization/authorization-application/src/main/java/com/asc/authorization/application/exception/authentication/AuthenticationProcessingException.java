@@ -27,7 +27,7 @@
 
 package com.asc.authorization.application.exception.authentication;
 
-import com.asc.authorization.application.security.oauth.errors.AuthenticationError;
+import com.asc.authorization.application.security.error.AuthenticationError;
 import lombok.Getter;
 import org.springframework.security.core.AuthenticationException;
 

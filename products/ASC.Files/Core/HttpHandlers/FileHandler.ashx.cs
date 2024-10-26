@@ -57,7 +57,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility,
     Global global,
     EmailValidationKeyProvider emailValidationKeyProvider,
-    CoreBaseSettings coreBaseSettings,
     GlobalFolderHelper globalFolderHelper,
     PathProvider pathProvider,
     UserManager userManager,
@@ -336,16 +335,18 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         var ext = FileUtility.GetFileExtension(file.Title);
 
                         var outType = (context.Request.Query[FilesLinkUtility.OutType].FirstOrDefault() ?? "").Trim();
-                        var extsConvertibleAsync = await fileUtility.GetExtsConvertibleAsync();
-                        if (!string.IsNullOrEmpty(outType) && extsConvertibleAsync.TryGetValue(ext, out var value) && value.Contains(outType))
+                        var extsConvertible = await fileUtility.GetExtsConvertibleAsync();
+                        var convertible = extsConvertible.TryGetValue(ext, out var value);
+
+                        if (!string.IsNullOrEmpty(outType) && convertible && value.Contains(outType))
                         {
                             ext = outType;
                         }
 
-                        if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)))
+                        if (convertible)
                         {
                             var folderDao = daoFactory.GetFolderDao<T>();
-                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao) && value.Contains(FileUtility.WatermarkedDocumentExt))
                             {
                                 ext = FileUtility.WatermarkedDocumentExt;
                             }
@@ -480,7 +481,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var linkId = await externalShare.GetLinkIdAsync();
             if (linkId != Guid.Empty)
             {
-                await entryManager.MarkAsRecentByLink(file, linkId);
+                await entryManager.MarkFileAsRecentByLink(file, linkId);
             }
         }
     }
@@ -779,18 +780,18 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
             var toExtension = FileUtility.GetFileExtension(fileName);
             var fileExtension = fileUtility.GetInternalExtension(toExtension);
-            fileName = "new" + fileExtension;
-            var path = FileConstant.NewDocPath
-                       + (coreBaseSettings.CustomMode ? "ru-RU/" : "en-US/")
-                       + fileName;
 
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
+            var path = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExtension);
+
             if (!await storeTemplate.IsFileAsync("", path))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_FileNotFound);
                 return;
             }
+
+            fileName = Path.GetFileName(path);
 
             context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(fileName));
             context.Response.ContentType = MimeMapping.GetMimeMapping(fileName);
@@ -1336,19 +1337,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             }
         }
 
-        var templateName = "new" + fileExt;
-
-        var templatePath = FileConstant.NewDocPath + lang + "/";
-        if (!await storeTemplate.IsDirectoryAsync(templatePath))
-        {
-            templatePath = FileConstant.NewDocPath + "en-US/";
-        }
-
-        templatePath += templateName;
+        var templatePath = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, lang);
 
         if (string.IsNullOrEmpty(fileTitle))
         {
-            fileTitle = templateName;
+            fileTitle = Path.GetFileName(templatePath);
         }
         else
         {
@@ -1492,7 +1485,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             logger.ErrorDocServiceTrackAuth(validateResult, FilesLinkUtility.AuthKey, auth);
             throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
         }
-        var fillingSessionId = context.Request.Query[FilesLinkUtility.FillingSessionId];
         TrackerData fileData;
         try
         {
@@ -1523,6 +1515,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             logger.ErrorDocServiceTrackReadBody(e);
             throw new HttpException((int)HttpStatusCode.BadRequest, e.Message);
         }
+
+        var lastfileDataAction = fileData.Actions?.LastOrDefault();
+        var fillingSessionId = lastfileDataAction != null
+            ? (lastfileDataAction.UserId.StartsWith(FileConstant.AnonFillingSession)
+                ? lastfileDataAction.UserId
+                : $"{fileId}_{lastfileDataAction.UserId}")
+            : string.Empty;
 
         if (!string.IsNullOrEmpty(fileUtility.SignatureSecret))
         {

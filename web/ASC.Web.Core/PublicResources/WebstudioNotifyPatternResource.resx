@@ -2477,7 +2477,7 @@ Your license for ONLYOFFICE DocSpace Enterprise will expire in 7 days. It means 
 
 To update the license, please contact your dedicated sales manager directly or reach out to us via "${__SalesEmail}":"mailto:${__SalesEmail}".
 
-For payment questions, contact us at sales@onlyoffice.com. For solving any technical problems, use "${__SupportLink}":"${__SupportLink}".
+For payment questions, contact us at "${__SalesEmail}":"mailto:${__SalesEmail}". For solving any technical problems, use "${__SupportLink}":"${__SupportLink}".
 
 *You can use all the features available at the moment of the license purchase for an unlimited period of time.
 
@@ -2493,7 +2493,7 @@ Your license for ONLYOFFICE DocSpace Enterprise expires today. It means updates 
 
 To update the license, please contact your dedicated sales manager directly or reach out to us via "${__SalesEmail}":"mailto:${__SalesEmail}".
 
-For payment questions, contact us at sales@onlyoffice.com. For solving any technical problems, use "${__SupportLink}":"${__SupportLink}".
+For payment questions, contact us at "${__SalesEmail}":"mailto:${__SalesEmail}". For solving any technical problems, use "${__SupportLink}":"${__SupportLink}".
 
 *You can use all the features available at the moment of the license purchase for an unlimited period of time.
 

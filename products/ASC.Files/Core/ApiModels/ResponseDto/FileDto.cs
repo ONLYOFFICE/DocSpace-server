@@ -127,7 +127,6 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
-    public string RequestToken { get; set; }
     public ApiDateTime LastOpened { get; set; }
     public ApiDateTime Expired { get; set; }
 
@@ -268,9 +267,9 @@ public class FileDtoHelper(
                 result.IsForm = file.IsForm;
             }
 
-            if (ace is { Access: FileShare.FillForms } || result.IsForm == false || currentFolder.FolderType == FolderType.FormFillingFolderInProgress)
+            if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType) || currentFolder.FolderType == FolderType.FillingFormsRoom)
             {
-                result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
+                result.Security[FileSecurity.FilesSecurityActions.Edit] = false;
             }
 
             result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;

@@ -2851,7 +2851,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Number of admins/power users.
+        ///   Looks up a localized string similar to Number of admins.
         /// </summary>
         public static string TariffsFeature_manager_price_count {
             get {
@@ -2941,7 +2941,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Admins/Power users added:.
+        ///   Looks up a localized string similar to Admins added:.
         /// </summary>
         public static string TariffsFeature_used_manager {
             get {

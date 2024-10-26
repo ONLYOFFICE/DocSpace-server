@@ -170,7 +170,7 @@ public class FilesMessageService(
             throw new ArgumentException(null, nameof(action));
         }
         
-        var folderDao = daoFactory.GetFolderDao<int>();
+        var folderDao = daoFactory.GetCacheFolderDao<int>();
         var fromParents = await folderDao.GetParentFoldersAsync(from.Id).ToListAsync();
         
         var rootFolderTitle = GetRootFolderTitle(target.RootFolderType);
@@ -411,6 +411,12 @@ public class FilesMessageService(
         desc.ParentType = parentType.HasValue 
             ? (int)parentType.Value 
             : (int)parent.FolderType;
+
+        if (entry.FileEntryType == FileEntryType.Folder)
+        {
+            var f = entry as Folder<int>;
+            desc.Type = (int)f.FolderType;
+        }
 
         return new FileEntryData(JsonSerializer.Serialize(desc, _serializerOptions), references);
     }

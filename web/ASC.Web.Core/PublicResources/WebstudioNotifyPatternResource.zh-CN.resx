@@ -1763,4 +1763,206 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>立即购买</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>设置密码</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间开发者版宽限期已激活</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间开发者版许可证即将到期</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间开发者版宽限期即将到期</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间开发者版已停用</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版宽限期已激活 </value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版许可证即将到期</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版宽限期即将到期</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版已停用</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版许可证即将到期</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版许可证将于今日到期</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间开发者版许可证于今日到期。
+
+我们已为您激活 $PaymentDelay 天的宽限期。在此期间，文档编辑的访问数量限制为20个同时连接（且不再提供支持和更新）。
+
+若需要更新许可证，请直接联系您的专属销售经理，或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间开发者版许可证将在7天内到期。
+
+要更新许可证，请直接联系您的专属销售经理，或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间开发者版许可证的宽限期将在7天内到期。届时协作空间将无法使用。
+
+要更新许可证，请直接联系您的专属销售经理，或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间开发者版许可证的宽限期于今日到期。协作空间即将停用。
+
+要更新许可证，请直接联系您的专属销售经理，或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证于今日到期。
+
+我们已为您激活 *$PaymentDelay‎ 天的宽限期* 。在此期间，协作空间将仅为3名指定用户提供访问权限*（且不再提供支持和更新）。
+
+如需 *无限期* 使用购买的所有功能，我们建议您 *获取 ONLYOFFICE 协作空间企业版的终身许可证* （包括3年的支持和更新）：
+
+$OrangeButton
+
+您也可以直接联系您的专属销售经理进行许可证更新。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+*前3名打开文件进行编辑的用户的 ID 将被记录。可以同时编辑的文档数量没有限制。其他用户只能查看文档。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证将在7天内到期。
+
+如需 *无限期* 使用购买的所有功能，我们建议您 *获取 ONLYOFFICE 协作空间企业版的终身许可证* （包括3年的支持和更新）。
+
+$OrangeButton
+
+您也可以直接联系您的专属销售经理进行许可证更新。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证的宽限期将在7天内到期。届时协作空间将停用。
+
+如需 *无限期* 使用购买的全部功能，我们建议您 *获取 ONLYOFFICE 协作空间企业版的终身许可证* （包括3年的支持和更新）：
+
+$OrangeButton
+
+您也可以直接联系您的专属销售经理进行许可证更新。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证的宽限期于今日到期。协作空间即将停用。
+
+如需 *无限期* 使用购买的所有功能，我们建议您 *获取 ONLYOFFICE 协作空间企业版的终身许可证* （包括3年的支持和更新）：
+
+$OrangeButton
+
+您也可以直接联系您的专属销售经理进行许可证更新。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证将在7天内到期。届时更新和支持将停用。*
+
+若需要更新许可证，请直接联系您的专属销售经理或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+*您可以无限期使用购买的所有功能。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证于今日到期。更新和支持即将停用。
+
+若需要更新许可证，请直接联系您的专属销售经理或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+您可以无限期使用购买的所有功能。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>您好！请为您的 ONLYOFFICE 协作空间账户设置密码。点击下方按钮设置密码：
+
+$OrangeButton
+
+该链接有效期为7天。</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>设置 ONLYOFFICE 协作空间的密码</value>
+  </data>
 </root>

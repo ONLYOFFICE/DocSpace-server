@@ -103,6 +103,10 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>Counter</summary>
     /// <type>System.Nullable{System.Int64}, System</type>
     public long? UsedSpace { get; set; }
+    
+    public bool? External { get; set; }
+    public bool? PasswordProtected { get; set; }
+    public bool? Expired { get; set; }
 
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
 
@@ -148,7 +152,8 @@ public class FolderDtoHelper(
     TenantManager tenantManager,
     WatermarkManager watermarkManager,
     WatermarkDtoHelper watermarkHelper,
-    IMapper mapper)
+    IMapper mapper,
+    ExternalShare externalShare)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
@@ -216,6 +221,17 @@ public class FolderDtoHelper(
             
             var watermarkSettings = await watermarkManager.GetWatermarkAsync(folder);
             result.Watermark = watermarkHelper.Get(watermarkSettings);
+
+            if (folder.ShareRecord is { IsLink: true })
+            {
+                result.External = true;
+                result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
+                                           folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
+                                           !canRead;
+
+                result.Expired = folder.ShareRecord.Options?.IsExpired;
+                result.RequestToken = await externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
+            }
         }
 
         if (folder.Order != 0)
@@ -237,6 +253,22 @@ public class FolderDtoHelper(
         
         return result;
     }
+    
+    public async Task<FolderDto<T>> GetShortAsync<T>(Folder<T> folder)
+    {
+        var result = await GetFolderWrapperAsync(folder);
+        result.ParentId = folder.ParentId;
+
+        if (!DocSpaceHelper.IsRoom(folder.FolderType))
+        {
+            return result;
+        }
+
+        result.RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType);
+        result.Logo = await roomLogoManager.GetLogoAsync(folder);
+
+        return result;
+    }
 
     private async Task<FolderDto<T>> GetFolderWrapperAsync<T>(Folder<T> folder)
     {
@@ -253,8 +285,12 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        result.FilesCount = folder.FilesCount;
-        result.FoldersCount = folder.FoldersCount;
+        if (folder.FolderType != FolderType.VirtualRooms)
+        {
+            result.FilesCount = folder.FilesCount;
+            result.FoldersCount = folder.FoldersCount;
+        }
+
         result.IsShareable = folder.Shareable.NullIfDefault();
         result.IsFavorite = folder.IsFavorite.NullIfDefault();
         result.New = newBadges;

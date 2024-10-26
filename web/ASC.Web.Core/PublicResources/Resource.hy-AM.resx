@@ -133,7 +133,7 @@
     <value>Ադմինիստրատորների թիվը չպետք է գերազանցի {0}-ը</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Ադմինիստրատորների/հզոր օգտագործողների թիվը</value>
+    <value>Ադմինիստրատորների թիվը</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Հետևել օգտվողների մուտքերին &amp; գործողություն</value>
@@ -1105,7 +1105,7 @@
     <value>Օգտատերն անջատված է</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Ադմիններ/Հզոր օգտվողներ ավելացվել են՝</value>
+    <value>Ադմիններ ավելացվել են՝</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Հրավերների սահմանաչափը գերազանցված է</value>
@@ -1115,5 +1115,11 @@
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Այս նամակը կցված է {0} օգտատիրոջը՝ որպես երրորդ կողմի պրովայդեր</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Չհաջողվեց սահմանել քվոտա մեկ սենյակի համար: Մուտքագրված արժեքը մեծ է DocSpace-ի ընդհանուր պահեստից:</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Չհաջողվեց սահմանել յուրաքանչյուր օգտատիրոջ քվոտան: Մուտքագրված արժեքը մեծ է DocSpace-ի ընդհանուր պահեստից:</value>
   </data>
 </root>
