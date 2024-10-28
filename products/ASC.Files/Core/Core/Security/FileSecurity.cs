@@ -87,18 +87,18 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         SubjectType.User, [
                             FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Review,
-                            FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                            FileShare.Comment, FileShare.Read, FileShare.None
                         ]
                     },
                     {
                         SubjectType.Group, [
-                            FileShare.ContentCreator, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                            FileShare.ContentCreator, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
                         ]
                     },
                     {
                         SubjectType.InvitationLink, [
                             FileShare.ContentCreator, FileShare.Editing, FileShare.Review,
-                            FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                            FileShare.Comment, FileShare.Read, FileShare.None
                         ]
                     },
                     { SubjectType.ExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] },
