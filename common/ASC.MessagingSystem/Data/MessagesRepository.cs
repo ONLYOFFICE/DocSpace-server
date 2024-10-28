@@ -102,7 +102,7 @@ public class MessagesRepository(
         var loginEvent = mapper.Map<EventMessage, DbLoginEvent>(message);
 
         await dbContext.LoginEvents.AddAsync(loginEvent);
-        await dbContext.SaveChangesWithValidateAsync();
+        await dbContext.SaveChangesAsync();
 
         return loginEvent.Id;
     }
@@ -112,7 +112,7 @@ public class MessagesRepository(
         var auditEvent = mapper.Map<EventMessage, DbAuditEvent>(message);
 
         await dbContext.AuditEvents.AddAsync(auditEvent);
-        await dbContext.SaveChangesWithValidateAsync();
+        await dbContext.SaveChangesAsync();
 
         if (auditEvent.FilesReferences == null || auditEvent.FilesReferences.Count == 0)
         {
@@ -241,7 +241,7 @@ public class MessageSenderService(
                             }
                             
 
-                            await ef.SaveChangesWithValidateAsync(stoppingToken);
+                            await ef.SaveChangesAsync(stoppingToken);
 
                             if (references.Count <= 0)
                             {

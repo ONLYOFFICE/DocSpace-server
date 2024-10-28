@@ -576,7 +576,7 @@ internal class FileDao(
                     {                    
                         await filesDbContext.AddOrUpdateAsync(r => r.Files, toInsert);
                     }
-                    await filesDbContext.SaveChangesWithValidateAsync();
+                    await filesDbContext.SaveChangesAsync();
                     await tx.CommitAsync();
                 });
 
@@ -767,7 +767,7 @@ internal class FileDao(
                 toUpdate.ThumbnailStatus = file.ThumbnailStatus;
 
                 context.Update(toUpdate);
-                await context.SaveChangesWithValidateAsync();
+                await context.SaveChangesAsync();
 
                 await tx.CommitAsync();
             });
@@ -901,7 +901,7 @@ internal class FileDao(
 
             await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
 
-            await context.SaveChangesWithValidateAsync();
+            await context.SaveChangesAsync();
             await tx.CommitAsync();
 
             foreach (var folderId in fromFolders)
@@ -1222,7 +1222,7 @@ internal class FileDao(
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         filesDbContext.Update(toUpdate);
 
-        await filesDbContext.SaveChangesWithValidateAsync();
+        await filesDbContext.SaveChangesAsync();
 
         await factoryIndexer.UpdateAsync(toUpdate, true, r => r.Title, r => r.ModifiedBy, r => r.ModifiedOn);
 
@@ -1792,7 +1792,7 @@ internal class FileDao(
         }
 
         await filesDbContext.AddOrUpdateAsync(r => r.FilesProperties, new DbFilesProperties { TenantId = tenantId, EntryId = fileId.ToString(), Data = data });
-        await filesDbContext.SaveChangesWithValidateAsync();
+        await filesDbContext.SaveChangesAsync();
     }
 
     public async Task SetCustomOrder(int fileId, int parentFolderId, int order = 0)

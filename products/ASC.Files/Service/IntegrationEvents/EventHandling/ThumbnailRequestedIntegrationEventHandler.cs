@@ -73,7 +73,7 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
         }
 
         filesDbContext.UpdateRange(files);
-        await filesDbContext.SaveChangesWithValidateAsync();
+        await filesDbContext.SaveChangesAsync();
 
         return await files.ToAsyncEnumerable().SelectAwait(async r =>
         {

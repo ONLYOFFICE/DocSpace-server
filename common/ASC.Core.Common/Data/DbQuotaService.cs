@@ -50,7 +50,7 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
 
         await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
         await coreDbContext.AddOrUpdateAsync(q => q.Quotas, mapper.Map<TenantQuota, DbQuota>(quota));
-        await coreDbContext.SaveChangesWithValidateAsync();
+        await coreDbContext.SaveChangesAsync();
 
         return quota;
     }
@@ -64,7 +64,7 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
         if (quota != null)
         {
             coreDbContext.Quotas.Remove(quota);
-            await coreDbContext.SaveChangesWithValidateAsync();
+            await coreDbContext.SaveChangesAsync();
         }
     }
 
@@ -82,7 +82,7 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
         if (exist == null)
         {
             await coreDbContext.QuotaRows.AddAsync(dbTenantQuotaRow);
-            await coreDbContext.SaveChangesWithValidateAsync();
+            await coreDbContext.SaveChangesAsync();
         }
         else
         {
@@ -93,7 +93,7 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
             else
             {
                 await coreDbContext.AddOrUpdateAsync(q => q.QuotaRows, dbTenantQuotaRow);
-                await coreDbContext.SaveChangesWithValidateAsync();
+                await coreDbContext.SaveChangesAsync();
             }
         }
     }

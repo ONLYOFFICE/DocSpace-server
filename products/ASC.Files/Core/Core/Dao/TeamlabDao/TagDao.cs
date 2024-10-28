@@ -172,7 +172,7 @@ internal abstract class BaseTagDao<T>(
         tagDb.TenantId = tenantId;
 
         var tag = await filesDbContext.Tag.AddAsync(tagDb);
-        await filesDbContext.SaveChangesWithValidateAsync();
+        await filesDbContext.SaveChangesAsync();
 
         return mapper.Map<DbFilesTag, TagInfo>(tag.Entity);
     }
@@ -232,7 +232,7 @@ internal abstract class BaseTagDao<T>(
                     if (id == 0)
                     {
                         toAdd = internalFilesDbContext.Tag.Add(toAdd).Entity;
-                        await internalFilesDbContext.SaveChangesWithValidateAsync();
+                        await internalFilesDbContext.SaveChangesAsync();
                     }
 
                     cachedTags.Add(key, toAdd);
@@ -252,7 +252,7 @@ internal abstract class BaseTagDao<T>(
                     result.Add(t);
                 }
                 
-                await internalFilesDbContext.SaveChangesWithValidateAsync();
+                await internalFilesDbContext.SaveChangesAsync();
                 await tx.CommitAsync();
             });
         }
@@ -327,7 +327,7 @@ internal abstract class BaseTagDao<T>(
                 };
 
                 toAdd = filesDbContext.Tag.Add(toAdd).Entity;
-                await filesDbContext.SaveChangesWithValidateAsync();
+                await filesDbContext.SaveChangesAsync();
                 id = toAdd.Id;
             }
 
@@ -348,7 +348,7 @@ internal abstract class BaseTagDao<T>(
         };
 
         await filesDbContext.AddOrUpdateAsync(r => r.TagLink, linkToInsert);
-        await filesDbContext.SaveChangesWithValidateAsync();
+        await filesDbContext.SaveChangesAsync();
 
         return t;
     }
@@ -662,7 +662,7 @@ internal abstract class BaseTagDao<T>(
             };
 
             await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyIdMapping, newItem);
-            await filesDbContext.SaveChangesWithValidateAsync();
+            await filesDbContext.SaveChangesAsync();
         }
 
         return result;

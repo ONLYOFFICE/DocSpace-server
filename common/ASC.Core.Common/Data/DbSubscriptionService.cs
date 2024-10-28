@@ -114,7 +114,7 @@ public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFac
 
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         await userDbContext.AddOrUpdateAsync(q => q.Subscriptions, subs);
-        await userDbContext.SaveChangesWithValidateAsync();
+        await userDbContext.SaveChangesAsync();
     }
 
     public async Task RemoveSubscriptionsAsync(int tenant, string sourceId, string actionId)
@@ -134,7 +134,7 @@ public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFac
         if (sub != null)
         {
             userDbContext.Subscriptions.Remove(sub);
-            await userDbContext.SaveChangesWithValidateAsync();
+            await userDbContext.SaveChangesAsync();
         }
     }
 
@@ -200,7 +200,7 @@ public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFac
             await userDbContext.AddOrUpdateAsync(q => q.SubscriptionMethods, sm);
         }
 
-        await userDbContext.SaveChangesWithValidateAsync();
+        await userDbContext.SaveChangesAsync();
     }
 
     private IEnumerable<SubscriptionRecord> GetSubscriptions(List<Subscription> subs, int tenant)

@@ -245,7 +245,7 @@ internal class SharePointFolderDao(
             var link = await Queries.TagLinksAsync(dbContext, tenantId, folder.ServerRelativeUrl).ToListAsync();
 
             dbContext.TagLink.RemoveRange(link);
-            await dbContext.SaveChangesWithValidateAsync();
+            await dbContext.SaveChangesAsync();
 
             var tagsToRemove = await Queries.TagsAsync(dbContext).ToListAsync();
 
@@ -254,12 +254,12 @@ internal class SharePointFolderDao(
             var securityToDelete = await Queries.SecuritiesAsync(dbContext, tenantId, folder.ServerRelativeUrl).ToListAsync();
 
             dbContext.Security.RemoveRange(securityToDelete);
-            await dbContext.SaveChangesWithValidateAsync();
+            await dbContext.SaveChangesAsync();
 
             var mappingToDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, tenantId, folder.ServerRelativeUrl).ToListAsync();
 
             dbContext.ThirdpartyIdMapping.RemoveRange(mappingToDelete);
-            await dbContext.SaveChangesWithValidateAsync();
+            await dbContext.SaveChangesAsync();
 
             await tx.CommitAsync();
         });

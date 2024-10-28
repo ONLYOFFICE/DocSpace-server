@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+
 using ValidationResult = System.ComponentModel.DataAnnotations.ValidationResult;
 
 namespace ASC.Core.Common.EF;
@@ -85,6 +87,38 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
     }
 }
 
+public class BaseDbContext(DbContextOptions options) : DbContext(options)
+{
+    public override int SaveChanges()
+    {
+        ValidateEntries();
+
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ValidateEntries();
+
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void ValidateEntries()
+    {
+        var entities = from e in ChangeTracker.Entries()
+                       where e.State == EntityState.Added
+                           || e.State == EntityState.Modified
+                       select e.Entity;
+        foreach (var entity in entities)
+        {
+            List<ValidationResult> results =  new();
+            if (!Validator.TryValidateObject(entity, new ValidationContext(entity), results, true))
+            {
+                throw new ArgumentException(results.First().ErrorMessage);
+            }
+        }
+    }
+}
 public static class BaseDbContextExtension
 {
     public static IServiceCollection AddBaseDbContextPool<T>(this IServiceCollection services, string region = "current", string nameConnectionString = "default") where T : DbContext
@@ -138,41 +172,6 @@ public static class BaseDbContextExtension
 
         dbSet.Update(entity);
         return entity;
-    }
-
-    public static int SaveChangesWithValidate(this DbContext context)
-    {
-        var entries = context.ChangeTracker.Entries();
-        foreach (var entry in entries)
-        {
-            var isValid = Validate(entry.Entity, out var results);
-            if (!isValid)
-            {
-                throw new ArgumentException(results.First().ErrorMessage);
-            }
-        }
-        return context.SaveChanges();
-    }
-
-    public static async Task<int> SaveChangesWithValidateAsync(this DbContext context, CancellationToken token = default)
-    {
-        var entries = context.ChangeTracker.Entries();
-        foreach (var entry in entries)
-        {
-            var isValid = Validate(entry.Entity, out var results);
-            if (!isValid)
-            {
-                throw new ArgumentException(results.First().ErrorMessage);
-            }
-        }
-        return await context.SaveChangesAsync(token);
-    }
-
-    private static bool Validate<T>(T obj, out ICollection<ValidationResult> results)
-    {
-        results = new List<ValidationResult>();
-
-        return Validator.TryValidateObject(obj, new ValidationContext(obj), results, true);
     }
 }
 

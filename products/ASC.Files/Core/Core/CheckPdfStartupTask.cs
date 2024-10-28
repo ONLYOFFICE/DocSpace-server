@@ -79,7 +79,7 @@ public class CheckPdfExecutor(IDbContextFactory<FilesDbContext> dbContextFactory
                     toUpdate.Category = category;
 
                     filesDbContext.Update(toUpdate);
-                    await filesDbContext.SaveChangesWithValidateAsync();
+                    await filesDbContext.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {

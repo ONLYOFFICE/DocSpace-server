@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF;
 
-public partial class CoreDbContext(DbContextOptions<CoreDbContext> options) : DbContext(options)
+public partial class CoreDbContext(DbContextOptions<CoreDbContext> options) : BaseDbContext(options)
 {
     public DbSet<DbTariff> Tariffs { get; set; }
     public DbSet<DbTariffRow> TariffRows { get; set; }

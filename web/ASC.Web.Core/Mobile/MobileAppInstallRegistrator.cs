@@ -41,7 +41,7 @@ public class MobileAppInstallRegistrator(IDbContextFactory<CustomDbContext> dbCo
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         await dbContext.MobileAppInstall.AddAsync(mai);
-        await dbContext.SaveChangesWithValidateAsync();
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task<bool> IsInstallRegisteredAsync(string userEmail, MobileAppType? appType)

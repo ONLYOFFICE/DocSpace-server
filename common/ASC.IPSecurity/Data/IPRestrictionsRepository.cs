@@ -58,7 +58,7 @@ public class IPRestrictionsRepository(IDbContextFactory<TenantDbContext> dbConte
             });
             tenantDbContext.TenantIpRestrictions.AddRange(ipsList);
 
-            await tenantDbContext.SaveChangesWithValidateAsync();
+            await tenantDbContext.SaveChangesAsync();
             await tr.CommitAsync();
         });
         return ips.ToList();

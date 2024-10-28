@@ -73,7 +73,7 @@ internal abstract class SecurityBaseDao<T>(
 
             filesDbContext.RemoveRange(query);
         }
-        await filesDbContext.SaveChangesWithValidateAsync();
+        await filesDbContext.SaveChangesAsync();
     }
 
     public async Task<bool> IsPureSharedAsync(T entryId, FileEntryType type, IEnumerable<SubjectType> subjectTypes)
@@ -142,7 +142,7 @@ internal abstract class SecurityBaseDao<T>(
                     await context.DeleteTagsAsync(tenantId);
                 }
 
-                await context.SaveChangesWithValidateAsync();
+                await context.SaveChangesAsync();
                 await tr.CommitAsync();
             });
         }
@@ -153,7 +153,7 @@ internal abstract class SecurityBaseDao<T>(
 
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await filesDbContext.AddOrUpdateAsync(context => context.Security, toInsert);
-            await filesDbContext.SaveChangesWithValidateAsync();
+            await filesDbContext.SaveChangesAsync();
         }
     }
 
@@ -864,7 +864,7 @@ internal abstract class SecurityBaseDao<T>(
             await filesDbContext.RemoveBySubjectAsync(tenantId, subject);
         }
 
-        await filesDbContext.SaveChangesWithValidateAsync();
+        await filesDbContext.SaveChangesAsync();
     }
     
     public async IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects)

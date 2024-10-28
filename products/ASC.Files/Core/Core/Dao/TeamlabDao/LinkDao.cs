@@ -65,7 +65,7 @@ internal class LinkDao<T>(
             LinkedFor = _authContext.CurrentAccount.ID
         });
 
-        await filesDbContext.SaveChangesWithValidateAsync();
+        await filesDbContext.SaveChangesAsync();
     }
 
     public async Task<T> GetSourceAsync(T linkedId)
@@ -119,7 +119,7 @@ internal class LinkDao<T>(
 
         filesDbContext.FilesLink.Remove(link);
 
-        await filesDbContext.SaveChangesWithValidateAsync();
+        await filesDbContext.SaveChangesAsync();
     }
 
     public async Task DeleteAllLinkAsync(T fileId)

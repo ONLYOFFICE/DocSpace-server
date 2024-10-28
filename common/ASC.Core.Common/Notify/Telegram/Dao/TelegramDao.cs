@@ -40,7 +40,7 @@ public class TelegramDao(IDbContextFactory<TelegramDbContext> dbContextFactory)
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         await dbContext.AddOrUpdateAsync(q => q.Users, user);
-        await dbContext.SaveChangesWithValidateAsync();
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task<TelegramUser> GetUserAsync(Guid userId, int tenantId)

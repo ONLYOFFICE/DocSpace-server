@@ -84,7 +84,7 @@ internal class ThirdPartyMappingId(TenantManager tenantManager, IDbContextFactor
 
             await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
             await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyIdMapping, newItem);
-            await filesDbContext.SaveChangesWithValidateAsync();
+            await filesDbContext.SaveChangesAsync();
         }
 
         return result;

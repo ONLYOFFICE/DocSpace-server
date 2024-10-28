@@ -99,7 +99,7 @@ public class AbstractDao
             await filesDbContext.ChangeFoldersCountAsync(tenantId, folderId, counter);
         }
 
-        await filesDbContext.SaveChangesWithValidateAsync();
+        await filesDbContext.SaveChangesAsync();
     }
 
     internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, string text, SearchType searchType) where T : IDbSearch
@@ -275,7 +275,7 @@ public class AbstractDao
                 });
             }
 
-            await filesDbContext.SaveChangesWithValidateAsync();
+            await filesDbContext.SaveChangesAsync();
             return order;
         }
     }
@@ -316,7 +316,7 @@ public class AbstractDao
             }
             
             filesDbContext.FileOrder.AddRange(orders);
-            await filesDbContext.SaveChangesWithValidateAsync();
+            await filesDbContext.SaveChangesAsync();
         }
     }
     
@@ -328,7 +328,7 @@ public class AbstractDao
         {
             filesDbContext.Remove(fileOrder);
 
-            await filesDbContext.SaveChangesWithValidateAsync();
+            await filesDbContext.SaveChangesAsync();
         }
     }
 

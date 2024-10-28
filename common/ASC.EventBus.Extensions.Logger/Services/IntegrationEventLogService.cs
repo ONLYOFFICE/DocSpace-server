@@ -69,7 +69,7 @@ public class IntegrationEventLogService : IIntegrationEventLogService
         await integrationEventLogContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
         integrationEventLogContext.IntegrationEventLogs.Add(eventLogEntry);
 
-        await integrationEventLogContext.SaveChangesWithValidateAsync();
+        await integrationEventLogContext.SaveChangesAsync();
     }
 
     public async Task MarkEventAsPublishedAsync(Guid eventId)
@@ -100,7 +100,7 @@ public class IntegrationEventLogService : IIntegrationEventLogService
 
         integrationEventLogContext.IntegrationEventLogs.Update(eventLogEntry);
 
-        await integrationEventLogContext.SaveChangesWithValidateAsync();
+        await integrationEventLogContext.SaveChangesAsync();
     }
 }
 

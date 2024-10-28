@@ -145,7 +145,7 @@ public class DbTenantService(
 
         _ = await InnerSaveTenantAsync(tenantDbContext, coreSettings, newTenant);
 
-        await tenantDbContext.SaveChangesWithValidateAsync();
+        await tenantDbContext.SaveChangesAsync();
 
         return newTenant;
     }
@@ -219,7 +219,7 @@ public class DbTenantService(
 
         if(dbtenant != null)
         {
-            await tenantDbContext.SaveChangesWithValidateAsync();
+            await tenantDbContext.SaveChangesAsync();
         }
 
         return tenant;
@@ -233,7 +233,7 @@ public class DbTenantService(
 
         if (tenant != null)
         {
-            await tenantDbContext.SaveChangesWithValidateAsync();
+            await tenantDbContext.SaveChangesAsync();
         }
     }
 
@@ -242,7 +242,7 @@ public class DbTenantService(
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenant = await tenantDbContext.Tenants.SingleOrDefaultAsync(r => r.Id == id);
         tenantDbContext.Tenants.Remove(tenant);
-        await tenantDbContext.SaveChangesWithValidateAsync();
+        await tenantDbContext.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<TenantVersion>> GetTenantVersionsAsync()
@@ -290,7 +290,7 @@ public class DbTenantService(
             await tenantDbContext.AddOrUpdateAsync(q => q.CoreSettings, settings);
         }
 
-        await tenantDbContext.SaveChangesWithValidateAsync();
+        await tenantDbContext.SaveChangesAsync();
     }
 
     private async Task ValidateDomainAsync(string domain, int tenantId, bool validateCharacters)
@@ -375,7 +375,7 @@ public class DbTenantService(
             var entity = await tenantDbContext.Tenants.AddAsync(dbTenant);
             dbTenant = entity.Entity;
 
-            await tenantDbContext.SaveChangesWithValidateAsync();
+            await tenantDbContext.SaveChangesAsync();
             tenant.Id = dbTenant.Id;
         }
         else

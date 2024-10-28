@@ -99,7 +99,7 @@ public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFact
                         TenantId = tenantId
                     };
                     await context.ShortLinks.AddAsync(newShortLink);
-                    await context.SaveChangesWithValidateAsync();
+                    await context.SaveChangesAsync();
                     return commonLinkUtility.GetFullAbsolutePath(UrlShortRewriter.BasePath + key);
                 }
             }

@@ -529,7 +529,7 @@ public class EFUserService(
             user.LastModified = DateTime.UtcNow;
             dbContext.Update(user);
 
-            await dbContext.SaveChangesWithValidateAsync();
+            await dbContext.SaveChangesAsync();
             await tr.CommitAsync();
         });
     }
@@ -550,7 +550,7 @@ public class EFUserService(
 
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         await userDbContext.AddOrUpdateAsync(q => q.Groups, dbGroup);
-        await userDbContext.SaveChangesWithValidateAsync();
+        await userDbContext.SaveChangesAsync();
 
         return group;
     }
@@ -596,7 +596,7 @@ public class EFUserService(
         }
 
         await userDbContext.AddOrUpdateAsync(q => q.Users, mapper.Map<UserInfo, User>(user));
-        await userDbContext.SaveChangesWithValidateAsync();
+        await userDbContext.SaveChangesAsync();
 
         return user;
     }
@@ -615,7 +615,7 @@ public class EFUserService(
         {
             user.LastModified = userGroupRef.LastModified;
             await userDbContext.AddOrUpdateAsync(q => q.UserGroups, mapper.Map<UserGroupRef, UserGroup>(userGroupRef));
-            await userDbContext.SaveChangesWithValidateAsync();
+            await userDbContext.SaveChangesAsync();
         }
 
         return userGroupRef;
@@ -635,7 +635,7 @@ public class EFUserService(
 
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         await userDbContext.AddOrUpdateAsync(q => q.UserSecurity, us);
-        await userDbContext.SaveChangesWithValidateAsync();
+        await userDbContext.SaveChangesAsync();
     }
 
     public async Task SetUserPhotoAsync(int tenant, Guid id, byte[] photo)
@@ -676,7 +676,7 @@ public class EFUserService(
             userDbContext.Photos.Remove(userPhoto);
         }
 
-        await userDbContext.SaveChangesWithValidateAsync();
+        await userDbContext.SaveChangesAsync();
     }
 
     public async Task SaveUsersRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
@@ -697,7 +697,7 @@ public class EFUserService(
         }
         
         await userDbContext.UserRelations.AddAsync(relation);
-        await userDbContext.SaveChangesWithValidateAsync();
+        await userDbContext.SaveChangesAsync();
     }
 
     public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(int tenantId, Guid sourceUserId)
