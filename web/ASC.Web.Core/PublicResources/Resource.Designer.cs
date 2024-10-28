@@ -3012,7 +3012,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The number of admins exceeds the limit: {0} / {1}.
+        ///   Looks up a localized string similar to The number of admins exceeds the limit: {0}/{1}.
         /// </summary>
         public static string TariffsFeature_usersQuotaExceeds_exception {
             get {
