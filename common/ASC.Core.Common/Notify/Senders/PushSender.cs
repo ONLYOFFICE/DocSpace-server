@@ -46,12 +46,12 @@ public class PushSender(ILoggerProvider options, IServiceProvider serviceProvide
             using var scope = serviceProvider.CreateScope();
             var FirebaseHelper = scope.ServiceProvider.GetService<FirebaseHelper>();
             await FirebaseHelper.SendMessageAsync(m);
+            return NoticeSendResult.OK;
         }
         catch (Exception e)
         {
             _logger.ErrorUnexpected(e);
+            return NoticeSendResult.SendingImpossible;
         }
-
-        return NoticeSendResult.OK;
     }
 }

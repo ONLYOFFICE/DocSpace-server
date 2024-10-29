@@ -52,7 +52,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
     AuthContext authContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    INotifyQueueManager roomNotifyEventQueue)
+    IServiceScopeFactory serviceScopeFactory)
 {
     public async Task Invoke(HttpContext context)
     {
@@ -92,6 +92,9 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                 return;
             }
+
+            using var scope = serviceScopeFactory.CreateScope();
+            var roomNotifyEventQueue = scope.ServiceProvider.GetRequiredService<INotifyQueueManager<T>>();
 
             switch (request.Type())
             {
@@ -136,8 +139,8 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 {
                                     var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
 
-                                    var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room.Id.ToString(), room.Title, whoCanRead, authContext.CurrentAccount.ID);
-                                    queue.AddMessage(resumedSession.File.Title);
+                                    var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room, whoCanRead, authContext.CurrentAccount.ID);
+                                    queue.AddMessage(resumedSession.File);
                                 }
                             }
 
@@ -195,8 +198,8 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         {
                             var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
 
-                            var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room.Id.ToString(), room.Title, whoCanRead, authContext.CurrentAccount.ID);
-                            queue.AddMessage(session.File.Title);
+                            var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room, whoCanRead, authContext.CurrentAccount.ID);
+                            queue.AddMessage(session.File);
                         }
                     }
                     await socketManager.CreateFileAsync(session.File);

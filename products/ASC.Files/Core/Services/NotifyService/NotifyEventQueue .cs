@@ -26,28 +26,28 @@
 
 namespace ASC.Files.Core.Services.NotifyService;
 
-public interface IRoomNotifyQueue
+public interface IRoomNotifyQueue<T>
 {
-    void AddMessage(string message);
+    void AddMessage(File<T> file);
     Task ProcessQueueAsync();
 }
 
-public class RoomNotifyQueue : IRoomNotifyQueue, IDisposable
+public class RoomNotifyQueue<T> : IRoomNotifyQueue<T>, IDisposable
 {
     protected readonly TenantManager _tenantManager;
     private readonly NotifyClient _notifyClient;
     private Timer _timer;
 
     protected readonly int _tenantId;
-    private readonly string _roomTitle;
+    private readonly Folder<T> _room;
     private readonly IEnumerable<Guid> _targetMessageRecipients;
     protected readonly Guid _currentAccountId;
 
-    private readonly Queue<string> _messages = new Queue<string>();
+    private readonly Queue<File<T>> _messages = new Queue<File<T>>();
     
-    public RoomNotifyQueue(int tenantId, string roomTitle, NotifyClient notifyClient, IEnumerable<Guid> targetMessageRecipients, Guid currentAccountId, TenantManager tenantManager)
+    public RoomNotifyQueue(int tenantId, Folder<T> room, NotifyClient notifyClient, IEnumerable<Guid> targetMessageRecipients, Guid currentAccountId, TenantManager tenantManager)
     {
-        _roomTitle = roomTitle;
+        _room = room;
         _notifyClient = notifyClient;
         _targetMessageRecipients = targetMessageRecipients;
         _currentAccountId = currentAccountId;
@@ -55,9 +55,9 @@ public class RoomNotifyQueue : IRoomNotifyQueue, IDisposable
         _tenantId = tenantId;
     }
 
-    public void AddMessage(string message)
+    public void AddMessage(File<T> file)
     {
-        _messages.Enqueue(message);
+        _messages.Enqueue(file);
 
         if (_timer == null)
         {
@@ -78,12 +78,12 @@ public class RoomNotifyQueue : IRoomNotifyQueue, IDisposable
         {
             while (_messages.Count > 0)
             {
-                await _notifyClient.SendDocumentUploadedToRoom(_targetMessageRecipients, _messages.Dequeue(), _roomTitle, _currentAccountId);
+                await _notifyClient.SendDocumentUploadedToRoom(_targetMessageRecipients, _messages.Dequeue(), _room, _currentAccountId);
             }
         }
         else
         {
-            await _notifyClient.SendDocumentsUploadedToRoom(_targetMessageRecipients, count, _roomTitle, _currentAccountId);
+            await _notifyClient.SendDocumentsUploadedToRoom(_targetMessageRecipients, count, _room, _currentAccountId);
             _messages.Clear();
         }
 

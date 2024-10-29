@@ -57,7 +57,7 @@ public class Startup : BaseStartup
         services.RegisterQuotaFeature();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddDocumentServiceHttpClient(_configuration);
-        services.AddSingleton<INotifyQueueManager, RoomNotifyQueueManager>();
+        services.AddSingleton(typeof(INotifyQueueManager<>), typeof(RoomNotifyQueueManager<>));
 
         services.AddStartupTask<CheckPdfStartupTask>()
            .TryAddSingleton(services);

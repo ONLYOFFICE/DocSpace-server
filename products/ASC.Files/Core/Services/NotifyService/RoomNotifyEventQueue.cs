@@ -27,14 +27,14 @@
 
 namespace ASC.Files.Core.Services.NotifyService;
 
-public interface INotifyQueueManager
+public interface INotifyQueueManager<T>
 {
-    IRoomNotifyQueue GetOrCreateRoomQueue(int tenantId, string roomId, string roomTitle, IEnumerable<Guid> targetMessageRecipients, Guid currentAccountId);
+    IRoomNotifyQueue<T> GetOrCreateRoomQueue(int tenantId, Folder<T> room, IEnumerable<Guid> targetMessageRecipients, Guid currentAccountId);
 }
 
-public class RoomNotifyQueueManager : INotifyQueueManager
+public class RoomNotifyQueueManager<T> : INotifyQueueManager<T>
 {
-    private readonly ConcurrentDictionary<string, IRoomNotifyQueue> _queues = new ConcurrentDictionary<string, IRoomNotifyQueue>();
+    private readonly ConcurrentDictionary<string, IRoomNotifyQueue<T>> _queues = new ConcurrentDictionary<string, IRoomNotifyQueue<T>>();
 
     private readonly NotifyClient _notifyClient;
     private readonly TenantManager _tenantManager;
@@ -45,8 +45,8 @@ public class RoomNotifyQueueManager : INotifyQueueManager
         _tenantManager = tenantManager;
     }
 
-    public IRoomNotifyQueue GetOrCreateRoomQueue(int tenantId, string roomId, string roomTitle, IEnumerable<Guid> targetMessageRecipients, Guid currentAccountId)
+    public IRoomNotifyQueue<T> GetOrCreateRoomQueue(int tenantId, Folder<T> room, IEnumerable<Guid> targetMessageRecipients, Guid currentAccountId)
     {
-        return _queues.GetOrAdd(roomId, _ => new RoomNotifyQueue(tenantId, roomTitle, _notifyClient, targetMessageRecipients, currentAccountId, _tenantManager));
+        return _queues.GetOrAdd(room.Id.ToString(), _ => new RoomNotifyQueue<T>(tenantId, room, _notifyClient, targetMessageRecipients, currentAccountId, _tenantManager));
     }
 }

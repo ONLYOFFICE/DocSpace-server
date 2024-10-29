@@ -324,6 +324,9 @@ public class NotifyClient(WorkContext notifyContext,
             ConfigurationConstants.NotifyPushSenderSysName,
             new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
             new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.TagFolderID, room.Id),
+            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
             new TagValue(CommonTags.Culture, userCulture.Name)
             );
     }
@@ -432,6 +435,9 @@ public class NotifyClient(WorkContext notifyContext,
             room.UniqID,
             recipient,
             ConfigurationConstants.NotifyPushSenderSysName,
+            new TagValue(NotifyConstants.TagFolderID, room.Id),
+            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
             new TagValue(NotifyConstants.RoomTitle, room.Title)
             );
     }
@@ -451,6 +457,9 @@ public class NotifyClient(WorkContext notifyContext,
             recipient,
             ConfigurationConstants.NotifyPushSenderSysName,
             new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.TagFolderID, room.Id),
+            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
             new TagValue(Tags.RoomRole, accessString)
             );
     }
@@ -484,17 +493,21 @@ public class NotifyClient(WorkContext notifyContext,
 
             await client.SendNoticeAsync(
                     NotifyConstants.EventDocumentCreatedInRoom,
-                    room.UniqID,
+                    file.UniqID,
                     recipient,
                     ConfigurationConstants.NotifyPushSenderSysName,
                     new TagValue(NotifyConstants.RoomTitle, room.Title),
-                    new TagValue(NotifyConstants.TagDocumentTitle, file.Title)
+                    new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
+                    new TagValue(NotifyConstants.TagDocumentExtension, Path.GetExtension(file.Title)),
+                    new TagValue(NotifyConstants.TagFolderID, room.Id),
+                    new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+                    new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
                 );
         }
     }
 
 
-    public async Task SendDocumentUploadedToRoom(IEnumerable<Guid> aces, string fileTitle, string roomTitle, Guid userId)
+    public async Task SendDocumentUploadedToRoom<T>(IEnumerable<Guid> aces, File<T> file, Folder<T> room, Guid userId)
     {
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
         var recipientsProvider = notifySource.GetRecipientsProvider();
@@ -517,16 +530,20 @@ public class NotifyClient(WorkContext notifyContext,
 
             await client.SendNoticeAsync(
                     NotifyConstants.EventDocumentUploadedToRoom,
-                    userId.ToString(),
+                    file.UniqID,
                     recipient,
                     ConfigurationConstants.NotifyPushSenderSysName,
-                    new TagValue(NotifyConstants.RoomTitle, roomTitle),
-                    new TagValue(NotifyConstants.TagDocumentTitle, fileTitle)
+                    new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
+                    new TagValue(NotifyConstants.TagDocumentExtension, Path.GetExtension(file.Title)),
+                    new TagValue(NotifyConstants.TagFolderID, room.Id),
+                    new TagValue(NotifyConstants.RoomTitle, room.Title),
+                    new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+                    new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
             );
         }
     }
 
-    public async Task SendDocumentsUploadedToRoom(IEnumerable<Guid> aces, int count, string roomTitle, Guid userId)
+    public async Task SendDocumentsUploadedToRoom<T>(IEnumerable<Guid> aces, int count, Folder<T> room, Guid userId)
     {
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
         var recipientsProvider = notifySource.GetRecipientsProvider();
@@ -549,16 +566,19 @@ public class NotifyClient(WorkContext notifyContext,
 
             await client.SendNoticeAsync(
                     NotifyConstants.EventDocumentsUploadedToRoom,
-                    userId.ToString(),
+                    room.UniqID,
                     recipient,
                     ConfigurationConstants.NotifyPushSenderSysName,
-                    new TagValue(NotifyConstants.RoomTitle, roomTitle),
+                    new TagValue(NotifyConstants.TagFolderID, room.Id),
+                    new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+                    new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
+                    new TagValue(NotifyConstants.RoomTitle, room.Title),
                     new TagValue(Tags.Count, count)
             );
         }
     }
 
-    public async Task SendFolderCreatedInRoom(string roomTitle, IEnumerable<Guid> aces, string folderTitle, Guid userId)
+    public async Task SendFolderCreatedInRoom<T>(string roomTitle, IEnumerable<Guid> aces, Folder<T> folder, Guid userId)
     {
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
         var recipientsProvider = notifySource.GetRecipientsProvider();
@@ -581,11 +601,14 @@ public class NotifyClient(WorkContext notifyContext,
 
             await client.SendNoticeAsync(
                     NotifyConstants.EventFolderCreatedInRoom,
-                    userId.ToString(),
+                    folder.UniqID,
                     recipient,
                     ConfigurationConstants.NotifyPushSenderSysName,
                     new TagValue(NotifyConstants.RoomTitle, roomTitle),
-                    new TagValue(NotifyConstants.FolderTitle, folderTitle)
+                    new TagValue(NotifyConstants.FolderTitle, folder.Title),
+                    new TagValue(NotifyConstants.TagFolderID, folder.Id),
+                    new TagValue(NotifyConstants.TagFolderParentId, folder.ParentId),
+                    new TagValue(NotifyConstants.TagFolderRootFolderType, folder.RootFolderType)
                 );
         }
     }
