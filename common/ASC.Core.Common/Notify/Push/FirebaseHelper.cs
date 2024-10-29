@@ -76,7 +76,14 @@ public class FirebaseHelper(AuthContext authContext,
                     Body = msg.Content
                 }
             };
-            await FirebaseAdminMessaging.FirebaseMessaging.DefaultInstance.SendAsync(m);
+            try
+            {
+                await FirebaseAdminMessaging.FirebaseMessaging.DefaultInstance.SendAsync(m);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorUnexpected(e);
+            }
         }
     }
 
