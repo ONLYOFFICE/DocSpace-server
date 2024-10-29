@@ -443,6 +443,15 @@ public class FileStorageService //: IFileStorageService
         var folder = await InternalCreateFolderAsync(parentId, title);
 
         await socketManager.CreateFolderAsync(folder);
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
+        {
+            var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
+            await notifyClient.SendFolderCreatedInRoom(room.Title, whoCanRead, folder.Title, authContext.CurrentAccount.ID);
+        }
+
         await filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
 
         return folder;

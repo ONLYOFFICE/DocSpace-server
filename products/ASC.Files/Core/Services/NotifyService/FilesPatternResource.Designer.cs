@@ -132,6 +132,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A new folder &quot;$FolderTitle&quot; has been created to the room &quot;$RoomTitle&quot;.
+        /// </summary>
+        public static string pattern_FolderCreatedInRoom_push {
+            get {
+                return ResourceManager.GetString("pattern_FolderCreatedInRoom_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. Form $Message is filled out
         ///
         ///A new form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; is filled out in the room &quot;$RoomTitle&quot;:&quot;$RoomURL&quot;

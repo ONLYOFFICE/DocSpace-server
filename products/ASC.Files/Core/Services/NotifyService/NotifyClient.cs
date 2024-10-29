@@ -558,6 +558,38 @@ public class NotifyClient(WorkContext notifyContext,
         }
     }
 
+    public async Task SendFolderCreatedInRoom(string roomTitle, IEnumerable<Guid> aces, string folderTitle, Guid userId)
+    {
+        var client = notifyContext.RegisterClient(serviceProvider, notifySource);
+        var recipientsProvider = notifySource.GetRecipientsProvider();
+
+        foreach (var ace in aces)
+        {
+            var recepientId = ace;
+
+            if (recepientId == userId)
+            {
+                continue;
+            }
+
+            var recipient = await recipientsProvider.GetRecipientAsync(recepientId.ToString());
+
+            if (recipient == null)
+            {
+                continue;
+            }
+
+            await client.SendNoticeAsync(
+                    NotifyConstants.EventFolderCreatedInRoom,
+                    userId.ToString(),
+                    recipient,
+                    ConfigurationConstants.NotifyPushSenderSysName,
+                    new TagValue(NotifyConstants.RoomTitle, roomTitle),
+                    new TagValue(NotifyConstants.FolderTitle, folderTitle)
+                );
+        }
+    }
+
     private async Task<bool> CheckRoomAccess<T>(FileEntry<T> room, UserInfo user)
     {
         if (room is not { FileEntryType: FileEntryType.Folder })

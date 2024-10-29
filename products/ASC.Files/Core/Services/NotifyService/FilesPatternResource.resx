@@ -204,4 +204,7 @@ $OrangeButton</value>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
     <value>A new files have been uploaded to the room "$RoomTitle" ($Count)</value>
   </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>A new folder "$FolderTitle" has been created to the room "$RoomTitle"</value>
+  </data>
 </root>
