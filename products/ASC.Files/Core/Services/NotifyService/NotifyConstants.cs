@@ -40,11 +40,12 @@ public static class NotifyConstants
     public static readonly INotifyAction EventRoomRemoved = new NotifyAction("RoomRemoved", "room removed");
     public static readonly INotifyAction EventFormSubmitted = new NotifyAction("FormSubmitted", "form submitted");
     public static readonly INotifyAction EventFormReceived = new NotifyAction("FormReceived", "form received");
-    public static readonly INotifyAction EventRoomMovedArchive = new NotifyAction("RoomMovedArchive", "room moved archive");
-    public static readonly INotifyAction EventInvitedToRoom = new NotifyAction("InvitedToRoom", "invited to room");
-    public static readonly INotifyAction EventRoomUpdateAccessForUser = new NotifyAction("RoomUpdateAccessForUser", "room update access for user");
-    public static readonly INotifyAction EventDocumentCreatedInRoom = new NotifyAction("DocumentCreatedInRoom", "document created in room");
-    public static readonly INotifyAction EventDocumentUploadedToRoom = new NotifyAction("DocumentUploadedTo", "document uploaded to room");
+    public static readonly INotifyAction EventRoomMovedArchive = new NotifyAction("RoomMovedArchive");
+    public static readonly INotifyAction EventInvitedToRoom = new NotifyAction("InvitedToRoom");
+    public static readonly INotifyAction EventRoomUpdateAccessForUser = new NotifyAction("RoomUpdateAccessForUser");
+    public static readonly INotifyAction EventDocumentCreatedInRoom = new NotifyAction("DocumentCreatedInRoom");
+    public static readonly INotifyAction EventDocumentUploadedToRoom = new NotifyAction("DocumentUploadedTo");
+    public static readonly INotifyAction EventDocumentsUploadedToRoom = new NotifyAction("DocumentsUploadedTo");
 
     #endregion
 

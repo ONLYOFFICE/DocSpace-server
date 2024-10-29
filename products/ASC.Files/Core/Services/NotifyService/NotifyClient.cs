@@ -494,7 +494,7 @@ public class NotifyClient(WorkContext notifyContext,
     }
 
 
-    public async Task SendDocumentUploadedToRoom<T>(Folder<T> room, IEnumerable<Guid> aces, string fileTitle, Guid userId)
+    public async Task SendDocumentUploadedToRoom(IEnumerable<Guid> aces, string fileTitle, string roomTitle, Guid userId)
     {
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
         var recipientsProvider = notifySource.GetRecipientsProvider();
@@ -515,19 +515,45 @@ public class NotifyClient(WorkContext notifyContext,
                 continue;
             }
 
-            var user = await userManager.GetUsersAsync(ace);
-            if (!await CheckRoomAccess(room, user))
+            await client.SendNoticeAsync(
+                    NotifyConstants.EventDocumentUploadedToRoom,
+                    userId.ToString(),
+                    recipient,
+                    ConfigurationConstants.NotifyPushSenderSysName,
+                    new TagValue(NotifyConstants.RoomTitle, roomTitle),
+                    new TagValue(NotifyConstants.TagDocumentTitle, fileTitle)
+            );
+        }
+    }
+
+    public async Task SendDocumentsUploadedToRoom(IEnumerable<Guid> aces, int count, string roomTitle, Guid userId)
+    {
+        var client = notifyContext.RegisterClient(serviceProvider, notifySource);
+        var recipientsProvider = notifySource.GetRecipientsProvider();
+
+        foreach (var ace in aces)
+        {
+            var recepientId = ace;
+
+            if (recepientId == userId)
+            {
+                continue;
+            }
+
+            var recipient = await recipientsProvider.GetRecipientAsync(recepientId.ToString());
+
+            if (recipient == null)
             {
                 continue;
             }
 
             await client.SendNoticeAsync(
-                    NotifyConstants.EventDocumentUploadedToRoom,
-                    room.UniqID,
+                    NotifyConstants.EventDocumentsUploadedToRoom,
+                    userId.ToString(),
                     recipient,
                     ConfigurationConstants.NotifyPushSenderSysName,
-                    new TagValue(NotifyConstants.RoomTitle, room.Title),
-                    new TagValue(NotifyConstants.TagDocumentTitle, fileTitle)
+                    new TagValue(NotifyConstants.RoomTitle, roomTitle),
+                    new TagValue(Tags.Count, count)
             );
         }
     }

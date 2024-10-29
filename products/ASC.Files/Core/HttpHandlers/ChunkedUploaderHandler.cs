@@ -50,9 +50,9 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
     SocketManager socketManager,
     FileDtoHelper filesWrapperHelper,
     AuthContext authContext,
-    NotifyClient notifyClient,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    INotifyQueueManager roomNotifyEventQueue)
 {
     public async Task Invoke(HttpContext context)
     {
@@ -135,7 +135,9 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 if (room != null)
                                 {
                                     var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
-                                    await notifyClient.SendDocumentUploadedToRoom(room, whoCanRead, resumedSession.File.Title, authContext.CurrentAccount.ID);
+
+                                    var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room.Id.ToString(), room.Title, whoCanRead, authContext.CurrentAccount.ID);
+                                    queue.AddMessage(resumedSession.File.Title);
                                 }
                             }
 
@@ -192,7 +194,9 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         if (room != null)
                         {
                             var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
-                            await notifyClient.SendDocumentUploadedToRoom(room, whoCanRead, session.File.Title, authContext.CurrentAccount.ID);
+
+                            var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room.Id.ToString(), room.Title, whoCanRead, authContext.CurrentAccount.ID);
+                            queue.AddMessage(session.File.Title);
                         }
                     }
                     await socketManager.CreateFileAsync(session.File);

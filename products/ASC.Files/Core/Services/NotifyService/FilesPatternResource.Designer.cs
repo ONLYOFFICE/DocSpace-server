@@ -79,6 +79,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A new files have been uploaded to the room &quot;$RoomTitle&quot; ($Count).
+        /// </summary>
+        public static string pattern_DocumentsUploadedTo_push {
+            get {
+                return ResourceManager.GetString("pattern_DocumentsUploadedTo_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A new file &quot;$DocumentTitle&quot; has been uploaded to the room &quot;$RoomTitle&quot;.
         /// </summary>
         public static string pattern_DocumentUploadedTo_push {
