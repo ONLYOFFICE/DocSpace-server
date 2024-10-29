@@ -948,11 +948,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom or FolderType.FillingFormsRoom))
-                {
-                    return false;
-                }
-
                 if (action == FilesSecurityActions.CopyLink && DocSpaceHelper.IsFormsFillingSystemFolder(folder.FolderType))
                 {
                     return false;
@@ -1046,9 +1041,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                 
                 if (isDocSpaceAdmin)
                 {
-                    if (action is FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory)
+                    switch (action)
                     {
-                        return true;
+                        case FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory:
+                        case FilesSecurityActions.CopySharedLink when e.Shared:
+                            return true;
                     }
 
                     if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.Duplicate or FilesSecurityActions.ChangeOwner)
@@ -1098,6 +1095,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                     if (parentFolders.Exists(parent => DocSpaceHelper.IsFormsFillingSystemFolder(parent.FolderType)))
                     {
                         return false;
+                    }
+
+                    if (isDocSpaceAdmin)
+                    {
+                        return true;
                     }
                 }
                 
