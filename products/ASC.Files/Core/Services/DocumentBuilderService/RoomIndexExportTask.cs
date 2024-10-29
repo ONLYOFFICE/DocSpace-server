@@ -191,7 +191,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
             {
                 company = tenantWhiteLabelSettings.LogoText ?? TenantWhiteLabelSettings.DefaultLogoText,
                 room = room.Title,
-                exportAuthor = user.DisplayUserName(displayUserSettingsHelper),
+                exportAuthor = user.DisplayUserName(false, displayUserSettingsHelper),
                 dateGenerated = tenantUtil.DateTimeNow().ConvertNumerals("g")
             },
 
