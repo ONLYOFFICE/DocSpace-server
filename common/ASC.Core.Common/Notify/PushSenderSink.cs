@@ -126,7 +126,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
 
         var serializeOptions = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = new LowerCaseNamingPolicy(),
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true
         };
 
