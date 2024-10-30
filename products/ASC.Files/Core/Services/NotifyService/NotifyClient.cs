@@ -393,8 +393,6 @@ public class NotifyClient(WorkContext notifyContext,
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
         var recipientsProvider = notifySource.GetRecipientsProvider();
 
-        var folderId = room.Id.ToString();
-
         foreach (var ace in aces)
         {
             var recepientId = ace;
@@ -411,6 +409,11 @@ public class NotifyClient(WorkContext notifyContext,
                 continue;
             }
             var user = await userManager.GetUsersAsync(userId);
+            if (!await CanNotifyRoom(room, user))
+            {
+                continue;
+            }
+
             await client.SendNoticeAsync(
                 NotifyConstants.EventRoomMovedArchive,
                 room.UniqID,
@@ -424,7 +427,10 @@ public class NotifyClient(WorkContext notifyContext,
 
     public async Task SendInvitedToRoom<T>(FileEntry<T> room, UserInfo user)
     {
-        if(!await CheckRoomAccess(room, user)) { return; }
+        if (!await CanNotifyRoom(room, user))
+        {
+            return;
+        }
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
         var recipientsProvider = notifySource.GetRecipientsProvider();
@@ -444,7 +450,10 @@ public class NotifyClient(WorkContext notifyContext,
 
     public async Task SendRoomUpdateAccessForUser<T>(FileEntry<T> room, UserInfo user, FileShare currentRole)
     {
-        if (!await CheckRoomAccess(room, user)) { return; }
+        if (!await CanNotifyRoom(room, user))
+        {
+            return;
+        }
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
         var recipientsProvider = notifySource.GetRecipientsProvider();
@@ -486,9 +495,9 @@ public class NotifyClient(WorkContext notifyContext,
             }
 
             var user = await userManager.GetUsersAsync(ace);
-            if (!await CheckRoomAccess(room, user)) 
-            { 
-                continue; 
+            if (!await CanNotifyRoom(room, user))
+            {
+                continue;
             }
 
             await client.SendNoticeAsync(
@@ -524,6 +533,12 @@ public class NotifyClient(WorkContext notifyContext,
             var recipient = await recipientsProvider.GetRecipientAsync(recepientId.ToString());
 
             if (recipient == null)
+            {
+                continue;
+            }
+
+            var user = await userManager.GetUsersAsync(ace);
+            if (!await CanNotifyRoom(room, user))
             {
                 continue;
             }
@@ -564,6 +579,12 @@ public class NotifyClient(WorkContext notifyContext,
                 continue;
             }
 
+            var user = await userManager.GetUsersAsync(ace);
+            if (!await CanNotifyRoom(room, user))
+            {
+                continue;
+            }
+
             await client.SendNoticeAsync(
                     NotifyConstants.EventDocumentsUploadedToRoom,
                     room.UniqID,
@@ -578,7 +599,7 @@ public class NotifyClient(WorkContext notifyContext,
         }
     }
 
-    public async Task SendFolderCreatedInRoom<T>(string roomTitle, IEnumerable<Guid> aces, Folder<T> folder, Guid userId)
+    public async Task SendFolderCreatedInRoom<T>(Folder<T> room, IEnumerable<Guid> aces, Folder<T> folder, Guid userId)
     {
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
         var recipientsProvider = notifySource.GetRecipientsProvider();
@@ -599,12 +620,18 @@ public class NotifyClient(WorkContext notifyContext,
                 continue;
             }
 
+            var user = await userManager.GetUsersAsync(ace);
+            if (!await CanNotifyRoom(room, user)) 
+            { 
+                continue; 
+            }
+
             await client.SendNoticeAsync(
                     NotifyConstants.EventFolderCreatedInRoom,
                     folder.UniqID,
                     recipient,
                     ConfigurationConstants.NotifyPushSenderSysName,
-                    new TagValue(NotifyConstants.RoomTitle, roomTitle),
+                    new TagValue(NotifyConstants.RoomTitle, room.Title),
                     new TagValue(NotifyConstants.FolderTitle, folder.Title),
                     new TagValue(NotifyConstants.TagFolderID, folder.Id),
                     new TagValue(NotifyConstants.TagFolderParentId, folder.ParentId),
@@ -613,13 +640,9 @@ public class NotifyClient(WorkContext notifyContext,
         }
     }
 
-    private async Task<bool> CheckRoomAccess<T>(FileEntry<T> room, UserInfo user)
+    private async Task<bool> CanNotifyRoom<T>(FileEntry<T> room, UserInfo user)
     {
         if (room is not { FileEntryType: FileEntryType.Folder })
-        {
-            return false;
-        }
-        if (!await fileSecurity.CanReadAsync(room, user.Id))
         {
             return false;
         }
