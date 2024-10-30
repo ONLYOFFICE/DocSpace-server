@@ -44,26 +44,18 @@ public class RegisterInstanceWorkerService<T>(
 
             return;
         }
-        
+
         await using var scope = serviceProvider.CreateAsyncScope();
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            try
-            {
-                var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
+            var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
 
-                await registerInstanceService.Register();
+            await registerInstanceService.Register();
 
-                logger.TraceWorkingRunnging(DateTimeOffset.Now);
+            logger.TraceWorkingRunnging(DateTimeOffset.Now);
 
-                await Task.Delay(TimeSpan.FromSeconds(_settings.IntervalCheckRegisterInstanceInSeconds), stoppingToken);
-            }
-            catch (Exception ex)
-            {
-                logger.CriticalError(ex);
-                applicationLifetime.StopApplication();
-            }
+            await Task.Delay(TimeSpan.FromSeconds(_settings.IntervalCheckRegisterInstanceInSeconds), stoppingToken);
         }
     }
     public override async Task StopAsync(CancellationToken cancellationToken)
