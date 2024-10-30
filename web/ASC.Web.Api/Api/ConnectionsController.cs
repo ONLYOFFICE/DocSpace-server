@@ -102,7 +102,7 @@ public class ConnectionsController(
         dto.IsAdmin = currentType is EmployeeType.DocSpaceAdmin;
         dto.IsRoomAdmin = currentType is EmployeeType.RoomAdmin;
         dto.IsOwner = user.IsOwner(tenant);
-        dto.IsCollaborator = currentType is EmployeeType.Collaborator;
+        dto.IsCollaborator = currentType is EmployeeType.User;
 
         dto.Avatar = await userPhotoManager.GetPhotoAbsoluteWebPath(user.Id) + $"?hash={cacheKey}";
 
@@ -344,23 +344,6 @@ public class ConnectionsController(
             logger.ErrorWithException(ex);
             return null;
         }
-    }
-
-    /// <summary>
-    /// Get current login event id
-    /// </summary>
-    /// <short>
-    /// Get login event id
-    /// </short>
-    /// <category>Active connections</category>
-    /// <returns type="System.Int32, System">Current login event id</returns>
-    /// <path>api/2.0/security/activeconnections/getthisconnection</path>
-    /// <httpMethod>GET</httpMethod>
-    [HttpGet("getthisconnection")]
-    public int GetThisConnection()
-    {
-        var auth = httpContextAccessor.HttpContext?.Request.Headers["Authorization"];
-        return cookieStorage.GetLoginEventIdFromCookie(auth);
     }
 
     /// <summary>

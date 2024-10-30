@@ -79,7 +79,7 @@ module.exports = (socket, next) => {
     const getUser = () => {
       return request({
         method: "get",
-        url: "/people/@self?fields=id,userName,displayName",
+        url: "/people/@self",
         headers,
         basePath,
       });
@@ -89,15 +89,6 @@ module.exports = (socket, next) => {
       return request({
         method: "get",
         url: "/portal?fields=tenantId,tenantDomain",
-        headers,
-        basePath,
-      });
-    };
-
-    const getConnection = () => {
-      return request({
-        method: "get",
-        url: "/security/activeconnections/getthisconnection",
         headers,
         basePath,
       });
@@ -133,12 +124,12 @@ module.exports = (socket, next) => {
       return validateExternalLink();
     }
 
-    return Promise.all([getUser(), getPortal(), getConnection(), validateLink(), getFile(), getRoomId()])
-      .then(([user, portal, connection, { status, linkId }, file, roomId = { }]) => {
+    return Promise.all([getUser(), getPortal(), validateLink(), getFile(), getRoomId()])
+      .then(([user, portal, { status, linkId }, file, roomId = { }]) => {
         logger.info(`WS: save account info in sessionId='sess:${session.id}'`, { user, portal });
         session.user = user;
         session.portal = portal;
-        session.user.connection = connection;
+        session.user.connection = user.loginEventId;
         if (status === 0){
           session.linkId = linkId;
         }

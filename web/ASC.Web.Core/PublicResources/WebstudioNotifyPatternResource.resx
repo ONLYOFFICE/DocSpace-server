@@ -2376,7 +2376,7 @@ $OrangeButton
 The link is valid for 7 days.</value>
   </data>
   <data name="subject_reset_password" xml:space="preserve">
-    <value>Reset your password</value>
+    <value>Reset your password.</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
     <value>Set up a password for ONLYOFFICE DocSpace</value>

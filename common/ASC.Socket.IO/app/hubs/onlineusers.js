@@ -1,5 +1,5 @@
 var uap = require('ua-parser-js');
-const { json } = require("express/lib/response");
+const { json, status } = require("express/lib/response");
 const config = require("../../config");
 const redis = require("redis");
 
@@ -17,7 +17,8 @@ module.exports = async (io) => {
 
     async function startAsync(socket)
     {
-      if (socket.handshake.session.system) {
+      if (socket.handshake.session.system) 
+      {
         return;
       }
       const ipAddress = getCleanIP(socket.handshake.headers['x-forwarded-for']);
@@ -27,6 +28,8 @@ module.exports = async (io) => {
       const browser = parser.browser.name + " " + browserVersion
   
       const userId = socket.handshake.session?.user?.id;
+      const displayName = socket.handshake.session?.user?.displayName;
+      const avatar = socket.handshake.session?.user?.avatarSmall;
       const tenantId = socket.handshake.session?.portal?.tenantId;
       let id;
       let idInRoom = -1;
@@ -87,16 +90,52 @@ module.exports = async (io) => {
         var users = [];
         if(portalUsers[tenantId])
         {
-          Object.values(portalUsers[tenantId]).forEach(function(entry) {
+          portalUsers[tenantId].sort((a,b) => 
+            {
+              if(a.sessions.length != 0 && b.sessions.length != 0 )
+              {
+                return b.sessions[b.sessions.length - 1] - a.sessions[a.sessions.length - 1] ;
+              }
+              if(a.sessions.length != 0)
+              {
+                return -1;
+              }
+              if(b.sessions.length != 0)
+              {
+                return 1;
+              }
+              return b.offlineSessions[b.offlineSessions.length - 1] - a.offlineSessions[a.offlineSessions.length - 1] ;
+            });
+          Object.values(portalUsers[tenantId]).forEach(function(entry) 
+          {
             users.push(serialize(entry));
           });
         }
-        onlineIO.to(socket.id).emit("statuses-in-portal",  users );
+        onlineIO.to(socket.id).emit("sessions-in-portal",  users );
+      });
+
+      socket.on("getSessions", async (obj) => {
+        var id = obj.id;
+        var user = portalUsers[tenantId][id];
+        var u = {};
+        u.id = id;
+        u.sessions = Array.from(user.sessions, ([name, value]) => {
+          return value;
+        });
+        u.sessions = u.sessions.concat(Array.from(user.offlineSessions, ([name, value]) => {
+          return value;
+        }));
+        onlineIO.to(socket.id).emit("user-sessions",  u );
       });
       
       socket.on("subscribeToPortal", () => {
         logger.info(`client ${socket.id} subscribe portal ${tenantId}`);
         socket.join(`p-${tenantId}`);
+      });
+
+      socket.on("subscribeToUser", (obj) => {
+        var id = obj.id;
+        socket.join(`p-${tenantId}-${id}`);
       });
   
       socket.on("unsubscribeToPortal", () => {
@@ -148,38 +187,42 @@ module.exports = async (io) => {
       {
         if(!allUsers[key])
         {
-          allUsers[key] = JSON.parse(await redisClient.get(`allusers-${key}`));
-          if(!allUsers[key])
+          allUsers[key] = [];
+          var users = JSON.parse(await redisClient.get(`allusers-${key}`));
+          if(users)
           {
-            allUsers[key]= [];
+            allUsers[key] = users;
           }
-          else
-          {
-            for(var i = 0; i < allUsers[key].length; i++)
+          
+          for(var i = 0; i < allUsers[key].length; i++)
             {
-              var id = allUsers[key][i];
+              var user = allUsers[key][i];
               var u = {};
-              u.id = id;
-  
-              var offSess = await redisClient.get(id);
-              if(offSess && offSess != '{}')
+              u.id = user.id;
+              u.displayName = user.displayName;
+              var offSess = await redisClient.get(u.id);
+              if(offSess && offSess != '[]')
               {
-                offSess = new Map(JSON.parse(offSess).map(i => [i[0], i[1]]));
+                offSess = JSON.parse(offSess);
               }
               else
               {
-                offSess = new Map();
+                offSess = [];
               }
               u.offlineSessions = offSess;
-              u.status = "offline";
-              u.sessions = new Map();
-              addUser(list, u, id, key);
+              u.sessions = [];
+              u.displayName = displayName;
+              u.avatar = avatar;
+              addUser(list, u, u.id, key);
             }
-          }
         }
-        if(!allUsers[key].includes(userId))
+        if(!allUsers[key].some((a) => a.id == userId))
         {
-          allUsers[key].push(userId);
+          var u = {};
+          u.id = userId;
+          u.avatar = avatar;
+          u.displayName = displayName;
+          allUsers[key].push(u);
           await redisClient.set(`allusers-${key}`, JSON.stringify(allUsers[key]));
         }
       }
@@ -192,14 +235,11 @@ module.exports = async (io) => {
         var user = getUser(usersList, userId, key);
         if (user) 
         {
-          var session = user.sessions.get(sessionId);
-          user.sessions.delete(sessionId);
-          var array = Array.from(user.sessions, ([name, value]) => {
-            return value;
-          });
-          if(!array.find(e=> e.id == session.id))
+          var session = user.sessions[sessionId];
+          user.sessions.splice(sessionId, 1);
+          if(!user.sessions.find(e=> e.id == session.id))
           {
-            user.offlineSessions.set(session.id,
+            user.offlineSessions.push(
               {
                 id: session.id,
                 platform: session.platform,
@@ -208,59 +248,62 @@ module.exports = async (io) => {
                 status: "offline",
                 date: new Date().toString()
             });
-            
-            redisClient.set(redisKey, JSON.stringify(Array.from(user.offlineSessions)));
+            redisClient.set(redisKey, JSON.stringify(user.offlineSessions));
           }
-          var date = new Date().toString();
-            if(user.sessions.size <= 0)
+          if(user.sessions.length == 0)
+          {
+            onlineIO.to(socketKey).emit(`leave-in-${socketDest}`, {userId} );
+          }
+          else
+          {
+            if(isRoom)
             {
-              user.status = "offline";
-              onlineIO.to(socketKey).emit(`leave-in-${socketDest}`, {userId, date} );
+              return;
             }
-            else
+            if(user.sessions[user.sessions.length - 1].id != session.id)
             {
-              if(isRoom || array.find(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip))
+              var u = 
               {
-                return;
-              }
-              onlineIO.to(socketKey).emit(`leave-session-in-${socketDest}`, {userId, sessionId, date} );
+                id: user.id,
+                displayName: user.displayName,
+                session: user.sessions[user.sessions.length - 1]
+              };
+              onlineIO.to(socketKey).emit(`new-session-in-${socketDest}`, {u} );
             }
+            onlineIO.to(`${socketKey}-${userId}`).emit(`leave-session-in-${socketDest}`, {userId, sessionId} );
+          }
         }
       }
 
       async function EnterAsync(usersList, key, redisKey, socketKey, socketDest, isRoom = false) {
         var user = getUser(usersList, userId, key);
+        var isNew = !user;
         var session;
         var id = 0;
-        if (!user) 
+        if (isNew) 
         {
-          var sessions = new Map();
-          sessions.set(
-            1,
-            {
-              id: sessionId,
-              platform: operationSystem,
-              browser: browser,
-              ip: ipAddress,
-              status: "online"
-            });
-          id = 1;
+          var sessions = new Array();
+          session ={
+            id: sessionId,
+            platform: operationSystem,
+            browser: browser,
+            ip: ipAddress,
+            status: "online"
+          };
+          sessions.push(session);
 
-          var offSess = new Map();
+          var offSess = new Array();
 
           user = {
             id: userId,
+            avatar: avatar,
+            displayName: displayName,
             sessions: sessions,
-            status: "online",
             offlineSessions: offSess
           };
         }
         else
         {
-          user.status = "online";
-
-          var keys = Array.from(user.sessions.keys());
-          id = keys.length == 0 ? 1 : keys[keys.length - 1] + 1;
           session = {
             id: sessionId,
             platform: operationSystem,
@@ -268,20 +311,20 @@ module.exports = async (io) => {
             ip: ipAddress,
             status:"online"
           };
-          user.sessions.set(
-            id,
-            session
-          );
+          user.sessions.push(session);
+          id = user.sessions.length - 1;
         }
-  
-        for (let k of user.offlineSessions.keys()) {
-          var value = user.offlineSessions.get(k);
+        
+        for(var i = 0; i < user.offlineSessions.length; i++)
+        {
+          var value = user.offlineSessions[i];
           if (value.id == sessionId || (value.ip == ipAddress && value.browser == browser && value.platform == operationSystem))
           {
-            user.offlineSessions.delete(k);
+            user.offlineSessions.splice(i, 1);
+            i--;
           }
         }
-        if(user.offlineSessions.size != 0)
+        if(user.offlineSessions.length != 0)
         {
           redisClient.set(redisKey, JSON.stringify(Array.from(user.offlineSessions)));
         }
@@ -289,11 +332,19 @@ module.exports = async (io) => {
         {
           redisClient.del(redisKey);
         }
-        if(user.sessions.size == 1)
+        if(isNew)
         {
-          var stringUser = serialize(user, isRoom);
           addUser(usersList, user, userId, key);
-          onlineIO.to(socketKey).emit(`enter-in-${socketDest}`, stringUser );
+        }
+        if(user.sessions.length == 1)
+        {
+          var u = 
+          {
+            id: user.id,
+            displayName: user.displayName,
+            session: session
+          };
+          onlineIO.to(socketKey).emit(`enter-in-${socketDest}`, {u});
         }
         else
         {
@@ -301,14 +352,11 @@ module.exports = async (io) => {
           {
             return id;
           }
-          var array = Array.from(user.sessions, ([name, value]) => {
-            return value;
-          });
-          if(array.filter(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip).length != 1)
+          if(user.sessions.filter(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip).length != 1)
           {
             return id;
           }
-          onlineIO.to(socketKey).emit(`enter-session-in-${socketDest}`, {userId, session} );
+          onlineIO.to(`${socketKey}-${userId}`).emit(`enter-session-in-${socketDest}`, {userId, session} );
         }
 
         return id;
@@ -333,28 +381,24 @@ module.exports = async (io) => {
       {
         var serUser = {
           userId: user.id,
-          status: user.status
+          displayName : user.displayName,
+          avatar: user.avatar
         };
-        if(isRoom)
+        if(user.sessions.length != 0)
         {
-          if(editFiles[roomId] && editFiles[roomId][user.id] && editFiles[roomId][user.id].length != 0)
+          serUser.session = user.sessions[user.sessions.length - 1]
+          if(isRoom)
           {
-            serUser.file = editFiles[roomId][user.id][0];
-            serUser.status = "edit";
-          }
-          if(serUser.status == "offline")
-          {
-            serUser.date = Array.from(user.offlineSessions)[user.offlineSessions.size-1][1].date;
+            if(editFiles[roomId] && editFiles[roomId][user.id] && editFiles[roomId][user.id].length != 0)
+            {
+              serUser.file = editFiles[roomId][user.id][0];
+              serUser.session.status = "edit";
+            }
           }
         }
         else
-        {  
-          serUser.sessions = Array.from(user.sessions, ([name, value]) => {
-            return value;
-          });
-          serUser.sessions = serUser.sessions.concat(Array.from(user.offlineSessions, ([name, value]) => {
-            return value;
-          }));
+        {
+          serUser.session = user.offlineSessions[user.offlineSessions.length - 1];
         }
         return serUser;
       }
@@ -400,7 +444,8 @@ module.exports = async (io) => {
         list[id] = [];
         return null;
       }
-      return list[id][userId];
+      var x =  list[id].find(q=> q.id == userId);
+      return x;
     }
 
     function addUser(list, user, userId, id){
@@ -408,7 +453,7 @@ module.exports = async (io) => {
       {
         list[id] = [];
       }
-      list[id][userId] = user;
+      list[id].push(user);
     }
     
     return {

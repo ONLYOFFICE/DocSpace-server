@@ -1086,8 +1086,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///      Outgoing Mail (SMTP): 
         ///      Server: &lt;b&gt;$Server&lt;/b&gt;
-        ///      Port: &lt;b&gt;$SmtpPort&lt;/b&gt;
-        /// [rest of string was truncated]&quot;;.
+        ///      Port: &lt;b&gt;$SmtpPort&lt;/b&gt;        /// [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_mailbox_created {
             get {
@@ -1600,6 +1599,21 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_request_tariff1 {
             get {
                 return ResourceManager.GetString("pattern_request_tariff1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The DocSpace administrator noticed suspicious activity from your account and disabled all active sessions. Your password was reset. 
+        ///
+        ///Please click the button below to set a new password for your DocSpace account.
+        ///
+        ///$OrangeButton
+        ///
+        ///The link is valid for 7 days..
+        /// </summary>
+        public static string pattern_reset_password {
+            get {
+                return ResourceManager.GetString("pattern_reset_password", resourceCulture);
             }
         }
         
@@ -2682,6 +2696,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_request_tariff {
             get {
                 return ResourceManager.GetString("subject_request_tariff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset your password..
+        /// </summary>
+        public static string subject_reset_password {
+            get {
+                return ResourceManager.GetString("subject_reset_password", resourceCulture);
             }
         }
         

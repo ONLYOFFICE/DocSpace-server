@@ -1235,7 +1235,11 @@ public class UserController(
         result.Theme = (await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>()).Theme;
 
         result.LoginEventId = cookieStorage.GetLoginEventIdFromCookie(cookiesManager.GetCookies(CookiesType.AuthKey));
-
+        if (result.LoginEventId == 0) 
+        {
+            var auth = httpContextAccessor.HttpContext?.Request.Headers["Authorization"];
+            result.LoginEventId = cookieStorage.GetLoginEventIdFromCookie(auth);
+        }
         return result;
     }
 
