@@ -1412,10 +1412,15 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FilesSecurityActions.ReadHistory:
+                if (!isAuthenticated)
+                {
+                    return false;
+                }
+                
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict && isAuthenticated)
+                        if (e.Access != FileShare.Restrict)
                         {
                             return true;
                         }
