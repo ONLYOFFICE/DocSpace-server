@@ -31,14 +31,12 @@ public class VirtualRoomsInternalController(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,
     CustomTagsService customTagsService,
-    WatermarkManager watermarkManager,
     RoomLogoManager roomLogoManager,
     FileOperationsManager fileOperationsManager,
     FileStorageService fileStorageService,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    WatermarkDtoHelper watermarkDtoHelper,
     IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
@@ -48,14 +46,12 @@ public class VirtualRoomsInternalController(
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
-        watermarkManager,
         roomLogoManager,
         fileOperationsManager,
         fileStorageService,
         folderDtoHelper,
         fileDtoHelper,
         fileShareDtoHelper,
-        watermarkDtoHelper,
         mapper,
         socketManager,
         apiContext,
@@ -87,14 +83,12 @@ public class VirtualRoomsThirdPartyController(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,
     CustomTagsService customTagsService,
-    WatermarkManager watermarkManager,
     RoomLogoManager roomLogoManager,
     FileOperationsManager fileOperationsManager,
     FileStorageService fileStorageService,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    WatermarkDtoHelper watermarkDtoHelper,
     IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
@@ -104,14 +98,12 @@ public class VirtualRoomsThirdPartyController(
     : VirtualRoomsController<string>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
-        watermarkManager,
         roomLogoManager,
         fileOperationsManager,
         fileStorageService,
         folderDtoHelper,
         fileDtoHelper,
         fileShareDtoHelper,
-        watermarkDtoHelper,
         mapper,
         socketManager,
         apiContext,
@@ -143,14 +135,12 @@ public abstract class VirtualRoomsController<T>(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,
     CustomTagsService customTagsService,
-    WatermarkManager watermarkManager,
     RoomLogoManager roomLogoManager,
     FileOperationsManager fileOperationsManager,
     FileStorageService fileStorageService,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    WatermarkDtoHelper watermarkDtoHelper,
     IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
@@ -507,57 +497,7 @@ public abstract class VirtualRoomsController<T>(
         return await _folderDtoHelper.GetAsync(room);
     }
 
-    /// <summary>
-    /// Adds the watermarks settings to a room with the ID specified in the request.
-    /// </summary>
-    /// <short>Add room watermarks settings</short>
-    /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarkRequestDto, ASC.Files.Core" name="inDto">Request parameters for adding watermarks</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Room information</returns>
-    /// <path>api/2.0/files/rooms/{id}/watermark</path>
-    /// <httpMethod>PUT</httpMethod>
-    [HttpPut("{id}/watermark")]
-    public async Task<WatermarkDto> AddWaterMarksAsync(T id, WatermarkRequestDto inDto)
-    {
-        var watermarkSettings = await watermarkManager.SetWatermarkAsync(id, inDto);
-
-        return watermarkDtoHelper.Get(watermarkSettings);
-    }
-
-    /// <summary>
-    /// Returns the watermark information.
-    /// </summary>
-    /// <short>Get watermark information</short>
-    /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Watermark information</returns>
-    /// <path>api/2.0/files/rooms/{id}/watermark</path>
-    /// <httpMethod>GET</httpMethod>
-    [AllowAnonymous]
-    [HttpGet("{id}/watermark")]
-    public async Task<WatermarkDto> GetWatermarkInfoAsync(T id)
-    {
-        var room = await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
-        var watermarkSettings = await watermarkManager.GetWatermarkAsync(room);
-
-        return watermarkDtoHelper.Get(watermarkSettings);
-    }
-
-    /// <summary>
-    /// Removes the watermarks from a room with the ID specified in the request.
-    /// </summary>
-    /// <short>Remove room watermarks</short>
-    /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <returns></returns>
-    /// <path>api/2.0/files/rooms/{id}/watermark</path>
-    /// <httpMethod>DELETE</httpMethod>
-    [HttpDelete("{id}/watermark")]
-    public async Task DeleteWatermarkAsync(T id)
-    {
-        await watermarkManager.DeleteWatermarkAsync(id);
-    }
+    
     /// <summary>
     /// Creates a logo for a room with the ID specified in the request.
     /// </summary>
@@ -667,24 +607,6 @@ public abstract class VirtualRoomsController<T>(
         await _fileStorageService.ResendEmailInvitationsAsync(id, inDto.UsersIds, inDto.ResendAll);
     }
 
-    [HttpPut("{id}/settings")]
-    public async Task<FolderDto<T>> UpdateSettingsAsync(T id, SettingsRoomRequestDto inDto)
-    {
-        var room = await _fileStorageService.SetRoomSettingsAsync(id, inDto.Indexing, inDto.DenyDownload);
-
-        return await _folderDtoHelper.GetAsync(room);
-    }
-
-    [HttpPut("{id}/lifetime")]
-    public async Task<FolderDto<T>> UpdateLifetimeSettingsAsync(T id, RoomDataLifetimeDto inDto = null)
-    {
-        var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto);
-
-        var room = await _fileStorageService.SetRoomLifetimeSettingsAsync(id, lifetime);
-
-        return await _folderDtoHelper.GetAsync(room);
-    }
-
     [HttpPut("{id}/reorder")]
     public async Task<FolderDto<T>> ReorderAsync(T id)
     {
@@ -704,18 +626,25 @@ public abstract class VirtualRoomsController<T>(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("{id}/news")]
-    public async IAsyncEnumerable<NewItemsDto<FileEntryDto>> GetNewItemsAsync(T id)
+    public async Task<List<NewItemsDto<FileEntryDto>>> GetNewItemsAsync(T id)
     {
         var newItems = await _fileStorageService.GetNewRoomFilesAsync(id);
+        var result = new List<NewItemsDto<FileEntryDto>>();
         
-        foreach (var item in newItems)
+        foreach (var (date, entries) in newItems)
         {
-            yield return new NewItemsDto<FileEntryDto>
+            var apiDateTime = apiDateTimeHelper.Get(date);
+            var items = new List<FileEntryDto>();
+
+            foreach (var en in entries)
             {
-                Date = apiDateTimeHelper.Get(item.Key), 
-                Items = await Task.WhenAll(item.Value.Select(GetFileEntryWrapperAsync))
-            };
+                items.Add(await GetFileEntryWrapperAsync(en));
+            }
+            
+            result.Add(new NewItemsDto<FileEntryDto> { Date = apiDateTime, Items = items });
         }
+
+        return result;
     }
 }
 
@@ -734,7 +663,8 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         UserManager userManager,
         IServiceProvider serviceProvider,
         ApiDateTimeHelper apiDateTimeHelper,
-        RoomNewItemsDtoHelper roomNewItemsDtoHelper)
+        RoomNewItemsDtoHelper roomNewItemsDtoHelper,
+        IHttpContextAccessor httpContextAccessor)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
     {
     /// <summary>
@@ -917,6 +847,11 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpPost("rooms/{id:int}/indexexport")]
     public async Task<DocumentBuilderTaskDto> StartRoomIndexExportAsync(int id)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var room = await fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
 
         if (!room.SettingsIndexing)
@@ -927,17 +862,20 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var userId = authContext.CurrentAccount.ID;
 
-        var task = serviceProvider.GetService<DocumentBuilderTask<int>>();
+        var task = serviceProvider.GetService<RoomIndexExportTask>();
 
         var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
 
         var baseUri = commonLinkUtility.ServerRootPath;
 
-        task.Init(baseUri, tenantId, userId, null, null, null);
+        task.Init(baseUri, tenantId, userId, null);
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
-
-        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id, baseUri);
+        
+        var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id, baseUri, headers: headers != null 
+            ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
+            : []);
 
         await eventBus.PublishAsync(evt);
 
@@ -947,6 +885,11 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpGet("rooms/indexexport")]
     public async Task<DocumentBuilderTaskDto> GetRoomIndexExport()
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var userId = authContext.CurrentAccount.ID;
 
@@ -958,6 +901,11 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpDelete("rooms/indexexport")]
     public async Task TerminateRoomIndexExport()
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var userId = authContext.CurrentAccount.ID;
 
@@ -967,19 +915,25 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     [HttpGet("rooms/news")]
-    public async IAsyncEnumerable<NewItemsDto<RoomNewItemsDto>> GetRoomsNewItems()
+    public async Task<List<NewItemsDto<RoomNewItemsDto>>> GetRoomsNewItems()
     {
         var newItems = await fileStorageService.GetNewRoomFilesAsync();
+        var result = new List<NewItemsDto<RoomNewItemsDto>>();
 
-        foreach (var item in newItems)
+        foreach (var (key, value) in newItems)
         {
-            yield return new NewItemsDto<RoomNewItemsDto>
+            var date = apiDateTimeHelper.Get(key);
+            var items = new List<RoomNewItemsDto>();
+            
+            foreach (var (k, v) in value)
             {
-                Date = apiDateTimeHelper.Get(item.Key), 
-                Items = await Task.WhenAll(item.Value
-                    .Select(s => 
-                        roomNewItemsDtoHelper.GetAsync(s.Key, s.Value.AsEnumerable())))
-            };
+                var item = await roomNewItemsDtoHelper.GetAsync(k, v);
+                items.Add(item);
+            }
+            
+            result.Add(new NewItemsDto<RoomNewItemsDto> { Date = date, Items = items });
         }
+        
+        return result;
     }
 }

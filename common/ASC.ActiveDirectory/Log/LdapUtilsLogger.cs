@@ -27,6 +27,6 @@
 namespace ASC.ActiveDirectory.Log;
 internal static partial class LdapUtilsLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "SkipErrors() failed")]
+    [LoggerMessage(LogLevel.Error, "SkipErrors() failed")]
     public static partial void ErrorSkipErrors(this ILogger logger, Exception exception);
 }

@@ -71,7 +71,8 @@ public class UserController(
     IQuotaService quotaService,
     CustomQuota customQuota,
     AuditEventsRepository auditEventsRepository,
-    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper,
+    CountPaidUserStatistic countPaidUserStatistic)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
 
@@ -341,6 +342,20 @@ public class UserController(
         if (currentUserType is EmployeeType.User or EmployeeType.Guest)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
+        var quotaIncreaseBy = inDto.Invitations.Count(x => x.Type is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin);
+        if (quotaIncreaseBy > 0)
+        {
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            var quota = await tenantManager.GetTenantQuotaAsync(tenantId);
+            var maxCount = quota.GetFeature<CountPaidUserFeature>().Value;
+            var currentCount = await countPaidUserStatistic.GetValueAsync();
+            
+            if (maxCount < currentCount + quotaIncreaseBy)
+            {
+                throw new TenantQuotaException(string.Format(Resource.TariffsFeature_usersQuotaExceeds_exception, quotaIncreaseBy, maxCount - currentCount));
+            }
         }
 
         foreach (var invite in inDto.Invitations)
@@ -1384,7 +1399,11 @@ public class UserController(
     public async IAsyncEnumerable<EmployeeFullDto> UpdateEmployeeActivationStatus(EmployeeActivationStatus activationstatus, UpdateMembersRequestDto inDto)
     {
         await _apiContext.AuthByClaimAsync();
-
+        
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
+        
         foreach (var id in inDto.UserIds.Where(userId => !_userManager.IsSystemUser(userId)))
         {
             await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(id), Constants.Action_EditUser);
@@ -1393,7 +1412,15 @@ public class UserController(
             {
                 continue;
             }
+            var userType = await _userManager.GetUserTypeAsync(u.Id); 
 
+            switch (userType)
+            {
+                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                    continue;
+            }
+            
             u.ActivationStatus = activationstatus;
             await _userManager.UpdateUserInfoAsync(u);
 

@@ -27,12 +27,12 @@
 namespace ASC.Core.Common.Log;
 internal static partial class DBResourceManagerLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "SetNewText")]
+    [LoggerMessage(LogLevel.Error, "SetNewText")]
     public static partial void ErrorSetNewText(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "RestoreOldText")]
+    [LoggerMessage(LogLevel.Error, "RestoreOldText")]
     public static partial void ErrorRestoreOldText(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "ReplaceLogo")]
+    [LoggerMessage(LogLevel.Error, "ReplaceLogo")]
     public static partial void ErrorReplaceLogo(this ILogger logger, Exception exception);
 }

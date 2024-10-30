@@ -23,6 +23,9 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class WatermarkRequestDto
@@ -37,6 +40,7 @@ public class WatermarkRequestDto
 
     /// <summary>Watermark Text</summary>
     /// <type>System.String, System</type>
+    [StringLength(255)]
     public string Text { get; set; }
 
     /// <summary>Watermark text and image rotate</summary>

@@ -27,6 +27,6 @@
 namespace ASC.MessagingSystem.Log;
 internal static partial class DbMessageSenderLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send a message")]
+    [LoggerMessage(LogLevel.Error, "Failed to send a message")]
     public static partial void ErrorFailedSend(this ILogger logger, Exception exception);
 }

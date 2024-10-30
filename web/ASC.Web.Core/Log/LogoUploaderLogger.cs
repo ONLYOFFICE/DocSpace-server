@@ -27,9 +27,9 @@
 namespace ASC.Web.Core.Log;
 internal static partial class StorageHelperLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "SaveTmpLogo")]
+    [LoggerMessage(LogLevel.Error, "SaveTmpLogo")]
     public static partial void ErrorSaveTmpLogo(this ILogger<StorageHelper> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "DeleteLogo")]
+    [LoggerMessage(LogLevel.Error, "DeleteLogo")]
     public static partial void ErrorDeleteLogo(this ILogger<StorageHelper> logger, Exception exception);
 }

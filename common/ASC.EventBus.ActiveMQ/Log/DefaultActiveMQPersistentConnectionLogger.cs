@@ -27,27 +27,27 @@
 namespace ASC.EventBus.ActiveMQ.Log;
 internal static partial class DefaultActiveMQPersistentConnectionLogger
 {
-    [LoggerMessage(Level = LogLevel.Critical, Message = "DefaultActiveMQPersistentConnection")]
+    [LoggerMessage(LogLevel.Critical, "DefaultActiveMQPersistentConnection")]
     public static partial void CriticalDefaultActiveMQPersistentConnection(this ILogger<DefaultActiveMQPersistentConnection> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "ActiveMQ Client is trying to connect")]
+    [LoggerMessage(LogLevel.Information, "ActiveMQ Client is trying to connect")]
     public static partial void InformationActiveMQTryingConnect(this ILogger<DefaultActiveMQPersistentConnection> logger);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "ActiveMQ Client could not connect after {timeOut}s")]
+    [LoggerMessage(LogLevel.Warning, "ActiveMQ Client could not connect after {timeOut}s")]
     public static partial void WarningActiveMQCouldNotConnect(this ILogger<DefaultActiveMQPersistentConnection> logger, double timeOut, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "ActiveMQ Client acquired a persistent connection to '{hostName}' and is subscribed to failure events")]
+    [LoggerMessage(LogLevel.Information, "ActiveMQ Client acquired a persistent connection to '{hostName}' and is subscribed to failure events")]
     public static partial void InformationActiveMQAcquiredPersistentConnection(this ILogger<DefaultActiveMQPersistentConnection> logger, string hostName);
 
-    [LoggerMessage(Level = LogLevel.Critical, Message = "FATAL ERROR: ActiveMQ connections could not be created and opened")]
+    [LoggerMessage(LogLevel.Critical, "FATAL ERROR: ActiveMQ connections could not be created and opened")]
     public static partial void CriticalActiveMQCouldNotBeCreated(this ILogger<DefaultActiveMQPersistentConnection> logger);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "A ActiveMQ connection is shutdown. Trying to re-connect...")]
+    [LoggerMessage(LogLevel.Warning, "A ActiveMQ connection is shutdown. Trying to re-connect...")]
     public static partial void WarningActiveMQConnectionShutdown(this ILogger<DefaultActiveMQPersistentConnection> logger);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "A ActiveMQ connection throw exception. Trying to re-connect...")]
+    [LoggerMessage(LogLevel.Warning, "A ActiveMQ connection throw exception. Trying to re-connect...")]
     public static partial void WarningActiveMQConnectionThrowException(this ILogger<DefaultActiveMQPersistentConnection> logger);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "A ActiveMQ connection is on shutdown. Trying to re-connect...")]
+    [LoggerMessage(LogLevel.Warning, "A ActiveMQ connection is on shutdown. Trying to re-connect...")]
     public static partial void WarningActiveMQConnectionIsOnShutDown(this ILogger<DefaultActiveMQPersistentConnection> logger);
 }

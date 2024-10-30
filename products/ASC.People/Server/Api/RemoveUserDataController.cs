@@ -105,10 +105,22 @@ public class RemoveUserDataController(PermissionContext permissionContext,
             throw new ArgumentException("User with id = " + inDto.UserId + " not found");
         }
 
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserType = await userManager.GetUserTypeAsync(currentUser.Id); 
+        
         var tenant = await tenantManager.GetCurrentTenantAsync();
         if (user.IsOwner(tenant) || user.IsMe(authContext) || user.Status != EmployeeStatus.Terminated)
         {
             throw new ArgumentException("Can not delete user with id = " + inDto.UserId);
+        }
+        
+        var userType = await userManager.GetUserTypeAsync(user); 
+
+        switch (userType)
+        {
+            case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+            case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                throw new SecurityException(Resource.ErrorAccessDenied);
         }
         
         var isGuest = await userManager.IsGuestAsync(user);

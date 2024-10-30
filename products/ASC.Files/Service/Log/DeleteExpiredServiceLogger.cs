@@ -29,6 +29,6 @@ using ASC.Files.Service.Services;
 namespace ASC.Files.Service.Log;
 internal static partial class DeleteExpiredServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "DeleteExpired")]
+    [LoggerMessage(LogLevel.Error, "DeleteExpired")]
     public static partial void ErrorDeleteExpired(this ILogger<DeleteExpiredService> logger, Exception exception);
 }

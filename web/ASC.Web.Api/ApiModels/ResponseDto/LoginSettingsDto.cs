@@ -41,4 +41,6 @@ public class LoginSettingsDto : IMapFrom<LoginSettings>
     /// <summary>The time to wait for a response from the server</summary>
     /// <type>System.Int32, System</type>
     public int CheckPeriod { get; set; }
+    
+    public bool IsDefault { get; set; }
 }

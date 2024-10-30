@@ -56,6 +56,8 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
                 return null;
             }
 
+            id = HttpUtility.UrlDecode(id);
+
             var match = Selector.Match(id);
             if (match.Success)
             {

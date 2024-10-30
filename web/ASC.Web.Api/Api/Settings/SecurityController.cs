@@ -438,4 +438,16 @@ public class SecurityController(
 
         return mapper.Map<LoginSettings, LoginSettingsDto>(settings);
     }
+    
+    [HttpDelete("loginSettings")]
+    public async Task<LoginSettingsDto> SetDefaultLoginSettingsAsync()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var defaultSettings = new LoginSettings().GetDefault();
+        
+        await settingsManager.SaveAsync(defaultSettings);
+
+        return mapper.Map<LoginSettings, LoginSettingsDto>(defaultSettings);
+    }
 }

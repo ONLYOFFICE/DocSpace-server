@@ -168,9 +168,8 @@ internal class RoomsActionMapper : IModuleActionMapper
                             MessageAction.RoomGroupRemove
                         ]
                     },
-                    {
-                        ActionType.Delete, [MessageAction.RoomDeleted]
-                    }
+                    { ActionType.Delete, [MessageAction.RoomDeleted] },
+                    { ActionType.Export, [MessageAction.RoomIndexExportSaved] }
                 }
             },
             {

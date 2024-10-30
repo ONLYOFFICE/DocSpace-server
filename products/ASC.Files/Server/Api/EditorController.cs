@@ -152,6 +152,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <param type="System.Boolean, System" name="view">Specifies if a document will be opened for viewing only or not</param>
     /// <param type="ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core" name="editorType">Editor type (Desktop, Mobile, Embedded)</param>
     /// <param type="System.Boolean, System" name="edit"></param>
+    /// <param type="System.Boolean, System" name="fill"></param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConfigurationDto, ASC.Files.Core">Configuration parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
@@ -160,7 +161,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
-    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, bool view, EditorType editorType, bool edit)
+    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, bool view, EditorType editorType, bool edit, bool fill)
     {
         var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(fileId, version);
         var fileType = FileUtility.GetFileTypeByFileName(file.Title);
@@ -261,8 +262,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     break;
 
                 default:
-                    canEdit = true;
-                    canFill = false;
+                    canEdit = !fill;
+                    canFill = fill;
                     break;
             }
         }

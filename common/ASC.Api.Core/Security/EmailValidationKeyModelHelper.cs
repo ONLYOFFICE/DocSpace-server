@@ -147,25 +147,10 @@ public class EmailValidationKeyModelHelper(
 
             case ConfirmType.EmailChange:
                 var userId = uiD.GetValueOrDefault();
-                if (authContext.CurrentAccount.ID != userId)
-                {
-                    checkKeyResult = ValidationResult.Invalid;
-                    break;
-                }
                 var emailChangeEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentEmailChangeInstructions, entry: EntryType.User, target: MessageTarget.Create(userId).ToString(), limit: 1)).FirstOrDefault();
                 var postfix = emailChangeEvent == null ? userId.ToString() : tenantUtil.DateTimeToUtc(emailChangeEvent.Date).ToString("s", CultureInfo.InvariantCulture);
 
                 checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + postfix, key, provider.ValidEmailKeyInterval);
-                break;
-
-            case ConfirmType.EmailActivation:
-                if (authContext.CurrentAccount.ID != uiD.GetValueOrDefault())
-                {
-                    checkKeyResult = ValidationResult.Invalid;
-                    break;
-                }
-                
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type, key, provider.ValidEmailKeyInterval);
                 break;
             case ConfirmType.PasswordChange:
                 userInfo = await userManager.GetUserByEmailAsync(email);
@@ -208,7 +193,7 @@ public class EmailValidationKeyModelHelper(
             case ConfirmType.ProfileRemove:
                 // validate UiD
                 userInfo = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
-                if (userInfo == null || Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD)
+                if (userInfo == null || Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && (authContext.CurrentAccount.ID != uiD || userInfo.Email != email))
                 {
                     return ValidationResult.Invalid;
                 }

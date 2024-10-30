@@ -3087,17 +3087,28 @@ public class FileStorageService //: IFileStorageService
         if ((entry is File<T> || entry is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)) && entry.RootFolderType == FolderType.VirtualRooms)
         {
             var room = await DocSpaceHelper.GetParentRoom(entry, folderDao);
+            
+            var linkId = await externalShare.GetLinkIdAsync();
+            AceWrapper ace;
 
-            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
-            if (parentLink == null)
+            if (linkId == Guid.Empty)
+            {
+                ace = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
+            }
+            else
+            {
+                ace = await fileSharing.GetPureSharesAsync(room, [linkId]).FirstOrDefaultAsync();
+            }
+
+            if (ace == null)
             {
                 throw new ItemNotFoundException();
             }
-            
-            var data = await externalShare.GetLinkDataAsync(entry, parentLink.Id, entryType == FileEntryType.File);
-            parentLink.Link = await urlShortener.GetShortenLinkAsync(data.Url);
 
-            return parentLink;
+            var data = await externalShare.GetLinkDataAsync(entry, ace.Id, entryType == FileEntryType.File);
+            ace.Link = await urlShortener.GetShortenLinkAsync(data.Url);
+
+            return ace;
         }
 
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
@@ -4044,6 +4055,11 @@ public class FileStorageService //: IFileStorageService
 
         async Task<bool> HasAccessInviteAsync(UserInfo user)
         {
+            if (user.Status == EmployeeStatus.Terminated)
+            {
+                return false;
+            }
+            
             if (isDocSpaceAdmin)
             {
                 return true;
