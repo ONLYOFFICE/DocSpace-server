@@ -847,16 +847,18 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpPost("rooms/{id:int}/indexexport")]
     public async Task<DocumentBuilderTaskDto> StartRoomIndexExportAsync(int id)
     {
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
-
         var room = await fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
+
+        var fileSecurity = serviceProvider.GetService<FileSecurity>();
+
+        if (!await fileSecurity.CanEditRoomAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
+        }
 
         if (!room.SettingsIndexing)
         {
-            throw new NotSupportedException("Folder indexing is turned off");
+            throw new InvalidOperationException("Folder indexing is turned off");
         }
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -871,7 +873,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         task.Init(baseUri, tenantId, userId, null);
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
-        
+
         var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id, baseUri, headers: headers != null 
             ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
@@ -885,11 +887,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpGet("rooms/indexexport")]
     public async Task<DocumentBuilderTaskDto> GetRoomIndexExport()
     {
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
-
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var userId = authContext.CurrentAccount.ID;
 
@@ -901,11 +898,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpDelete("rooms/indexexport")]
     public async Task TerminateRoomIndexExport()
     {
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
-
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var userId = authContext.CurrentAccount.ID;
 
