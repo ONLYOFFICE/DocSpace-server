@@ -116,15 +116,11 @@ module.exports = async (io) => {
 
       socket.on("getSessions", async (obj) => {
         var id = obj.id;
-        var user = portalUsers[tenantId][id];
+        var user = getUser(portalUsers, userId, tenantId);
         var u = {};
         u.id = id;
-        u.sessions = Array.from(user.sessions, ([name, value]) => {
-          return value;
-        });
-        u.sessions = u.sessions.concat(Array.from(user.offlineSessions, ([name, value]) => {
-          return value;
-        }));
+        u.sessions = user.sessions;
+        u.sessions = u.sessions.concat(user.offlineSessions);
         onlineIO.to(socket.id).emit("user-sessions",  u );
       });
       
