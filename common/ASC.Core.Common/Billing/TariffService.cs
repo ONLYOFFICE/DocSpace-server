@@ -696,7 +696,18 @@ public class TariffService(
 
         if (coreBaseSettings.Standalone)
         {
-            lifetime = await tariff.Quotas.ToAsyncEnumerable().AnyAwaitAsync(async q => (await quotaService.GetTenantQuotaAsync(q.Id)).Lifetime);
+            foreach (var q in tariff.Quotas)
+            {
+                var quota = await quotaService.GetTenantQuotaAsync(q.Id);
+                if (quota.Lifetime)
+                {
+                    lifetime = true;
+                }
+                if (quota.Trial)
+                {
+                    setDelay = false;
+                }
+            }
         }
 
         if (TrialEnabled)
