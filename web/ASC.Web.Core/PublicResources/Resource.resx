@@ -1125,4 +1125,7 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>The number of admins exceeds the limit: {0}/{1}.</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Add at least 1 trusted domain.</value>
+  </data>
 </root>
