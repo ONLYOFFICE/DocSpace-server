@@ -29,7 +29,7 @@ namespace ASC.Files.Core.Services.NotifyService;
 
 public interface INotifyQueueManager<T>
 {
-    IRoomNotifyQueue<T> GetOrCreateRoomQueue(int tenantId, Folder<T> room, IEnumerable<Guid> targetMessageRecipients, Guid currentAccountId);
+    IRoomNotifyQueue<T> GetOrCreateRoomQueue(int tenantId, Folder<T> room, Guid currentAccountId);
 }
 
 public class RoomNotifyQueueManager<T> : INotifyQueueManager<T>
@@ -38,15 +38,27 @@ public class RoomNotifyQueueManager<T> : INotifyQueueManager<T>
 
     private readonly NotifyClient _notifyClient;
     private readonly TenantManager _tenantManager;
+    private readonly FileSecurity _fileSecurity;
     
-    public RoomNotifyQueueManager(NotifyClient notifyClient, TenantManager tenantManager)
+
+    public RoomNotifyQueueManager(NotifyClient notifyClient, TenantManager tenantManager, FileSecurity fileSecurity)
     {
         _notifyClient = notifyClient;
         _tenantManager = tenantManager;
+        _fileSecurity = fileSecurity;
     }
 
-    public IRoomNotifyQueue<T> GetOrCreateRoomQueue(int tenantId, Folder<T> room, IEnumerable<Guid> targetMessageRecipients, Guid currentAccountId)
+    public IRoomNotifyQueue<T> GetOrCreateRoomQueue(int tenantId, Folder<T> room, Guid currentAccountId)
     {
-        return _queues.GetOrAdd(room.Id.ToString(), _ => new RoomNotifyQueue<T>(tenantId, room, _notifyClient, targetMessageRecipients, currentAccountId, _tenantManager));
+        return _queues.GetOrAdd(room.Id.ToString(), _ => {
+            var roomNotifyQueue = new RoomNotifyQueue<T>(tenantId, room, _notifyClient, currentAccountId, _tenantManager, _fileSecurity);
+            roomNotifyQueue.RegisterCallback(RemoveRoomQueue);
+            return roomNotifyQueue;
+        });
+    }
+
+    public void RemoveRoomQueue(string roomId)
+    {
+        _queues.TryRemove(roomId, out var roomNotifyQueue);
     }
 }

@@ -137,9 +137,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
                                 if (room != null)
                                 {
-                                    var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
-
-                                    var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room, whoCanRead, authContext.CurrentAccount.ID);
+                                    var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room, authContext.CurrentAccount.ID);
                                     queue.AddMessage(resumedSession.File);
                                 }
                             }
@@ -196,9 +194,8 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         var room = await folderDao.GetParentFoldersAsync(session.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
                         if (room != null)
                         {
-                            var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
 
-                            var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room, whoCanRead, authContext.CurrentAccount.ID);
+                            var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room, authContext.CurrentAccount.ID);
                             queue.AddMessage(session.File);
                         }
                     }

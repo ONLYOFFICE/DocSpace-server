@@ -30,29 +30,36 @@ public interface IRoomNotifyQueue<T>
 {
     void AddMessage(File<T> file);
     Task ProcessQueueAsync();
+    void RegisterCallback(Action<string> callback);
 }
 
 public class RoomNotifyQueue<T> : IRoomNotifyQueue<T>, IDisposable
 {
     protected readonly TenantManager _tenantManager;
     private readonly NotifyClient _notifyClient;
+    private readonly FileSecurity _fileSecurity;
     private Timer _timer;
 
     protected readonly int _tenantId;
     private readonly Folder<T> _room;
-    private readonly IEnumerable<Guid> _targetMessageRecipients;
     protected readonly Guid _currentAccountId;
 
     private readonly Queue<File<T>> _messages = new Queue<File<T>>();
-    
-    public RoomNotifyQueue(int tenantId, Folder<T> room, NotifyClient notifyClient, IEnumerable<Guid> targetMessageRecipients, Guid currentAccountId, TenantManager tenantManager)
+
+    private Action<string> _removeCallback;
+    public RoomNotifyQueue(int tenantId, Folder<T> room, NotifyClient notifyClient, Guid currentAccountId, TenantManager tenantManager, FileSecurity fileSecurity)
     {
         _room = room;
         _notifyClient = notifyClient;
-        _targetMessageRecipients = targetMessageRecipients;
         _currentAccountId = currentAccountId;
         _tenantManager = tenantManager;
         _tenantId = tenantId;
+        _fileSecurity = fileSecurity;
+    }
+
+    public void RegisterCallback(Action<string> callback)
+    {
+        _removeCallback = callback;
     }
 
     public void AddMessage(File<T> file)
@@ -74,19 +81,22 @@ public class RoomNotifyQueue<T> : IRoomNotifyQueue<T>, IDisposable
             return;
         }
 
+        var whoCanRead = await _fileSecurity.WhoCanReadAsync(_room, true);
+
         if (count <= 3)
         {
             while (_messages.Count > 0)
             {
-                await _notifyClient.SendDocumentUploadedToRoom(_targetMessageRecipients, _messages.Dequeue(), _room, _currentAccountId);
+                await _notifyClient.SendDocumentUploadedToRoom(whoCanRead, _messages.Dequeue(), _room, _currentAccountId);
             }
         }
         else
         {
-            await _notifyClient.SendDocumentsUploadedToRoom(_targetMessageRecipients, count, _room, _currentAccountId);
+            await _notifyClient.SendDocumentsUploadedToRoom(whoCanRead, count, _room, _currentAccountId);
             _messages.Clear();
         }
 
+        _removeCallback?.Invoke(_room.Id.ToString());
         _timer?.Dispose();
         _timer = null;
     }
