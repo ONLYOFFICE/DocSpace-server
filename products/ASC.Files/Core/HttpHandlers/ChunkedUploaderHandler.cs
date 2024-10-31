@@ -51,7 +51,6 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
     FileDtoHelper filesWrapperHelper,
     AuthContext authContext,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity,
     IServiceScopeFactory serviceScopeFactory)
 {
     public async Task Invoke(HttpContext context)
