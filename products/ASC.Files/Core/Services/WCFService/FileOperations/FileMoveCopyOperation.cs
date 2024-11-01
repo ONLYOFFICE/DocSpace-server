@@ -127,6 +127,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
     protected override async Task DoJob(IServiceScope serviceScope)
     {
+        var notifyConfiguration = serviceScope.ServiceProvider.GetService<NotifyConfiguration>();
+        notifyConfiguration.Configure();
+
         if (_daoFolderId != 0)
         {
             await DoAsync(serviceScope, _daoFolderId);
@@ -736,9 +739,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         }
                                         else if (toFolder.FolderType == FolderType.Archive)
                                         {
-
-                                            notifyContext.RegisterSender(dispatchEngine, "push.sender", new PushSenderSink(notifyPushSender));
-
                                             var whoCanRead = await fileSecurity.WhoCanReadAsync(folder, true);
                                             await notifyClient.SendRoomMovedArchiveAsync(folder, whoCanRead, securityContext.CurrentAccount.ID);
 
