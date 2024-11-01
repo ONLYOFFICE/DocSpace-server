@@ -149,7 +149,6 @@ public class FolderDtoHelper(
     SettingsManager settingsManager,
     BreadCrumbsManager breadCrumbsManager,
     TenantManager tenantManager,
-    WatermarkManager watermarkManager,
     WatermarkDtoHelper watermarkHelper,
     IMapper mapper,
     ExternalShare externalShare)
