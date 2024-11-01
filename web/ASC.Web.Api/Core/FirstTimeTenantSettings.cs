@@ -57,7 +57,9 @@ public class FirstTimeTenantSettings(
                 throw new Exception("Wizard passed.");
             }
 
-            if (!string.IsNullOrEmpty(setupInfo.AmiMetaUrl) && await IncorrectAmiId(amiid))
+            var ami = !string.IsNullOrEmpty(setupInfo.AmiMetaUrl);
+
+            if (ami && await IncorrectAmiId(amiid))
             {
                 throw new Exception(Resource.EmailAndPasswordIncorrectAmiId);
             }
@@ -95,7 +97,7 @@ public class FirstTimeTenantSettings(
 
             await userManager.UpdateUserInfoAsync(currentUser);
 
-            if (await tenantExtra.GetEnableTariffSettings() && tenantExtra.Enterprise)
+            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
             {
                 await TariffSettings.SetLicenseAcceptAsync(settingsManager);
                 await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
