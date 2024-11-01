@@ -82,7 +82,9 @@ public class HttpUtils {
             .findFirst()
             .orElse(null);
 
-    if (address == null || address.isBlank()) return Optional.empty();
+    if (address == null || address.isBlank()) {
+      return Optional.of(String.format("%s://%s", request.getScheme(), request.getRemoteAddr()));
+    }
 
     var protocol = request.getScheme();
     var protocols = protoHeader.split(",");
@@ -135,7 +137,9 @@ public class HttpUtils {
             .findFirst()
             .orElse(null);
 
-    if (host == null || host.isBlank()) return Optional.empty();
+    if (host == null || host.isBlank()) {
+      return Optional.of(String.format("%s://%s", request.getScheme(), request.getRemoteAddr()));
+    }
 
     var protocol = request.getScheme();
     var protocols = protoHeader.split(",");
