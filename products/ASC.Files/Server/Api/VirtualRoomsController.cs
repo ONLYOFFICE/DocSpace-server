@@ -851,9 +851,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var fileSecurity = serviceProvider.GetService<FileSecurity>();
 
-        if (!await fileSecurity.CanEditRoomAsync(room))
+        if (!await fileSecurity.CanIndexExportAsync(room))
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         if (!room.SettingsIndexing)
