@@ -132,6 +132,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to $ToUserName mentioned you in the document $DocumentTitle.
+        /// </summary>
+        public static string pattern_EditorMentions_push {
+            get {
+                return ResourceManager.GetString("pattern_EditorMentions_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A new folder &quot;$FolderTitle&quot; has been created to the room &quot;$RoomTitle&quot;.
         /// </summary>
         public static string pattern_FolderCreatedInRoom_push {
@@ -323,15 +332,6 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string subject_EditorMentions {
             get {
                 return ResourceManager.GetString("subject_EditorMentions", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to $ToUserName mentioned you in the document $DocumentTitle.
-        /// </summary>
-        public static string subject_EditorMentions_push {
-            get {
-                return ResourceManager.GetString("subject_EditorMentions_push", resourceCulture);
             }
         }
         

@@ -136,9 +136,6 @@ $Message</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Sign status changed</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>$ToUserName mentioned you in the document $DocumentTitle</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Mailing is complete.</value>
   </data>
@@ -206,5 +203,8 @@ $OrangeButton</value>
   </data>
   <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
     <value>A new folder "$FolderTitle" has been created to the room "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName mentioned you in the document $DocumentTitle</value>
   </data>
 </root>
