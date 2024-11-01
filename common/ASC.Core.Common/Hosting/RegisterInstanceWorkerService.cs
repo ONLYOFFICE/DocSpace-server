@@ -30,7 +30,6 @@ namespace ASC.Core.Common.Hosting;
 public class RegisterInstanceWorkerService<T>(
     ILogger<RegisterInstanceWorkerService<T>> logger,
     IServiceProvider serviceProvider,
-    IHostApplicationLifetime applicationLifetime,
     IOptions<InstanceWorkerOptions<T>> optionsSettings)
     : BackgroundService where T : IHostedService
 {
