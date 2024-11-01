@@ -32,6 +32,7 @@ module.exports = async (io) => {
       const avatar = socket.handshake.session?.user?.avatarSmall;
       const tenantId = socket.handshake.session?.portal?.tenantId;
       let id;
+      var logout = false;
       let idInRoom = -1;
       let roomId = -1;
       let file;
@@ -125,7 +126,9 @@ module.exports = async (io) => {
         onlineIO.to(socket.id).emit("user-sessions",  u );
       });
 
-      
+      socket.on("logout", () => {
+        logout = true;
+      });
       
       socket.on("subscribeToPortal", () => {
         logger.info(`client ${socket.id} subscribe portal ${tenantId}`);
@@ -140,6 +143,11 @@ module.exports = async (io) => {
       socket.on("unsubscribeToPortal", () => {
         logger.info(`client ${socket.id} unsubscribe portal ${tenantId}`);
         socket.leave(`p-${tenantId}`);
+      });
+
+      socket.on("unsubscribeToUser", (obj) => {
+        var id = obj.id;
+        socket.leave(`p-${tenantId}-${id}`);
       });
      /******************************* */
       socket.on("enterInRoom", async(roomPart)=>
@@ -268,7 +276,14 @@ module.exports = async (io) => {
           }
           if(user.sessions.length == 0)
           {
-            onlineIO.to(socketKey).emit(`leave-in-${socketDest}`, {userId} );
+            if(!logout) 
+            {
+              onlineIO.to(socketKey).emit(`leave-in-${socketDest}`, {userId} );
+            }
+            else
+            {
+              onlineIO.to(socketKey).emit(`logout-in-${socketDest}`, {userId} );
+            }
           }
           else
           {
@@ -276,17 +291,24 @@ module.exports = async (io) => {
             {
               return;
             }
-            if(user.sessions[user.sessions.length - 1].id != session.id)
+            if(!logout)
             {
-              var u = 
+              if(user.sessions[user.sessions.length - 1].id != session.id)
               {
-                id: user.id,
-                displayName: user.displayName,
-                session: user.sessions[user.sessions.length - 1]
-              };
-              onlineIO.to(socketKey).emit(`new-session-in-${socketDest}`, {u} );
+                var u = 
+                {
+                  id: user.id,
+                  displayName: user.displayName,
+                  session: user.sessions[user.sessions.length - 1]
+                };
+                onlineIO.to(socketKey).emit(`new-session-in-${socketDest}`, {u} );
+              }
+              onlineIO.to(`${socketKey}-${userId}`).emit(`leave-session-in-${socketDest}`, {userId, sessionId} );
             }
-            onlineIO.to(`${socketKey}-${userId}`).emit(`leave-session-in-${socketDest}`, {userId, sessionId} );
+            else
+            {
+              onlineIO.to(`${socketKey}-${userId}`).emit(`logout-session-in-${socketDest}`, {userId, sessionId} );
+            }
           }
         }
       }
