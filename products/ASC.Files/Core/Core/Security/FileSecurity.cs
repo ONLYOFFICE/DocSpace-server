@@ -225,7 +225,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.CreateRoomFrom,
                     FilesSecurityActions.CopyLink,
                     FilesSecurityActions.Embed,
-                    FilesSecurityActions.ChangeOwner
+                    FilesSecurityActions.ChangeOwner,
+                    FilesSecurityActions.IndexExport
                 }
             }
     }.ToFrozenDictionary();
@@ -453,6 +454,11 @@ public class FileSecurity(IDaoFactory daoFactory,
     public async Task<bool> CanChangeOwnerAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.ChangeOwner);
+    }
+    
+    public async Task<bool> CanIndexExportAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.IndexExport);
     }
     
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false)
@@ -849,6 +855,11 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
 
+        if (action == FilesSecurityActions.IndexExport && (!isRoom || !folder.SettingsIndexing))
+        {
+            return false;
+        }
+
         if (action is FilesSecurityActions.ReadHistory or FilesSecurityActions.EditHistory && e.ProviderEntry)
         {
             return false;
@@ -1048,7 +1059,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                             return true;
                     }
 
-                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.Duplicate or FilesSecurityActions.ChangeOwner)
+                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.Duplicate or FilesSecurityActions.ChangeOwner or 
+                            FilesSecurityActions.IndexExport)
                     {
                         return true;
                     }
@@ -1115,7 +1127,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     action != FilesSecurityActions.Copy &&
                     action != FilesSecurityActions.Move &&
                     action != FilesSecurityActions.Download &&
-                    action != FilesSecurityActions.ReadLinks
+                    action != FilesSecurityActions.ReadLinks &&
+                    action != FilesSecurityActions.IndexExport
                     )
                 {
                     return false;
@@ -1134,7 +1147,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return true;
                     }
 
-                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Delete)
+                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Delete or FilesSecurityActions.IndexExport)
                     {
                         return true;
                     }
@@ -1594,6 +1607,19 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     default:
                         if (e.Access == FileShare.RoomManager && ((isRoom && e.Shared) || (file is { Shared: true })))
+                        {
+                            return true;
+                        }
+                        break;
+                }
+                break;
+            case FilesSecurityActions.IndexExport:
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomManager)
                         {
                             return true;
                         }
@@ -2477,6 +2503,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         CreateRoomFrom,
         CopyLink,
         Embed,
-        ChangeOwner
+        ChangeOwner,
+        IndexExport
     }
 }
