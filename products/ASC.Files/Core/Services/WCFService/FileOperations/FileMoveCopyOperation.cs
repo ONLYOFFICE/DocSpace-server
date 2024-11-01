@@ -337,9 +337,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var global = scope.ServiceProvider.GetRequiredService<Global>();
         var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
         var notifyClient = scope.ServiceProvider.GetRequiredService<NotifyClient>();
-        var notifyContext = scope.ServiceProvider.GetRequiredService<NotifyContext>();
-        var dispatchEngine = scope.ServiceProvider.GetRequiredService<DispatchEngine>();
-        var notifyPushSender = scope.ServiceProvider.GetRequiredService<PushSender>();
         var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
 
         var toFolderId = toFolder.Id;
