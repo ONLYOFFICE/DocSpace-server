@@ -178,7 +178,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
                 dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}"
             },
 
-            logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath),
+            logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath.Split('?')[0]),
 
             themeColors = new
             {
