@@ -93,19 +93,22 @@ module.exports = async (io) => {
         if(portalUsers[tenantId])
         {
           var onlineUsers = portalUsers[tenantId].filter(o => o.sessions.length != 0).sort(userSort);
-          onlineUsers.splice(index + 100, portalUsers[tenantId].length);
-          onlineUsers.forEach(function(entry) 
+          
+          var end = onlineUsers.length >= index + 100 ? index + 100 : onlineUsers.length;
+          for(var i = index; i < end; i++)
           {
-            users.push(serialize(entry));
-          });
+            users.push(serialize(onlineUsers[i]));
+          }
           if(onlineUsers.length < 100)
           {
             var offlineUsers = portalUsers[tenantId].filter(o => o.sessions.length == 0).sort(userSort);
-            offlineUsers.splice(index - onlineUsers.length + 100, portalUsers[tenantId].length);
-            offlineUsers.forEach(function(entry) 
-            {
-              users.push(serialize(entry));
-            });
+            index = index - onlineUsers.length;
+            end = offlineUsers.length >= index + 100 ? index + 100 : offlineUsers.length;
+            index = index < 0 ? 0 : index;
+            for(var i = index; i < end; i++)
+              {
+                users.push(serialize(offlineUsers[i]));
+              }
           }
         }
         var result = 
