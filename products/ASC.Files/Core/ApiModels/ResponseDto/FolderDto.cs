@@ -216,8 +216,7 @@ public class FolderDtoHelper(
                 }
             }
             
-            var watermarkSettings = await watermarkManager.GetWatermarkAsync(folder);
-            result.Watermark = watermarkHelper.Get(watermarkSettings);
+            result.Watermark = watermarkHelper.Get(folder.SettingsWatermark);
 
             if (folder.ShareRecord is { IsLink: true })
             {
