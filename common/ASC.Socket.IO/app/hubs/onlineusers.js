@@ -86,32 +86,33 @@ module.exports = async (io) => {
         file = null;
       });
 
-      socket.on("getSessionsInPortal", async () => {
+      socket.on("getSessionsInPortal", async (obj) => {
+        var index = obj.index;
         var users = [];
         if(portalUsers[tenantId])
         {
-          portalUsers[tenantId].sort((a,b) => 
-            {
-              if(a.sessions.length != 0 && b.sessions.length != 0 )
-              {
-                return b.sessions[b.sessions.length - 1] - a.sessions[a.sessions.length - 1] ;
-              }
-              if(a.sessions.length != 0)
-              {
-                return -1;
-              }
-              if(b.sessions.length != 0)
-              {
-                return 1;
-              }
-              return b.offlineSessions[b.offlineSessions.length - 1] - a.offlineSessions[a.offlineSessions.length - 1] ;
-            });
-          Object.values(portalUsers[tenantId]).forEach(function(entry) 
+          var onlineUsers = portalUsers[tenantId].filter(o => o.sessions.length != 0).sort(userSort);
+          onlineUsers.splice(index + 100, portalUsers[tenantId].length);
+          onlineUsers.forEach(function(entry) 
           {
             users.push(serialize(entry));
           });
+          if(onlineUsers.length < 100)
+          {
+            var offlineUsers = portalUsers[tenantId].filter(o => o.sessions.length == 0).sort(userSort);
+            offlineUsers.splice(index - onlineUsers.length + 100, portalUsers[tenantId].length);
+            offlineUsers.forEach(function(entry) 
+            {
+              users.push(serialize(entry));
+            });
+          }
         }
-        onlineIO.to(socket.id).emit("sessions-in-portal",  users );
+        var result = 
+        { 
+          total: portalUsers[tenantId].length,
+          users: users
+        };
+        onlineIO.to(socket.id).emit("sessions-in-portal",  result );
       });
 
       socket.on("getSessions", async (obj) => {
@@ -123,6 +124,8 @@ module.exports = async (io) => {
         u.sessions = u.sessions.concat(user.offlineSessions);
         onlineIO.to(socket.id).emit("user-sessions",  u );
       });
+
+      
       
       socket.on("subscribeToPortal", () => {
         logger.info(`client ${socket.id} subscribe portal ${tenantId}`);
@@ -149,7 +152,7 @@ module.exports = async (io) => {
     socket.on("leaveRoom", async()=>{
       await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", idInRoom, true);
       idInRoom = -1;
-  });
+    });
 
     socket.on("getSessionsInRoom", async (roomPart) => {
       var users = [];
@@ -174,6 +177,23 @@ module.exports = async (io) => {
       logger.info(`client ${socket.id} unsubscribe room ${roomId}`);
       socket.leave(roomId);
     });
+
+    var userSort = (a,b) => 
+      {
+        if(a.sessions.length != 0 && b.sessions.length != 0 )
+        {
+          return b.sessions[b.sessions.length - 1].date - a.sessions[a.sessions.length - 1].date;
+        }
+        if(a.sessions.length != 0)
+        {
+          return -1;
+        }
+        if(b.sessions.length != 0)
+        {
+          return 1;
+        }
+        return b.offlineSessions[b.offlineSessions.length - 1].date - a.offlineSessions[a.offlineSessions.length - 1].date;
+      };
 
       var getRoom = (obj) => {
         return `${tenantId}-${obj.roomPart}`;
@@ -242,7 +262,7 @@ module.exports = async (io) => {
                 browser: session.browser,
                 ip: session.ip,
                 status: "offline",
-                date: new Date().toString()
+                date: new Date()
             });
             redisClient.set(redisKey, JSON.stringify(user.offlineSessions));
           }
@@ -284,7 +304,8 @@ module.exports = async (io) => {
             platform: operationSystem,
             browser: browser,
             ip: ipAddress,
-            status: "online"
+            status: "online",
+            date: new Date()
           };
           sessions.push(session);
 
@@ -305,7 +326,8 @@ module.exports = async (io) => {
             platform: operationSystem,
             browser: browser,
             ip: ipAddress,
-            status:"online"
+            status:"online",
+            date: new Date()
           };
           user.sessions.push(session);
           id = user.sessions.length - 1;
