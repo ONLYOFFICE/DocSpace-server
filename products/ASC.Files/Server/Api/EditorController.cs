@@ -313,7 +313,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
         
-        if (fileType == FileType.Pdf && file.IsForm)
+        if (fileType == FileType.Pdf && file.IsForm && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
             result.StartFilling = canStartFilling;
         }
