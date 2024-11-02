@@ -14,7 +14,40 @@ module.exports = async (io) => {
     const redisOptions = config.get("Redis");
     var redisClient = redis.createClient(redisOptions);
     await redisClient.connect();
-
+    
+    var clear = () =>
+    {
+      var today = new Date();
+      var date = new Date(today.setDate(today.getDate() - 3));
+      portalUsers.forEach(users =>
+      {
+        for(var j = 0; j < users.length; j++)
+        {
+          for(var i = 0; i < users[j].offlineSessions.length; i++)
+          {
+            if(users[j].offlineSessions[i].date <= date)
+            {
+              users[j].offlineSessions.splice(i, 1);
+              i--;
+            }
+          }
+          if(users[j].offlineSessions.length != 0)
+          {
+            redisClient.set(users[j].id, JSON.stringify(users[j].offlineSessions));
+          }
+          else
+          {
+            redisClient.del(users[j].id);
+          }
+          if(users[j].offlineSessions.length == 0 && users[j].sessions.length == 0)
+          {
+            users.splice(j, 1);
+            j--;
+          }
+        }
+      });
+    };
+    setInterval(clear, 1000 * 60 * 60);
     async function startAsync(socket)
     {
       if (socket.handshake.session.system) 
@@ -37,7 +70,6 @@ module.exports = async (io) => {
       let roomId = -1;
       let file;
       let sessionId = socket.handshake.session?.user?.connection;
-      
       await InitUsersAsync(tenantId, portalUsers);
       id = await EnterAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal");
       if(socket.handshake.session.file)
@@ -236,15 +268,17 @@ module.exports = async (io) => {
           var users = JSON.parse(await redisClient.get(`allusers-${key}`));
           if(users)
           {
-           // allUsers[key] = users;
+            allUsers[key] = users;
           }
-          
-          for(var i = 0; i < allUsers[key].length; i++)
+          if(allUsers[key].length != 0)
+          {
+            for(var i = 0; i < allUsers[key].length; i++)
             {
               var user = allUsers[key][i];
               var u = {};
               u.id = user.id;
               u.displayName = user.displayName;
+              u.avatar = user.avatar;
               var offSess = await redisClient.get(u.id);
               if(offSess && offSess != '[]')
               {
@@ -264,6 +298,8 @@ module.exports = async (io) => {
               u.avatar = avatar;
               addUser(list, u, u.id, key);
             }
+            clear();
+          }
         }
         if(!allUsers[key].some((a) => a.id == userId))
         {
@@ -324,6 +360,7 @@ module.exports = async (io) => {
                 {
                   id: user.id,
                   displayName: user.displayName,
+                  avatar: user.avatar,
                   session: user.sessions[user.sessions.length - 1]
                 };
                 onlineIO.to(socketKey).emit(`new-session-in-${socketDest}`, {u} );
@@ -407,6 +444,7 @@ module.exports = async (io) => {
           {
             userId: user.id,
             displayName: user.displayName,
+            avatar: user.avatar,
             session: session
           };
           onlineIO.to(socketKey).emit(`enter-in-${socketDest}`, {u});
