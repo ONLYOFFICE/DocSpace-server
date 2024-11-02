@@ -28,6 +28,7 @@
 package com.asc.authorization.application.configuration.resilience;
 
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -53,9 +54,6 @@ public class Bucket4jConfiguration {
     /** The Redis server port. */
     private int port;
 
-    /** The Redis server database. */
-    private int database;
-
     /** The Redis server username. */
     private String username;
 
@@ -70,11 +68,13 @@ public class Bucket4jConfiguration {
   @Data
   public static class RateLimitProperties {
     /** Properties for client rate limiting. */
-    private ClientRateLimitProperties clientRateLimit;
+    private List<ClientRateLimitProperties> limits;
 
     /** Configuration properties for client rate limiting. */
     @Data
     public static class ClientRateLimitProperties {
+      private String method;
+
       /** The maximum number of tokens available in the bucket. */
       private int capacity;
 

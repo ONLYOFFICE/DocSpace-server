@@ -7,12 +7,37 @@ bucket4j:
     password: ${REDIS_PASSWORD:}
     ssl: ${REDIS_SSL:false}
   rate-limits:
-    client-rate-limit:
-      capacity: ${CLIENT_RATE_LIMITER_CAPACITY:200}
-      refill:
-        tokens: ${CLIENT_RATE_LIMITER_REFILL:200}
-        period: ${CLIENT_RATE_LIMITER_REFILL_PERIOD:1}
-        time-unit: ${CLIENT_RATE_LIMITER_REFILL_UNIT:MINUTES}
+    limits:
+      - method: GET
+        capacity: ${GET_RATE_LIMITER_CAPACITY:200}
+        refill:
+          tokens: ${GET_RATE_LIMITER_REFILL:200}
+          period: ${GET_RATE_LIMITER_REFILL_PERIOD:1}
+          time-unit: ${GET_RATE_LIMITER_REFILL_UNIT:MINUTES}
+      - method: POST
+        capacity: ${POST_RATE_LIMITER_CAPACITY:15}
+        refill:
+          tokens: ${POST_RATE_LIMITER_REFILL:15}
+          period: ${POST_RATE_LIMITER_REFILL_PERIOD:1}
+          time-unit: ${POST_RATE_LIMITER_REFILL_UNIT:SECONDS}
+      - method: PUT
+        capacity: ${PUT_RATE_LIMITER_CAPACITY:15}
+        refill:
+          tokens: ${PUT_RATE_LIMITER_REFILL:15}
+          period: ${PUT_RATE_LIMITER_REFILL_PERIOD:1}
+          time-unit: ${PUT_RATE_LIMITER_REFILL_UNIT:SECONDS}
+      - method: PATCH
+        capacity: ${PATCH_RATE_LIMITER_CAPACITY:15}
+        refill:
+          tokens: ${PATCH_RATE_LIMITER_REFILL:15}
+          period: ${PATCH_RATE_LIMITER_REFILL_PERIOD:1}
+          time-unit: ${PATCH_RATE_LIMITER_REFILL_UNIT:SECONDS}
+      - method: DELETE
+        capacity: ${DELETE_RATE_LIMITER_CAPACITY:15}
+        refill:
+          tokens: ${DELETE_RATE_LIMITER_REFILL:15}
+          period: ${DELETE_RATE_LIMITER_REFILL_PERIOD:1}
+          time-unit: ${DELETE_RATE_LIMITER_REFILL_UNIT:SECONDS}
 
 resilience4j:
   ratelimiter:

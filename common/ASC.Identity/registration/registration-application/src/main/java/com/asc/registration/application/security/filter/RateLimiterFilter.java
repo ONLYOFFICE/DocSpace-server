@@ -29,7 +29,6 @@ package com.asc.registration.application.security.filter;
 
 import com.asc.common.application.transfer.response.AscPersonResponse;
 import com.asc.common.utilities.HttpUtils;
-import com.asc.registration.application.configuration.resilience.Bucket4jConfiguration;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
@@ -39,9 +38,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -50,12 +51,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @RequiredArgsConstructor
 public class RateLimiterFilter extends OncePerRequestFilter {
-  private final String X_RATE_LIMIT = "X-Ratelimit-Limit";
   private final String X_RATE_REMAINING = "X-Ratelimit-Remaining";
   private final String X_RATE_RESET = "X-Ratelimit-Reset";
 
-  private final Bucket4jConfiguration bucket4jConfiguration;
-  private final Supplier<BucketConfiguration> bucketConfiguration;
+  private final Function<HttpMethod, Supplier<BucketConfiguration>> bucketFactory;
   private final ProxyManager<String> proxyManager;
 
   /**
@@ -70,8 +69,13 @@ public class RateLimiterFilter extends OncePerRequestFilter {
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
+    var method = request.getMethod();
+    var bucketConfiguration = bucketFactory.apply(HttpMethod.valueOf(method));
     if (request.getAttribute("person") instanceof AscPersonResponse person) {
-      var bucket = proxyManager.builder().build(person.getId(), bucketConfiguration);
+      var bucket =
+          proxyManager
+              .builder()
+              .build(String.format("%s:%s", method, person.getId()), bucketConfiguration);
       handleRequest(bucket, request, response, chain);
     } else {
       var clientIp = HttpUtils.getRequestClientAddress(request).orElse(request.getRemoteAddr());
@@ -80,7 +84,10 @@ public class RateLimiterFilter extends OncePerRequestFilter {
         return;
       }
 
-      var bucket = proxyManager.builder().build(clientIp, bucketConfiguration);
+      var bucket =
+          proxyManager
+              .builder()
+              .build(String.format("%s:%s", method, clientIp), bucketConfiguration);
       handleRequest(bucket, request, response, chain);
     }
   }
@@ -89,18 +96,13 @@ public class RateLimiterFilter extends OncePerRequestFilter {
       Bucket bucket, HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws IOException, ServletException {
     var probe = bucket.tryConsumeAndReturnRemaining(1);
+    response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
+    response.setHeader(
+        X_RATE_RESET,
+        String.valueOf(TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill())));
+    response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
     if (probe.isConsumed()) {
       chain.doFilter(request, response);
-    } else {
-      response.setContentType("application/json");
-      response.setHeader(
-          X_RATE_LIMIT,
-          String.valueOf(bucket4jConfiguration.getRateLimits().getClientRateLimit().getCapacity()));
-      response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
-      response.setHeader(
-          X_RATE_RESET,
-          String.valueOf(TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill())));
-      response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
     }
   }
 }
