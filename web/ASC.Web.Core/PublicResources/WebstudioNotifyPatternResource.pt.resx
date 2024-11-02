@@ -1851,7 +1851,7 @@ O link é válido por 7 dias.</value>
     <value>Seu desenvolvedor do ONLYOFFICE DocSpace não está mais disponível</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Período de carência para o seu ONLYOFFICE DocSpace Enterprise ativado </value>
+    <value>Período de carência para o seu ONLYOFFICE DocSpace Enterprise ativado</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Sua licença do ONLYOFFICE DocSpace Enterprise expirará em breve</value>

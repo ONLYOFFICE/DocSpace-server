@@ -1923,7 +1923,7 @@ $OrangeButton
     <value>Ваш ONLYOFFICE DocSpace Developer больше не доступен</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Льготный период для вашего ONLYOFFICE DocSpace Enterprise активирован </value>
+    <value>Льготный период для вашего ONLYOFFICE DocSpace Enterprise активирован</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Срок действия вашей лицензии для ONLYOFFICE DocSpace Enterprise скоро истекает</value>

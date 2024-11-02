@@ -1786,7 +1786,7 @@ Link jest ważny przez 7 dni.</value>
     <value>Twoje konto ONLYOFFICE DocSpace Developer nie jest już dostępne</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Okres prolongaty dla Twojego konta ONLYOFFICE DocSpace Enterprise został aktywowany </value>
+    <value>Okres prolongaty dla Twojego konta ONLYOFFICE DocSpace Enterprise został aktywowany</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Twoja licencja ONLYOFFICE DocSpace Enterprise wkrótce wygaśnie</value>

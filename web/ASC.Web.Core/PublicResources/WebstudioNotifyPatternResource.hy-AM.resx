@@ -1982,7 +1982,7 @@ $OrangeButton
     <value>Ձեր ONLYOFFICE DocSpace Developer-ն այլևս հասանելի չէ</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Ձեր ONLYOFFICE DocSpace Enterprise-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է </value>
+    <value>Ձեր ONLYOFFICE DocSpace Enterprise-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Ձեր ONLYOFFICE DocSpace Enterprise-ի լիցենզիայի ժամկետը շուտով կլրանա</value>

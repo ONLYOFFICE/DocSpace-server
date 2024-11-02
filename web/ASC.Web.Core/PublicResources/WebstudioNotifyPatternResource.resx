@@ -2398,7 +2398,7 @@ For payment questions, contact us at "${__SalesEmail}":"mailto:${__SalesEmail}"
 $TrulyYours</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Grace period for your ONLYOFFICE DocSpace Enterprise activated </value>
+    <value>Grace period for your ONLYOFFICE DocSpace Enterprise activated</value>
   </data>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Hello, $UserName!

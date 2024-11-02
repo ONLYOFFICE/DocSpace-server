@@ -1778,7 +1778,7 @@ $TrulyYours</value>
     <value>Вашият ONLYOFFICE DocSpace Developer вече не е наличен</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Гратисният период за вашия ONLYOFFICE DocSpace Enterprise е активиран </value>
+    <value>Гратисният период за вашия ONLYOFFICE DocSpace Enterprise е активиран</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Вашият ONLYOFFICE DocSpace Enterprise лиценз ще изтече скоро</value>

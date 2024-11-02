@@ -1779,7 +1779,7 @@ $TrulyYours</value>
     <value>Votre ONLYOFFICE DocSpace Developer n'est plus disponible</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Période de grâce pour votre ONLYOFFICE DocSpace Enterprise activé </value>
+    <value>Période de grâce pour votre ONLYOFFICE DocSpace Enterprise activé</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Votre licence ONLYOFFICE DocSpace Enterprise expirera bientôt</value>

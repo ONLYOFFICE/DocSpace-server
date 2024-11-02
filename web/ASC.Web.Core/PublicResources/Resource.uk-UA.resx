@@ -1057,4 +1057,10 @@
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>{0} на адміністратора/досвідченого користувача та можливість додавати простір за запитом</value>
   </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не вдалося задати квоту на кімнату. Введене значення більше загального сховища DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не вдалося задати квоту на користувача. Введене значення більше загального сховища DocSpace.</value>
+  </data>
 </root>

@@ -1943,7 +1943,7 @@ $TrulyYours</value>
     <value>ترخيص "ONLYOFFICE DocSpace Developer" الخاص بك لم يعد متوفرًا</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>تم تفعيل فترة السماح لـ"ONLYOFFICE DocSpace Enterprise" الخاص بك </value>
+    <value>تم تفعيل فترة السماح لـ"ONLYOFFICE DocSpace Enterprise" الخاص بك</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>ترخيص "ONLYOFFICE DocSpace Enterprise" الخاص بك سينتهي قريبًا</value>

@@ -1787,7 +1787,7 @@ Odkaz bude platný 7 dní.</value>
     <value>Váš ONLYOFFICE DocSpace Developer už nie je dostupný</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Doba odkladu pre váš ONLYOFFICE DocSpace Enterprise bola aktivovaná </value>
+    <value>Doba odkladu pre váš ONLYOFFICE DocSpace Enterprise bola aktivovaná</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Platnosť vašej licencie ONLYOFFICE DocSpace Enterprise čoskoro vyprší</value>

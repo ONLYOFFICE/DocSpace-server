@@ -1776,7 +1776,7 @@ $TrulyYours</value>
     <value>ONLYOFFICE DocSpace Developerはご利用いただけなくなりました</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>ONLYOFFICE DocSpace Enterpriseの猶予期間が開始されました </value>
+    <value>ONLYOFFICE DocSpace Enterpriseの猶予期間が開始されました</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>ONLYOFFICE DocSpace Enterpriseライセンスはまもなく期限切れになります</value>

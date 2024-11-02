@@ -1761,4 +1761,180 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Şimdi satın al</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Şifre ayarla</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Merhaba! Lütfen ONLYOFFICE DocSpace hesabınız için bir şifre ayarlayın. Aşağıdaki düğmeye tıklamanız yeterlidir:
+
+$OrangeButton
+
+Bağlantı 7 gün boyunca geçerlidir.</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developer için ödemesiz süre etkinleştirildi</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developer lisansınız yakında sona erecek</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developer için ödemesiz süre yakında sona erecek</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developer ürününüz artık mevcut değil</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise için ödemesiz süre etkinleştirildi</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise lisansınızın süresi yakında dolacak</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise için ödemesiz süre yakında sona erecek</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise ürününüz artık mevcut değil</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise lisansınızın süresi yakında dolacak</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise lisansınızın süresi bugün doluyor</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace için bir şifre oluşturun</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Merhaba, $UserName!ONLYOFFICE DocSpace Developer lisansınızın süresi bugün doluyor.
+
+Sizin için $PaymentDelay günlük bir ödemesiz süre etkinleştirdik. Bu süre zarfında, belge düzenleme erişimi 20 eşzamanlı bağlantı ile sınırlıdır (destek ve güncellemeler artık sağlanmamaktadır).
+
+Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan iletişime geçin veya "${__SalesEmail}":"mailto:${__SalesEmail}" üzerinden bize ulaşın.
+
+Ödeme ile ilgili sorularınız için "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden bize ulaşın. Herhangi bir teknik sorunun çözümü için "${__SupportLink}":"${__SupportLink}" adresini kullanın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Merhaba, $UserName!ONLYOFFICE DocSpace Developer lisansınızın süresi 7 gün içinde dolacaktır.
+
+Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan iletişime geçin veya "${__SalesEmail}":"mailto:${__SalesEmail}" üzerinden bize ulaşın.
+
+Ödeme ile ilgili sorularınız için "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden bize ulaşın. Herhangi bir teknik sorunun çözümü için "${__SupportLink}":"${__SupportLink}" adresini kullanın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+ONLYOFFICE DocSpace Developer lisansınızın ödemesiz süresi 7 gün içinde sona erecek. Bu, DocSpace'ın kullanılamaz hale geleceği anlamına geliyor.
+
+Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan iletişime geçin veya bize "${__SalesEmail}":"mailto:${__SalesEmail}" üzerinden ulaşın.
+
+Ödeme ile ilgili sorularınız için, bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin. Herhangi bir teknik sorunun çözümü için "${__SupportLink}":"${__SupportLink}" adresini kullanın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+ONLYOFFICE DocSpace Developer lisansınızın ödemesiz süresi bugün sona eriyor. Bu, DocSpace'ın artık kullanılamayacağı anlamına geliyor.
+
+Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan iletişime geçin veya bize "${__SalesEmail}":"mailto:${__SalesEmail}" üzerinden ulaşın.
+
+Ödeme ile ilgili sorularınız için, bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin. Herhangi bir teknik sorunun çözümü için "${__SupportLink}":"${__SupportLink}" adresini kullanın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisansınız bugün sona eriyor.
+
+Sizin için *$PaymentDelay‎ günlük ödemesiz süreyi* etkinleştirdik. Bu süre zarfında, DocSpace'e erişim adı verilen 3 kullanıcıya* sağlanır (destek ve güncellemeler artık sağlanmaz).
+
+Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ONLYOFFICE DocSpace Enterprise için *ÖMÜR BOYU lisans* almanızı öneririz (3 yıllık destek ve güncellemeler dahil):
+
+$OrangeButton
+
+Sertifika güncellemesi için atanmış satış yöneticinizle de doğrudan iletişime geçebilirsiniz.
+
+Ödeme ile ilgili sorularınız için bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin. Teknik sorunların çözümü için "${__SupportLink}":"${__SupportLink}" adresini kullanın.
+
+*Herhangi bir dosyayı düzenlemek için açan ilk 3 kullanıcının kayıtlı kimlikleri. Aynı anda düzenlenebilecek belge sayısı sınırsızdır. Diğer kullanıcılar belgeleri yalnızca görüntüleyebilir.$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+ONLYOFFICE DocSpace Enterprise için lisansınız 7 gün içinde sona erecektir.
+
+Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ONLYOFFICE DocSpace Enterprise için *ÖMÜR BOYU lisans* almanızı öneririz (3 yıllık destek ve güncellemeler dahil).
+
+$OrangeButton
+
+Sertifika güncellemesi için atanmış satış yöneticinizle de doğrudan iletişime geçebilirsiniz.
+
+Ödeme ile ilgili sorularınız için bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin. Teknik sorunların çözümü için "${__SupportLink}":"${__SupportLink}" adresini kullanın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisansınızın ödemesiz süresi 7 gün içinde sona erecek. Bu, DocSpace'ın kullanılamaz hale geleceği anlamına geliyor.
+
+Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ONLYOFFICE DocSpace Enterprise için ÖMÜR BOYU lisans almanızı öneririz (3 yıl destek ve güncellemeler dahil):
+
+$OrangeButton
+
+Sertifika güncellemesi için atanmış satış yöneticinizle de doğrudan iletişime geçebilirsiniz.
+
+Ödeme ile ilgili sorularınız için bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin. Teknik sorunların çözümü için "${__SupportLink}":"${__SupportLink}" adresini kullanın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisansınızın ödemesiz süresi bugün sona eriyor. Bu, DocSpace'in artık kullanılamayacağı anlamına geliyor.
+
+Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ONLYOFFICE DocSpace Enterprise için *ÖMÜR BOYU lisans* almanızı öneririz (3 yıllık destek ve güncellemeler dahil):
+
+$OrangeButton
+
+Sertifika güncellemesi için atanmış satış yöneticinizle de doğrudan iletişime geçebilirsiniz.
+
+Ödeme ile ilgili sorularınız için bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin. Teknik sorunların çözümü için "${__SupportLink}":"${__SupportLink}" adresini kullanın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisansınız 7 gün içinde sona erecek. Bu, güncellemelerin ve desteğin artık sağlanmayacağı anlamına geliyor.*
+
+Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan iletişime geçin veya bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin.
+
+Ödeme ile ilgili sorularınız için bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin. Teknik sorunların çözümü için "${__SupportLink}":"${__SupportLink}" adresini kullanın.
+
+*Lisans satın alındığı andaki tüm özellikleri sonsuz süreyle kullanabilirsiniz.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisansınız bugün sona eriyor. Bu, güncellemelerin ve desteğin artık sağlanmayacağı anlamına geliyor.*
+
+Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan iletişime geçin veya bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin.
+
+Ödeme ile ilgili sorularınız için bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin. Teknik sorunların çözümü için "${__SupportLink}":"${__SupportLink}" adresini kullanın.
+
+*Lisans satın alındığı andaki tüm özellikleri sonsuz süreyle kullanabilirsiniz.
+
+$TrulyYours</value>
+  </data>
 </root>

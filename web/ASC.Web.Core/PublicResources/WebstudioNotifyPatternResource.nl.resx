@@ -1787,7 +1787,7 @@ De link is 7 dagen geldig.</value>
     <value>Uw ONLYOFFICE DocSpace Developer niet langer beschikbaar</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Wachtperiode voor uw ONLYOFFICE DocSpace Enterprise geactiveerd </value>
+    <value>Wachtperiode voor uw ONLYOFFICE DocSpace Enterprise geactiveerd</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Uw ONLYOFFICE DocSpace Enterprise licentie verloopt binnenkort</value>

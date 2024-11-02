@@ -1782,7 +1782,7 @@ $TrulyYours</value>
     <value>您的 ONLYOFFICE 协作空间开发者版已停用</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>您的 ONLYOFFICE 协作空间企业版宽限期已激活 </value>
+    <value>您的 ONLYOFFICE 协作空间企业版宽限期已激活</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>您的 ONLYOFFICE 协作空间企业版许可证即将到期</value>

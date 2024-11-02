@@ -1057,4 +1057,10 @@
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>관리자/파워 유저당 {0} 및 요청 시 공간 추가 가능</value>
   </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>룸당 할당량을 설정하는 데 실패했습니다. 입력한 값이 총 DocSpace 스토리지 값보다 큽니다.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>사용자당 할당량을 설정하는 데 실패했습니다. 입력한 값이 총 DocSpace 스토리지 값보다 큽니다.</value>
+  </data>
 </root>

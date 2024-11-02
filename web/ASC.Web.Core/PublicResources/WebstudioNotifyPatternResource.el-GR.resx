@@ -1787,7 +1787,7 @@ $OrangeButton
     <value>Το ONLYOFFICE DocSpace Developer σας δεν είναι πλέον διαθέσιμο</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Περίοδος χάριτος για το ONLYOFFICE DocSpace Enterprise σας που έχετε ενεργοποιήσει </value>
+    <value>Περίοδος χάριτος για το ONLYOFFICE DocSpace Enterprise σας που έχετε ενεργοποιήσει</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Η άδεια χρήσης του ONLYOFFICE DocSpace Enterprise σας θα λήξει σύντομα</value>

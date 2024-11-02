@@ -1786,7 +1786,7 @@ Linkki on voimassa 7 päivää.</value>
     <value>ONLYOFFICE DocSpace Developer ei ole enää käytettävissä</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>ONLYOFFICE DocSpace Enterprisen lisäaika on aktivoitu </value>
+    <value>ONLYOFFICE DocSpace Enterprisen lisäaika on aktivoitu</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>ONLYOFFICE DocSpace Enterprise-lisenssi päättyy pian</value>
