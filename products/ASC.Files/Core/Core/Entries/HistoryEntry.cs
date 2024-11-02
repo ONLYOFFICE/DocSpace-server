@@ -83,7 +83,8 @@ public record HistoryEntry
 [JsonDerivedType(typeof(FileOperationData))]
 [JsonDerivedType(typeof(FileRenameData))]
 [JsonDerivedType(typeof(LifeTimeHistoryData))]
-[JsonDerivedType(typeof(IndexChangedData))]
+[JsonDerivedType(typeof(FolderIndexChangedData))]
+[JsonDerivedType(typeof(FileIndexChangedData))]
 [JsonDerivedType(typeof(WatermarkData))]
 public abstract record HistoryData
 {

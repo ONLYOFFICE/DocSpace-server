@@ -26,6 +26,34 @@
 
 namespace ASC.Files.Core.Core.History.Interpreters;
 
+public record FolderIndexChangedData : EntryData
+{
+    public int OldIndex { get; }
+    public int NewIndex { get; }
+    
+    public FolderIndexChangedData(
+        int oldIndex,
+        int newIndex,
+        string id,
+        string title,
+        int? parentId = null,
+        string parentTitle = null,
+        int? parentType = null) : base(id,
+        title,
+        parentId,
+        parentTitle,
+        parentType)
+    {
+        NewIndex = newIndex;
+        OldIndex = oldIndex;
+    }
+
+    public override int GetId()
+    {
+        return ParentId.HasValue ? ParentId.GetHashCode() : 0;
+    }
+}
+
 public class FolderCreatedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
@@ -119,5 +147,18 @@ public class FolderIndexReorderedInterpreter : ActionInterpreter
             : null;
         
         return new ValueTask<HistoryData>(new EntryData(target, title, parentId, parentTitle, parentType));
+    }
+}
+
+public class FolderIndexChangedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {
+        var oldIndex = int.Parse(description[1]);
+        var newIndex = int.Parse(description[2]);
+        
+        var desc = GetAdditionalDescription(description);
+        
+        return new ValueTask<HistoryData>(new FolderIndexChangedData(oldIndex, newIndex, target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType));
     }
 }

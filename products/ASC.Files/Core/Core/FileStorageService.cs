@@ -3143,7 +3143,7 @@ public class FileStorageService //: IFileStorageService
             var data = await externalShare.GetLinkDataAsync(entry, ace.Id, entryType == FileEntryType.File);
             ace.Link = await urlShortener.GetShortenLinkAsync(data.Url);
             
-            await filesMessageService.SendAsync(MessageAction.PrimaryExternalLinkCopied, entry, entry.Title, parentLink.FileShareOptions?.Title);
+            await filesMessageService.SendAsync(MessageAction.PrimaryExternalLinkCopied, entry, entry.Title, ace.FileShareOptions?.Title);
 
             return ace;
         }

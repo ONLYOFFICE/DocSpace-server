@@ -157,6 +157,40 @@ public record FileRenameData : RenameEntryData
     }
 }
 
+public record FileIndexChangedData : EntryData
+{
+    public int OldIndex { get; }
+    public int NewIndex { get; }
+    public IDictionary<Accessibility, bool> Accessibility { get; }
+    public string ViewUrl { get; }
+    
+    public FileIndexChangedData(
+        int oldIndex,
+        int newIndex,
+        string id,
+        string title,
+        int? parentId = null,
+        string parentTitle = null,
+        int? parentType = null,
+        IDictionary<Accessibility, bool> accessibility = null,
+        string viewUrl = null) : base(id,
+        title,
+        parentId,
+        parentTitle,
+        parentType)
+    {
+        OldIndex = oldIndex;
+        NewIndex = newIndex;
+        Accessibility = accessibility;
+        ViewUrl = viewUrl;
+    }
+
+    public override int GetId()
+    {
+        return ParentId.HasValue ? ParentId.GetHashCode() : 0;
+    }
+}
+
 #endregion
 
 #region Interpreters
@@ -316,7 +350,7 @@ public class FileConvertedInterpreter : FileActionInterpreterBase
     }
 }
 
-public class FileLockInterpreter : ActionInterpreter
+public class FileLockInterpreter : FileActionInterpreterBase
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
@@ -332,6 +366,29 @@ public class FileLockInterpreter : ActionInterpreter
             desc.ParentType,
             accessibility: accessibility,
             viewUrl: viewUrl));
+    }
+}
+
+public class FileIndexChangedInterpreter : FileActionInterpreterBase
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {
+        var desc = GetAdditionalDescription(description);
+        var oldIndex = int.Parse(description[1]);
+        var newIndex = int.Parse(description[2]);
+        var accessibility = GetAccessibility(serviceProvider, description[0]);
+        var viewUrl = GetViewUrl(serviceProvider, target);
+        
+        return new ValueTask<HistoryData>(new FileIndexChangedData(
+            oldIndex,
+            newIndex,
+            target,
+            description[0],
+            desc.ParentId,
+            desc.ParentTitle,
+            desc.ParentType,
+            accessibility,
+            viewUrl));
     }
 }
 

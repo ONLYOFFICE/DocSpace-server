@@ -39,7 +39,6 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     private static readonly FileUpdatedInterpreter _fileUpdatedInterpreter = new();
     private static readonly RoomTagsInterpreter _roomTagsInterpreter = new();
     private static readonly RoomIndexingInterpreter _roomIndexingInterpreter = new();
-    private static readonly IndexChangedInterpreter _indexChangedInterpreter = new();
     private static readonly RoomArchivingInterpreter _roomArchivingInterpreter = new();
     private static readonly FileLockInterpreter _fileLockInterpreter = new();
     private static readonly RoomDenyDownloadInterpreter _roomDenyDownloadInterpreter = new();
@@ -91,8 +90,8 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomIndexingDisabled, _roomIndexingInterpreter },
         { (int)MessageAction.RoomLifeTimeSet, new RoomLifeTimeSetInterpreter() },
         { (int)MessageAction.RoomLifeTimeDisabled, new RoomLifeTimeDisabledInterpreter() },
-        { (int)MessageAction.FolderIndexChanged, _indexChangedInterpreter },
-        { (int)MessageAction.FileIndexChanged, _indexChangedInterpreter },
+        { (int)MessageAction.FolderIndexChanged, new FolderIndexChangedInterpreter() },
+        { (int)MessageAction.FileIndexChanged, new FileIndexChangedInterpreter() },
         { (int)MessageAction.FolderIndexReordered, new FolderIndexReorderedInterpreter() },
         { (int)MessageAction.RoomArchived, _roomArchivingInterpreter },
         { (int)MessageAction.RoomUnarchived, _roomArchivingInterpreter },

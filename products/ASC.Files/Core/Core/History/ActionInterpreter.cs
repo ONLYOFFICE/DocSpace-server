@@ -160,68 +160,6 @@ public record EntryOperationData : HistoryData
     }
 }
 
-public record UserFileUpdateData : EntryData
-{
-    public string UserName { get; }
-
-    public UserFileUpdateData(string id,
-        string title,
-        int? parentId = null,
-        string parentTitle = null,
-        int? parentType = null,
-        string userName = null) : base(id,
-        title,
-        parentId,
-        parentTitle,
-        parentType)
-    {
-        UserName = userName;
-    }
-    
-    public override string InitiatorName => UserName;
-}
-
-public record IndexChangedData : EntryData
-{
-    public int OldIndex { get; }
-    public int NewIndex { get; }
-    
-    public IndexChangedData(
-        int oldIndex,
-        int newIndex,
-        string id,
-        string title,
-        int? parentId = null,
-        string parentTitle = null,
-        int? parentType = null) : base(id,
-        title,
-        parentId,
-        parentTitle,
-        parentType)
-    {
-        OldIndex = oldIndex;
-        NewIndex = newIndex;
-    }
-
-    public override int GetId()
-    {
-        return ParentId.HasValue ? ParentId.GetHashCode() : 0;
-    }
-}
-
-public class IndexChangedInterpreter : ActionInterpreter
-{
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
-    {
-        var oldIndex = int.Parse(description[1]);
-        var newIndex = int.Parse(description[2]);
-        
-        var desc = GetAdditionalDescription(description);
-        
-        return new ValueTask<HistoryData>(new IndexChangedData(oldIndex, newIndex, target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType));
-    }
-}
-
 public class PrimaryLinkCopiedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
