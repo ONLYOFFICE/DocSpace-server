@@ -143,6 +143,7 @@ internal class OneDriveDaoBase(
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
         ProcessFolderAsRoom(folder);
+        folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
     }

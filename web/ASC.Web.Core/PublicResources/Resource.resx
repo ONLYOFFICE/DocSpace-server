@@ -976,7 +976,7 @@
     <value>The number of admins should not exceed {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Number of admins/power users</value>
+    <value>Number of admins</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatic backup &amp; recovery</value>
@@ -1000,7 +1000,7 @@
     <value>Storage space</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Admins/Power users added:</value>
+    <value>Admins added:</value>
   </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Rooms:</value>
@@ -1121,5 +1121,11 @@
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Failed to set quota per user. The entered value is greater than the total DocSpace storage.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>The number of admins exceeds the limit: {0}/{1}.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Add at least 1 trusted domain.</value>
   </data>
 </root>

@@ -134,9 +134,12 @@ public class PortalController(
         {
             return string.Empty;
         }
+        
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, (int)employeeType + authContext.CurrentAccount.ID.ToString(), authContext.CurrentAccount.ID)
-                + $"&emplType={employeeType:d}";
+        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, 
+                (int)employeeType + authContext.CurrentAccount.ID.ToString() + tenant.Alias, 
+                authContext.CurrentAccount.ID) + $"&emplType={employeeType:d}";
 
         return await urlShortener.GetShortenLinkAsync(link);
     }
@@ -552,10 +555,7 @@ public class PortalController(
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        if (securityContext.CurrentAccount.ID != tenant.OwnerId)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
-        }
+        await DemandPermissionToDeleteTenantAsync(tenant);
 
         await tenantManager.RemoveTenantAsync(tenant.Id);
 

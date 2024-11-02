@@ -303,7 +303,7 @@ public abstract class Migrator(
 
     private async Task MigrateStorageAsync(MigrationStorage storage, MigrationUser user = null)
     {
-        if (!storage.ShouldImport || storage.Files.Count == 0)
+        if (!storage.ShouldImport || storage.Files.Count == 0 && storage.Folders.Count == 0)
         {
             return;
         }
@@ -450,7 +450,7 @@ public abstract class Migrator(
                         {
                             var userForShare = await UserManager.GetUsersAsync(infoUser.Info.Id);
                             await SecurityContext.AuthenticateMeAsync(userForShare.Id);
-                            await EntryManager.MarkAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
+                            await EntryManager.MarkFileAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
                         }
                         else
                         {
@@ -470,7 +470,7 @@ public abstract class Migrator(
                             await foreach (var u in users)
                             {
                                 await SecurityContext.AuthenticateMeAsync(u.Id);
-                                await EntryManager.MarkAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
+                                await EntryManager.MarkFileAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
                             }
                         }
                     }

@@ -66,13 +66,13 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             FolderType.USER, new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                {
-                        SubjectType.ExternalLink,
-                        [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
+                { 
+                    SubjectType.ExternalLink, 
+                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
                 },
-                {
-                        SubjectType.PrimaryExternalLink,
-                        [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
+                { 
+                    SubjectType.PrimaryExternalLink, 
+                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
                 }
             }.ToFrozenDictionary()
         }
@@ -87,18 +87,18 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         SubjectType.User, [
                             FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Review,
-                            FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                            FileShare.Comment, FileShare.Read, FileShare.None
                         ]
                     },
                     {
                         SubjectType.Group, [
-                            FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                            FileShare.ContentCreator, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
                         ]
                     },
                     {
                         SubjectType.InvitationLink, [
                             FileShare.ContentCreator, FileShare.Editing, FileShare.Review,
-                            FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                            FileShare.Comment, FileShare.Read, FileShare.None
                         ]
                     },
                     { SubjectType.ExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] },
@@ -110,6 +110,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
                     { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.None] },
+                    { SubjectType.Group, [FileShare.ContentCreator] },
                     { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Read, FileShare.None] },
                     { SubjectType.ExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] },
                     { SubjectType.PrimaryExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] }
@@ -120,7 +121,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
                     { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.FillForms, FileShare.None] },
-                    { SubjectType.Group, [FileShare.FillForms, FileShare.None] },
+                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.FillForms, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.FillForms, FileShare.None] },
                     { SubjectType.ExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] },
                     { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] }
@@ -131,7 +132,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
                     { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
-                    { SubjectType.Group, [FileShare.Editing, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             },
@@ -139,8 +140,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FolderType.VirtualDataRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Read, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Read, FileShare.None] }
+                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
@@ -223,7 +225,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.CreateRoomFrom,
                     FilesSecurityActions.CopyLink,
                     FilesSecurityActions.Embed,
-                    FilesSecurityActions.ChangeOwner
+                    FilesSecurityActions.ChangeOwner,
+                    FilesSecurityActions.IndexExport
                 }
             }
     }.ToFrozenDictionary();
@@ -453,6 +456,11 @@ public class FileSecurity(IDaoFactory daoFactory,
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.ChangeOwner);
     }
     
+    public async Task<bool> CanIndexExportAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.IndexExport);
+    }
+    
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false)
     {
         return await WhoCanAsync(entry, FilesSecurityActions.Read, includeLinks);
@@ -461,11 +469,15 @@ public class FileSecurity(IDaoFactory daoFactory,
     private async Task<IEnumerable<Guid>> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action, bool includeLinks = false)
     {
         var shares = await GetSharesAsync(entry);
-
+        
         if (!includeLinks)
         {
             shares = shares.Where(r => !r.IsLink);
         }
+        
+        var linksUsersTask = includeLinks ? 
+            GetLinksUsersAsync(shares.Where(r => r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)) 
+            : Task.FromResult(Enumerable.Empty<Guid>());
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var copyShares = shares.GroupBy(k => k.Subject).ToDictionary(k => k.Key);
@@ -644,7 +656,41 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
+        var linkUsers = await linksUsersTask;
+        if (linkUsers.Any())
+        {
+            result.AddRange(linkUsers);
+        }
+
         return result;
+
+        async Task<IEnumerable<Guid>> GetLinksUsersAsync(IEnumerable<FileShareRecord<T>> linksRecords)
+        {
+            if (!linksRecords.Any())
+            {
+                return [];
+            }
+            
+            var tagDao = daoFactory.GetTagDao<T>();
+            var users = new List<Guid>();
+
+            foreach (var record in linksRecords)
+            {
+                var entryId = record.EntryId;
+                var entryType = record.EntryType;
+
+                if (entry.FileEntryType == FileEntryType.Folder)
+                {
+                    entryId = record.ParentId;
+                }
+
+                users.AddRange(await tagDao.GetTagsAsync(entryId, entryType, TagType.RecentByLink, null, record.Subject.ToString())
+                    .Select(x => x.Owner)
+                    .ToListAsync());
+            }
+
+            return users;
+        }
     }
 
     private async ValueTask<IAsyncEnumerable<Guid>> ToGuidAsync<T>(FileShareRecord<T> x)
@@ -691,6 +737,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isAuthenticated =  authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isUser = userType is EmployeeType.User;
+        
         await foreach (var entry in entries)
         {
             if (entry.Security != null)
@@ -773,6 +820,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (!setEntryAccess)
         {
             entry.Access = accessSnapshot;
+            entry.ShareRecord = null;
         }
     
         return haveAccess;
@@ -803,6 +851,11 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (file != null &&
             action == FilesSecurityActions.FillForms &&
             !file.IsForm)
+        {
+            return false;
+        }
+
+        if (action == FilesSecurityActions.IndexExport && (!isRoom || !folder.SettingsIndexing))
         {
             return false;
         }
@@ -862,7 +915,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
-            if(userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && 
+            if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && 
                folder.FolderType is 
                    FolderType.ReadyFormFolder or 
                    FolderType.InProcessFormFolder or 
@@ -902,11 +955,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
 
                 if (action == FilesSecurityActions.Mute && isRoom && await IsAllGeneralNotificationSettingsOffAsync())
-                {
-                    return false;
-                }
-
-                if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom or FolderType.FillingFormsRoom))
                 {
                     return false;
                 }
@@ -1004,12 +1052,15 @@ public class FileSecurity(IDaoFactory daoFactory,
                 
                 if (isDocSpaceAdmin)
                 {
-                    if (action is FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory)
+                    switch (action)
                     {
-                        return true;
+                        case FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory:
+                        case FilesSecurityActions.CopySharedLink when e.Shared:
+                            return true;
                     }
 
-                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.Duplicate or FilesSecurityActions.ChangeOwner)
+                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.Duplicate or FilesSecurityActions.ChangeOwner or 
+                            FilesSecurityActions.IndexExport)
                     {
                         return true;
                     }
@@ -1057,6 +1108,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         return false;
                     }
+
+                    if (isDocSpaceAdmin)
+                    {
+                        return true;
+                    }
                 }
                 
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
@@ -1071,7 +1127,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     action != FilesSecurityActions.Copy &&
                     action != FilesSecurityActions.Move &&
                     action != FilesSecurityActions.Download &&
-                    action != FilesSecurityActions.ReadLinks
+                    action != FilesSecurityActions.ReadLinks &&
+                    action != FilesSecurityActions.IndexExport
                     )
                 {
                     return false;
@@ -1090,7 +1147,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return true;
                     }
 
-                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Delete)
+                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Delete or FilesSecurityActions.IndexExport)
                     {
                         return true;
                     }
@@ -1126,7 +1183,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                 var subjects = new List<Guid>();
                 if (shares == null)
                 {
-                    subjects = await GetUserSubjectsAsync(userId, e);
+                    var includeAvailableLinks = e is { RootFolderType: FolderType.USER or FolderType.VirtualRooms } and not IFolder { FolderType: FolderType.USER } && 
+                                                e.RootCreateBy != userId;
+                    
+                    subjects = await GetUserSubjectsAsync(userId, includeAvailableLinks);
                     shares = await GetSharesAsync(e, subjects);
                 }
 
@@ -1143,6 +1203,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         ace = shares.Where(r => Equals(r.EntryId, file.ParentId) && r.EntryType == FileEntryType.Folder)
                             .OrderBy(r => r, new SubjectComparer<T>(subjects))
                             .ThenBy(r => r.Level)
+                            .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(e.RootFolderType))
                             .FirstOrDefault();
                     }
                 }
@@ -1151,7 +1212,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     ace = shares.Where(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.Folder)
                         .OrderBy(r => r, new SubjectComparer<T>(subjects))
                         .ThenBy(r => r.Level)
-                        .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(e.RootFolderType))
+                        .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(e.RootFolderType))
                         .FirstOrDefault();
                 }
             
@@ -1184,7 +1245,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 var parentFolders = await GetFileParentFolders(file.ParentId);
                 if (parentFolders.Exists(parent => parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder))
                 {
-                    if (ace is { Share: FileShare.FillForms } && (!userId.Equals(file.CreateBy) || userId.Equals(ASC.Core.Configuration.Constants.Guest.ID)))
+                    if (ace is { Share: FileShare.FillForms } && !userId.Equals(file.CreateBy))
                     {
                         return false;
                     }
@@ -1364,10 +1425,15 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FilesSecurityActions.ReadHistory:
+                if (!isAuthenticated)
+                {
+                    return false;
+                }
+                
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict && isAuthenticated)
+                        if (e.Access != FileShare.Restrict)
                         {
                             return true;
                         }
@@ -1547,6 +1613,19 @@ public class FileSecurity(IDaoFactory daoFactory,
                         break;
                 }
                 break;
+            case FilesSecurityActions.IndexExport:
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomManager)
+                        {
+                            return true;
+                        }
+                        break;
+                }
+                break;
         }
 
         if (e.Access != FileShare.Restrict &&
@@ -1640,8 +1719,10 @@ public class FileSecurity(IDaoFactory daoFactory,
         var subjectEntries = subjectFilter is SubjectFilter.Member
             ? await securityDao.GetSharesAsync([subjectId]).Where(r => r.EntryType == FileEntryType.Folder).Select(r => r.EntryId.ToString()).ToListAsync()
             : null;
+
+        var isAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
         
-        var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
+        var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any && !isAdmin);
         var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects)
             .Where(x => x.EntryType == FileEntryType.Folder)
             .ToListAsync();
@@ -1679,7 +1760,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
-        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+        if (isAdmin)
         {
             return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, 
                 subjectFilter, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);
@@ -1771,12 +1852,12 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
             else
             {
-                folder.Access = FileShare.Restrict;
+                folder.Access = FileShare.None;
                 folder.ShareRecord = new FileShareRecord<T>
                 {
                     EntryId = folder.Id,
                     EntryType = FileEntryType.Folder,
-                    Share = FileShare.Restrict,
+                    Share = FileShare.None,
                     SubjectType = SubjectType.User,
                     Subject = authContext.CurrentAccount.ID
                 };
@@ -1835,7 +1916,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             entries.AddRange(files.Where(f => Filter(f, internalRecords)));
             entries.AddRange(thirdPartyFiles.Where(f => Filter(f, thirdPartyRecords)));
         }
-
+        
         var t1 = SetTagsAsync(rooms);
         var t2 = SetTagsAsync(thirdPartyRooms);
         var t3 = SetPinAsync(rooms);
@@ -2174,9 +2255,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         return daoFactory.GetSecurityDao<int>().RemoveSecuritiesAsync(subject, owner, subjectType);
     }
 
-    public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId)
+    public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId, bool includeAvailableLinks = false)
     {
-        return await GetUserSubjectsAsync<int>(userId, null);
+        return await GetUserSubjectsAsync<int>(userId, includeAvailableLinks);
     }
 
     public async IAsyncEnumerable<FileShareRecord<string>> GetUserRecordsAsync()
@@ -2267,28 +2348,12 @@ public class FileSecurity(IDaoFactory daoFactory,
                availableRolesBySubject.Contains(share);
     }
     
-    private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, FileEntry<T> entry)
+    private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, bool includeAvailableLinks = false)
     {
         // priority order
         // User, Departments, admin, everyone
 
         var result = new List<Guid> { userId };
-        
-        var linkId = await externalShare.GetLinkIdAsync();
-        if (linkId != Guid.Empty)
-        {
-            result.Add(linkId);
-        }
-
-        if (entry is { RootFolderType: FolderType.USER } and not IFolder { FolderType: FolderType.USER } &&
-            entry.RootCreateBy != userId && linkId == Guid.Empty)
-        {
-            var linkTag = await daoFactory.GetTagDao<T>().GetTagsAsync(userId, TagType.RecentByLink, [entry]).FirstOrDefaultAsync();
-            if (linkTag != null && Guid.TryParse(linkTag.Name, out var linkTagId))
-            {
-                result.Add(linkTagId);
-            }
-        }
         
         result.AddRange((await userManager.GetUserGroupsAsync(userId)).Select(g => g.ID));
         
@@ -2298,6 +2363,23 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
 
         result.Add(Constants.GroupEveryone.ID);
+        
+        var linkId = await externalShare.GetLinkIdAsync();
+        if (linkId != Guid.Empty)
+        {
+            result.Add(linkId);
+        }
+
+        if (includeAvailableLinks && linkId == Guid.Empty)
+        {
+            await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync(userId, TagType.RecentByLink))
+            {
+                if (Guid.TryParse(tag.Name, out var tagId))
+                {
+                    result.Add(tagId);
+                }
+            }
+        }
 
         return result;
     }
@@ -2421,6 +2503,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         CreateRoomFrom,
         CopyLink,
         Embed,
-        ChangeOwner
+        ChangeOwner,
+        IndexExport
     }
 }

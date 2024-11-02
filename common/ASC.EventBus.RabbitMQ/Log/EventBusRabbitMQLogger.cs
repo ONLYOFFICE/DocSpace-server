@@ -27,69 +27,72 @@
 namespace ASC.EventBus.RabbitMQ.Log;
 internal static partial class EventBusRabbitMQLogger
 {
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Could not publish event: {eventId} after {timeout}s")]
+    [LoggerMessage(LogLevel.Warning, "Could not publish event: {eventId} after {timeout}s")]
     public static partial void WarningCouldNotPublishEvent(this ILogger<EventBusRabbitMQ> logger, Guid eventId, double timeout, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Creating RabbitMQ channel to publish event: {eventId} ({eventName})")]
+    [LoggerMessage(LogLevel.Trace, "Creating RabbitMQ channel to publish event: {eventId} ({eventName})")]
     public static partial void TraceCreatingRabbitMQChannel(this ILogger<EventBusRabbitMQ> logger, Guid eventId, string eventName);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Declaring RabbitMQ exchange to publish event: {eventId}")]
+    [LoggerMessage(LogLevel.Trace, "Declaring RabbitMQ exchange to publish event: {eventId}")]
     public static partial void TraceDeclaringRabbitMQChannel(this ILogger<EventBusRabbitMQ> logger, Guid eventId);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Publishing event to RabbitMQ: {eventId}")]
+    [LoggerMessage(LogLevel.Trace, "Publishing event to RabbitMQ: {eventId}")]
     public static partial void TracePublishingEvent(this ILogger<EventBusRabbitMQ> logger, Guid eventId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Subscribing to dynamic event {eventName} with {eventHandler}")]
+    [LoggerMessage(LogLevel.Information, "Subscribing to dynamic event {eventName} with {eventHandler}")]
     public static partial void InformationSubscribingDynamic(this ILogger<EventBusRabbitMQ> logger, string eventName, string eventHandler);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Subscribing to event {eventName} with {eventHandler}")]
+    [LoggerMessage(LogLevel.Information, "Subscribing to event {eventName} with {eventHandler}")]
     public static partial void InformationSubscribing(this ILogger<EventBusRabbitMQ> logger, string eventName, string eventHandler);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Unsubscribing from event {eventName}")]
+    [LoggerMessage(LogLevel.Information, "Unsubscribing from event {eventName}")]
     public static partial void InformationUnsubscribing(this ILogger<EventBusRabbitMQ> logger, string eventName);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Starting RabbitMQ basic consume")]
+    [LoggerMessage(LogLevel.Trace, "Starting RabbitMQ basic consume")]
     public static partial void TraceStartingBasicConsume(this ILogger<EventBusRabbitMQ> logger);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Consumer tag {consumerTag} already exist. Cancelled BasicConsume again")]
+    [LoggerMessage(LogLevel.Trace, "Consumer tag {consumerTag} already exist. Cancelled BasicConsume again")]
     public static partial void TraceConsumerTagExist(this ILogger<EventBusRabbitMQ> logger, string consumerTag);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "StartBasicConsume can't call on _consumerChannel == null")]
+    [LoggerMessage(LogLevel.Error, "StartBasicConsume can't call on _consumerChannel == null")]
     public static partial void ErrorStartBasicConsumeCantCall(this ILogger<EventBusRabbitMQ> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "----- ERROR Processing message \"{message}\"")]
+    [LoggerMessage(LogLevel.Error, "----- ERROR Processing message \"{message}\"")]
     public static partial void ErrorProcessingMessage(this ILogger<EventBusRabbitMQ> logger, string message, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Creating RabbitMQ consumer channel")]
+    [LoggerMessage(LogLevel.Trace, "Creating RabbitMQ consumer channel")]
     public static partial void TraceCreatingConsumerChannel(this ILogger<EventBusRabbitMQ> logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Channel was recreated successfully")]
+    [LoggerMessage(LogLevel.Information, "Channel was recreated successfully")]
     public static partial void InfoCreatedConsumerChannel(this ILogger<EventBusRabbitMQ> logger);
        
-    [LoggerMessage(Level = LogLevel.Warning, Message = "RabbitMQ: Consumer channel callback exception")]
+    [LoggerMessage(LogLevel.Warning, "RabbitMQ: Consumer channel callback exception")]
     public static partial void WarningCallbackException(this ILogger<EventBusRabbitMQ> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "RabbitMQ: Recreating consumer channel ")]
+    [LoggerMessage(LogLevel.Warning, "RabbitMQ: Recreating consumer channel ")]
     public static partial void WarningRecreatingChannel(this ILogger<EventBusRabbitMQ> logger);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Processing RabbitMQ event: {eventName}")]
+    [LoggerMessage(LogLevel.Trace, "Processing RabbitMQ event: {eventName}")]
     public static partial void TraceProcessingEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "No subscription for RabbitMQ event: {eventName}")]
+    [LoggerMessage(LogLevel.Warning, "No subscription for RabbitMQ event: {eventName}")]
     public static partial void WarningNoSubscription(this ILogger<EventBusRabbitMQ> logger, string eventName);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "RabbitMQ: Before reject event: {eventName}.  Message {message}")]
+    [LoggerMessage(LogLevel.Debug, "RabbitMQ: Before reject event: {eventName}.  Message {message}")]
     public static partial void DebugBeforeRejectEvent(this ILogger<EventBusRabbitMQ> logger, string eventName, string message);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "RabbitMQ: Before nack event: {eventName}. Message {message}")]
+    [LoggerMessage(LogLevel.Debug, "RabbitMQ: Before nack event: {eventName}. Message {message}")]
     public static partial void DebugBeforeNackEvent(this ILogger<EventBusRabbitMQ> logger, string eventName, string message);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "RabbitMQ: reject event: {eventName}")]
+    [LoggerMessage(LogLevel.Debug, "RabbitMQ: reject event: {eventName}")]
     public static partial void DebugRejectEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "RabbitMQ: nack event: {eventName}")]
+    [LoggerMessage(LogLevel.Debug, "RabbitMQ: nack event: {eventName}")]
     public static partial void DebugNackEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "RabbitMQ: model is shutdown: {cause}")]
+    [LoggerMessage(LogLevel.Warning, "RabbitMQ: unknown event: {eventName}. Subscription not found")]
+    public static partial void WarningUnknownEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
+
+    [LoggerMessage(LogLevel.Warning, "RabbitMQ: model is shutdown: {cause}")]
     public static partial void WarningModelIsShutdown(this ILogger<EventBusRabbitMQ> logger, string cause, Exception exception);
 }

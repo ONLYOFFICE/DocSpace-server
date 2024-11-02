@@ -38,11 +38,12 @@ public class RoomDataLifetimeDto : IMapFrom<RoomDataLifetime>
 
     /// <summary>Specifies time period type</summary>
     /// <type>ASC.Files.Core.VirtualRooms.RoomDataLifetimePeriod, ASC.Files.Core</type>
+    [EnumDataType(typeof(RoomDataLifetimePeriod))]
     public RoomDataLifetimePeriod Period { get; set; }
 
     /// <summary>Specifies time period value</summary>
     /// <type>System.Int32, System</type>
-    [Range(1, 9999)]
+    [Range(1, 999)]
     public int? Value { get; set; }
     
     public bool? Enabled { get; set; }

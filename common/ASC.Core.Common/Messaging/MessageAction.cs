@@ -154,7 +154,7 @@ public enum MessageAction
     FileMovedWithOverwriting = 5016,
     FileMovedToTrash = 5017,
     FileDeleted = 5018,
-    FileIndexChanged = 5106,
+    FileIndexChanged = 5120, // last
 
     FolderCreated = 5019,
     FolderRenamed = 5020,
@@ -262,8 +262,9 @@ public enum MessageAction
     RoomWatermarkSet = 5112,
     RoomWatermarkDisabled = 5113,
     
-    RoomIndexExportSaved = 5118,
-    RoomInviteResend = 5119,  //last
+    RoomInviteResend = 5119,
+    
+    RoomIndexExportSaved = 5106,
 
     #endregion
 

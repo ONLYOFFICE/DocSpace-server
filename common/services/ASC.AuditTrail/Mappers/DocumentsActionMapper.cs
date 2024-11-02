@@ -181,7 +181,8 @@ internal class RoomsActionMapper : IModuleActionMapper
                         ]
                     },
                     { ActionType.Delete, [MessageAction.RoomDeleted] },
-                    { ActionType.Other, [MessageAction.PrimaryExternalLinkCopied, MessageAction.RoomIndexExportSaved] }
+                    { ActionType.Export, [MessageAction.RoomIndexExportSaved] },
+                    { ActionType.Other, [MessageAction.PrimaryExternalLinkCopied] }
                 }
             },
             {

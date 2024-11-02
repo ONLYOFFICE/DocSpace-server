@@ -28,6 +28,7 @@
 package com.asc.common.utilities;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -38,6 +39,7 @@ public class HttpUtils {
   private static final String DOMAIN_PATTERN = "https?://([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})";
   private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
   private static final String X_FORWARDED_FOR = "X-Forwarded-For";
+  private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
   private static final String HOST = "Host";
   private static final String[] IP_HEADERS = {
     "X-Forwarded-Host",
@@ -66,9 +68,34 @@ public class HttpUtils {
    * @return An Optional containing the address if found, otherwise an empty Optional
    */
   private static Optional<String> getRequestAddress(HttpServletRequest request, String header) {
-    var address = request.getHeader(header);
-    if (address == null || address.isBlank()) return Optional.empty();
-    return Optional.of(String.format("%s://%s", request.getScheme(), address));
+    var addressHeader = request.getHeader(header);
+    var protoHeader = request.getHeader(X_FORWARDED_PROTO);
+    if (addressHeader == null
+        || addressHeader.isBlank()
+        || protoHeader == null
+        || protoHeader.isBlank()) return Optional.empty();
+
+    var address =
+        Arrays.stream(addressHeader.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isBlank())
+            .findFirst()
+            .orElse(null);
+
+    if (address == null || address.isBlank()) {
+      return Optional.of(String.format("%s://%s", request.getScheme(), request.getRemoteAddr()));
+    }
+
+    var protocol = request.getScheme();
+    var protocols = protoHeader.split(",");
+    for (String proto : protocols) {
+      if ("https".equalsIgnoreCase(proto)) {
+        protocol = "https";
+        break;
+      }
+    }
+
+    return Optional.of(String.format("%s://%s", protocol, address));
   }
 
   /**
@@ -98,12 +125,32 @@ public class HttpUtils {
    * @return An Optional containing the domain if found, otherwise an empty Optional
    */
   public static Optional<String> getRequestDomain(HttpServletRequest request) {
-    var host = request.getHeader(HOST);
-    if (host == null || host.isBlank()) {
+    var hostHeader = request.getHeader(HOST);
+    var protoHeader = request.getHeader(X_FORWARDED_PROTO);
+    if (hostHeader == null || hostHeader.isBlank() || protoHeader == null || protoHeader.isBlank())
       return Optional.empty();
+
+    var host =
+        Arrays.stream(hostHeader.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isBlank())
+            .findFirst()
+            .orElse(null);
+
+    if (host == null || host.isBlank()) {
+      return Optional.of(String.format("%s://%s", request.getScheme(), request.getRemoteAddr()));
     }
 
-    return Optional.of(String.format("%s://%s", request.getScheme(), host));
+    var protocol = request.getScheme();
+    var protocols = protoHeader.split(",");
+    for (String proto : protocols) {
+      if ("https".equalsIgnoreCase(proto)) {
+        protocol = "https";
+        break;
+      }
+    }
+
+    return Optional.of(String.format("%s://%s", protocol, host));
   }
 
   /**

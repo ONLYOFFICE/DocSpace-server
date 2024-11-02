@@ -45,9 +45,29 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         return new DocumentBuilderInputData(script, tempFileName, outputFileName);
     }
 
-    protected override async Task OnCompleteAsync(IServiceProvider serviceProvider)
+    protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, string fileName)
     {
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
+        var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
+        var socketManager = serviceProvider.GetService<SocketManager>();
+        
+        var file = serviceProvider.GetService<File<int>>();
+        
+        file.ParentId = await daoFactory.GetFolderDao<int>().GetFolderIDUserAsync(false, _userId);
+        file.Title = fileName;
+        
+        using var request = new HttpRequestMessage();
+        request.RequestUri = fileUri;
+
+        using var httpClient = clientFactory.CreateClient();
+        using var response = await httpClient.SendAsync(request);
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        
+        var fileDao = daoFactory.GetFileDao<int>();
+
+        file = await fileDao.SaveFileAsync(file, stream);
+        await socketManager.CreateFileAsync(file);
+        
         var filesMessageService = serviceProvider.GetService<FilesMessageService>();
         
         var headers = _data.Headers != null 
@@ -57,6 +77,8 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(_data.RoomId);
         
         await filesMessageService.SendAsync(MessageAction.RoomIndexExportSaved, room, headers: headers);
+
+        return file;
     }
 
     private static async Task<(object data, string outputFileName)> GetRoomIndexExportData<T>(IServiceProvider serviceProvider, Guid userId, T roomId)
@@ -72,8 +94,12 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
         var tenantUtil = serviceProvider.GetService<TenantUtil>();
         var documentServiceConnector = serviceProvider.GetService<DocumentServiceConnector>();
-        
+
         var user = await userManager.GetUsersAsync(userId);
+
+        var usertCulture = user.GetCulture();
+        CultureInfo.CurrentCulture = usertCulture;
+        CultureInfo.CurrentUICulture = usertCulture;
 
         var room = await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
 
@@ -124,7 +150,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
                 name = entry.Title,
                 url = commonLinkUtility.GetFullAbsolutePath(url),
                 type = isFolder ? FilesCommonResource.RoomIndex_Folder : Path.GetExtension(entry.Title),
-                size = isFolder ? null : Math.Round(((File<T>)entry).ContentLength / 1024d / 1024d, 2).ToString(CultureInfo.InvariantCulture),
+                size = isFolder ? null : Math.Round(((File<T>)entry).ContentLength / 1024d / 1024d, 3).ToString(CultureInfo.InvariantCulture),
                 author = entry.CreateByString,
                 created = entry.CreateOnString,
                 modified = entry.ModifiedOnString
@@ -148,11 +174,11 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
                 modified = FilesCommonResource.RoomIndex_Modified,
                 total = FilesCommonResource.RoomIndex_Total,
                 sheetName = FilesCommonResource.RoomIndex_SheetName,
-                numberFormat = "0.00",
-                dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern}"
+                numberFormat = "0.000",
+                dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}"
             },
 
-            logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath),
+            logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath.Split('?')[0]),
 
             themeColors = new
             {
@@ -165,7 +191,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
             {
                 company = tenantWhiteLabelSettings.LogoText ?? TenantWhiteLabelSettings.DefaultLogoText,
                 room = room.Title,
-                exportAuthor = user.DisplayUserName(displayUserSettingsHelper),
+                exportAuthor = user.DisplayUserName(false, displayUserSettingsHelper),
                 dateGenerated = tenantUtil.DateTimeNow().ConvertNumerals("g")
             },
 

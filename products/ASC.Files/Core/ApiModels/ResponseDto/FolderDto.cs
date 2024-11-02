@@ -103,6 +103,10 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>Counter</summary>
     /// <type>System.Nullable{System.Int64}, System</type>
     public long? UsedSpace { get; set; }
+    
+    public bool? External { get; set; }
+    public bool? PasswordProtected { get; set; }
+    public bool? Expired { get; set; }
 
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
 
@@ -143,12 +147,11 @@ public class FolderDtoHelper(
     FilesSettingsHelper filesSettingsHelper,
     FileDateTime fileDateTime,
     SettingsManager settingsManager,
-    CoreBaseSettings coreBaseSettings,
     BreadCrumbsManager breadCrumbsManager,
     TenantManager tenantManager,
-    WatermarkManager watermarkManager,
     WatermarkDtoHelper watermarkHelper,
-    IMapper mapper)
+    IMapper mapper,
+    ExternalShare externalShare)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
@@ -200,9 +203,7 @@ public class FolderDtoHelper(
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
-            if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 
-                    ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate) || 
-                     (result.RootFolderType is FolderType.Archive or FolderType.TRASH && (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete))))
+            if ((await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
             {
                 var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
                 result.UsedSpace = folder.Counter;
@@ -214,8 +215,18 @@ public class FolderDtoHelper(
                 }
             }
             
-            var watermarkSettings = await watermarkManager.GetWatermarkAsync(folder);
-            result.Watermark = watermarkHelper.Get(watermarkSettings);
+            result.Watermark = watermarkHelper.Get(folder.SettingsWatermark);
+
+            if (folder.ShareRecord is { IsLink: true })
+            {
+                result.External = true;
+                result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
+                                           folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
+                                           !canRead;
+
+                result.Expired = folder.ShareRecord.Options?.IsExpired;
+                result.RequestToken = await externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
+            }
         }
 
         if (folder.Order != 0)
@@ -269,8 +280,12 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        result.FilesCount = folder.FilesCount;
-        result.FoldersCount = folder.FoldersCount;
+        if (folder.FolderType != FolderType.VirtualRooms)
+        {
+            result.FilesCount = folder.FilesCount;
+            result.FoldersCount = folder.FoldersCount;
+        }
+
         result.IsShareable = folder.Shareable.NullIfDefault();
         result.IsFavorite = folder.IsFavorite.NullIfDefault();
         result.New = newBadges;

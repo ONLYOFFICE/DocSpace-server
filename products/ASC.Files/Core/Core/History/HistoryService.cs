@@ -112,7 +112,7 @@ public class HistoryService(
         (int)MessageAction.FormSubmit,
         (int)MessageAction.FormOpenedForFilling
     ];
-
+    
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(
         FileEntry<int> entry,
         int offset,

@@ -27,28 +27,28 @@
 namespace ASC.Files.Core.Log;
 public static partial class FileConverterLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Run CheckConvertFilesStatus: count {count}")]
+    [LoggerMessage(LogLevel.Debug, "Run CheckConvertFilesStatus: count {count}")]
     public static partial void DebugRunCheckConvertFilesStatus(this ILogger logger, int count);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "CheckConvertFilesStatus iteration continue")]
+    [LoggerMessage(LogLevel.Debug, "CheckConvertFilesStatus iteration continue")]
     public static partial void DebugCheckConvertFilesStatusIterationContinue(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "CheckConvertFilesStatus iteration end")]
+    [LoggerMessage(LogLevel.Debug, "CheckConvertFilesStatus iteration end")]
     public static partial void DebugCheckConvertFilesStatusIterationEnd(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Error convert {fileId} with url {url}")]
+    [LoggerMessage(LogLevel.Error, "Error convert {fileId} with url {url}")]
     public static partial void ErrorConvertFileWithUrl(this ILogger logger, string fileId, string url, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "{operationResultError} ConvertUrl: {convertedFileUrl} fromUrl: {fileUri} ConvertedFileType: {convertedFileType}")]
+    [LoggerMessage(LogLevel.Error, "{operationResultError} ConvertUrl: {convertedFileUrl} fromUrl: {fileUri} ConvertedFileType: {convertedFileType}")]
     public static partial void ErrorOperation(this ILogger logger, string operationResultError, string convertedFileUrl, string fileUri, string convertedFileType, Exception exception);
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "CheckConvertFilesStatus timeout: {fileId} ({contentLengthString})")]
+    [LoggerMessage(LogLevel.Error, "CheckConvertFilesStatus timeout: {fileId} ({contentLengthString})")]
     public static partial void ErrorCheckConvertFilesStatus(this ILogger logger, string fileId, long contentLengthString);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "FileConverterService is starting.")]
+    [LoggerMessage(LogLevel.Debug, "FileConverterService is starting.")]
     public static partial void DebugFileConverterServiceRuning(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "FileConverterService is stopping")]
+    [LoggerMessage(LogLevel.Debug, "FileConverterService is stopping")]
     public static partial void DebugFileConverterServiceStopping(this ILogger logger);
 
 }

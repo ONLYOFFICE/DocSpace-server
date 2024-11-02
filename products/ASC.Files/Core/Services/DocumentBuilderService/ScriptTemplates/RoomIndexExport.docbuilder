@@ -96,14 +96,29 @@ function prepareData(startColIndex, startRowIndex) {
         }
     ];
 
-    for (var i = 0; i < inputData.data.length; i++) {
-        var item = inputData.data[i];
+    var sortedData = inputData.data.sort(function(a, b) {
+        var i, diff;
+        var segmentsA = (a.index ?? "").split('.');
+        var segmentsB = (b.index ?? "").split('.');
+        var l = Math.min(segmentsA.length, segmentsB.length);
+
+        for (i = 0; i < l; i++) {
+            diff = parseInt(segmentsA[i]) - parseInt(segmentsB[i]);
+            if (diff) {
+                return diff;
+            }
+        }
+        return segmentsA.length - segmentsB.length;
+    });
+
+    for (var i = 0; i < sortedData.length; i++) {
+        var item = sortedData[i];
         var indexBgColor = i > 0 ? defaultBgColorGray : null;
         var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
         dataTable.push({
             height: 19.5,
             dataArray: [
-                { "value": item.index, "fontSize": (defaultFontSize + 1), "bgColor": indexBgColor, valign: "center", "borderColor": defaultBorderColorWhite },
+                { "value": item.index, "fontSize": (defaultFontSize + 1), "bgColor": indexBgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": "@" },
                 { "value": item.name, "url": item.url, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": item.type, "bold": !item.type.startsWith('.'), "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": item.size, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.numberFormat },
@@ -114,7 +129,7 @@ function prepareData(startColIndex, startRowIndex) {
         });
     }
 
-    var sizeSum = "=SUM(" + toColumnName(currentColIndex + 3) + (currentRowIndex + 1) + ":" + toColumnName(currentColIndex + 3) + (currentRowIndex + inputData.data.length) + ")";
+    var sizeSum = "=SUM(" + toColumnName(currentColIndex + 3) + (currentRowIndex + 1) + ":" + toColumnName(currentColIndex + 3) + (currentRowIndex + sortedData.length) + ")";
 
     dataTable.push({ height: 19.5, dataArray: [] });
 
@@ -141,6 +156,10 @@ function writeCell(position, data) {
 
     var sRange = oWorksheet.GetRange(position);
 
+    if (data.format) {
+        sRange.SetNumberFormat(data.format);
+    }
+
     if (data.url) {
         oWorksheet.SetHyperlink(position, data.url, "", data.value);
     } else {
@@ -154,10 +173,6 @@ function writeCell(position, data) {
     sRange.SetBold(data.bold || false);
     sRange.SetAlignHorizontal(data.halign || "left");
     sRange.SetAlignVertical(data.valign || "bottom");
-
-    if (data.format) {
-        sRange.SetNumberFormat(data.format);
-    }
 
     if (data.bgColor) {
         sRange.SetFillColor(data.bgColor);

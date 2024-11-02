@@ -88,15 +88,12 @@ public abstract class DocumentBuilderTask<TId, TData>(IServiceScopeFactory servi
             await PublishChanges();
 
             CancellationToken.ThrowIfCancellationRequested();
-
-            var file = scope.ServiceProvider.GetService<File<TId>>();
-            file = await documentBuilderTask.SaveFileFromUriAsync(file, new Uri(fileUri), _userId, inputData.OutputFileName);
+            
+            var file = await ProcessSourceFileAsync(scope.ServiceProvider, new Uri(fileUri), inputData.OutputFileName);
             
             this["ResultFileId"] = file.Id;
             this["ResultFileName"] = file.Title;
             this["ResultFileUrl"] = filesLinkUtility.GetFileWebEditorUrl(file.Id);
-            
-            await OnCompleteAsync(scope.ServiceProvider);
 
             Percentage = 100;
 
@@ -121,17 +118,13 @@ public abstract class DocumentBuilderTask<TId, TData>(IServiceScopeFactory servi
     }
     
     protected abstract Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider);
-    protected abstract Task OnCompleteAsync(IServiceProvider serviceProvider);
+    protected abstract Task<File<TId>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, string fileName);
 }
 
 public record DocumentBuilderInputData(string Script, string TempFileName, string OutputFileName);
 
 [Scope]
-public class DocumentBuilderTask(
-    DocumentServiceConnector documentServiceConnector,
-    IHttpClientFactory clientFactory,
-    IDaoFactory daoFactory,
-    SocketManager socketManager)
+public class DocumentBuilderTask(DocumentServiceConnector documentServiceConnector)
 {
     internal async Task<string> BuildFileAsync(string script, string fileName, CancellationToken cancellationToken)
     {
@@ -155,39 +148,22 @@ public class DocumentBuilderTask(
                 throw new Exception("DocbuilderRequest: empty Key");
             }
 
-            if (resultTuple.Urls != null)
+            if (resultTuple.Urls == null)
             {
-                if (resultTuple.Urls.Count == 0)
-                {
-                    throw new Exception("DocbuilderRequest: empty Urls");
-                }
+                continue;
+            }
 
-                if (resultTuple.Urls.ContainsKey(fileName))
-                {
-                    break;
-                }
+            if (resultTuple.Urls.Count == 0)
+            {
+                throw new Exception("DocbuilderRequest: empty Urls");
+            }
+
+            if (resultTuple.Urls.ContainsKey(fileName))
+            {
+                break;
             }
         }
 
         return resultTuple.Urls[fileName];
-    }
-
-    internal async Task<File<T>> SaveFileFromUriAsync<T>(File<T> file, Uri sourceUri, Guid userId, string title)
-    {            
-        file.ParentId = await daoFactory.GetFolderDao<T>().GetFolderIDUserAsync(false, userId);
-        file.Title = title;
-        
-        using var request = new HttpRequestMessage();
-        request.RequestUri = sourceUri;
-
-        using var httpClient = clientFactory.CreateClient();
-        using var response = await httpClient.SendAsync(request);
-        await using var stream = await response.Content.ReadAsStreamAsync();
-        
-        var fileDao = daoFactory.GetFileDao<T>();
-
-        file = await fileDao.SaveFileAsync(file, stream);
-        await socketManager.CreateFileAsync(file);
-        return file;
     }
 }

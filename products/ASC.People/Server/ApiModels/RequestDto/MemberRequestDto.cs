@@ -112,6 +112,10 @@ public class MemberRequestDto
     /// <summary>Target</summary>
     /// <type>System.Guid, System</type>
     public Guid Target { get; set; }
+
+    /// <summary>Spam</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? Spam { get; set; }
 }
 
 /// <summary>

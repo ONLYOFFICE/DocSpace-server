@@ -71,7 +71,8 @@ public class UserController(
     IQuotaService quotaService,
     CustomQuota customQuota,
     AuditEventsRepository auditEventsRepository,
-    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper,
+    CountPaidUserStatistic countPaidUserStatistic)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
 
@@ -143,6 +144,7 @@ public class UserController(
             user.Sex =  false;
         }
         
+        user.Spam = inDto.Spam;
         user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
@@ -192,6 +194,17 @@ public class UserController(
         else
         {
             await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+            var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
+            
+            switch (inDto.Type)
+            {
+                case EmployeeType.Guest:
+                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                    throw new SecurityException(Resource.ErrorAccessDenied);
+            }
         }
 
         inDto.Type = linkData?.EmployeeType ?? inDto.Type;
@@ -254,7 +267,8 @@ public class UserController(
         {
             user.Sex =  false;
         }
-        
+
+        user.Spam = inDto.Spam;
         user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
         user.Status = EmployeeStatus.Active;
@@ -328,6 +342,20 @@ public class UserController(
         if (currentUserType is EmployeeType.User or EmployeeType.Guest)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
+        var quotaIncreaseBy = inDto.Invitations.Count(x => x.Type is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin);
+        if (quotaIncreaseBy > 0)
+        {
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            var quota = await tenantManager.GetTenantQuotaAsync(tenantId);
+            var maxCount = quota.GetFeature<CountPaidUserFeature>().Value;
+            var currentCount = await countPaidUserStatistic.GetValueAsync();
+            
+            if (maxCount < currentCount + quotaIncreaseBy)
+            {
+                throw new TenantQuotaException(string.Format(Resource.TariffsFeature_usersQuotaExceeds_exception, quotaIncreaseBy, maxCount - currentCount));
+            }
         }
 
         foreach (var invite in inDto.Invitations)
@@ -986,6 +1014,8 @@ public class UserController(
 
         var userNames = users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList();
         var tenant = await tenantManager.GetCurrentTenantAsync();
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
         
         foreach (var user in users)
         {
@@ -994,7 +1024,15 @@ public class UserController(
                 continue;
             }
             
-            var isGuest = await _userManager.IsGuestAsync(user);
+            var userType = await _userManager.GetUserTypeAsync(user.Id);
+            switch (userType)
+            {
+                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                    continue;
+            }
+            
+            var isGuest = userType == EmployeeType.Guest;
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
@@ -1361,7 +1399,11 @@ public class UserController(
     public async IAsyncEnumerable<EmployeeFullDto> UpdateEmployeeActivationStatus(EmployeeActivationStatus activationstatus, UpdateMembersRequestDto inDto)
     {
         await _apiContext.AuthByClaimAsync();
-
+        
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
+        
         foreach (var id in inDto.UserIds.Where(userId => !_userManager.IsSystemUser(userId)))
         {
             await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(id), Constants.Action_EditUser);
@@ -1370,7 +1412,15 @@ public class UserController(
             {
                 continue;
             }
+            var userType = await _userManager.GetUserTypeAsync(u.Id); 
 
+            switch (userType)
+            {
+                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                    continue;
+            }
+            
             u.ActivationStatus = activationstatus;
             await _userManager.UpdateUserInfoAsync(u);
 
@@ -1446,7 +1496,7 @@ public class UserController(
 
         var changed = false;
         var self = securityContext.CurrentAccount.ID.Equals(user.Id);
-        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
+        var currentUserIsDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
         
         //Update it
         if (self)
@@ -1470,7 +1520,7 @@ public class UserController(
                 user.LastName = lastName;
                 user.Location = inDto.Location ?? user.Location;
 
-                if (isDocSpaceAdmin)
+                if (currentUserIsDocSpaceAdmin)
                 {
                     user.Title = inDto.Title ?? user.Title;
                 }
@@ -1485,6 +1535,7 @@ public class UserController(
                 _ => user.Sex
             };
 
+            user.Spam = inDto.Spam;
 
             user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : user.BirthDate;
 
@@ -1516,10 +1567,12 @@ public class UserController(
         }
         
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var owner = user.IsOwner(tenant);
+        var userIsOwner = user.IsOwner(tenant);
+        var currentUserIsOwner = securityContext.CurrentAccount.ID.IsOwner(tenant);
+        var userType = await _userManager.GetUserTypeAsync(user.Id); 
         var statusChanged = false;
         
-        if ((self || isDocSpaceAdmin && !owner) && inDto.Disable.HasValue)
+        if ((self || currentUserIsOwner || currentUserIsDocSpaceAdmin && !userIsOwner && userType != EmployeeType.DocSpaceAdmin) && inDto.Disable.HasValue)
         {
             user.Status = inDto.Disable.Value ? EmployeeStatus.Terminated : EmployeeStatus.Active;
             user.TerminatedDate = inDto.Disable.Value ? DateTime.UtcNow : null;
@@ -1529,7 +1582,7 @@ public class UserController(
 
 
         // change user type
-        var canBeGuestFlag = !owner && 
+        var canBeGuestFlag = !userIsOwner && 
                              !await _userManager.IsDocSpaceAdminAsync(user) && 
                              (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 && 
                              !self;

@@ -152,6 +152,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <param type="System.Boolean, System" name="view">Specifies if a document will be opened for viewing only or not</param>
     /// <param type="ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core" name="editorType">Editor type (Desktop, Mobile, Embedded)</param>
     /// <param type="System.Boolean, System" name="edit"></param>
+    /// <param type="System.Boolean, System" name="fill"></param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConfigurationDto, ASC.Files.Core">Configuration parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
@@ -160,13 +161,14 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
-    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, bool view, EditorType editorType, bool edit)
+    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, bool view, EditorType editorType, bool edit, bool fill)
     {
         var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(fileId, version);
         var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
         bool canEdit;
         bool canFill;
+        var disableEmbeddedConfig = false;
         var canStartFilling = true;
         var isSubmitOnly = false;
 
@@ -258,11 +260,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     editorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
+                    disableEmbeddedConfig = true;
                     break;
 
                 default:
-                    canEdit = true;
-                    canFill = false;
+                    canEdit = !fill;
+                    canFill = fill;
                     break;
             }
         }
@@ -290,7 +293,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         }
 
         var result = await configurationConverter.Convert(configuration, file);
-        
+
+        if (disableEmbeddedConfig)
+        {
+            result.EditorConfig.Embedded = null;
+        }
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
         {
@@ -298,7 +305,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
             if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
             {
-                await entryManager.MarkAsRecentByLink(file, linkId);
+                await entryManager.MarkFileAsRecentByLink(file, linkId);
             }
             else
             {
@@ -306,7 +313,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
         
-        if (fileType == FileType.Pdf && file.IsForm)
+        if (fileType == FileType.Pdf && file.IsForm && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
             result.StartFilling = canStartFilling;
         }

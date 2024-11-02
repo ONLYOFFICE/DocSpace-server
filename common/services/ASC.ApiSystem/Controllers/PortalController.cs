@@ -308,6 +308,15 @@ public class PortalController(
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> RemoveAsync([FromQuery] TenantModel model)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "error",
+                message = "Method for server edition only."
+            });
+        }
+
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
@@ -331,6 +340,29 @@ public class PortalController(
             });
         }
 
+        var isLastFullAccessSpace = true;
+
+        var activeTenants = await hostedSolution.GetTenantsAsync(default);
+
+        foreach (var t in activeTenants.Where(t => t.Id != tenant.Id))
+        {
+            var settings = await settingsManager.LoadAsync<TenantAccessSpaceSettings>(t.Id);
+            if (!settings.LimitedAccessSpace)
+            {
+                isLastFullAccessSpace = false;
+                break;
+            }
+        }
+
+        if (isLastFullAccessSpace)
+        {
+            return BadRequest(new
+            {
+                error = "error",
+                message = "The last full access space cannot be deleted."
+            });
+        }
+
         await hostedSolution.RemoveTenantAsync(tenant);
 
         return Ok(new
@@ -344,6 +376,15 @@ public class PortalController(
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> ChangeStatusAsync(TenantModel model)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "error",
+                message = "Method for server edition only."
+            });
+        }
+
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {

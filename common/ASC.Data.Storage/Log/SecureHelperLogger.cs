@@ -27,6 +27,6 @@
 namespace ASC.Data.Storage.Log;
 internal static partial class SecureHelperLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "IsSecure")]
+    [LoggerMessage(LogLevel.Error, "IsSecure")]
     public static partial void ErrorIsSecure(this ILogger logger, Exception exception);
 }

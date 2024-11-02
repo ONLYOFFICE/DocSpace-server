@@ -54,6 +54,7 @@ public sealed class Tag : IMapFrom<DbFilesTag>
     public FileEntryType EntryType { get; set; }
     public int Id { get; set; }
     public int Count { get; set; }
+    public DateTime? CreateOn { get; set; }
 
     public Tag() { }
 
@@ -124,7 +125,7 @@ public sealed class Tag : IMapFrom<DbFilesTag>
         };
     }
 
-    public static Tag RecentByLink<T>(Guid owner, Guid linkId, File<T> file)
+    public static Tag RecentByLink<T>(Guid owner, Guid linkId, FileEntry<T> file)
     {
         return new Tag(linkId.ToString(), TagType.RecentByLink, owner).AddEntry(file);
     }
