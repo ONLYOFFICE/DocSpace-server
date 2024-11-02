@@ -360,14 +360,12 @@ public class WhitelabelController(ApiContext apiContext,
 
         if (inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value)
         {
-            await DemandRebrandingPermissionAsync();
+            await DemandRebrandingPermissionAsync(false);
 
             await RestoreWhiteLabelOptionsForDefaultTenantAsync();
         }
         else
         {
-            await tenantLogoManager.DemandWhiteLabelPermissionAsync();
-
             await RestoreWhiteLabelOptionsForCurrentTenantAsync();
         }
 
@@ -486,7 +484,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await DemandRebrandingPermissionAsync();
+        await DemandRebrandingPermissionAsync(false);
 
         var defaultSettings = settingsManager.GetDefault<CompanyWhiteLabelSettings>();
 
@@ -551,7 +549,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await DemandRebrandingPermissionAsync();
+        await DemandRebrandingPermissionAsync(false);
 
         var defaultSettings = settingsManager.GetDefault<AdditionalWhiteLabelSettings>();
 
@@ -639,7 +637,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await DemandRebrandingPermissionAsync();
+        await DemandRebrandingPermissionAsync(false);
 
         var defaultSettings = settingsManager.GetDefault<MailWhiteLabelSettings>();
 
@@ -665,7 +663,7 @@ public class WhitelabelController(ApiContext apiContext,
     }
     
 
-    private async Task DemandRebrandingPermissionAsync()
+    private async Task DemandRebrandingPermissionAsync(bool demandWhiteLabelPermission = true)
     {
         await tenantExtra.DemandAccessSpacePermissionAsync();
 
@@ -673,6 +671,10 @@ public class WhitelabelController(ApiContext apiContext,
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        await tenantLogoManager.DemandWhiteLabelPermissionAsync();
+
+        if (demandWhiteLabelPermission)
+        {
+            await tenantLogoManager.DemandWhiteLabelPermissionAsync();
+        }
     }
 }
