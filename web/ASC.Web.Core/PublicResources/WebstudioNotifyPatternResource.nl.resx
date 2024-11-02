@@ -1761,4 +1761,186 @@ $TrulyYours</value>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>U bent uitgenodigd voor de ONLYOFFICE DocSpace kamer</value>
   </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Koop nu</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Wachtwoord instellen</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Hallo! Stel een wachtwoord in voor uw ONLYOFFICE DocSpace account. Klik dan op de knop hieronder:
+
+$OrangeButton
+
+De link is 7 dagen geldig.</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Wachtperiode voor uw ONLYOFFICE DocSpace Developer geactiveerd</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Uw ONLYOFFICE DocSpace Developer licentie verloopt binnenkort</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Wachtperiode voor uw ONLYOFFICE DocSpace Developer verloopt binnenkort</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Uw ONLYOFFICE DocSpace Developer niet langer beschikbaar</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Wachtperiode voor uw ONLYOFFICE DocSpace Enterprise geactiveerd </value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Uw ONLYOFFICE DocSpace Enterprise licentie verloopt binnenkort</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Wachtperiode voor uw ONLYOFFICE DocSpace Enterprise verloopt binnenkort</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Uw ONLYOFFICE DocSpace Enterprise niet langer beschikbaar</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Uw ONLYOFFICE DocSpace Enterprise licentie verloopt binnenkort</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Uw ONLYOFFICE DocSpace Enterprise licentie verloopt vandaag</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Stel een wachtwoord in voor ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Uw licentie voor ONLYOFFICE DocSpace Developer verloopt vandaag.
+
+Wij hebben een wachtperiode van $PaymentDelay dagen voor u ingeschakeld. In deze periode is de toegang tot documentbewerking beperkt tot 20 gelijktijdige verbindingen (ondersteuning en updates worden niet langer aangeboden).
+
+Om de licentie aan te passen, neemt u rechtstreeks contact op met uw toegewezen sales manager of neemt u contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Neem voor vragen over betalingen contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}". Voor het oplossen van technische problemen gebruikt u "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Uw licentie voor ONLYOFFICE DocSpace Developer verloopt over 7 dagen.
+
+Om de licentie aan te passen, neemt u rechtstreeks contact op met uw toegewezen sales manager of neemt u contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Neem voor vragen over betalingen contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}". Voor het oplossen van technische problemen gebruikt u "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+De wachtperiode voor uw ONLYOFFICE DocSpace Developer licentie verloopt over 7 dagen. Dit betekent dat DocSpace niet beschikbaar zal zijn.
+
+Om de licentie aan te passen, neemt u rechtstreeks contact op met uw toegewezen sales manager of neemt u contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Neem voor vragen over betalingen contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}". Voor het oplossen van technische problemen gebruikt u "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+De wachtperiode voor uw ONLYOFFICE DocSpace Developer licentie verloopt vandaag. Dit betekent dat DocSpace niet meer beschikbaar zal zijn.
+
+Om de licentie aan te passen, neemt u rechtstreeks contact op met uw toegewezen sales manager of neemt u contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Neem voor vragen over betalingen contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}". Voor het oplossen van technische problemen gebruikt u "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Uw licentie voor ONLYOFFICE DocSpace Enterprise verloopt vandaag.
+
+Wij hebben *een wachtperiode van $PaymentDelay dagen voor u ingeschakeld. Gedurende deze tijd is er toegang tot DocSpace voor 3 benoemde gebruikers* (ondersteuning en updates worden niet langer geleverd).
+
+Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ONLYOFFICE DocSpace Enterprise (inclusief 3 jaar ondersteuning en updates):
+
+$OrangeButton
+
+U kunt ook direct contact opnemen met uw toegewezen sales manager voor het bijwerken van de licentie.
+
+Neem voor vragen over betalingen contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}". Voor het oplossen van technische problemen gebruikt u "${__SupportLink}":"${__SupportLink}".
+
+*De geregistreerde ID's van de eerste 3 gebruikers die een bestand openen om te bewerken. Het aantal documenten dat tegelijkertijd bewerkt kan worden, is onbeperkt. Andere gebruikers kunnen documenten alleen openen om te bekijken.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Uw licentie voor ONLYOFFICE DocSpace Enterprise verloopt over 7 dagen.
+
+Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ONLYOFFICE DocSpace Enterprise (inclusief 3 jaar ondersteuning en updates).
+
+$OrangeButton
+
+U kunt ook direct contact opnemen met uw toegewezen sales manager voor het bijwerken van de licentie.
+
+Neem voor vragen over betalingen contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}". Voor het oplossen van technische problemen gebruikt u "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+De wachtperiode voor uw ONLYOFFICE DocSpace Enterprise licentie verloopt over 7 dagen. Dit betekent dat DocSpace niet beschikbaar zal zijn.
+
+Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ONLYOFFICE DocSpace Enterprise (inclusief 3 jaar ondersteuning en updates):
+
+$OrangeButton
+
+U kunt ook direct contact opnemen met uw toegewezen sales manager voor het bijwerken van de licentie.
+
+Neem voor vragen over betalingen contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}". Voor het oplossen van technische problemen gebruikt u "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+De wachtperiode voor uw ONLYOFFICE DocSpace Enterprise licentie verloopt vandaag. Dit betekent dat DocSpace niet meer beschikbaar zal zijn.
+
+Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ONLYOFFICE DocSpace Enterprise (inclusief 3 jaar ondersteuning en updates):
+
+$OrangeButton
+
+U kunt ook direct contact opnemen met uw toegewezen sales manager voor het bijwerken van de licentie. 
+
+Neem voor vragen over betalingen contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}". Voor het oplossen van technische problemen gebruikt u "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Uw licentie voor ONLYOFFICE DocSpace Enterprise verloopt over 7 dagen. Dit betekent dat updates en ondersteuning niet meer beschikbaar zullen zijn.*
+
+Om de licentie aan te passen, neemt u rechtstreeks contact op met uw toegewezen sales manager of neemt u contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Neem voor vragen over betalingen contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}". Voor het oplossen van technische problemen gebruikt u "${__SupportLink}":"${__SupportLink}".
+
+*U kunt alle functionaliteiten die beschikbaar zijn op het moment dat u de licentie koopt voor onbepaalde tijd gebruiken.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Uw licentie voor ONLYOFFICE DocSpace Enterprise verloopt vandaag. Dit betekent dat updates en ondersteuning niet meer beschikbaar zijn.*
+
+Om de licentie aan te passen, neemt u rechtstreeks contact op met uw toegewezen sales manager of neemt u contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Neem voor vragen over betalingen contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}". Voor het oplossen van technische problemen gebruikt u "${__SupportLink}":"${__SupportLink}".
+
+*U kunt alle functionaliteiten die beschikbaar zijn op het moment dat u de licentie koopt voor onbepaalde tijd gebruiken.
+
+$TrulyYours</value>
+  </data>
 </root>

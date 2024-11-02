@@ -1057,4 +1057,10 @@
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>Hər admin/ekspert istifadəçi üçün {0} və sorğu əsasında sahələr əlavə etmək imkanı</value>
   </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Otaq üçün kvota təyin etmək mümkün olmadı. Daxil edilmiş dəyər ümumi DocSpace yaddaşından böyükdür.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>İstifadəçi üçün kvota təyin etmək alınmadı. Daxil edilmiş dəyər ümumi DocSpace yaddaşından böyükdür.</value>
+  </data>
 </root>

@@ -488,4 +488,7 @@
   <data name="ExternalUser" xml:space="preserve">
     <value>Внешний пользователь</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Создатель контента</value>
+  </data>
 </root>

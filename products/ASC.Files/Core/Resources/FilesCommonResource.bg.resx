@@ -488,4 +488,16 @@
   <data name="ExternalUser" xml:space="preserve">
     <value>Външен потребител</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Създател на съдържание</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Управител на стая</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Създател на съдържание</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Управител на стая</value>
+  </data>
 </root>

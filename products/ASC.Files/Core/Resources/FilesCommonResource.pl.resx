@@ -485,4 +485,19 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Numer formularza</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Twórca treści</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Menedżer pokoju</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Użytkownik zewnętrzny</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Twórca treści</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Menedżer pokoju</value>
+  </data>
 </root>

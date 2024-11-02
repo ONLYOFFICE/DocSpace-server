@@ -1057,4 +1057,10 @@
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>{0} por administrador/usuário avançado e capacidade de adicionar espaço mediante solicitação</value>
   </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir cota por quarto. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota por utilizador. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+  </data>
 </root>

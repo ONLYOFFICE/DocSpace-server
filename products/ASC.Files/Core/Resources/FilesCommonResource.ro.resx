@@ -488,4 +488,7 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ExternalUser" xml:space="preserve">
     <value>Utilizator extern</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Creator de conținut</value>
+  </data>
 </root>

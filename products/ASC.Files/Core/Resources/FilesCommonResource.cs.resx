@@ -488,4 +488,16 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="ExternalUser" xml:space="preserve">
     <value>Externí uživatel</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Tvůrce obsahu</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Správce místnosti</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Tvůrce obsahu</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Správce místnosti</value>
+  </data>
 </root>

@@ -488,4 +488,7 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="ExternalUser" xml:space="preserve">
     <value>Externer Benutzer</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Inhaltsersteller</value>
+  </data>
 </root>
