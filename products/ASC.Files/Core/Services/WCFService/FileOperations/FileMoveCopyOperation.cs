@@ -127,9 +127,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
     protected override async Task DoJob(IServiceScope serviceScope)
     {
-        var notifyConfiguration = serviceScope.ServiceProvider.GetService<NotifyConfiguration>();
-        notifyConfiguration.Configure();
-
         if (_daoFolderId != 0)
         {
             await DoAsync(serviceScope, _daoFolderId);
