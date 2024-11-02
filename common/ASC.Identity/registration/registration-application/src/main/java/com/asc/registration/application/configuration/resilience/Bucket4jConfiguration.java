@@ -54,6 +54,9 @@ public class Bucket4jConfiguration {
     /** The Redis server port. */
     private int port;
 
+    /** The Redis server database. */
+    private int database;
+
     /** The Redis server username. */
     private String username;
 
