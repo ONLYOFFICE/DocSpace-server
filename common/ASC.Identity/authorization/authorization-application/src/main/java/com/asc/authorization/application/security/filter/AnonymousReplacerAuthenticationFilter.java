@@ -59,6 +59,7 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
 
   private final AuthenticationManager authenticationManager;
   private final SecurityUtils securityUtils;
+  private final HttpUtils httpUtils;
   private final AnonymousFilterSecurityConfigurationProperties securityConfigProperties;
 
   /**
@@ -87,7 +88,7 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
     var cookie =
         new Cookie(
             securityConfigProperties.getRedirectAuthorizationCookie(),
-            HttpUtils.getFullURL(request));
+            httpUtils.getFullURL(request));
     cookie.setPath("/");
     cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
     response.addCookie(cookie);

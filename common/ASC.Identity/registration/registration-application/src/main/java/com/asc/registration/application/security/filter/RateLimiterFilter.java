@@ -54,6 +54,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
   private final String X_RATE_REMAINING = "X-Ratelimit-Remaining";
   private final String X_RATE_RESET = "X-Ratelimit-Reset";
 
+  private final HttpUtils httpUtils;
   private final Function<HttpMethod, Supplier<BucketConfiguration>> bucketFactory;
   private final ProxyManager<String> proxyManager;
 
@@ -78,7 +79,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
               .build(String.format("%s:%s", method, person.getId()), bucketConfiguration);
       handleRequest(bucket, request, response, chain);
     } else {
-      var clientIp = HttpUtils.getRequestClientAddress(request).orElse(request.getRemoteAddr());
+      var clientIp = httpUtils.getRequestClientAddress(request).orElse(request.getRemoteAddr());
       if (clientIp.isEmpty()) {
         response.setStatus(HttpStatus.FORBIDDEN.value());
         return;

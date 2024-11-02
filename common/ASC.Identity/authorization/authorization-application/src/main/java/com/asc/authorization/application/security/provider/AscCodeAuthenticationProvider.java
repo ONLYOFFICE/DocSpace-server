@@ -70,6 +70,7 @@ public class AscCodeAuthenticationProvider implements AuthenticationProvider {
   @Value("${spring.application.name}")
   private String serviceName;
 
+  private final HttpUtils httpUtils;
   private final AscApiClient apiClient;
   private final AuditMessagePublisher auditMessagePublisher;
   private final CacheableRegisteredClientQueryService cacheableRegisteredClientQueryService;
@@ -95,11 +96,13 @@ public class AscCodeAuthenticationProvider implements AuthenticationProvider {
       throw new BadCredentialsException("Authentication failed due to missing response context");
 
     var address =
-        HttpUtils.getRequestHostAddress(request)
+        httpUtils
+            .getRequestHostAddress(request)
             .orElseThrow(
                 () -> new BadCredentialsException("Could not find ASC request host address"));
     var hostAddress =
-        HttpUtils.getRequestDomain(request)
+        httpUtils
+            .getRequestDomain(request)
             .orElseThrow(
                 () -> new BadCredentialsException("Could not find ASC request domain address"));
 
@@ -175,19 +178,20 @@ public class AscCodeAuthenticationProvider implements AuthenticationProvider {
       auditMessagePublisher.publish(
           AuditMessage.builder()
               .ip(
-                  HttpUtils.getRequestClientAddress(request)
-                      .map(HttpUtils::extractHostFromUrl)
+                  httpUtils
+                      .getRequestClientAddress(request)
+                      .map(httpUtils::extractHostFromUrl)
                       .orElseGet(
-                          () -> HttpUtils.extractHostFromUrl(HttpUtils.getFirstRequestIP(request))))
+                          () -> httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request))))
               .initiator(serviceName)
               .target(clientId)
-              .browser(HttpUtils.getClientBrowser(request))
-              .platform(HttpUtils.getClientOS(request))
+              .browser(httpUtils.getClientBrowser(request))
+              .platform(httpUtils.getClientOS(request))
               .tenantId(tenant.getResponse().getTenantId())
               .userId(me.getResponse().getId())
               .userEmail(me.getResponse().getEmail())
               .userName(me.getResponse().getUserName())
-              .page(HttpUtils.getFullURL(request))
+              .page(httpUtils.getFullURL(request))
               .action(AuditCode.GENERATE_AUTHORIZATION_CODE_TOKEN.getCode())
               .build());
 

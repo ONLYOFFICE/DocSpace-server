@@ -31,9 +31,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 /** Utility class for handling HTTP-related operations. */
-public class HttpUtils {
+@Component
+public class HttpUtils implements EnvironmentAware {
+  private String portalAddress;
   private static final String IP_PATTERN =
       "https?://([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})";
   private static final String DOMAIN_PATTERN = "https?://([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})";
@@ -60,6 +65,10 @@ public class HttpUtils {
     // Private constructor to prevent instantiation
   }
 
+  public void setEnvironment(Environment environment) {
+    portalAddress = environment.getProperty("APP_URL_PORTAL");
+  }
+
   /**
    * Retrieves the address from the specified header of the request.
    *
@@ -67,7 +76,9 @@ public class HttpUtils {
    * @param header The header name to retrieve the address from
    * @return An Optional containing the address if found, otherwise an empty Optional
    */
-  private static Optional<String> getRequestAddress(HttpServletRequest request, String header) {
+  private Optional<String> getRequestAddress(HttpServletRequest request, String header) {
+    if (portalAddress != null && !portalAddress.isBlank())
+      return Optional.of(portalAddress);
     var addressHeader = request.getHeader(header);
     var protoHeader = request.getHeader(X_FORWARDED_PROTO);
     if (addressHeader == null
@@ -104,7 +115,7 @@ public class HttpUtils {
    * @param request HttpServletRequest object
    * @return An Optional containing the host address if found, otherwise an empty Optional
    */
-  public static Optional<String> getRequestHostAddress(HttpServletRequest request) {
+  public Optional<String> getRequestHostAddress(HttpServletRequest request) {
     return getRequestAddress(request, X_FORWARDED_HOST);
   }
 
@@ -114,7 +125,7 @@ public class HttpUtils {
    * @param request HttpServletRequest object
    * @return An Optional containing the client address if found, otherwise an empty Optional
    */
-  public static Optional<String> getRequestClientAddress(HttpServletRequest request) {
+  public Optional<String> getRequestClientAddress(HttpServletRequest request) {
     return getRequestAddress(request, X_FORWARDED_FOR);
   }
 
@@ -124,7 +135,7 @@ public class HttpUtils {
    * @param request HttpServletRequest object
    * @return An Optional containing the domain if found, otherwise an empty Optional
    */
-  public static Optional<String> getRequestDomain(HttpServletRequest request) {
+  public Optional<String> getRequestDomain(HttpServletRequest request) {
     var hostHeader = request.getHeader(HOST);
     var protoHeader = request.getHeader(X_FORWARDED_PROTO);
     if (hostHeader == null || hostHeader.isBlank() || protoHeader == null || protoHeader.isBlank())
@@ -159,7 +170,7 @@ public class HttpUtils {
    * @param request HttpServletRequest object
    * @return The first IP address found in the request headers, or the remote address if none found
    */
-  public static String getFirstRequestIP(HttpServletRequest request) {
+  public String getFirstRequestIP(HttpServletRequest request) {
     for (var header : IP_HEADERS) {
       var value = request.getHeader(header);
       if (value != null && !value.isEmpty()) return value.split("\\s*,\\s*")[0];
@@ -174,7 +185,7 @@ public class HttpUtils {
    * @param request HttpServletRequest object
    * @return Client's operating system
    */
-  public static String getClientOS(HttpServletRequest request) {
+  public String getClientOS(HttpServletRequest request) {
     var userAgent = request.getHeader("User-Agent");
     if (userAgent == null) return "Unknown";
 
@@ -210,7 +221,7 @@ public class HttpUtils {
    * @param request HttpServletRequest object
    * @return Client's browser
    */
-  public static String getClientBrowser(HttpServletRequest request) {
+  public String getClientBrowser(HttpServletRequest request) {
     var browserDetails = request.getHeader("User-Agent");
     var user = browserDetails.toLowerCase();
     var browser = "";
@@ -267,7 +278,7 @@ public class HttpUtils {
    * @param request HttpServletRequest object
    * @return Full URL of the request
    */
-  public static String getFullURL(HttpServletRequest request) {
+  public String getFullURL(HttpServletRequest request) {
     var requestURL = request.getRequestURL();
     var queryString = request.getQueryString();
     return queryString == null
@@ -281,7 +292,7 @@ public class HttpUtils {
    * @param url The URL to extract the host from
    * @return The extracted host if found, otherwise the original URL
    */
-  public static String extractHostFromUrl(String url) {
+  public String extractHostFromUrl(String url) {
     return extractPattern(url, IP_PATTERN)
         .or(() -> extractPattern(url, DOMAIN_PATTERN))
         .orElse(url);
@@ -294,7 +305,7 @@ public class HttpUtils {
    * @param pattern The pattern to extract
    * @return An Optional containing the extracted pattern if found, otherwise an empty Optional
    */
-  private static Optional<String> extractPattern(String input, String pattern) {
+  private Optional<String> extractPattern(String input, String pattern) {
     var compiledPattern = Pattern.compile(pattern);
     var matcher = compiledPattern.matcher(input);
     if (matcher.find()) return Optional.of(matcher.group(1));
@@ -308,7 +319,7 @@ public class HttpUtils {
    * @param identifier
    * @return A string with a major version or an empty string
    */
-  private static String extractMajorVersion(String userAgent, String identifier) {
+  private String extractMajorVersion(String userAgent, String identifier) {
     var versionPattern = identifier + " ([\\d.]+)";
     var pattern = Pattern.compile(versionPattern);
     var matcher = pattern.matcher(userAgent);
