@@ -141,12 +141,9 @@ module.exports = async (io) => {
 
       socket.on("getSessions", async (obj) => {
         var id = obj.id;
-        var user = getUser(portalUsers, userId, tenantId);
-        var u = {};
-        u.id = id;
-        u.sessions = user.sessions;
-        u.sessions = u.sessions.concat(user.offlineSessions);
-        onlineIO.to(socket.id).emit("user-sessions",  u );
+        var user = getUser(portalUsers, id, tenantId);
+        var sessions = user.sessions.concat(user.offlineSessions);
+        onlineIO.to(socket.id).emit("user-sessions",  {sessions} );
       });
 
       socket.on("logout", () => {
@@ -403,7 +400,7 @@ module.exports = async (io) => {
         {
           var u = 
           {
-            id: user.id,
+            userId: user.id,
             displayName: user.displayName,
             session: session
           };
