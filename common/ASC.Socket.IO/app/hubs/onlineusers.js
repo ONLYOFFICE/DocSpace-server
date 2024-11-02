@@ -88,45 +88,46 @@ module.exports = async (io) => {
       });
 
       var pushedUsers = [];
+      var date;
       socket.on("getSessionsInPortal", async (obj) => {
         var index = obj.index;
         var users = [];
-        if(index == 0){
+        if(index == 0)
+        {
           pushedUsers = [];
+          date = new Date();
         }
         if(portalUsers[tenantId])
         {
           var onlineUsers = portalUsers[tenantId].filter(o => o.sessions.length != 0).sort(userSort);
           
-          var end = onlineUsers.length >= index + 100 ? index + 100 : onlineUsers.length;
-          for(var i = index; i < end; i++)
+          for(var i = index; i < onlineUsers.length; i++)
           {
-            if(pushedUsers.includes(onlineUsers[i].id))
+            if(!pushedUsers.includes(onlineUsers[i].id))
             {
               users.push(serialize(onlineUsers[i]));
               pushedUsers.push(onlineUsers[i].id);
             }
-            else
+            if(users.length == 100)
             {
-              i--;
+              break;
             }
           }
           if(onlineUsers.length < 100)
           {
             var offlineUsers = portalUsers[tenantId].filter(o => o.sessions.length == 0).sort(userSort);
             index = index - onlineUsers.length;
-            end = offlineUsers.length >= index + 100 ? index + 100 : offlineUsers.length;
             index = index < 0 ? 0 : index;
-            for(var i = index; i < end; i++)
+            for(var i = index; i < offlineUsers.length; i++)
             {
-                if(pushedUsers.includes(onlineUsers[i].id))
+                if(!pushedUsers.includes(offlineUsers[i].id) && offlineUsers[i].offlineSessions[offlineUsers[i].offlineSessions.length -1].date <= date)
                 {
                   users.push(serialize(offlineUsers[i]));
                   pushedUsers.push(offlineUsers[i].id);
                 }
-                else
+                if(users.length == 100)
                 {
-                  i--;
+                  break;
                 }
             }
           }
@@ -248,6 +249,10 @@ module.exports = async (io) => {
               if(offSess && offSess != '[]')
               {
                 offSess = JSON.parse(offSess);
+                for(var i = 0; i < offSess.length; i++)
+                {
+                  offSess[i].date = new Date(offSess[i].date);
+                }
               }
               else
               {
