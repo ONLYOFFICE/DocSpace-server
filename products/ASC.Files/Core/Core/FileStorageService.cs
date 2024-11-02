@@ -850,6 +850,8 @@ public class FileStorageService //: IFileStorageService
                 watermarkChanged ? (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark) : folder.SettingsWatermark,
                 colorChanged ? updateData.Color : folder.SettingsColor,
                 coverChanged ? updateData.Cover : folder.SettingsCover);
+            
+            var pastWatermark = folder.SettingsWatermark;
 
             folder = await folderDao.GetFolderAsync(newFolderId);
             
@@ -863,9 +865,9 @@ public class FileStorageService //: IFileStorageService
                     {
                         await filesMessageService.SendAsync(MessageAction.RoomWatermarkDisabled, folder, folder.Title);
                     }
-                    else
+                    else if (pastWatermark == null)
                     {
-                        await filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, folder, folder.Title, watermark.Created.GetHashCode().ToString());
+                        await filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, folder, folder.Title);
                     }
                 }
                 
@@ -3142,8 +3144,6 @@ public class FileStorageService //: IFileStorageService
 
             var data = await externalShare.GetLinkDataAsync(entry, ace.Id, entryType == FileEntryType.File);
             ace.Link = await urlShortener.GetShortenLinkAsync(data.Url);
-            
-            await filesMessageService.SendAsync(MessageAction.PrimaryExternalLinkCopied, entry, entry.Title, ace.FileShareOptions?.Title);
 
             return ace;
         }
@@ -3153,24 +3153,14 @@ public class FileStorageService //: IFileStorageService
         
         if (link == null)
         {
-            var primaryLink = await SetExternalLinkAsync(entry, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
-            
-            await filesMessageService.SendAsync(MessageAction.PrimaryExternalLinkCopied, entry, entry.Title, primaryLink.FileShareOptions?.Title);
-            
-            return primaryLink;
+            return await SetExternalLinkAsync(entry, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         }
 
         if (link.FileShareOptions.IsExpired && entry.RootFolderType == FolderType.USER && entry.FileEntryType == FileEntryType.File)
         {
-            var primaryLink = await SetExternalLinkAsync(entry, link.Id, link.Access, FilesCommonResource.DefaultExternalLinkTitle, 
+            return await SetExternalLinkAsync(entry, link.Id, link.Access, FilesCommonResource.DefaultExternalLinkTitle, 
                 DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime), requiredAuth: link.FileShareOptions.Internal, primary: true);
-            
-            await filesMessageService.SendAsync(MessageAction.PrimaryExternalLinkCopied, entry, entry.Title, primaryLink.FileShareOptions?.Title);
-            
-            return primaryLink;
         }
-        
-        await filesMessageService.SendAsync(MessageAction.PrimaryExternalLinkCopied, entry, entry.Title, link.FileShareOptions?.Title);
 
         return link;
     }

@@ -44,7 +44,6 @@ public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRe
     public double ImageHeight { get; set; }
     public string ImageUrl { get; set; }
     public int ImageScale { get; set; }
-    public DateTime Created { get; set; }
 }
 
 [Scope]
@@ -85,8 +84,7 @@ public class WatermarkManager
         {
             Text = watermarkRequestDto.Text,
             Additions = watermarkRequestDto.Additions,
-            Rotate = watermarkRequestDto.Rotate,
-            Created = DateTime.UtcNow
+            Rotate = watermarkRequestDto.Rotate
         };
 
         var imageUrl = await GetWatermarkImageUrlAsync(room, watermarkRequestDto.ImageUrl);
@@ -107,7 +105,7 @@ public class WatermarkManager
         }
         else
         {
-            await _filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, room, room.Title, watermarkSettings.Created.GetHashCode().ToString());
+            await _filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, room, room.Title);
         }
 
         return watermarkSettings;

@@ -159,25 +159,3 @@ public record EntryOperationData : HistoryData
         return FromFolderId.HasValue ? HashCode.Combine(ToFolderId, FromFolderId) : ToFolderId.GetHashCode();
     }
 }
-
-public class PrimaryLinkCopiedInterpreter : ActionInterpreter
-{
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
-    {
-        var desc = GetAdditionalDescription(description);
-
-        var parentType = desc.ParentType is (int)FolderType.VirtualRooms or (int)FolderType.Archive
-            ? null
-            : desc.ParentType;
-        
-        var parentTitle = parentType != null 
-            ? desc.ParentTitle
-            : null;
-        
-        var parentId = parentType != null 
-            ? desc.ParentId 
-            : (int?)null;
-        
-        return new ValueTask<HistoryData>(new EntryData(target, description[0], parentId, parentTitle, parentType));
-    }
-}

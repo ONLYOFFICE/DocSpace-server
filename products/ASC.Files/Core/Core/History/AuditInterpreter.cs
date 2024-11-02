@@ -99,7 +99,6 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.FileUnlocked, _fileLockInterpreter },
         { (int)MessageAction.RoomDenyDownloadEnabled, _roomDenyDownloadInterpreter },
         { (int)MessageAction.RoomDenyDownloadDisabled, _roomDenyDownloadInterpreter },
-        { (int)MessageAction.PrimaryExternalLinkCopied, new PrimaryLinkCopiedInterpreter() },
         { (int)MessageAction.RoomWatermarkSet, new RoomWatermarkSetInterpreter() },
         { (int)MessageAction.RoomWatermarkDisabled, new RoomWatermarkDisabledInterpreter() },
         { (int)MessageAction.RoomColorChanged, _roomLogoChangedInterpreter },

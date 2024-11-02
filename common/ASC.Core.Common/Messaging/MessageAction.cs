@@ -154,7 +154,7 @@ public enum MessageAction
     FileMovedWithOverwriting = 5016,
     FileMovedToTrash = 5017,
     FileDeleted = 5018,
-    FileIndexChanged = 5120, // last
+    FileIndexChanged = 5111,
 
     FolderCreated = 5019,
     FolderRenamed = 5020,
@@ -257,12 +257,10 @@ public enum MessageAction
     RoomDenyDownloadEnabled = 5109,
     RoomDenyDownloadDisabled = 5110,
     
-    PrimaryExternalLinkCopied = 5111,
-    
     RoomWatermarkSet = 5112,
     RoomWatermarkDisabled = 5113,
     
-    RoomInviteResend = 5119,
+    RoomInviteResend = 5119, // last
     
     RoomIndexExportSaved = 5106,
 

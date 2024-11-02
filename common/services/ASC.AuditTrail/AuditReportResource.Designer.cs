@@ -1392,15 +1392,6 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Primary link copied: {1}.
-        /// </summary>
-        public static string PrimaryExternalLinkCopied {
-            get {
-                return ResourceManager.GetString("PrimaryExternalLinkCopied", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Private Room is disabled.
         /// </summary>
         public static string PrivacyRoomDisable {

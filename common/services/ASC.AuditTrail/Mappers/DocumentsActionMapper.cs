@@ -77,8 +77,7 @@ internal class FilesActionMapper : IModuleActionMapper
                 new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Import, MessageAction.FileImported },
-                    { ActionType.Move, MessageAction.FileMovedToTrash },
-                    { ActionType.Other, MessageAction.PrimaryExternalLinkCopied }
+                    { ActionType.Move, MessageAction.FileMovedToTrash }
                 }
             },
             {
@@ -118,8 +117,7 @@ internal class FoldersActionMapper : IModuleActionMapper
                     { ActionType.Create, MessageAction.FolderCreated },
                     { ActionType.Move, MessageAction.FolderMovedToTrash },
                     { ActionType.Delete, MessageAction.FolderDeleted },
-                    { ActionType.Download, MessageAction.FolderDownloaded },
-                    { ActionType.Other, MessageAction.PrimaryExternalLinkCopied }
+                    { ActionType.Download, MessageAction.FolderDownloaded }
                 }
             },
             {
@@ -181,8 +179,7 @@ internal class RoomsActionMapper : IModuleActionMapper
                         ]
                     },
                     { ActionType.Delete, [MessageAction.RoomDeleted] },
-                    { ActionType.Export, [MessageAction.RoomIndexExportSaved] },
-                    { ActionType.Other, [MessageAction.PrimaryExternalLinkCopied] }
+                    { ActionType.Export, [MessageAction.RoomIndexExportSaved] }
                 }
             },
             {

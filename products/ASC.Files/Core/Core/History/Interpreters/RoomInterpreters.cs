@@ -252,16 +252,7 @@ public class RoomWatermarkSetInterpreter : ActionInterpreter
     {
         var desc = GetAdditionalDescription(description);
 
-        if (entry is not Folder<int> folder || !DocSpaceHelper.IsRoom(folder.FolderType) || folder.SettingsWatermark == null)
-        {
-            return ValueTask.FromResult<HistoryData>(new WatermarkData(false, target, desc.RoomTitle));
-        }
-        
-        var hash = int.Parse(description[1]);
-            
-        var currentWatermark = folder.SettingsWatermark.Created.GetHashCode() == hash;
-
-        return ValueTask.FromResult<HistoryData>(new WatermarkData(currentWatermark, target, desc.RoomTitle));
+        return ValueTask.FromResult<HistoryData>(new EntryData(target, desc.RoomTitle));
     }
 }
 
@@ -334,15 +325,4 @@ public record LifeTimeHistoryData : EntryData
     }
 
     public RoomDataLifetime LifeTime { get; set; }
-}
-
-public record WatermarkData : EntryData
-{
-    public bool CurrentWatermark { get; set; }
-    
-    public WatermarkData(bool currentWatermark, string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null) 
-        : base(id, title, parentId, parentTitle, parentType)
-    {
-        CurrentWatermark = currentWatermark;
-    }
 }
