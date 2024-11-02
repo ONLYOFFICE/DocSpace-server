@@ -236,7 +236,7 @@ module.exports = async (io) => {
           var users = JSON.parse(await redisClient.get(`allusers-${key}`));
           if(users)
           {
-            allUsers[key] = users;
+           // allUsers[key] = users;
           }
           
           for(var i = 0; i < allUsers[key].length; i++)
