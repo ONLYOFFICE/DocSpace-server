@@ -87,9 +87,13 @@ module.exports = async (io) => {
         file = null;
       });
 
+      var pushedUsers = [];
       socket.on("getSessionsInPortal", async (obj) => {
         var index = obj.index;
         var users = [];
+        if(index == 0){
+          pushedUsers = [];
+        }
         if(portalUsers[tenantId])
         {
           var onlineUsers = portalUsers[tenantId].filter(o => o.sessions.length != 0).sort(userSort);
@@ -97,7 +101,15 @@ module.exports = async (io) => {
           var end = onlineUsers.length >= index + 100 ? index + 100 : onlineUsers.length;
           for(var i = index; i < end; i++)
           {
-            users.push(serialize(onlineUsers[i]));
+            if(pushedUsers.includes(onlineUsers[i].id))
+            {
+              users.push(serialize(onlineUsers[i]));
+              pushedUsers.push(onlineUsers[i].id);
+            }
+            else
+            {
+              i--;
+            }
           }
           if(onlineUsers.length < 100)
           {
@@ -106,9 +118,17 @@ module.exports = async (io) => {
             end = offlineUsers.length >= index + 100 ? index + 100 : offlineUsers.length;
             index = index < 0 ? 0 : index;
             for(var i = index; i < end; i++)
-              {
-                users.push(serialize(offlineUsers[i]));
-              }
+            {
+                if(pushedUsers.includes(onlineUsers[i].id))
+                {
+                  users.push(serialize(offlineUsers[i]));
+                  pushedUsers.push(offlineUsers[i].id);
+                }
+                else
+                {
+                  i--;
+                }
+            }
           }
         }
         var result = 
