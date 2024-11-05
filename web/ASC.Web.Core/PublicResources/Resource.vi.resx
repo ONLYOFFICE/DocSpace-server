@@ -1055,7 +1055,7 @@
     <value>Hạn mức lưu trữ &amp; thống kê</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} mỗi quản trị viên/người dùng cấp cao và khả năng thêm không gian theo yêu cầu</value>
+    <value>{0} mỗi quản trị viên và khả năng thêm không gian theo yêu cầu</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>Không thể đặt hạn mức cho mỗi phòng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>

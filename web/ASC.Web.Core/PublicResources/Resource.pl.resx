@@ -1055,7 +1055,7 @@
     <value>Limity pamięci i statystyki</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} n administratora/ użytkownika z większą liczbą uprawnień i możliwość dodawania pamięci na żądanie</value>
+    <value>{0} n administratora i możliwość dodawania pamięci na żądanie</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>Nie udało się skonfigurować limitu na pokój. Wprowadzona wartość jest większa niż całkowita pamięć DocSpace.</value>

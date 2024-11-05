@@ -1055,7 +1055,7 @@
     <value>Квоти и статистики за съхранение</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} за администратор/опитен потребител и възможност за добавяне на място по заявка</value>
+    <value>{0} за администратор и възможност за добавяне на място по заявка</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>Неуспешно задаване на квота за стая. Въведената стойност е по-голяма от общото хранилище на DocSpace.</value>

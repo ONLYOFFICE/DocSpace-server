@@ -2923,7 +2923,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} per admin/power user and ability to add space on request.
+        ///   Looks up a localized string similar to {0} per admin and ability to add space on request.
         /// </summary>
         public static string TariffsFeature_total_size {
             get {

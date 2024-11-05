@@ -1055,7 +1055,7 @@
     <value>Saxlama kvotaları və statistika</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>Hər admin/ekspert istifadəçi üçün {0} və sorğu əsasında sahələr əlavə etmək imkanı</value>
+    <value>Hər admin üçün {0} və sorğu əsasında sahələr əlavə etmək imkanı</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>Otaq üçün kvota təyin etmək mümkün olmadı. Daxil edilmiş dəyər ümumi DocSpace yaddaşından böyükdür.</value>
