@@ -122,7 +122,7 @@ module.exports = async (io) => {
       var pushedUsers = [];
       var date;
       socket.on("getSessionsInPortal", async (obj) => {
-        var index = obj.index;
+        var index = obj.startIndex;
         var users = [];
         if(index == 0)
         {
