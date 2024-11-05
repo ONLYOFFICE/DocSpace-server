@@ -39,6 +39,11 @@ public class TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderC
         get { return coreBaseSettings.Standalone && !string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 
+    public bool Developer
+    {
+        get { return Enterprise && licenseReaderConfig.LicenseType == LicenseType.Developer; }
+    }
+
     public bool Opensource
     {
         get { return coreBaseSettings.Standalone && string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
