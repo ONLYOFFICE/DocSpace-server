@@ -1712,7 +1712,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await fileSecurity.CanLockAsync(file) || lockfile && await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        if (!await fileSecurity.CanLockAsync(file))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
