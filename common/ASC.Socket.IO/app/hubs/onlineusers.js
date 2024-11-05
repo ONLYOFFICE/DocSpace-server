@@ -47,7 +47,7 @@ module.exports = async (io) => {
         }
       });
     };
-    setInterval(clear, 1000 * 60 * 60);
+    setInterval(clear, 1000 * 60 * 60 * 12);
     async function startAsync(socket)
     {
       if (socket.handshake.session.system) 
@@ -119,8 +119,6 @@ module.exports = async (io) => {
         file = null;
       });
 
-      var pushedUsers = [];
-      var date;
       socket.on("getSessionsInPortal", async (obj) => {
         var index = obj.startIndex;
         var users = [];
@@ -135,11 +133,8 @@ module.exports = async (io) => {
           
           for(var i = index; i < onlineUsers.length; i++)
           {
-            if(!pushedUsers.includes(onlineUsers[i].id))
-            {
-              users.push(serialize(onlineUsers[i]));
-              pushedUsers.push(onlineUsers[i].id);
-            }
+            users.push(serialize(onlineUsers[i]));
+            pushedUsers.push(onlineUsers[i].id);
             if(users.length == 100)
             {
               break;
@@ -152,15 +147,8 @@ module.exports = async (io) => {
             index = index < 0 ? 0 : index;
             for(var i = index; i < offlineUsers.length; i++)
             {
-                if(!pushedUsers.includes(offlineUsers[i].id) && offlineUsers[i].offlineSessions[offlineUsers[i].offlineSessions.length -1].date <= date)
-                {
-                  users.push(serialize(offlineUsers[i]));
-                  pushedUsers.push(offlineUsers[i].id);
-                }
-                if(users.length == 100)
-                {
-                  break;
-                }
+              users.push(serialize(offlineUsers[i]));
+              pushedUsers.push(offlineUsers[i].id);
             }
           }
         }
