@@ -991,7 +991,7 @@
     <value>SSO</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} per admin/power user and ability to add space on request</value>
+    <value>{0} per admin and ability to add space on request</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>The used storage size should not exceed {0}</value>
