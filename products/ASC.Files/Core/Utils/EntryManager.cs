@@ -1492,6 +1492,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         await fileDao.SaveProperties(originalFormId, origProperties);
 
                         var resultFolder = await folderDao.GetFolderAsync(origProperties.FormFilling.ResultsFolderId);
+                        var resultFile = await fileDao.GetFileAsync(origProperties.FormFilling.ResultsFileID);
 
                         if (resultFolder == null || resultFolder.FolderType != FolderType.FormFillingFolderDone)
         {
@@ -1504,6 +1505,11 @@ public class EntryManager(IDaoFactory daoFactory,
                             origProperties.FormFilling.ResultsFileID = await CreateCsvResult(resultsFolderId, originalForm.CreateBy, title, fileDao);
                             origProperties.FormFilling.ResultsFolderId = resultsFolderId;
 
+                            await fileDao.SaveProperties(originalForm.Id, origProperties);
+                        }
+                        else if (resultFile == null || !resultFile.ParentId.Equals(resultFolder.Id))
+                        {
+                            origProperties.FormFilling.ResultsFileID = await CreateCsvResult(resultFolder.Id, originalForm.CreateBy, Path.GetFileNameWithoutExtension(originalForm.Title), fileDao);
                             await fileDao.SaveProperties(originalForm.Id, origProperties);
                         }
 
