@@ -64,20 +64,19 @@ module.exports = async (io) => {
       const displayName = socket.handshake.session?.user?.displayName;
       const avatar = socket.handshake.session?.user?.avatarSmall;
       const tenantId = socket.handshake.session?.portal?.tenantId;
-      let id;
       var logout = false;
       let idInRoom = -1;
       let roomId = -1;
       let file;
       let sessionId = socket.handshake.session?.user?.connection;
       await InitUsersAsync(tenantId, portalUsers);
-      id = await EnterAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal");
+      await EnterAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal");
       if(socket.handshake.session.file)
       {
         roomId = `${tenantId}-${socket.handshake.session.file.roomId}`;
         await InitUsersAsync(roomId, roomUsers);
         file = socket.handshake.session.file.title;
-        idInRoom = await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
+       await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
         if(!editFiles[roomId])
         {
           editFiles[roomId] = [];
@@ -94,8 +93,8 @@ module.exports = async (io) => {
         editFiles[roomId][userId].push(file);
       }
       socket.on("disconnect", async (reason) => {
-        await LeaveAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal", id);
-        await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", idInRoom, true);
+        await LeaveAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal", sessionId);
+        await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", sessionId, true);
         if(file)
         {
           var index = editFiles[roomId][userId].indexOf(file);
@@ -112,8 +111,6 @@ module.exports = async (io) => {
             }
           }
         }
-        id = -1;
-        idInRoom = -1;
         sessionId = -1;
         roomId = -1;
         file = null;
@@ -164,7 +161,7 @@ module.exports = async (io) => {
         var id = obj.id;
         var user = getUser(portalUsers, id, tenantId);
         var sessions = user.sessions.concat(user.offlineSessions);
-        onlineIO.to(socket.id).emit("user-sessions",  {sessions} );
+        onlineIO.to(socket.id).emit("user-sessions",  sessions );
       });
 
       socket.on("logout", () => {
@@ -195,12 +192,11 @@ module.exports = async (io) => {
       {
         roomId = getRoom(roomPart);
         await InitUsersAsync(roomId, roomUsers);
-        idInRoom = await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
+        await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
       });
 
     socket.on("leaveRoom", async()=>{
-      await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", idInRoom, true);
-      idInRoom = -1;
+      await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", sessionId, true);
     });
 
     socket.on("getSessionsInRoom", async (roomPart) => {
@@ -308,8 +304,9 @@ module.exports = async (io) => {
         var user = getUser(usersList, userId, key);
         if (user) 
         {
-          var session = user.sessions[sessionId];
-          user.sessions.splice(sessionId, 1);
+          var index = user.sessions.findIndex(u=> u.id == sessionId);
+          var session = user.sessions[index];
+          user.sessions.splice(index, 1);
           if(!user.sessions.find(e=> e.id == session.id))
           {
             user.offlineSessions.push(
@@ -360,7 +357,6 @@ module.exports = async (io) => {
         var user = getUser(usersList, userId, key);
         var isNew = !user;
         var session;
-        var id = 0;
         if (isNew) 
         {
           var sessions = new Array();
@@ -395,7 +391,6 @@ module.exports = async (io) => {
             date: new Date()
           };
           user.sessions.push(session);
-          id = user.sessions.length - 1;
         }
         
         for(var i = 0; i < user.offlineSessions.length; i++)
@@ -427,12 +422,12 @@ module.exports = async (io) => {
         {
           if(isRoom)
           {
-            return id;
+            return;
           }
           onlineIO.to(`${socketKey}-${userId}`).emit(`enter-session-in-${socketDest}`, {userId, session} );
         }
 
-        return id;
+        return;
       }
 
       function getCleanIP (ipAddress) {
