@@ -50,6 +50,5 @@ public enum ActionType
     Reassigns,
     Follow,
     Unfollow,
-    Logout,
-    Other
+    Logout
 }
