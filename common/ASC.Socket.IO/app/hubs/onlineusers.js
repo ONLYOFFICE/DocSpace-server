@@ -344,14 +344,7 @@ module.exports = async (io) => {
             {
               if(user.sessions[user.sessions.length - 1].id != session.id)
               {
-                var u = 
-                {
-                  id: user.id,
-                  displayName: user.displayName,
-                  avatar: user.avatar,
-                  session: user.sessions[user.sessions.length - 1]
-                };
-                onlineIO.to(socketKey).emit(`new-session-in-${socketDest}`, {u} );
+                onlineIO.to(socketKey).emit(`new-session-in-${socketDest}`, {id: user.id, displayName: user.displayName, avatar: user.avatar, session: user.sessions[user.sessions.length - 1]} );
               }
               onlineIO.to(`${socketKey}-${userId}`).emit(`leave-session-in-${socketDest}`, {userId, sessionId} );
             }
@@ -428,22 +421,11 @@ module.exports = async (io) => {
         }
         if(user.sessions.length == 1)
         {
-          var u = 
-          {
-            userId: user.id,
-            displayName: user.displayName,
-            avatar: user.avatar,
-            session: session
-          };
-          onlineIO.to(socketKey).emit(`enter-in-${socketDest}`, {u});
+          onlineIO.to(socketKey).emit(`enter-in-${socketDest}`, {userId: user.id, displayName: user.displayName, avatar: user.avatar, session: session});
         }
         else
         {
           if(isRoom)
-          {
-            return id;
-          }
-          if(user.sessions.filter(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip).length != 1)
           {
             return id;
           }
