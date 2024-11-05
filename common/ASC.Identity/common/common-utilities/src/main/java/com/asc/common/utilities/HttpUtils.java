@@ -77,8 +77,7 @@ public class HttpUtils implements EnvironmentAware {
    * @return An Optional containing the address if found, otherwise an empty Optional
    */
   private Optional<String> getRequestAddress(HttpServletRequest request, String header) {
-    if (portalAddress != null && !portalAddress.isBlank())
-      return Optional.of(portalAddress);
+    if (portalAddress != null && !portalAddress.isBlank()) return Optional.of(portalAddress);
     var addressHeader = request.getHeader(header);
     var protoHeader = request.getHeader(X_FORWARDED_PROTO);
     if (addressHeader == null
