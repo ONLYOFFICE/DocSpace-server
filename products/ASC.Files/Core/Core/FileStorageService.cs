@@ -559,6 +559,31 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.CreateFolderAsync(folder);
         await filesMessageService.SendAsync(MessageAction.RoomCreated, folder, folder.Title);
+
+        if (folder.ProviderEntry)
+        {
+            return folder;
+        }
+
+        if (folder.SettingsIndexing)
+        {
+            await filesMessageService.SendAsync(MessageAction.RoomIndexingEnabled, folder);
+        }
+
+        if (folder.SettingsDenyDownload)
+        {
+            await filesMessageService.SendAsync(MessageAction.RoomDenyDownloadEnabled, folder, folder.Title);
+        }
+
+        if (folder.SettingsLifetime != null)
+        {
+            await filesMessageService.SendAsync(
+                MessageAction.RoomLifeTimeSet, 
+                folder, 
+                folder.SettingsLifetime.Value.ToString(), 
+                folder.SettingsLifetime.Period.ToStringFast(), 
+                folder.SettingsLifetime.DeletePermanently.ToString());
+        }
         
         return folder;
     }
@@ -640,7 +665,6 @@ public class FileStorageService //: IFileStorageService
             {
                 try
                 {
-
                     await watermarkManager.SetWatermarkAsync(newFolder, watermark);
                 }
                 catch (Exception)
@@ -665,11 +689,11 @@ public class FileStorageService //: IFileStorageService
                 var notFoundTags = names?.Where(x => tagsInfos.All(r => r.Name != x));
 
                 if (notFoundTags != null)
-            {
-                foreach (var tagInfo in notFoundTags)
                 {
-                    tagsInfos.Add(await customTagsService.CreateTagAsync(tagInfo));
-                }
+                    foreach (var tagInfo in notFoundTags)
+                    {
+                        tagsInfos.Add(await customTagsService.CreateTagAsync(tagInfo));
+                    }
                 }
 
                 if (tagsInfos.Count != 0)
