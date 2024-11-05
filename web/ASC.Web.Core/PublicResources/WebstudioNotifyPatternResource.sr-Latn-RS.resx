@@ -1822,4 +1822,186 @@ $TrulyYours</value>
   <data name="ButtonJoin" xml:space="preserve">
     <value>Klikni ovde da se pridružiš portalu</value>
   </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Kupite sada</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Podesite lozinku</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Vaša licenca za ONLYOFFICE DocSpace Developer ističe danas.
+
+Aktivirali smo grejs period od $PaymentDelay dana za vas. Tokom ovog perioda, pristup uređivanju dokumenata je ograničen na 20 istovremenih veza (podrška i ažuriranja više nisu obezbeđeni).
+
+Za ažuriranje licence, molimo vas da direktno kontaktirate svog dodeljenog menadžera prodaje ili nam se obratite putem "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Za pitanja o plaćanju, kontaktirajte nas na "${__SalesEmail}":"mailto:${__SalesEmail}". Za rešavanje bilo kakvih tehničkih problema, koristite "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Vaša licenca za ONLYOFFICE DocSpace Developer ističe za 7 dana.
+
+Da biste ažurirali licencu, obratite se direktno svom dodeljenom menadžeru prodaje ili nam se obratite preko "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Za pitanja o plaćanju, kontaktirajte nas na "${__SalesEmail}":"mailto:${__SalesEmail}". Za rešavanje bilo kakvih tehničkih problema, koristite "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Grejs period za vašu ONLYOFFICE DocSpace Developer licencu ističe za 7 dana. To znači da će DocSpace biti nedostupan.
+
+Da biste ažurirali licencu, obratite se direktno svom dodeljenom menadžeru prodaje ili nam se obratite preko "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Za pitanja o plaćanju, kontaktirajte nas na "${__SalesEmail}":"mailto:${__SalesEmail}". Za rešavanje bilo kakvih tehničkih problema, koristite "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Grejs period za vašu licencu ONLYOFFICE DocSpace Developer ističe danas. To znači da DocSpace više neće biti dostupan.
+
+Da biste ažurirali licencu, obratite se direktno svom dodeljenom menadžeru prodaje ili nam se obratite preko "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Za pitanja o plaćanju, kontaktirajte nas na "${__SalesEmail}":"mailto:${__SalesEmail}". Za rešavanje bilo kakvih tehničkih problema, koristite "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Vaša licenca za ONLYOFFICE DocSpace Enterprise ističe danas.
+
+Aktivirali smo *grejs period od $PaymentDelay dana* za vas. Tokom ovog perioda, pristup DocSpace-u je obezbeđen za 3 imenovana korisnika* (podrška i ažuriranja se više ne obezbeđuju).
+
+Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ONLYOFFICE DocSpace Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
+
+$OrangeButton
+
+Takođe ste dobrodošli da direktno kontaktirate svog dodeljenog menadžera prodaje za ažuriranje licence.
+
+Za pitanja o plaćanju, kontaktirajte nas na "${__SalesEmail}":"mailto:${__SalesEmail}". Za rešavanje bilo kakvih tehničkih problema, koristite "${__SupportLink}":"${__SupportLink}".
+
+*Snimljeni ID-ovi prva 3 korisnika koji će otvoriti bilo koju datoteku za uređivanje. Broj dokumenata koji se mogu uređivati u isto vreme nije ograničen. Ostali korisnici će moći da otvaraju dokumenta samo za gledanje.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Vaša licenca za ONLYOFFICE DocSpace Enterprise ističe za 7 dana.
+
+Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ONLYOFFICE DocSpace Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
+
+$OrangeButton
+
+Takođe ste dobrodošli da direktno kontaktirate svog dodeljenog menadžera prodaje za ažuriranje licence.
+
+Za pitanja o plaćanju, kontaktirajte nas na "${__SalesEmail}":"mailto:${__SalesEmail}". Za rešavanje bilo kakvih tehničkih problema, koristite "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Grejs period za vašu ONLYOFFICE DocSpace Enterprise licencu ističe za 7 dana. To znači da će DocSpace postati nedostupan.
+
+Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ONLYOFFICE DocSpace Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
+
+$OrangeButton
+
+Takođe ste dobrodošli da direktno kontaktirate svog dodeljenog menadžera prodaje za ažuriranje licence.
+
+Za pitanja o plaćanju, kontaktirajte nas na "${__SalesEmail}":"mailto:${__SalesEmail}". Za rešavanje bilo kakvih tehničkih problema, koristite "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Grejs period za vašu ONLYOFFICE DocSpace Enterprise licencu ističe danas. To znači da DocSpace više neće biti dostupan.
+
+Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ONLYOFFICE DocSpace Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
+
+$OrangeButton
+
+Takođe ste dobrodošli da direktno kontaktirate svog dodeljenog menadžera prodaje za ažuriranje licence.
+
+Za pitanja o plaćanju, kontaktirajte nas na "${__SalesEmail}":"mailto:${__SalesEmail}". Za rešavanje bilo kakvih tehničkih problema, koristite "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Vaša licenca za ONLYOFFICE DocSpace Enterprise ističe za 7 dana. To znači da ažuriranja i podrška više neće biti dostupni.*
+
+Da biste ažurirali licencu, obratite se direktno svom dodeljenom menadžeru prodaje ili nam se obratite preko "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Za pitanja o plaćanju, kontaktirajte nas na "${__SalesEmail}":"mailto:${__SalesEmail}". Za rešavanje bilo kakvih tehničkih problema, koristite "${__SupportLink}":"${__SupportLink}".
+
+*Možete koristiti sve funkcije dostupne u trenutku kupovine licence na neograničen vremenski period.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Vaša licenca za ONLYOFFICE DocSpace Enterprise ističe danas. To znači da ažuriranja i podrška više nisu dostupni.*
+
+Da biste ažurirali licencu, obratite se direktno svom dodeljenom menadžeru prodaje ili nam se obratite preko "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Za pitanja o plaćanju, kontaktirajte nas na "${__SalesEmail}":"mailto:${__SalesEmail}". Za rešavanje bilo kakvih tehničkih problema, koristite "${__SupportLink}":"${__SupportLink}".
+
+*Možete koristiti sve funkcije dostupne u trenutku kupovine licence na neograničen vremenski period.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Zdravo! Molim vas postavite lozinku za svoj ONLYOFFICE DocSpace nalog. Samo kliknite dugme ispod:
+
+$OrangeButton
+
+Link važi 7 dana.</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Podesite lozinku za ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Grejs period za vaš ONLYOFFICE DocSpace Developer je aktiviran</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Vaša licenca za ONLYOFFICE DocSpace Developer uskoro ističe</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Grejs period za vaš ONLYOFFICE DocSpace Developer uskoro ističe</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Vaš ONLYOFFICE DocSpace Developer više nije dostupan</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Grejs period za vaš ONLYOFFICE DocSpace Enterprise je aktiviran</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Vaša ONLYOFFICE DocSpace Enterprise licenca uskoro ističe</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Grejs period za vaš ONLYOFFICE DocSpace Enterprise uskoro ističe</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Vaš ONLYOFFICE DocSpace Enterprise više nije dostupan</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Vaša ONLYOFFICE DocSpace Enterprise licenca uskoro ističe</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Vaša ONLYOFFICE DocSpace Enterprise licenca ističe danas</value>
+  </data>
 </root>

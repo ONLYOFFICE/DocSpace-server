@@ -1063,4 +1063,7 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Не удалось установить квоту на пользователя. Введенное значение превышает объем хранилища DocSpace.</value>
   </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Количество администраторов превышает лимит: {0}/{1}.</value>
+  </data>
 </root>
