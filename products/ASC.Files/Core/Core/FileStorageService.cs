@@ -850,8 +850,6 @@ public class FileStorageService //: IFileStorageService
                 watermarkChanged ? (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark) : folder.SettingsWatermark,
                 colorChanged ? updateData.Color : folder.SettingsColor,
                 coverChanged ? updateData.Cover : folder.SettingsCover);
-            
-            var pastWatermark = folder.SettingsWatermark;
 
             folder = await folderDao.GetFolderAsync(newFolderId);
             
@@ -865,7 +863,7 @@ public class FileStorageService //: IFileStorageService
                     {
                         await filesMessageService.SendAsync(MessageAction.RoomWatermarkDisabled, folder, folder.Title);
                     }
-                    else if (pastWatermark == null)
+                    else
                     {
                         await filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, folder, folder.Title);
                     }
