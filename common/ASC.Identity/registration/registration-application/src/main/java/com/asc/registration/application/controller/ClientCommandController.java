@@ -80,6 +80,8 @@ public class ClientCommandController {
   @Value("${spring.application.name}")
   private String serviceName;
 
+  private final HttpUtils httpUtils;
+
   /** The service for managing client applications. */
   private final ClientApplicationService clientApplicationService;
 
@@ -456,19 +458,20 @@ public class ClientCommandController {
       AuditCode auditCode) {
     return Audit.Builder.builder()
         .ip(
-            HttpUtils.getRequestClientAddress(request)
-                .map(HttpUtils::extractHostFromUrl)
+            httpUtils
+                .getRequestClientAddress(request)
+                .map(httpUtils::extractHostFromUrl)
                 .orElseGet(
-                    () -> HttpUtils.extractHostFromUrl(HttpUtils.getFirstRequestIP(request))))
+                    () -> httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request))))
         .initiator(serviceName)
         .target(clientId)
-        .browser(HttpUtils.getClientBrowser(request))
-        .platform(HttpUtils.getClientOS(request))
+        .browser(httpUtils.getClientBrowser(request))
+        .platform(httpUtils.getClientOS(request))
         .tenantId(tenant.getTenantId())
         .userId(person.getId())
         .userEmail(person.getEmail())
         .userName(person.getUserName())
-        .page(HttpUtils.getFullURL(request))
+        .page(httpUtils.getFullURL(request))
         .auditCode(auditCode)
         .build();
   }

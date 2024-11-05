@@ -626,18 +626,25 @@ public abstract class VirtualRoomsController<T>(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("{id}/news")]
-    public async IAsyncEnumerable<NewItemsDto<FileEntryDto>> GetNewItemsAsync(T id)
+    public async Task<List<NewItemsDto<FileEntryDto>>> GetNewItemsAsync(T id)
     {
         var newItems = await _fileStorageService.GetNewRoomFilesAsync(id);
+        var result = new List<NewItemsDto<FileEntryDto>>();
         
-        foreach (var item in newItems)
+        foreach (var (date, entries) in newItems)
         {
-            yield return new NewItemsDto<FileEntryDto>
+            var apiDateTime = apiDateTimeHelper.Get(date);
+            var items = new List<FileEntryDto>();
+
+            foreach (var en in entries)
             {
-                Date = apiDateTimeHelper.Get(item.Key), 
-                Items = await Task.WhenAll(item.Value.Select(GetFileEntryWrapperAsync))
-            };
+                items.Add(await GetFileEntryWrapperAsync(en));
+            }
+            
+            result.Add(new NewItemsDto<FileEntryDto> { Date = apiDateTime, Items = items });
         }
+
+        return result;
     }
 }
 
@@ -842,9 +849,16 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     {
         var room = await fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
 
+        var fileSecurity = serviceProvider.GetService<FileSecurity>();
+
+        if (!await fileSecurity.CanIndexExportAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         if (!room.SettingsIndexing)
         {
-            throw new NotSupportedException("Folder indexing is turned off");
+            throw new InvalidOperationException("Folder indexing is turned off");
         }
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -859,7 +873,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         task.Init(baseUri, tenantId, userId, null);
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
-        
+
         var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id, baseUri, headers: headers != null 
             ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
@@ -893,19 +907,25 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     [HttpGet("rooms/news")]
-    public async IAsyncEnumerable<NewItemsDto<RoomNewItemsDto>> GetRoomsNewItems()
+    public async Task<List<NewItemsDto<RoomNewItemsDto>>> GetRoomsNewItems()
     {
         var newItems = await fileStorageService.GetNewRoomFilesAsync();
+        var result = new List<NewItemsDto<RoomNewItemsDto>>();
 
-        foreach (var item in newItems)
+        foreach (var (key, value) in newItems)
         {
-            yield return new NewItemsDto<RoomNewItemsDto>
+            var date = apiDateTimeHelper.Get(key);
+            var items = new List<RoomNewItemsDto>();
+            
+            foreach (var (k, v) in value)
             {
-                Date = apiDateTimeHelper.Get(item.Key), 
-                Items = await Task.WhenAll(item.Value
-                    .Select(s => 
-                        roomNewItemsDtoHelper.GetAsync(s.Key, s.Value.AsEnumerable())))
-            };
+                var item = await roomNewItemsDtoHelper.GetAsync(k, v);
+                items.Add(item);
+            }
+            
+            result.Add(new NewItemsDto<RoomNewItemsDto> { Date = date, Items = items });
         }
+        
+        return result;
     }
 }

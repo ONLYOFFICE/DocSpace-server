@@ -109,9 +109,6 @@ public class FileMarker(
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
     private const string LockKey = "file_marker";
-    
-    private static readonly IComparer<FileEntry> _entryDateDescComparer = Comparer<FileEntry>.Create((x, y) => y.ModifiedOn.CompareTo(x.ModifiedOn));
-    private static readonly IComparer<DateTime> _dateDescComparer = Comparer<DateTime>.Create((x, y) => y.CompareTo(x));
 
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
     {
@@ -157,32 +154,29 @@ public class FileMarker(
         else
         {
             var additionalSubjects = Array.Empty<Guid>();
+            if (obj.FileEntry.RootFolderType == FolderType.VirtualRooms)
+            {
+                var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
+                if (room.CreateBy != obj.CurrentAccountId)
+                {
+                    additionalSubjects = [room.CreateBy];
+                }
+            }
             
             if (userIDs.Count == 0)
             {
-                if (obj.FileEntry.RootFolderType == FolderType.VirtualRooms)
-                {
-                    var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
-                    if (room.CreateBy != obj.CurrentAccountId)
-                    {
-                        additionalSubjects = [room.CreateBy];
-                    }
-                }
-                
                 var parentFolder = parentFolders.FirstOrDefault();
                 var guids = await fileSecurity.WhoCanReadAsync(obj.FileEntry);
                 if (parentFolder.FolderType != FolderType.FormFillingFolderDone && parentFolder.FolderType != FolderType.FormFillingFolderInProgress &&
                     parentFolder.FolderType != FolderType.FillingFormsRoom)
                 {
                     userIDs = guids.Where(x => x != obj.CurrentAccountId)
-                        .Concat(additionalSubjects)
                         .ToList();
                 }
                 else
                 {
-                    var (currentRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(parentFolder);
-                    var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
-
+                    var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
+                    
                     await foreach (var ace in fileSecurity.GetPureSharesAsync(room, guids))
                     {
                         if (ace.Share != FileShare.FillForms && ace.Subject != obj.CurrentAccountId)
@@ -191,6 +185,8 @@ public class FileMarker(
                         }
                     }
                 }
+
+                userIDs.AddRange(additionalSubjects);
             }
 
             if (obj.FileEntry.ProviderEntry)
@@ -724,7 +720,7 @@ public class FileMarker(
         var (entryTagsProvider, entryTagsInternal) = await GetMarkedEntriesAsync(roomsRoot);
         if (entryTagsProvider.Count == 0 && entryTagsInternal.Count == 0)
         {
-            return new Dictionary<DateTime, Dictionary<FileEntry, List<FileEntry>>>();
+            return [];
         }
         
         var treeInternal = MakeTree(entryTagsInternal);

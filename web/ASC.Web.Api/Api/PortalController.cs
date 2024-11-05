@@ -555,10 +555,7 @@ public class PortalController(
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        if (securityContext.CurrentAccount.ID != tenant.OwnerId)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
-        }
+        await DemandPermissionToDeleteTenantAsync(tenant);
 
         await tenantManager.RemoveTenantAsync(tenant.Id);
 

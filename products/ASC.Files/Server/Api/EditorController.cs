@@ -168,6 +168,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
         bool canEdit;
         bool canFill;
+        var disableEmbeddedConfig = false;
         var canStartFilling = true;
         var isSubmitOnly = false;
 
@@ -259,6 +260,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     editorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
+                    disableEmbeddedConfig = true;
                     break;
 
                 default:
@@ -291,7 +293,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         }
 
         var result = await configurationConverter.Convert(configuration, file);
-        
+
+        if (disableEmbeddedConfig)
+        {
+            result.EditorConfig.Embedded = null;
+        }
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
         {
@@ -307,7 +313,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
         
-        if (fileType == FileType.Pdf && file.IsForm)
+        if (fileType == FileType.Pdf && file.IsForm && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
             result.StartFilling = canStartFilling;
         }

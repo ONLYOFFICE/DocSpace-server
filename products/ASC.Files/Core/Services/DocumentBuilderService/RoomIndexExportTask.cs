@@ -178,7 +178,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
                 dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}"
             },
 
-            logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath),
+            logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath.Split('?')[0]),
 
             themeColors = new
             {
@@ -191,7 +191,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
             {
                 company = tenantWhiteLabelSettings.LogoText ?? TenantWhiteLabelSettings.DefaultLogoText,
                 room = room.Title,
-                exportAuthor = user.DisplayUserName(displayUserSettingsHelper),
+                exportAuthor = user.DisplayUserName(false, displayUserSettingsHelper),
                 dateGenerated = tenantUtil.DateTimeNow().ConvertNumerals("g")
             },
 

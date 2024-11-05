@@ -83,6 +83,8 @@ public class ClientQueryController {
   /** The API client for accessing ASC services. */
   private final AscApiClient ascApiClient;
 
+  private final HttpUtils httpUtils;
+
   /**
    * Sets the logging parameters for the current request.
    *
@@ -203,7 +205,8 @@ public class ClientQueryController {
                           () ->
                               ascApiClient.getProfile(
                                   URI.create(
-                                      HttpUtils.getRequestHostAddress(request)
+                                      httpUtils
+                                          .getRequestHostAddress(request)
                                           .orElseThrow(
                                               () ->
                                                   new ClientDomainException(
