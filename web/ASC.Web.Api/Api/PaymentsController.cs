@@ -207,6 +207,13 @@ public class PaymentController(UserManager userManager,
     public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var currentQuota = await tariffHelper.GetCurrentQuotaAsync(false, false);
+        if (currentQuota.NonProfit)
+        {
+            return [currentQuota];
+        }
+
         return await tariffHelper.GetQuotasAsync().ToListAsync();
     }
 
