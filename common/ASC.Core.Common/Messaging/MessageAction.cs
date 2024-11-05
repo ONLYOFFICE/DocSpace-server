@@ -260,7 +260,7 @@ public enum MessageAction
     RoomWatermarkSet = 5112,
     RoomWatermarkDisabled = 5113,
     
-    RoomInviteResend = 5119, // last
+    RoomInviteResend = 5118, // last
     
     RoomIndexExportSaved = 5106,
 
