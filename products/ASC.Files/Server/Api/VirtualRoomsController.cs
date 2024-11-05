@@ -611,6 +611,7 @@ public abstract class VirtualRoomsController<T>(
     public async Task<FolderDto<T>> ReorderAsync(T id)
     {
         var room = await _fileStorageService.ReOrderAsync(id);
+        await _filesMessageService.SendAsync(MessageAction.FolderIndexReordered, room, room.Title);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -873,7 +874,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         task.Init(baseUri, tenantId, userId, null);
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
-
+        
         var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id, baseUri, headers: headers != null 
             ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())

@@ -58,14 +58,16 @@ public class FilesControllerInternal(
     /// </short>
     /// <category>Files</category>
     /// <param type="System.Int32, System" name="fileId">File ID</param>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="fromDate">Start date</param>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="toDate">End date</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.HistoryDto, ASC.Files.Core">List of actions performed on the file</returns>
     /// <path>api/2.0/files/file/{fileId}/log</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("file/{fileId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int fileId)
+    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate)
     {
-        return historyApiHelper.GetFileHistoryAsync(fileId);
+        return historyApiHelper.GetFileHistoryAsync(fileId, fromDate, toDate);
     }
 }
 

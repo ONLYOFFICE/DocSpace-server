@@ -58,7 +58,8 @@ internal class FilesActionMapper : IModuleActionMapper
                         ActionType.Update, [
                             MessageAction.FileRenamed, MessageAction.FileUpdated, MessageAction.UserFileUpdated, MessageAction.FileUpdatedRevisionComment,
                             MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileMarkedAsFavorite,
-                            MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling
+                            MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling,
+                            MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered
                         ]
                     },
                     { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied
@@ -106,7 +107,7 @@ internal class FoldersActionMapper : IModuleActionMapper
             {
                 EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Update, [MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead] },
+                    { ActionType.Update, [MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead, MessageAction.FolderIndexChanged] },
                     { ActionType.UpdateAccess, [MessageAction.FolderUpdatedAccess, MessageAction.FolderUpdatedAccessFor, MessageAction.FolderRemovedFromList
                         ]
                     }
@@ -165,7 +166,16 @@ internal class RoomsActionMapper : IModuleActionMapper
                             MessageAction.RoomExternalLinkDeleted,
                             MessageAction.RoomGroupAdded,
                             MessageAction.RoomUpdateAccessForGroup,
-                            MessageAction.RoomGroupRemove
+                            MessageAction.RoomGroupRemove,
+                            MessageAction.RoomIndexingEnabled,
+                            MessageAction.RoomIndexingDisabled,
+                            MessageAction.RoomLifeTimeSet,
+                            MessageAction.RoomLifeTimeDisabled,
+                            MessageAction.RoomDenyDownloadEnabled,
+                            MessageAction.RoomDenyDownloadDisabled,
+                            MessageAction.RoomWatermarkSet,
+                            MessageAction.RoomWatermarkDisabled,
+                            MessageAction.RoomInviteResend
                         ]
                     },
                     { ActionType.Delete, [MessageAction.RoomDeleted] },

@@ -244,7 +244,6 @@ public class AbstractDao
                 if (fileOrder.ParentFolderId == parentFolderId)
                 {
                     var currentOrder = fileOrder.Order;
-
                     if (currentOrder == order)
                     {
                         return currentOrder;

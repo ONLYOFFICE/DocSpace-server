@@ -52,14 +52,18 @@ public class WatermarkManager
     private readonly IDaoFactory _daoFactory;
     private readonly FileSecurity _fileSecurity;
     private readonly RoomLogoManager _roomLogoManager;
+    private readonly FilesMessageService _filesMessageService;
+    
     public WatermarkManager(
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
-        RoomLogoManager roomLogoManager)
+        RoomLogoManager roomLogoManager,
+        FilesMessageService filesMessageService)
     {
         _daoFactory = daoFactory;
         _fileSecurity = fileSecurity;
         _roomLogoManager = roomLogoManager;
+        _filesMessageService = filesMessageService;
     }
 
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)
@@ -94,6 +98,15 @@ public class WatermarkManager
         }
 
         await folderDao.SetWatermarkSettings(watermarkSettings, room);
+
+        if (watermarkRequestDto.Enabled.HasValue && !watermarkRequestDto.Enabled.Value)
+        {
+            await _filesMessageService.SendAsync(MessageAction.RoomWatermarkDisabled, room, room.Title);
+        }
+        else
+        {
+            await _filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, room, room.Title);
+        }
 
         return watermarkSettings;
     }
