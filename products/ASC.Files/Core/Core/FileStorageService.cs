@@ -1346,16 +1346,16 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(MessageAction.FileCreated, file, file.Title);
 
+        await fileMarker.MarkAsNewAsync(file);
+
+        await socketManager.CreateFileAsync(file);
+
         var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
         if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
         {
             var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
             await notifyClient.SendDocumentCreatedInRoom(room, whoCanRead, file, authContext.CurrentAccount.ID);
         }
-
-        await fileMarker.MarkAsNewAsync(file);
-
-        await socketManager.CreateFileAsync(file);
 
         return file;
     }

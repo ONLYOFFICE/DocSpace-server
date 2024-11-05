@@ -130,7 +130,8 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 ? MessageAction.FileUploadedWithOverwriting 
                                 : MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
-                            if(resumedSession.File.Version <= 1)
+                            await socketManager.CreateFileAsync(resumedSession.File);
+                            if (resumedSession.File.Version <= 1)
                             {
                                 var folderDao = daoFactory.GetFolderDao<T>();
                                 var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
@@ -140,8 +141,6 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                     queue.AddMessage(resumedSession.File);
                                 }
                             }
-
-                            await socketManager.CreateFileAsync(resumedSession.File);
                         }
                         else
                         {
@@ -187,18 +186,17 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         ? MessageAction.FileUploadedWithOverwriting 
                         : MessageAction.FileUploaded, session.File, session.File.Title);
 
+                    await socketManager.CreateFileAsync(session.File);
                     if (session.File.Version <= 1)
                     {
                         var folderDao = daoFactory.GetFolderDao<T>();
                         var room = await folderDao.GetParentFoldersAsync(session.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
                         if (room != null)
                         {
-
                             var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room, authContext.CurrentAccount.ID);
                             queue.AddMessage(session.File);
                         }
                     }
-                    await socketManager.CreateFileAsync(session.File);
                     return;
             }
         }

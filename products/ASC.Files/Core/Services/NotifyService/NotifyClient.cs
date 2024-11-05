@@ -407,7 +407,6 @@ public class NotifyClient(WorkContext notifyContext,
                 new TagValue(Tags.FromUserName, user.DisplayUserName(displayUserSettingsHelper))
                 );
     }
-
     public async Task SendInvitedToRoom<T>(FileEntry<T> room, UserInfo user)
     {
         if (!await CanNotifyRoom(room, user))
@@ -428,7 +427,6 @@ public class NotifyClient(WorkContext notifyContext,
             new TagValue(NotifyConstants.RoomTitle, room.Title)
             );
     }
-
     public async Task SendRoomUpdateAccessForUser<T>(FileEntry<T> room, UserInfo user, FileShare currentRole)
     {
         if (!await CanNotifyRoom(room, user))
@@ -451,7 +449,6 @@ public class NotifyClient(WorkContext notifyContext,
             new TagValue(Tags.RoomRole, accessString)
             );
     }
-
     public async Task SendDocumentCreatedInRoom<T>(Folder<T> room, IEnumerable<Guid> aces, FileEntry<T> file, Guid userId)
     {
         var recipients = await GetNotifiableUsersAsync(aces, room, userId);
@@ -476,8 +473,6 @@ public class NotifyClient(WorkContext notifyContext,
             );
 
     }
-
-
     public async Task SendDocumentUploadedToRoom<T>(IEnumerable<Guid> aces, File<T> file, Folder<T> room, Guid userId)
     {
         var recipients = await GetNotifiableUsersAsync(aces, room, userId);
@@ -502,7 +497,6 @@ public class NotifyClient(WorkContext notifyContext,
                    new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
            );
     }
-
     public async Task SendDocumentsUploadedToRoom<T>(IEnumerable<Guid> aces, int count, Folder<T> room, Guid userId)
     {
         var recipients = await GetNotifiableUsersAsync(aces, room, userId);
@@ -526,7 +520,6 @@ public class NotifyClient(WorkContext notifyContext,
                     new TagValue(Tags.Count, count)
             );
     }
-
     public async Task SendFolderCreatedInRoom<T>(Folder<T> room, IEnumerable<Guid> aces, Folder<T> folder, Guid userId)
     {
         var recipients = await GetNotifiableUsersAsync(aces, room, userId);
