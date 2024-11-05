@@ -26,9 +26,16 @@
 
 namespace ASC.Core.Billing;
 
+public enum LicenseType
+{
+    Enterprise,
+    Developer
+}
+
 [Singleton]
 public class LicenseReaderConfig
 {
+    public readonly LicenseType LicenseType;
     public readonly string LicensePath;
     public readonly string LicensePathTemp;
 
@@ -36,6 +43,8 @@ public class LicenseReaderConfig
     {
         LicensePath = configuration["license:file:path"] ?? "";
         LicensePathTemp = LicensePath + ".tmp";
+
+        _ = Enum.TryParse(configuration["license:type"], true, out LicenseType);
     }
 }
 
@@ -49,6 +58,7 @@ public class LicenseReader(
 {
     public readonly string LicensePath = licenseReaderConfig.LicensePath;
     private readonly string _licensePathTemp = licenseReaderConfig.LicensePathTemp;
+    private readonly LicenseType _licenseType = licenseReaderConfig.LicenseType;
 
     public const string CustomerIdKey = "CustomerId";
 
@@ -164,8 +174,11 @@ public class LicenseReader(
 
     private DateTime Validate(License license)
     {
+        var invalidLicenseType = _licenseType == LicenseType.Enterprise ? license.Customization : !license.Customization;
+
         if (string.IsNullOrEmpty(license.CustomerId)
-            || string.IsNullOrEmpty(license.Signature))
+            || string.IsNullOrEmpty(license.Signature)
+            || invalidLicenseType)
         {
             throw new BillingNotConfiguredException("License not correct", license.OriginalLicense);
         }

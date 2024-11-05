@@ -30,4 +30,5 @@ public class TariffDto : Tariff
 {
     public bool? OpenSource { get; set; }
     public bool? Enterprise { get; set; }
+    public bool? Developer { get; set; }
 }
