@@ -129,22 +129,11 @@ public class FolderIndexReorderedInterpreter : ActionInterpreter
     {
         var desc = GetAdditionalDescription(description);
         var title = description[0];
-
-        var folderType = desc.ParentType.HasValue 
-            ? (FolderType)desc.ParentType
-            : FolderType.DEFAULT;
         
-        var parentType = folderType is FolderType.VirtualRooms or FolderType.Archive 
-            ? null : 
-            desc.ParentType;
-        
-        var parentId = parentType.HasValue 
-            ? int.Parse(target)
-            : (int?)null;
-        
-        var parentTitle = parentType.HasValue 
-            ? title 
-            : null;
+        var isRoom = desc.ParentType is (int)FolderType.VirtualRooms or (int)FolderType.Archive;
+        var parentId = isRoom ? int.Parse(target) : desc.ParentId;
+        var parentTitle = isRoom ? title : desc.ParentTitle;
+        var parentType = isRoom ? (int)FolderType.VirtualDataRoom : desc.ParentType;
         
         return new ValueTask<HistoryData>(new EntryData(target, title, parentId, parentTitle, parentType));
     }
