@@ -278,9 +278,7 @@ module.exports = async (io) => {
               }
               u.offlineSessions = offSess;
               u.sessions = [];
-              u.displayName = displayName;
-              u.avatar = avatar;
-              addUser(list, u, u.id, key);
+              addUser(list, u, key);
             }
             clear();
           }
@@ -412,7 +410,7 @@ module.exports = async (io) => {
         }
         if(isNew)
         {
-          addUser(usersList, user, userId, key);
+          addUser(usersList, user, key);
         }
         if(user.sessions.length == 1)
         {
@@ -516,7 +514,7 @@ module.exports = async (io) => {
       return x;
     }
 
-    function addUser(list, user, userId, id){
+    function addUser(list, user, id){
       if(!list[id])
       {
         list[id] = [];
