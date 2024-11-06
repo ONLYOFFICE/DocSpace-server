@@ -1128,4 +1128,7 @@
   <data name="ErrorTrustedMailDomain" xml:space="preserve">
     <value>Add at least 1 trusted domain.</value>
   </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Non-profit</value>
+  </data>
 </root>

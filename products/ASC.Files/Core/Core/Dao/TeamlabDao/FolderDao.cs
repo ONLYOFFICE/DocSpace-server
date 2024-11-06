@@ -575,7 +575,6 @@ internal class FolderDao(
         var toUpdate = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
 
         toUpdate.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermarkSettings);
-
         filesDbContext.Update(toUpdate);
 
         await filesDbContext.SaveChangesAsync();
@@ -1649,10 +1648,10 @@ internal class FolderDao(
         return (parentFolders[0].ParentId, parentFolders[0].Title);
     }
 
-    public async Task SetCustomOrder(int folderId, int parentFolderId, int order = 0)
+    public async Task<int> SetCustomOrder(int folderId, int parentFolderId, int order = 0)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        await SetCustomOrder(filesDbContext, folderId, parentFolderId, order);
+        return await SetCustomOrder(filesDbContext, folderId, parentFolderId, order);
     }
 
     public async Task InitCustomOrder(Dictionary<int, int> folderIds, int parentFolderId)
@@ -1660,9 +1659,9 @@ internal class FolderDao(
         await InitCustomOrder(folderIds, parentFolderId, FileEntryType.Folder);
     }
     
-    private async Task SetCustomOrder(FilesDbContext filesDbContext, int folderId, int parentFolderId, int order = 0)
+    private async Task<int> SetCustomOrder(FilesDbContext filesDbContext, int folderId, int parentFolderId, int order = 0)
     {
-        await SetCustomOrder(filesDbContext, folderId, parentFolderId, FileEntryType.Folder, order);
+        return await SetCustomOrder(filesDbContext, folderId, parentFolderId, FileEntryType.Folder, order);
     }
 
     private async Task DeleteCustomOrder(FilesDbContext filesDbContext, int folderId)
