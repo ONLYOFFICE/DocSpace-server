@@ -323,6 +323,9 @@ public enum MessageAction
     [SwaggerEnum("File deleted")]
     FileDeleted = 5018,
 
+    [SwaggerEnum("File index changed")]
+    FileIndexChanged = 5111,
+
     [SwaggerEnum("Folder created")]
     FolderCreated = 5019,
 
@@ -355,6 +358,12 @@ public enum MessageAction
 
     [SwaggerEnum("Folder removed from list")]
     FolderRemovedFromList = 5059,
+
+    [SwaggerEnum("Folder index changed")]
+    FolderIndexChanged = 5107,
+
+    [SwaggerEnum("Folder index reordered")]
+    FolderIndexReordered = 5108,
 
     [SwaggerEnum("Folder downloaded")]
     FolderDownloaded = 5057,
@@ -528,7 +537,34 @@ public enum MessageAction
     FileExternalLinkDeleted = 5093,
 
     [SwaggerEnum("Room index export saved")]
-    RoomIndexExportSaved = 5106, //last
+    RoomIndexingEnabled = 5114,
+
+    [SwaggerEnum("Room indexing disabled")]
+    RoomIndexingDisabled = 5115,
+
+    [SwaggerEnum("Room life time set")]
+    RoomLifeTimeSet = 5116,
+
+    [SwaggerEnum("Room life time disabled")]
+    RoomLifeTimeDisabled = 5117,
+
+    [SwaggerEnum("Room deny download enabled")]
+    RoomDenyDownloadEnabled = 5109,
+
+    [SwaggerEnum("Room deny download disabled")]
+    RoomDenyDownloadDisabled = 5110,
+
+    [SwaggerEnum("Room watermark set")]
+    RoomWatermarkSet = 5112,
+
+    [SwaggerEnum("Room watermark disabled")]
+    RoomWatermarkDisabled = 5113,
+
+    [SwaggerEnum("Room invite resend")]
+    RoomInviteResend = 5118, 
+
+    [SwaggerEnum("Room index export saved")]
+    RoomIndexExportSaved = 5106,
 
     #endregion
 

@@ -44,6 +44,11 @@ public class TenantExtraDto
     public bool Enterprise { get; set; }
 
     /// <summary>
+    /// Specifies if the extra tenant license is Developer or not
+    /// </summary>
+    public bool Developer { get; set; }
+
+    /// <summary>
     /// License tariff
     /// </summary>
     public Tariff Tariff { get; set; }

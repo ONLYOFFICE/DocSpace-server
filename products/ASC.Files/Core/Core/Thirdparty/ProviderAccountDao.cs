@@ -36,7 +36,9 @@ public enum ProviderTypes
     SharePoint,
     WebDav,
     kDrive,
-    Yandex
+    Yandex,
+    NextCloud,
+    OwnCloud
 }
 
 [Scope(typeof(IProviderDao))]
@@ -111,10 +113,18 @@ internal class ProviderAccountDao(
         try
         {
             prKey = (ProviderTypes)Enum.Parse(typeof(ProviderTypes), providerKey, true);
+            switch (prKey)
+            {
+                case ProviderTypes.NextCloud:
+                case ProviderTypes.OwnCloud:
+                    prKey = ProviderTypes.WebDav;
+                    providerKey = prKey.ToStringFast();
+                    break;
+            }
         }
         catch (Exception)
         {
-            throw new ArgumentException("Unrecognize ProviderType");
+            throw new ArgumentException("Unrecognized ProviderType");
         }
 
         authData = GetEncodedAccessToken(authData, prKey);
@@ -127,7 +137,7 @@ internal class ProviderAccountDao(
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var now = tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow());
 
-        var dbFilesThirdpartyAccount = new DbFilesThirdpartyAccount
+        var dbFilesThirdPartyAccount = new DbFilesThirdpartyAccount
         {
             Id = 0,
             TenantId = tenantId,
@@ -144,7 +154,7 @@ internal class ProviderAccountDao(
         };
 
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var res = await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyAccount, dbFilesThirdpartyAccount);
+        var res = await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyAccount, dbFilesThirdPartyAccount);
         await filesDbContext.SaveChangesAsync();
 
         return res.Id;
@@ -266,7 +276,16 @@ internal class ProviderAccountDao(
 
             if (!ProviderTypesExtensions.TryParse(input.Provider, true, out var key))
             {
-                throw new ArgumentException("Unrecognize ProviderType");
+                throw new ArgumentException("Unrecognized ProviderType");
+            }
+
+            switch (key)
+            {
+                case ProviderTypes.NextCloud:
+                case ProviderTypes.OwnCloud:
+                    key = ProviderTypes.WebDav;
+                    input.Provider = key.ToStringFast();
+                    break;
             }
 
             authData = new AuthData(
@@ -343,6 +362,15 @@ internal class ProviderAccountDao(
         if (!ProviderTypesExtensions.TryParse(providerKey, true, out var key))
         {
             throw new ArgumentException("Unrecognize ProviderType");
+        }
+        
+        switch (key)
+        {
+            case ProviderTypes.NextCloud:
+            case ProviderTypes.OwnCloud:
+                key = ProviderTypes.WebDav;
+                providerKey = key.ToStringFast();
+                break;
         }
 
         if (newAuthData != null && !newAuthData.IsEmpty())
@@ -658,6 +686,8 @@ internal class ProviderAccountDao(
                 return new AuthData(token: token.ToJson());
             case ProviderTypes.SharePoint:
             case ProviderTypes.WebDav:
+            case ProviderTypes.NextCloud:
+            case ProviderTypes.OwnCloud:
                 break;
 
             default:

@@ -606,35 +606,36 @@ public class Options
     }
 }
 
-public class WatermarkOnDraw
+public class WatermarkOnDraw(double widthInPixels, double heightInPixels, string fill, int rotate, List<Paragraph> paragraphs)
 {
-    public WatermarkOnDraw(double width, double height, string fill, int rotate, List<Paragraph> paragraphs)
-    {
-        Width = width == 0 ? 200 : width; 
-        Height = height == 0 ? 240 : height;
-        Fill = fill;
-        Rotate = rotate;
-        Transparent = 0.4;
-        Paragraphs = paragraphs;
-    }
-    [JsonPropertyName("width")]
-    public double Width { get; set; }
+    private const double DotsPerInch = 96;
+    private const double DotsPerMm = DotsPerInch / 25.4;
 
+    /// <summary>
+    /// Defines the watermark width measured in millimeters.
+    /// </summary>
+    [JsonPropertyName("width")]
+    public double Width { get; init; } = widthInPixels == 0 ? 200 : widthInPixels / DotsPerMm;
+
+    /// <summary>
+    /// Defines the watermark height measured in millimeters.
+    /// </summary>
     [JsonPropertyName("height")]
-    public double Height { get; set; }
+    public double Height { get; init; } = heightInPixels == 0 ? 240 : heightInPixels / DotsPerMm;
 
     [JsonPropertyName("fill")]
-    public string Fill { get; set; }
+    public string Fill { get; init; } = fill;
 
     [JsonPropertyName("rotate")]
-    public int Rotate { get; set; }
+    public int Rotate { get; init; } = rotate;
 
     [JsonPropertyName("transparent")]
-    public double Transparent { get; set; }
+    public double Transparent { get; init; } = 0.4;
 
     [JsonPropertyName("paragraphs")]
-    public List<Paragraph> Paragraphs { get; set; }
+    public List<Paragraph> Paragraphs { get; init; } = paragraphs;
 }
+
 public class Paragraph
 {
     public Paragraph(List<Run> runs)

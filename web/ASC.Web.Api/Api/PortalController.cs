@@ -184,6 +184,7 @@ public class PortalController(
             CustomMode = coreBaseSettings.CustomMode,
             Opensource = tenantExtra.Opensource,
             Enterprise = tenantExtra.Enterprise,
+            Developer = tenantExtra.Developer,
             EnableTariffPage = 
                 (!coreBaseSettings.Standalone || !string.IsNullOrEmpty(licenseReader.LicensePath))
                 && string.IsNullOrEmpty(setupInfo.AmiMetaUrl)
@@ -268,8 +269,9 @@ public class PortalController(
         {
             result.OpenSource = tenantExtra.Opensource;
             result.Enterprise = tenantExtra.Enterprise;
-    }
-
+            result.Developer = tenantExtra.Developer;
+        }
+        
         return result;
     }
 
@@ -528,10 +530,7 @@ public class PortalController(
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        if (securityContext.CurrentAccount.ID != tenant.OwnerId)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
-        }
+        await DemandPermissionToDeleteTenantAsync(tenant);
 
         await tenantManager.RemoveTenantAsync(tenant.Id);
 

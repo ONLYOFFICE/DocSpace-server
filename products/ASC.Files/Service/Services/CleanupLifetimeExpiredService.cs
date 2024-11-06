@@ -144,9 +144,10 @@ static file class Queries
         LifetimeEnabledRoomsAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 ctx.RoomSettings
-                    .Join(ctx.Folders, a => a.RoomId, b => b.Id,
-                        (settings, room) => new { settings, room })
+                    .Join(ctx.Folders, a => a.RoomId, b => b.Id, (settings, room) => new { settings, room })
+                    .Join(ctx.BunchObjects, a => a.room.ParentId.ToString(), b => b.LeftNode, (folder, bunch) => new { folder.settings, folder.room, bunch })
                     .Where(x => x.settings.Lifetime != null)
+                    .Where(r => r.bunch.RightNode != "files/archive/")
                     .Select(r => new LifetimeEnabledRoom
                     {
                         TenantId = r.settings.TenantId,

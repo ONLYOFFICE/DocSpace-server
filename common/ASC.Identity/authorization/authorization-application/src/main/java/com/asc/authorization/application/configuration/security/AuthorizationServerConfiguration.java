@@ -35,6 +35,7 @@ import com.asc.authorization.application.security.provider.AscPersonalAccessToke
 import com.asc.authorization.application.security.provider.AscTokenIntrospectionAuthenticationProvider;
 import com.asc.common.application.client.AscApiClient;
 import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
+import com.asc.common.utilities.HttpUtils;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.servlet.RequestDispatcher;
@@ -73,6 +74,8 @@ public class AuthorizationServerConfiguration {
 
   private final AscApiClient ascApiClient;
   private final AuditMessagePublisher auditMessagePublisher;
+
+  private final HttpUtils httpUtils;
 
   private final OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer;
   private final JWKSource<SecurityContext> jwkSource;
@@ -118,11 +121,13 @@ public class AuthorizationServerConfiguration {
                 t.accessTokenRequestConverters(
                         converters ->
                             converters.add(
-                                new PersonalAccessTokenAuthenticationConverter(ascApiClient)))
+                                new PersonalAccessTokenAuthenticationConverter(
+                                    ascApiClient, httpUtils)))
                     .authenticationProviders(
                         providers ->
                             providers.add(
                                 new AscPersonalAccessTokenAuthenticationProvider(
+                                    httpUtils,
                                     auditMessagePublisher,
                                     authorizationService,
                                     tokenGenerator()))))

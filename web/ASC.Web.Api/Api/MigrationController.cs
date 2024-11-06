@@ -201,6 +201,7 @@ public class MigrationController(
                 await studioNotifyService.UserInfoActivationAsync(u);
             }
         }
+        await migrationCore.ClearAsync();
     }
 
     private async Task DemandPermissionAsync()

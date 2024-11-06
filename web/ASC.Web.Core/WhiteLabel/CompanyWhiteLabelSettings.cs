@@ -46,29 +46,34 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
     /// <summary>
     /// Company name
     /// </summary>
+    [StringLength(255)]
     public string CompanyName { get; set; }
 
     /// <summary>
     /// Site
     /// </summary>
     [Url]
+    [StringLength(255)]
     public string Site { get; set; }
 
     /// <summary>
     /// Email address
     /// </summary>
     [EmailAddress]
+    [StringLength(255)]
     public string Email { get; set; }
 
     /// <summary>
     /// Address
     /// </summary>
+    [StringLength(255)]
     public string Address { get; set; }
 
     /// <summary>
     /// Phone
     /// </summary>
     [Phone]
+    [StringLength(255)]
     public string Phone { get; set; }
 
     /// <summary>

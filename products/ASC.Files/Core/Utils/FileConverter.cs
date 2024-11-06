@@ -349,7 +349,7 @@ public class FileConverter(
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
         Options options = null;
-        if (file.RootFolderType == FolderType.VirtualRooms)
+        if (file.RootFolderType == FolderType.VirtualRooms || file.RootFolderType == FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);

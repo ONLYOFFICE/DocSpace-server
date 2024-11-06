@@ -54,7 +54,9 @@ public class FilesControllerInternal(
     /// <summary>
     /// Get the list of actions performed on the file with the specified identifier
     /// </summary>
-    /// <short>Get file history</short>
+    /// <short>
+    /// Get file history
+    /// </short>
     /// <path>api/2.0/files/file/{fileId}/log</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
@@ -62,9 +64,9 @@ public class FilesControllerInternal(
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "The required file was not found")]
     [HttpGet("file/{fileId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(FileIdRequestDto<int> inDto)
+    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(HistoryRequestDto inDto)
     {
-        return historyApiHelper.GetFileHistoryAsync(inDto.FileId);
+        return historyApiHelper.GetFileHistoryAsync(inDto.FileId, inDto.FromDate, inDto.ToDate);
     }
 }
 

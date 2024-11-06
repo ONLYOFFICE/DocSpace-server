@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Amazon.DynamoDBv2;
-
-using Nest;
-
 namespace ASC.People.Api;
 
 public class UserController(
@@ -75,7 +71,8 @@ public class UserController(
     IQuotaService quotaService,
     CustomQuota customQuota,
     AuditEventsRepository auditEventsRepository,
-    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper,
+    CountPaidUserStatistic countPaidUserStatistic)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -338,9 +335,28 @@ public class UserController(
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
+        
+        var quotaIncreaseBy = inDto.Invitations.Count(x => x.Type is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin);
+        if (quotaIncreaseBy > 0)
+        {
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            var quota = await tenantManager.GetTenantQuotaAsync(tenantId);
+            var maxCount = quota.GetFeature<CountPaidUserFeature>().Value;
+            var currentCount = await countPaidUserStatistic.GetValueAsync();
+            
+            if (maxCount < currentCount + quotaIncreaseBy)
+            {
+                throw new TenantQuotaException(string.Format(Resource.TariffsFeature_usersQuotaExceeds_exception, quotaIncreaseBy, maxCount - currentCount));
+            }
+        }
 
         foreach (var invite in inDto.Invitations)
-        {
+        {            
+            if (invite.Email.TestEmailPunyCode())
+            {
+               continue;
+            }
+            
             switch (invite.Type)
             {
                 case EmployeeType.Guest:

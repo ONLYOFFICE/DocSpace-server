@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,51 +24,52 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
-namespace ASC.Files.Core.ApiModels;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for file history
 /// </summary>
-public class RoomDataLifetimeDto : IMapFrom<RoomDataLifetime>
+public class HistoryRequestDto
 {
     /// <summary>
-    /// Specifies action
+    /// File ID
     /// </summary>
-    public bool DeletePermanently { get; set; }
+    [FromRoute(Name = "fileId")]
+    public int FileId { get; set; }
 
     /// <summary>
-    /// Specifies time period type
+    /// Start date
     /// </summary>
-    [EnumDataType(typeof(RoomDataLifetimePeriod))]
-    public RoomDataLifetimePeriod Period { get; set; }
+    [FromQuery(Name = "fromDate")]
+    public ApiDateTime FromDate {  get; set; }
 
     /// <summary>
-    /// Specifies time period value
+    /// End date
     /// </summary>
-    [Range(1, 999)]
-    public int? Value { get; set; }
-    
-    /// <summary>
-    /// Enabled
-    /// </summary>
-    public bool? Enabled { get; set; }
+    [FromQuery(Name = "toDate")]
+    public ApiDateTime ToDate { get; set; }
 }
 
 /// <summary>
-/// Request parameters for room data lifetime
+/// Request parameters for folder history
 /// </summary>
-public class RoomDataLifetimeDto<T>
+public class HistoryFolderRequestDto
 {
     /// <summary>
-    /// Room ID
+    /// File ID
     /// </summary>
-    [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    [FromRoute(Name = "folderId")]
+    public int FolderId { get; set; }
 
     /// <summary>
-    /// Room data lifetime
+    /// Start date
     /// </summary>
-    [FromBody]
-    public RoomDataLifetimeDto RoomDataLifetime { get; set; }
+    [FromQuery(Name = "fromDate")]
+    public ApiDateTime FromDate { get; set; }
+
+    /// <summary>
+    /// End date
+    /// </summary>
+    [FromQuery(Name = "toDate")]
+    public ApiDateTime ToDate { get; set; }
 }

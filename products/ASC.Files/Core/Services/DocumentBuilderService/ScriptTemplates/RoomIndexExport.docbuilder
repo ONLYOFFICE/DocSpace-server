@@ -97,7 +97,18 @@ function prepareData(startColIndex, startRowIndex) {
     ];
 
     var sortedData = inputData.data.sort(function(a, b) {
-        return (a.index ?? "").localeCompare(b.index ?? "")
+        var i, diff;
+        var segmentsA = (a.index ?? "").split('.');
+        var segmentsB = (b.index ?? "").split('.');
+        var l = Math.min(segmentsA.length, segmentsB.length);
+
+        for (i = 0; i < l; i++) {
+            diff = parseInt(segmentsA[i]) - parseInt(segmentsB[i]);
+            if (diff) {
+                return diff;
+            }
+        }
+        return segmentsA.length - segmentsB.length;
     });
 
     for (var i = 0; i < sortedData.length; i++) {

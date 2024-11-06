@@ -133,22 +133,20 @@ public class FolderDto<T> : FileEntryDto<T>
 [Scope]
 public class FolderDtoHelper(
     ApiDateTimeHelper apiDateTimeHelper,
-        EmployeeDtoHelper employeeWrapperHelper,
-        AuthContext authContext,
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        GlobalFolderHelper globalFolderHelper,
-        FileSharingHelper fileSharingHelper,
-        RoomLogoManager roomLogoManager,
-        BadgesSettingsHelper badgesSettingsHelper,
-        RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-        FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime,
-        SettingsManager settingsManager,
-        CoreBaseSettings coreBaseSettings,
+    EmployeeDtoHelper employeeWrapperHelper,
+    AuthContext authContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    GlobalFolderHelper globalFolderHelper,
+    FileSharingHelper fileSharingHelper,
+    RoomLogoManager roomLogoManager,
+    BadgesSettingsHelper badgesSettingsHelper,
+    RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
+    FilesSettingsHelper filesSettingsHelper,
+    FileDateTime fileDateTime,
+    SettingsManager settingsManager,
     BreadCrumbsManager breadCrumbsManager,
     TenantManager tenantManager,
-    WatermarkManager watermarkManager,
     WatermarkDtoHelper watermarkHelper,
     IMapper mapper,
     ExternalShare externalShare)
@@ -203,9 +201,7 @@ public class FolderDtoHelper(
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
-            if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 
-                    ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate) || 
-                     (result.RootFolderType is FolderType.Archive or FolderType.TRASH && (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete))))
+            if ((await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
             {
                 var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
                 result.UsedSpace = folder.Counter;
@@ -217,8 +213,7 @@ public class FolderDtoHelper(
                 }
             }
             
-            var watermarkSettings = await watermarkManager.GetWatermarkAsync(folder);
-            result.Watermark = watermarkHelper.Get(watermarkSettings);
+            result.Watermark = watermarkHelper.Get(folder.SettingsWatermark);
 
             if (folder.ShareRecord is { IsLink: true })
             {

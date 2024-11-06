@@ -55,6 +55,7 @@ global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;
+global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Security.Authentication;
 global using ASC.Core.Tenants;

@@ -239,7 +239,7 @@ public partial class SettingsController(MessageService messageService,
             {
                 if (!(!string.IsNullOrEmpty(d) && EmailDomainRegex().IsMatch(d)))
                 {
-                    return Resource.ErrorNotCorrectTrustedDomain;
+                    throw new ArgumentException(Resource.ErrorNotCorrectTrustedDomain);
                 }
 
                 tenant.TrustedDomains.Add(d);
@@ -247,7 +247,7 @@ public partial class SettingsController(MessageService messageService,
 
             if (tenant.TrustedDomains.Count == 0)
             {
-                inDto.Type = TenantTrustedDomainsType.None;
+                throw new ArgumentException(Resource.ErrorTrustedMailDomain);
             }
         }
 

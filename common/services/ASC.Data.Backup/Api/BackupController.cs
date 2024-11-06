@@ -181,7 +181,7 @@ public class BackupController(
                 await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
-        if (storageType is BackupStorageType.ThirdPartyConsumer)
+        if (storageType is BackupStorageType.ThirdPartyConsumer && !storageParams.ContainsKey("subdir"))
         {
             storageParams.Add("subdir", "backup");
         }
@@ -303,7 +303,11 @@ public class BackupController(
                 await backupAjaxHandler.CheckAccessToFileAsync(storageParams["filePath"]);
             }
         }
-        
+        if (storageType is BackupStorageType.ThirdPartyConsumer && !storageParams.ContainsKey("subdir"))
+        {
+            storageParams.Add("subdir", "backup");
+        }
+
         await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
                              createBy: CurrentUserId,
