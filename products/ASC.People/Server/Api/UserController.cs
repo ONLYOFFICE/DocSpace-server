@@ -359,7 +359,12 @@ public class UserController(
         }
 
         foreach (var invite in inDto.Invitations)
-        {
+        {            
+            if (invite.Email.TestEmailPunyCode())
+            {
+               continue;
+            }
+            
             switch (invite.Type)
             {
                 case EmployeeType.Guest:
