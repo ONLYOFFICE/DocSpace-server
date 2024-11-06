@@ -1229,6 +1229,12 @@ internal class FileDao(
 
         await factoryIndexer.UpdateAsync(toUpdate, true, r => r.Title, r => r.ModifiedBy, r => r.ModifiedOn);
 
+        if (!Path.HasExtension(file.Title))
+        {
+            var storage = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule);
+            await storage.MoveAsync(GetUniqFilePath(file), "", GetUniqFilePath(file, "content" + FileUtility.GetFileExtension(newTitle)));
+        }
+
         return file.Id;
     }
 

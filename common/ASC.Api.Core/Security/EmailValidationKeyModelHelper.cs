@@ -193,7 +193,7 @@ public class EmailValidationKeyModelHelper(
             case ConfirmType.ProfileRemove:
                 // validate UiD
                 userInfo = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
-                if (userInfo == null || Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && (authContext.CurrentAccount.ID != uiD || userInfo.Email != email))
+                if (userInfo == null || Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD || userInfo.Email != email)
                 {
                     return ValidationResult.Invalid;
                 }
