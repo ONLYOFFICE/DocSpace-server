@@ -65,17 +65,29 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [HttpPut("")]
-    public async Task<IEnumerable<IpRestrictionBase>> SaveIpRestrictionsAsync(IpRestrictionsRequestsDto inDto)
+    public async Task<IpRestrictionsDto> SaveIpRestrictionsAsync(IpRestrictionsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
+        inDto.IpRestrictions = inDto.IpRestrictions ?? new List<IpRestrictionBase>();
+
+        if (inDto.Enable && !inDto.IpRestrictions.Any())
+        {
+            throw new ArgumentException(Resource.ErrorIpRestriction);
+        }
+
         if (inDto.IpRestrictions.Any(r => !IPAddress.TryParse(r.Ip, out _)))
         {
             throw new ArgumentException(nameof(inDto.IpRestrictions));
         }
-        
+
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        return await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
+        var ips = await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
+
+        var settings = new IPRestrictionsSettings { Enable = inDto.Enable };
+        await settingsManager.SaveAsync(settings);
+
+        return inDto;
     }
 
     /// <summary>
@@ -104,13 +116,28 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("settings")]
-    public async Task<IPRestrictionsSettings> UpdateIpRestrictionsSettingsAsync(IpRestrictionsRequestsDto inDto)
+    public async Task<IpRestrictionsDto> UpdateIpRestrictionsSettingsAsync(IpRestrictionsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        inDto.IpRestrictions = inDto.IpRestrictions ?? new List<IpRestrictionBase>();
+
+        if (inDto.Enable && !inDto.IpRestrictions.Any())
+        {
+            throw new ArgumentException(nameof(inDto.IpRestrictions));
+        }
+
+        if (inDto.IpRestrictions.Any(r => !IPAddress.TryParse(r.Ip, out _)))
+        {
+            throw new ArgumentException(nameof(inDto.IpRestrictions));
+        }
+
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var ips = await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
 
         var settings = new IPRestrictionsSettings { Enable = inDto.Enable };
         await settingsManager.SaveAsync(settings);
 
-        return settings;
+        return inDto;
     }
 }

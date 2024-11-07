@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
 /// </summary>
-public class IpRestrictionsRequestsDto
+public class IpRestrictionsDto
 {
     /// <summary>List of IP addresses</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.IPSecurity.IpRestrictionBase}, System.Collections.Generic</type>
