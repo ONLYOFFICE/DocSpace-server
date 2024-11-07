@@ -360,7 +360,7 @@ public class UserController(
 
         foreach (var invite in inDto.Invitations)
         {            
-            if (invite.Email.TestEmailPunyCode())
+            if (!invite.Email.TestEmailRegex() || invite.Email.TestEmailPunyCode())
             {
                continue;
             }
