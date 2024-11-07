@@ -485,4 +485,19 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Form numarası</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>İçerik oluşturucu</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>İçerik oluşturucu</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Oda yöneticisi</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Oda yöneticisi</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Harici kullanıcı</value>
+  </data>
 </root>

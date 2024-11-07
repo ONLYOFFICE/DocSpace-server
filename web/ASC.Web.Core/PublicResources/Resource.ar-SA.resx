@@ -1114,7 +1114,7 @@
     <value>حصص التخزين والإحصائيات</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} لكل مسؤول/مستخدم مميز إمكانية إضافة مساحة عند الطلب</value>
+    <value>{0} لكل مسؤول إمكانية إضافة مساحة عند الطلب</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>فشل في تحديد حصة لكل غرفة. القيمة المدخلة تتجاوز السعة الإجمالية لـ "DocSpace".</value>

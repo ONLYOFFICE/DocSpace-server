@@ -1055,6 +1055,12 @@
     <value>Ποσοστώσεις αποθήκευσης και στατιστικά στοιχεία</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} ανά διαχειριστή/ενεργό χρήστη και δυνατότητα προσθήκης χώρου κατόπιν αιτήματος</value>
+    <value>{0} ανά διαχειριστή και δυνατότητα προσθήκης χώρου κατόπιν αιτήματος</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Αποτυχία ορισμού ποσόστωσης ανά δωμάτιο. Η εισαχθείσα τιμή είναι μεγαλύτερη από το συνολικό χώρο αποθήκευσης του DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Αποτυχία ορισμού ποσόστωσης ανά χρήστη. Η εισαχθείσα τιμή είναι μεγαλύτερη από τον συνολικό αποθηκευτικό χώρο του DocSpace.</value>
   </data>
 </root>
