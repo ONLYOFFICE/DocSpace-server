@@ -188,7 +188,7 @@ public class SsoHandlerService
                 }
                 try
                 {
-                    userInfo = await AddUserAsync(userInfo);
+                    userInfo = await AddUserAsync(userInfo, settings.UsersType);
                 }
                 catch (Exception ex)
                 {
@@ -260,7 +260,7 @@ public class SsoHandlerService
         await context.Response.WriteAsync(((int)messageKey).ToString());
     }
 
-    private async Task<UserInfo> AddUserAsync(UserInfo userInfo)
+    private async Task<UserInfo> AddUserAsync(UserInfo userInfo, EmployeeType employeeType)
     {
         UserInfo newUserInfo;
 
@@ -279,7 +279,7 @@ public class SsoHandlerService
 
             if (string.IsNullOrEmpty(newUserInfo.UserName))
             {
-                var type = EmployeeType.RoomAdmin;
+                var type = employeeType is EmployeeType.User or EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin ? employeeType : EmployeeType.User;
 
                 try
                 {
