@@ -1715,18 +1715,18 @@ Datele utilizatorului "$FromUserName":"$FromUserLink" au fost eliminate cu succe
   </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. în &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
- 
- 
+ 
+ 
 Stimate, $UserName!
- 
+ 
 Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a oferi un impuls colaborării în echipa, cu clienții și partenerii dvs și nu numai. Adresa spațiului "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+ 
 Planul dvs tarifar actual est STARTUP. Acest abonament este absolut gratuit și include:
- 
-&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 de administratori/utilizatori avansați&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Până la 100 săli&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB de spațiu de stocare&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
- 
+ 
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 de administratori&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Până la 100 săli&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB de spațiu de stocare&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+ 
 *Descoperiți un nou mod de colaborare asupra documentelor!*
- 
+ 
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
@@ -1821,37 +1821,37 @@ $TrulyYours</value>
     <value>Sunteți invitat la sala ONLYOFFICE DocSpace</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Setați parola pentru ONLYOFFICE DocSpace</value>
+    <value>Setați parola pentru ONLYOFFICE DocSpace</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Perioadă de grație pentru ONLYOFFICE DocSpace Developer a fost activată</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Licența dvs ONLYOFFICE DocSpace Developer va expira în curând</value>
+    <value>Licența dvs ONLYOFFICE DocSpace Developer va expira în curând</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Perioadă de grație pentru ONLYOFFICE DocSpace Developer va expira în curând</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>ONLYOFFICE DocSpace Developer nu mai este disponibil pentru dvs.</value>
+    <value>ONLYOFFICE DocSpace Developer nu mai este disponibil pentru dvs</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Perioadă de grație pentru ONLYOFFICE DocSpace Enterprise a fost activată </value>
+    <value>Perioadă de grație pentru ONLYOFFICE DocSpace Enterprise a fost activată</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Licența dvs ONLYOFFICE DocSpace Enterprise va expira în curând</value>
+    <value>Licența dvs ONLYOFFICE DocSpace Enterprise va expira în curând</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Perioadă de grație pentru ONLYOFFICE DocSpace Developer va expira în curând</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>ONLYOFFICE DocSpace Enterprise nu mai este disponibil pentru dvs.</value>
+    <value>ONLYOFFICE DocSpace Enterprise nu mai este disponibil pentru dvs</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Licența dvs ONLYOFFICE DocSpace Enterprise va expira în curând</value>
+    <value>Licența dvs ONLYOFFICE DocSpace Enterprise va expira în curând</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Astăzi expiră licența dvs ONLYOFFICE DocSpace Enterprise</value>
+    <value>Astăzi expiră licența dvs ONLYOFFICE DocSpace Enterprise</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Cumpără acum</value>

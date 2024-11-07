@@ -972,13 +972,14 @@ internal class FileDao(
 
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
+            var toRoom = DocSpaceHelper.IsRoom(toFolder.FolderType) ? toFolder : await folderDao.GetFolderAsync(toRoomId);
             var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaRoomSettings.EnableQuota)
             {
-                var roomQuotaLimit = toFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toFolder.SettingsQuota;
+                var roomQuotaLimit = toRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toRoom.SettingsQuota;
                 if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
-                    if (roomQuotaLimit - toFolder.Counter < fileContentLength)
+                    if (roomQuotaLimit - toRoom.Counter < fileContentLength)
                     {
                         throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
                     }
@@ -1227,6 +1228,12 @@ internal class FileDao(
         await filesDbContext.SaveChangesAsync();
 
         await factoryIndexer.UpdateAsync(toUpdate, true, r => r.Title, r => r.ModifiedBy, r => r.ModifiedOn);
+
+        if (!Path.HasExtension(file.Title))
+        {
+            var storage = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule);
+            await storage.MoveAsync(GetUniqFilePath(file), "", GetUniqFilePath(file, "content" + FileUtility.GetFileExtension(newTitle)));
+        }
 
         return file.Id;
     }

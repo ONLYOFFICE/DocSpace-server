@@ -278,7 +278,12 @@ public class WorkspaceMigrator : Migrator
 
             u.Storage = new MigrationStorage { Type = FolderType.USER };
 
-            if (!(await UserManager.GetUserByEmailAsync(u.Info.Email)).Equals(Constants.LostUser))
+            var ascUser = await UserManager.GetUserByEmailAsync(u.Info.Email);
+            if (ascUser.Status == EmployeeStatus.Terminated)
+            {
+                continue;
+            }
+            if (!ascUser.Equals(Constants.LostUser))
             {
                 var user = MigrationInfo.ExistUsers.SingleOrDefault(eu => eu.Value.Info.Email == u.Info.Email);
                 if (user.Value == null)

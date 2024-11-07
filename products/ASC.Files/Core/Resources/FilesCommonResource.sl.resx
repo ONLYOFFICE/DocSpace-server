@@ -485,4 +485,19 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Številka obrazca</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Ustvarjalec vsebine</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Ustvarjalec vsebine</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Upravljalec sobe</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Upravljalec sobe</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Zunanji uporabnik</value>
+  </data>
 </root>

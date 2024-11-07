@@ -485,4 +485,19 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Formuliernummer</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Content maker</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Kamer Beheerder</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Externe gebruiker</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Content maker</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Kamer Beheerder</value>
+  </data>
 </root>

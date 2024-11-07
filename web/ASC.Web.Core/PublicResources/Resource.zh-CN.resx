@@ -431,7 +431,7 @@
     <value>SSO单点登录</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>每个管理员/高级用户 {0}，并且能够请求增加空间</value>
+    <value>每个管理员 {0}，并且能够请求增加空间</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>使用的存储空间大小不应超过{0}</value>

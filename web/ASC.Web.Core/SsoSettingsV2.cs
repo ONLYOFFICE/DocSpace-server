@@ -87,7 +87,8 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
                 Phone = "mobile"
             },
             SpLoginLabel = SSO_SP_LOGIN_LABEL,
-            HideAuthPage = false
+            HideAuthPage = false,
+            UsersType = (int)EmployeeType.User
         };
     }
 
@@ -126,6 +127,10 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     /// <summary>Specifies if the authentication page will be hidden or not</summary>
     /// <type>System.Boolean, System</type>
     public bool HideAuthPage { get; set; }
+
+    /// <summary>Users type (RoomAdmin, User, DocSpaceAdmin)</summary>
+    /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
+    public int UsersType { get; set; }
 }
 
 

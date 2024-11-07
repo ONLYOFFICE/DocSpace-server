@@ -2310,7 +2310,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace Enterprise activated .
+        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace Enterprise activated.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_activation {
             get {
