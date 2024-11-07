@@ -1813,7 +1813,7 @@ ONLYOFFICE DocSpace Developer-lisenssisi päättyy tänään.
 
 Olemme aktivoineet sinulle $PaymentDelay päivän lisäajan. Tämän lisäajan aikana pääsy asiakirjojen muokkaamiseen on rajoitettu 20 samanaikaiseen yhteyteen (tuki ja päivitykset eivät ole enää tarjolla).
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia"${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
 
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
@@ -1825,7 +1825,7 @@ $TrulyYours</value>
 
 ONLY OFFICE DocSpace Developer-lisenssi päättyy 7 päivän päästä.
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia"${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -1836,7 +1836,7 @@ $TrulyYours</value>
 
 ONLY OFFICE DocSpace Developer-lisenssin lisäaika päättyy 7 päivän päästä.Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia"${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -1847,7 +1847,7 @@ $TrulyYours</value>
 
 ONLY OFFICE DocSpace Developer-lisenssin lisäaika päättyy tänään. Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia"${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -1922,7 +1922,7 @@ $TrulyYours</value>
 
 ONLYOFFICE DocSpace Enterprise- lisenssisi vanhenee 7 päivän päästä. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.* 
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia"${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -1935,7 +1935,7 @@ $TrulyYours</value>
 
 ONLYOFFICE DocSpace Enterprise- lisenssisi vanhenee tänään. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.*
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia"${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 

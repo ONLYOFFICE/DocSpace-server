@@ -1821,37 +1821,37 @@ $TrulyYours</value>
     <value>Sunteți invitat la sala ONLYOFFICE DocSpace</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Setați parola pentru ONLYOFFICE DocSpace</value>
+    <value>Setați parola pentru ONLYOFFICE DocSpace</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Perioadă de grație pentru ONLYOFFICE DocSpace Developer a fost activată</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Licența dvs ONLYOFFICE DocSpace Developer va expira în curând</value>
+    <value>Licența dvs ONLYOFFICE DocSpace Developer va expira în curând</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Perioadă de grație pentru ONLYOFFICE DocSpace Developer va expira în curând</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>ONLYOFFICE DocSpace Developer nu mai este disponibil pentru dvs</value>
+    <value>ONLYOFFICE DocSpace Developer nu mai este disponibil pentru dvs</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Perioadă de grație pentru ONLYOFFICE DocSpace Enterprise a fost activată</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Licența dvs ONLYOFFICE DocSpace Enterprise va expira în curând</value>
+    <value>Licența dvs ONLYOFFICE DocSpace Enterprise va expira în curând</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Perioadă de grație pentru ONLYOFFICE DocSpace Developer va expira în curând</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>ONLYOFFICE DocSpace Enterprise nu mai este disponibil pentru dvs</value>
+    <value>ONLYOFFICE DocSpace Enterprise nu mai este disponibil pentru dvs</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Licența dvs ONLYOFFICE DocSpace Enterprise va expira în curând</value>
+    <value>Licența dvs ONLYOFFICE DocSpace Enterprise va expira în curând</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Astăzi expiră licența dvs ONLYOFFICE DocSpace Enterprise</value>
+    <value>Astăzi expiră licența dvs ONLYOFFICE DocSpace Enterprise</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Cumpără acum</value>

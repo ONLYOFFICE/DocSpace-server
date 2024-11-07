@@ -1882,9 +1882,9 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Здраво, $UserName!
 
-Грејс период за вашу ОНЛYОФФИЦЕ ДоцСпаце Девелопер лиценцу истиче за 7 дана. То значи да ће ДоцСпаце бити недоступан.
+Грејс период за вашу ONLYOFFICE DocSpace Developer лиценцу истиче за 7 дана. То значи да ће DocSpace бити недоступан.
 
-Да бисте ажурирали лиценцу, обратите се директно свом додељеном менаџеру продаје или нам се обратите преко "${__SalesEmail}":"mailto:${__SalesEmail ".
+Да бисте ажурирали лиценцу, обратите се директно свом додељеном менаџеру продаје или нам се обратите преко "${__SalesEmail}":"mailto:${__SalesEmail}".
 
 За питања о плаћању, контактирајте нас на "${__SalesEmail}":"mailto:${__SalesEmail}". За решавање било каквих техничких проблема, користите "${__SupportLink}":"${__SupportLink}".
 
@@ -1893,7 +1893,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Здраво, $UserName!
 
-Грејс период за вашу лиценцу ONLYOFFICE DocSpace Developer истиче данас. То значи да ДоцСпаце више неће бити доступан.
+Грејс период за вашу лиценцу ONLYOFFICE DocSpace Developer истиче данас. То значи да DocSpace више неће бити доступан.
 
 Да бисте ажурирали лиценцу, обратите се директно свом додељеном менаџеру продаје или нам се обратите преко "${__SalesEmail}":"mailto:${__SalesEmail}".
 

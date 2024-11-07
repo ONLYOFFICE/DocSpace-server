@@ -1888,7 +1888,7 @@ Vaša licenca za ONLYOFFICE DocSpace Developer bo potekla čez 7 dni.
 
 Če želite posodobiti licenco, se obrnite neposredno na svojega dodeljenega vodjo prodaje ali stopite v stik z nami prek "${__SalesEmail}":"mailto:${__SalesEmail}".
 
-Za vprašanja glede plačila nas kontaktirajte na "${__SalesEmail}":"mailto:${__SalesEmail}". Za reševanje tehničnih težav uporabite “"${__SupportLink}":"${__SupportLink}".
+Za vprašanja glede plačila nas kontaktirajte na "${__SalesEmail}":"mailto:${__SalesEmail}". Za reševanje tehničnih težav uporabite "${__SupportLink}":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>
@@ -1944,7 +1944,7 @@ $OrangeButton
 
 Za posodobitev licence se lahko obrnete neposredno na svojega dodeljenega vodjo prodaje.
 
-Za vprašanja glede plačila nas kontaktirajte na "${__SalesEmail}":"mailto:${__SalesEmail}". Za reševanje tehničnih težav uporabite “"${__SupportLink}":"${__SupportLink}".
+Za vprašanja glede plačila nas kontaktirajte na "${__SalesEmail}":"mailto:${__SalesEmail}". Za reševanje tehničnih težav uporabite "${__SupportLink}":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>
@@ -1959,7 +1959,7 @@ $OrangeButton
 
 Za posodobitev licence se lahko tudi obrnete neposredno na svojega dodeljenega vodjo prodaje.
 
-Za vprašanja glede plačila nas kontaktirajte na "${__SalesEmail}":"mailto:${__SalesEmail}". Za reševanje tehničnih težav uporabite “"${__SupportLink}":"${__SupportLink}".
+Za vprašanja glede plačila nas kontaktirajte na "${__SalesEmail}":"mailto:${__SalesEmail}". Za reševanje tehničnih težav uporabite "${__SupportLink}":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>
