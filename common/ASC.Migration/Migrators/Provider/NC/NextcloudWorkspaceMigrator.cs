@@ -187,6 +187,10 @@ public class NextcloudWorkspaceMigrator : Migrator
                         else
                         {
                             var ascUser = await UserManager.GetUserByEmailAsync(user.Value.Info.Email);
+                            if (ascUser.Status == EmployeeStatus.Terminated)
+                            {
+                                continue;
+                            }
                             if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
                             {
                                 MigrationInfo.ExistUsers.Add(user.Key, user.Value);
