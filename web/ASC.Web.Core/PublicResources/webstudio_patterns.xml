@@ -320,13 +320,13 @@ $activity.Key
 	<!-- saas admin useful integrations-->
 	<pattern id="saas_admin_integrations_v1">
 		<subject resource="|subject_saas_admin_integrations_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-		<body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_integrations_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+		<body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_integrations_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
 	</pattern>
 	
   <!-- saas admin activation v1 for docspace-->
   <pattern id="saas_admin_activation_v1">
     <subject resource="|subject_saas_admin_activation_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_activation_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_activation_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise admin activationv1 for docspace -->
@@ -350,7 +350,7 @@ $activity.Key
   <!-- saas admin welcome v1 for docspace -->
   <pattern id="saas_admin_welcome_v1" sender="email.sender">
     <subject resource="|subject_saas_admin_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise admin welcome v1 for docspace -->
@@ -404,51 +404,51 @@ $activity.Key
   <!-- saas user welcome v1 for DocSpace -->
   <pattern id="saas_user_welcome_v1" sender="email.sender">
     <subject resource="|subject_saas_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="saas_user_welcome_v1" sender="messanger.sender">
     <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise user welcome v1 for DocSpace -->
   <pattern id="enterprise_user_welcome_v1" sender="email.sender">
     <subject resource="|subject_enterprise_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="enterprise_user_welcome_v1" sender="messanger.sender">
     <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_enterprise_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise whitelabel user welcome v1 for DocSpace-->
   <pattern id="enterprise_whitelabel_user_welcome_v1" sender="email.sender">
     <subject resource="|subject_enterprise_whitelabel_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_whitelabel_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="enterprise_whitelabel_user_welcome_v1" sender="messanger.sender">
     <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_enterprise_whitelabel_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise whitelabel user welcome custom mode v1 for DocSpace-->
   <pattern id="enterprise_whitelabel_user_welcome_custom_mode_v1" sender="email.sender">
     <subject resource="|subject_enterprise_whitelabel_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_whitelabel_user_welcome_custom_mode_v1|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
   </pattern>
   <pattern id="enterprise_whitelabel_user_welcome_custom_mode_v1" sender="messanger.sender">
     <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_enterprise_whitelabel_user_welcome_custom_mode_v1|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
   </pattern>
 
   <!-- opensource user welcome v1 for DocSpace -->
   <pattern id="opensource_user_welcome_v1" sender="email.sender">
     <subject resource="|subject_opensource_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_opensource_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="opensource_user_welcome_v1" sender="messanger.sender">
     <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_opensource_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- saas guest activation v10 -->
@@ -478,47 +478,47 @@ $activity.Key
   <!-- saas guest welcome v1 -->
   <pattern id="saas_guest_welcome_v1" sender="email.sender">
     <subject resource="|subject_saas_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="saas_guest_welcome_v1" sender="messanger.sender">
     <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise guest welcome v1 -->
   <pattern id="enterprise_guest_welcome_v1" sender="email.sender">
     <subject resource="|subject_enterprise_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="enterprise_guest_welcome_v1" sender="messanger.sender">
     <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_enterprise_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise whitelabel guest welcome v1 -->
   <pattern id="enterprise_whitelabel_guest_welcome_v1" sender="email.sender">
     <subject resource="|subject_enterprise_whitelabel_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_whitelabel_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="enterprise_whitelabel_guest_welcome_v1" sender="messanger.sender">
     <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_enterprise_whitelabel_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- opensource guest welcome v1 -->
   <pattern id="opensource_guest_welcome_v1" sender="email.sender">
     <subject resource="|subject_opensource_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_opensource_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="opensource_guest_welcome_v1" sender="messanger.sender">
     <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_opensource_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise admin user docs tips v1 for DocSpace -->
   <pattern id="enterprise_admin_user_docs_tips_v1">
     <subject resource="|subject_enterprise_admin_user_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_admin_user_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_user_docs_tips_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise admin user apps tips v1 for DocSpace -->
@@ -530,10 +530,10 @@ $activity.Key
   <!-- saas admin user docs tips v1 for DocSpace -->
   <pattern id="saas_admin_user_docs_tips_v1">
     <subject resource="|subject_saas_admin_user_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_user_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_user_docs_tips_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
-  <!-- saas admin user docs tips v1 for DocSpace -->
+  <!-- saas admin user apps tips v1 for DocSpace -->
   <pattern id="saas_admin_user_apps_tips_v1">
     <subject resource="|subject_saas_admin_user_apps_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_user_apps_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
@@ -572,19 +572,19 @@ $activity.Key
   <!-- saas admin trial modules v1 for DocSpace -->
   <pattern id="saas_admin_modules_v1">
     <subject resource="|subject_saas_admin_modules_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_modules_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_modules_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- opensource admin docs tips v1 for DocSpace -->
   <pattern id="opensource_admin_docs_tips_v1">
     <subject resource="|subject_opensource_admin_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_opensource_admin_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_user_docs_tips_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- opensource user docs tips v1 for DocSpace -->
   <pattern id="opensource_user_docs_tips_v1">
     <subject resource="|subject_opensource_user_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_opensource_user_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_user_docs_tips_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 	
   <pattern id="saas_custom_mode_reg_data">
