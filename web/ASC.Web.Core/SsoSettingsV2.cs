@@ -88,7 +88,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
             },
             SpLoginLabel = SSO_SP_LOGIN_LABEL,
             HideAuthPage = false,
-            UsersType = EmployeeType.User
+            UsersType = (int)EmployeeType.User
         };
     }
 
@@ -130,7 +130,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
 
     /// <summary>Users type (RoomAdmin, User, DocSpaceAdmin)</summary>
     /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
-    public EmployeeType UsersType { get; set; }
+    public int UsersType { get; set; }
 }
 
 

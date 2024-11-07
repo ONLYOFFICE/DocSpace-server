@@ -188,7 +188,7 @@ public class SsoHandlerService
                 }
                 try
                 {
-                    userInfo = await AddUserAsync(userInfo, settings.UsersType);
+                    userInfo = await AddUserAsync(userInfo, (EmployeeType)settings.UsersType);
                 }
                 catch (Exception ex)
                 {
