@@ -184,13 +184,17 @@ public class NextcloudWorkspaceMigrator : Migrator
                         {
                             MigrationInfo.WithoutEmailUsers.Add(user.Key, user.Value);
                         }
-                        else if (!(await UserManager.GetUserByEmailAsync(user.Value.Info.Email)).Equals(ASC.Core.Users.Constants.LostUser))
-                        {
-                            MigrationInfo.ExistUsers.Add(user.Key, user.Value);
-                        }
                         else
                         {
-                            MigrationInfo.Users.Add(user.Key, user.Value);
+                            var ascUser = await UserManager.GetUserByEmailAsync(user.Value.Info.Email);
+                            if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
+                            {
+                                MigrationInfo.ExistUsers.Add(user.Key, user.Value);
+                            }
+                            else
+                            {
+                                MigrationInfo.Users.Add(user.Key, user.Value);
+                            }
                         }
                     }
                     catch (Exception ex)
