@@ -54,7 +54,8 @@ module.exports = async (io) => {
       {
         return;
       }
-      const ipAddress = getCleanIP(socket.handshake.headers['x-forwarded-for']);
+      const ipAddress = socket.handshake.session.ip;
+      const ipInfo = socket.handshake.session.ipInfo;
       const parser = uap(socket.request.headers['user-agent']);
       const operationSystem = parser.os.version !== undefined ?  `${parser.os.name} ${parser.os.version}` : `${parser.os.name}`;  
       const browserVersion = parser.browser.version ? parser.browser.version : '';
@@ -312,6 +313,8 @@ module.exports = async (io) => {
                 id: session.id,
                 platform: session.platform,
                 browser: session.browser,
+                country: session.country,
+                city: session.city,
                 ip: session.ip,
                 status: "offline",
                 date: new Date()
@@ -362,6 +365,8 @@ module.exports = async (io) => {
             id: sessionId,
             platform: operationSystem,
             browser: browser,
+            country: ipInfo.country,
+            city: ipInfo.city,
             ip: ipAddress,
             status: "online",
             date: new Date()
@@ -384,6 +389,8 @@ module.exports = async (io) => {
             id: sessionId,
             platform: operationSystem,
             browser: browser,
+            country: ipInfo.country,
+            city: ipInfo.city,
             ip: ipAddress,
             status:"online",
             date: new Date()
@@ -426,21 +433,6 @@ module.exports = async (io) => {
         }
 
         return;
-      }
-
-      function getCleanIP (ipAddress) {
-        if(typeof(ipAddress) == "undefined"){
-          return "127.0.0.1";
-        }
-              const indexOfColon = ipAddress.indexOf(':');
-              if (indexOfColon === -1){
-                  return ipAddress;
-              } else if (indexOfColon > 3){
-                  return ipAddress.substring(0, indexOfColon);
-              }
-              else {
-                  return "127.0.0.1";
-              }
       }
 
       function serialize(user, isRoom)
@@ -499,7 +491,6 @@ module.exports = async (io) => {
       }
     }
     
-
     function logoutSession({ room, loginEventId } = {}) {
       logger.info(`logout user ${room} session ${loginEventId}`);
       onlineIO.to(room).emit("s:logout-session", loginEventId);

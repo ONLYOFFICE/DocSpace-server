@@ -115,6 +115,15 @@ module.exports = (socket, next) => {
         });
       }
     };
+
+    const getIPInformation = (ip) => {
+      return request({
+        method: "get",
+        url: `/security/activeconnections/ipinfo/${ip}`,
+        headers,
+        basePath,
+      });
+    };
     
     const validateLink = () => {
       if (!share) {
@@ -124,12 +133,30 @@ module.exports = (socket, next) => {
       return validateExternalLink();
     }
 
-    return Promise.all([getUser(), getPortal(), validateLink(), getFile(), getRoomId()])
-      .then(([user, portal, { status, linkId }, file, roomId = { }]) => {
+    var getCleanIP = (ipAddress) => {
+      if(typeof(ipAddress) == "undefined"){
+        return "127.0.0.1";
+      }
+            const indexOfColon = ipAddress.indexOf(':');
+            if (indexOfColon === -1){
+                return ipAddress;
+            } else if (indexOfColon > 3){
+                return ipAddress.substring(0, indexOfColon);
+            }
+            else {
+                return "127.0.0.1";
+            }
+    }
+    var ip = getCleanIP(socket.handshake.headers['x-forwarded-for']);
+
+    return Promise.all([getUser(), getPortal(), validateLink(), getFile(), getIPInformation(ip), getRoomId()])
+      .then(([user, portal, { status, linkId }, file, ipInfo, roomId = { }]) => {
         logger.info(`WS: save account info in sessionId='sess:${session.id}'`, { user, portal });
         session.user = user;
         session.portal = portal;
         session.user.connection = user.loginEventId;
+        session.ip = ip;
+        session.ipInfo = ipInfo
         if (status === 0){
           session.linkId = linkId;
         }

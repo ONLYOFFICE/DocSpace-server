@@ -396,6 +396,22 @@ public class ConnectionsController(
         }
     }
 
+    [HttpGet("ipinfo/{ipAddress}")]
+    public async Task<LocationDto> GetIPInformation(string ipAddress)
+    {
+        if (!IPAddress.TryParse(ipAddress, out var ip))
+        {
+            throw new ArgumentException(nameof(ipAddress));
+        }
+        var geoloc = await geolocationHelper.GetIPGeolocationAsync(ip);
+        var dto = new LocationDto
+        {
+            Country = geoloc.Key,
+            City = geoloc.City
+        };
+        return dto;
+    }
+
     private async Task LogOutAllActiveConnections(Guid? userId = null, bool changePassword = false)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
