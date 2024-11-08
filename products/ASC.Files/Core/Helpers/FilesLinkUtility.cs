@@ -83,7 +83,7 @@ public class FilesLinkUtility
 
     public string FileHandlerPath
     {
-        get { return FilesBaseAbsolutePath + "filehandler.ashx"; }
+        get { return FilesBaseAbsolutePath + "api/2.0/files/filehandler/"; }
     }
 
     private const string PublicUrlKey = "public";
@@ -292,7 +292,7 @@ public class FilesLinkUtility
 
     public string FileDownloadUrlString
     {
-        get { return FileHandlerPath + "?" + Action + "=download&" + FileId + "={0}"; }
+        get { return FilesBaseAbsolutePath + "api/2.0/files/filehandler/download/{0}"; }
     }
 
     public string GetFileDownloadUrl(object fileId)
@@ -330,7 +330,7 @@ public class FilesLinkUtility
 
     public string FileWebEditorExternalUrlString
     {
-        get { return FileHandlerPath + "?" + Action + "=create&" + FileUri + "={0}&" + FileTitle + "={1}"; }
+        get { return $"{FileHandlerPath}create?" + FileUri + "={0}&" + FileTitle + "={1}"; }
     }
 
     public string GetFileWebPreviewUrl(FileUtility fileUtility, string fileTitle, object fileId, int fileVersion = 0, bool external = false)
@@ -355,18 +355,18 @@ public class FilesLinkUtility
 
     public string FileRedirectPreviewUrlString
     {
-        get { return FileHandlerPath + "?" + Action + "=redirect"; }
+        get { return $"{FileHandlerPath}redirect"; }
     }
 
     public string FileThumbnailUrlString
     {
-        get { return FileHandlerPath + "?" + Action + "=thumb&" + FileId + "={0}"; }
+        get { return  $"{FileHandlerPath}thumb/{{0}}"; }
     }
 
     public string GetFileThumbnailUrl(object fileId, int fileVersion)
     {
         return string.Format(FileThumbnailUrlString, HttpUtility.UrlEncode(fileId.ToString()))
-               + (fileVersion > 0 ? "&" + Version + "=" + fileVersion : string.Empty);
+               + (fileVersion > 0 ? "?" + Version + "=" + fileVersion : string.Empty);
     }
 
 

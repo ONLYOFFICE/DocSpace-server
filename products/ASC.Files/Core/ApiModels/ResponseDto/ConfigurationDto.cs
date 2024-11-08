@@ -239,7 +239,7 @@ public class ConfigurationConverter<T>(
                 ? $"&{FilesLinkUtility.ShareKey}={await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject)}"
                 : "";
 
-            result.EditorConfig.Embedded.ShareLinkParam = $"&{FilesLinkUtility.FileId}={file.Id}{shareParam}";
+            result.EditorConfig.Embedded.ShareLinkParam = $"{FilesLinkUtility.FileId}={file.Id}{shareParam}";
         }
         return result;
     }

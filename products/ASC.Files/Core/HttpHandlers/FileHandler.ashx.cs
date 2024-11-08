@@ -1400,7 +1400,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 await buffered.DisposeAsync();
             }
         }
-
     }
 
     private async Task RedirectAsync(HttpContext context)

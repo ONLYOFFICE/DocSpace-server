@@ -105,10 +105,8 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         }
 
         //NOTE: Always build path to handler!
-        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));
+        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}stream/{file.Id}"));
         var query = uriBuilder.Query;
-        query += FilesLinkUtility.Action + "=stream&";
-        query += FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(file.Id.ToString()) + "&";
         var version = 0;
         if (!lastVersion)
         {
@@ -130,10 +128,8 @@ public class PathProvider(WebImageSupplier webImageSupplier,
             throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));
+        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}diff/{file.Id}"));
         var query = uriBuilder.Query;
-        query += $"{FilesLinkUtility.Action}=diff&";
-        query += $"{FilesLinkUtility.FileId}={HttpUtility.UrlEncode(file.Id.ToString())}&";
         query += $"{FilesLinkUtility.Version}={file.Version}&";
         query += $"{FilesLinkUtility.AuthKey}={await emailValidationKeyProvider.GetEmailKeyAsync(file.Id + file.Version.ToString(CultureInfo.InvariantCulture))}";
 
@@ -162,9 +158,8 @@ public class PathProvider(WebImageSupplier webImageSupplier,
             MimeMapping.GetMimeMapping(ext),
             "attachment; filename=\"" + fileName + "\"");
 
-        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));
+        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}tmp"));
         var query = uriBuilder.Query;
-        query += $"{FilesLinkUtility.Action}=tmp&";
         query += $"{FilesLinkUtility.FileTitle}={HttpUtility.UrlEncode(fileName)}&";
         query += $"{FilesLinkUtility.AuthKey}={await emailValidationKeyProvider.GetEmailKeyAsync(fileName)}";
 
@@ -173,9 +168,8 @@ public class PathProvider(WebImageSupplier webImageSupplier,
 
     public string GetEmptyFileUrl(string extension)
     {
-        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));
+        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}empty"));
         var query = uriBuilder.Query;
-        query += $"{FilesLinkUtility.Action}=empty&";
         query += $"{FilesLinkUtility.FileTitle}={HttpUtility.UrlEncode(extension)}";
 
         return $"{uriBuilder.Uri}?{query}";

@@ -78,7 +78,7 @@ public class Configuration<T>(
     DocumentConfig<T> document,
     EditorConfiguration<T> editorConfig)
 {
-    internal static readonly Dictionary<FileType, string> DocType = new()
+    public static readonly Dictionary<FileType, string> DocType = new()
     {
         { FileType.Document, "word" },
         { FileType.Spreadsheet, "cell" },
@@ -307,9 +307,8 @@ public class EditorConfiguration<T>(
 
         Configuration<T>.DocType.TryGetValue(fileType, out var documentType);
 
-        return baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath)
-               + "?" + FilesLinkUtility.Action + "=create"
-               + "&doctype=" + documentType
+        return baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}create")
+               + "?" + "doctype=" + documentType
                + "&" + FilesLinkUtility.FileTitle + "=" + HttpUtility.UrlEncode(title);
     }
     
@@ -808,13 +807,13 @@ public class CustomizationConfig<T>(
 [Transient]
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
-    public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam);
+    public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded&" + ShareLinkParam);
 
-    public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath + "?" + FilesLinkUtility.Action + "=download" + ShareLinkParam);
+    public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}download" + "?" + ShareLinkParam);
 
     public string ShareLinkParam { get; set; }
 
-    public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam);
+    public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view&" + ShareLinkParam);
 
     public string ToolbarDocked => "top";
 }

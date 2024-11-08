@@ -168,9 +168,6 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     public async Task<string> GetCallbackUrlAsync<T>(T fileId)
     {
         var queryParams = HttpUtility.ParseQueryString(String.Empty);
-
-        queryParams[FilesLinkUtility.Action] = "track";
-        queryParams[FilesLinkUtility.FileId] = fileId.ToString();
         queryParams[FilesLinkUtility.AuthKey] = await emailValidationKeyProvider.GetEmailKeyAsync(fileId.ToString());
 
         if (httpContextAccessor?.HttpContext != null)
@@ -183,7 +180,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             }
         }
         
-        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams}"); 
+        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}track/{fileId}?{queryParams}"); 
 
         callbackUrl = await documentServiceConnector.ReplaceCommunityAddressAsync(callbackUrl);
 

@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.Log;
-internal static partial class FileHandlerLogger
+public static partial class FileHandlerLogger
 {
     [LoggerMessage(LogLevel.Debug, "DocService StreamFile payload: {payload}")]
     public static partial void DebugDocServiceStreamFilePayload(this ILogger<FileHandlerService> logger, string payload);
