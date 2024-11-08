@@ -59,7 +59,11 @@ module.exports = async (io) => {
       const parser = uap(socket.request.headers['user-agent']);
       const operationSystem = parser.os.version !== undefined ?  `${parser.os.name} ${parser.os.version}` : `${parser.os.name}`;  
       const browserVersion = parser.browser.version ? parser.browser.version : '';
-      const browser = parser.browser.name + " " + browserVersion
+      const browser = parser.browser.name + " " + browserVersion;
+      const isCollaborator = socket.handshake.session?.user.isCollaborator;
+      const isOwner = socket.handshake.session?.user.isOwner;
+      const isAdmin = socket.handshake.session?.user.isAdmin;
+      const isRoomAdmin = socket.handshake.session?.user.isRoomAdmin;
   
       const userId = socket.handshake.session?.user?.id;
       const displayName = socket.handshake.session?.user?.displayName;
@@ -76,7 +80,7 @@ module.exports = async (io) => {
         roomId = `${tenantId}-${socket.handshake.session.file.roomId}`;
         await InitUsersAsync(roomId, roomUsers);
         file = socket.handshake.session.file.title;
-       await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
+        await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
         if(!editFiles[roomId])
         {
           editFiles[roomId] = [];
@@ -263,6 +267,10 @@ module.exports = async (io) => {
               var u = {};
               u.id = user.id;
               u.displayName = user.displayName;
+              u.isAdmin = user.isAdmin;
+              u.isOwner = user.isOwner;
+              u.isCollaborator = user.isCollaborator;
+              u.isRoomAdmin = user.isRoomAdmin;
               u.avatar = user.avatar;
               var offSess = await redisClient.get(u.id);
               if(offSess && offSess != '[]')
@@ -290,6 +298,10 @@ module.exports = async (io) => {
           u.id = userId;
           u.avatar = avatar;
           u.displayName = displayName;
+          u.isAdmin = isAdmin;
+          u.isOwner = isOwner;
+          u.isCollaborator = isCollaborator;
+          u.isRoomAdmin = isRoomAdmin;
           allUsers[key].push(u);
           await redisClient.set(`allusers-${key}`, JSON.stringify(allUsers[key]));
         }
@@ -379,6 +391,10 @@ module.exports = async (io) => {
             id: userId,
             avatar: avatar,
             displayName: displayName,
+            isAdmin: isAdmin,
+            isOwner: isOwner,
+            isCollaborator: isCollaborator,
+            isRoomAdmin: isRoomAdmin,
             sessions: sessions,
             offlineSessions: offSess
           };
@@ -440,6 +456,10 @@ module.exports = async (io) => {
         var serUser = {
           userId: user.id,
           displayName : user.displayName,
+          isAdmin: isAdmin,
+          isOwner: isOwner,
+          isCollaborator: isCollaborator,
+          isRoomAdmin: isRoomAdmin,
           avatar: user.avatar
         };
         if(user.sessions.length != 0)
