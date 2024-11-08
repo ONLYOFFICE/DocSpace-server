@@ -547,4 +547,16 @@
   <data name="ExternalUser" xml:space="preserve">
     <value>مستخدم خارجي</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>صانع المحتوى</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>مدير الغرفة</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>صانع المحتوى</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>مدير الغرفة</value>
+  </data>
 </root>

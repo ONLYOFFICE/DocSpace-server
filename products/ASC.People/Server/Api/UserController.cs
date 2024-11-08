@@ -352,7 +352,7 @@ public class UserController(
 
         foreach (var invite in inDto.Invitations)
         {            
-            if (invite.Email.TestEmailPunyCode())
+            if (!invite.Email.TestEmailRegex() || invite.Email.TestEmailPunyCode())
             {
                continue;
             }
@@ -1738,6 +1738,11 @@ public class UserController(
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
+        if (!inDto.Quota.TryGetInt64(out var quota))
+        {
+            throw new Exception(Resource.UserQuotaGreaterPortalError);
+        }
+
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var users = await inDto.UserIds.ToAsyncEnumerable()
@@ -1749,7 +1754,7 @@ public class UserController(
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
         
-        if (maxTotalSize < inDto.Quota)
+        if (maxTotalSize < quota)
         {
             throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
@@ -1758,7 +1763,7 @@ public class UserController(
             var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
             if (tenantQuotaSetting.EnableQuota)
             {
-                if (tenantQuotaSetting.Quota < inDto.Quota)
+                if (tenantQuotaSetting.Quota < quota)
                 {
                     throw new Exception(Resource.UserQuotaGreaterPortalError);
                 }
@@ -1767,16 +1772,16 @@ public class UserController(
 
         foreach (var user in users)
         {
-            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
+            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = quota }, user);
 
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
             var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, inDto.Quota, [user.Id]);
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, quota, [user.Id]);
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
 
-        if(inDto.Quota >= 0)
+        if(quota >= 0)
         {
             await messageService.SendAsync(MessageAction.CustomQuotaPerUserChanged, inDto.Quota.ToString(),
                         users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));

@@ -39,5 +39,5 @@ public class UpdateMembersQuotaRequestDto
     /// <summary>
     /// Quota
     /// </summary>
-    public long Quota { get; set; }
+    public JsonElement Quota { get; set; }
 }

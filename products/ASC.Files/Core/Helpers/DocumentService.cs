@@ -309,7 +309,7 @@ public static class DocumentService
             return new CommandResponse
             {
                 Error = ErrorTypes.ParseError,
-                ErrorString = ex.Message
+                ErrorString = $"{ex.Message} Content: {dataResponse}"
             };
         }
     }

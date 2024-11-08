@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
@@ -34,8 +36,20 @@ public class OrderRequestDto
     /// <summary>
     /// Order
     /// </summary>
+    [Range(1, int.MaxValue)]
     [JsonConverter(typeof(OrderRequestDtoConverter))]
     public int Order { get; set; }
+}
+
+public class OrdersItemRequestDto<T> : OrderRequestDto
+{
+    public T EntryId { get; set; }
+    public FileEntryType EntryType { get; set; }
+}
+
+public class OrdersRequestDto<T>
+{
+    public IEnumerable<OrdersItemRequestDto<T>> Items { get; set; }
 }
 
 public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConverter<int>

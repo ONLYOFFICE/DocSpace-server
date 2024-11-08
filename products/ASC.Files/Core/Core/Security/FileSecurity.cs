@@ -1274,31 +1274,37 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                     default:
                         if (e.Access is FileShare.Comment or FileShare.Review or FileShare.RoomManager or FileShare.Editing or FileShare.FillForms or FileShare.ContentCreator)
                         {
                             return true;
                         }
+
                         break;
                 }
+
                 break;
             case FilesSecurityActions.FillForms:
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access is FileShare.Editing or FileShare.Review or FileShare.FillForms) 
+                        if (e.Access is FileShare.Editing or FileShare.Review or FileShare.FillForms)
                         {
                             return true;
                         }
+
                         break;
                     default:
                         if (e.Access is FileShare.FillForms or FileShare.RoomManager or FileShare.Editing or FileShare.ContentCreator)
                         {
                             return true;
                         }
+
                         break;
                 }
+
                 break;
             case FilesSecurityActions.Review:
                 switch (e.RootFolderType)
@@ -1308,14 +1314,17 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                     default:
                         if (e.Access is FileShare.Review or FileShare.RoomManager or FileShare.Editing or FileShare.ContentCreator)
                         {
                             return true;
                         }
+
                         break;
                 }
+
                 break;
             case FilesSecurityActions.Convert:
             case FilesSecurityActions.Create:
@@ -1328,8 +1337,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                 }
+
                 break;
             case FilesSecurityActions.Edit:
                 switch (e.RootFolderType)
@@ -1339,14 +1350,17 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                     default:
                         if (e.Access is FileShare.RoomManager or FileShare.ContentCreator || (e.Access is FileShare.Editing && !MustConvert(e)))
                         {
                             return true;
                         }
+
                         break;
                 }
+
                 break;
             case FilesSecurityActions.Delete:
                 switch (e.RootFolderType)
@@ -1354,31 +1368,37 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                if (e.Access == FileShare.RoomManager ||
+                        if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
-                {
-                    if (file is { RootFolderType: FolderType.VirtualRooms })
-                    {
-                        return true;
-                    }
+                        {
+                            if (file is { RootFolderType: FolderType.VirtualRooms })
+                            {
+                                return true;
+                            }
 
-                    if (folder is { RootFolderType: FolderType.VirtualRooms, FolderType: FolderType.DEFAULT or FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress })
-                    {
-                        return true;
-                    }
-                }
-                else if (file != null && e.Access == FileShare.FillForms && e.CreateBy == userId)
-                {
-                    var folderDao = daoFactory.GetFolderDao<T>();
-                    var parentFolder = await folderDao.GetFolderAsync(file.ParentId);
+                            if (folder is
+                                {
+                                    RootFolderType: FolderType.VirtualRooms,
+                                    FolderType: FolderType.DEFAULT or FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress
+                                })
+                            {
+                                return true;
+                            }
+                        }
+                        else if (file != null && e.Access == FileShare.FillForms && e.CreateBy == userId)
+                        {
+                            var folderDao = daoFactory.GetFolderDao<T>();
+                            var parentFolder = await folderDao.GetFolderAsync(file.ParentId);
 
-                    if (parentFolder.FolderType is FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress)
-                    {
-                        return true;
-                    }
+                            if (parentFolder.FolderType is FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress)
+                            {
+                                return true;
+                            }
+                        }
+
+                        break;
                 }
-                break;
-                }
+
                 break;
             case FilesSecurityActions.CustomFilter:
                 switch (e.RootFolderType)
@@ -1388,14 +1408,17 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                     default:
                         if (e.Access is FileShare.RoomManager or FileShare.ContentCreator || (e.Access is FileShare.Editing && !MustConvert(e)))
                         {
                             return true;
                         }
+
                         break;
                 }
+
                 break;
             case FilesSecurityActions.EditRoom:
                 switch (e.RootFolderType)
@@ -1403,12 +1426,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                if (e.Access == FileShare.RoomManager)
-                {
-                    return true;
+                        if (e.Access == FileShare.RoomManager)
+                        {
+                            return true;
+                        }
+
+                        break;
                 }
-                break;
-                }
+
                 break;
             case FilesSecurityActions.Rename:
                 switch (e.RootFolderType)
@@ -1418,18 +1443,20 @@ public class FileSecurity(IDaoFactory daoFactory,
                     default:
                         if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
-                {
-                    return true;
+                        {
+                            return true;
+                        }
+
+                        break;
                 }
-                break;
-                }
+
                 break;
             case FilesSecurityActions.ReadHistory:
                 if (!isAuthenticated)
                 {
                     return false;
                 }
-                
+
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
@@ -1437,14 +1464,17 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                     default:
                         if (e.Access is FileShare.RoomManager or FileShare.Editing or FileShare.ContentCreator)
                         {
                             return true;
                         }
+
                         break;
                 }
+
                 break;
             case FilesSecurityActions.Lock:
                 switch (e.RootFolderType)
@@ -1456,8 +1486,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                 }
+
                 break;
             case FilesSecurityActions.EditHistory:
                 if (file is { Encrypted: true })
@@ -1472,12 +1504,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                     default:
                         if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
                         {
                             return true;
                         }
+
                         break;
                 }
 
@@ -1493,6 +1527,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                 }
 
@@ -1505,6 +1540,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                     default:
                         if (e.Access == FileShare.RoomManager ||
@@ -1512,8 +1548,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                 }
+
                 break;
             case FilesSecurityActions.Duplicate:
                 switch (e.RootFolderType)
@@ -1521,13 +1559,15 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                if (e.Access == FileShare.RoomManager ||
+                        if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
-                {
-                    return true;
+                        {
+                            return true;
+                        }
+
+                        break;
                 }
-                break;
-                }
+
                 break;
             case FilesSecurityActions.EditAccess:
             case FilesSecurityActions.ReadLinks:
@@ -1536,12 +1576,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                if (e.Access == FileShare.RoomManager)
-                {
-                    return true;
+                        if (e.Access == FileShare.RoomManager)
+                        {
+                            return true;
+                        }
+
+                        break;
                 }
-                break;
-                }
+
                 break;
             case FilesSecurityActions.Move:
                 switch (e.RootFolderType)
@@ -1549,14 +1591,16 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                if ((e.Access == FileShare.RoomManager ||
+                        if ((e.Access == FileShare.RoomManager ||
                              (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
-                    && !isRoom)
-                {
-                    return true;
+                            && !isRoom)
+                        {
+                            return true;
+                        }
+
+                        break;
                 }
-                break;
-                }
+
                 break;
             case FilesSecurityActions.SubmitToFormGallery:
                 switch (e.RootFolderType)
@@ -1564,54 +1608,57 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                 }
+
                 break;
             case FilesSecurityActions.Download:
-                if (e.Access != FileShare.Restrict && ace?.Options is not { DenyDownload: true })
+                if (e.Access == FileShare.Restrict || ace?.Options is { DenyDownload: true })
                 {
-                    if (e.Access == FileShare.Read)
-                    {
-                        if (file == null)
-                        {
-                            return true;
-                        }
+                    return false;
+                }
 
-                        var parentFolders = await GetFileParentFolders(file.ParentId);
-                        var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
-                        if (room is { SettingsDenyDownload: true })
-                        {
-                            return false;
-                        }
-                    }
-
+                if (e.RootFolderType == FolderType.USER || e.Access != FileShare.Read)
+                {
                     return true;
                 }
-                break;
+
+                if (isRoom)
+                {
+                    return !folder.SettingsDenyDownload;
+                }
+
+                var parentFolders = await GetFileParentFolders(e.ParentId);
+                var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+                return room is not { SettingsDenyDownload: true };
             case FilesSecurityActions.CopySharedLink:
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
                         return false;
                     default:
-                if (e.Access == FileShare.RoomManager || (e.Access != FileShare.Restrict && e.Shared))
-                {
-                    return true;
+                        if (e.Access == FileShare.RoomManager || (e.Access != FileShare.Restrict && e.Shared))
+                        {
+                            return true;
+                        }
+
+                        break;
                 }
+
                 break;
-        }
-                break;
-            
+
             case FilesSecurityActions.Embed:
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access == FileShare.RoomManager && ((isRoom && e.Shared) || (file is { Shared: true })))
+                        if (e.Access == FileShare.RoomManager && ((isRoom && e.Shared) || file is { Shared: true }))
                         {
                             return true;
                         }
+
                         break;
                 }
+
                 break;
             case FilesSecurityActions.IndexExport:
                 switch (e.RootFolderType)
@@ -1623,8 +1670,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                         {
                             return true;
                         }
+
                         break;
                 }
+
                 break;
         }
 
@@ -1640,12 +1689,13 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             e.Access = FileShare.None; //HACK: for client
         }
+
         return false;
 
         bool MustConvert(FileEntry entry)
         {
             return entry.FileEntryType == FileEntryType.File && fileUtility.MustConvert(entry.Title);
-    }
+        }
     }
 
     public async Task ShareAsync<T>(T entryId, FileEntryType entryType, Guid @for, FileShare share, SubjectType subjectType = default, FileShareOptions options = null, Guid? owner = null)

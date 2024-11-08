@@ -1040,7 +1040,7 @@
     <value>Quote e statistiche di archivio</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} per amministratore/utente esperto e possibilità di aggiungere spazio su richiesta</value>
+    <value>{0} per amministratore e possibilità di aggiungere spazio su richiesta</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Amministratori aggiunti:</value>
