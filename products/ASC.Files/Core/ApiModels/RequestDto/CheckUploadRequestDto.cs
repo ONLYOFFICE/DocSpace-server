@@ -38,7 +38,7 @@ public class CheckUploadRequest
 }
 
 /// <summary>
-/// Request arameters for checking files uploading
+/// Request parameters for checking files uploading
 /// </summary>
 public class CheckUploadRequestDto<T>
 {

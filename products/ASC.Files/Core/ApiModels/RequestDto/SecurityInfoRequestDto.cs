@@ -80,7 +80,7 @@ public class FileSecurityInfoSimpleRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// Security info simpe
+    /// Security info simple
     /// </summary>
     [FromBody]
     public SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }
@@ -98,7 +98,7 @@ public class FolderSecurityInfoSimpleRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// Security info simpe
+    /// Security info simple
     /// </summary>
     [FromBody]
     public SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }
