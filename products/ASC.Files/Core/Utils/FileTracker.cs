@@ -273,7 +273,13 @@ public class FileTrackerHelper
                 var tracker = scope.ServiceProvider.GetRequiredService<DocumentServiceTrackerHelper>();
                 var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
 
-                var docKey = await helper.GetDocKeyAsync(await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId));
+                var file = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+                if (file == null)
+                {
+                    return;
+                }
+
+                var docKey = await helper.GetDocKeyAsync(file);
                 using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}") }))
                 {
                     if (await tracker.StartTrackAsync(fileId.ToString(), docKey, token))
