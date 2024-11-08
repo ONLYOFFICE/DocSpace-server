@@ -32,6 +32,17 @@ public class OrderRequestDto
     public int Order { get; set; }
 }
 
+public class OrdersItemRequestDto<T> : OrderRequestDto
+{
+    public T EntryId { get; set; }
+    public FileEntryType EntryType { get; set; }
+}
+
+public class OrdersRequestDto<T>
+{
+    public IEnumerable<OrdersItemRequestDto<T>> Items { get; set; }
+}
+
 public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConverter<int>
 {
     public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
