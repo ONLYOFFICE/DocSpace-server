@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters
+/// Parameters for saving file as pdf
 /// </summary>
 public class SaveAsPdf<T>
 {
@@ -44,7 +44,7 @@ public class SaveAsPdf<T>
 
 
 /// <summary>
-/// Request parameters
+/// Request parameters for saving file as pdf
 /// </summary>
 public class SaveAsPdfRequestDto<T>
 {
@@ -55,7 +55,7 @@ public class SaveAsPdfRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// File
+    /// Parameters for saving file as pdf
     /// </summary>
     [FromBody]
     public SaveAsPdf<T> File { get; set; }

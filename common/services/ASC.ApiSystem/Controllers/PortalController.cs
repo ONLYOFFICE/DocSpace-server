@@ -482,7 +482,7 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Gets portal
+    /// Gets a list of portals
     /// </summary>
     /// <path>apisystem/portal</path>
     [Tags("Portal")]

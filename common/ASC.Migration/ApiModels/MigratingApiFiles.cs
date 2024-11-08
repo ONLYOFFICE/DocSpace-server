@@ -30,19 +30,19 @@ namespace ASC.Migration.Core.Models.Api;
 public class MigratingApiFiles
 {
     /// <summary>
-    /// FoldersCount
+    /// Folders Count
     /// </summary>
     [ProtoMember(1)]
     public int FoldersCount { get; set; }
 
     /// <summary>
-    /// FilesCount
+    /// Files Count
     /// </summary>
     [ProtoMember(2)]
     public int FilesCount { get; set; }
 
     /// <summary>
-    /// BytesTotal
+    /// Bytes Total
     /// </summary>
     [ProtoMember(3)]
     public long BytesTotal { get; set; }

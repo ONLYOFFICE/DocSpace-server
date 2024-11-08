@@ -47,5 +47,6 @@ public class RestoreVersionRequestDto<T>
     /// File version URL
     /// </summary>
     [FromQuery(Name = "url")]
+    [Url]
     public string Url { get; set; } = null;
 }

@@ -29,7 +29,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class ExternalShareDataRequestDto
 {
     /// <summary>
-    /// The unique document identifier
+    /// The unique key
     /// </summary>
     [FromRoute(Name = "key")]
     public string Key { get; set; }

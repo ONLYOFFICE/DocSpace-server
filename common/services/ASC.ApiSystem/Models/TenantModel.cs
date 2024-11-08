@@ -103,7 +103,7 @@ public class TenantModel : IModel
     public string Password { get; set; }
 
     /// <summary>
-    /// PasswordHash
+    /// Password hash
     /// </summary>
     public string PasswordHash { get; set; }
 
@@ -130,7 +130,7 @@ public class TenantModel : IModel
     public string Region { get; set; }
 
     /// <summary>
-    /// AWSRegion
+    /// AWS region
     /// </summary>
     [JsonPropertyName("awsRegion")]
     public string AWSRegion { get; set; }

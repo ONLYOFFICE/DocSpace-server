@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for deleting a folder
+/// Parameters for deleting a folder
 /// </summary>
 public class DeleteFolder
 {
@@ -42,6 +42,9 @@ public class DeleteFolder
     public bool Immediately { get; set; }
 }
 
+/// <summary>
+/// Request parameters for deleting a folder
+/// </summary>
 public class DeleteFolder<T>
 {
     /// <summary>
@@ -51,7 +54,7 @@ public class DeleteFolder<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// Delete
+    /// Parameters for deleting a folder
     /// </summary>
     [FromBody]
     public DeleteFolder Delete { get; set; }

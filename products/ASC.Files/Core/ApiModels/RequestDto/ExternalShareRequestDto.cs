@@ -43,13 +43,13 @@ public class ExternalShareRequestParam
 public class ExternalShareRequestDto
 {
     /// <summary>
-    /// File ID
+    /// The unique document identifier
     /// </summary>
     [FromRoute(Name = "key")]
     public string Key { get; set; }
 
     /// <summary>
-    /// Request param
+    /// External data parameters
     /// </summary>
     [FromBody]
     public ExternalShareRequestParam RequestParam { get; set; }

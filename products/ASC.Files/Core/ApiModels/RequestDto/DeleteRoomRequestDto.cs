@@ -49,7 +49,7 @@ public class DeleteRoomRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// Delete room
+    /// Parameters for deleting a room
     /// </summary>
     [FromBody]
     public DeleteRoomRequest DeleteRoom { get; set; }

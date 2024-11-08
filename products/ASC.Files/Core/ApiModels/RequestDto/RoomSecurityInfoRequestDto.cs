@@ -38,7 +38,7 @@ public class RoomSecurityInfoRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// Share type filter
+    /// Share filter type
     /// </summary>
     [FromQuery(Name = "filterType")]
     public ShareFilterType FilterType { get; set; } = ShareFilterType.UserOrGroup;

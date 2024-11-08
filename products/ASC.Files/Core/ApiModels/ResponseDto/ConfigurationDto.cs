@@ -254,6 +254,9 @@ public class CustomerConfigDto
     /// </summary>
     public string Logo { get; set; }
 
+    /// <summary>
+    /// Dark logo
+    /// </summary>
     public string LogoDark { get; set; }
 
     /// <summary>
@@ -267,7 +270,7 @@ public class CustomerConfigDto
     public string Name  { get; set; }
 
     /// <summary>
-    /// Www
+    /// Site
     /// </summary>
     public string Www  { get; set; }
 }
@@ -325,6 +328,9 @@ public class DocumentConfigDto
     [Url]
     public string Url { get; set; }
 
+    /// <summary>
+    /// Options
+    /// </summary>
     public Options Options { get; set; }
 }
 

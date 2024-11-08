@@ -105,7 +105,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information: sharing rights, a user who has the access to the specified file, the file is locked by this user or not, this user is an owner of the specified file or not, this user can edit the access to the specified file or not", typeof(FileShareDto))]
     [HttpPut("file/{fileId}/share")]
-    public async IAsyncEnumerable<FileShareDto> SetFileSecurityInfoAsync(FileSecurityInfoSimpeRequestDto<T> inDto)
+    public async IAsyncEnumerable<FileShareDto> SetFileSecurityInfoAsync(FileSecurityInfoSimpleRequestDto<T> inDto)
     {
         await foreach (var s in securityControllerHelper.SetSecurityInfoAsync(new List<T> { inDto.FileId }, new List<T>(), inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage))
         {
@@ -123,7 +123,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared folder information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not", typeof(FileShareDto))]
     [HttpPut("folder/{folderId}/share")]
-    public async IAsyncEnumerable<FileShareDto> SetFolderSecurityInfoAsync(FolderSecurityInfoSimpeRequestDto<T> inDto)
+    public async IAsyncEnumerable<FileShareDto> SetFolderSecurityInfoAsync(FolderSecurityInfoSimpleRequestDto<T> inDto)
     {
         await foreach (var s in securityControllerHelper.SetSecurityInfoAsync(new List<T>(), new List<T> { inDto.FolderId }, inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage))
         {
@@ -165,6 +165,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <summary>
     /// Gets groups memebers with folder security
     /// </summary>
+    /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]

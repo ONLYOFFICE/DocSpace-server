@@ -68,10 +68,14 @@ public class UpdateRoomRequest
     public LogoRequest Logo { get; set; }
 
     /// <summary>
+    /// List of tags
+    /// </summary>
+    public IEnumerable<string> Tags { get; set; }
+    
+    /// <summary>
     /// Color
     /// </summary>
     [StringLength(6)]
-    public IEnumerable<string> Tags { get; set; }
     public string Color { get; set; }
 
     /// <summary>

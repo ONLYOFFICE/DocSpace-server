@@ -222,11 +222,16 @@ public class FilesSettingsDto
     /// Keep new file name
     /// </summary>
     public bool KeepNewFileName { get; set; }
+
+    /// <summary>
+    /// Display file extension
+    /// </summary>
     public bool DisplayFileExtension { get; set; }
 
     /// <summary>
     /// Convert notify
-    /// </summary>    public bool ConvertNotify { get; set; }
+    /// </summary>    
+    public bool ConvertNotify { get; set; }
 
     /// <summary>
     /// HideC confirm convert save

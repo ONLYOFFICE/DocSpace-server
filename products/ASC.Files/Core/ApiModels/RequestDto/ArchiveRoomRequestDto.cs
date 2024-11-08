@@ -49,7 +49,7 @@ public class ArchiveRoomRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// Archive room
+    /// Parameters for archiving a room
     /// </summary>
     [FromBody]
     public ArchiveRoomRequest ArchiveRoom { get; set; }

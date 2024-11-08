@@ -71,7 +71,7 @@ public record BackupProgress
     public int TenantId { get; set; }
 
     /// <summary>
-    /// Backup progress item
+    /// Backup progress type
     /// </summary>
     [ProtoMember(6)]
     public BackupProgressEnum BackupProgressEnum { get; set;}

@@ -52,6 +52,10 @@ public class Logo
     /// Color
     /// </summary>
     public string Color { get; set; }
+
+    /// <summary>
+    /// Cover
+    /// </summary>
     public LogoCover Cover { get; set; }
 
     public bool IsDefault()

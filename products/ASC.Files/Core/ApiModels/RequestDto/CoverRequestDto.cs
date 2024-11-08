@@ -27,6 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Parameters to change the room cover
 /// </summary>
 public class CoverRequestDto
 {
@@ -41,6 +42,9 @@ public class CoverRequestDto
     public string Cover { get; set; }
 }
 
+/// <summary>
+/// Request parameters to change the room cover
+/// </summary>
 public class CoverRequestDto<T>
 {
     /// <summary>
@@ -50,7 +54,7 @@ public class CoverRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// Cover
+    /// Parameters to change the room cover
     /// </summary>
     [FromBody]
     public CoverRequestDto Cover { get; set; } = null;

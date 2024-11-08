@@ -54,7 +54,7 @@ public class UpdateCommentRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// File
+    /// Parameters for updating a comment
     /// </summary>
     [FromBody]
     public UpdateComment File { get; set; }

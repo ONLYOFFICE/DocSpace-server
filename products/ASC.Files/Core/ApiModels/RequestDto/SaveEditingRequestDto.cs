@@ -36,6 +36,7 @@ public class SaveEditingRequestDto<T> : IModelWithFile
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
+
     /// <summary>
     /// File extension
     /// </summary>
@@ -47,6 +48,7 @@ public class SaveEditingRequestDto<T> : IModelWithFile
     /// URI to download a file
     /// </summary>
     [FromForm(Name = "DownloadUri")]
+    [Url]
     public string DownloadUri { get; set; }
 
     /// <summary>

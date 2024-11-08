@@ -37,5 +37,9 @@ public class TariffDto : Tariff
     /// Enterprise
     /// </summary>
     public bool? Enterprise { get; set; }
+
+    /// <summary>
+    /// Developer
+    /// </summary>
     public bool? Developer { get; set; }
 }

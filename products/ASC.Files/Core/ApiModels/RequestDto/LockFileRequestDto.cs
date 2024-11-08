@@ -49,7 +49,7 @@ public class LockFileRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// File
+    /// Parameters for locking a file
     /// </summary>
     [FromBody]
     public LockFileParameters File { get; set; }

@@ -25,6 +25,10 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
+
+/// <summary>
+/// Parameters for checking files uploading
+/// </summary>
 public class CheckUploadRequest
 {
     /// <summary>
@@ -33,6 +37,9 @@ public class CheckUploadRequest
     public IEnumerable<string> FilesTitle { get; set; }
 }
 
+/// <summary>
+/// Request arameters for checking files uploading
+/// </summary>
 public class CheckUploadRequestDto<T>
 {
     /// <summary>
@@ -42,7 +49,7 @@ public class CheckUploadRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// Check
+    /// Parameters for checking files uploading
     /// </summary>
     [FromBody]
     public CheckUploadRequest Check { get; set; }

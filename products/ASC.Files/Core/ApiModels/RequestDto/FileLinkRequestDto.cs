@@ -55,7 +55,7 @@ public class FileLinkRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// File
+    /// External link parameters
     /// </summary>
     [FromBody]
     public FileLinkRequest File { get; set; }

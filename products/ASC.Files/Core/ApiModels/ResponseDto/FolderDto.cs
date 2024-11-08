@@ -35,7 +35,7 @@ public class FolderDto<T> : FileEntryDto<T>
     public T ParentId { get; set; }
 
     /// <summary>
-    /// "Number of files
+    /// Number of files
     /// </summary>
     [SwaggerSchemaCustom(Example = 5)]
     public int FilesCount { get; set; }
@@ -90,12 +90,25 @@ public class FolderDto<T> : FileEntryDto<T>
     /// Specifies if a folder is private or not
     /// </summary>
     public bool Private { get; set; }
+
+    /// <summary>
+    /// Indexing
+    /// </summary>
     public bool Indexing { get; set; }
+
+    /// <summary>
+    /// Deny download
+    /// </summary>
     public bool DenyDownload { get; set; }
 
-    /// <summary>Room data lifetime settings</summary>
+    /// <summary>
+    /// Room data lifetime settings
+    /// </summary>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
+    /// <summary>
+    /// Watermark settings
+    /// </summary>
     public WatermarkDto Watermark { get; set; }
 
     /// <summary>
@@ -122,11 +135,25 @@ public class FolderDto<T> : FileEntryDto<T>
     /// Counter
     /// </summary>
     public long? UsedSpace { get; set; }
-    
+
+    /// <summary>
+    /// Specifies if the link external
+    /// </summary>
     public bool? External { get; set; }
+
+    /// <summary>
+    /// Specifies if the password protected
+    /// </summary>
     public bool? PasswordProtected { get; set; }
+
+    /// <summary>
+    /// Expired
+    /// </summary>
     public bool? Expired { get; set; }
 
+    /// <summary>
+    /// File entry type
+    /// </summary>
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
 }
 
