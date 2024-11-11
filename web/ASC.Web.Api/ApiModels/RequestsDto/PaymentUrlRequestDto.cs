@@ -35,7 +35,6 @@ public class PaymentUrlRequestDto
     /// Back URL
     /// </summary>
     [FromQuery(Name = "backUrl")]
-    [Url]
     public string BackUrl { get; set; }
 }
 

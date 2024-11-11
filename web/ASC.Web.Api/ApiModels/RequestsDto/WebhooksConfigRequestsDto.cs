@@ -46,7 +46,6 @@ public class WebhooksConfigRequestsDto
     /// <summary>
     /// URI
     /// </summary>
-    [Url]
     [Required]
     public string Uri { get; set; }
 

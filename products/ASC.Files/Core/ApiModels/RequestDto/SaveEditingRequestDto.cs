@@ -48,7 +48,6 @@ public class SaveEditingRequestDto<T> : IModelWithFile
     /// URI to download a file
     /// </summary>
     [FromForm(Name = "DownloadUri")]
-    [Url]
     public string DownloadUri { get; set; }
 
     /// <summary>

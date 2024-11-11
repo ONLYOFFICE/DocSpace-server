@@ -34,18 +34,15 @@ public class CheckDocServiceUrlRequestDto
     /// <summary>
     /// The Document Server address
     /// </summary>
-    [Url]
     public string DocServiceUrl { get; set; }
 
     /// <summary>
     /// The Document Server address in the local private network
     /// </summary>
-    [Url]
     public string DocServiceUrlInternal { get; set; }
 
     /// <summary>
     /// The Community Server address
     /// </summary>
-    [Url]
     public string DocServiceUrlPortal { get; set; }
 }
