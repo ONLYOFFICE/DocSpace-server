@@ -26,7 +26,6 @@
 
 using System.Reflection;
 
-using Folder = Microsoft.OneDrive.Sdk.Folder;
 using Image = SixLabors.ImageSharp.Image;
 using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
