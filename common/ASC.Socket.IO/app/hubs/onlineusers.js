@@ -136,7 +136,7 @@ module.exports = async (io) => {
               break;
             }
           }
-          if(users < count)
+          if(users.length < count)
           {
             var offlineUsers = portalUsers[tenantId].filter(o => o.sessions.length == 0).sort(userSort);
             index = index - onlineUsers.length;
