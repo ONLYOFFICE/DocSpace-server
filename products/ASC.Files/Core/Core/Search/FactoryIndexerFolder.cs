@@ -49,7 +49,7 @@ public class FactoryIndexerFolder(ILoggerProvider options,
         Settings settings)
     : FactoryIndexer<DbFolder>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
 {
-    public override async Task IndexAllAsync()
+    public override async Task IndexAllAsync(int tenantId = 0)
     {
         try
         {
@@ -57,7 +57,7 @@ public class FactoryIndexerFolder(ILoggerProvider options,
             var tasks = new List<Task>();
             var now = DateTime.UtcNow;
 
-            await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
+            await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData, tenantId))
             {
                 if (settings.Threads == 1)
                 {
@@ -88,52 +88,55 @@ public class FactoryIndexerFolder(ILoggerProvider options,
             Logger.ErrorFactoryIndexerFolder(e);
             throw;
         }
+    }
 
-        return;
+    public override async Task ReIndexAsync(int tenantId)
+    {
+        await IndexAllAsync(tenantId);
+    }
 
-        List<int> GetIds(DateTime lastIndexed)
+    private List<int> GetIds(DateTime lastIndexed, int tenantId)
+    {
+        var start = 0;
+        var result = new List<int>();
+
+        using var filesDbContext = dbContextFactory.CreateDbContext();
+
+        while (true)
         {
-            var start = 0;
-            var result = new List<int>();
-
-            using var filesDbContext = dbContextFactory.CreateDbContext();
-
-            while (true)
+            var id = Queries.FolderId(filesDbContext, lastIndexed, start, tenantId);
+            if (id != 0)
             {
-                var id = Queries.FolderId(filesDbContext, lastIndexed, start);
-                if (id != 0)
-                {
-                    start = id;
-                    result.Add(id);
-                }
-                else
-                {
-                    break;
-                }
+                start = id;
+                result.Add(id);
             }
-
-            return result;
-        }
-
-        List<DbFolder> GetData(long start, long stop, DateTime lastIndexed)
-        {
-            using var filesDbContext = dbContextFactory.CreateDbContext();
-            return Queries.FolderData(filesDbContext, lastIndexed, start, stop).ToList();
-        }
-
-        (int, int, int) GetCount(DateTime lastIndexed)
+            else
             {
-                using var filesDbContext = dbContextFactory.CreateDbContext();
-
-                var minId = Queries.FolderMinId(filesDbContext, lastIndexed);
-
-                var maxId = Queries.FolderMaxId(filesDbContext, lastIndexed);
-
-                var count = Queries.FoldersCount(filesDbContext, lastIndexed);
-
-                return new(count, maxId, minId);
+                break;
             }
         }
+
+        return result;
+    }
+
+    private List<DbFolder> GetData(long start, long stop, DateTime lastIndexed, int tenantId)
+    {
+        using var filesDbContext = dbContextFactory.CreateDbContext();
+        return Queries.FolderData(filesDbContext, lastIndexed, start, stop, tenantId).ToList();
+    }
+
+    private (int, int, int) GetCount(DateTime lastIndexed, int tenantId)
+    {
+        using var filesDbContext = dbContextFactory.CreateDbContext();
+
+        var minId = Queries.FolderMinId(filesDbContext, lastIndexed, tenantId);
+
+        var maxId = Queries.FolderMaxId(filesDbContext, lastIndexed, tenantId);
+
+        var count = Queries.FoldersCount(filesDbContext, lastIndexed, tenantId);
+
+        return new(count, maxId, minId);
+    }
 }
 
 class FolderTenant
@@ -144,10 +147,11 @@ class FolderTenant
 
 static file class Queries
 {
-    public static readonly Func<FilesDbContext, DateTime, int> FolderMinId =
+    public static readonly Func<FilesDbContext, DateTime, int, int> FolderMinId =
         EF.CompileQuery(
-            (FilesDbContext ctx, DateTime lastIndexed) =>
+            (FilesDbContext ctx, DateTime lastIndexed, int tenantId) =>
                 ctx.Folders
+                    .Where(r => tenantId == 0 || r.TenantId == tenantId)
                     .Where(r => r.ModifiedOn >= lastIndexed)
                     .Join(ctx.Tenants, r => r.TenantId, r => r.Id,
                         (f, t) => new FolderTenant { DbFolder = f, DbTenant = t })
@@ -156,10 +160,11 @@ static file class Queries
                     .Select(r => r.DbFolder.Id)
                     .FirstOrDefault());
 
-    public static readonly Func<FilesDbContext, DateTime, int> FolderMaxId =
+    public static readonly Func<FilesDbContext, DateTime, int, int> FolderMaxId =
         EF.CompileQuery(
-            (FilesDbContext ctx, DateTime lastIndexed) =>
+            (FilesDbContext ctx, DateTime lastIndexed, int tenantId) =>
                 ctx.Folders
+                    .Where(r => tenantId == 0 || r.TenantId == tenantId)
                     .Where(r => r.ModifiedOn >= lastIndexed)
                     .Join(ctx.Tenants, r => r.TenantId, r => r.Id,
                         (f, t) => new FolderTenant { DbFolder = f, DbTenant = t })
@@ -168,20 +173,22 @@ static file class Queries
                     .Select(r => r.DbFolder.Id)
                     .FirstOrDefault());
 
-    public static readonly Func<FilesDbContext, DateTime, int> FoldersCount =
+    public static readonly Func<FilesDbContext, DateTime, int, int> FoldersCount =
         EF.CompileQuery(
-            (FilesDbContext ctx, DateTime lastIndexed) =>
+            (FilesDbContext ctx, DateTime lastIndexed, int tenantId) =>
                 ctx.Folders
+                    .Where(r => tenantId == 0 || r.TenantId == tenantId)
                     .Where(r => r.ModifiedOn >= lastIndexed)
                     .Join(ctx.Tenants, r => r.TenantId, r => r.Id,
                         (f, t) => new FolderTenant { DbFolder = f, DbTenant = t })
                     .Count(r => r.DbTenant.Status == TenantStatus.Active));
 
-    public static readonly Func<FilesDbContext, DateTime, long, int> FolderId =
+    public static readonly Func<FilesDbContext, DateTime, long, int, int> FolderId =
         EF.CompileQuery(
-            (FilesDbContext ctx, DateTime lastIndexed, long start) =>
+            (FilesDbContext ctx, DateTime lastIndexed, long start, int tenantId) =>
                 ctx.Folders
                     .Where(r => r.ModifiedOn >= lastIndexed)
+                    .Where(r => tenantId == 0 || r.TenantId == tenantId)
                     .Join(ctx.Tenants, r => r.TenantId, r => r.Id,
                         (f, t) => new FolderTenant { DbFolder = f, DbTenant = t })
                     .Where(r => r.DbTenant.Status == TenantStatus.Active)
@@ -191,10 +198,11 @@ static file class Queries
                     .Skip(BaseIndexer<DbFolder>.QueryLimit)
                     .FirstOrDefault());
 
-    public static readonly Func<FilesDbContext, DateTime, long, long, IEnumerable<DbFolder>> FolderData =
+    public static readonly Func<FilesDbContext, DateTime, long, long, int, IEnumerable<DbFolder>> FolderData =
         EF.CompileQuery(
-            (FilesDbContext ctx, DateTime lastIndexed, long start, long stop) =>
+            (FilesDbContext ctx, DateTime lastIndexed, long start, long stop, int tenantId) =>
                 ctx.Folders
+                    .Where(r => tenantId == 0 || r.TenantId == tenantId)
                     .Where(r => r.ModifiedOn >= lastIndexed)
                     .Join(ctx.Tenants, r => r.TenantId, r => r.Id,
                         (f, t) => new FolderTenant { DbFolder = f, DbTenant = t })

@@ -68,7 +68,7 @@ public class FactoryIndexerFile(
     FileUtility fileUtility)
     : FactoryIndexer<DbFile>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
 {
-    public override async Task IndexAllAsync()
+    public override async Task IndexAllAsync(int tenantId = 0)
     {
         try
         {
@@ -76,7 +76,7 @@ public class FactoryIndexerFile(
             var tasks = new List<Task>();
             var now = DateTime.UtcNow;
             
-            await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
+            await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData, tenantId))
             {
                 if (settings.Threads == 1)
                 {
@@ -107,59 +107,62 @@ public class FactoryIndexerFile(
             Logger.ErrorFactoryIndexerFile(e);
             throw;
         }
+    }
 
-        return;
+    private List<int> GetIds(DateTime lastIndexed, int tenantId)
+    {
+        var start = 0;
+        var result = new List<int>();
 
-        List<int> GetIds(DateTime lastIndexed)
+        using var filesDbContext = dbContextFactory.CreateDbContext();
+
+        while (true)
         {
-            var start = 0;
-            var result = new List<int>();
-
-            using var filesDbContext = dbContextFactory.CreateDbContext();
-
-            while (true)
+            var id = Queries.FileId(filesDbContext, lastIndexed, start, tenantId);
+            if (id != 0)
             {
-                var id = Queries.FileId(filesDbContext, lastIndexed, start);
-                if (id != 0)
-                {
-                    start = id;
-                    result.Add(id);
-                }
-                else
-                {
-                    break;
-                }
+                start = id;
+                result.Add(id);
             }
-
-            return result;
+            else
+            {
+                break;
+            }
         }
 
-        List<DbFile> GetData(long start, long stop, DateTime lastIndexed)
-        {
-            using var filesDbContext = dbContextFactory.CreateDbContext();
-            return Queries.FilesFoldersPair(filesDbContext, lastIndexed, start, stop)
-                .Select(r =>
-                {
-                    var result = r.File;
-                    result.Folders = r.Folders;
-                    return result;
-                })
-                .ToList();
+        return result;
+    }
 
-        }
+    private List<DbFile> GetData(long start, long stop, DateTime lastIndexed, int tenantId)
+    {
+        using var filesDbContext = dbContextFactory.CreateDbContext();
+        return Queries.FilesFoldersPair(filesDbContext, lastIndexed, start, stop, tenantId)
+            .Select(r =>
+            {
+                var result = r.File;
+                result.Folders = r.Folders;
+                return result;
+            })
+            .ToList();
 
-        (int, int, int) GetCount(DateTime lastIndexed)
-        {
-            using var filesDbContext = dbContextFactory.CreateDbContext();
+    }
 
-            var minId = Queries.FileMinId(filesDbContext, lastIndexed);
+    private (int, int, int) GetCount(DateTime lastIndexed, int tenantId)
+    {
+        using var filesDbContext = dbContextFactory.CreateDbContext();
 
-            var maxId = Queries.FileMaxId(filesDbContext, lastIndexed);
+        var minId = Queries.FileMinId(filesDbContext, lastIndexed, tenantId);
 
-            var count = Queries.FilesCount(filesDbContext, lastIndexed);
+        var maxId = Queries.FileMaxId(filesDbContext, lastIndexed, tenantId);
 
-            return new(count, maxId, minId);
-        }
+        var count = Queries.FilesCount(filesDbContext, lastIndexed, tenantId);
+
+        return new(count, maxId, minId);
+    }
+    
+    public override async Task ReIndexAsync(int tenantId)
+    {
+        await IndexAllAsync(tenantId);
     }
 
     public override string SettingsTitle => FilesCommonResource.IndexTitle;
@@ -184,42 +187,45 @@ sealed file class FilesFoldersPair
 
 static file class Queries
 {
-    public static readonly Func<FilesDbContext, DateTime, int> FileMinId = EF.CompileQuery(
-        (FilesDbContext ctx, DateTime lastIndexed) =>
+    public static readonly Func<FilesDbContext, DateTime, int, int> FileMinId = EF.CompileQuery(
+        (FilesDbContext ctx, DateTime lastIndexed, int tenantId) =>
             ctx.Files
                 .Where(r => r.ModifiedOn >= lastIndexed)
                 .Join(ctx.Tenants, r => r.TenantId, r => r.Id, (f, t) => new FileTenant { DbFile = f, DbTenant = t })
                 .Where(r => r.DbTenant.Status == TenantStatus.Active)
                 .Select(r => r.DbFile)
                 .Where(r => r.Version == 1)
+                .Where(r => tenantId == 0 || r.TenantId == tenantId)
                 .OrderBy(r => r.Id)
                 .Select(r => r.Id)
                 .FirstOrDefault());
 
-    public static readonly Func<FilesDbContext, DateTime, int> FileMaxId = EF.CompileQuery(
-        (FilesDbContext ctx, DateTime lastIndexed) =>
+    public static readonly Func<FilesDbContext, DateTime, int, int> FileMaxId = EF.CompileQuery(
+        (FilesDbContext ctx, DateTime lastIndexed, int tenantId) =>
             ctx.Files
                 .Where(r => r.ModifiedOn >= lastIndexed)
                 .Join(ctx.Tenants, r => r.TenantId, r => r.Id, (f, t) => new FileTenant { DbFile = f, DbTenant = t })
                 .Where(r => r.DbTenant.Status == TenantStatus.Active)
                 .Select(r => r.DbFile)
                 .Where(r => r.Version == 1)
+                .Where(r => tenantId == 0 || r.TenantId == tenantId)
                 .OrderByDescending(r => r.Id)
                 .Select(r => r.Id)
                 .FirstOrDefault());
 
-    public static readonly Func<FilesDbContext, DateTime, int> FilesCount = EF.CompileQuery(
-        (FilesDbContext ctx, DateTime lastIndexed) =>
+    public static readonly Func<FilesDbContext, DateTime, int, int> FilesCount = EF.CompileQuery(
+        (FilesDbContext ctx, DateTime lastIndexed, int tenantId) =>
             ctx.Files
                 .Where(r => r.ModifiedOn >= lastIndexed)
+                .Where(r => tenantId == 0 || r.TenantId == tenantId)
                 .Join(ctx.Tenants, r => r.TenantId, r => r.Id, (f, t) => new FileTenant { DbFile = f, DbTenant = t })
                 .Where(r => r.DbTenant.Status == TenantStatus.Active)
                 .Select(r => r.DbFile)
                 .Count(r => r.Version == 1));
 
-    public static readonly Func<FilesDbContext, DateTime, long, long, IEnumerable<FilesFoldersPair>> FilesFoldersPair =
+    public static readonly Func<FilesDbContext, DateTime, long, long, int, IEnumerable<FilesFoldersPair>> FilesFoldersPair =
         EF.CompileQuery(
-            (FilesDbContext ctx, DateTime lastIndexed, long start, long stop) =>
+            (FilesDbContext ctx, DateTime lastIndexed, long start, long stop, int tenantId) =>
                 ctx.Files
                     .Where(r => r.ModifiedOn >= lastIndexed)
                     .Join(ctx.Tenants, r => r.TenantId, r => r.Id,
@@ -227,13 +233,14 @@ static file class Queries
                     .Where(r => r.DbTenant.Status == TenantStatus.Active)
                     .Select(r => r.DbFile)
                     .Where(r => r.Id >= start && r.Id <= stop && r.CurrentVersion)
+                    .Where(r => tenantId == 0 || r.TenantId == tenantId)
                     .Select(file => new FilesFoldersPair
                     {
                         File = file, Folders = ctx.Tree.Where(b => b.FolderId == file.ParentId).ToList()
                     }));
     
-    public static readonly Func<FilesDbContext, DateTime, long, int> FileId = EF.CompileQuery(
-    (FilesDbContext ctx, DateTime lastIndexed, long start) =>
+    public static readonly Func<FilesDbContext, DateTime, long, int, int> FileId = EF.CompileQuery(
+    (FilesDbContext ctx, DateTime lastIndexed, long start, int tenantId) =>
         ctx.Files
             .Where(r => r.ModifiedOn >= lastIndexed)
             .Join(ctx.Tenants, r => r.TenantId, r => r.Id, (f, t) => new FileTenant { DbFile = f, DbTenant = t })
@@ -241,6 +248,7 @@ static file class Queries
             .Select(r => r.DbFile)
             .Where(r => r.Id >= start)
             .Where(r => r.Version == 1)
+            .Where(r => tenantId == 0 || r.TenantId == tenantId)
             .OrderBy(r => r.Id)
             .Select(r => r.Id)
             .Skip(BaseIndexer<DbFile>.QueryLimit)

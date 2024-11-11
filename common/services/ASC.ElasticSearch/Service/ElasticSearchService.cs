@@ -56,8 +56,11 @@ public class ElasticSearchService(IServiceProvider serviceProvider, ICacheNotify
             }
 
             var generic = typeof(BaseIndexer<>);
-            var instance = (IIndexer)Activator.CreateInstance(generic.MakeGenericType(index.GetType()), index);
-            tasks.Add(instance.ReIndexAsync());
+            var instance = (IFactoryIndexer)Activator.CreateInstance(generic.MakeGenericType(index.GetType()), index);
+            if (instance != null)
+            {
+                tasks.Add(instance.ReIndexAsync(tenant));
+            }
         }
 
         if (tasks.Count == 0)

@@ -49,8 +49,8 @@ public interface IFactoryIndexer
 {
     string IndexName { get; }
     string SettingsTitle { get; }
-    Task IndexAllAsync();
-    Task ReIndexAsync();
+    Task IndexAllAsync(int tenantId = 0);
+    Task ReIndexAsync(int tenantId = 0);
     Task DeleteAsync(int tenantId, bool immediately = true);
 }
 
@@ -407,6 +407,8 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
         return await QueueAsync(() => _indexer.Delete(expression, tenant, immediately));
     }
 
+    public abstract Task ReIndexAsync(int tenantId);
+
     public async Task DeleteAsync(int tenantId, bool immediately = true)
     {
         var t = serviceProvider.GetService<T>();
@@ -440,15 +442,7 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
         _indexer.Refresh();
     }
 
-    public virtual Task IndexAllAsync()
-    {
-        return Task.CompletedTask;
-    }
-
-    public async Task ReIndexAsync()
-    {
-        await _indexer.ReIndexAsync();
-    }
+    public abstract Task IndexAllAsync(int tenantId = 0);
 
     public bool Support(T t)
     {
@@ -712,7 +706,7 @@ public class FactoryIndexer
         };
     }
 
-    public async Task ReindexAsync(string name)
+    public async Task ReindexAsync(string name, int tenantId = 0)
     {
         if (!_coreBaseSettings.Standalone)
         {
@@ -724,7 +718,7 @@ public class FactoryIndexer
             .Where(r => string.IsNullOrEmpty(name) || r.IndexName == name)
             .Select(r => (IFactoryIndexer)Activator.CreateInstance(generic.MakeGenericType(r.GetType()), r));
 
-        foreach (var indexer in indexers)
+        foreach (var indexer in indexers.Where(r => r != null))
         {
             await indexer.ReIndexAsync();
         }

@@ -68,24 +68,23 @@ public abstract class BaseIndexer<T>(Client client,
 {
     public const int QueryLimit = 10000;
 
-    protected internal T Wrapper => serviceProvider.GetService<T>();
+    private T Wrapper => serviceProvider.GetService<T>();
     internal string IndexName => Wrapper.IndexName;
 
     private bool _isExist;
-    private readonly ILogger _logger = logger;
-    protected readonly TenantManager _tenantManager = tenantManager;
     private static readonly object _locker = new();
 
     public async IAsyncEnumerable<List<T>> IndexAllAsync(
-        Func<DateTime, (int, int, int)> getCount,
-        Func<DateTime, List<int>> getIds,
-        Func<long, long, DateTime, List<T>> getData)
+        Func<DateTime, int, (int, int, int)> getCount,
+        Func<DateTime, int, List<int>> getIds,
+        Func<long, long, DateTime, int, List<T>> getData,
+        int tenantId)
     {
         DateTime lastIndexed;
 
         await using (var webStudioDbContext = await dbContextFactory.CreateDbContextAsync())
         {
-            lastIndexed = await Queries.LastIndexedAsync(webStudioDbContext, Wrapper.IndexName);
+            lastIndexed = await Queries.LastIndexedAsync(webStudioDbContext, Wrapper.IndexName + tenantId);
         }
 
         if (lastIndexed.Equals(DateTime.MinValue))
@@ -93,16 +92,16 @@ public abstract class BaseIndexer<T>(Client client,
             CreateIfNotExist(serviceProvider.GetService<T>());
         }
 
-        var (count, max, min) = getCount(lastIndexed);
-        _logger.DebugIndex(IndexName, count, max, min);
+        var (count, max, min) = getCount(lastIndexed, tenantId);
+        logger.DebugIndex(IndexName, count, max, min);
 
         var ids = new List<int> { min };
-        ids.AddRange(getIds(lastIndexed));
+        ids.AddRange(getIds(lastIndexed, tenantId));
         ids.Add(max);
 
         for (var i = 0; i < ids.Count - 1; i++)
         {
-            yield return getData(ids[i], ids[i + 1], lastIndexed);
+            yield return getData(ids[i], ids[i + 1], lastIndexed, tenantId);
         }
     }
 
@@ -112,19 +111,14 @@ public abstract class BaseIndexer<T>(Client client,
         {
             await webStudioDbContext.AddOrUpdateAsync(q => q.WebstudioIndex, new DbWebstudioIndex
             {
-            IndexName = Wrapper.IndexName,
+                IndexName = Wrapper.IndexName,
                 LastModified = lastModified
-        });
+            });
 
             await webStudioDbContext.SaveChangesAsync();
         }
 
-        _logger.DebugIndexCompleted(Wrapper.IndexName);
-    }
-
-    public async Task ReIndexAsync()
-    {
-        await ClearAsync();
+        logger.DebugIndexCompleted(Wrapper.IndexName);
     }
 
     public void CreateIfNotExist(T data)
@@ -178,7 +172,7 @@ public abstract class BaseIndexer<T>(Client client,
         }
         catch (Exception e)
         {
-            _logger.ErrorCreateIfNotExist(e);
+            logger.ErrorCreateIfNotExist(e);
         }
     }
 
@@ -247,11 +241,11 @@ public abstract class BaseIndexer<T>(Client client,
                                 throw;
                             }
                             
-                            _logger.ErrorIndex(e);
+                            logger.ErrorIndex(e);
                         }
                         catch (Exception e)
                         {
-                            _logger.ErrorIndex(e);
+                            logger.ErrorIndex(e);
                         }
                         finally
                         {
@@ -380,7 +374,7 @@ public abstract class BaseIndexer<T>(Client client,
         }
         catch (Exception e)
         {
-            _logger.ErrorCheckExist(data.IndexName, e);
+            logger.ErrorCheckExist(data.IndexName, e);
         }
 
         return false;
@@ -390,7 +384,7 @@ public abstract class BaseIndexer<T>(Client client,
     {
         var func = expression.Compile();
         var selector = new Selector<T>(serviceProvider);
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
 
         return (await client.Instance.SearchAsync(descriptor.GetDescriptor(this, onlyId))).Documents;
@@ -400,7 +394,7 @@ public abstract class BaseIndexer<T>(Client client,
     {
         var func = expression.Compile();
         var selector = new Selector<T>(serviceProvider);
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
         var result = client.Instance.Search(descriptor.GetDescriptor(this, onlyId));
         var total = result.Total;
@@ -424,7 +418,7 @@ public abstract class BaseIndexer<T>(Client client,
             await webstudioDbContext.SaveChangesAsync();
         }
 
-        _logger.DebugIndexDeleted(Wrapper.IndexName);
+        logger.DebugIndexDeleted(Wrapper.IndexName);
         await client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
         await baseIndexerHelper.ClearAsync(Wrapper);
         CreateIfNotExist(Wrapper);
