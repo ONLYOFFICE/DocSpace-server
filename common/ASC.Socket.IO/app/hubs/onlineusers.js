@@ -124,11 +124,6 @@ module.exports = async (io) => {
         var index = obj.startIndex;
         var count = obj.count;
         var users = [];
-        if(index == 0)
-        {
-          pushedUsers = [];
-          date = new Date();
-        }
         if(portalUsers[tenantId])
         {
           var onlineUsers = portalUsers[tenantId].filter(o => o.sessions.length != 0).sort(userSort);
@@ -136,13 +131,12 @@ module.exports = async (io) => {
           for(var i = index; i < onlineUsers.length; i++)
           {
             users.push(serialize(onlineUsers[i]));
-            pushedUsers.push(onlineUsers[i].id);
             if(users.length == count)
             {
               break;
             }
           }
-          if(onlineUsers.length < count)
+          if(users < count)
           {
             var offlineUsers = portalUsers[tenantId].filter(o => o.sessions.length == 0).sort(userSort);
             index = index - onlineUsers.length;
@@ -150,7 +144,10 @@ module.exports = async (io) => {
             for(var i = index; i < offlineUsers.length; i++)
             {
               users.push(serialize(offlineUsers[i]));
-              pushedUsers.push(offlineUsers[i].id);
+              if(users.length == count)
+              {
+                break;
+              }
             }
           }
         }
