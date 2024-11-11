@@ -130,16 +130,16 @@ public class LicenseReader(
                 }
 
                 await LicenseToDBAsync(license);
+            }
 
-                if (temp)
-                {
-                    File.Delete(_licensePathTemp);
-                }
+            if (temp)
+            {
+                File.Delete(_licensePathTemp);
+            }
 
-                if (bcp)
-                {
-                    File.Delete(_licensePathBcp);
-                }
+            if (bcp)
+            {
+                File.Delete(_licensePathBcp);
             }
         }
         catch (Exception ex)
