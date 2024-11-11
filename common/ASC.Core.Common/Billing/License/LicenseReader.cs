@@ -142,7 +142,7 @@ public class LicenseReader(
                 File.Delete(_licensePathBcp);
             }
         }
-        catch (Exception ex)
+        catch (BillingNotConfiguredException ex)
         {
             if (bcp)
             {
@@ -154,7 +154,11 @@ public class LicenseReader(
             }
 
             LogError(ex);
-
+            throw;
+        }
+        catch (Exception ex)
+        {
+            LogError(ex);
             throw;
         }
     }
