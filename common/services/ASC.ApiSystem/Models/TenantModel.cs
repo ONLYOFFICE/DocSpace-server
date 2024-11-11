@@ -67,7 +67,7 @@ public class TenantModel : IModel
     /// <summary>
     /// Email
     /// </summary>
-    [Email]
+    [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
 
