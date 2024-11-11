@@ -26,28 +26,37 @@
 
 namespace ASC.Files.Core;
 
-/// <summary>
-/// </summary>
 public enum DateToAutoCleanUp
 {
+    [SwaggerEnum(Description = "One week")]
     OneWeek = 1,
+
+    [SwaggerEnum(Description = "Two weeks")]
     TwoWeeks,
+
+    [SwaggerEnum(Description = "One month")]
     OneMonth,
+
+    [SwaggerEnum(Description = "Thirty days")]
     ThirtyDays,
+
+    [SwaggerEnum(Description = "Two months")]
     TwoMonths,
+
+    [SwaggerEnum(Description = "Three months")]
     ThreeMonths
 }
 
-/// <summary>
-/// </summary>
 public class AutoCleanUpData
 {
-    /// <summary>Specifies if the auto-clearing setting is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the auto-clearing setting is enabled or not
+    /// </summary>
     public bool IsAutoCleanUp { get; init; }
 
-    /// <summary>The period when the trash bin will be cleared</summary>
-    /// <type>ASC.Files.Core.DateToAutoCleanUp, ASC.Files.Core</type>
+    /// <summary>
+    /// The period when the trash bin will be cleared
+    /// </summary>
     public DateToAutoCleanUp Gap { get; init; }
 
     public static AutoCleanUpData GetDefault()

@@ -35,8 +35,10 @@ public class EmailInvitationsDto
 
 public class EmailInvitationDto
 {
-    /// <summary>Email address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Email address
+    /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 }
 

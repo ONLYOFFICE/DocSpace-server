@@ -40,6 +40,12 @@ public class TariffController(CommonMethods commonMethods,
 
     #region For TEST api
 
+    /// <summary>
+    /// Test Api
+    /// </summary>
+    /// <path>apisystem/tariff/test</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [SwaggerResponse(200, "Tariff api works")]
     [HttpGet("test")]
     public IActionResult Check()
     {
@@ -53,6 +59,12 @@ public class TariffController(CommonMethods commonMethods,
 
     #region API methods
 
+    /// <summary>
+    /// Sets tariff
+    /// </summary>
+    /// <path>apisystem/tariff/set</path>
+    [Tags("Tariff")]
+    [SwaggerResponse(200, "Tariff", typeof(IActionResult))]
     [HttpPut("set")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
@@ -118,6 +130,12 @@ public class TariffController(CommonMethods commonMethods,
         return await GetTariffAsync(tenant);
     }
 
+    /// <summary>
+    /// Gets tariff
+    /// </summary>
+    /// <path>apisystem/tariff/get</path>
+    [Tags("Tariff")]
+    [SwaggerResponse(200, "Tariff", typeof(IActionResult))]
     [HttpGet("get")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
@@ -149,6 +167,12 @@ public class TariffController(CommonMethods commonMethods,
         return await GetTariffAsync(tenant);
     }
 
+    /// <summary>
+    /// Gets all tariffs
+    /// </summary>
+    /// <path>apisystem/tariff/all</path>
+    [Tags("Tariff")]
+    [SwaggerResponse(200, "Tariff", typeof(IActionResult))]
     [HttpGet("all")]
     [AllowCrossSiteJson]
     public async Task<IActionResult> GetTariffsAsync()

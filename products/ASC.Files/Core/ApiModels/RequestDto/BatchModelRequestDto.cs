@@ -27,68 +27,126 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Base batch request parameters
 /// </summary>
-public class BaseBatchRequestDto
+public class FileBaseBatchRequestDto
 {
-    /// <summary>List of folder IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
-    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
-
-    /// <summary>List of file IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of file IDs
+    /// </summary>
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 
 /// <summary>
+/// Base batch request parameters
+/// </summary>
+public class BaseBatchRequestDto
+{
+    /// <summary>
+    /// List of folder IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// List of file IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+}
+
+/// <summary>
+/// Request parameters for downloading files
 /// </summary>
 public class DownloadRequestDto : BaseBatchRequestDto
 {
-    /// <summary>List of file IDs which will be converted</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Text.Json.JsonElement, System.String}}, System.Collections.Generic</type>
-    public IEnumerable<ItemKeyValuePair<JsonElement, string>> FileConvertIds { get; set; } = new List<ItemKeyValuePair<JsonElement, string>>();
+    /// <summary>
+    /// List of file IDs which will be converted
+    /// </summary>
+    public IDictionary<JsonElement, string> FileConvertIds { get; set; } = new Dictionary<JsonElement, string>();
 }
 
 /// <summary>
+/// Request parameters for deleting files
 /// </summary>
 public class DeleteBatchRequestDto : BaseBatchRequestDto
 {
-    /// <summary>Specifies whether to delete a file after the editing session is finished or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to delete a file after the editing session is finished or not
+    /// </summary>
     public bool DeleteAfter { get; set; }
 
-    /// <summary>Specifies whether to move a file to the "Trash" folder or delete it immediately</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
+    /// </summary>
     public bool Immediately { get; set; }
 }
 
 /// <summary>
+/// Parameters for deleting a file
 /// </summary>
-public class DeleteRequestDto
+public class Delete
 {
-    /// <summary>Specifies whether to delete a file after the editing session is finished or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to delete a file after the editing session is finished or not
+    /// </summary>
     public bool DeleteAfter { get; set; }
 
-    /// <summary>Specifies whether to move a file to the "Trash" folder or delete it immediately</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
+    /// </summary>
     public bool Immediately { get; set; }
 }
 
 /// <summary>
+/// Request parameters for deleting a file
+/// </summary>
+public class DeleteRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromBody]
+    public Delete File {  get; set; }
+}
+
+/// <summary>
+/// Request parameters for copying/moving files
 /// </summary>
 public class BatchRequestDto : BaseBatchRequestDto
 {
-    /// <summary>Destination folder ID</summary>
-    /// <type>System.Text.Json.JsonElement, System.Text.Json</type>
+    /// <summary>
+    /// Destination folder ID
+    /// </summary>
     public JsonElement DestFolderId { get; set; }
 
-    /// <summary>Overwriting behavior</summary>
-    /// <type>ASC.Web.Files.Services.WCFService.FileOperations.FileConflictResolveType, ASC.Files.Core</type>
+    /// <summary>
+    /// Overwriting behavior
+    /// </summary>
     public FileConflictResolveType ConflictResolveType { get; set; }
 
-    /// <summary>Specifies whether to delete a folder after the editing session is finished or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to delete a folder after the editing session is finished or not
+    /// </summary>
     public bool DeleteAfter { get; set; }
 
+    /// <summary>
+    /// Content
+    /// </summary>
     public bool Content { get; set; }
+}
+
+/// <summary>
+/// Request parameters for checking files and folders for conflicts
+/// </summary>
+public class BatchSimpleRequestDto : BaseBatchRequestDto
+{
+    /// <summary>
+    /// Destination folder ID
+    /// </summary>
+    public JsonElement DestFolderId { get; set; }
 }

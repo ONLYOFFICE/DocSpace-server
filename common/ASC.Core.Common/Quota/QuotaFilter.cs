@@ -26,12 +26,14 @@
 
 namespace ASC.Core;
 
-/// <summary>
-/// 
-/// </summary>
 public enum QuotaFilter
 {
+    [SwaggerEnum("All")]
     All = 0,
+
+    [SwaggerEnum("Default")]
     Default = 1,
+
+    [SwaggerEnum("Custom")]
     Custom = 2
 }

@@ -60,17 +60,17 @@ public class AccountsController<T>(
     AuthContext authContext,
     UserManager userManager) : ControllerBase
 {
+    /// <summary>
+    /// Gets accounts entries with shared
+    /// </summary>
+    /// <path>api/2.0/accounts/room/{id}/search</path>
+    [Tags("People / Search")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}/search")]
-    public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(
-        T id,
-        EmployeeStatus? employeeStatus,
-        EmployeeActivationStatus? activationStatus,
-        bool? excludeShared,
-        bool? invitedByMe,
-        Guid? inviterId,
-        Area area = Area.All)
+    public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(AccountsEntriesRequestDto<T> inDto)
     {
-        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
         if (!await fileSecurity.CanEditAccessAsync(room))
         {
@@ -92,17 +92,17 @@ public class AccountsController<T>(
 
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(room, text, excludeShared ?? false);
+        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(room, text, inDto.ExcludeShared ?? false);
         var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room,
             text,
-            employeeStatus,
-            activationStatus,
-            excludeShared ?? false,
+            inDto.EmployeeStatus,
+            inDto.ActivationStatus,
+            inDto.ExcludeShared ?? false,
             separator,
             includeStrangers,
-            area,
-            invitedByMe,
-            inviterId);
+            inDto.Area,
+            inDto.InvitedByMe,
+            inDto.InviterId);
         
         var total = totalGroups + totalUsers;
         
@@ -110,7 +110,7 @@ public class AccountsController<T>(
 
         var groupsCount = 0;
 
-        await foreach (var item in securityDao.GetGroupsWithSharedAsync(room, text, excludeShared ?? false, offset, count))
+        await foreach (var item in securityDao.GetGroupsWithSharedAsync(room, text, inDto.ExcludeShared ?? false, offset, count))
         {
             groupsCount++;
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
@@ -121,14 +121,14 @@ public class AccountsController<T>(
 
         await foreach (var item in securityDao.GetUsersWithSharedAsync(room,
                            text,
-                           employeeStatus,
-                           activationStatus,
-                           excludeShared ?? false,
+                           inDto.EmployeeStatus,
+                           inDto.ActivationStatus,
+                           inDto.ExcludeShared ?? false,
                            separator,
                            includeStrangers,
-                           area,
-                           invitedByMe,
-                           inviterId,
+                           inDto.Area,
+                           inDto.InvitedByMe,
+                           inDto.InviterId,
                            usersOffset,
                            usersCount))
         {

@@ -28,5 +28,8 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class FinishDto
 {
+    /// <summary>
+    /// Is send welcome email
+    /// </summary>
     public bool IsSendWelcomeEmail { get; set; }
 }

@@ -29,10 +29,19 @@ namespace ASC.Files.Core.VirtualRooms;
 [Flags]
 public enum WatermarkAdditions
 {
+    [SwaggerEnum("User name")]
     UserName = 1,
+
+    [SwaggerEnum("User email")]
     UserEmail = 2,
+
+    [SwaggerEnum("User ip adress")]
     UserIpAdress = 4,
+
+    [SwaggerEnum("Current date")]
     CurrentDate = 8,
+
+    [SwaggerEnum("Room name")]
     RoomName = 16
 }
 public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRequestDto>
@@ -69,6 +78,10 @@ public class WatermarkManager
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
+        if(watermarkRequestDto == null)
+        {
+            return new WatermarkSettings();
+        }
 
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
         {

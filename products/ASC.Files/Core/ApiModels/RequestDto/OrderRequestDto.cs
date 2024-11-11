@@ -24,12 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Order request parameters
+/// </summary>
 public class OrderRequestDto
 {
+    /// <summary>
+    /// Order
+    /// </summary>
     [Range(1, int.MaxValue)]
     [JsonConverter(typeof(OrderRequestDtoConverter))]
     public int Order { get; set; }
@@ -67,4 +71,40 @@ public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConve
     {
         writer.WriteStringValue(value.ToString());
     }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class OrderFileRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// Order
+    /// </summary>
+    [FromBody]
+    public OrderRequestDto Order { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class OrderFolderRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Order
+    /// </summary>
+    [FromBody]
+    public OrderRequestDto Order { get; set; }
 }

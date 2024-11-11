@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Net.Http.Headers;
@@ -35,7 +36,6 @@ global using System.Security.Cryptography.X509Certificates;
 global using System.Text;
 global using System.Text.Json.Serialization;
 global using System.Web;
-
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;
@@ -52,7 +52,6 @@ global using ASC.FederatedLogin.LoginProviders;
 global using ASC.FederatedLogin.Profile;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core.Files;
-
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.AspNetCore.Http;
@@ -62,8 +61,6 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.IdentityModel.Tokens;
-
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
-
 global using JsonSerializer = System.Text.Json.JsonSerializer;

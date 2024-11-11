@@ -26,69 +26,148 @@
 
 namespace ASC.ApiSystem.Models;
 
+/// <summary>
+/// Request parameters for portal
+/// </summary>
 public class TenantModel : IModel
 {
+    /// <summary>
+    /// Portal name
+    /// </summary>
     public string PortalName { get; set; }
 
+    /// <summary>
+    /// Tenant id
+    /// </summary>
     public int? TenantId { get; set; }
 
+    /// <summary>
+    /// Affiliate id
+    /// </summary>
     [StringLength(255)]
     public string AffiliateId { get; set; }
 
+    /// <summary>
+    /// Partner id
+    /// </summary>
     [StringLength(255)]
     public string PartnerId { get; set; }
 
+    /// <summary>
+    /// Campaign
+    /// </summary>
     public string Campaign { get; set; }
 
+    /// <summary>
+    /// First name
+    /// </summary>
     [StringLength(255)]
     public string FirstName { get; set; }
 
-    //todo  [Email]
+    /// <summary>
+    /// Email
+    /// </summary>
+    [Email]
     [StringLength(255)]
     public string Email { get; set; }
 
+    /// <summary>
+    /// Industry
+    /// </summary>
     public int Industry { get; set; }
 
+    /// <summary>
+    /// Language
+    /// </summary>
     [StringLength(7)]
     public string Language { get; set; }
 
+
+    /// <summary>
+    /// Last name
+    /// </summary>
     [StringLength(255)]
     public string LastName { get; set; }
 
+    /// <summary>
+    /// Module
+    /// </summary>
     [StringLength(38)]
     public string Module { get; set; }
 
+    /// <summary>
+    /// Password
+    /// </summary>
     //todo: delete after www update
     [StringLength(PasswordSettingsManager.MaxLength)]
     public string Password { get; set; }
 
+    /// <summary>
+    /// Password hash
+    /// </summary>
     public string PasswordHash { get; set; }
 
+    /// <summary>
+    /// Phone
+    /// </summary>
     [StringLength(32)]
     public string Phone { get; set; }
 
+    /// <summary>
+    /// Recaptcha response
+    /// </summary>
     public string RecaptchaResponse { get; set; }
 
+    /// <summary>
+    /// Recaptcha type
+    /// </summary>
     public RecaptchaType RecaptchaType { get; set; }
 
+    /// <summary>
+    /// Region
+    /// </summary>
     [StringLength(20)]
     public string Region { get; set; }
 
+    /// <summary>
+    /// AWS region
+    /// </summary>
     [JsonPropertyName("awsRegion")]
     public string AWSRegion { get; set; }
 
+    /// <summary>
+    /// Status
+    /// </summary>
     public TenantStatus Status { get; set; }
 
+    /// <summary>
+    /// Skip welcome
+    /// </summary>
     public bool SkipWelcome { get; set; }
 
+    /// <summary>
+    /// TimeZone name
+    /// </summary>
     [StringLength(255)]
     public string TimeZoneName { get; set; }
 
+    /// <summary>
+    /// Spam
+    /// </summary>
     public bool Spam { get; set; }
 
+    /// <summary>
+    /// Calls
+    /// </summary>
     public bool Calls { get; set; }
 
+    /// <summary>
+    /// App key
+    /// </summary>
     public string AppKey { get; set; }
 
+    /// <summary>
+    /// Limited access space
+    /// </summary>
     public bool LimitedAccessSpace { get; set; }
 }

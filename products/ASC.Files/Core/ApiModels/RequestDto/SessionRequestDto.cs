@@ -27,27 +27,53 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Session parameters
 /// </summary>
-public class SessionRequestDto
+public class SessionRequest
 {
-    /// <summary>File name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// File name
+    /// </summary>
     public string FileName { get; set; }
 
-    /// <summary>File length in bytes</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// File length in bytes
+    /// </summary>
     public long FileSize { get; set; }
 
-    /// <summary>Relative path to the folder</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Relative path to the folder
+    /// </summary>
     public string RelativePath { get; set; }
 
-    /// <summary>Creation time</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    /// <summary>
+    /// Creation time
+    /// </summary>
     public ApiDateTime CreateOn { get; set; }
 
-    /// <summary>Specifies whether to encrypt a file or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to encrypt a file or not
+    /// </summary>
     public bool Encrypted { get; set; }
+
+    /// <summary>
+    /// Create new if exists
+    /// </summary>
     public bool CreateNewIfExist { get; set; }
+}
+
+
+public class SessionRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Session
+    /// </summary>
+    [FromBody]
+    public SessionRequest Session {  get; set; }
 }
