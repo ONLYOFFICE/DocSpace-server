@@ -28,11 +28,24 @@ namespace ASC.Core.Tenants;
 
 public enum TenantStatus
 {
+    [SwaggerEnum("Active")]
     Active = 0,
+
+    [SwaggerEnum("Suspended")]
     Suspended = 1,
+
+    [SwaggerEnum("Remove pending")]
     RemovePending = 2,
+
+    [SwaggerEnum("Transfering")]
     Transfering = 3,
+
+    [SwaggerEnum("Restoring")]
     Restoring = 4,
+
+    [SwaggerEnum("Migrating")]
     Migrating = 5,
+
+    [SwaggerEnum("Encryption")]
     Encryption = 6
 }

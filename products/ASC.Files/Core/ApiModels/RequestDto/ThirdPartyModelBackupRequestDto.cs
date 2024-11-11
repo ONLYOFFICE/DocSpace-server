@@ -27,30 +27,37 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Third-party backup request parameters
 /// </summary>
 public class ThirdPartyBackupRequestDto
 {
-    /// <summary>Connection URL for the sharepoint</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Connection URL for the sharepoint
+    /// </summary>
     public string Url { get; set; }
 
-    /// <summary>Login</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Login
+    /// </summary>
     public string Login { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Password
+    /// </summary>
     public string Password { get; set; }
 
-    /// <summary>Authentication token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Authentication token
+    /// </summary>
     public string Token { get; set; }
 
-    /// <summary>Customer title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Customer title
+    /// </summary>
     public string CustomerTitle { get; set; }
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Provider key
+    /// </summary>
     public string ProviderKey { get; set; }
 }

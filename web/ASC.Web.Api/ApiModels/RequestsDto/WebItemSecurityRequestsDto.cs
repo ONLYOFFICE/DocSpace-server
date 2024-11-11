@@ -27,24 +27,33 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// Module request parameters
 /// </summary>
 public class WebItemSecurityRequestsDto
 {
-    /// <summary>Module ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Module ID
+    /// </summary>
     public string Id { get; set; }
 
-    /// <summary>Specifies if the module security settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the module security settings are enabled or not
+    /// </summary>
     public bool Enabled { get; set; }
 
-    /// <summary>List of user/group IDs with the access to the module</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    /// <summary>
+    /// List of user/group IDs with the access to the module
+    /// </summary>
     public IEnumerable<Guid> Subjects { get; set; }
+}
 
-    /// <summary>Products with security information</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.String, System.Boolean}}, System.Collections.Generic</type>
-    public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }
+/// <summary>
+/// Module request parameters
+/// </summary>
+public class WebItemsSecurityRequestsDto
+{
+    /// <summary>
+    /// Products with security information
+    /// </summary>
+    public IDictionary<string, bool> Items { get; set; }
 }

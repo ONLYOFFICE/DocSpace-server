@@ -45,6 +45,10 @@ management:
       enabled: false
 
 server:
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: application/json
   servlet:
     session:
       tracking-modes: cookie

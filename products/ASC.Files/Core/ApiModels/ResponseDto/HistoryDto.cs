@@ -28,10 +28,29 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public record HistoryDto
 {
+    /// <summary>
+    /// Action
+    /// </summary>
     public HistoryAction Action { get; init; }
+
+    /// <summary>
+    /// Initiator
+    /// </summary>
     public EmployeeDto Initiator { get; init; }
+
+    /// <summary>
+    /// Date
+    /// </summary>
     public ApiDateTime Date { get; init; }
+
+    /// <summary>
+    /// Data
+    /// </summary>
     public HistoryData Data { get; init; }
+
+    /// <summary>
+    /// Related
+    /// </summary>
     public List<HistoryDto> Related { get; set; }
 }
 

@@ -13,6 +13,8 @@
     <NoWarn>NU1701</NoWarn>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>12</LangVersion>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  <NoWarn>NU1701;1701;1702;1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

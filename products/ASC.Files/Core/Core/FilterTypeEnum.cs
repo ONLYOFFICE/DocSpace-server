@@ -28,23 +28,57 @@ namespace ASC.Files.Core;
 
 public enum FilterType
 {
+    [SwaggerEnum("None")]
     [EnumMember] None = 0,
+
+    [SwaggerEnum("Files  only")]
     [EnumMember] FilesOnly = 1,
+
+    [SwaggerEnum("Folders only")]
     [EnumMember] FoldersOnly = 2,
+
+    [SwaggerEnum("Documents only")]
     [EnumMember] DocumentsOnly = 3,
+
+    [SwaggerEnum("Presentations only")]
     [EnumMember] PresentationsOnly = 4,
+
+    [SwaggerEnum("Spreadsheets only")]
     [EnumMember] SpreadsheetsOnly = 5,
+
+    [SwaggerEnum("Images only")]
     [EnumMember] ImagesOnly = 7,
+
+    [SwaggerEnum("By user")]
     [EnumMember] ByUser = 8,
+
+    [SwaggerEnum("By department")]
     [EnumMember] ByDepartment = 9,
+
+    [SwaggerEnum("Archive only")]
     [EnumMember] ArchiveOnly = 10,
+
+    [SwaggerEnum("By extension")]
     [EnumMember] ByExtension = 11,
+
+    [SwaggerEnum("Media only")]
     [EnumMember] MediaOnly = 12,
+
+    [SwaggerEnum("Filling forms rooms")]
     [EnumMember] FillingFormsRooms = 13,
+
+    [SwaggerEnum("Editing rooms")]
     [EnumMember] EditingRooms = 14,
+
+    [SwaggerEnum("Custom rooms")]
     [EnumMember] CustomRooms = 17,
+
+    [SwaggerEnum("Public rooms")]
     [EnumMember] PublicRooms = 20,
+
+    [SwaggerEnum("Pdf")]
     [EnumMember] Pdf = 22,
+    [SwaggerEnum("Pdf form")]
     [EnumMember] PdfForm = 23,
     [EnumMember] VirtualDataRooms = 24
 }

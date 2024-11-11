@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="ASC.ApiSystem">
+      <HintPath>..\..\..\services\ASC.ApiSystem\bin\Debug\ASC.ApiSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="ASC.Data.Backup">
+      <HintPath>..\..\..\services\ASC.Data.Backup\bin\Debug\ASC.Data.Backup.dll</HintPath>
+    </Reference>
+    <Reference Include="ASC.Files">
+      <HintPath>..\..\..\..\products\ASC.Files\Server\bin\Debug\ASC.Files.dll</HintPath>
+    </Reference>
+    <Reference Include="ASC.People">
+      <HintPath>..\..\..\..\products\ASC.People\Server\bin\Debug\ASC.People.dll</HintPath>
+    </Reference>
+    <Reference Include="ASC.Web.Api">
+      <HintPath>..\..\..\..\web\ASC.Web.Api\bin\Debug\ASC.Web.Api.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

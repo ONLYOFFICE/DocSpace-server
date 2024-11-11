@@ -26,47 +26,41 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class CapabilitiesDto
 {
-    /// <summary>Specifies if the LDAP settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the LDAP settings are enabled or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool LdapEnabled { get; set; }
 
-    /// <summary>Ldap domain</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Ldap domain
+    /// </summary>
     public string LdapDomain { get; set; }
 
-    /// <summary>List of providers</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of providers
+    /// </summary>
     public List<string> Providers { get; set; }
 
-    /// <summary>SP login label</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// SP login label
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
     public string SsoLabel { get; set; }
 
-    /// <summary>Specifies if OAuth is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if OAuth is enabled or not
+    /// </summary>
     public bool OauthEnabled { get; init; }
 
-    /// <summary>SSO URL. If this parameter is empty, then the SSO settings are disabled</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// SSO URL. If this parameter is empty, then the SSO settings are disabled
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
+    [Url]
     public string SsoUrl { get; set; }
-
-    /// <summary>Specifies if OAuth2/OpenId Identity Server is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    
     public bool IdentityServerEnabled { get; set; }
-
-    public static CapabilitiesDto GetSample()
-    {
-        return new CapabilitiesDto
-        {
-            LdapEnabled = false,
-            IdentityServerEnabled = false,
-            // Providers = AccountLinkControl.AuthProviders,
-            SsoLabel = string.Empty,
-            SsoUrl = string.Empty
-        };
-    }
 }

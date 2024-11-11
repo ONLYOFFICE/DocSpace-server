@@ -26,44 +26,51 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class EditHistoryDto
 {
-    /// <summary>File ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// File ID
+    /// </summary>
     public int ID { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; set; }
 
-    /// <summary>File version</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// File version
+    /// </summary>
     public int Version { get; set; }
 
-    /// <summary>Version group</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Version group
+    /// </summary>
     public int VersionGroup { get; set; }
 
-    /// <summary>A user who updated a file</summary>
-    /// <type>ASC.Files.Core.EditHistoryAuthor, ASC.Files.Core</type>
+    /// <summary>
+    /// A user who updated a file
+    /// </summary>
     public EditHistoryAuthor User { get; set; }
 
-    /// <summary>Creation time</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    /// <summary>
+    /// Creation time
+    /// </summary>
     public ApiDateTime Created { get; set; }
 
-    /// <summary>History changes in the string format</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// History changes in the string format
+    /// </summary>
     public string ChangesHistory { get; set; }
 
-    /// <summary>List of history changes</summary>
-    /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.EditHistoryChangesWrapper}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of history changes
+    /// </summary>
     public List<EditHistoryChangesWrapper> Changes { get; set; }
 
-    /// <summary>Server version</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Server version
+    /// </summary>
     public string ServerVersion { get; set; }
 
     public EditHistoryDto(EditHistory editHistory, ApiDateTimeHelper apiDateTimeHelper, UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)
@@ -82,6 +89,13 @@ public class EditHistoryDto
 
 public class EditHistoryChangesWrapper(EditHistoryChanges historyChanges, ApiDateTimeHelper apiDateTimeHelper)
 {
+    /// <summary>
+    /// User
+    /// </summary>
     public EditHistoryAuthor User { get; set; } = historyChanges.Author;
+
+    /// <summary>
+    /// Created
+    /// </summary>
     public ApiDateTime Created { get; set; } = apiDateTimeHelper.Get(historyChanges.Date);
 }

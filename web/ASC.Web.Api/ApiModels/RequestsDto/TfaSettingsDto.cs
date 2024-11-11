@@ -26,35 +26,40 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class TfaSettingsDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public string Id { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Specifies if the TFA settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the TFA settings are enabled or not
+    /// </summary>
     public bool Enabled { get; set; }
 
-    /// <summary>Specifies if the TFA settings are available or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the TFA settings are available or not
+    /// </summary>
     public bool Avaliable { get; set; }
 
-    /// <summary>List of trusted IP addresses</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of trusted IP addresses
+    /// </summary>
     public List<string> TrustedIps { get; set; }
 
-    /// <summary>List of users who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of users who must use the TFA verification
+    /// </summary>
     public List<Guid> MandatoryUsers { get; set; }
 
-    /// <summary>List of groups who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of groups who must use the TFA verification
+    /// </summary>
     public List<Guid> MandatoryGroups { get; set; }
 }

@@ -38,8 +38,17 @@ public class WebPluginsController(ApiContext apiContext,
         IMapper mapper)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
+    /// <summary>
+    /// Adds web plugins from file
+    /// </summary>
+    /// <path>api/2.0/settings/webplugins</path>
+    /// <exception cref="CustomHttpException"></exception>
+    [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
+    [SwaggerResponse(400, "bad request")]
+    [SwaggerResponse(403, "Plugins disabled")]
     [HttpPost("")]
-    public async Task<WebPluginDto> AddWebPluginFromFile(bool system)
+    public async Task<WebPluginDto> AddWebPluginFromFile(WebPluginFromFileRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -57,7 +66,7 @@ public class WebPluginsController(ApiContext apiContext,
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, system);
+        var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, inDto.System);
 
         await ChangeCspSettings(webPlugin, webPlugin.Enabled);
 
@@ -66,8 +75,15 @@ public class WebPluginsController(ApiContext apiContext,
         return outDto;
     }
 
+    /// <summary>
+    /// Gets web plugins
+    /// </summary>
+    /// <path>api/2.0/settings/webplugins</path>
+    [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
+    [SwaggerResponse(403, "Plugins disabled")]
     [HttpGet("")]
-    public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(bool? enabled = null)
+    public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(GetWebPluginsRequestDto inDto)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
@@ -75,46 +91,67 @@ public class WebPluginsController(ApiContext apiContext,
 
         var outDto = mapper.Map<List<WebPlugin>, List<WebPluginDto>>(webPlugins);
 
-        if (enabled.HasValue)
+        if (inDto.Enabled.HasValue)
         {
-            outDto = outDto.Where(i => i.Enabled == enabled).ToList();
+            outDto = outDto.Where(i => i.Enabled == inDto.Enabled).ToList();
         }
 
         return outDto;
     }
 
+    /// <summary>
+    /// Gets web plugins by name specified in request
+    /// </summary>
+    /// <path>api/2.0/settings/webplugins/{name}</path>
+    [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
+    [SwaggerResponse(403, "Plugins disabled")]
     [HttpGet("{name}")]
-    public async Task<WebPluginDto> GetWebPluginAsync(string name)
+    public async Task<WebPluginDto> GetWebPluginAsync(WebPluginNameRequestDto inDto)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, name);
+        var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, inDto.Name);
 
         var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
 
         return outDto;
     }
 
+    /// <summary>
+    /// Updates web plugins
+    /// </summary>
+    /// <path>api/2.0/settings/webplugins/{name}</path>
+    [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "Plugins disabled")]
     [HttpPut("{name}")]
-    public async Task UpdateWebPluginAsync(string name, WebPluginRequestsDto inDto)
+    public async Task UpdateWebPluginAsync(WebPluginRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, name, inDto.Enabled, inDto.Settings);
+        var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, inDto.Name, inDto.WebPlugin.Enabled, inDto.WebPlugin.Settings);
 
-        await ChangeCspSettings(webPlugin, inDto.Enabled);
+        await ChangeCspSettings(webPlugin, inDto.WebPlugin.Enabled);
     }
 
+    /// <summary>
+    /// Deletes web plugins by name specified in request
+    /// </summary>
+    /// <path>api/2.0/settings/webplugins/{name}</path>
+    [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "Plugins disabled")]
     [HttpDelete("{name}")]
-    public async Task DeleteWebPluginAsync(string name)
+    public async Task DeleteWebPluginAsync(WebPluginNameRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, name);
+        var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, inDto.Name);
 
         await ChangeCspSettings(webPlugin, false);
     }

@@ -26,10 +26,11 @@
 
 namespace ASC.Core;
 
-/// <summary>
-/// </summary>
 public enum Payments
 {
+    [SwaggerEnum("Paid")]
     Paid = 0,
+
+    [SwaggerEnum("Free")]
     Free = 1
 }

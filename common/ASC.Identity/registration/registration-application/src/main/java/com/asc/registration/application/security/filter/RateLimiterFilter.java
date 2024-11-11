@@ -37,7 +37,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -76,7 +75,8 @@ public class RateLimiterFilter extends OncePerRequestFilter {
       var bucket =
           proxyManager
               .builder()
-              .build(String.format("registration:%s:%s", method, person.getId()), bucketConfiguration);
+              .build(
+                  String.format("registration:%s:%s", method, person.getId()), bucketConfiguration);
       handleRequest(bucket, request, response, chain);
     } else {
       var clientIp = httpUtils.getRequestClientAddress(request).orElse(request.getRemoteAddr());
@@ -98,9 +98,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
       throws IOException, ServletException {
     var probe = bucket.tryConsumeAndReturnRemaining(1);
     response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
-    response.setHeader(
-        X_RATE_RESET,
-        String.valueOf(probe.getNanosToWaitForReset()));
+    response.setHeader(X_RATE_RESET, String.valueOf(probe.getNanosToWaitForReset()));
     response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
     if (probe.isConsumed()) {
       chain.doFilter(request, response);

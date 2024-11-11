@@ -52,13 +52,12 @@ public class OwnerController(
     /// <short>
     /// Send the owner change instructions
     /// </short>
-    /// <category>Owner</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
-    /// <returns type="System.Object, System">Message about changing the portal owner</returns>
     /// <path>api/2.0/settings/owner</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Owner")]
+    [SwaggerResponse(200, "Message about changing the portal owner", typeof(object))]
+    [SwaggerResponse(403, "Collaborator can not be an owner")]
     [HttpPost("")]
-    public async Task<object> SendOwnerChangeInstructionsAsync(SettingsRequestsDto inDto)
+    public async Task<object> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -93,14 +92,14 @@ public class OwnerController(
     /// <short>
     /// Update the portal owner
     /// </short>
-    /// <category>Owner</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
-    /// <returns></returns>
     /// <path>api/2.0/settings/owner</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Owner")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(400, "The user could not be found")]
+    [SwaggerResponse(409, "")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
-    public async Task OwnerAsync(SettingsRequestsDto inDto)
+    public async Task OwnerAsync(OwnerIdSettingsRequestDto inDto)
     {
         var newOwner = Constants.LostUser;
         try

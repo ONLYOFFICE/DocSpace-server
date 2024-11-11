@@ -27,41 +27,47 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// Request parameters for white label settings
 /// </summary>
 public class WhiteLabelRequestsDto
 {
-    /// <summary>Logo text</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Logo text
+    /// </summary>
     [StringLength(30)]
     public string LogoText { get; set; }
 
-    /// <summary>Tenant IDs with their logos (light or dark)</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.String, ASC.Web.Api.ApiModel.RequestsDto.LogoRequestsDto}}, System.Collections.Generic</type>
-    public IEnumerable<ItemKeyValuePair<string, LogoRequestsDto>> Logo { get; set; }
+    /// <summary>
+    /// Tenant IDs with their logos (light or dark)
+    /// </summary>
+    public IDictionary<string, LogoRequestsDto> Logo { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class LogoRequestsDto
 {
-    /// <summary>Light theme logo</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Light theme logo
+    /// </summary>
     public string Light { get; set; }
 
-    /// <summary>Dark theme logo</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Dark theme logo
+    /// </summary>
     public string Dark { get; set; }
 }
 
 /// <summary>
+/// White label request parameters
 /// </summary>
 public class WhiteLabelQueryRequestsDto
 {
-    /// <summary>Specifies if the logo is for a dark theme or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if the logo is for a dark theme or not
+    /// </summary>
     public bool? IsDark { get; set; }
 
-    /// <summary>Specifies if the logo is for a default tenant or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if the logo is for a default tenant or not
+    /// </summary>
     public bool? IsDefault { get; set; }
 }
