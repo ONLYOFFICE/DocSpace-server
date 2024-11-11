@@ -41,3 +41,12 @@ public class SendCongratulationsDto
     /// </summary>
     public string Key { get; set; }
 }
+
+public class SendRemoveInstructionsDto
+{
+    /// <summary>Uer ID</summary>
+    public Guid Userid { get; set; }
+
+    /// <summary>Email key</summary>
+    public string Key { get; set; }
+}

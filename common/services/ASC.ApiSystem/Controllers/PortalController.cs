@@ -381,11 +381,21 @@ public class PortalController(
             });
         }
 
-        await hostedSolution.RemoveTenantAsync(tenant);
+        var wizardSettings = await settingsManager.LoadAsync<WizardSettings>(tenant.Id);
+
+        if (!wizardSettings.Completed)
+        {
+            await hostedSolution.RemoveTenantAsync(tenant);
+        }
+        else
+        {
+            await commonMethods.SendRemoveInstructions(commonMethods.GetRequestScheme(), tenant);
+        }
 
         return Ok(new
         {
-            tenant = commonMethods.ToTenantWrapper(tenant)
+            tenant = commonMethods.ToTenantWrapper(tenant),
+            removed = !wizardSettings.Completed,
         });
     }
 

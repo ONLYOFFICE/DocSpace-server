@@ -532,6 +532,13 @@ public class PortalController(
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
+        var user = await userManager.GetUsersAsync(tenant.OwnerId);
+
+        if (!SetupInfo.IsSecretEmail(user.Email))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         await tenantManager.RemoveTenantAsync(tenant.Id);
 
         if (!coreBaseSettings.Standalone)
@@ -727,6 +734,39 @@ public class PortalController(
             default:
                 throw new SecurityException("Access Denied.");
         }
+    }
+
+    /// <summary>
+    /// Sends the instructions to remove the current portal.
+    /// </summary>
+    /// <short>Send removal instructions</short>
+    /// <path>api/2.0/portal/sendremoveinstructions</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [AllowAnonymous]
+    [HttpPost("sendremoveinstructions")]
+    public async Task SendRemoveInstructionsAsync([FromQuery] SendRemoveInstructionsDto inDto)
+    {
+        var checkKeyResult = ValidationResult.Invalid;
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var authInterval = TimeSpan.FromHours(1);
+
+        if (coreBaseSettings.Standalone && tenant.OwnerId == inDto.Userid)
+        {
+            checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(inDto.Userid.ToString() + ConfirmType.PortalRemove, inDto.Key, authInterval);
+        }
+
+        if (checkKeyResult != ValidationResult.Ok)
+        {
+            throw new SecurityException("Access Denied.");
+        }
+
+        var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+        var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove);
+
+        await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), false, false);
     }
 
     private async Task DemandPermissionToDeleteTenantAsync(Tenant tenant)
