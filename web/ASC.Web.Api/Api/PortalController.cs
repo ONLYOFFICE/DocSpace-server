@@ -740,11 +740,11 @@ public class PortalController(
     /// Sends the instructions to remove the current portal.
     /// </summary>
     /// <short>Send removal instructions</short>
-    /// <category>Settings</category>
-    /// <returns></returns>
     /// <path>api/2.0/portal/sendremoveinstructions</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowAnonymous]
     [HttpPost("sendremoveinstructions")]
     public async Task SendRemoveInstructionsAsync([FromQuery] SendRemoveInstructionsDto inDto)
