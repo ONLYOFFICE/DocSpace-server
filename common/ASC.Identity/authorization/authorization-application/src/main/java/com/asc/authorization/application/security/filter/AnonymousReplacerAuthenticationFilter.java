@@ -85,9 +85,9 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
     }
 
     var cookie =
-            new Cookie(
-                    securityConfigProperties.getRedirectAuthorizationCookie(),
-                    httpUtils.getFullURL(request));
+        new Cookie(
+            securityConfigProperties.getRedirectAuthorizationCookie(),
+            httpUtils.getFullURL(request));
     cookie.setPath("/");
     cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
     response.addCookie(cookie);
@@ -96,7 +96,7 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
     if (authCookieValue.isEmpty()) {
       log.warn("Missing '{}' cookie", securityConfigProperties.getAuthCookieName());
       securityUtils.redirectWithError(
-              request, response, clientId, AuthenticationError.MISSING_ASC_COOKIE_ERROR.getCode());
+          request, response, clientId, AuthenticationError.MISSING_ASC_COOKIE_ERROR.getCode());
       return;
     }
 
