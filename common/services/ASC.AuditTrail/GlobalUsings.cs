@@ -26,7 +26,7 @@
 
 global using System.Collections;
 global using System.Text.Json;
-
+global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Log;
 global using ASC.AuditTrail.Mappers;
 global using ASC.AuditTrail.Models;
@@ -41,14 +41,8 @@ global using ASC.Geolocation;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;
-
 global using AutoMapper;
-
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Logging;
-
 global using NetEscapades.EnumGenerators;
-
 global using Newtonsoft.Json;
-
-global using ASC.Api.Core.Extensions;
