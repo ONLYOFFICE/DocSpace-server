@@ -111,12 +111,14 @@ public class MigrationController(
         {
             throw new Exception(MigrationResource.MigrationProgressException);
         }
+        migrationLogger.Init(status.LogName);
+        using var stream = await migrationLogger.GetStreamAsync();
 
         httpContextAccessor.HttpContext.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("migration.log"));
         httpContextAccessor.HttpContext.Response.ContentType = "text/plain; charset=UTF-8";
+        httpContextAccessor.HttpContext.Response.Headers["Content-Length"] = stream.Length.ToString(CultureInfo.InvariantCulture);
 
-        migrationLogger.Init(status.LogName);
-        await (await migrationLogger.GetStreamAsync()).CopyToAsync(httpContextAccessor.HttpContext.Response.Body);
+        await stream.CopyToAsync(httpContextAccessor.HttpContext.Response.Body);
     }
 
     [HttpPost("finish")]
@@ -142,6 +144,7 @@ public class MigrationController(
                 await studioNotifyService.UserInfoActivationAsync(u);
             }
         }
+        await migrationCore.ClearAsync();
     }
 
     private async Task DemandPermissionAsync()

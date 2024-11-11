@@ -39,6 +39,11 @@ public class TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderC
         get { return coreBaseSettings.Standalone && !string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 
+    public bool Developer
+    {
+        get { return Enterprise && licenseReaderConfig.LicenseType == LicenseType.Developer; }
+    }
+
     public bool Opensource
     {
         get { return coreBaseSettings.Standalone && string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
@@ -696,7 +701,18 @@ public class TariffService(
 
         if (coreBaseSettings.Standalone)
         {
-            lifetime = await tariff.Quotas.ToAsyncEnumerable().AnyAwaitAsync(async q => (await quotaService.GetTenantQuotaAsync(q.Id)).Lifetime);
+            foreach (var q in tariff.Quotas)
+            {
+                var quota = await quotaService.GetTenantQuotaAsync(q.Id);
+                if (quota.Lifetime)
+                {
+                    lifetime = true;
+                }
+                if (quota.Trial)
+                {
+                    setDelay = false;
+                }
+            }
         }
 
         if (TrialEnabled)

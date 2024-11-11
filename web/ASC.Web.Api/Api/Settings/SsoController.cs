@@ -185,6 +185,11 @@ public class SsoController(TenantManager tenantManager,
             throw new Exception(Resource.SsoSettingsInvalidMapping);
         }
 
+        if ((EmployeeType)settings.UsersType is not (EmployeeType.User or EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin))
+        {
+            settings.UsersType = (int)EmployeeType.User;
+        }
+
         if (string.IsNullOrEmpty(settings.SpLoginLabel))
         {
             settings.SpLoginLabel = SsoSettingsV2.SSO_SP_LOGIN_LABEL;

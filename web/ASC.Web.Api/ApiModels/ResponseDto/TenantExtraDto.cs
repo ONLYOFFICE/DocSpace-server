@@ -42,6 +42,10 @@ public class TenantExtraDto
     /// <type>System.Boolean, System</type>
     public bool Enterprise { get; set; }
 
+    /// <summary>Specifies if the extra tenant license is Developer or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Developer { get; set; }
+
     /// <summary>License tariff</summary>
     /// <type>ASC.Core.Billing.Tariff, ASC.Core.Common</type>
     public Tariff Tariff { get; set; }

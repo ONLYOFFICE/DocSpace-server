@@ -177,7 +177,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var locatedInPrivateRoom = false;
         Options options = null;
-        if (file.RootFolderType == FolderType.VirtualRooms)
+        if (file.RootFolderType == FolderType.VirtualRooms || file.RootFolderType == FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
@@ -253,6 +253,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         var rightToDownload = await fileSecurity.CanDownloadAsync(file);
+        var noWatermark = options?.WatermarkOnDraw == null;
 
         var configuration = serviceProvider.GetService<Configuration<T>>();
         configuration.Document.Key = docKey;
@@ -266,8 +267,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             ChangeHistory = rightChangeHistory,
             ModifyFilter = rightModifyFilter,
             Print = rightToDownload,
-            Download = rightToDownload,
-            Copy = rightToDownload,
+            Download = rightToDownload && noWatermark,
+            Copy = rightToDownload && noWatermark,
             Protect = authContext.IsAuthenticated,
             Chat = file.Access != FileShare.Read   
         };

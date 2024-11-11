@@ -47,25 +47,30 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
     /// <summary>Company name</summary>
     /// <type>System.String, System</type>
+    [StringLength(255)]
     public string CompanyName { get; set; }
 
     /// <summary>Site</summary>
     /// <type>System.String, System</type>
     [Url]
+    [StringLength(255)]
     public string Site { get; set; }
 
     /// <summary>Email address</summary>
     /// <type>System.String, System</type>
     [EmailAddress]
+    [StringLength(255)]
     public string Email { get; set; }
 
     /// <summary>Address</summary>
     /// <type>System.String, System</type>
+    [StringLength(255)]
     public string Address { get; set; }
 
     /// <summary>Phone</summary>
     /// <type>System.String, System</type>
     [Phone]
+    [StringLength(255)]
     public string Phone { get; set; }
 
     /// <summary>Specifies if a company is a licensor or not</summary>

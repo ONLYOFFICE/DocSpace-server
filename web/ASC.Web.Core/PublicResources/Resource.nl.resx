@@ -1055,6 +1055,12 @@
     <value>Opslagquota &amp; statistieken</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} per beheerder/power user en mogelijkheid om ruimte op verzoek toe te voegen</value>
+    <value>{0} per beheerder en mogelijkheid om ruimte op verzoek toe te voegen</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Fout bij het instellen van quota per kamer. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Fout bij het instellen van quota per gebruiker. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
   </data>
 </root>

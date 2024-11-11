@@ -485,4 +485,19 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>양식 번호</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>콘텐츠 작성자</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>콘텐츠 작성자</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>룸 관리자</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>룸 관리자</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>외부 사용자</value>
+  </data>
 </root>

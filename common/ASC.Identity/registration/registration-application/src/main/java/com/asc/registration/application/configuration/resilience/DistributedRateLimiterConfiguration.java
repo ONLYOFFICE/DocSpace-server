@@ -38,10 +38,13 @@ import io.lettuce.core.codec.ByteArrayCodec;
 import io.lettuce.core.codec.RedisCodec;
 import io.lettuce.core.codec.StringCodec;
 import java.time.Duration;
+import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 
 /** Configuration class for setting up the distributed rate limiter using Bucket4j and Redis. */
 @Configuration
@@ -60,6 +63,7 @@ public class DistributedRateLimiterConfiguration {
         RedisURI.builder()
             .withHost(bucket4jConfiguration.getRedis().getHost())
             .withPort(bucket4jConfiguration.getRedis().getPort())
+            .withDatabase(bucket4jConfiguration.getRedis().getDatabase())
             .withSsl(bucket4jConfiguration.getRedis().isSsl())
             .withAuthentication(
                 bucket4jConfiguration.getRedis().getUsername(),
@@ -90,19 +94,31 @@ public class DistributedRateLimiterConfiguration {
    * @return the supplier of {@link BucketConfiguration}.
    */
   @Bean
-  public Supplier<BucketConfiguration> bucketConfiguration() {
-    Bucket4jConfiguration.RateLimitProperties.ClientRateLimitProperties rateLimitProperties =
-        bucket4jConfiguration.getRateLimits().getClientRateLimit();
-    return () ->
-        BucketConfiguration.builder()
-            .addLimit(
-                Bandwidth.classic(
-                    rateLimitProperties.getCapacity(),
-                    Refill.greedy(
-                        rateLimitProperties.getRefill().getTokens(),
-                        Duration.of(
-                            rateLimitProperties.getRefill().getPeriod(),
-                            rateLimitProperties.getRefill().getTimeUnit()))))
-            .build();
+  public Function<HttpMethod, Supplier<BucketConfiguration>> bucketConfiguration()
+      throws Exception {
+    List<Bucket4jConfiguration.RateLimitProperties.ClientRateLimitProperties> rateLimitProperties =
+        bucket4jConfiguration.getRateLimits().getLimits();
+    Bucket4jConfiguration.RateLimitProperties.ClientRateLimitProperties getLimits =
+        bucket4jConfiguration.getRateLimits().getLimits().stream()
+            .filter(props -> props.getMethod().equalsIgnoreCase(HttpMethod.GET.name()))
+            .findFirst()
+            .orElseThrow(() -> new Exception("Could not initialize rate-limiter configuration"));
+    return (HttpMethod method) -> {
+      var config =
+          rateLimitProperties.stream()
+              .filter(props -> props.getMethod().equalsIgnoreCase(method.name()))
+              .findFirst()
+              .orElse(getLimits);
+      return () ->
+          BucketConfiguration.builder()
+              .addLimit(
+                  Bandwidth.classic(
+                      config.getCapacity(),
+                      Refill.greedy(
+                          config.getRefill().getTokens(),
+                          Duration.of(
+                              config.getRefill().getPeriod(), config.getRefill().getTimeUnit()))))
+              .build();
+    };
   }
 }

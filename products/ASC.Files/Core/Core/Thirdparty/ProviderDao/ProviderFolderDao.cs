@@ -633,11 +633,11 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
     }
 
-    public async Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    public async Task<int> SetCustomOrder(string folderId, string parentFolderId, int order)
     {
         var selector = _selectorFactory.GetSelector(folderId);
         var folderDao = selector.GetFolderDao(folderId);
-        await folderDao.SetCustomOrder(folderId, parentFolderId, order);
+        return await folderDao.SetCustomOrder(folderId, parentFolderId, order);
     }
 
     public async Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)

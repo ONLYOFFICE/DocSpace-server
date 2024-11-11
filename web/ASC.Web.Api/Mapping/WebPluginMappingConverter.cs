@@ -31,6 +31,11 @@ public class WebPluginMappingConverter(EmployeeDtoHelper employeeDtoHelper) : IT
 {
     public EmployeeDto Convert(Guid source, EmployeeDto destination, ResolutionContext context)
     {
+        if (source == Guid.Empty)
+        {
+            return new EmployeeDto();
+        }
+        
         return employeeDtoHelper.GetAsync(source).Result;
     }
 }

@@ -485,4 +485,19 @@
   <data name="FormNumber" xml:space="preserve">
     <value>Αριθμός φόρμας</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Δημιουργός περιεχομένου</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Διαχειριστής δωματίου</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Εξωτερικός χρήστης</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Δημιουργός περιεχομένου</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Διαχειριστής δωματίου</value>
+  </data>
 </root>

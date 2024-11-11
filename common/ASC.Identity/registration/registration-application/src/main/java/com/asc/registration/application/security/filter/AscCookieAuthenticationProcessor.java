@@ -51,6 +51,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AscCookieAuthenticationProcessor {
   private final AscApiClient apiClient;
+  private final HttpUtils httpUtils;
 
   /**
    * Process ASC cookies and authenticate the request.
@@ -67,7 +68,8 @@ public class AscCookieAuthenticationProcessor {
     var cookie = String.format("%s=%s", ascCookieName, ascCookieValue);
 
     var address =
-        HttpUtils.getRequestHostAddress(request)
+        httpUtils
+            .getRequestHostAddress(request)
             .orElseThrow(() -> new BadCredentialsException("Could not find ASC address"));
 
     try {

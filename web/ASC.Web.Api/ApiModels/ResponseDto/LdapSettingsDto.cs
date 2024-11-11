@@ -123,7 +123,8 @@ public class LdapSettingsDto : IMapFrom<LdapSettings>
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<LdapSettings, LdapSettingsDto>();
+        profile.CreateMap<LdapSettings, LdapSettingsDto>()
+            .ForMember(dest => dest.Server, opt => opt.MapFrom(src => src.Server.Replace("LDAP://", "")));
     }
 
 }

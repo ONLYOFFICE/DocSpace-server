@@ -546,6 +546,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File: {0}. Index changed from {1} to {2}.
+        /// </summary>
+        public static string FileIndexChanged {
+            get {
+                return ResourceManager.GetString("FileIndexChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File Locked: {0}.
         /// </summary>
         public static string FileLocked {
@@ -740,6 +749,24 @@ namespace ASC.AuditTrail {
         public static string FolderDeleted {
             get {
                 return ResourceManager.GetString("FolderDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folder: {0}. Index changed from {1} to {2}.
+        /// </summary>
+        public static string FolderIndexChanged {
+            get {
+                return ResourceManager.GetString("FolderIndexChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folder: {0}. Indexes reordered.
+        /// </summary>
+        public static string FolderIndexReordered {
+            get {
+                return ResourceManager.GetString("FolderIndexReordered", resourceCulture);
             }
         }
         
@@ -1572,6 +1599,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Room: {0}. Deny download disabled.
+        /// </summary>
+        public static string RoomDenyDownloadDisabled {
+            get {
+                return ResourceManager.GetString("RoomDenyDownloadDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room: {0}. Deny download enabled.
+        /// </summary>
+        public static string RoomDenyDownloadEnabled {
+            get {
+                return ResourceManager.GetString("RoomDenyDownloadEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to External link created: {0}. Role: {1}.
         /// </summary>
         public static string RoomExternalLinkCreated {
@@ -1626,6 +1671,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Room indexing disabled.
+        /// </summary>
+        public static string RoomIndexingDisabled {
+            get {
+                return ResourceManager.GetString("RoomIndexingDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room indexing enabled.
+        /// </summary>
+        public static string RoomIndexingEnabled {
+            get {
+                return ResourceManager.GetString("RoomIndexingEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Link created. Role: {1}.
         /// </summary>
         public static string RoomInvitationLinkCreated {
@@ -1649,6 +1712,33 @@ namespace ASC.AuditTrail {
         public static string RoomInvitationLinkUpdated {
             get {
                 return ResourceManager.GetString("RoomInvitationLinkUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invitation sent again: {0}.
+        /// </summary>
+        public static string RoomInviteResend {
+            get {
+                return ResourceManager.GetString("RoomInviteResend", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LifeTime disabled.
+        /// </summary>
+        public static string RoomLifeTimeDisabled {
+            get {
+                return ResourceManager.GetString("RoomLifeTimeDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Life time is set. Value: {0}. Period: {1}. Permanently Delete: {2}.
+        /// </summary>
+        public static string RoomLifeTimeSet {
+            get {
+                return ResourceManager.GetString("RoomLifeTimeSet", resourceCulture);
             }
         }
         
@@ -1721,6 +1811,24 @@ namespace ASC.AuditTrail {
         public static string RoomUpdateAccessForUser {
             get {
                 return ResourceManager.GetString("RoomUpdateAccessForUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room: {0}. Watermark disabled.
+        /// </summary>
+        public static string RoomWatermarkDisabled {
+            get {
+                return ResourceManager.GetString("RoomWatermarkDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room: {0}. Watermark enabled.
+        /// </summary>
+        public static string RoomWatermarkSet {
+            get {
+                return ResourceManager.GetString("RoomWatermarkSet", resourceCulture);
             }
         }
         
