@@ -27,68 +27,78 @@
 namespace ASC.Web.Core.WhiteLabel;
 
 /// <summary>
+/// Additional white label settings
 /// </summary>
 public class AdditionalWhiteLabelSettingsWrapper
 {
-    /// <summary>Additional white label settings</summary>
-    /// <type>ASC.Web.Core.WhiteLabel.AdditionalWhiteLabelSettings, ASC.Web.Core</type>
+    /// <summary>
+    /// Additional white label settings
+    /// </summary>
     public AdditionalWhiteLabelSettings Settings { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettings>
 {
-    /// <summary>Additional white label settings helper</summary>
-    /// <type>ASC.Web.Core.WhiteLabel.AdditionalWhiteLabelSettingsHelperInit, ASC.Web.Core</type>
     public AdditionalWhiteLabelSettingsHelperInit AdditionalWhiteLabelSettingsHelper;
 
-    /// <summary>Specifies if the start document is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the start document is enabled or not
+    /// </summary>
     public bool StartDocsEnabled { get; init; }
 
-    /// <summary>Specifies if the help center is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the help center is enabled or not
+    /// </summary>
     public bool HelpCenterEnabled { get; init; }
 
-    /// <summary>Specifies if feedback and support are available or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if feedback and support are available or not
+    /// </summary>
     public bool FeedbackAndSupportEnabled { get; init; }
 
-    /// <summary>Feedback and support URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Feedback and support URL
+    /// </summary>
     public string FeedbackAndSupportUrl { get; init; }
 
-    /// <summary>Specifies if the user forum is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user forum is enabled or not
+    /// </summary>
     public bool UserForumEnabled { get; init; }
 
-    /// <summary>User forum URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// User forum URL
+    /// </summary>
     public string UserForumUrl { get; init; }
 
-    /// <summary>Specifies if the video guides are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the video guides are enabled or not
+    /// </summary>
     public bool VideoGuidesEnabled { get; init; }
 
-    /// <summary>Video guides URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Video guides URL
+    /// </summary>
     public string VideoGuidesUrl { get; init; }
 
-    /// <summary>Sales email</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Sales email
+    /// </summary>
     public string SalesEmail { get; init; }
 
-    /// <summary>URL to pay for the portal</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// URL to pay for the portal
+    /// </summary>
     public string BuyUrl { get; init; }
 
-    /// <summary>Specifies if the license agreements are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the license agreements are enabled or not
+    /// </summary>
     public bool LicenseAgreementsEnabled { get; init; }
 
-    /// <summary>License agreements URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// License agreements URL
+    /// </summary>
     public string LicenseAgreementsUrl { get; init; }
 
     [JsonIgnore]
@@ -156,13 +166,12 @@ public class AdditionalWhiteLabelSettingsHelper(AdditionalWhiteLabelSettingsHelp
     }
 }
 
-/// <summary>
-/// </summary>
 [Singleton]
 public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration)
 {
-    /// <summary>Default help center URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Default help center URL
+    /// </summary>
     public string DefaultHelpCenterUrl
     {
         get
@@ -172,8 +181,9 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    /// <summary>Default feedback and support URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Default feedback and support URL
+    /// </summary>
     public string DefaultFeedbackAndSupportUrl
     {
         get
@@ -183,8 +193,9 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    /// <summary>Default user forum URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Default user forum URL
+    /// </summary>
     public string DefaultUserForumUrl
     {
         get
@@ -194,8 +205,9 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    /// <summary>Default video guides URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Default video guides URL
+    /// </summary>
     public string DefaultVideoGuidesUrl
     {
         get
@@ -205,8 +217,9 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    /// <summary>Default sales email</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Default sales email
+    /// </summary>
     public string DefaultMailSalesEmail
     {
         get
@@ -216,8 +229,9 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    /// <summary>Default URL to pay for the portal</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Default URL to pay for the portal
+    /// </summary>
     public string DefaultBuyUrl
     {
         get

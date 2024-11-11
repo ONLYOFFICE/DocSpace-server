@@ -112,9 +112,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
       throws IOException {
     response.setContentType("application/json");
     response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
-    response.setHeader(
-        X_RATE_RESET,
-        String.valueOf(probe.getNanosToWaitForReset()));
+    response.setHeader(X_RATE_RESET, String.valueOf(probe.getNanosToWaitForReset()));
     response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
   }
 

@@ -26,44 +26,51 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class LdapStatusDto : IMapFrom<LdapOperationStatus>
 {
-    /// <summary>Specifies if the LDAP operation is completed or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the LDAP operation is completed or not
+    /// </summary>
     public bool Completed { get; set; }
 
-    /// <summary>ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public string Id { get; set; }
 
-    /// <summary>Status</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Status
+    /// </summary>
     public string Status { get; set; }
 
-    /// <summary>Error</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Error
+    /// </summary>
     public string Error { get; set; }
 
-    /// <summary>Warning</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Warning
+    /// </summary>
     public string Warning { get; set; }
 
-    /// <summary>Percentage of completion</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Percentage of completion
+    /// </summary>
     public int Percents { get; set; }
 
-    /// <summary>Certificate confirmation request</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Certificate confirmation request
+    /// </summary>
     public string CertificateConfirmRequest { get; set; }
 
-    /// <summary>Source</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Source
+    /// </summary>
     public string Source { get; set; }
 
-    /// <summary>Operation type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Operation type
+    /// </summary>
     public string OperationType { get; set; }
 
     public void Mapping(Profile profile)

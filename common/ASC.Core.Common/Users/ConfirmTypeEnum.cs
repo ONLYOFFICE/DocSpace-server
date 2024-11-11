@@ -37,22 +37,57 @@ namespace ASC.Web.Studio.Utility;
 [EnumExtensions]
 public enum ConfirmType
 {
+    [SwaggerEnum("Emp invite")]
     EmpInvite,
+
+    [SwaggerEnum("Link invite")]
     LinkInvite,
+
+    [SwaggerEnum("Portal suspend")]
     PortalSuspend,
+
+    [SwaggerEnum("Portal continue")]
     PortalContinue,
+
+    [SwaggerEnum("Portal remove")]
     PortalRemove,
+
+    [SwaggerEnum("Dns change")]
     DnsChange,
+
+    [SwaggerEnum("Portal owner change")]
     PortalOwnerChange,
+
+    [SwaggerEnum("Activation")]
     Activation,
+
+    [SwaggerEnum("Email change")]
     EmailChange,
+
+    [SwaggerEnum("Email activation")]
     EmailActivation,
+
+    [SwaggerEnum("Password change")]
     PasswordChange,
+
+    [SwaggerEnum("Profile remove")]
     ProfileRemove,
+
+    [SwaggerEnum("Phone activation")]
     PhoneActivation,
+
+    [SwaggerEnum("Phone auth")]
     PhoneAuth,
+
+    [SwaggerEnum("Auth")]
     Auth,
+
+    [SwaggerEnum("Tfa activation")]
     TfaActivation,
+
+    [SwaggerEnum("Tfa auth")]
     TfaAuth,
+
+    [SwaggerEnum("Wizard")]
     Wizard
 }

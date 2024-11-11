@@ -24,15 +24,33 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Swashbuckle.AspNetCore.Annotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class DbTenantPartner : BaseEntity
 {
+    /// <summary>
+    /// Tenant id
+    /// </summary>
     public int TenantId { get; set; }
+
+    /// <summary>
+    /// Partner id
+    /// </summary>
     public string PartnerId { get; set; }
+
+    /// <summary>
+    /// Affiliate id
+    /// </summary>
     public string AffiliateId { get; set; }
+
+    /// <summary>
+    /// Campaign
+    /// </summary>
     public string Campaign { get; set; }
 
+    [SwaggerIgnore]
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()

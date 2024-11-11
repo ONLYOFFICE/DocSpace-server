@@ -38,6 +38,7 @@ namespace ASC.Web.Api.Controllers;
 [ApiController]
 [AllowAnonymous]
 [WebhookDisable]
+[ControllerName("authentication")]
 public class AuthenticationController(
     UserManager userManager,
     LdapUserManager ldapUserManager,
@@ -79,10 +80,10 @@ public class AuthenticationController(
     /// Checks if the current user is authenticated or not.
     /// </summary>
     /// <short>Check authentication</short>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/authentication</path>
-    /// <returns type="System.Boolean, System">Boolean value: true if the current user is authenticated</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Boolean value: true if the current user is authenticated", typeof(bool))]
     [AllowNotPayment]
     [HttpGet]
     public bool GetIsAuthentificated()
@@ -96,11 +97,14 @@ public class AuthenticationController(
     /// <short>
     /// Authenticate a user by code
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/{code}</path>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(400, "userName, password or passworHash is empty")]
+    [SwaggerResponse(401, "User authentication failed")]
+    [SwaggerResponse(403, "Auth code is not available")]
+    [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
@@ -170,11 +174,14 @@ public class AuthenticationController(
     /// <short>
     /// Authenticate a user
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication</path>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(400, "userName, password or passworHash is empty")]
+    [SwaggerResponse(401, "User authentication failed")]
+    [SwaggerResponse(404, "The user could not be found")]
+    [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment]
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
@@ -283,13 +290,12 @@ public class AuthenticationController(
     /// <short>
     /// Log out
     /// </short>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/logout</path>
-    /// <returns></returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Ok", typeof(object))]
     [AllowNotPayment]
     [HttpPost("logout")]
-    [HttpGet("logout")]// temp fix
     public async Task<object> LogoutAsync()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
@@ -333,11 +339,10 @@ public class AuthenticationController(
     /// <short>
     /// Open confirmation email URL
     /// </short>
-    /// <param type="ASC.Security.Cryptography.EmailValidationKeyModel, ASC.Core.Common" name="inDto">Confirmation email parameters</param>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/confirm</path>
-    /// <returns type="ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult, ASC.Security.Cryptography">Validation result: Ok, Invalid, or Expired</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Validation result: Ok, Invalid, or Expired", typeof(ConfirmDto))]
     [AllowNotPayment, AllowSuspended]
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
@@ -363,11 +368,10 @@ public class AuthenticationController(
     /// <short>
     /// Set a mobile phone
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.MobileRequestsDto, ASC.Web.Api" name="inDto">Mobile phone request parameters</param>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/setphone</path>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
@@ -392,11 +396,12 @@ public class AuthenticationController(
     /// <short>
     /// Send SMS code
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/sendsms</path>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(400, "userName, password or passworHash is empty")]
+    [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment]
     [HttpPost("sendsms")]
     public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)
@@ -430,7 +435,7 @@ public class AuthenticationController(
                     
                 var checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
 
-                if (checkKeyResult == ValidationResult.Ok)
+                if (checkKeyResult == Security.Cryptography.EmailValidationKeyProvider.ValidationResult.Ok)
                 {
                     user = email.Contains("@")
                                    ? await userManager.GetUserByEmailAsync(email)

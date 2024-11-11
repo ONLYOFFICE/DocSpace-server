@@ -26,22 +26,42 @@
 
 namespace ASC.ApiSystem.Models;
 
+/// <summary>
+/// Request parameters for settings
+/// </summary>
 public class SettingsModel : IModel
 {
+    /// <summary>
+    /// Portal name
+    /// </summary>
     [StringLength(255)]
     public string PortalName { get; set; }
 
+    /// <summary>
+    /// Tenant id
+    /// </summary>
     public int? TenantId { get; set; }
 
-
+    /// <summary>
+    /// Key
+    /// </summary>
     [StringLength(255)]
     public string Key { get; set; }
 
+    /// <summary>
+    /// Value
+    /// </summary>
     public string Value { get; set; }
 }
 
+/// <summary>
+/// Requst parameters for domain
+/// </summary>
 public class DomainModel
 {
+    /// <summary>
+    /// Host name
+    /// </summary>
     [StringLength (255)]
     public string HostName { get; set; }
 }

@@ -27,14 +27,35 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// Group request parameters
 /// </summary>
-public class UpdateGroupRequestDto : GroupRequestDtoBase
+public class UpdateGroupRequest : GroupRequestDtoBase
 {
-    /// <summary>List of user IDs to add to the group</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of user IDs to add to the group
+    /// </summary>
     public IEnumerable<Guid> MembersToAdd { get; set; }
-    
-    /// <summary>List of user IDs to remove from the group</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
+
+    /// <summary>
+    /// List of user IDs to remove from the group
+    /// </summary>
     public IEnumerable<Guid> MembersToRemove { get; set; }
+}
+
+/// <summary>
+/// Group request parameters
+/// </summary>
+public class UpdateGroupRequestDto
+{
+    /// <summary>
+    /// Group ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public Guid Id { get; set; }
+
+    /// <summary>
+    /// Update group parameters
+    /// </summary>
+    [FromBody]
+    public UpdateGroupRequest Update {  get; set; }
 }

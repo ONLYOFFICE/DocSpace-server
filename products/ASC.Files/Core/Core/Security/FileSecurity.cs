@@ -2523,37 +2523,99 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public enum FilesSecurityActions
     {
+        [SwaggerEnum("Read")]
         Read,
+
+        [SwaggerEnum("Comment")]
         Comment,
+
+        [SwaggerEnum("Fill forms")]
         FillForms,
+
+        [SwaggerEnum("Review")]
         Review,
+
+        [SwaggerEnum("Create")]
         Create,
+
+        [SwaggerEnum("Edit")]
         Edit,
+
+        [SwaggerEnum("Delete")]
         Delete,
+
+        [SwaggerEnum("Custom filter")]
         CustomFilter,
+
+        [SwaggerEnum("Edit room")]
         EditRoom,
+
+        [SwaggerEnum("Rename")]
         Rename,
+
+        [SwaggerEnum("Read history")]
         ReadHistory,
+
+        [SwaggerEnum("Lock")]
         Lock,
+
+        [SwaggerEnum("Edit history")]
         EditHistory,
+
+        [SwaggerEnum("Copy to")]
         CopyTo,
+
+        [SwaggerEnum("Copy")]
         Copy,
+
+        [SwaggerEnum("Move to")]
         MoveTo,
+
+        [SwaggerEnum("Move")]
         Move,
+
+        [SwaggerEnum("Pin")]
         Pin,
+
+        [SwaggerEnum("Mute")]
         Mute,
+
+        [SwaggerEnum("Edit access")]
         EditAccess,
+
+        [SwaggerEnum("Duplicate")]
         Duplicate,
+
+        [SwaggerEnum("Submit to form gallery")]
         SubmitToFormGallery,
+
+        [SwaggerEnum("Download")]
         Download,
+
+        [SwaggerEnum("Convert")]
         Convert,
+
+        [SwaggerEnum("Copy shared link")]
         CopySharedLink,
+
+        [SwaggerEnum("Read links")]
         ReadLinks,
+
+        [SwaggerEnum("Reconnect")]
         Reconnect,
+
+        [SwaggerEnum("Create room from")]
         CreateRoomFrom,
+
+        [SwaggerEnum("Copy link")]
         CopyLink,
+
+        [SwaggerEnum("Embed")]
         Embed,
-        ChangeOwner,
+
+        [SwaggerEnum("Change owner")]        ChangeOwner,
+
+        [SwaggerEnum("Index export")]
         IndexExport
     }
 }

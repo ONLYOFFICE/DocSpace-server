@@ -30,37 +30,118 @@ namespace ASC.Core.Common.EF.Model;
 
 public class DbTenant : IMapFrom<Tenant>
 {
+    /// <summary>
+    /// Id
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// Alias
+    /// </summary>
     public string Alias { get; set; }
+
+    /// <summary>
+    /// Mapped domain
+    /// </summary>
     public string MappedDomain { get; set; }
+
+    /// <summary>
+    /// Version
+    /// </summary>
     public int Version { get; set; }
+
+    /// <summary>
+    /// Version_changed
+    /// </summary>
     public DateTime? Version_Changed { get; set; }
+
+    /// <summary>
+    /// Version changed
+    /// </summary>
     public DateTime VersionChanged
     {
         get => Version_Changed ?? DateTime.MinValue;
         set => Version_Changed = value;
     }
+
+    /// <summary>
+    /// Language
+    /// </summary>
     public string Language { get; set; }
+
+    /// <summary>
+    /// Time zone
+    /// </summary>
     public string TimeZone { get; set; }
+
+    /// <summary>
+    /// Trusted domains raw
+    /// </summary>
     public string TrustedDomainsRaw { get; set; }
+
+    /// <summary>
+    /// Trusted domains enabled
+    /// </summary>
     public TenantTrustedDomainsType TrustedDomainsEnabled { get; set; }
+
+    /// <summary>
+    /// Status
+    /// </summary>
     public TenantStatus Status { get; set; }
+
+    /// <summary>
+    /// Status changed
+    /// </summary>
     public DateTime? StatusChanged { get; set; }
     //hack for DateTime?
 
+    /// <summary>
+    /// Status changed hack
+    /// </summary>
     public DateTime StatusChangedHack
     {
         get => StatusChanged ?? DateTime.MinValue;
         set { StatusChanged = value; }
     }
+
+    /// <summary>
+    /// Creation date time
+    /// </summary>
     public DateTime CreationDateTime { get; set; }
+
+    /// <summary>
+    /// Owner id
+    /// </summary>
     public Guid? OwnerId { get; set; }
+
+    /// <summary>
+    /// Payment id
+    /// </summary>
     public string PaymentId { get; set; }
+
+    /// <summary>
+    /// Industry
+    /// </summary>
     public TenantIndustry Industry { get; set; }
+
+    /// <summary>
+    /// Last modified
+    /// </summary>
     public DateTime LastModified { get; set; }
+
+    /// <summary>
+    /// Calls
+    /// </summary>
     public bool Calls { get; set; }
 
+    /// <summary>
+    /// Partner
+    /// </summary>
     public DbTenantPartner Partner { get; set; }
 
     public void Mapping(Profile profile)
