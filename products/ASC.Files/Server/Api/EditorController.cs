@@ -102,6 +102,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File key for Document Service", typeof(object))]
     [SwaggerResponse(403, "You don't have enough permission to view the file")]
+    [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
     public async Task<object> StartEditAsync(StartEditRequestDto<T> inDto)
     {
@@ -130,6 +131,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File changes", typeof(KeyValuePair<bool, string>))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [AllowAnonymous]
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(TrackEditFileRequestDto<T> inDto)
     {
