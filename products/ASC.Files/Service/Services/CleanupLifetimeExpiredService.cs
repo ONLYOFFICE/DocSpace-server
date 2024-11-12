@@ -161,7 +161,7 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, int roomId, DateTime expiration) =>
                 ctx.Tree
                     .Join(ctx.Files, a => a.FolderId, b => b.ParentId, (tree, file) => new { tree, file })
-                    .Where(x => x.tree.ParentId == roomId && x.file.TenantId == tenantId && x.file.ModifiedOn < expiration)
+                    .Where(x => x.tree.ParentId == roomId && x.file.TenantId == tenantId && x.file.Version == 1 && x.file.ModifiedOn < expiration)
                     .Select(r => r.file.Id));
 }
 
