@@ -33,7 +33,7 @@ namespace ASC.People.Api;
 [Scope]
 [DefaultRoute]
 [ApiController]
-[ControllerName("groups")]
+[ControllerName("group")]
 public class GroupController(
     GroupSummaryDtoHelper groupSummaryDtoHelper,
     UserManager userManager,

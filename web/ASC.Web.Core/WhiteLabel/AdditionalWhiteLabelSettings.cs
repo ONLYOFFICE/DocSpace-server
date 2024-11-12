@@ -237,7 +237,8 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         get
         {
             var site = configuration["web:teamlab-site"];
-            return !string.IsNullOrEmpty(site) ? site + "/post.ashx?type=buydocspaceenterprise" : "";
+            var type = configuration["license:type"] ?? "enterprise";
+            return !string.IsNullOrEmpty(site) ? $"{site}/post.ashx?type=buydocspace{type}" : "";
         }
     }
 }
