@@ -31,14 +31,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /** Utility class for handling HTTP-related operations. */
 @Component
-public class HttpUtils implements EnvironmentAware {
-  private String portalAddress;
+public class HttpUtils {
   private static final String IP_PATTERN =
       "https?://([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})";
   private static final String DOMAIN_PATTERN = "https?://([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})";
@@ -65,10 +62,6 @@ public class HttpUtils implements EnvironmentAware {
     // Private constructor to prevent instantiation
   }
 
-  public void setEnvironment(Environment environment) {
-    portalAddress = environment.getProperty("APP_URL_PORTAL");
-  }
-
   /**
    * Retrieves the address from the specified header of the request.
    *
@@ -77,7 +70,6 @@ public class HttpUtils implements EnvironmentAware {
    * @return An Optional containing the address if found, otherwise an empty Optional
    */
   private Optional<String> getRequestAddress(HttpServletRequest request, String header) {
-    if (portalAddress != null && !portalAddress.isBlank()) return Optional.of(portalAddress);
     var addressHeader = request.getHeader(header);
     var protoHeader = request.getHeader(X_FORWARDED_PROTO);
     if (addressHeader == null

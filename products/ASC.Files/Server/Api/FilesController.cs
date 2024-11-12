@@ -482,6 +482,25 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         await fileStorageService.SetFileOrder(fileId, inDto.Order);
     }
 
+    [HttpPut("order")]
+    public async Task SetOrder(OrdersRequestDto<T> inDto)
+    {
+        foreach (var item in inDto.Items)
+        {
+            switch (item.EntryType)
+            {
+                case FileEntryType.Folder:
+                    await fileStorageService.SetFolderOrder(item.EntryId, item.Order);
+                    break;
+                case FileEntryType.File:
+                    await fileStorageService.SetFileOrder(item.EntryId, item.Order);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
     /// <summary>
     /// Returns the external links of a file with the ID specified in the request.
     /// </summary>

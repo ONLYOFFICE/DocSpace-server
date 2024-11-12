@@ -1657,7 +1657,7 @@ Salam, $İstifadəçiAdı!
 Siz indicə ONLYOFFICE DocSpace yaratdınız, komanda, müştəri, tərəfdaşlarınız və s. ilə əməkdaşlığı gücləndirə biləcəyiniz sənəd mərkəzi. Ünvanı "${__VirtualRootPath}":"${__VirtualRootPath}"-dir.
 Cari tarif planınız STARTUP-dır. Tamamilə pulsuzdur və ona daxildir:
 
-&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 administrator/bacarıqlı istifadəçi&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 otağa qədər&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB disk sahəsi&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 administrator&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 otağa qədər&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB disk sahəsi&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
 *Sənəd əməkdaşlığının yeni üsulundan həzz alın!*
 
@@ -1759,5 +1759,187 @@ $TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
     <value>$Date üçün ${__VirtualRootPath} portalınızda yeniliklər</value>
+  </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>İndi alın</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Şifrə təyin edin</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Salam! Lütfən, ONLYOFFICE DocSpace hesabınız üçün şifrə yaradın. Sadəcə aşağıdakı düyməni basın:
+
+$OrangeButton
+
+Link 7 gün ərzində etibarlıdır.</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developer üçün güzəşt müddəti aktivləşdirildi</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developer lisenziyanızın müddəti tezliklə başa çatacaq</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developer üçün güzəşt müddəti tezliklə başa çatacaq</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developer artıq mövcud deyil</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>ONLYOFFICE Güzəşt müddəti DocSpace Enterprise üçün aktivləşdirildi</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise lisenziyanızın müddəti tezliklə başa çatacaq</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise güzəşt müddətiniz tezliklə başa çatacaq</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Sizin ONLYOFFICE DocSpace Enterprise artıq mövcud deyil</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise lisenziyanızın müddəti tezliklə başa çatacaq</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise lisenziyanızın müddəti bu gün bitir</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace üçün şifrə təyin edin</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Salam $UserName!
+
+ONLYOFFICE DocSpace Developer lisenziyanızın müddəti bu gün bitir.
+
+Sizin üçün $PaymentDelay gündəlik güzəşt müddətini aktiv etdik. Bu müddət ərzində sənəd redaktəsinə giriş eyni vaxtda 20 əlaqə ilə məhdudlaşır (dəstək və yeniləmələr artıq təmin edilmir).
+
+Lisenziyanı yeniləmək üçün birbaşa xüsusi satış menecerinizlə əlaqə saxlayın və ya "${__SalesEmail}":"mailto:${__SalesEmail}" vasitəsilə bizimlə əlaqə saxlayın.
+
+Ödənişlə bağlı suallar üçün "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın. Hər hansı texniki problemləri həll etmək üçün "${__SupportLink}":"${__SupportLink}" istifadə edin.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Salam $UserName!
+
+ONLYOFFICE DocSpace Developer lisenziyanızın müddəti 7 günə başa çatacaq.
+
+Lisenziyanı yeniləmək üçün birbaşa xüsusi satış menecerinizlə əlaqə saxlayın və ya "${__SalesEmail}":"mailto:${__SalesEmail}" vasitəsilə bizimlə əlaqə saxlayın.
+
+Ödənişlə bağlı suallar üçün "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın. Hər hansı texniki problemləri həll etmək üçün "${__SupportLink}":"${__SupportLink}" istifadə edin.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Salam $UserName!
+
+ONLYOFFICE DocSpace Developer lisenziyanızın müddəti 7 günə başa çatacaq. Bu o deməkdir ki, DocSpace istifadəsi mümkün olmayacaq.
+
+Lisenziyanı yeniləmək üçün birbaşa xüsusi satış menecerinizlə əlaqə saxlayın və ya "${__SalesEmail}":"mailto:${__SalesEmail}" vasitəsilə bizimlə əlaqə saxlayın.
+
+Ödənişlə bağlı suallar üçün "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın. Hər hansı texniki problemləri həll etmək üçün "${__SupportLink}":"${__SupportLink}" istifadə edin.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Salam $UserName!
+
+ONLYOFFICE DocSpace Developer lisenziyanızın güzəşt müddəti bu gün başa çatır. Bu o deməkdir ki, DocSpace artıq əlçatan olmayacaq.
+
+Lisenziyanı yeniləmək üçün birbaşa xüsusi satış menecerinizlə əlaqə saxlayın və ya "${__SalesEmail}":"mailto:${__SalesEmail}" vasitəsilə bizimlə əlaqə saxlayın.
+
+Ödənişlə bağlı suallar üçün "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın. Hər hansı texniki problemləri həll etmək üçün "${__SupportLink}":"${__SupportLink}" istifadə edin.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Salam $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisenziyanızın müddəti bu gün bitir.
+
+Sizin üçün *$PaymentDelay‎ gün* güzəşt müddətini aktiv etdik. Bu müddət ərzində adları çəkilən 3 istifadəçiyə* DocSpace-ə giriş icazəsi verildi (dəstək və yeniləmələr artıq təmin edilmir).
+
+Satınalma zamanı mövcud olan bütün funksiyalardan *məhdud müddətə* istifadə etmək üçün ONLYOFFICE DocSpace Enterprise (3 illik dəstək və yeniləmələr daxil olmaqla) üçün Ömürlük lisenziya* almağı tövsiyə edirik:
+
+$OrangeButton
+
+Həmçinin lisenziya yeniləmələri üçün birbaşa satış menecerinizlə əlaqə saxlaya bilərsiniz.
+
+Ödənişlə bağlı suallar üçün "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın. Hər hansı texniki problemləri həll etmək üçün "${__SupportLink}":"${__SupportLink}" istifadə edin.
+
+*Redaktə məqsədi ilə istənilən faylı açacaq ilk 3 istifadəçinin qeydiyyatdan keçmiş ID-ləri. Eyni zamanda, redaktə edilə bilən sənədlərin sayında heç bir məhdudiyyət yoxdur. Digər istifadəçilər sənədləri yalnız baxmaq üçün aça biləcəklər.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Salam $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisenziyanızın müddəti 7 günə başa çatacaq.
+
+Satınalma zamanı mövcud olan bütün funksiyalardan *məhdud müddətə* istifadə etmək üçün ONLYOFFICE DocSpace Enterprise (3 illik dəstək və yeniləmələr daxil olmaqla) üçün Ömürlük lisenziya* almağı tövsiyə edirik.
+
+$OrangeButton
+
+Həmçinin lisenziya yeniləmələri üçün birbaşa satış menecerinizlə əlaqə saxlaya bilərsiniz.
+
+Ödənişlə bağlı suallar üçün "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın. Hər hansı texniki problemləri həll etmək üçün "${__SupportLink}":"${__SupportLink}" istifadə edin.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Salam $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisenziyanızın müddəti 7 gün ərzində bitəcək. Bu o deməkdir ki, DocSpace istifadəsi mümkün olmayacaq.
+
+Satınalma zamanı mövcud olan bütün funksiyalardan *məhdud müddətə* istifadə etmək üçün ONLYOFFICE DocSpace Enterprise (3 illik dəstək və yeniləmələr daxil olmaqla) üçün Ömürlük lisenziya* almağı tövsiyə edirik:
+
+$OrangeButton
+
+Həmçinin lisenziya yeniləmələri üçün birbaşa satış menecerinizlə əlaqə saxlaya bilərsiniz.
+
+Ödənişlə bağlı suallar üçün "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın. Hər hansı texniki problemləri həll etmək üçün "${__SupportLink}":"${__SupportLink}" istifadə edin.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Salam $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisenziyanızın güzəşt müddəti bu gün başa çatır. Bu o deməkdir ki, DocSpace artıq əlçatan olmayacaq.
+
+Satınalma zamanı mövcud olan bütün funksiyalardan *məhdud müddətə* istifadə etmək üçün ONLYOFFICE DocSpace Enterprise (3 illik dəstək və yeniləmələr daxil olmaqla) üçün Ömürlük lisenziya* almağı tövsiyə edirik:
+
+$OrangeButton
+
+Həmçinin lisenziya yeniləmələri üçün birbaşa satış menecerinizlə əlaqə saxlaya bilərsiniz. 
+
+Ödənişlə bağlı suallar üçün "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın. Hər hansı texniki problemləri həll etmək üçün "${__SupportLink}":"${__SupportLink}" istifadə edin.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Salam $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisenziyanızın müddəti 7 günə başa çatacaq. Bu o deməkdir ki, yeniləmələr və dəstək artıq əlçatan olmayacaq.*
+
+Lisenziyanı yeniləmək üçün birbaşa xüsusi satış menecerinizlə əlaqə saxlayın və ya "${__SalesEmail}":"mailto:${__SalesEmail}" vasitəsilə bizimlə əlaqə saxlayın.
+
+Ödənişlə bağlı suallar üçün "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın. Hər hansı texniki problemləri həll etmək üçün "${__SupportLink}":"${__SupportLink}" istifadə edin.
+
+*Lisenziya satın aldığınız zaman qeyri-məhdud müddət ərzində mövcud olan bütün funksiyalardan istifadə edə bilərsiniz.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Salam $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisenziyanızın müddəti bu gün bitir. Bu o deməkdir ki, yeniləmələr və dəstək artıq əlçatan olmayacaq.*
+
+Lisenziyanı yeniləmək üçün birbaşa xüsusi satış menecerinizlə əlaqə saxlayın və ya "${__SalesEmail}":"mailto:${__SalesEmail}" vasitəsilə bizimlə əlaqə saxlayın.
+
+Ödənişlə bağlı suallar üçün "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın. Hər hansı texniki problemləri həll etmək üçün "${__SupportLink}":"${__SupportLink}" istifadə edin.
+
+*Lisenziya satın aldığınız zaman qeyri-məhdud müddət ərzində mövcud olan bütün funksiyalardan istifadə edə bilərsiniz.
+
+$TrulyYours</value>
   </data>
 </root>

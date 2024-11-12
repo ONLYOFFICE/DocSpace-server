@@ -1054,4 +1054,10 @@
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Kvote za shranjevanje in statistika</value>
   </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Kvote na sobo ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupnega prostora za shranjevanje DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Kvote na uporabnika ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupnega prostora za shranjevanje DocSpace.</value>
+  </data>
 </root>

@@ -1055,6 +1055,12 @@
     <value>Kvóty a štatistiky úložiska</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} na administrátora/oprávneného používateľa a možnosť pridať priestor na požiadanie</value>
+    <value>{0} na administrátora a možnosť pridať priestor na požiadanie</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Nepodarilo sa nastaviť kvótu pre miestnosť. Zadaná hodnota je väčšia ako celkové úložisko DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Nepodarilo sa nastaviť kvótu pre používateľa. Zadaná hodnota je väčšia ako celkové úložisko DocSpace.</value>
   </data>
 </root>

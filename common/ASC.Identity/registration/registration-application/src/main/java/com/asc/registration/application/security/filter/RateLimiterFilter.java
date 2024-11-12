@@ -76,7 +76,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
       var bucket =
           proxyManager
               .builder()
-              .build(String.format("%s:%s", method, person.getId()), bucketConfiguration);
+              .build(String.format("registration:%s:%s", method, person.getId()), bucketConfiguration);
       handleRequest(bucket, request, response, chain);
     } else {
       var clientIp = httpUtils.getRequestClientAddress(request).orElse(request.getRemoteAddr());
@@ -100,7 +100,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
     response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
     response.setHeader(
         X_RATE_RESET,
-        String.valueOf(TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill())));
+        String.valueOf(probe.getNanosToWaitForReset()));
     response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
     if (probe.isConsumed()) {
       chain.doFilter(request, response);

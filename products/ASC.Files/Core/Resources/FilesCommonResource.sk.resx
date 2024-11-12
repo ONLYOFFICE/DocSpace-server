@@ -485,4 +485,19 @@
   <data name="FormNumber" xml:space="preserve">
     <value>Číslo formulára</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Tvorca obsahu</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Tvorca obsahu</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Manažér miestnosti</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Manažér miestnosti</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Externý používateľ</value>
+  </data>
 </root>

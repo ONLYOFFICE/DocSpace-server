@@ -96,6 +96,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var orangeButtonUrl3 = string.Empty;
                 Func<CultureInfo, string> orangeButtonText4 = _ => string.Empty;
                 var orangeButtonUrl4 = string.Empty;
+                Func<CultureInfo, string> orangeButtonText5 = _ => string.Empty;
+                var orangeButtonUrl5 = string.Empty;
 
                 var img1 = string.Empty;
                 var img2 = string.Empty;
@@ -103,6 +105,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var img4 = string.Empty;
                 var img5 = string.Empty;
                 var img6 = string.Empty;
+                var img7 = string.Empty;
                 Func<CultureInfo, string> txtTrulyYours = c =>  WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
                 var topGif = string.Empty;
 
@@ -189,6 +192,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img4 = studioNotifyHelper.GetNotificationImageUrl("zapier.png");
                         img5 = studioNotifyHelper.GetNotificationImageUrl("wordpress.png");
                         img6 = studioNotifyHelper.GetNotificationImageUrl("drupal.png");
+                        img7 = studioNotifyHelper.GetNotificationImageUrl("pipedrive.png");
 
                         orangeButtonText1 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
                         orangeButtonUrl1 = "https://marketplace.zoom.us/apps/OW6rOq-nRgCihG5eps_p-g";
@@ -198,6 +202,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         orangeButtonUrl3 = "https://wordpress.org/plugins/onlyoffice-docspace/";
                         orangeButtonText4 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
                         orangeButtonUrl4 = "https://www.drupal.org/project/onlyoffice_docspace";
+                        orangeButtonText5 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
+                        orangeButtonUrl5 = "https://www.pipedrive.com/en/marketplace/app/onlyoffice-doc-space/4cb3b5d9d19a1918";
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("integration.gif");
 
