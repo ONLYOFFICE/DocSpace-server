@@ -77,6 +77,7 @@ try
     await eventBus.SubscribeAsync<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>();
     await eventBus.SubscribeAsync<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>();
     await eventBus.SubscribeAsync<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<ReindexIntegrationEvent, ReindexIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

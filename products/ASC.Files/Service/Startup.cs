@@ -53,7 +53,8 @@ public class Startup : BaseWorkerStartup
 
         if (elasticLaunchType != ElasticLaunchType.Disabled)
         {
-            services.AddHostedService<ElasticSearchIndexService>();
+            services.AddActivePassiveHostedService<ElasticSearchIndexService>(Configuration);
+            services.AddHostedService<ElasticSearchService>();
         }
 
         if (elasticLaunchType != ElasticLaunchType.Exclusive)
@@ -74,6 +75,7 @@ public class Startup : BaseWorkerStartup
         services.AddSingleton(Channel.CreateUnbounded<FileData<int>>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
+        
         services.AddDocumentServiceHttpClient(Configuration);
     }
 }

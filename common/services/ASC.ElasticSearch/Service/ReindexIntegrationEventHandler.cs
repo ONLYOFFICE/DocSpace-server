@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,32 +24,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ProtoBuf;
+using System.Threading.Channels;
 
-namespace ASC.ElasticSearch;
+using ASC.EventBus.Abstractions;
+using ASC.EventBus.Log;
+using ASC.Files.Core.IntegrationEvents.Events;
 
-[ProtoContract]
-public record ClearIndexAction
+namespace ASC.ElasticSearch.Service;
+
+[Scope]
+public class ReindexIntegrationEventHandler(
+    ILogger<ReindexIntegrationEventHandler> logger,
+    ChannelWriter<ReIndexAction> channelWriter)
+    : IIntegrationEventHandler<ReindexIntegrationEvent>
 {
-    [ProtoMember(1)]
-    public string Id { get; set; }
+    public async Task Handle(ReindexIntegrationEvent @event)
+    {
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, "", @event);
+            
+            if (await channelWriter.WaitToWriteAsync())
+            {
+                await channelWriter.WriteAsync(new ReIndexAction {Tenant = @event.TenantId});
+            }
+        }
+    }
 }
-
-[ProtoContract]
-public record ReIndexAction
-{
-    [ProtoMember(1)]
-    public int Tenant { get; set; }
-}
-
-[ProtoContract]
-public record IndexAction
-{
-    [ProtoMember(1)]
-    public string Indexing { get; set; }
-
-    [ProtoMember(2)]
-    public long LastIndexed { get; set; }
-}
-
-

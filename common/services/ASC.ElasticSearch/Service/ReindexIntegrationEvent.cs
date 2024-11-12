@@ -24,32 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.EventBus.Events;
+
 using ProtoBuf;
 
-namespace ASC.ElasticSearch;
+namespace ASC.Files.Core.IntegrationEvents.Events;
 
 [ProtoContract]
-public record ClearIndexAction
+public record ReindexIntegrationEvent : IntegrationEvent
 {
-    [ProtoMember(1)]
-    public string Id { get; set; }
+    private ReindexIntegrationEvent()
+    {
+
+    }
+
+    public ReindexIntegrationEvent(Guid createBy, int tenantId)
+    : base(createBy, tenantId)
+    {
+
+    }
 }
-
-[ProtoContract]
-public record ReIndexAction
-{
-    [ProtoMember(1)]
-    public int Tenant { get; set; }
-}
-
-[ProtoContract]
-public record IndexAction
-{
-    [ProtoMember(1)]
-    public string Indexing { get; set; }
-
-    [ProtoMember(2)]
-    public long LastIndexed { get; set; }
-}
-
-

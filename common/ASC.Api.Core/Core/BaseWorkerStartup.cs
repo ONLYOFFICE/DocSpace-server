@@ -25,6 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Notify.Socket;
+using ASC.ElasticSearch;
+using ASC.Files.Core.IntegrationEvents.Events;
 
 namespace ASC.Api.Core;
 
@@ -94,6 +96,10 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
         services.AddTransient<DistributedTaskProgress>();
+        
+        services.AddSingleton(Channel.CreateUnbounded<ReIndexAction>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<ReIndexAction>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<ReIndexAction>>().Writer);
     }
 
     protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()

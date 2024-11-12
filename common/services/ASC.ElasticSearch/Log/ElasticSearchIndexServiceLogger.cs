@@ -25,14 +25,15 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ElasticSearch.Log;
+
 internal static partial class ElasticSearchIndexServiceLogger
 {
     [LoggerMessage(LogLevel.Critical, "FactoryIndexer")]
-    public static partial void CriticalFactoryIndexer(this ILogger logger, Exception exception);  
-    
+    public static partial void CriticalFactoryIndexer(this ILogger logger, Exception exception);
+
     [LoggerMessage(LogLevel.Debug, "Product reindex {indexName}")]
-    public static partial void DebugProductReindex(this ILogger logger, string indexName);  
-    
+    public static partial void DebugProductReindex(this ILogger logger, string indexName);
+
     [LoggerMessage(LogLevel.Debug, "Product {indexName}")]
     public static partial void DebugProduct(this ILogger logger, string indexName);
 
@@ -41,4 +42,10 @@ internal static partial class ElasticSearchIndexServiceLogger
 
     [LoggerMessage(LogLevel.Error, "Product reindex {indexName}")]
     public static partial void ErrorProductReindex(this ILogger logger, string indexName, Exception exception);
+
+    [LoggerMessage(LogLevel.Information, "Elastic Reindex running.")]
+    public static partial void InformationElasticSearchServiceRunning(this ILogger<ElasticSearchService> logger);
+
+    [LoggerMessage(LogLevel.Information, "Elastic Reindex is stopping.")]
+    public static partial void InformationElasticSearchServiceStopping(this ILogger<ElasticSearchService> logger);
 }

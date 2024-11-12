@@ -84,7 +84,7 @@ public abstract class BaseIndexer<T>(Client client,
 
         await using (var webStudioDbContext = await dbContextFactory.CreateDbContextAsync())
         {
-            lastIndexed = await Queries.LastIndexedAsync(webStudioDbContext, Wrapper.IndexName + tenantId);
+            lastIndexed = await Queries.LastIndexedAsync(webStudioDbContext, Wrapper.IndexName + (tenantId == 0 ? "" : tenantId));
         }
 
         if (lastIndexed.Equals(DateTime.MinValue))

@@ -115,7 +115,7 @@ public class SearchSettingsHelper(TenantManager tenantManager,
         await settingsManager.SaveAsync(settings);
 
         var action = new ReIndexAction { Tenant = await tenantManager.GetCurrentTenantIdAsync() };
-        action.Names.AddRange(toReIndex.Select(r => r.ID).ToList());
+        //action.Names.AddRange(toReIndex.Select(r => r.ID).ToList());
 
         await cacheNotify.PublishAsync(action, CacheNotifyAction.Any);
     }

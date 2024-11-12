@@ -24,40 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Hosting;
+
 namespace ASC.ElasticSearch;
 
-public class ElasticSearchIndexService(ILoggerProvider options,
-        ICacheNotify<AscCacheItem> notify,
+public class ElasticSearchIndexService(
+    ILogger<ElasticSearchIndexService> logger,
         ICacheNotify<IndexAction> indexNotify,
         IServiceScopeFactory serviceScopeFactory,
         Settings settings)
-    : BackgroundService
+    : ActivePassiveBackgroundService<ElasticSearchIndexService>(logger, serviceScopeFactory)
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.Indexer");
-    private readonly TimeSpan _period = TimeSpan.FromMinutes(settings.Period.Value);
-    private bool _isStarted;
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.FromMinutes(settings.Period.Value);
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("ElasticSearch Index Service running");
-
-        try
-        {
-            notify.Subscribe(async _ =>
-            {
-                while (_isStarted)
-                {
-                    await Task.Delay(10000, stoppingToken);
-                }
-                await IndexAll(true);
-            }, CacheNotifyAction.Any);
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorSubscribeOnStart(e);
-        }
-
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        logger.LogInformation("ElasticSearch Index Service running");
+        
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var factoryIndexer = scope.ServiceProvider.GetService<FactoryIndexer>();
 
         while (!await factoryIndexer.CheckStateAsync(false))
@@ -69,83 +54,59 @@ public class ElasticSearchIndexService(ILoggerProvider options,
 
             await Task.Delay(10000, stoppingToken);
         }
-
-        var service = scope.ServiceProvider.GetService<ElasticSearchService>();
-        service.Subscribe();
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await IndexAll();
-
-            await Task.Delay(_period, stoppingToken);
-        }
-    }
-
-    public async Task IndexProductAsync(IFactoryIndexer product, bool reindex)
-    {
-        if (reindex)
-        {
-            try
-            {
-                if (!_isStarted)
-                {
-                    return;
-                }
-
-                _logger.DebugProductReindex(product.IndexName);
-                await product.ReIndexAsync();
-            }
-            catch (Exception e)
-            {
-                _logger.ErrorProductReindex(product.IndexName, e);
-            }
-        }
-
-        try
-        {
-            if (!_isStarted)
-            {
-                return;
-            }
-
-            _logger.DebugProduct(product.IndexName);
-            await indexNotify.PublishAsync(new IndexAction { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
-            await product.IndexAllAsync();
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorProductReindex(product.IndexName, e);
-        }
+        
+        await IndexAll();
     }
 
     private async Task IndexAll(bool reindex = false)
     {
         try
         {
-            _isStarted = true;
-
             IEnumerable<Type> wrappers;
 
-            await using (var scope = serviceScopeFactory.CreateAsyncScope())
+            await using (var scope = _serviceScopeFactory.CreateAsyncScope())
             {
                 wrappers = scope.ServiceProvider.GetService<IEnumerable<IFactoryIndexer>>().Select(r => r.GetType()).ToList();
             }
 
             await Parallel.ForEachAsync(wrappers, async (wrapper, _) =>
             {
-                await using var scope = serviceScopeFactory.CreateAsyncScope();
+                await using var scope = _serviceScopeFactory.CreateAsyncScope();
                 await IndexProductAsync((IFactoryIndexer)scope.ServiceProvider.GetRequiredService(wrapper), reindex);
             });
-
-
-            await indexNotify.PublishAsync(new IndexAction { Indexing = "", LastIndexed = DateTime.Now.Ticks }, CacheNotifyAction.Any);
-            _isStarted = false;
         }
         catch (Exception e)
         {
-            _logger.CriticalIndexAll(e);
+            logger.CriticalIndexAll(e);
 
             throw;
+        }
+    }
+    
+    private async Task IndexProductAsync(IFactoryIndexer product, bool reindex)
+    {
+        if (reindex)
+        {
+            try
+            {
+                logger.DebugProductReindex(product.IndexName);
+                await product.ReIndexAsync();
+            }
+            catch (Exception e)
+            {
+                logger.ErrorProductReindex(product.IndexName, e);
+            }
+        }
+
+        try
+        {
+            logger.DebugProduct(product.IndexName);
+            await indexNotify.PublishAsync(new IndexAction { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
+            await product.IndexAllAsync();
+        }
+        catch (Exception e)
+        {
+            logger.ErrorProductReindex(product.IndexName, e);
         }
     }
 }

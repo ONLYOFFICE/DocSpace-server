@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.IntegrationEvents.Events;
+
 using Microsoft.AspNetCore.RateLimiting;
 
 using Constants = ASC.Core.Users.Constants;
@@ -768,7 +770,14 @@ public class PortalController(
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), false, false);
     }
-
+    
+    [HttpPost("search/reindex")]
+    public async Task Reindex()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await eventBus.PublishAsync(new ReindexIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync()));
+    }
+    
     private async Task DemandPermissionToDeleteTenantAsync(Tenant tenant)
     {
         if (securityContext.CurrentAccount.ID != tenant.OwnerId)
