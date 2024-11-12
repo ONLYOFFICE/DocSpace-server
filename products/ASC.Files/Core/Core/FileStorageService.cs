@@ -1546,7 +1546,7 @@ public class FileStorageService //: IFileStorageService
                 return await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue);
             }
 
-            var fileOptions = await documentServiceHelper.GetParamsAsync(fileId.ToString(), -1, true, true, false, true);
+            var fileOptions = await documentServiceHelper.GetParamsAsync(fileId, -1, true, true, false, true);
 
             var configuration = fileOptions.Configuration;
             if (!configuration.EditorConfig.ModeWrite || !(configuration.Document.Permissions.Edit || configuration.Document.Permissions.ModifyFilter || configuration.Document.Permissions.Review
