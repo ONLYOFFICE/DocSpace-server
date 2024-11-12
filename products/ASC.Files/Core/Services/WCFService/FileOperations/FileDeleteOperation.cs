@@ -378,7 +378,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             await folderDao.ChangeTreeFolderSizeAsync(_trashId, (-1) * file.ContentLength);
                         }
                         
-                        if (_headers != null)
+                        if (_headers != null && _headers.Count > 0)
                         {
                             if (isNeedSendActions)
                             {
