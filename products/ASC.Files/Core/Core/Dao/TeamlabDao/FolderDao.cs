@@ -594,6 +594,18 @@ internal class FolderDao(
         return room;
     }
 
+    public async Task<Folder<int>> DeleteLifetimeSettings(Folder<int> room)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
+        roomSettings.Lifetime = null;
+        filesDbContext.Update(roomSettings);
+        await filesDbContext.SaveChangesAsync();
+        return room;
+    }
+
     public async Task DeleteFolderAsync(int folderId)
     {
         if (folderId == default)
