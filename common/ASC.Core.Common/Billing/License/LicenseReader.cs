@@ -38,11 +38,13 @@ public class LicenseReaderConfig
     public readonly LicenseType LicenseType;
     public readonly string LicensePath;
     public readonly string LicensePathTemp;
+    public readonly string LicensePathBcp;
 
     public LicenseReaderConfig(IConfiguration configuration)
     {
         LicensePath = configuration["license:file:path"] ?? "";
         LicensePathTemp = LicensePath + ".tmp";
+        LicensePathBcp = LicensePath + ".bcp";
 
         _ = Enum.TryParse(configuration["license:type"], true, out LicenseType);
     }
@@ -58,6 +60,7 @@ public class LicenseReader(
 {
     public readonly string LicensePath = licenseReaderConfig.LicensePath;
     private readonly string _licensePathTemp = licenseReaderConfig.LicensePathTemp;
+    private readonly string _licensePathBcp = licenseReaderConfig.LicensePathBcp;
     private readonly LicenseType _licenseType = licenseReaderConfig.LicenseType;
 
     public const string CustomerIdKey = "CustomerId";
@@ -93,40 +96,69 @@ public class LicenseReader(
         await tariffService.DeleteDefaultBillingInfoAsync();
     }
 
-    public async Task RefreshLicenseAsync()
+    public async Task RefreshLicenseAsync(Func<Task<bool>> validateFunc)
     {
         if (string.IsNullOrEmpty(LicensePath))
         {
             throw new BillingNotFoundException("Empty license path");
         }
 
+        var temp = File.Exists(_licensePathTemp);
+        var bcp = temp && File.Exists(LicensePath);
+
         try
         {
-            var temp = File.Exists(_licensePathTemp);
-
             await using (var licenseStream = GetLicenseStream(temp))
             using (var reader = new StreamReader(licenseStream))
             {
                 var licenseJsonString = await reader.ReadToEndAsync();
                 var license = License.Parse(licenseJsonString);
 
-                await LicenseToDBAsync(license);
+                if (bcp)
+                {
+                    File.Move(LicensePath, _licensePathBcp, true);
+                }
 
                 if (temp)
                 {
                     await SaveLicenseAsync(licenseStream, LicensePath);
                 }
+
+                if (!await validateFunc())
+                {
+                    throw new BillingNotConfiguredException("License not correct");
+                }
+
+                await LicenseToDBAsync(license);
             }
 
             if (temp)
             {
                 File.Delete(_licensePathTemp);
             }
+
+            if (bcp)
+            {
+                File.Delete(_licensePathBcp);
+            }
+        }
+        catch (BillingNotConfiguredException ex)
+        {
+            if (bcp)
+            {
+                File.Move(_licensePathBcp, LicensePath, true);
+            }
+            else if (temp)
+            {
+                File.Delete(LicensePath);
+            }
+
+            LogError(ex);
+            throw;
         }
         catch (Exception ex)
         {
             LogError(ex);
-
             throw;
         }
     }

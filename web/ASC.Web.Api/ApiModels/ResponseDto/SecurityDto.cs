@@ -26,39 +26,33 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class SecurityDto
 {
-    /// <summary>Module ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Module ID
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
     public string WebItemId { get; set; }
 
-    /// <summary>List of users with the access to the module</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.EmployeeDto}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of users with the access to the module
+    /// </summary>
     public List<EmployeeDto> Users { get; set; }
 
-    /// <summary>List of groups with the access to the module</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.GroupSummaryDto}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of groups with the access to the module
+    /// </summary>
     public List<GroupSummaryDto> Groups { get; init; }
 
-    /// <summary>Specifies if the security settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the security settings are enabled or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = true)]
     public bool Enabled { get; set; }
 
-    /// <summary>Specifies if this module is a subitem or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if this module is a subitem or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool IsSubItem { get; set; }
-
-    public static SecurityDto GetSample()
-    {
-        return new SecurityDto
-        {
-            WebItemId = Guid.Empty.ToString(),
-            Enabled = true,
-            IsSubItem = false,
-            Groups = [GroupSummaryDto.GetSample()],
-            Users = [EmployeeDto.GetSample()]
-        };
-    }
 }

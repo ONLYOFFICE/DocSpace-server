@@ -125,9 +125,16 @@ class ChangesUserData
 [DebuggerDisplay("{Id} {Name}")]
 public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)
 {
+    /// <summary>
+    /// Id
+    /// </summary>
     public string Id { get; init; }
 
     private readonly string _name;
+
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name
     {
         get
@@ -158,44 +165,63 @@ public class EditHistoryChanges
     public DateTime Date { get; set; }
 }
 
-/// <summary>
-/// </summary>
 [DebuggerDisplay("{Version}")]
 public class EditHistoryDataDto
 {
-    /// <summary>URL to the file changes</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// URL to the file changes
+    /// </summary>
+    [Url]
     public string ChangesUrl { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; set; }
 
-    /// <summary>Previous version</summary>
-    /// <type>ASC.Files.Core.EditHistoryUrl, ASC.Files.Core</type>
+    /// <summary>
+    /// Previous version
+    /// </summary>
     public EditHistoryUrl Previous { get; set; }
 
-    /// <summary>Token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Token
+    /// </summary>
     public string Token { get; set; }
 
-    /// <summary>File URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// File URL
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 
-    /// <summary>File version</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// File version
+    /// </summary>
     public int Version { get; init; }
 
-    /// <summary>File type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// File type
+    /// </summary>
     public string FileType { get; set; }
 }
 
 [DebuggerDisplay("{Key} - {Url}")]
 public class EditHistoryUrl
 {
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; init; }
+
+    /// <summary>
+    /// Url
+    /// </summary>
+    [Url]
     public string Url { get; init; }
+
+    /// <summary>
+    /// File type
+    /// </summary>
     public string FileType { get; set; }
 }

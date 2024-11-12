@@ -26,37 +26,90 @@
 
 namespace ASC.AuditTrail.Types;
 
-/// <summary>
-/// </summary>
 [EnumExtensions]
 public enum ModuleType
 {
+    [SwaggerEnum("None")]
     None,
+
+    [SwaggerEnum("Files")]
     Files,
+
+    [SwaggerEnum("Folders")]
     Folders,
+
+    [SwaggerEnum("Documents settings")]
     DocumentsSettings,
+
+    [SwaggerEnum("Companies")]
     Companies,
+
+    [SwaggerEnum("Persons")]
     Persons,
+
+    [SwaggerEnum("Contacts")]
     Contacts,
+
+    [SwaggerEnum("Crm tasks")]
     CrmTasks,
+
+    [SwaggerEnum("Opportunities")]
     Opportunities,
+
+    [SwaggerEnum("Invoices")]
     Invoices,
+
+    [SwaggerEnum("Cases")]
     Cases,
+
+    [SwaggerEnum("Common crm settings")]
     CommonCrmSettings,
+
+    [SwaggerEnum("Contacts settings")]
     ContactsSettings,
+
+    [SwaggerEnum("Contact types")]
     ContactTypes,
+
+    [SwaggerEnum("Invoice settings")]
     InvoiceSettings,
+
+    [SwaggerEnum("Other crm settings")]
     OtherCrmSettings,
+
+    [SwaggerEnum("Users")]
     Users,
+
+    [SwaggerEnum("Groups")]
     Groups,
+
+    [SwaggerEnum("Projects")]
     Projects,
+
+    [SwaggerEnum("Milestones")]
     Milestones,
+
+    [SwaggerEnum("Tasks")]
     Tasks,
+
+    [SwaggerEnum("Discussions")]
     Discussions,
+
+    [SwaggerEnum("Time tracking")]
     TimeTracking,
+
+    [SwaggerEnum("Reports")]
     Reports,
+
+    [SwaggerEnum("Projects settings")]
     ProjectsSettings,
+
+    [SwaggerEnum("General")]
     General,
+
+    [SwaggerEnum("Products")]
     Products,
+
+    [SwaggerEnum("Rooms")]
     Rooms
 }

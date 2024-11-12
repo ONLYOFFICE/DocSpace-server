@@ -286,6 +286,10 @@ public class FileTrackerHelper
                     {
                         await SetTrackerAsync(fileId, fileTracker);
                     }
+                    else
+                    {
+                        await RemoveTrackerAsync(fileId);
+                    }
                 }
             }
             catch (Exception e)

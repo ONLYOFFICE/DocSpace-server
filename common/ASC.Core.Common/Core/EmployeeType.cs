@@ -26,17 +26,24 @@
 
 namespace ASC.Core.Users;
 
-/// <summary>
-/// </summary>
 [Flags]
 [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter<EmployeeType>))]
 [EnumExtensions]
 public enum EmployeeType
 {
+    [SwaggerEnum("All")]
     All = 0,
+
+    [SwaggerEnum("Room admin")]
     RoomAdmin = 1,
+
+    [SwaggerEnum("Guest")]
     Guest = 2,
+
+    [SwaggerEnum("DocSpace admin")]
     DocSpaceAdmin = 3,
+	
+    [SwaggerEnum("User")]
     User = 4
 }
 

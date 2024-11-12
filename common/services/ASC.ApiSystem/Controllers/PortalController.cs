@@ -56,6 +56,12 @@ public class PortalController(
 {
     #region For TEST api
 
+    /// <summary>
+    /// Test api
+    /// </summary>
+    /// <path>apisystem/portal/test</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [SwaggerResponse(200, "Portal api works")]
     [HttpGet("test")]
     public IActionResult Check()
     {
@@ -69,6 +75,12 @@ public class PortalController(
 
     #region API methods
 
+    /// <summary>
+    /// Register
+    /// </summary>
+    /// <path>apisystem/portal/register</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("register")]
     //[AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal,auth:portalbasic")]
@@ -303,6 +315,12 @@ public class PortalController(
         });
     }
 
+    /// <summary>
+    /// Remove
+    /// </summary>
+    /// <path>apisystem/portal/remove</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpDelete("remove")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -363,14 +381,30 @@ public class PortalController(
             });
         }
 
-        await hostedSolution.RemoveTenantAsync(tenant);
+        var wizardSettings = await settingsManager.LoadAsync<WizardSettings>(tenant.Id);
+
+        if (!wizardSettings.Completed)
+        {
+            await hostedSolution.RemoveTenantAsync(tenant);
+        }
+        else
+        {
+            await commonMethods.SendRemoveInstructions(commonMethods.GetRequestScheme(), tenant);
+        }
 
         return Ok(new
         {
-            tenant = commonMethods.ToTenantWrapper(tenant)
+            tenant = commonMethods.ToTenantWrapper(tenant),
+            removed = !wizardSettings.Completed,
         });
     }
 
+    /// <summary>
+    /// Status
+    /// </summary>
+    /// <path>apisystem/portal/status</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPut("status")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -425,6 +459,12 @@ public class PortalController(
         });
     }
 
+    /// <summary>
+    /// Checks if portal exists
+    /// </summary>
+    /// <path>apisystem/portal/validateportalname</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("validateportalname")]
     [AllowCrossSiteJson]
     public async ValueTask<IActionResult> CheckExistingNamePortalAsync(TenantModel model)
@@ -451,6 +491,12 @@ public class PortalController(
         });
     }
 
+    /// <summary>
+    /// Gets a list of portals
+    /// </summary>
+    /// <path>apisystem/portal</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpGet("get")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -517,6 +563,12 @@ public class PortalController(
         }
     }
 
+    /// <summary>
+    /// Signs in to portal
+    /// </summary>
+    /// <path>apisystem/portal/signin</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("signin")]
     [AllowCrossSiteJson]
     public async Task<IActionResult> SignInToPortalAsync(TenantModel model)

@@ -25,9 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
+
+/// <summary>
+/// Base batch request parameters
+/// </summary>
 public class GetInfoUsersRequestDto
 {
-    /// <summary>List of user ids</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of user ids
+    /// </summary>
     public List<Guid> UserIds { get; set; }
 }

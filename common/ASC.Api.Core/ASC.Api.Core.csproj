@@ -24,7 +24,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.1.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.2.0" />
     <PackageReference Include="NLog.Targets.ElasticSearch" Version="7.7.0" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.14" />
     <PackageReference Include="RedisRateLimiting" Version="1.2.0" />
@@ -33,6 +33,8 @@
     <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" Version="10.2.0" />
 	<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
 	<PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.1" />
+
+	<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.9.0" />
   </ItemGroup>
 
   <ItemGroup>

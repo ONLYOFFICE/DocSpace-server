@@ -28,5 +28,8 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class EasyBibCitationBookRequestDto
 {
+    /// <summary>
+    /// Citation data
+    /// </summary>
     public string CitationData { get; set; }
 }

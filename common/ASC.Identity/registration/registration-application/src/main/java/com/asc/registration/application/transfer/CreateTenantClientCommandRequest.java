@@ -27,6 +27,7 @@
 
 package com.asc.registration.application.transfer;
 
+import com.asc.common.utilities.validation.LogoSize;
 import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
@@ -110,6 +111,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
   @Pattern(
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
+  @LogoSize
   private String logo;
 
   /** Indicates whether PKCE is allowed for the client. */

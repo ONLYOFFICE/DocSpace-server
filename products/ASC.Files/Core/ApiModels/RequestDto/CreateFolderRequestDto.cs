@@ -27,10 +27,31 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Parameters for creating a folder: Title (string) - new folder title
 /// </summary>
-public class CreateFolderRequestDto
+public class CreateFolder
 {
-    /// <summary>Folder title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Folder title
+    /// </summary>
+    [StringLength(165)]
     public string Title { get; set; }
+}
+
+/// <summary>
+/// Request parameters for creating a folder: Title (string) - new folder title
+/// </summary>
+public class CreateFolderRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Folder
+    /// </summary>
+    [FromBody]
+    public CreateFolder Folder { get; set; }
 }

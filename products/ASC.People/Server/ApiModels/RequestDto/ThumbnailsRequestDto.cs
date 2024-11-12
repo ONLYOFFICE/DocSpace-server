@@ -27,26 +27,50 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// Thumbnail request parameters
+/// </summary>
+public class ThumbnailsRequest
+{
+    /// <summary>
+    /// Path to the temporary file
+    /// </summary>
+    public string TmpFile { get; set; }
+
+    /// <summary>
+    /// Horizontal coordinate
+    /// </summary>
+    public int X { get; set; }
+
+    /// <summary>
+    /// Vertical coordinate
+    /// </summary>
+    public int Y { get; set; }
+
+    /// <summary>
+    /// Thumbnail width
+    /// </summary>
+    public int Width { get; set; }
+
+    /// <summary>
+    /// Thumbnail height
+    /// </summary>
+    public int Height { get; set; }
+}
+
+/// <summary>
+/// Thumbnail request parameters
 /// </summary>
 public class ThumbnailsRequestDto
 {
-    /// <summary>Path to the temporary file</summary>
-    /// <type>System.String, System</type>
-    public string TmpFile { get; set; }
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public string UserId { get; set; }
 
-    /// <summary>Horizontal coordinate</summary>
-    /// <type>System.Int32, System</type>
-    public int X { get; set; }
-
-    /// <summary>Vertical coordinate</summary>
-    /// <type>System.Int32, System</type>
-    public int Y { get; set; }
-
-    /// <summary>Thumbnail width</summary>
-    /// <type>System.Int32, System</type>
-    public int Width { get; set; }
-
-    /// <summary>Thumbnail height</summary>
-    /// <type>System.Int32, System</type>
-    public int Height { get; set; }
+    /// <summary>
+    /// Thumbnails
+    /// </summary>
+    [FromBody]
+    public ThumbnailsRequest Thumbnails { get; set; }
 }

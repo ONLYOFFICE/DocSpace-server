@@ -26,62 +26,57 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FileOperationDto
 {
-    /// <summary>Operation ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Operation ID
+    /// </summary>
     public string Id { get; set; }
 
-    /// <summary>Operation type</summary>
-    /// <type>ASC.Web.Files.Services.WCFService.FileOperations.FileOperationType, ASC.Files.Core</type>
+    /// <summary>
+    /// Operation type
+    /// </summary>
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; init; }
 
-    /// <summary>Operation progress</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Operation progress
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 100)]
     public int Progress { get; set; }
 
-    /// <summary>Error</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Error
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
     public string Error { get; set; }
 
-    /// <summary>Processing status</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Processing status
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "1")]
     public string Processed { get; set; }
 
-    /// <summary>Specifies if the operation is finished or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the operation is finished or not
+    /// </summary>
     public bool Finished { get; set; }
 
-    /// <summary>URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// URL
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 
-    /// <summary>List of files</summary>
-    /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of files
+    /// </summary>
     public List<FileEntryDto> Files { get; set; }
 
-    /// <summary>List of folders</summary>
-    /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of folders
+    /// </summary>
     public List<FileEntryDto> Folders { get; set; }
-
-    public static FileOperationDto GetSample()
-    {
-        return new FileOperationDto
-        {
-            Id = Guid.NewGuid().ToString(),
-            OperationType = FileOperationType.Move,
-            Progress = 100,
-            //Source = "folder_1,file_1",
-            //Result = "folder_1,file_1",
-            Error = "",
-            Processed = "1",
-            Files = [FileDto<int>.GetSample()],
-            Folders = [FolderDto<int>.GetSample()]
-        };
-    }
 }
 
 [Scope]

@@ -41,13 +41,13 @@ public class NotificationController    : ApiControllerBase
     /// <short>
     /// Send a notification to change a phone
     /// </short>
-    /// <category>Profiles</category>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
-    /// <returns type="System.Object, System">Notification</returns>
     /// <path>api/2.0/people/phone</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("People / Profiles")]
+    [SwaggerResponse(200, "Notification", typeof(object))]
+    [SwaggerResponse(501, "Not Implemented")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [HttpPost("phone")]
-    public Task<object> SendNotificationToChangeAsync(UpdateMemberRequestDto inDto)
+    public Task<object> SendNotificationToChangeAsync(UpdateMemberSimpleRequestDto inDto)
     {
         throw new NotImplementedException();
         // var user = await userManager.GetUsersAsync(string.IsNullOrEmpty(inDto.UserId)
@@ -72,5 +72,5 @@ public class NotificationController    : ApiControllerBase
         // await studioNotifyService.SendMsgMobilePhoneChangeAsync(user);
         //
         // return string.Empty;
-    }
+        }
 }

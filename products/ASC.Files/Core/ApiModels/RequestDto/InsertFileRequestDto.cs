@@ -27,30 +27,37 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for inserting a file
 /// </summary>
 public class InsertFileRequestDto : IModelWithFile, IDisposable
 {
-    /// <summary>File</summary>
-    /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
+    /// <summary>
+    /// File
+    /// </summary>
     public IFormFile File { get; set; }
 
-    /// <summary>File name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// File name
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Specifies whether to create a new file if it already exists or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to create a new file if it already exists or not
+    /// </summary>
     public bool CreateNewIfExist { get; set; }
 
-    /// <summary>Specifies whether to keep the file converting status or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to keep the file converting status or not
+    /// </summary>
     public bool KeepConvertStatus { get; set; }
+
 
     private Stream _stream;
     private bool _disposedValue;
 
-    /// <summary>Request input stream</summary>
-    /// <type>System.IO.Stream, System.IO</type>
+    /// <summary>
+    /// Request input stream
+    /// </summary>
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;
@@ -82,4 +89,23 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class InsertWithFileRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Insert file
+    /// </summary>
+    [FromForm]
+    [ModelBinder(BinderType = typeof(InsertFileModelBinder))]
+    public InsertFileRequestDto InsertFile { get; set; }
 }

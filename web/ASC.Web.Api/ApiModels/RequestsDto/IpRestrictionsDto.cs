@@ -27,6 +27,18 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// IP restrictions request parameters
+/// </summary>
+public class IpRestrictionsBaseRequestsDto
+{
+    /// <summary>
+    /// List of IP addresses
+    /// </summary>
+    public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
+}
+
+/// <summary>
+/// New IP restriction settings
 /// </summary>
 public class IpRestrictionsDto
 {
