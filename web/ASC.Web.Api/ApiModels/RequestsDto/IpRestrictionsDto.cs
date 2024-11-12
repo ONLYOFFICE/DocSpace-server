@@ -36,5 +36,5 @@ public class IpRestrictionsDto
 
     /// <summary>Enables IP restrictions or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool Enable { get; set; }
+    public bool? Enable { get; set; }
 }

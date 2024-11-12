@@ -70,8 +70,19 @@ public class IpRestrictionsController(ApiContext apiContext,
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         inDto.IpRestrictions = inDto.IpRestrictions ?? new List<IpRestrictionBase>();
+        var isEmpty = !inDto.IpRestrictions.Any();
 
-        if (inDto.Enable && !inDto.IpRestrictions.Any())
+        bool enable;
+        if (!inDto.Enable.HasValue)
+        {
+            enable = isEmpty ? false : true;
+        }
+        else
+        {
+            enable = inDto.Enable.Value;
+        }
+
+        if (enable && isEmpty)
         {
             throw new ArgumentException(Resource.ErrorIpRestriction);
         }
@@ -84,7 +95,7 @@ public class IpRestrictionsController(ApiContext apiContext,
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var ips = await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
 
-        var settings = new IPRestrictionsSettings { Enable = inDto.Enable };
+        var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);
 
         return inDto;
@@ -121,10 +132,21 @@ public class IpRestrictionsController(ApiContext apiContext,
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         inDto.IpRestrictions = inDto.IpRestrictions ?? new List<IpRestrictionBase>();
+        var isEmpty = !inDto.IpRestrictions.Any();
 
-        if (inDto.Enable && !inDto.IpRestrictions.Any())
+        bool enable;
+        if (!inDto.Enable.HasValue)
         {
-            throw new ArgumentException(nameof(inDto.IpRestrictions));
+            enable = isEmpty ? false : true;
+        }
+        else
+        {
+            enable = inDto.Enable.Value;
+        }
+
+        if (enable && isEmpty)
+        {
+            throw new ArgumentException(Resource.ErrorIpRestriction);
         }
 
         if (inDto.IpRestrictions.Any(r => !IPAddress.TryParse(r.Ip, out _)))
@@ -135,7 +157,7 @@ public class IpRestrictionsController(ApiContext apiContext,
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var ips = await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
 
-        var settings = new IPRestrictionsSettings { Enable = inDto.Enable };
+        var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);
 
         return inDto;
