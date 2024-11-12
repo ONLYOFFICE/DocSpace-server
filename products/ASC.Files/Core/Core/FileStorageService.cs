@@ -1546,7 +1546,7 @@ public class FileStorageService //: IFileStorageService
                 return await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue);
             }
 
-            var fileOptions = await documentServiceHelper.GetParamsAsync(fileId.ToString(), -1, true, true, false, true);
+            var fileOptions = await documentServiceHelper.GetParamsAsync(fileId, -1, true, true, false, true);
 
             var configuration = fileOptions.Configuration;
             if (!configuration.EditorConfig.ModeWrite || !(configuration.Document.Permissions.Edit || configuration.Document.Permissions.ModifyFilter || configuration.Document.Permissions.Review
@@ -3175,7 +3175,8 @@ public class FileStorageService //: IFileStorageService
         
         if (link == null)
         {
-            return await SetExternalLinkAsync(entry, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+            return await SetExternalLinkAsync(entry, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true,
+                expirationDate: entry.RootFolderType == FolderType.USER ? DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime) : default);
         }
 
         if (link.FileShareOptions.IsExpired && entry.RootFolderType == FolderType.USER && entry.FileEntryType == FileEntryType.File)

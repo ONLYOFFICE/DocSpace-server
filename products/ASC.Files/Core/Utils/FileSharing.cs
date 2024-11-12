@@ -45,7 +45,6 @@ public class FileSharingAceHelper(
     IUrlShortener urlShortener,
     IDistributedLockProvider distributedLockProvider,
     SocketManager socketManager,
-    FilesLinkUtility filesLinkUtility,
     IDaoFactory daoFactory)
 {
     private const int MaxInvitationLinks = 1;
@@ -133,11 +132,6 @@ public class FileSharingAceHelper(
                 {
                     w.FileShareOptions.Password = null;
                     w.FileShareOptions.DenyDownload = false;
-                }
-
-                if (eventType == EventType.Create && w.FileShareOptions.ExpirationDate == DateTime.MinValue)
-                {
-                    w.FileShareOptions.ExpirationDate = DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime);
                 }
             }
 
