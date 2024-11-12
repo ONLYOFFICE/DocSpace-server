@@ -54,11 +54,10 @@ public class IpRestrictionsController(ApiContext apiContext,
     }
 
     /// <summary>
-    /// Saves the new portal IP restrictions specified in the request.
+    /// Updates the IP restriction settings with a parameter specified in the request.
     /// </summary>
-    /// <short>Save the IP restrictions</short>
+    /// <short>Save the IP restriction settings</short>
     /// <path>api/2.0/settings/iprestrictions</path>
-    /// <collection>list</collection>
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]
     [HttpPut("")]
@@ -116,7 +115,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <summary>
     /// Updates the IP restriction settings with a parameter specified in the request.
     /// </summary>
-    /// <short>Update the IP restriction settings</short>
+    /// <short>Save the IP restriction settings</short>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]
