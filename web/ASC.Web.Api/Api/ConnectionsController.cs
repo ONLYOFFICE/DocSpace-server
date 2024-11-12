@@ -406,7 +406,7 @@ public class ConnectionsController(
         var geoloc = await geolocationHelper.GetIPGeolocationAsync(ip);
         var dto = new LocationDto
         {
-            Country = geoloc.Key,
+            Country = new RegionInfo(geoloc.Key).EnglishName,
             City = geoloc.City
         };
         return dto;
