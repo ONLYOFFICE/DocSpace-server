@@ -874,12 +874,11 @@ public class CustomizationConfig<T>(
         return modeWrite ? null : "markup";
     }
 
-    public async Task<bool> GetSubmitForm(File<T> file, bool modeWrite)
+    public async Task<bool> GetSubmitForm(File<T> file)
     {
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-
-        return properties is { FormFilling.CollectFillForm: true } && file.RootFolderType != FolderType.Archive;
+        return file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormsAsync(file) && properties is { FormFilling.CollectFillForm: true };
     }
 
     private FileSharing FileSharing { get; } = fileSharing;

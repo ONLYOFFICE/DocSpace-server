@@ -42,8 +42,9 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
         IDaoFactory daoFactory,
-        SecurityContext securityContext)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext);
+        SecurityContext securityContext,
+        FileSecurity fileSecurity)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -58,8 +59,9 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
         IDaoFactory daoFactory,
-        SecurityContext securityContext)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext);
+        SecurityContext securityContext,
+        FileSecurity fileSecurity)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -73,7 +75,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<T> configurationConverter,
         IDaoFactory daoFactory,
-        SecurityContext securityContext)
+        SecurityContext securityContext,
+        FileSecurity fileSecurity)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
@@ -208,7 +211,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     }
                     else
                     {
-                        if (file.RootFolderType == FolderType.Archive)
+                        if (!await fileSecurity.CanFillFormsAsync(rootFolder))
                         {
                             canEdit = false;
                             canFill = false;
