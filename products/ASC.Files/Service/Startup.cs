@@ -76,6 +76,11 @@ public class Startup : BaseWorkerStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
         
+        services.Configure<DistributedTaskQueueFactoryOptions>(ElasticSearchService.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        {
+            x.MaxThreadsCount = 2;
+        });
+        
         services.AddDocumentServiceHttpClient(Configuration);
     }
 }

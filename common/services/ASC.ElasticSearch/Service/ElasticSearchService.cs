@@ -26,15 +26,23 @@
 
 using System.Threading.Channels;
 
+using ASC.Common.Threading;
+using ASC.Common.Threading.DistributedLock.Abstractions;
+
 namespace ASC.ElasticSearch.Service;
 
 [Singleton]
 public class ElasticSearchService(
+    IDistributedTaskQueueFactory queueFactory,
     ILogger<ElasticSearchService> logger,
     IServiceScopeFactory serviceScopeFactory,
-    ChannelReader<ReIndexAction> channelReader)
+    ChannelReader<ReIndexAction> channelReader,
+    IDistributedLockProvider distributedLockProvider)
     : BackgroundService
-{
+{    
+    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = nameof(ElasticSearchService);
+    private const string LockKey = $"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}";
+    private readonly DistributedTaskQueue _reindexQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.InformationElasticSearchServiceRunning();
@@ -54,20 +62,48 @@ public class ElasticSearchService(
 
             tasks.Add(Task.Run(async () =>
             {
-                await foreach (var fileData in reader.ReadAllAsync(stoppingToken))
+                await foreach (var reIndexAction in reader.ReadAllAsync(stoppingToken))
                 {
-                    await using var scope = serviceScopeFactory.CreateAsyncScope();
-
-                    var allItems = scope.ServiceProvider.GetService<IEnumerable<IFactoryIndexer>>().ToList();
-
-                    foreach (var item in allItems)
+                    try
                     {
-                        await item.ReIndexAsync(fileData.Tenant);
+                        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, cancellationToken: stoppingToken))
+                        {
+                            var item = (await _reindexQueue.GetAllTasks<ReIndexAction>()).FirstOrDefault(r => r.Tenant != reIndexAction.Tenant);
+
+                            if (item is { Status: DistributedTaskStatus.Completed })
+                            {
+                                await _reindexQueue.DequeueTask(item.Id);
+                                item = null;
+                            }
+                            
+                            if (item == null)
+                            {
+                                await _reindexQueue.EnqueueTask(async (_, _) => await Reindex(reIndexAction), reIndexAction);
+                            }
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        logger.ErrorWithException(e);
+                        throw;
+                    }
+
                 }
             }, stoppingToken));
         }
 
         await Task.WhenAll(tasks);
+    }
+
+    private async Task Reindex(ReIndexAction reIndexAction)
+    {
+        await using var scope = serviceScopeFactory.CreateAsyncScope();
+
+        var allItems = scope.ServiceProvider.GetService<IEnumerable<IFactoryIndexer>>().ToList();
+
+        foreach (var item in allItems)
+        {
+            await item.ReIndexAsync(reIndexAction.Tenant);
+        }
     }
 }
