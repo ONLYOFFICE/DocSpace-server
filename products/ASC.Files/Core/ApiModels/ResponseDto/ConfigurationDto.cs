@@ -476,7 +476,7 @@ public class CustomizationConfigConverter<T>(
             Logo = await configConverter.Convert(configuration),
             MentionShare = await source.GetMentionShare(file),
             ReviewDisplay = source.GetReviewDisplay(configuration.EditorConfig.ModeWrite),
-            SubmitForm = await source.GetSubmitForm(file, configuration.EditorConfig.ModeWrite),
+            SubmitForm = await source.GetSubmitForm(file),
             Anonymous = anonymousConfigConverter.Convert(configuration)
         };
 
