@@ -2,6 +2,7 @@ var uap = require('ua-parser-js');
 const { json, status } = require("express/lib/response");
 const config = require("../../config");
 const redis = require("redis");
+var Mutex = require('async-mutex').Mutex;
 
 module.exports = async (io) => {
     const logger = require("../log.js");
@@ -13,41 +14,9 @@ module.exports = async (io) => {
     let targetFile = [];
     const redisOptions = config.get("Redis");
     var redisClient = redis.createClient(redisOptions);
+    const mutex = new Mutex();
     await redisClient.connect();
     
-    var clear = () =>
-    {
-      var today = new Date();
-      var date = new Date(today.setDate(today.getDate() - 3));
-      portalUsers.forEach(users =>
-      {
-        for(var j = 0; j < users.length; j++)
-        {
-          for(var i = 0; i < users[j].offlineSessions.length; i++)
-          {
-            if(users[j].offlineSessions[i].date <= date)
-            {
-              users[j].offlineSessions.splice(i, 1);
-              i--;
-            }
-          }
-          if(users[j].offlineSessions.length != 0)
-          {
-            redisClient.set(users[j].id, JSON.stringify(users[j].offlineSessions));
-          }
-          else
-          {
-            redisClient.del(users[j].id);
-          }
-          if(users[j].offlineSessions.length == 0 && users[j].sessions.length == 0)
-          {
-            users.splice(j, 1);
-            j--;
-          }
-        }
-      });
-    };
-    setInterval(clear, 1000 * 60 * 60 * 12);
     async function startAsync(socket)
     {
       if (socket.handshake.session.system) 
@@ -138,7 +107,7 @@ module.exports = async (io) => {
           }
           if(users.length < count)
           {
-            var offlineUsers = portalUsers[tenantId].filter(o => o.sessions.length == 0).sort(userSort);
+            var offlineUsers = portalUsers[tenantId].filter(o => o.sessions.length == 0 ).sort(userSort);
             index = index - onlineUsers.length;
             index = index < 0 ? 0 : index;
             for(var i = index; i < offlineUsers.length; i++)
@@ -250,43 +219,54 @@ module.exports = async (io) => {
       {
         if(!allUsers[key])
         {
-          allUsers[key] = [];
-          var users = JSON.parse(await redisClient.get(`allusers-${key}`));
-          if(users)
+          const release = await mutex.acquire();
+          if(allUsers[key])
           {
-            allUsers[key] = users;
+            return;
           }
-          if(allUsers[key].length != 0)
+          try
           {
-            for(var i = 0; i < allUsers[key].length; i++)
+            allUsers[key] = [];
+            var users = JSON.parse(await redisClient.get(`allusers-${key}`));
+            if(users)
             {
-              var user = allUsers[key][i];
-              var u = {};
-              u.id = user.id;
-              u.displayName = user.displayName;
-              u.isAdmin = user.isAdmin;
-              u.isOwner = user.isOwner;
-              u.isCollaborator = user.isCollaborator;
-              u.isRoomAdmin = user.isRoomAdmin;
-              u.avatar = user.avatar;
-              var offSess = await redisClient.get(u.id);
-              if(offSess && offSess != '[]')
-              {
-                offSess = JSON.parse(offSess);
-                for(var i = 0; i < offSess.length; i++)
-                {
-                  offSess[i].date = new Date(offSess[i].date);
-                }
-              }
-              else
-              {
-                offSess = [];
-              }
-              u.offlineSessions = offSess;
-              u.sessions = [];
-              addUser(list, u, key);
+           //   allUsers[key] = users;
             }
-            clear();
+            if(allUsers[key].length != 0)
+            {
+              for(var i = 0; i < allUsers[key].length; i++)
+              {
+                var user = allUsers[key][i];
+                var u = {};
+                u.id = user.id;
+                u.displayName = user.displayName;
+                u.isAdmin = user.isAdmin;
+                u.isOwner = user.isOwner;
+                u.isCollaborator = user.isCollaborator;
+                u.isRoomAdmin = user.isRoomAdmin;
+                u.avatar = user.avatar;
+                var offSess = await redisClient.get(u.id);
+                if(offSess && offSess != '[]')
+                {
+                  offSess = JSON.parse(offSess);
+                  for(var i = 0; i < offSess.length; i++)
+                  {
+                    offSess[i].date = new Date(offSess[i].date);
+                  }
+                }
+                else
+                {
+                  continue;
+                }
+                u.offlineSessions = offSess;
+                u.sessions = [];
+                addUser(list, u, key);
+              }
+            }
+          }
+          finally
+          {
+            release();
           }
         }
         if(!allUsers[key].some((a) => a.id == userId))
@@ -351,7 +331,7 @@ module.exports = async (io) => {
             {
               if(user.sessions[user.sessions.length - 1].id != session.id)
               {
-                onlineIO.to(socketKey).emit(`new-session-in-${socketDest}`, {userId: user.id, displayName: user.displayName, avatar: user.avatar, session: user.sessions[user.sessions.length - 1]} );
+                onlineIO.to(socketKey).emit(`new-session-in-${socketDest}`, {userId: user.id, displayName: user.displayName, isAdmin: user.isAdmin, isCollaborator: user.isCollaborator, isOwner: user.isOwner, isRoomAdmin: user.isRoomAdmin, avatar: user.avatar, session: user.sessions[user.sessions.length - 1]} );
               }
               onlineIO.to(`${socketKey}-${userId}`).emit(`leave-session-in-${socketDest}`, {userId, sessionId} );
             }
@@ -434,7 +414,7 @@ module.exports = async (io) => {
         }
         if(user.sessions.length == 1)
         {
-          onlineIO.to(socketKey).emit(`enter-in-${socketDest}`, {userId: user.id, displayName: user.displayName, avatar: user.avatar, session: session});
+          onlineIO.to(socketKey).emit(`enter-in-${socketDest}`, {userId: user.id, displayName: user.displayName, isAdmin: user.isAdmin, isCollaborator: user.isCollaborator, isOwner: user.isOwner, isRoomAdmin: user.isRoomAdmin, avatar: user.avatar, session: session});
         }
         else
         {
@@ -453,10 +433,10 @@ module.exports = async (io) => {
         var serUser = {
           userId: user.id,
           displayName : user.displayName,
-          isAdmin: isAdmin,
-          isOwner: isOwner,
-          isCollaborator: isCollaborator,
-          isRoomAdmin: isRoomAdmin,
+          isAdmin: user.isAdmin,
+          isOwner: user.isOwner,
+          isCollaborator: user.isCollaborator,
+          isRoomAdmin: user.isRoomAdmin,
           avatar: user.avatar
         };
         if(user.sessions.length != 0)
