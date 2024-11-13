@@ -61,7 +61,7 @@ public class DownloadRequestDto : BaseBatchRequestDto
     /// <summary>
     /// List of file IDs which will be converted
     /// </summary>
-    public IDictionary<JsonElement, string> FileConvertIds { get; set; } = new Dictionary<JsonElement, string>();
+    public IEnumerable<ItemKeyValuePair<JsonElement, string>> FileConvertIds { get; set; } = new List<ItemKeyValuePair<JsonElement, string>>();
 }
 
 /// <summary>
