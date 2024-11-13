@@ -770,6 +770,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         await TagDao.RemoveTagsAsync(pins);
                                     }
 
+                                    await FolderDao.DeleteLifetimeSettings(folder);
+
                                     await filesMessageService.SendAsync(MessageAction.RoomArchived, folder, _headers, folder.Title);
                                 }
                                 else

@@ -418,6 +418,7 @@ public interface IFolderDao<T>
     Task<T> SetWatermarkSettings(WatermarkSettings waterMarks, Folder<T> folder);
     Task<WatermarkSettings> GetWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteWatermarkSettings(Folder<T> room);
+    Task<Folder<T>> DeleteLifetimeSettings(Folder<T> room);
     #endregion
 }
 

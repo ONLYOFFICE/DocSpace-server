@@ -697,6 +697,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         throw new NotImplementedException();
     }
+
+    public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 internal abstract class BaseFolderDao
