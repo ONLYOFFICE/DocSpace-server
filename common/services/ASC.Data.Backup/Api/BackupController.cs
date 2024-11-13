@@ -207,6 +207,14 @@ public class BackupController(
         return await backupAjaxHandler.GetBackupProgressAsync();
     }
 
+    /// <summary>
+    /// Stop current backup.
+    /// </summary>
+    /// <short>Stop current backup</short>
+    /// <path>api/2.0/backup/stopbackup</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpPost("stopbackup")]
     public async Task StopBackupAsync()
