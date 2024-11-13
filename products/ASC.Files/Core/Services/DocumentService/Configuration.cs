@@ -579,6 +579,7 @@ public class Options
 
         _ = stringBuilder.Append(WatermarkOnDraw.Width.ToString(CultureInfo.InvariantCulture));
         _ = stringBuilder.Append(WatermarkOnDraw.Height.ToString(CultureInfo.InvariantCulture));
+        _ = stringBuilder.Append(string.Join(',',WatermarkOnDraw.Margins));
         _ = stringBuilder.Append(WatermarkOnDraw.Fill);
         _ = stringBuilder.Append(WatermarkOnDraw.Rotate);
         _ = stringBuilder.Append(WatermarkOnDraw.Transparent.ToString(CultureInfo.InvariantCulture));
@@ -621,7 +622,10 @@ public class WatermarkOnDraw(double widthInPixels, double heightInPixels, string
     /// Defines the watermark height measured in millimeters.
     /// </summary>
     [JsonPropertyName("height")]
-    public double Height { get; init; } = heightInPixels == 0 ? 240 : heightInPixels / DotsPerMm;
+    public double Height { get; init; } = heightInPixels == 0 ? 200 : heightInPixels / DotsPerMm;
+
+    [JsonPropertyName("margins")]
+    public int[] Margins { get; init; } = [0, 0, 0, 0];
 
     [JsonPropertyName("fill")]
     public string Fill { get; init; } = fill;
@@ -657,7 +661,7 @@ public class Run
 
     public Run(string text, bool usedInHash = true)
     {
-        FontSize = "42";
+        FontSize = "28";
         Fill = [124, 124, 124];
         Text = text;
 
