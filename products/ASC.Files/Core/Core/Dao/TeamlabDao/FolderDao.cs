@@ -568,41 +568,58 @@ internal class FolderDao(
 
     public async Task<int> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<int> room)
     {
+        ArgumentNullException.ThrowIfNull(room);
+
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
 
-        var toUpdate = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
-
-        toUpdate.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermarkSettings);
-        filesDbContext.Update(toUpdate);
-
-        await filesDbContext.SaveChangesAsync();
+        if (roomSettings != null)
+        {
+            roomSettings.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermarkSettings);
+            filesDbContext.Update(roomSettings);
+            await filesDbContext.SaveChangesAsync();
+        }
 
         return room.Id;
     }
 
     public async Task<Folder<int>> DeleteWatermarkSettings(Folder<int> room)
     {
+        ArgumentNullException.ThrowIfNull(room);
+
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
-        roomSettings.Watermark = null;
-        filesDbContext.Update(roomSettings);
-        await filesDbContext.SaveChangesAsync();
+
+        if (roomSettings != null)
+        {
+            roomSettings.Watermark = null;
+            filesDbContext.Update(roomSettings);
+            await filesDbContext.SaveChangesAsync();
+        }
+
         return room;
     }
 
     public async Task<Folder<int>> DeleteLifetimeSettings(Folder<int> room)
     {
+        ArgumentNullException.ThrowIfNull(room);
+
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
-        roomSettings.Lifetime = null;
-        filesDbContext.Update(roomSettings);
-        await filesDbContext.SaveChangesAsync();
+
+        if (roomSettings != null)
+        {
+            roomSettings.Lifetime = null;
+            filesDbContext.Update(roomSettings);
+            await filesDbContext.SaveChangesAsync();
+        }
+
         return room;
     }
 
