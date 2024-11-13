@@ -207,6 +207,13 @@ public class BackupController(
         return await backupAjaxHandler.GetBackupProgressAsync();
     }
 
+    [AllowNotPayment]
+    [HttpPost("stopbackup")]
+    public async Task StopBackupAsync()
+    {
+        await backupAjaxHandler.StopBackupAsync();
+    }
+
     /// <summary>
     /// Returns the progress of the started backup.
     /// </summary>

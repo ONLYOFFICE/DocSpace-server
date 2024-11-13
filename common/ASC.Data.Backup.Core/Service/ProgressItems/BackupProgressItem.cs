@@ -100,17 +100,25 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
             tempFile = CrossPlatform.PathCombine(_tempFolder, backupName);
             storagePath = tempFile;
 
-            var writer = await DataOperatorFactory.GetWriteOperatorAsync(tempStream, _storageBasePath, backupName, _tempFolder, _userId, getter);
+            var writer = await DataOperatorFactory.GetWriteOperatorAsync(tempStream, _storageBasePath, backupName, _tempFolder, _userId, CancellationToken, getter);
 
             backupPortalTask.Init(TenantId, tempFile, _limit, writer, _dump);
 
             backupPortalTask.ProgressChanged = async (args) =>
             {
+                if (CancellationToken.IsCancellationRequested) 
+                {
+                    return;
+                }
                 Percentage = 0.9 * args.Progress;
                 await PublishChanges();
             };
 
             await backupPortalTask.RunJob();
+            if (CancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException();
+            }
 
             string hash;
             if (writer.NeedUpload)
@@ -122,6 +130,10 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
             {
                 storagePath = writer.StoragePath;
                 hash = writer.Hash;
+            }
+            if (CancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException();
             }
             Link = await backupStorage.GetPublicLinkAsync(storagePath);
 
@@ -157,21 +169,26 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         }
         catch (Exception error)
         {
-            logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
+            if (!CancellationToken.IsCancellationRequested) 
+            {
+                logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
+            }
             Exception = error;
             IsCompleted = true;
         }
         finally
         {
-            try
+            if (!CancellationToken.IsCancellationRequested)
             {
-                await PublishChanges();
+                try
+                {
+                    await PublishChanges();
+                }
+                catch (Exception error)
+                {
+                    logger.ErrorPublish(error);
+                }
             }
-            catch (Exception error)
-            {
-                logger.ErrorPublish(error);
-            }
-
             try
             {
                 if (!(storagePath == tempFile && _storageType == BackupStorageType.Local))

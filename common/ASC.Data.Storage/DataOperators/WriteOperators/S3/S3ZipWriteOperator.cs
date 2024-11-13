@@ -42,6 +42,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
     private readonly object _locker = new();
 
     public string Hash { get; private set; }
+    public CancellationToken CancellationToken { get; set; }
     public string StoragePath { get; private set; }
     public bool NeedUpload
     {
@@ -71,6 +72,10 @@ public class S3ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
+        if (CancellationToken.IsCancellationRequested)
+        {
+            throw new OperationCanceledException();
+        }
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
         
         if (fileStream != null)
@@ -82,6 +87,10 @@ public class S3ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
+        if (CancellationToken.IsCancellationRequested)
+        {
+            throw new OperationCanceledException();
+        }
         if (_fileStream == null)
         {
             _fileStream = _tempStream.Create();

@@ -40,6 +40,8 @@ public class ZipWriteOperator : IDataWriteOperator
         }
     }
 
+    public CancellationToken CancellationToken { get; set; }
+
     public string Hash => throw new NotImplementedException();
 
     public string StoragePath => throw new NotImplementedException();
@@ -54,6 +56,10 @@ public class ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
+        if (CancellationToken.IsCancellationRequested)
+        {
+            throw new OperationCanceledException();
+        }
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
         
         if (fileStream != null)
@@ -65,6 +71,10 @@ public class ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
+        if (CancellationToken.IsCancellationRequested)
+        {
+            throw new OperationCanceledException();
+        }
         var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
         try
         {

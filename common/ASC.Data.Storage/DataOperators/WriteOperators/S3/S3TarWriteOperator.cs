@@ -39,6 +39,7 @@ public class S3TarWriteOperator : IDataWriteOperator
     private readonly ConcurrentQueue<int> _queue = new();
     private readonly CancellationTokenSource _cts = new();
     private readonly AscDistributedCache _cache;
+    public CancellationToken CancellationToken { get; set; }
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
@@ -66,12 +67,20 @@ public class S3TarWriteOperator : IDataWriteOperator
     {
         if (store is S3Storage s3Store) 
         {
+            if (CancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException();
+            }
             if (_cts.IsCancellationRequested)
             {
                 return;
             }
             var task = new Task(() =>
             {
+                if (CancellationToken.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException();
+                }
                 if (_cts.Token.IsCancellationRequested)
                 {
                     return;
@@ -105,6 +114,10 @@ public class S3TarWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
+        if (CancellationToken.IsCancellationRequested)
+        {
+            throw new OperationCanceledException();
+        }
         if (_cts.IsCancellationRequested)
         {
             return;
@@ -115,6 +128,10 @@ public class S3TarWriteOperator : IDataWriteOperator
 
         var task = new Task(() =>
         {
+            if (CancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException();
+            }
             if (_cts.Token.IsCancellationRequested)
             {
                 return;

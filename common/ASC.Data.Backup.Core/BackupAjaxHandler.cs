@@ -96,6 +96,13 @@ public class BackupAjaxHandler(
 
         return await backupService.GetBackupProgress(await GetCurrentTenantIdAsync());
     }
+    
+    public async Task StopBackupAsync()
+    {
+        await DemandPermissionsBackupAsync();
+
+        await backupService.StopBackupAsync(await GetCurrentTenantIdAsync());
+    }
 
     public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
     {

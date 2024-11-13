@@ -28,11 +28,15 @@ namespace ASC.Data.Storage.DataOperators;
 
 public static class DataOperatorFactory
 {
-    public static async Task<IDataWriteOperator> GetWriteOperatorAsync(TempStream tempStream, string storageBasePath, string title, string tempFolder, Guid userId, IGetterWriteOperator getter)
+    public static async Task<IDataWriteOperator> GetWriteOperatorAsync(TempStream tempStream, string storageBasePath, string title, string tempFolder, Guid userId, CancellationToken token, IGetterWriteOperator getter)
     {
         var writer = await getter.GetWriteOperatorAsync(storageBasePath, title, userId);
 
-        return writer ?? new ZipWriteOperator(tempStream, Path.Combine(tempFolder, title));
+        writer = writer ?? new ZipWriteOperator(tempStream, Path.Combine(tempFolder, title));
+
+        writer.CancellationToken = token;
+
+        return writer;
     }
 
     public static IDataWriteOperator GetDefaultWriteOperator(TempStream tempStream, string backupFilePath)

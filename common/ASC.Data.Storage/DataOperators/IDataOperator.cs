@@ -33,6 +33,7 @@ public interface IDataWriteOperator : IAsyncDisposable
     bool NeedUpload { get; }
     string Hash { get; }
     string StoragePath { get; }
+    CancellationToken CancellationToken { get; set; }
 }
 
 public interface IDataReadOperator : IDisposable

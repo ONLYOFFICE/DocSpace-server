@@ -132,6 +132,16 @@ public class BackupWorker(
         }
     }
 
+    public async Task StopBackupAsync(int tenantId)
+    {
+        var tasks = (await _progressQueue.GetAllTasks<BackupProgressItem>()).Where(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
+
+        foreach (var t in tasks)
+        {
+            await _progressQueue.DequeueTask(t.Id);
+        }
+    }
+
     public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))

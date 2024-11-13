@@ -151,6 +151,11 @@ public class BackupService(
     {
         return await backupWorker.GetBackupProgressAsync(tenantId);
     }
+    
+    public async Task StopBackupAsync(int tenantId)
+    {
+        await backupWorker.StopBackupAsync(tenantId);
+    }
 
     public async Task<BackupProgress> GetTransferProgress(int tenantId)
     {
