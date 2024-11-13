@@ -55,7 +55,7 @@ public class BackupController(
     /// Returns the backup schedule of the current portal.
     /// </summary>
     /// <short>Get the backup schedule</short>
-    /// <path>api/2.0/backup/getbackupschedule</path>
+    /// <path>api/2.0/portal/getbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup schedule", typeof(BackupAjaxHandler.Schedule))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
@@ -69,7 +69,7 @@ public class BackupController(
     /// Creates the backup schedule of the current portal with the parameters specified in the request.
     /// </summary>
     /// <short>Create the backup schedule</short>
-    /// <path>api/2.0/backup/createbackupschedule</path>
+    /// <path>api/2.0/portal/createbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(400, "BackupStored must be 1 - 30 or backup can not start as dump")]
@@ -118,7 +118,7 @@ public class BackupController(
     /// Deletes the backup schedule of the current portal.
     /// </summary>
     /// <short>Delete the backup schedule</short>
-    /// <path>api/2.0/backup/deletebackupschedule</path>
+    /// <path>api/2.0/portal/deletebackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
@@ -134,7 +134,7 @@ public class BackupController(
     /// Starts the backup of the current portal with the parameters specified in the request.
     /// </summary>
     /// <short>Start the backup</short>
-    /// <path>api/2.0/backup/startbackup</path>
+    /// <path>api/2.0/portal/startbackup</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [SwaggerResponse(400, "Wrong folder type or backup can`t start as dump")]
@@ -211,7 +211,7 @@ public class BackupController(
     /// Returns the progress of the started backup.
     /// </summary>
     /// <short>Get the backup progress</short>
-    /// <path>api/2.0/backup/getbackupprogress</path>
+    /// <path>api/2.0/portal/getbackupprogress</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
@@ -226,7 +226,7 @@ public class BackupController(
     /// Returns the history of the started backup.
     /// </summary>
     /// <short>Get the backup history</short>
-    /// <path>api/2.0/backup/getbackuphistory</path>
+    /// <path>api/2.0/portal/getbackuphistory</path>
     /// <collection>list</collection>
     [Tags("Backup")]
     [SwaggerResponse(200, "List of backup history records", typeof(BackupHistoryRecord))]
@@ -241,7 +241,7 @@ public class BackupController(
     /// Deletes the backup with the ID specified in the request.
     /// </summary>
     /// <short>Delete the backup</short>
-    /// <path>api/2.0/backup/deletebackup/{id}</path>
+    /// <path>api/2.0/portal/deletebackup/{id}</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
@@ -256,7 +256,7 @@ public class BackupController(
     /// Deletes the backup history of the current portal.
     /// </summary>
     /// <short>Delete the backup history</short>
-    /// <path>api/2.0/backup/deletebackuphistory</path>
+    /// <path>api/2.0/portal/deletebackuphistory</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
@@ -271,7 +271,7 @@ public class BackupController(
     /// Starts the data restoring process of the current portal with the parameters specified in the request.
     /// </summary>
     /// <short>Start the restoring process</short>
-    /// <path>api/2.0/backup/startrestore</path>
+    /// <path>api/2.0/portal/startrestore</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [SwaggerResponse(400, "Backup can not start as dump")]
@@ -326,7 +326,7 @@ public class BackupController(
     /// Returns the progress of the started restoring process.
     /// </summary>
     /// <short>Get the restoring progress</short>
-    /// <path>api/2.0/backup/getrestoreprogress</path>
+    /// <path>api/2.0/portal/getrestoreprogress</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
@@ -342,7 +342,7 @@ public class BackupController(
     /// Returns a path to the temporary folder with the stored backup.
     /// </summary>
     /// <short>Get the temporary backup folder</short>
-    /// <path>api/2.0/backup/backuptmp</path>
+    /// <path>api/2.0/portal/backuptmp</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Backup")]
     [HttpGet("backuptmp")]
