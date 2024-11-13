@@ -80,7 +80,7 @@ internal class SharePointFolderDao(
         return Task.FromResult(SharePointProviderInfo.ToFolder(SharePointProviderInfo.RootFolder));
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null)
+    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, QuotaFilter quotaFilter = QuotaFilter.All)
     {
         if (CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != SharePointProviderInfo.ProviderFilter))
         {
