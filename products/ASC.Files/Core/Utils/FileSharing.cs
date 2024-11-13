@@ -350,13 +350,6 @@ public class FileSharingAceHelper(
 
         if (recipients.Count > 0)
         {
-            if (entryType == FileEntryType.File
-                || ((Folder<T>)entry).FoldersCount + ((Folder<T>)entry).FilesCount > 0
-                || entry.ProviderEntry)
-            {
-                await fileMarker.MarkAsNewAsync(entry, recipients.Keys.ToList());
-            }
-
             if (entry.RootFolderType is FolderType.USER or FolderType.Privacy
                 && notify)
             {
