@@ -407,7 +407,11 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
         return await QueueAsync(() => _indexer.Delete(expression, tenant, immediately));
     }
 
-    public abstract Task ReIndexAsync(int tenantId);
+    public virtual async Task ReIndexAsync(int tenantId)
+    {
+        await DeleteAsync(tenantId);
+        await IndexAllAsync(tenantId);
+    }
 
     public async Task DeleteAsync(int tenantId, bool immediately = true)
     {

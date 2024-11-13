@@ -159,11 +159,6 @@ public class FactoryIndexerFile(
 
         return new(count, maxId, minId);
     }
-    
-    public override async Task ReIndexAsync(int tenantId)
-    {
-        await IndexAllAsync(tenantId);
-    }
 
     public override string SettingsTitle => FilesCommonResource.IndexTitle;
 

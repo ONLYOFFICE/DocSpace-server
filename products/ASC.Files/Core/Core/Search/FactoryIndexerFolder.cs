@@ -90,11 +90,6 @@ public class FactoryIndexerFolder(ILoggerProvider options,
         }
     }
 
-    public override async Task ReIndexAsync(int tenantId)
-    {
-        await IndexAllAsync(tenantId);
-    }
-
     private List<int> GetIds(DateTime lastIndexed, int tenantId)
     {
         var start = 0;
