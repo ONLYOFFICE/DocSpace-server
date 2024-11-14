@@ -862,6 +862,7 @@ public class FileStorageService //: IFileStorageService
             if (lifetimeChanged)
             {
                 lifetime = mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(updateData.Lifetime);
+                lifetime.StartDate = DateTime.UtcNow;
             }
 
             var newFolderId = await folderDao.UpdateFolderAsync(
