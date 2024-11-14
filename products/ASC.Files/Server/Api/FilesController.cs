@@ -418,6 +418,21 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     }
 
     /// <summary>
+    /// Creates a primary external link by the identifier specified in the request.
+    /// </summary>
+    /// <short>Create primary external link</short>
+    /// <path>api/2.0/files/file/{id}/link</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [SwaggerResponse(404, "Not Found")]
+    [HttpPost("file/{id}/link")]
+    public async Task<FileShareDto> CreatePrimaryExternalLinkAsync(FileLinkRequestDto<T> inDto)
+    {
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.Access, expirationDate: inDto.File.ExpirationDate, requiredAuth: inDto.File.Internal);
+        return await fileShareDtoHelper.Get(linkAce);
+    }
+
+    /// <summary>
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
     /// <short>Get primary external link</short>

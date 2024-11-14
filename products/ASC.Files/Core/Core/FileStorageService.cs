@@ -3130,7 +3130,15 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<AceWrapper> GetPrimaryExternalLinkAsync<T>(T entryId, FileEntryType entryType)
+    public async Task<AceWrapper> GetPrimaryExternalLinkAsync<T>(
+        T entryId, 
+        FileEntryType entryType, 
+        FileShare share = FileShare.Read, 
+        string title = null,
+        DateTime expirationDate = default,
+        bool denyDownload = false,
+        bool requiredAuth = false,
+        string password = null)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -3150,9 +3158,7 @@ public class FileStorageService //: IFileStorageService
 
             if (linkId == Guid.Empty)
             {
-                ace = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
-                .FirstOrDefaultAsync();
-            
+                ace = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
             }
             else
             {
@@ -3170,13 +3176,21 @@ public class FileStorageService //: IFileStorageService
             return ace;
         }
 
-        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
-            .FirstOrDefaultAsync();
-        
+        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
-            return await SetExternalLinkAsync(entry, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true,
-                expirationDate: entry.RootFolderType == FolderType.USER ? DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime) : default);
+            return await SetExternalLinkAsync(
+                entry, 
+                Guid.NewGuid(), 
+                share, 
+                title ?? FilesCommonResource.DefaultExternalLinkTitle,
+                primary: true,
+                expirationDate: expirationDate != default 
+                    ? expirationDate 
+                    : entry.RootFolderType == FolderType.USER ? DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime) : default,
+                denyDownload: denyDownload,
+                requiredAuth: requiredAuth,
+                password: password);
         }
 
         if (link.FileShareOptions.IsExpired && entry.RootFolderType == FolderType.USER && entry.FileEntryType == FileEntryType.File)
