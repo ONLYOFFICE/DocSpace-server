@@ -127,7 +127,6 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     "mailaggregator",
                     "whitelabel",
                     "customnavigation",
-                    "userPhotos",
                     "room_logos",
                     "webplugins"
                 };
