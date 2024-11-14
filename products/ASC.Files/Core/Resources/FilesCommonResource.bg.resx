@@ -500,4 +500,7 @@
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Управител на стая</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Отвори файл</value>
+  </data>
 </root>
