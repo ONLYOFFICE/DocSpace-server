@@ -176,7 +176,8 @@ public class FolderDtoHelper(
     TenantManager tenantManager,
     WatermarkDtoHelper watermarkHelper,
     IMapper mapper,
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    FileSecurityCommon fileSecurityCommon)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
@@ -228,7 +229,10 @@ public class FolderDtoHelper(
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
-            if ((await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+            if ((await tenantManager.GetCurrentTenantQuotaAsync()).Statistic &&
+                    ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate) ||
+                     (result.RootFolderType is FolderType.Archive or FolderType.TRASH && result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete) ||
+                     await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID)))
             {
                 var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
                 result.UsedSpace = folder.Counter;
