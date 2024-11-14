@@ -39,7 +39,8 @@ public class BackupRestoreDto
     /// <summary>
     /// Storage type
     /// </summary>
-    public int? StorageType { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
     /// Storage parameters

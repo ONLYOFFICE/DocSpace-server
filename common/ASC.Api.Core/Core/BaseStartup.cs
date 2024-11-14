@@ -341,6 +341,7 @@ public abstract class BaseStartup
         {
             options.JsonSerializerOptions.WriteIndented = false;
             options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
         };
 
         services.AddControllers().AddJsonOptions(jsonOptions);
