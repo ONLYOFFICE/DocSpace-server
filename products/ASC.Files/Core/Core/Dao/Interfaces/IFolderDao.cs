@@ -60,7 +60,7 @@ public interface IFolderDao<T>
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter);
 
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, QuotaFilter quotaFilter = QuotaFilter.All);
+        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null);
 
     IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags, 
         bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
