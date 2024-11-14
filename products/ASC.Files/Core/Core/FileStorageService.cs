@@ -899,17 +899,17 @@ public class FileStorageService //: IFileStorageService
                     if (updateData.Indexing.Value)
                     {
                         await ReOrderAsync(folder.Id, true, true);
-                        _ = filesMessageService.SendAsync(MessageAction.RoomIndexingEnabled, folder);
+                        await filesMessageService.SendAsync(MessageAction.RoomIndexingEnabled, folder);
                     }
                     else
                     {
-                        _ = filesMessageService.SendAsync(MessageAction.RoomIndexingDisabled, folder);
+                        await filesMessageService.SendAsync(MessageAction.RoomIndexingDisabled, folder);
                     }
                 }
             
                 if (denyDownloadChanged)
                 {
-                    _ = filesMessageService.SendAsync(updateData.DenyDownload.Value 
+                    await filesMessageService.SendAsync(updateData.DenyDownload.Value 
                         ? MessageAction.RoomDenyDownloadEnabled 
                         : MessageAction.RoomDenyDownloadDisabled, 
                         folder, folder.Title);
@@ -917,24 +917,24 @@ public class FileStorageService //: IFileStorageService
                 
                 if (colorChanged)
                 {
-                    _ = filesMessageService.SendAsync(MessageAction.RoomColorChanged, folder, folder.Title);
+                    await filesMessageService.SendAsync(MessageAction.RoomColorChanged, folder, folder.Title);
                 }
 
                 if (coverChanged)
                 {
-                    _ = filesMessageService.SendAsync(MessageAction.RoomCoverChanged, folder, folder.Title);
+                    await filesMessageService.SendAsync(MessageAction.RoomCoverChanged, folder, folder.Title);
                 }
 
                 if (lifetimeChanged)
                 {
                     if (updateData.Lifetime.Enabled.HasValue && !updateData.Lifetime.Enabled.Value)
                     {
-                        _ = filesMessageService.SendAsync(MessageAction.RoomLifeTimeDisabled, folder);
+                        await filesMessageService.SendAsync(MessageAction.RoomLifeTimeDisabled, folder);
                         
                     }
                     else
                     {
-                        _ = filesMessageService.SendAsync(MessageAction.RoomLifeTimeSet, folder, lifetime.Value.ToString(), lifetime.Period.ToStringFast(), 
+                        await filesMessageService.SendAsync(MessageAction.RoomLifeTimeSet, folder, lifetime.Value.ToString(), lifetime.Period.ToStringFast(), 
                             lifetime.DeletePermanently.ToString());
                     }
                 }
@@ -944,11 +944,11 @@ public class FileStorageService //: IFileStorageService
             {
                 if (isRoom)
                 {
-                    _ = filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
+                    await filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
                 }
                 else
                 {
-                    _ = filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
+                    await filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
                 }
             }
             
@@ -956,16 +956,16 @@ public class FileStorageService //: IFileStorageService
             {
                 if (updateData.Quota >= 0)
                 {
-                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomChanged, updateData.Quota.ToString(), [folder.Title]);
+                    await filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomChanged, updateData.Quota.ToString(), [folder.Title]);
                 }
                 else if(updateData.Quota == -1)
                 {
-                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, folder.Title);
+                    await filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, folder.Title);
                 }
                 else
                 {
                     var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), [folder.Title]);
+                    await filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), [folder.Title]);
                 }
             }
             
