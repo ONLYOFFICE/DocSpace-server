@@ -454,12 +454,22 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
+    [SwaggerResponse(200, "Order is set")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "Not Found")]
     [HttpPut("{fileId}/order")]
     public async Task SetOrder(OrderFileRequestDto<T> inDto)
     {
         await fileStorageService.SetFileOrder(inDto.FileId, inDto.Order.Order);
     }
 
+    /// <summary>
+    /// Sets order
+    /// </summary>
+    /// <path>api/2.0/files/order</path>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Order is set")]
     [HttpPut("order")]
     public async Task SetOrder(OrdersRequestDto<T> inDto)
     {
