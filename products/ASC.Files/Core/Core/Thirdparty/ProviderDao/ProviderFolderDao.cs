@@ -83,7 +83,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return await ResolveParentAsync(folder);
     }
 
-    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, QuotaFilter quotaFilter = QuotaFilter.All)
+    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null)
     {
         var result = AsyncEnumerable.Empty<Folder<string>>();
 
@@ -100,7 +100,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                     var folderDao = selectorLocal.GetFolderDao(matchedId.FirstOrDefault());
 
                     return folderDao.GetRoomsAsync(matchedId.Select(selectorLocal.ConvertId).ToList(), filterTypes, tags, subjectId, searchText, withSubfolders, withoutTags,
-                        excludeSubject, provider, subjectFilter, subjectEntriesIds, quotaFilter);
+                        excludeSubject, provider, subjectFilter, subjectEntriesIds);
                 })
                 .Where(r => r != null))
                 .SelectAwait(async r => await ResolveParentAsync(r));

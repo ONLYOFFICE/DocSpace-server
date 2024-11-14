@@ -1812,12 +1812,12 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (isAdmin)
         {
-            return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
+            return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, 
                 subjectFilter, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);
         }
 
-        return await GetVirtualRoomsForMeAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
-            subjectFilter, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);
+        return await GetVirtualRoomsForMeAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, 
+            subjectFilter, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);
     }
 
     private async Task<List<FileEntry>> GetAllVirtualRoomsAsync(
@@ -1930,7 +1930,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         ProviderFilter provider,
         SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntries,
-        QuotaFilter quotaFilter,
         StorageFilter storageFilter,
         Dictionary<int, FileShareRecord<int>> internalRecords,
         Dictionary<string, FileShareRecord<string>> thirdPartyRecords)
@@ -1951,7 +1950,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
             : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider,
-                subjectFilter, subjectEntries, rootFoldersIds, quotaFilter).Where(r => Filter(r, internalRecords)).ToListAsync();
+                subjectFilter, subjectEntries, rootFoldersIds).Where(r => Filter(r, internalRecords)).ToListAsync();
 
         var thirdPartyRooms = storageFilter == StorageFilter.Internal
             ? []
