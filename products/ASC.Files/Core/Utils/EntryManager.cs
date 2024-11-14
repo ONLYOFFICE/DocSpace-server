@@ -1486,10 +1486,10 @@ public class EntryManager(IDaoFactory daoFactory,
                     var originalForm = await fileDao.GetFileAsync(originalFormId);
 
                     await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{roomId}_{originalFormId}"))
-                {
+                    {
                         var origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId);
                         if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (origProperties.FormFilling.ResultsFileID == null || Equals(origProperties.FormFilling.ResultsFileID, default(T))))
-                    {
+                        {
                             await InitFormFillingFolders(file, room, origProperties, folderDao, fileDao, originalForm.CreateBy);
                             origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId);
                         }
@@ -1501,7 +1501,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         var resultFile = await fileDao.GetFileAsync(origProperties.FormFilling.ResultsFileID);
 
                         if (resultFolder == null || resultFolder.FolderType != FolderType.FormFillingFolderDone)
-        {
+                        {
                             logger.LogDebug("Result folder: {Folder} not found.", origProperties.FormFilling.ResultsFolderId);
 
                             var title = Path.GetFileNameWithoutExtension(originalForm.Title);
@@ -1530,12 +1530,12 @@ public class EntryManager(IDaoFactory daoFactory,
 
                         File<T> result;
                         if (tmpStream.CanSeek)
-            {
+                        {
                             pdfFile.ContentLength = tmpStream.Length;
                             result = await fileDao.SaveFileAsync(pdfFile, tmpStream, false);
-            }
-            else
-            {
+                        }
+                        else
+                        {
                             var (buffered, isNew) = await tempStream.TryGetBufferedAsync(tmpStream);
                             try
                             {
@@ -1553,7 +1553,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         await notifyClient.SendFormSubmittedAsync(room, originalForm, pdfFile);
 
                         if (fillingSessionId != null)
-                {
+                        {
                             await distributedCache.SetStringAsync(fillingSessionId, result.Id.ToString());
                         }
 
@@ -1575,11 +1575,14 @@ public class EntryManager(IDaoFactory daoFactory,
                                     ResultsFileID = origProperties.FormFilling.ResultsFileID,
                                     ResultFormNumber = origProperties.FormFilling.ResultFormNumber
                                 }
-                };
+                            };
                             await fileDao.SaveProperties(result.Id, resProp);
 
                             var aces = await fileSharing.GetSharedInfoAsync(room);
-                            var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
+                            var users = aces
+                                .Where(ace => ace is not { Access: FileShare.FillForms } && ace.Id != userId)
+                                .Select(ace => ace.Id)
+                                .ToList();
 
                             await fileMarker.MarkAsNewAsync(result, users);
                             await socketManager.CreateFileAsync(result, users);
@@ -1597,8 +1600,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
                                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
                                 await linkDao.DeleteAllLinkAsync(file.Id);
-            }
                             }
+                        }
                         catch(Exception ex)
                         {
                             logger.LogError(ex, "Form submission error");
