@@ -25,6 +25,11 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+
+using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization;
 
 public class Programm
 {
@@ -68,9 +73,11 @@ public class Programm
 
         try
         {
-            var swaggerJson = await httpClient.GetStringAsync(url);
+            var swaggerFile = await httpClient.GetStringAsync(url);
             var fileName = $"{name}.swagger.{extension}";
-            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, fileName), swaggerJson);
+            var modifiedSwaggerData = SelectExtension(swaggerFile, extension);
+
+            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, fileName), modifiedSwaggerData);
             Console.WriteLine($"File created successfully {fileName}");
         }
         catch (HttpRequestException ex)
@@ -79,6 +86,67 @@ public class Programm
         }
     }
 
+    private static string SelectExtension(string swaggerData, string extension)
+    {
+        if(extension == "json")
+        {
+            var swaggerModifiedDoc = JsonNode.Parse(swaggerData) is not JsonObject jsonObject ? swaggerData : ModifyDocumentation(jsonObject);
+            return swaggerModifiedDoc;
+        }
+        else if(extension == "yaml") 
+        {
+            return swaggerData;
+        }
+        return swaggerData;
+    }
+
+    private static string ModifyDocumentation(JsonObject jsonObject)
+    {
+        if (jsonObject.TryGetPropertyValue("paths", out var pathsNode) && pathsNode is JsonObject paths)
+        {
+            foreach (var path in paths)
+            {
+                if (path.Key.EndsWith("{.format}"))
+                {
+                    paths.Remove(path.Key);
+                    continue;
+                }
+
+                if (path.Value is JsonObject methods)
+                {
+                    foreach (var method in methods)
+                    {
+                        if (method.Value is JsonObject methodDetails)
+                        {
+                            if (methodDetails.TryGetPropertyValue("description", out var descriptionNode))
+                            {
+                                methodDetails["description"] = $"**Note**: {descriptionNode}";
+                            }
+
+                            if (methodDetails.TryGetPropertyValue("summary", out var summaryNode) && summaryNode != null)
+                            {
+                                var summaryText = summaryNode.ToString();
+
+                                methodDetails["description"] = methodDetails.TryGetPropertyValue("description", out var existingDescriptionNode)
+                                    ? (JsonNode)$"{summaryText}\n\n**Note**: {existingDescriptionNode}"
+                                    : (JsonNode)summaryText;
+                            }
+
+                            if (methodDetails.TryGetPropertyValue("x-shortName", out var shortNameNode) && shortNameNode != null)
+                            {
+                                var shortNameText = shortNameNode.ToString();
+                                methodDetails["summary"] = shortNameText;
+                                methodDetails.Remove("x-shortName");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return jsonObject.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+    }
+    
+    
 
     private static bool IsApiAssembly(string name)
     {
