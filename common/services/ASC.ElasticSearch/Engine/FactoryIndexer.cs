@@ -24,26 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
+using Microsoft.Extensions.Caching.Distributed;
+
 namespace ASC.ElasticSearch;
-
-[Singleton]
-public class FactoryIndexerHelper
-{
-    public DateTime LastIndexed { get; set; }
-    public string Indexing { get; set; }
-
-    public FactoryIndexerHelper(ICacheNotify<IndexAction> cacheNotify)
-    {
-        cacheNotify.Subscribe(a =>
-        {
-            if (a.LastIndexed != 0)
-            {
-                LastIndexed = new DateTime(a.LastIndexed);
-            }
-            Indexing = a.Indexing;
-        }, CacheNotifyAction.Any);
-    }
-}
 
 public interface IFactoryIndexer
 {
@@ -537,47 +522,21 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
 }
 
 [Scope]
-public class FactoryIndexer
+public class FactoryIndexer(
+    IServiceProvider serviceProvider,
+    IDistributedCache distributedCache,
+    Client client,
+    CoreBaseSettings coreBaseSettings,
+    ICache cache,
+    ILogger<FactoryIndexer> logger)
 {
-    public ILogger Log { get; }
-
-    private readonly ICache _cache;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly FactoryIndexerHelper _factoryIndexerHelper;
-    private readonly Client _client;
-    private readonly CoreBaseSettings _coreBaseSettings;
-
-    public FactoryIndexer(
-        IServiceProvider serviceProvider,
-        FactoryIndexerHelper factoryIndexerHelper,
-        Client client,
-        ILoggerProvider options,
-        CoreBaseSettings coreBaseSettings,
-        ICache cache)
-    {
-        _cache = cache;
-        _serviceProvider = serviceProvider;
-        _factoryIndexerHelper = factoryIndexerHelper;
-        _client = client;
-        _coreBaseSettings = coreBaseSettings;
-
-        try
-        {
-            Log = options.CreateLogger("ASC.Indexer");
-        }
-        catch (Exception e)
-        {
-            Log.CriticalFactoryIndexer(e);
-        }
-    }
-
     public bool CheckState(bool cacheState = true)
     {
         const string key = "elasticsearch";
 
         if (cacheState)
         {
-            var cacheValue = _cache.Get<string>(key);
+            var cacheValue = cache.Get<string>(key);
             if (!string.IsNullOrEmpty(cacheValue))
             {
                 return Convert.ToBoolean(cacheValue);
@@ -588,11 +547,11 @@ public class FactoryIndexer
 
         try
         {
-            var isValid = _client.Ping();
+            var isValid = client.Ping();
 
             if (cacheState)
             {
-                _cache.Insert(key, isValid.ToString(CultureInfo.InvariantCulture).ToLower(), cacheTime);
+                cache.Insert(key, isValid.ToString(CultureInfo.InvariantCulture).ToLower(), cacheTime);
             }
 
             return isValid;
@@ -601,10 +560,10 @@ public class FactoryIndexer
         {
             if (cacheState)
             {
-                _cache.Insert(key, "false", cacheTime);
+                cache.Insert(key, "false", cacheTime);
             }
 
-            Log.ErrorPingFalse(e);
+            logger.ErrorPingFalse(e);
 
             return false;
         }
@@ -616,7 +575,7 @@ public class FactoryIndexer
 
         if (cacheState)
         {
-            var cacheValue = _cache.Get<string>(key);
+            var cacheValue = cache.Get<string>(key);
             if (!string.IsNullOrEmpty(cacheValue))
             {
                 return Convert.ToBoolean(cacheValue);
@@ -627,27 +586,27 @@ public class FactoryIndexer
 
         try
         {
-            if (_client.Instance == null)
+            if (client.Instance == null)
             {
                 if (cacheState)
                 {
-                    _cache.Insert(key, "false", cacheTime);
+                    cache.Insert(key, "false", cacheTime);
                 }
 
-                Log.DebugCheckStatePing("Client instance is null");
+                logger.DebugCheckStatePing("Client instance is null");
 
                 return false;
             }
 
-            var result = await _client.Instance.PingAsync(new PingRequest());
+            var result = await client.Instance.PingAsync(new PingRequest());
 
             var isValid = result.IsValid;
 
-            Log.DebugCheckStatePing(result.DebugInformation);
+            logger.DebugCheckStatePing(result.DebugInformation);
 
             if (cacheState)
             {
-                _cache.Insert(key, isValid.ToString(CultureInfo.InvariantCulture).ToLower(), cacheTime);
+                cache.Insert(key, isValid.ToString(CultureInfo.InvariantCulture).ToLower(), cacheTime);
             }
 
             return isValid;
@@ -656,48 +615,54 @@ public class FactoryIndexer
         {
             if (cacheState)
             {
-                _cache.Insert(key, "false", cacheTime);
+                cache.Insert(key, "false", cacheTime);
             }
 
-            Log.ErrorPingFalse(e);
+            logger.ErrorPingFalse(e);
 
             return false;
         }
     }
 
-    public object GetState(TenantUtil tenantUtil)
+    public async Task<object> GetState(TenantUtil tenantUtil)
     {
         State state = null;
         IEnumerable<object> indices = null;
         Dictionary<string, long> count = null;
 
-        if (!_coreBaseSettings.Standalone)
+        if (!coreBaseSettings.Standalone)
         {
             return new
             {
                 state,
                 indices,
-                status = CheckState()
+                status = await CheckStateAsync()
             };
         }
 
-        state = new State
-        {
-            Indexing = _factoryIndexerHelper.Indexing,
-            LastIndexed = _factoryIndexerHelper.LastIndexed != DateTime.MinValue ? _factoryIndexerHelper.LastIndexed : default(DateTime?)
-        };
+        var data = await distributedCache.GetStringAsync(nameof(IndexAction));
 
-        if (state.LastIndexed.HasValue)
+        if (data != null)
         {
-            state.LastIndexed = tenantUtil.DateTimeFromUtc(state.LastIndexed.Value);
+            var parsed = JsonSerializer.Deserialize<IndexAction>(data);
+            state = new State
+            {
+                Indexing = parsed.Indexing, 
+                LastIndexed = parsed.LastIndexed != 0 ? new DateTime(parsed.LastIndexed) : default(DateTime?)
+            };
+
+            if (state.LastIndexed.HasValue)
+            {
+                state.LastIndexed = tenantUtil.DateTimeFromUtc(state.LastIndexed.Value);
+            }
         }
 
-        indices = _client.Instance.Cat.Indices(new CatIndicesRequest { SortByColumns = ["index"] }).Records
+        indices = (await client.Instance.Cat.IndicesAsync(new CatIndicesRequest { SortByColumns = ["index"] })).Records
             .Select(r => new
             {
                 r.Index,
                 Count = count.GetValueOrDefault(r.Index, 0),
-                DocsCount = _client.Instance.Count(new CountRequest(r.Index)).Count,
+                DocsCount = client.Instance.Count(new CountRequest(r.Index)).Count,
                 r.StoreSize
             })
             .Where(r => r.Count > 0);
@@ -706,19 +671,19 @@ public class FactoryIndexer
         {
             state,
             indices,
-            status = CheckState()
+            status = await CheckStateAsync()
         };
     }
 
     public async Task ReindexAsync(string name, int tenantId = 0)
     {
-        if (!_coreBaseSettings.Standalone)
+        if (!coreBaseSettings.Standalone)
         {
             return;
         }
 
         var generic = typeof(BaseIndexer<>);
-        var indexers = _serviceProvider.GetService<IEnumerable<IFactoryIndexer>>()
+        var indexers = serviceProvider.GetService<IEnumerable<IFactoryIndexer>>()
             .Where(r => string.IsNullOrEmpty(name) || r.IndexName == name)
             .Select(r => (IFactoryIndexer)Activator.CreateInstance(generic.MakeGenericType(r.GetType()), r));
 

@@ -24,13 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 using ASC.Core.Common.Hosting;
+
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ASC.ElasticSearch;
 
 public class ElasticSearchIndexService(
     ILogger<ElasticSearchIndexService> logger,
-        ICacheNotify<IndexAction> indexNotify,
+        IDistributedCache distributedCache,
         IServiceScopeFactory serviceScopeFactory,
         Settings settings)
     : ActivePassiveBackgroundService<ElasticSearchIndexService>(logger, serviceScopeFactory)
@@ -74,6 +78,8 @@ public class ElasticSearchIndexService(
                 await using var scope = _serviceScopeFactory.CreateAsyncScope();
                 await IndexProductAsync((IFactoryIndexer)scope.ServiceProvider.GetRequiredService(wrapper), reindex);
             });
+            
+            await distributedCache.SetStringAsync(nameof(IndexAction), JsonSerializer.Serialize(new IndexAction { Indexing = "", LastIndexed = DateTime.Now.Ticks }));
         }
         catch (Exception e)
         {
@@ -101,7 +107,7 @@ public class ElasticSearchIndexService(
         try
         {
             logger.DebugProduct(product.IndexName);
-            await indexNotify.PublishAsync(new IndexAction { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
+            await distributedCache.SetStringAsync(nameof(IndexAction), JsonSerializer.Serialize(new IndexAction { Indexing = product.IndexName, LastIndexed = 0 }));
             await product.IndexAllAsync();
         }
         catch (Exception e)
