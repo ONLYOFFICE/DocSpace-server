@@ -34,6 +34,7 @@ public class BackupScheduleDto
     /// <summary>
     /// Storage type
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
@@ -65,6 +66,7 @@ public class Cron
     /// <summary>
     /// Period
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupPeriod? Period { get; set; }
 
     /// <summary>
@@ -77,5 +79,5 @@ public class Cron
     /// Day
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
-    public int Day { get; set; }
+    public int? Day { get; set; }
 }

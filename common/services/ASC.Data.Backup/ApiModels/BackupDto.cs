@@ -34,6 +34,7 @@ public class BackupDto
     /// <summary>
     /// Storage type
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
