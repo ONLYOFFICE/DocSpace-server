@@ -3139,7 +3139,8 @@ public class FileStorageService //: IFileStorageService
         DateTime expirationDate = default,
         bool denyDownload = false,
         bool requiredAuth = false,
-        string password = null)
+        string password = null,
+        bool allowUnlimitedDate = false)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -3188,7 +3189,7 @@ public class FileStorageService //: IFileStorageService
                 primary: true,
                 expirationDate: expirationDate != default 
                     ? expirationDate 
-                    : entry.RootFolderType == FolderType.USER ? DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime) : default,
+                    : entry.RootFolderType == FolderType.USER && !allowUnlimitedDate ? DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime) : default,
                 denyDownload: denyDownload,
                 requiredAuth: requiredAuth,
                 password: password);
