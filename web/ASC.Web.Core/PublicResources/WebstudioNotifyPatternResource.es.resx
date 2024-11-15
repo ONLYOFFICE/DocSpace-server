@@ -277,7 +277,6 @@ $OrangeButton
       Administrador ha creado un nuevo buzón de correo &lt;b&gt;$Address&lt;/b&gt; para Usted en el portal "${__VirtualRootPath}":"${__VirtualRootPath}".
 
       Use los ajustes siguientes para otros clientes de email:
-
       Login: &lt;b&gt;$Login&lt;/b&gt;
       Contraseña: "&lt;b&gt;establecer contraseña&lt;/b&gt;":"$MyStaffLink"
 

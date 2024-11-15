@@ -802,4 +802,10 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>El usuario {0} ha enviado una invitación a {1} para que se una a este DocSpace</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Exportación del índice de la sala guardado en Documentos</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Invitacion enviada de nuevo: {0}</value>
+  </data>
 </root>

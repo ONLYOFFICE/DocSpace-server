@@ -488,4 +488,19 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="ExternalUser" xml:space="preserve">
     <value>Utilisateur externe</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Créateur de contenu</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Responsable de salle</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Créateur de contenu</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Responsable de salle</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Ouvrir le fichier</value>
+  </data>
 </root>

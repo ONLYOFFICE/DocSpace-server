@@ -861,4 +861,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Korisnici [{0}]. Formular dostavljen: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Izvoz indeksa sobe sačuvan u Dokumentima</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Pozivnice ponovo poslate: {0}</value>
+  </data>
 </root>

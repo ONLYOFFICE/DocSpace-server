@@ -1063,4 +1063,10 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>无法设置每个用户的配额。输入值大于协作空间总存储空间。</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>至少添加1个受信任域。</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>管理员数量超出限制：{0}/{1}。</value>
+  </data>
 </root>
