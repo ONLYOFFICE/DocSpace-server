@@ -1063,4 +1063,7 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Nepodařilo se nastavit kvótu na uživatele. Zadaná hodnota je větší než celkové úložiště DocSpace.</value>
   </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Počet správců překročil limit: {0}/{1}.</value>
+  </data>
 </root>

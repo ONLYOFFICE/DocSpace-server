@@ -1063,4 +1063,10 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Error al establecer la cuota por usuario. El valor introducido es mayor que el almacenamiento total de DocSpace.</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Añada al menos 1 dominio de confianza.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>El número de administradores supera el límite: {0}/{1}.</value>
+  </data>
 </root>

@@ -1771,7 +1771,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add at least 1 allowed ip adress..
+        ///   Looks up a localized string similar to Add at least 1 allowed IP address..
         /// </summary>
         public static string ErrorIpRestriction {
             get {

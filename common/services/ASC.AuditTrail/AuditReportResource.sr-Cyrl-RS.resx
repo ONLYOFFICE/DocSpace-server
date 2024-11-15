@@ -861,4 +861,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Корисници [{0}]. Формулар достављен: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Извоз индекса собе сачуван у Документима</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Позивнице поново послате: {0}</value>
+  </data>
 </root>

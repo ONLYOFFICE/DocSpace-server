@@ -559,4 +559,7 @@
   <data name="RoleEnum_ContentCreator" xml:space="preserve">
     <value>Креатор садржаја</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Отвори фајл</value>
+  </data>
 </root>

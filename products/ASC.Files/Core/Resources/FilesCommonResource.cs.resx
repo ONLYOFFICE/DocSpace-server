@@ -500,4 +500,7 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Správce místnosti</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Otevřít soubor</value>
+  </data>
 </root>
