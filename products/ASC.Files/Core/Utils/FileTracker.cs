@@ -44,6 +44,13 @@ public class FileTrackerHelper
     {
         _cacheNotify = cacheNotify;
         _cache = cache;
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+        _callbackAction = EvictionCallback();
+    }
+
+    public void Subscribe()
+    {
         _cacheNotify.Subscribe(a =>
         {
             try
@@ -68,9 +75,7 @@ public class FileTrackerHelper
             }
         }, CacheNotifyAction.Remove);
         
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-        _callbackAction = EvictionCallback();
+        _logger.Debug("FileTracker subscribed");
     }
 
     public async Task<bool> ProlongEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, string baseUri, bool editingAlone = false, string token = null)
