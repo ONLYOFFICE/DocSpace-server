@@ -218,4 +218,4 @@ public record ReassignProgressItemScope(
     UserPhotoManager UserPhotoManager,
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
     ILoggerProvider Options,
-    SocketManager socketManager);
+    SocketManager SocketManager);
