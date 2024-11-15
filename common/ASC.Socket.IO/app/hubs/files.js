@@ -343,6 +343,14 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
+  function backupProgress({ tenantId, percentage } = {}) {
+    filesIO.to(`${tenantId}-restore-backup`).emit("s:backup-progress", percentage);
+  }
+
+  function restoreProgress({ tenantId, percentage } = {}) {
+    filesIO.to(`${tenantId}-restore-backup`).emit("s:restore-progress", percentage);
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -360,6 +368,8 @@ module.exports = (io) => {
     markAsNewFolders,
     changeInvitationLimitValue,
     updateHistory,
-    logoutSession
+    logoutSession,
+    backupProgress,
+    restoreProgress
   };
 };

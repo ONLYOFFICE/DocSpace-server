@@ -120,6 +120,18 @@ public class SocketManager(
         
         await MakeRequest("mark-as-new-folder", result);
     }
+
+    public async Task BackupProgressAsync(double percentage)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await MakeRequest("backup-progress", new { tenantId, percentage });
+    }
+
+    public async Task RestoreProgressAsync(int tenantId, double percentage)
+    {
+        await MakeRequest("restore-progress", new { tenantId, percentage });
+    }
+
     private async Task MakeCreateFormRequest<T>(string method, FileEntry<T> entry, IEnumerable<Guid> userIds, bool isOneMember)
     {
         var room = await FolderRoomAsync(entry.FolderIdDisplay);

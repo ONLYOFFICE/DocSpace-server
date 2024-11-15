@@ -112,5 +112,15 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/backup-progress", (req, res) => {
+    files.backupProgress(req.body);
+    res.end();
+  });
+
+  router.post("/restore-progress", (req, res) => {
+    files.restoreProgress(req.body);
+    res.end();
+  });
+
   return router;
 };
