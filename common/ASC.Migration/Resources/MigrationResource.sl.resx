@@ -205,7 +205,7 @@
     <value>Arhiva {0} ni bilo mogoče razčleniti</value>
   </data>
   <data name="CreateFolder" xml:space="preserve">
-    <value>Ustvari mapo{0}</value>
+    <value>Ustvari mapo {0}</value>
   </data>
   <data name="СanNotImportProjectFiles" xml:space="preserve">
     <value>Projektnih datotek ni bilo mogoče uvoziti</value>

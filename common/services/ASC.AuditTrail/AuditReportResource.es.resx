@@ -806,6 +806,6 @@
     <value>Exportación del índice de la sala guardado en Documentos</value>
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
-    <value>Invitacion enviada de nuevo: {0}</value>
+    <value>Invitacion enviada de nuevo: {0}</value>
   </data>
 </root>

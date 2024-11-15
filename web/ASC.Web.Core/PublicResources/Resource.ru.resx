@@ -1073,6 +1073,6 @@
     <value>Добавьте хотя бы 1 доверенный домен.</value>
   </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
-    <value>Некоммерческая</value>
+    <value>Некоммерческий</value>
   </data>
 </root>
