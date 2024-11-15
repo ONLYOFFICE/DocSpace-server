@@ -35,16 +35,6 @@ public class Programm
 {
     public static async Task Main(string[] args)
     {
-        Console.WriteLine("Write extension to file: yaml or json");
-        var extension = Console.ReadLine();
-
-        if (extension != "yaml" && extension != "json")
-        {
-            ArgumentNullException.ThrowIfNull(extension);
-
-            Console.WriteLine("Wrong extension");
-            return;
-        }
         var assembliesPath = $"{AppContext.BaseDirectory}";
 
         if (!Directory.Exists(assembliesPath))
@@ -60,25 +50,30 @@ public class Programm
             if (assemblyName != null && IsApiAssembly(assemblyName))
             {
 
-                var url = $"http://localhost:8092/openapi/{assemblyName}/common.{extension}";
-                await GenerateSwaggerFile(url, assemblyName, extension);
+                var baseUrl = $"http://localhost:8092/openapi/{assemblyName}/common";
+                await GenerateSwaggerFile(baseUrl, assemblyName);
             }
         }
     }
 
 
-    private static async Task GenerateSwaggerFile(string url, string name, string extension)
+    private static async Task GenerateSwaggerFile(string baseUrl, string name)
     {
         var httpClient = new HttpClient();
 
         try
         {
-            var swaggerFile = await httpClient.GetStringAsync(url);
-            var fileName = $"{name}.swagger.{extension}";
-            var modifiedSwaggerData = SelectExtension(swaggerFile, extension);
+            var swaggerFileJson = await httpClient.GetStringAsync($"{baseUrl}.json");
+            var swaggerFileYaml = await httpClient.GetStringAsync($"{baseUrl}.yaml");
+            var modifiedJson = SelectExtension(swaggerFileJson, "json");
+            var jsonFileName = $"{name}.swagger.json";
+            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, jsonFileName), modifiedJson);
+            Console.WriteLine($"JSON file created successfully: {jsonFileName}");
 
-            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, fileName), modifiedSwaggerData);
-            Console.WriteLine($"File created successfully {fileName}");
+            var modifiedYaml = SelectExtension(swaggerFileYaml, "yaml");
+            var yamlFileName = $"{name}.swagger.yaml";
+            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, yamlFileName), modifiedYaml);
+            Console.WriteLine($"YAML file created successfully: {yamlFileName}");
         }
         catch (HttpRequestException ex)
         {
@@ -90,17 +85,16 @@ public class Programm
     {
         if(extension == "json")
         {
-            var swaggerModifiedDoc = JsonNode.Parse(swaggerData) is not JsonObject jsonObject ? swaggerData : ModifyDocumentation(jsonObject);
-            return swaggerModifiedDoc;
+            return JsonNode.Parse(swaggerData) is not JsonObject jsonObject ? swaggerData : ModifyJsonDocumentation(jsonObject);
         }
         else if(extension == "yaml") 
         {
-            return swaggerData;
+            return ModifyYamlDocumentation(swaggerData);
         }
         return swaggerData;
     }
 
-    private static string ModifyDocumentation(JsonObject jsonObject)
+    private static string ModifyJsonDocumentation(JsonObject jsonObject)
     {
         if (jsonObject.TryGetPropertyValue("paths", out var pathsNode) && pathsNode is JsonObject paths)
         {
@@ -145,8 +139,62 @@ public class Programm
         }
         return jsonObject.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
     }
-    
-    
+
+    private static string ModifyYamlDocumentation(string yamlData)
+    {
+        var deserializer = new DeserializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
+
+        var yamlObject = deserializer.Deserialize<Dictionary<object, object>>(yamlData);
+
+        if (yamlObject != null && yamlObject.TryGetValue("paths", out var pathsNode) && pathsNode is Dictionary<object, object> paths)
+        {
+            var keysToRemove = new List<object>();
+
+            foreach (var path in paths)
+            {
+                if (path.Key is string pathKey && pathKey.EndsWith("{.format}"))
+                {
+                    keysToRemove.Add(pathKey);
+                    continue;
+                }
+
+                if (path.Value is Dictionary<object, object> methods)
+                {
+                    foreach (var method in methods)
+                    {
+                        if (method.Value is Dictionary<object, object> methodDetails)
+                        {
+                            if (methodDetails.TryGetValue("description", out var description))
+                            {
+                                methodDetails["description"] = $"**Note**: {description}";
+                            }
+
+                            if (methodDetails.TryGetValue("summary", out var summary) && summary is string summaryText)
+                            {
+                                methodDetails["description"] = methodDetails.TryGetValue("description", out var existingDescription)
+                                    ? $"{summaryText}\n\n**Note**: {existingDescription}"
+                                    : (object)summaryText;
+                            }
+
+                            if (methodDetails.TryGetValue("x-shortName", out var shortName) && shortName is string shortNameText)
+                            {
+                                methodDetails["summary"] = shortNameText;
+                                methodDetails.Remove("x-shortName");
+                            }
+                        }
+                    }
+                }
+            }
+            foreach (var key in keysToRemove)
+            {
+                paths.Remove(key);
+            }
+        }
+
+        var serializer = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
+
+        return serializer.Serialize(yamlObject);
+    }
 
     private static bool IsApiAssembly(string name)
     {
