@@ -41,12 +41,6 @@ public class RoomContentRequestDto
     public string SubjectId { get; set; }
 
     /// <summary>
-    /// Specifies whether to search within the section contents or not
-    /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    public bool? SearchInContent { get; set; }
-
-    /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "withSubfolders")]

@@ -53,12 +53,6 @@ public class GetFolderRequestDto<T>
     public T RoomId { get; set; }
 
     /// <summary>
-    /// Specifies whether to search within the section contents or not
-    /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    public bool? SearchInContent { get; set; }
-
-    /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "withsubfolders")]
@@ -109,12 +103,6 @@ public class GetCommonFolderRequestDto
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    public bool? SearchInContent { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
     [FromQuery(Name = "withsubfolders")]
     public bool? Withsubfolders { get; set; }
 }
@@ -135,12 +123,6 @@ public class GetMyTrashFolderRequestDto
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    public bool? SearchInContent { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
@@ -183,12 +165,6 @@ public class GetRootFolderRequestDto
     /// </summary>
     [FromQuery(Name = "withoutTrash")]
     public bool? WithoutTrash { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    public bool? SearchInContent { get; set; }
 }
 
 /// <summary>
@@ -207,12 +183,6 @@ public class GetRecentFolderRequestDto
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    public bool? SearchInContent { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
