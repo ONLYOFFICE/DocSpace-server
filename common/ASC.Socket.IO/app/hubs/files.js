@@ -343,6 +343,24 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
+  function addUser({ tenantId, userId } = {}) {
+    console.log(userId);
+    var room = `${tenantId}-accounts`;
+    filesIO.to(room).emit("s:add-user", userId);
+  }
+
+  function updateUser({ tenantId, userId } = {}) {
+    console.log(userId);
+    var room = `${tenantId}-accounts`;
+    filesIO.to(room).emit("s:update-user", userId);
+  }
+
+  function deleteUser({ tenantId, userId } = {}) {
+    console.log(userId);
+    var room = `${tenantId}-accounts`;
+    filesIO.to(room).emit("s:delete-user", userId);
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -360,6 +378,9 @@ module.exports = (io) => {
     markAsNewFolders,
     changeInvitationLimitValue,
     updateHistory,
-    logoutSession
+    logoutSession,
+    addUser,
+    updateUser,
+    deleteUser
   };
 };

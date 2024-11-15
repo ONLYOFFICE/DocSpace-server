@@ -112,5 +112,20 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/add-user", (req, res) => {
+    files.addUser(req.body);
+    res.end();
+  });
+
+  router.post("/update-user", (req, res) => {
+    files.updateUser(req.body);
+    res.end();
+  });
+
+  router.post("/delete-user", (req, res) => {
+    files.deleteUser(req.body);
+    res.end();
+  });
+
   return router;
 };

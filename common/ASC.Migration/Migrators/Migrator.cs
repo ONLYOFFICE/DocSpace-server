@@ -41,10 +41,12 @@ public abstract class Migrator(
     MigrationLogger migrationLogger,
     AuthContext authContext,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    UserManagerWrapper userManagerWrapper)
+    UserManagerWrapper userManagerWrapper,
+    SocketManager socketManager)
     : IAsyncDisposable
 {
     protected SecurityContext SecurityContext { get; } = securityContext;
+    protected SocketManager SocketManager { get; } = socketManager;
     protected UserManager UserManager { get; } = userManager;
     protected TenantQuotaFeatureStatHelper TenantQuotaFeatureStatHelper { get; } = tenantQuotaFeatureStatHelper;
     protected QuotaSocketManager QuotaSocketManager { get; } = quotaSocketManager;
@@ -191,6 +193,7 @@ public abstract class Migrator(
                     user.Info.UserName = await UserManagerWrapper.MakeUniqueNameAsync(user.Info);
                     user.Info.ActivationStatus = EmployeeActivationStatus.Pending;
                     saved = await UserManager.SaveUserInfo(user.Info, user.UserType);
+                    await SocketManager.AddUserAsync(saved.Id);
                     var groupId = user.UserType switch
                     {
                         EmployeeType.User => Constants.GroupUser.ID,

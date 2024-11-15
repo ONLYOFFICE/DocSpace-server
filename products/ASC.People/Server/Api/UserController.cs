@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Utils;
+
 namespace ASC.People.Api;
 
 public class UserController(
@@ -72,7 +74,8 @@ public class UserController(
     CustomQuota customQuota,
     AuditEventsRepository auditEventsRepository,
     EmailValidationKeyModelHelper emailValidationKeyModelHelper,
-    CountPaidUserStatistic countPaidUserStatistic)
+    CountPaidUserStatistic countPaidUserStatistic,
+    SocketManager socketManager)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -394,6 +397,7 @@ public class UserController(
 
             await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
             await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+            await socketManager.AddUserAsync(user.Id);
         }
 
         var result = new List<EmployeeDto>();
@@ -540,7 +544,7 @@ public class UserController(
         await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
 
         await messageService.SendAsync(MessageAction.UserDeleted, MessageTarget.Create(user.Id), userName);
-
+        await socketManager.DeleteUserAsync(user.Id);
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
@@ -1277,6 +1281,7 @@ public class UserController(
             await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
 
+        await socketManager.AddUserAsync(user.Id);
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
 
@@ -1548,6 +1553,7 @@ public class UserController(
         if (changed)
         {
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+            await socketManager.UpdateUserAsync(user.Id);
 
             await messageService.SendAsync(MessageAction.UserUpdated, MessageTarget.Create(user.Id),
                 user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
@@ -1626,6 +1632,7 @@ public class UserController(
                             }
 
                             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+                            await socketManager.UpdateUserAsync(user.Id);
                         }
                         finally
                         {
@@ -1643,6 +1650,7 @@ public class UserController(
 
                     await cookiesManager.ResetUserCookieAsync(user.Id);
                     await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+                    await socketManager.UpdateUserAsync(user.Id);
                     break;
             }
         }
@@ -1680,6 +1688,7 @@ public class UserController(
         foreach (var user in users)
         {
             await userManagerWrapper.UpdateUserTypeAsync(user, inDto.Type);
+            await socketManager.UpdateUserAsync(user.Id);
         }
 
         await messageService.SendAsync(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Utils;
+
 namespace ASC.Data.Reassigns;
 
 /// <summary>
@@ -65,7 +67,7 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
     {
         await using var scope = serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
 
@@ -110,7 +112,7 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
 
             if (_deleteProfile)
             {
-                await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper);
+                await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager);
             }
 
             await SetPercentageAndCheckCancellation(100, false);
@@ -185,13 +187,14 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
         await studioNotifyService.SendMsgReassignsFailedAsync(_currentUserId, fromUser, toUser, errorMessage);
     }
 
-    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper)
+    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper, SocketManager socketManager)
     {
         var user = await userManager.GetUsersAsync(FromUser);
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
         await userPhotoManager.RemovePhotoAsync(user.Id);
         await userManager.DeleteUserAsync(user.Id);
+        await socketManager.DeleteUserAsync(user.Id);
 
         if (_httpHeaders != null)
         {
@@ -214,4 +217,5 @@ public record ReassignProgressItemScope(
     UserManager UserManager,
     UserPhotoManager UserPhotoManager,
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
-    ILoggerProvider Options);
+    ILoggerProvider Options,
+    SocketManager socketManager);

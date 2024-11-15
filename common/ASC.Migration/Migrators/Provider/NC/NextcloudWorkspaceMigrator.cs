@@ -50,7 +50,8 @@ public class NextcloudWorkspaceMigrator : Migrator
         MigrationLogger migrationLogger,
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
+        UserManagerWrapper userManagerWrapper,
+        SocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }

@@ -90,6 +90,29 @@ public class SocketManager(
         await MakeRequest("delete-folder", folder, users: users, action: action);
     }
 
+    public async Task RestoreProgressAsync(int tenantId, double percentage)
+    {
+        await MakeRequest("restore-progress", new { tenantId, percentage });
+    }
+
+    public async Task AddUserAsync(Guid userId)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await MakeRequest("add-user", new { tenantId, userId});
+    }
+
+    public async Task UpdateUserAsync(Guid userId)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await MakeRequest("update-user", new { tenantId, userId });
+    }
+
+    public async Task DeleteUserAsync(Guid userId)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await MakeRequest("delete-user", new { tenantId, userId });
+    }
+
     public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)
     {
         var result = new List<object>();
