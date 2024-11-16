@@ -85,8 +85,8 @@ public class FileSharingAceHelper(
             }
 
             var emailInvite = !string.IsNullOrEmpty(w.Email);
-            var currentUser = await userManager.GetUsersAsync(w.Id);
-            if ((currentUser.Status == EmployeeStatus.Terminated || (w.SubjectType == SubjectType.User && currentUser.Id == Constants.LostUser.Id) && w.Access != FileShare.None))
+            var currentUser = await userManager.GetUsersAsync(w.Id, false);
+            if ((currentUser.Status == EmployeeStatus.Terminated || currentUser.Removed) && w.Access != FileShare.None)
             {
                 continue;
             }
