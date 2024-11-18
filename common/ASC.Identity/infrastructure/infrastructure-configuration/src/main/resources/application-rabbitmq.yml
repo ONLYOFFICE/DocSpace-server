@@ -31,3 +31,4 @@ spring:
             exchange: ${RABBITMQ_AUDIT_EXCHANGE:asc_identity_audit_exchange}
             queue: ${RABBITMQ_AUDIT_QUEUE:asc_identity_audit_queue}
             routing: ${RABBITMQ_AUDIT_ROUTING:asc_identity_audit_routing}
+            singleActiveConsumer: true
