@@ -162,7 +162,7 @@ public abstract class FoldersController<T>(
     {
 
         var split = inDto.Extension == null ? [] : inDto.Extension.Split(",");
-        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.FilterType, inDto.RoomId, true, inDto.Withsubfolders, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, split);
+        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.FilterType, inDto.RoomId, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, split);
 
         return folder.NotFoundIfNull();
     }
@@ -314,8 +314,7 @@ public class FoldersControllerCommon(
     [HttpGet("@common")]
     public async Task<FolderContentDto<int>> GetCommonFolderAsync(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderCommonAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, inDto.Withsubfolders,
-            false, ApplyFilterOption.All, null);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderCommonAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, true, false, ApplyFilterOption.All, null);
     }
 
     /// <summary>
@@ -331,8 +330,7 @@ public class FoldersControllerCommon(
     [HttpGet("@favorites")]
     public async Task<FolderContentDto<int>> GetFavoritesFolderAsync(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFavoritesAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, inDto.Withsubfolders,
-            false, ApplyFilterOption.All, null);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFavoritesAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, true, false, ApplyFilterOption.All, null);
     }
 
     /// <summary>
@@ -347,8 +345,7 @@ public class FoldersControllerCommon(
     [HttpGet("@my")]
     public async Task<FolderContentDto<int>> GetMyFolderAsync(GetMyTrashFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderMyAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, inDto.Withsubfolders,
-            false, inDto.ApplyFilterOption, null);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderMyAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, true, false, inDto.ApplyFilterOption, null);
     }
 
     /// <summary>
@@ -368,8 +365,7 @@ public class FoldersControllerCommon(
             throw new SecurityException();
         }
 
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivacyAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, inDto.Withsubfolders,
-            false, ApplyFilterOption.All, null);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivacyAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, true, false, ApplyFilterOption.All, null);
     }
 
     /// <summary>
@@ -385,8 +381,7 @@ public class FoldersControllerCommon(
     [HttpGet("@projects")]
     public async Task<FolderContentDto<string>> GetProjectsFolderAsync(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.GetFolderProjectsAsync<string>(), inDto.UserIdOrGroupId, inDto.FilterType, default, true, inDto.Withsubfolders,
-            false, ApplyFilterOption.All, null);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.GetFolderProjectsAsync<string>(), inDto.UserIdOrGroupId, inDto.FilterType, default, true, true, false, ApplyFilterOption.All, null);
     }
 
     /// <summary>
@@ -402,8 +397,7 @@ public class FoldersControllerCommon(
     [HttpGet("recent")]
     public async Task<FolderContentDto<int>> GetRecentFolderAsync(GetRecentFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, inDto.Withsubfolders,
-            inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.Extension);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.Extension);
     }
 
     /// <summary>
@@ -423,7 +417,7 @@ public class FoldersControllerCommon(
 
         await foreach (var folder in foldersIds)
         {
-            yield return await folderContentDtoHelper.GetAsync(folder, inDto.UserIdOrGroupId, inDto.FilterType, default, true, inDto.Withsubfolders, false, ApplyFilterOption.All, null);
+            yield return await folderContentDtoHelper.GetAsync(folder, inDto.UserIdOrGroupId, inDto.FilterType, default, true, true, false, ApplyFilterOption.All, null);
         }
     }
 
@@ -440,8 +434,7 @@ public class FoldersControllerCommon(
     [HttpGet("@share")]
     public async Task<FolderContentDto<int>> GetShareFolderAsync(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderShareAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, inDto.Withsubfolders,
-            false, ApplyFilterOption.All, null);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderShareAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, true, false, ApplyFilterOption.All, null);
     }
 
     /// <summary>
@@ -457,8 +450,7 @@ public class FoldersControllerCommon(
     [HttpGet("@templates")]
     public async Task<FolderContentDto<int>> GetTemplatesFolderAsync(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderTemplatesAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, inDto.Withsubfolders,
-            false, ApplyFilterOption.All, null);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderTemplatesAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, true, true, false, ApplyFilterOption.All, null);
     }
 
     /// <summary>
@@ -473,8 +465,7 @@ public class FoldersControllerCommon(
     [HttpGet("@trash")]
     public async Task<FolderContentDto<int>> GetTrashFolderAsync(GetMyTrashFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), inDto.UserIdOrGroupId, inDto.FilterType, default, true, inDto.Withsubfolders,
-            false, inDto.ApplyFilterOption, null);
+        return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), inDto.UserIdOrGroupId, inDto.FilterType, default, true, true, false, inDto.ApplyFilterOption, null);
     }
     
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)

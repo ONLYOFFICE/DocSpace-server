@@ -1783,19 +1783,21 @@ internal class FolderDao(
 
         var q = await GetFolderQuery(filesDbContext, r => r.ParentId == parentId);
 
-        if (withSubfolders)
-        {
-            q = (await GetFolderQuery(filesDbContext))
-                .Join(filesDbContext.Tree, r => r.Id, a => a.FolderId, (folder, tree) => new { folder, tree })
-                .Where(r => r.tree.ParentId == parentId && r.tree.Level != 0)
-                .Select(r => r.folder);
-        }
+
 
         if (!string.IsNullOrEmpty(searchText))
-        {
+        {        
+            if (withSubfolders)
+            {
+                q = (await GetFolderQuery(filesDbContext))
+                    .Join(filesDbContext.Tree, r => r.Id, a => a.FolderId, (folder, tree) => new { folder, tree })
+                    .Where(r => r.tree.ParentId == parentId && r.tree.Level != 0)
+                    .Select(r => r.folder);
+            }
+            
             var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(searchText));
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
-            }
+        }
 
         q = orderBy == null ? q : orderBy.SortedBy switch
         {

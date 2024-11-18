@@ -41,12 +41,6 @@ public class RoomContentRequestDto
     public string SubjectId { get; set; }
 
     /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "withSubfolders")]
-    public bool? WithSubfolders { get; set; }
-
-    /// <summary>
     /// Room search area (Active, Archive, Any)
     /// </summary>
     [FromQuery(Name = "searchArea")]

@@ -2066,15 +2066,7 @@ internal class FileDao(
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();        
         var q = await GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
-
-        if (withSubfolders)
-        {
-            q = (await GetFileQuery(filesDbContext, r => r.CurrentVersion))
-                .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
-                .Where(r => r.tree.ParentId == parentId)
-                .Select(r => r.file);
-        }
-
+        
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
@@ -2085,6 +2077,14 @@ internal class FileDao(
 
         if (searchByText || searchByExtension)
         {
+            if (searchByText && withSubfolders)
+            {
+                q = (await GetFileQuery(filesDbContext, r => r.CurrentVersion))
+                    .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
+                    .Where(r => r.tree.ParentId == parentId)
+                    .Select(r => r.file);
+            }
+            
             var searchIds = new List<int>();
             var success = false;
             foreach (var e in extension)
