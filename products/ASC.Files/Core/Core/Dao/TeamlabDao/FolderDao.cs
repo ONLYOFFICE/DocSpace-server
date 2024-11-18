@@ -613,7 +613,7 @@ internal class FolderDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
 
-        if (roomSettings != null)
+        if (roomSettings?.Lifetime != null)
         {
             roomSettings.Lifetime = null;
             filesDbContext.Update(roomSettings);
