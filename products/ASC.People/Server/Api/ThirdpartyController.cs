@@ -51,25 +51,20 @@ public class ThirdpartyController(
     EmailValidationKeyModelHelper emailValidationKeyModelHelper)
     : ApiControllerBase
     {
-    
+
 
     /// <summary>
     /// Returns a list of the available third-party accounts.
     /// </summary>
     /// <short>Get third-party accounts</short>
-    /// <category>Third-party accounts</category>
-    /// <param type="System.Boolean, System" name="inviteView">Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers</param>
-    /// <param type="System.Boolean, System" name="settingsView">Specifies whether to return URLs in the format that is used on the Settings page</param>
-    /// <param type="System.String, System" name="clientCallback">Method that is called after authorization</param>
-    /// <param type="System.String, System" name="fromOnly">Provider name if the response only from this provider is needed</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.AccountInfoDto, ASC.People">List of third-party accounts</returns>
     /// <path>api/2.0/people/thirdparty/providers</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
+    [Tags("People / Third-party accounts")]
+    [SwaggerResponse(200, "List of third-party accounts", typeof(AccountInfoDto))]
     [AllowAnonymous, AllowNotPayment]
     [HttpGet("providers")]
-    public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(bool inviteView, bool settingsView, string clientCallback, string fromOnly)
+    public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(AuthProvidersRequestDto inDto)
     {
         var infos = new List<AccountInfoDto>();
         IEnumerable<LoginProfile> linkedAccounts = new List<LoginProfile>();
@@ -79,11 +74,11 @@ public class ThirdpartyController(
             linkedAccounts = await accountLinker.GetLinkedProfilesAsync(authContext.CurrentAccount.ID.ToString());
         }
 
-        fromOnly = string.IsNullOrWhiteSpace(fromOnly) ? string.Empty : fromOnly.ToLower();
+        inDto.FromOnly = string.IsNullOrWhiteSpace(inDto.FromOnly) ? string.Empty : inDto.FromOnly.ToLower();
 
-        foreach (var provider in ProviderManager.AuthProviders.Where(provider => string.IsNullOrEmpty(fromOnly) || fromOnly == provider || (provider == "google" && fromOnly == "openid")))
+        foreach (var provider in ProviderManager.AuthProviders.Where(provider => string.IsNullOrEmpty(inDto.FromOnly) || inDto.FromOnly == provider || (provider == "google" && inDto.FromOnly == "openid")))
         {
-            if (inviteView && ProviderManager.InviteExceptProviders.Contains(provider))
+            if (inDto.InviteView && ProviderManager.InviteExceptProviders.Contains(provider))
             {
                 continue;
             }
@@ -92,8 +87,8 @@ public class ThirdpartyController(
             {
 
                 var url = VirtualPathUtility.ToAbsolute("~/login.ashx") + $"?auth={provider}";
-                var mode = settingsView || inviteView || (!mobileDetector.IsMobile() && !Request.DesktopApp())
-                        ? $"&mode=popup&callback={clientCallback}"
+                var mode = inDto.SettingsView || inDto.InviteView || (!mobileDetector.IsMobile() && !Request.DesktopApp())
+                        ? $"&mode=popup&callback={inDto.ClientCallback}"
                         : "&mode=Redirect&desktop=true";
 
                 infos.Add(new AccountInfoDto
@@ -114,11 +109,10 @@ public class ThirdpartyController(
     /// <short>
     /// Link a third-pary account
     /// </short>
-    /// <category>Third-party accounts</category>
-    /// <param type="ASC.People.ApiModels.RequestDto.LinkAccountRequestDto, ASC.People" name="inDto">Request parameters for linking accounts</param>
     /// <path>api/2.0/people/thirdparty/linkaccount</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns></returns>
+    [Tags("People / Third-party accounts")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(405, "Error not allowed option")]
     [HttpPut("linkaccount")]
     public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
@@ -150,12 +144,12 @@ public class ThirdpartyController(
     /// <short>
     /// Create a third-pary account
     /// </short>
-    /// <category>Third-party accounts</category>
-    /// <param type="ASC.People.ApiModels.RequestDto.SignupAccountRequestDto, ASC.People" name="inDto">Request parameters for creating a third-party account</param>
     /// <path>api/2.0/people/thirdparty/signup</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <returns></returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("People / Third-party accounts")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(400, "Incorrect email")]
+    [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
     [AllowAnonymous]
     [HttpPost("signup")]
     public async Task SignupAccountAsync(SignupAccountRequestDto inDto)
@@ -254,17 +248,14 @@ public class ThirdpartyController(
     /// <short>
     /// Unlink a third-pary account
     /// </short>
-    /// <category>Third-party accounts</category>
-    /// <param type="System.String, System" name="provider">Provider name</param>
     /// <path>api/2.0/people/thirdparty/unlinkaccount</path>
-    /// <httpMethod>DELETE</httpMethod>
-    /// <returns></returns>
+    [Tags("People / Third-party accounts")]
     [HttpDelete("unlinkaccount")]
-    public async Task UnlinkAccountAsync(string provider)
+    public async Task UnlinkAccountAsync(UnlinkAccountRequestDto inDto)
     {
-        await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID.ToString(), provider);
+        await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID.ToString(), inDto.Provider);
 
-        await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(provider));
+        await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
     }
 
     private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, 

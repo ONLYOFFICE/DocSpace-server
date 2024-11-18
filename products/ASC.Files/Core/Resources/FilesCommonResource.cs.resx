@@ -290,9 +290,6 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrátor místnosti</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Uživatel</value>
   </data>
@@ -364,9 +361,6 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Místnost nelze připnout</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrátor místnosti</value>
   </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Vlastní filtr</value>
@@ -467,12 +461,6 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="Date" xml:space="preserve">
     <value>Datum</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Mocný uživatel</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Mocný uživatel</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Uživatel</value>
   </data>
@@ -496,5 +484,20 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Číslo formuláře</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Externí uživatel</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Tvůrce obsahu</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Správce místnosti</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Tvůrce obsahu</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Správce místnosti</value>
   </data>
 </root>

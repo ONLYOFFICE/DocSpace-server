@@ -176,7 +176,7 @@
     <value>최대 관리자 수는 {0}입니다</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>관리자/고급 사용자 수</value>
+    <value>관리자 수</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>자동 백업 &amp; 복구</value>
@@ -1037,7 +1037,7 @@
     <value>사용자 공간 할당량을 초과했습니다</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>추가된 관리자/파워 사용자:</value>
+    <value>추가된 관리자:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>초대 한도를 초과했습니다</value>
@@ -1055,6 +1055,12 @@
     <value>스토리지 할당량 &amp; 통계</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>관리자/파워 유저당 {0} 및 요청 시 공간 추가 가능</value>
+    <value>관리자당 {0} 및 요청 시 공간 추가 가능</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>룸당 할당량을 설정하는 데 실패했습니다. 입력한 값이 총 DocSpace 스토리지 값보다 큽니다.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>사용자당 할당량을 설정하는 데 실패했습니다. 입력한 값이 총 DocSpace 스토리지 값보다 큽니다.</value>
   </data>
 </root>

@@ -27,27 +27,27 @@
 namespace ASC.Core.Common.Log;
 internal static partial class AWSSenderLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Tenant: {tenantId}, To: {reciever}")]
+    [LoggerMessage(LogLevel.Debug, "Tenant: {tenantId}, To: {reciever}")]
     public static partial void DebugSendTo(this ILogger logger, int tenantId, string reciever);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Amazon sending failed: {result}, fallback to smtp")]
+    [LoggerMessage(LogLevel.Debug, "Amazon sending failed: {result}, fallback to smtp")]
     public static partial void DebugAmazonSendingFailed(this ILogger logger, NoticeSendResult result);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Send rate doesn't fit in send window. sleeping for: {interval}")]
+    [LoggerMessage(LogLevel.Debug, "Send rate doesn't fit in send window. sleeping for: {interval}")]
     public static partial void DebugSendRate(this ILogger logger, TimeSpan interval);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "refreshing quota. interval: {timeout} Last refresh was at: {refreshDate}")]
+    [LoggerMessage(LogLevel.Debug, "refreshing quota. interval: {timeout} Last refresh was at: {refreshDate}")]
     public static partial void DebugRefreshingQuota(this ILogger logger, TimeSpan timeout, DateTime refreshDate);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "quota: {lastCount}/{maxCount} at {rate} mps. send window:{interval}")]
+    [LoggerMessage(LogLevel.Debug, "quota: {lastCount}/{maxCount} at {rate} mps. send window:{interval}")]
     public static partial void DebugQuota(this ILogger logger, double lastCount, double maxCount, double rate, TimeSpan interval);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Quota limit reached. setting next check to: {lastRefresh}")]
+    [LoggerMessage(LogLevel.Warning, "Quota limit reached. setting next check to: {lastRefresh}")]
     public static partial void WarningQuotaLimit(this ILogger logger, DateTime lastRefresh);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Tenant: {tenantId}, To: {reciever}")]
+    [LoggerMessage(LogLevel.Error, "Tenant: {tenantId}, To: {reciever}")]
     public static partial void ErrorSend(this ILogger logger, int tenantId, string reciever, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "error refreshing quota")]
+    [LoggerMessage(LogLevel.Error, "error refreshing quota")]
     public static partial void ErrorRefreshingQuota(this ILogger logger, Exception exception);
 }

@@ -416,7 +416,7 @@
     <value>管理员的数量不应超过{0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>管理员/高级用户数量</value>
+    <value>管理员数量</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>自动备份与恢复</value>
@@ -431,7 +431,7 @@
     <value>SSO单点登录</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>每个管理员/高级用户 {0}，并且能够请求增加空间</value>
+    <value>每个管理员 {0}，并且能够请求增加空间</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>使用的存储空间大小不应超过{0}</value>
@@ -1046,7 +1046,7 @@
     <value>禁用用户</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>管理员/高级用户已添加：</value>
+    <value>管理员已添加：</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>邀请人数已超过上限</value>
@@ -1056,5 +1056,11 @@
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>此电子邮件已作为第三方提供商附加到用户 {0}</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>无法设置每个房间的配额。输入值大于协作空间总存储空间。</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>无法设置每个用户的配额。输入值大于协作空间总存储空间。</value>
   </data>
 </root>

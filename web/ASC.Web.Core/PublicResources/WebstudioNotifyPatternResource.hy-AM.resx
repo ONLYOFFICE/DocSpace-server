@@ -1717,7 +1717,7 @@ $TrulyYours</value>
 Դուք հենց նոր ստեղծեցիք ONLYOFFICE DocSpace-ը՝ փաստաթղթերի կենտրոն, որտեղ կարող եք խթանել համագործակցությունը ձեր թիմի, հաճախորդների, գործընկերների և այլնի հետ: Հասցեն է՝"${__VirtualRootPath}":"${__VirtualRootPath}".
 Ձեր ընթացիկ սակագնային պլանը ՍՏԱՐՏԱՓՆ է: Այն բացարձակապես անվճար է և ներառում է՝
 
-&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 ադմինիստրատոր/հզոր օգտվող&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Մինչև 100 սենյակ&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 ԳԲ սկավառակի տարածություն &lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 ադմինիստրատոր&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Մինչև 100 սենյակ&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 ԳԲ սկավառակի տարածություն &lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
 *Օգտվեք փաստաթղթերի համագործակցության նոր եղանակը!*
 
@@ -1819,5 +1819,187 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>Դուք հրավիրված եք ONLYOFFICE DocSpace սենյակ</value>
+  </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Գնել հիմա</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Սահմանել գաղտնաբառ</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Ո՜ղջույն, $UserName!
+
+ONLYOFFICE DocSpace Developer-ի ձեր լիցենզիայի ժամկետը լրանում է այսօր:
+
+Մենք ձեզ համար ակտիվացրել ենք $ՎճարմանՀետաձգման‎ օրերի արտոնյալ ժամկետը: Այս ընթացքում փաստաթղթերի խմբագրման հասանելիությունը սահմանափակվում է 20 միաժամանակյա միացումներով (աջակցությունը և թարմացումներն այլևս չեն տրամադրվում):
+
+Լիցենզիան թարմացնելու համար կապվեք ձեր վաճառքի մենեջերի կամ մեզ հետ՝ "${__SalesEmail}":"mailto:${__SalesEmail}":
+
+Վճարման հարցերի համար կապվեք մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}". Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ո՜ղջույն, $UserName!
+
+Ձեր ONLYOFFICE DocSpace Developer լիցենզիան կլրանա 7 օրից: 
+
+Լիցենզիան թարմացնելու համար կապվեք ձեր վաճառքի մենեջերի կամ մեզ հետ՝ "${__SalesEmail}":"mailto:${__SalesEmail}":
+
+Վճարման հարցերի համար կապվեք մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}". Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Ո՜ղջույն, $UserName!
+
+Ձեր ONLYOFFICE DocSpace Developer լիցենզիայի արտոնյալ ժամկետը կլրանա 7 օրից: Դա նշանակում է, որ DocSpace-ն անհասանելի կդառնա:
+
+Լիցենզիան թարմացնելու համար կապվեք ձեր վաճառքի մենեջերի կամ մեզ հետ՝ "${__SalesEmail}":"mailto:${__SalesEmail}":
+
+Վճարման հարցերի համար կապվեք մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}". Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Ո՜ղջույն, $UserName!
+
+ONLYOFFICE DocSpace Developer լիցենզիայի արտոնյալ ժամկետն այսօր լրանում է: Դա նշանակում է, որ DocSpace-ն այլևս հասանելի չի լինի:
+
+Լիցենզիան թարմացնելու համար կապվեք ձեր վաճառքի մենեջերի կամ մեզ հետ՝ "${__SalesEmail}":"mailto:${__SalesEmail}":
+
+Վճարման հարցերի համար կապվեք մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}". Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Ո՜ղջույն, $UserName!
+
+Your license for ONLYOFFICE DocSpace Enterprise expires today.
+
+Մենք ձեզ համար ակտիվացրել ենք *$ՎճարմանՀետաձգման‎ օրեր* արտոնյալ ժամանակահատվածը: Այս ընթացքում DocSpace մուտքն ապահովված է 3 նշված օգտատերերի համար* (աջակցությունը և թարմացումներն այլևս չեն տրամադրվում):
+
+Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ONLYOFFICE DocSpace Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
+
+$OrangeButton
+
+Դուք նաև կարող եք անմիջապես կապվել ձեր վաճառքի մենեջերի հետ լիցենզիայի թարմացման համար:
+
+Վճարման հարցերի համար կապվեք մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}". Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
+
+* Առաջին 3 օգտատերերի գրանցված ID-ները, ովքեր ցանկացած ֆայլ կբացեն խմբագրման համար: Միաժամանակ խմբագրման ենթակա փաստաթղթերի քանակը սահմանափակված չէ: Այլ օգտատերերը կկարողանան բացել փաստաթղթերը միայն դիտելու համար:
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ո՜ղջույն, $UserName!
+
+ONLYOFFICE DocSpace Enterprise-ի Ձեր լիցենզիայի ժամկետը կլրանա 7 օրից: 
+
+Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ONLYOFFICE DocSpace Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
+
+$OrangeButton
+
+Դուք նաև կարող եք անմիջապես կապվել ձեր վաճառքի մենեջերի հետ լիցենզիայի թարմացման համար:
+
+Վճարման հարցերի համար կապվեք մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}". Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Ո՜ղջույն, $UserName!
+
+ONLYOFFICE DocSpace Enterprise-ի Ձեր լիցենզիայի ժամկետը կլրանա 7 օրից: Դա նշանակում է, որ թարմացումները և աջակցությունն այլևս հասանելի չեն լինի։
+
+Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ONLYOFFICE DocSpace Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
+
+$OrangeButton
+
+Դուք նաև կարող եք անմիջապես կապվել ձեր վաճառքի մենեջերի հետ լիցենզիայի թարմացման համար:
+
+Վճարման հարցերի համար կապվեք մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}". Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Ո՜ղջույն, $UserName!
+
+Այսօր լրանում է Ձեր ONLYOFFICE DocSpace Enterprise-ի լիցենզիայի արտոնյալ ժամկետը: Դա նշանակում է, որ DocSpace-ն այլևս հասանելի չի լինի:
+
+Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ONLYOFFICE DocSpace Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
+
+$OrangeButton
+
+Դուք նաև կարող եք անմիջապես կապվել ձեր վաճառքի մենեջերի հետ լիցենզիայի թարմացման համար:
+
+Վճարման հարցերի համար կապվեք մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}". Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Ո՜ղջույն, $UserName!
+
+ONLYOFFICE DocSpace Enterprise-ի Ձեր լիցենզիայի ժամկետը կլրանա 7 օրից: Դա նշանակում է, որ թարմացումները և աջակցությունն այլևս հասանելի չեն լինի։*
+
+Լիցենզիան թարմացնելու համար խնդրում ենք կապվել ձեր վաճառքի մենեջերի կամ մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Վճարման հարցերի համար կարող եք դիմել մեզ՝ "${__SalesEmail}":"mailto:${__SalesEmail}" հասցեով: Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
+
+* Դուք կարող եք անսահմանափակ ժամանակով օգտագործել լիցենզիայի գնման պահին առկա բոլոր հնարավորությունները:
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Ո՜ղջույն, $UserName!
+
+ONLYOFFICE DocSpace Enterprise-ի Ձեր լիցենզիայի ժամկետը այսօր լրանում է: Դա նշանակում է, որ թարմացումները և աջակցությունն այլևս հասանելի չեն։*
+
+Լիցենզիան թարմացնելու համար խնդրում ենք կապվել ձեր վաճառքի մենեջերի կամ մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Վճարման հարցերի համար կարող եք դիմել մեզ՝ "${__SalesEmail}":"mailto:${__SalesEmail}" հասցեով: Տեխնիկական խնդիրների լուծման համար՝ "${__SupportLink}":"${__SupportLink}".
+
+* Դուք կարող եք անսահմանափակ ժամանակով օգտագործել լիցենզիայի գնման պահին առկա բոլոր հնարավորությունները:
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Ո՜ղջույն։ Խնդրում ենք ստեղծել գաղտնաբառ Ձեր ONLYOFFICE DocSpace հաշվի համար: Պարզապես սեղմեք ստորև նշված կոճակը՝
+
+$OrangeButton
+
+Հղումը վավեր է 7 օր։</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Ձեր ONLYOFFICE DocSpace Developer-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ձեր ONLYOFFICE DocSpace Developer-ի լիցենզիայի ժամկետը շուտով կլրանա</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Ձեր ONLYOFFICE DocSpace Developer-ի արտոնյալ ժամկետը շուտով կլրանա</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Ձեր ONLYOFFICE DocSpace Developer-ն այլևս հասանելի չէ</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Ձեր ONLYOFFICE DocSpace Enterprise-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ձեր ONLYOFFICE DocSpace Enterprise-ի լիցենզիայի ժամկետը շուտով կլրանա</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Ձեր ONLYOFFICE DocSpace Enterprise-ի արտոնյալ ժամկետը շուտով կլրանա</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Ձեր ONLYOFFICE DocSpace Enterprise-ն այլևս հասանելի չէ</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Ձեր ONLYOFFICE DocSpace Enterprise-ի լիցենզիայի ժամկետը շուտով կլրանա</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Ձեր ONLYOFFICE DocSpace Enterprise-ի լիցենզիայի ժամկետը լրանում է այսօր</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Սահմանեք գաղտնաբառ ONLYOFFICE DocSpace-ի համար</value>
   </data>
 </root>

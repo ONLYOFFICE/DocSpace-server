@@ -274,9 +274,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Muokkaaja</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Huoneen ylläpitäjä</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Käyttäjä</value>
   </data>
@@ -348,9 +345,6 @@
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Muokkaaja</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Huoneen ylläpitäjä</value>
   </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Kommentti</value>
@@ -467,12 +461,6 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="Date" xml:space="preserve">
     <value>Päivämäärä</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Tehokäyttäjä</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Tehokäyttäjä</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Käyttäjä</value>
   </data>
@@ -496,5 +484,20 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Lomakkeen numero</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Sisällöntuottaja</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Huoneen johtaja</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Ulkoinen käyttäjä</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Sisällöntuottaja</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Huoneen johtaja</value>
   </data>
 </root>

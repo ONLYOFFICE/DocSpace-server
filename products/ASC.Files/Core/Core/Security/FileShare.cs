@@ -26,24 +26,45 @@
 
 namespace ASC.Files.Core.Security;
 
-/// <summary>
-/// </summary>
 [EnumExtensions]
 [JsonConverter(typeof(FileShareConverter))]
 public enum FileShare
 {
+    [SwaggerEnum(Description = "None")]
     None,
+
+    [SwaggerEnum(Description = "Read and write")]
     ReadWrite,
+
+    [SwaggerEnum(Description = "Read")]
     Read,
+
+    [SwaggerEnum(Description = "Restrict")]
     Restrict,
+
+    [SwaggerEnum(Description = "Varies")]
     Varies,
+
+    [SwaggerEnum(Description = "Review")]
     Review,
+
+    [SwaggerEnum(Description = "Comment")]
     Comment,
+
+    [SwaggerEnum(Description = "Fill forms")]
     FillForms,
+
+    [SwaggerEnum(Description = "Custom filter")]
     CustomFilter,
-    RoomAdmin,
+
+    [SwaggerEnum(Description = "Room manager")]
+    RoomManager,
+
+    [SwaggerEnum(Description = "Editing")]
     Editing,
-    PowerUser
+
+    [SwaggerEnum(Description = "Content creator")]
+    ContentCreator
 }
 
 public class FileShareConverter : System.Text.Json.Serialization.JsonConverter<FileShare>
@@ -84,9 +105,9 @@ public static partial class FileShareExtensions
             case FileShare.FillForms:
             case FileShare.Comment:
             case FileShare.Restrict:
-            case FileShare.RoomAdmin:
+            case FileShare.RoomManager:
             case FileShare.Editing:
-            case FileShare.PowerUser:
+            case FileShare.ContentCreator:
             case FileShare.Varies:
             case FileShare.None:
                 return FilesCommonResource.ResourceManager.GetString(prefix + fileShare.ToStringFast(), cultureInfo);

@@ -24,15 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Data;
 global using System.Collections.Concurrent;
 global using System.Collections.Frozen;
 global using System.Collections.Immutable;
+global using System.ComponentModel.DataAnnotations;
+global using System.Data;
 global using System.Diagnostics;
 global using System.Extensions;
 global using System.Globalization;
 global using System.Linq.Expressions;
-global using ASC.Files.Core.Services.WCFService.Wrappers;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Net.Mime;
@@ -46,13 +46,13 @@ global using System.Text.Encodings.Web;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
+global using System.Text.Unicode;
 global using System.Web;
 global using System.Xml;
-
 global using ASC.Api.Collections;
 global using ASC.Api.Core;
-global using ASC.Api.Core.Model;
 global using ASC.Api.Core.Extensions;
+global using ASC.Api.Core.Model;
 global using ASC.Api.Core.Security;
 global using ASC.Api.Utils;
 global using ASC.AuditTrail;
@@ -72,6 +72,7 @@ global using ASC.Core;
 global using ASC.Core.ChunkedUploader;
 global using ASC.Core.Common;
 global using ASC.Core.Common.Configuration;
+global using ASC.Core.Common.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
@@ -102,23 +103,24 @@ global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.Core.Entries;
-global using ASC.Files.Core.Core.Thirdparty;
-global using ASC.Files.Core.Core.Thirdparty.ProviderDao;
-global using ASC.Files.Core.Data;
-global using ASC.Files.Core.EF;
-global using ASC.Files.Core.Exceptions;
-global using ASC.Files.Core.Entries;
-global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Core.History;
 global using ASC.Files.Core.Core.History.Interpreters;
+global using ASC.Files.Core.Core.Thirdparty;
+global using ASC.Files.Core.Core.Thirdparty.ProviderDao;
+global using ASC.Files.Core.Core.Thirdparty.WebDav;
+global using ASC.Files.Core.Data;
+global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Entries;
+global using ASC.Files.Core.Exceptions;
+global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;
 global using ASC.Files.Core.Log;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Files.Core.Services.OFormService;
+global using ASC.Files.Core.Services.WCFService.Wrappers;
 global using ASC.Files.Core.Thirdparty;
-global using ASC.Files.Core.Core.Thirdparty.WebDav;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Thirdparty;
 global using ASC.Files.Thirdparty.Box;
@@ -164,38 +166,30 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
-
 global using AutoMapper;
-
 global using Box.V2;
 global using Box.V2.Auth;
 global using Box.V2.Config;
 global using Box.V2.Models;
-
 global using DocuSign.eSign.Api;
 global using DocuSign.eSign.Client;
 global using DocuSign.eSign.Model;
-
 global using Dropbox.Api;
 global using Dropbox.Api.Files;
-
 global using Google;
 global using Google.Apis.Auth.OAuth2;
 global using Google.Apis.Auth.OAuth2.Flows;
 global using Google.Apis.Auth.OAuth2.Responses;
 global using Google.Apis.Drive.v3;
 global using Google.Apis.Services;
-
 global using ICSharpCode.SharpZipLib.GZip;
 global using ICSharpCode.SharpZipLib.Tar;
 global using ICSharpCode.SharpZipLib.Zip;
-
 global using Joonasw.AspNetCore.SecurityHeaders.Csp.Builder;
-
 global using JWT.Exceptions;
-
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
@@ -209,43 +203,35 @@ global using Microsoft.Extensions.Primitives;
 global using Microsoft.Graph;
 global using Microsoft.OneDrive.Sdk;
 global using Microsoft.SharePoint.Client;
-
 global using NetEscapades.EnumGenerators;
-
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
-
 global using OpenSearch.Client;
-
 global using ProtoBuf;
-
 global using SixLabors.ImageSharp;
-
 global using WebDav;
-
 global using static ASC.Files.Core.Data.AbstractDao;
 global using static ASC.Files.Core.Helpers.DocumentService;
 global using static ASC.Files.Core.Helpers.DocumentService.CommandResponse;
 global using static ASC.Web.Files.Services.DocumentService.DocumentServiceTracker;
 global using static ASC.Web.Files.Utils.FileTracker;
-
-global using HttpException = ASC.Common.Web.HttpException;
-global using License = ASC.Core.Billing.License;
-global using SecurityContext = ASC.Core.SecurityContext;
-global using Constants = ASC.Core.Users.Constants;
-global using UserInfo = ASC.Core.Users.UserInfo;
-global using FilesDbContext = ASC.Files.Core.EF.FilesDbContext;
 global using CommandMethod = ASC.Files.Core.Helpers.DocumentService.CommandMethod;
-global using FileShare = ASC.Files.Core.Security.FileShare;
-global using Tag = ASC.Files.Core.Tag;
-global using Thumbnail = ASC.Files.Core.Thumbnail;
-global using FileType = ASC.Web.Core.Files.FileType;
-global using Token = ASC.Web.Files.ThirdPartyApp.Token;
-global using SocketManager = ASC.Web.Files.Utils.SocketManager;
-global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+global using Constants = ASC.Core.Users.Constants;
 global using ContentType = System.Net.Mime.ContentType;
 global using EnumMemberAttribute = System.Runtime.Serialization.EnumMemberAttribute;
-global using JsonSerializer = System.Text.Json.JsonSerializer;
-global using JsonTokenType = System.Text.Json.JsonTokenType;
+global using FilesDbContext = ASC.Files.Core.EF.FilesDbContext;
+global using FileShare = ASC.Files.Core.Security.FileShare;
+global using FileType = ASC.Web.Core.Files.FileType;
+global using HttpException = ASC.Common.Web.HttpException;
 global using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
+global using JsonSerializer = System.Text.Json.JsonSerializer;
+global using JsonTokenType = System.Text.Json.JsonTokenType;
+global using License = ASC.Core.Billing.License;
+global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+global using SecurityContext = ASC.Core.SecurityContext;
+global using SocketManager = ASC.Web.Files.Utils.SocketManager;
+global using Tag = ASC.Files.Core.Tag;
+global using Thumbnail = ASC.Files.Core.Thumbnail;
+global using Token = ASC.Web.Files.ThirdPartyApp.Token;
+global using UserInfo = ASC.Core.Users.UserInfo;

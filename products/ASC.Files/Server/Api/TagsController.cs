@@ -48,17 +48,15 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <summary>
     /// Adds a file with the ID specified in the request to the "Recent" section.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
     /// <short>Add a file to the "Recent" section</short>
-    /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/file/{fileId}/recent</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("file/{fileId}/recent")]
-    public async Task<FileDto<T>> AddToRecentAsync(T fileId)
+    public async Task<FileDto<T>> AddToRecentAsync(FileIdRequestDto<T> inDto)
     {
-        var file = await fileStorageService.GetFileAsync(fileId, -1).NotFoundIfNull("File not found");
+        var file = await fileStorageService.GetFileAsync(inDto.FileId, -1).NotFoundIfNull("File not found");
 
         await entryManager.MarkAsRecent(file);
 
@@ -68,18 +66,16 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <summary>
     /// Changes the favorite status of the file with the ID specified in the request.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="System.Boolean, System" name="favorite">Specifies if this file is marked as favorite or not</param>
     /// <short>Change the file favorite status</short>
-    /// <category>Files</category>
-    /// <returns type="System.Boolean, System">Boolean value: true - the file is favorite, false - the file is not favorite</returns>
     /// <path>api/2.0/files/favorites/{fileId}</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Boolean value: true - the file is favorite, false - the file is not favorite", typeof(bool))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpGet("favorites/{fileId}")]
-    public async Task<bool> ToggleFileFavoriteAsync(T fileId, bool favorite)
+    public async Task<bool> ToggleFileFavoriteAsync(ToggleFileFavoriteRequestDto<T> inDto)
     {
-        return await fileStorageService.ToggleFileFavoriteAsync(fileId, favorite);
+        return await fileStorageService.ToggleFileFavoriteAsync(inDto.FileId, inDto.Favorite);
     }
 }
 
@@ -92,12 +88,11 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// Adds files and folders with the IDs specified in the request to the favorite list.
     /// </summary>
     /// <short>Add favorite files and folders</short>
-    /// <category>Operations</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/favorites</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("favorites")]
     public async Task<bool> AddFavoritesAsync(BaseBatchRequestDto inDto)
     {
@@ -114,11 +109,9 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// Adds files with the IDs specified in the request to the template list.
     /// </summary>
     /// <short>Add template files</short>
-    /// <category>Files</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.TemplatesRequestDto, ASC.Files.Core" name="inDto">Request parameters for adding files to the template list</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/templates</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("templates")]
     public async Task<bool> AddTemplatesAsync(TemplatesRequestDto inDto)
     {
@@ -131,12 +124,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// Removes files and folders with the IDs specified in the request from the favorite list. This method uses the body parameters.
     /// </summary>
     /// <short>Delete favorite files and folders (using body parameters)</short>
-    /// <category>Operations</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/favorites</path>
-    /// <httpMethod>DELETE</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("favorites")]
     [Consumes("application/json")]
     public async Task<bool> DeleteFavoritesFromBodyAsync([FromBody] BaseBatchRequestDto inDto)
@@ -148,12 +139,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// Removes files and folders with the IDs specified in the request from the favorite list. This method uses the query parameters.
     /// </summary>
     /// <short>Delete favorite files and folders (using query parameters)</short>
-    /// <category>Operations</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/favorites</path>
-    /// <httpMethod>DELETE</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("favorites")]
     public async Task<bool> DeleteFavoritesFromQueryAsync([FromQuery][ModelBinder(BinderType = typeof(BaseBatchModelBinder))] BaseBatchRequestDto inDto)
     {
@@ -164,15 +153,13 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// Removes files with the IDs specified in the request from the template list.
     /// </summary>
     /// <short>Delete template files</short>
-    /// <category>Files</category>
-    /// <param type="System.Collections.Generic.IEnumerable{System.Int32}, System.Collections.Generic" name="fileIds">List of file IDs</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/templates</path>
-    /// <httpMethod>DELETE</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("templates")]
-    public async Task<bool> DeleteTemplatesAsync(IEnumerable<int> fileIds)
+    public async Task<bool> DeleteTemplatesAsync(DeleteTemplateFilesRequestDto inDto)
     {
-        await fileStorageService.DeleteTemplatesAsync(fileIds);
+        await fileStorageService.DeleteTemplatesAsync(inDto.FileIds);
 
         return true;
     }
@@ -181,18 +168,20 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// Removes files with the IDs specified in the request from the "Recent" section.
     /// </summary>
     /// <short>Delete recent files</short>
-    /// <category>Files</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
-    /// <returns type="Microsoft.AspNetCore.Mvc.NoContentResult, Microsoft.AspNetCore.Mvc">No content</returns>
     /// <path>api/2.0/files/recent</path>
-    /// <httpMethod>DELETE</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "No content", typeof(NoContentResult))]
     [HttpDelete("recent")]
     public async Task<NoContentResult> DeleteRecentAsync(BaseBatchRequestDto inDto)
     {
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, _) = FileOperationsManager.GetIds(inDto.FileIds);
         
-        await fileStorageService.DeleteFromRecentAsync(fileIntIds, true);
-
+        var t1 = fileStorageService.DeleteFromRecentAsync(folderIntIds, fileIntIds, true);
+        var t2 = fileStorageService.DeleteFromRecentAsync(folderStringIds, [], true);
+        
+        await Task.WhenAll(t1, t2);
+        
         return NoContent();
     }
 

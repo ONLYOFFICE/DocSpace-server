@@ -332,9 +332,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrador da sala</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Usuário</value>
   </data>
@@ -358,9 +355,6 @@
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Editor</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrador da sala</value>
   </data>
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>Formulário enviado</value>
@@ -464,14 +458,8 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tipo</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Usuário avançado</value>
-  </data>
   <data name="Date" xml:space="preserve">
     <value>Data</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Usuário avançado</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Usuário</value>
@@ -496,5 +484,20 @@
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Número do formulário</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Usuário externo</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Gerente da sala</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Criador do conteúdo</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Criador do conteúdo</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Gerente da sala</value>
   </data>
 </root>

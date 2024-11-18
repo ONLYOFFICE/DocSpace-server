@@ -28,6 +28,7 @@ namespace ASC.Api.Migration;
 
 [DefaultRoute]
 [ApiController]
+[ControllerName("migration")]
 public class MigrationController(
     UserManager userManager,
     AuthContext authContext,
@@ -36,6 +37,13 @@ public class MigrationController(
     MigrationCore migrationCore,
     MigrationLogger migrationLogger) : ControllerBase
 {
+    /// <summary>
+    /// Gets migration list
+    /// </summary>
+    /// <path>api/2.0/migration/list</path>
+    [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("list")]
     public async Task<string[]> List()
     {
@@ -43,14 +51,28 @@ public class MigrationController(
         return migrationCore.GetAvailableMigrations();
     }
 
+    /// <summary>
+    /// Uploads and inits migration
+    /// </summary>
+    /// <path>api/2.0/migration/init/{migratorName}</path>
+    [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("init/{migratorName}")]
-    public async Task UploadAndInitAsync(string migratorName)
+    public async Task UploadAndInitAsync(MigratorNameRequestDto inDto)
     {
         await DemandPermissionAsync();
 
-        await migrationCore.StartParseAsync(migratorName);
+        await migrationCore.StartParseAsync(inDto.MigratorName);
     }
 
+    /// <summary>
+    /// Gets migration status
+    /// </summary>
+    /// <path>api/2.0/migration/status</path>
+    [Tags("Migration")]
+    [SwaggerResponse(200, "Ok", typeof(MigrationStatusDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("status")]
     public async Task<MigrationStatusDto> Status()
     {
@@ -77,6 +99,13 @@ public class MigrationController(
         return null;
     }
 
+    /// <summary>
+    /// Cancels migration
+    /// </summary>
+    /// <path>api/2.0/migration/cancel</path>
+    [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("cancel")]
     public async Task CancelAsync()
     {
@@ -85,6 +114,13 @@ public class MigrationController(
         await migrationCore.StopAsync();
     }
 
+    /// <summary>
+    /// Clears migration
+    /// </summary>
+    /// <path>api/2.0/migration/clear</path>
+    [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("clear")]
     public async Task ClearAsync()
     {
@@ -93,6 +129,13 @@ public class MigrationController(
         await migrationCore.ClearAsync();
     }
 
+    /// <summary>
+    /// Migrates
+    /// </summary>
+    /// <path>api/2.0/migration/migrate</path>
+    [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("migrate")]
     public async Task MigrateAsync(MigrationApiInfo info)
     {
@@ -101,6 +144,13 @@ public class MigrationController(
         await migrationCore.StartAsync(info);
     }
 
+    /// <summary>
+    /// Gets migration logs
+    /// </summary>
+    /// <path>api/2.0/migration/logs</path>
+    [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("logs")]
     public async Task LogsAsync()
     {
@@ -111,14 +161,23 @@ public class MigrationController(
         {
             throw new Exception(MigrationResource.MigrationProgressException);
         }
+        migrationLogger.Init(status.LogName);
+        using var stream = await migrationLogger.GetStreamAsync();
 
         httpContextAccessor.HttpContext.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("migration.log"));
         httpContextAccessor.HttpContext.Response.ContentType = "text/plain; charset=UTF-8";
+        httpContextAccessor.HttpContext.Response.Headers["Content-Length"] = stream.Length.ToString(CultureInfo.InvariantCulture);
 
-        migrationLogger.Init(status.LogName);
-        await (await migrationLogger.GetStreamAsync()).CopyToAsync(httpContextAccessor.HttpContext.Response.Body);
+        await stream.CopyToAsync(httpContextAccessor.HttpContext.Response.Body);
     }
 
+    /// <summary>
+    /// Finishes migration
+    /// </summary>
+    /// <path>api/2.0/migration/finish</path>
+    [Tags("Migration")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("finish")]
     public async Task FinishAsync(FinishDto inDto)
     {
@@ -142,6 +201,7 @@ public class MigrationController(
                 await studioNotifyService.UserInfoActivationAsync(u);
             }
         }
+        await migrationCore.ClearAsync();
     }
 
     private async Task DemandPermissionAsync()

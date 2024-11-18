@@ -232,19 +232,19 @@ internal abstract class ThirdPartyProviderDao
         return default;
     }
 
-    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText,
+    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
         bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public virtual IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
+    public virtual IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, 
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public virtual IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
+    public virtual IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntriesIds)
     {
@@ -259,12 +259,12 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
 
-    protected static IAsyncEnumerable<Folder<string>> FilterRoomsAsync(IAsyncEnumerable<Folder<string>> rooms, ProviderFilter provider, FilterType filterType, Guid subjectId,
+    protected static IAsyncEnumerable<Folder<string>> FilterRoomsAsync(IAsyncEnumerable<Folder<string>> rooms, ProviderFilter provider, IEnumerable<FilterType> filterTypes, Guid subjectId,
         bool excludeSubject, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, string searchText, bool withoutTags, IEnumerable<string> tags,
         FilesDbContext filesDbContext)
     {
         rooms = FilterByProvidersAsync(rooms, provider);
-        rooms = FilterByRoomType(rooms, filterType);
+        rooms = FilterByRoomType(rooms, filterTypes);
         rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectEntriesIds);
         rooms = FilterByTitle(rooms, searchText);
         rooms = FilterByTags(rooms, withoutTags, tags, filesDbContext);
@@ -307,16 +307,16 @@ internal abstract class ThirdPartyProviderDao
         return rooms.Where(f => f.ProviderKey == providerType);
     }
 
-    protected static IAsyncEnumerable<Folder<string>> FilterByRoomType(IAsyncEnumerable<Folder<string>> rooms, FilterType filterType)
+    protected static IAsyncEnumerable<Folder<string>> FilterByRoomType(IAsyncEnumerable<Folder<string>> rooms, IEnumerable<FilterType> filterTypes)
     {
-        if (filterType is FilterType.None or FilterType.FoldersOnly)
+        if (filterTypes == null || !filterTypes.Any() || filterTypes.Contains(FilterType.None) || filterTypes.Contains(FilterType.FoldersOnly))
         {
             return rooms;
         }
 
-        var typeFilter = GetRoomFolderType(filterType);
+        var types = DocSpaceHelper.MapToFolderTypes(filterTypes);
 
-        return rooms.Where(f => f.FolderType == typeFilter);
+        return rooms.Where(f => types.Contains(f.FolderType));
     }
 
     protected static IAsyncEnumerable<Folder<string>> FilterBySubject(IAsyncEnumerable<Folder<string>> rooms, Guid subjectId, bool excludeSubject, SubjectFilter subjectFilter,
@@ -366,11 +366,6 @@ internal abstract class ThirdPartyProviderDao
         };
         
         return filter.ToStringFast();
-    }
-    
-    internal static FolderType GetRoomFolderType(FilterType filterType)
-    {
-        return DocSpaceHelper.MapToFolderType(filterType) ?? FolderType.DEFAULT;
     }
 
     #endregion
@@ -476,9 +471,14 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             return;
         }
 
-            folder.FolderType = ProviderInfo.FolderType;
+        folder.FolderType = ProviderInfo.FolderType;
         folder.Title = ProviderInfo.CustomerTitle;
-        }
+    }
+    
+    public bool CheckInvalidFilters(IEnumerable<FilterType> filterTypes)
+    {
+        return filterTypes != null && filterTypes.Any(CheckInvalidFilter);
+    }
 
     public bool CheckInvalidFilter(FilterType filterType)
     {

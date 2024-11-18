@@ -574,8 +574,20 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             && FolderDao.UseRecursiveOperation(folder.Id, toFolderId))
                         {
                             var toNewFolderParents = await folderDao.GetParentFoldersAsync(newFolder.Id).ToListAsync();
+
+                            var foldersForCopyIds = new List<T>();
+                            if (folder.FolderType == FolderType.FillingFormsRoom)
+                            {
+                                var foldersForCopy = await FolderDao.GetFoldersAsync(folder.Id).ToListAsync();
+                                foldersForCopyIds = foldersForCopy.Where(f => !DocSpaceHelper.IsFormsFillingSystemFolder(f.FolderType)).Select(f => f.Id).ToList();
+                            }
+                            else
+                            {
+                                foldersForCopyIds = await FolderDao.GetFoldersAsync(folder.Id).Select(f => f.Id).ToListAsync();
+                            }
+
                             await MoveOrCopyFilesAsync(scope, await FileDao.GetFilesAsync(folder.Id).ToListAsync(), newFolder, copy, toNewFolderParents, checkPermissions);
-                            await MoveOrCopyFoldersAsync(scope, await FolderDao.GetFoldersAsync(folder.Id).Select(f => f.Id).ToListAsync(), newFolder, copy, toNewFolderParents, checkPermissions);
+                            await MoveOrCopyFoldersAsync(scope, foldersForCopyIds, newFolder, copy, toNewFolderParents, checkPermissions);
 
                             if (!copy)
                             {
@@ -823,6 +835,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
         var fileChecker = scope.ServiceProvider.GetService<FileChecker>();
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
+        var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
@@ -896,6 +909,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         }
                     }
                 }
+                
                 var deleteLinks = file.RootFolderType == FolderType.USER &&
                                 toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
 
@@ -975,7 +989,23 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                 if (Equals(toFolderId, _daoFolderId))
                                 {
-                                    needToMark.Add(newFile);
+                                    if (file.RootFolderType == FolderType.VirtualRooms && 
+                                        toFolder.RootFolderType == FolderType.VirtualRooms &&
+                                        !file.ProviderEntry)
+                                    {
+                                        var fromParents = await cachedFolderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
+                                        var fromRoom = fromParents.FirstOrDefault(x => DocSpaceHelper.IsRoom(x.FolderType));
+                                        var toRoom = toParentFolders.FirstOrDefault(x => DocSpaceHelper.IsRoom(x.FolderType));
+
+                                        if (!fromRoom.Id.Equals((T)Convert.ChangeType(toRoom.Id, typeof(T))))
+                                        {
+                                            needToMark.Add(newFile);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        needToMark.Add(newFile);
+                                    }
                                 }
 
                                 if (fileType == FileType.Pdf && !isInSameRoom)

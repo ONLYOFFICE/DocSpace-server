@@ -28,7 +28,18 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class InviteUsersByEmailRequestDto
 {
+    /// <summary>
+    /// Emails
+    /// </summary>
     public IEnumerable<string> Emails { get; set; }
+
+    /// <summary>
+    /// Employee type
+    /// </summary>
     public EmployeeType EmployeeType { get; set; }
+
+    /// <summary>
+    /// Access
+    /// </summary>
     public FileShare Access { get; set; }
 }

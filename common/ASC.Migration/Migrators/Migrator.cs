@@ -193,9 +193,9 @@ public abstract class Migrator(
                     saved = await UserManager.SaveUserInfo(user.Info, user.UserType);
                     var groupId = user.UserType switch
                     {
-                        EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
+                        EmployeeType.User => Constants.GroupUser.ID,
                         EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
-                        EmployeeType.RoomAdmin => Constants.GroupManager.ID,
+                        EmployeeType.RoomAdmin => Constants.GroupRoomAdmin.ID,
                         _ => Guid.Empty
                     };
 
@@ -303,7 +303,7 @@ public abstract class Migrator(
 
     private async Task MigrateStorageAsync(MigrationStorage storage, MigrationUser user = null)
     {
-        if (!storage.ShouldImport || storage.Files.Count == 0)
+        if (!storage.ShouldImport || storage.Files.Count == 0 && storage.Folders.Count == 0)
         {
             return;
         }
@@ -323,7 +323,7 @@ public abstract class Migrator(
         {
             newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
-                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null);
+                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
         Log(MigrationResource.СreateRootFolder);
         }
         else
@@ -341,7 +341,7 @@ public abstract class Migrator(
             {
                 if (storage.Type == FolderType.BUNCH && !folder.Private)
                 {
-                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null);
+                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
                 }
                 else
                 {
@@ -450,18 +450,27 @@ public abstract class Migrator(
                         {
                             var userForShare = await UserManager.GetUsersAsync(infoUser.Info.Id);
                             await SecurityContext.AuthenticateMeAsync(userForShare.Id);
-                            await EntryManager.MarkAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
+                            await EntryManager.MarkFileAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
                         }
                         else
                         {
-                            var users = UserManager.GetUsers(false, EmployeeStatus.Active,
-                                [[MigrationInfo.Groups[security.Subject].Info.ID]],
-                                [], [], null, null, null, "", null, false, "firstname",
-                                true, 100000, 0).Where(u => u.Id != user.Info.Id);
+                            var filter = new UserQueryFilter
+                            {
+                                EmployeeStatus = EmployeeStatus.Active,
+                                IncludeGroups = [[MigrationInfo.Groups[security.Subject].Info.ID]],
+                                SortType = UserSortType.FirstName,
+                                SortOrderAsc = true,
+                                IncludeStrangers = true,
+                                Limit = 100000,
+                                Offset = 0,
+                                Area = Area.All
+                            };
+                            
+                            var users = UserManager.GetUsers(filter).Where(u => u.Id != user.Info.Id);
                             await foreach (var u in users)
                             {
                                 await SecurityContext.AuthenticateMeAsync(u.Id);
-                                await EntryManager.MarkAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
+                                await EntryManager.MarkFileAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
                             }
                         }
                     }
@@ -483,7 +492,7 @@ public abstract class Migrator(
                             user = MigrationInfo.Users[owner];
                         }
 
-                        if (user.UserType == EmployeeType.Collaborator)
+                        if (user.UserType == EmployeeType.User)
                         {
                             await SecurityContext.AuthenticateMeAsync(_currentUser);
                         }
@@ -491,20 +500,20 @@ public abstract class Migrator(
                         {
                             await SecurityContext.AuthenticateMeAsync(user.Info.Id);
                         }
-                        var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null);
+                        var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
 
                         orderedFolders = storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
                         localMatchingRoomIds.Add(security.EntryId, room);
                         Log(string.Format(MigrationResource.CreateShareRoom, room.Title));
 
-                        if (user.UserType == EmployeeType.Collaborator)
+                        if (user.UserType == EmployeeType.User)
                         {
                             var aceList = new List<AceWrapper>
                             {
                                 new()
                                 {
-                                    Access = Files.Core.Security.FileShare.PowerUser,
+                                    Access = Files.Core.Security.FileShare.ContentCreator,
                                     Id = user.Info.Id
                                 }
                             };

@@ -1653,18 +1653,18 @@ $TrulyYours</value>
   </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
- 
- 
+ 
+ 
 Здравствуйте, $UserName!
- 
+ 
 Вы создали ONLYOFFICE DocSpace, центр управления документами, где вы можете повысить эффективность совместной работы с командой, клиентами и партнерами. Его адрес: "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+ 
 Ваш текущий тарифный план: STARTUP. Он абсолютно бесплатный и включает в себя:
- 
-&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 администраторов/опытных пользователей&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;До 100 комнат&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 Гб дискового пространства&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
- 
+ 
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 администраторов&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;До 100 комнат&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 Гб дискового пространства&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+ 
 *Оцените новый способ совместной работы над документами!*
- 
+ 
 $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
@@ -1760,5 +1760,187 @@ $TrulyYours</value>
   </data>
   <data name="ButtonGetFreeApp" xml:space="preserve">
     <value>Скачайте бесплатное приложение</value>
+  </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Купить сейчас</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Установить пароль</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Срок действия вашей лицензии для ONLYOFFICE DocSpace Developer истекает сегодня.
+
+Мы активировали для вас льготный период на $PaymentDelay‎ дней. В течение этого периода доступ к редактированию документов ограничен до 20 одновременных подключений (поддержка и обновления не предоставляются).
+
+Для обновления лицензии, пожалуйста, свяжитесь с вашим менеджером по продажам или напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+По вопросам оплаты напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}". Для решения технических проблем воспользуйтесь ссылкой: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Срок действия вашей лицензии для ONLYOFFICE DocSpace Developer истекает через 7 дней.
+
+Для обновления лицензии, пожалуйста, свяжитесь с вашим менеджером по продажам или напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+По вопросам оплаты напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}". Для решения технических проблем воспользуйтесь ссылкой: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Льготный период для вашей лицензии ONLYOFFICE DocSpace Developer истекает через 7 дней. Это означает, что DocSpace станет недоступен.
+
+Для обновления лицензии, пожалуйста, свяжитесь с вашим менеджером по продажам или напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+По вопросам оплаты напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}". Для решения технических проблем воспользуйтесь ссылкой: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Срок действия вашей лицензии для ONLYOFFICE DocSpace Developer истекает сегодня. Это означает, что DocSpace станет недоступен.
+
+Для обновления лицензии, пожалуйста, свяжитесь с вашим менеджером по продажам или напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+По вопросам оплаты напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}". Для решения технических проблем воспользуйтесь ссылкой: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Срок действия вашей лицензии для ONLYOFFICE DocSpace Enterprise истекает сегодня.
+
+Мы активировали для вас *льготный период на $PaymentDelay‎ дней*. В течение этого периода доступ к DocSpace предоставляется 3 указанным пользователям* (поддержка и обновления не предоставляются).
+
+Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ONLYOFFICE DocSpace Enterprise (включены 3 года поддержки и обновлений):
+
+$OrangeButton
+
+Вы можете обратиться напрямую к вашему менеджеру по продажам для обновления лицензии.
+
+По вопросам оплаты напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}". Для решения технических проблем воспользуйтесь ссылкой: "${__SupportLink}":"${__SupportLink}".
+
+*Зарегистрированные ID первых трех пользователей, которые откроют любой файл для редактирования. Количество документов, которые могут редактироваться одновременно, не ограничено. Остальные пользователи смогут открывать документы только для просмотра.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Срок действия вашей лицензии для ONLYOFFICE DocSpace Enterprise истекает через 7 дней.
+
+Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ONLYOFFICE DocSpace Enterprise (включены 3 года поддержки и обновлений).
+
+$OrangeButton
+
+Вы можете обратиться напрямую к вашему менеджеру по продажам для обновления лицензии.
+
+По вопросам оплаты напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}". Для решения технических проблем воспользуйтесь ссылкой: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Льготный период для вашей лицензии ONLYOFFICE DocSpace Enterprise истекает через 7 дней. Это означает, что DocSpace станет недоступен.
+
+Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ONLYOFFICE DocSpace Enterprise (включены 3 года поддержки и обновлений):
+
+$OrangeButton
+
+Вы можете обратиться напрямую к вашему менеджеру по продажам для обновления лицензии.
+
+По вопросам оплаты напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}". Для решения технических проблем воспользуйтесь ссылкой: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Льготный период для вашей лицензии ONLYOFFICE DocSpace Enterprise истекает завтра. Это означает, что DocSpace станет недоступен.
+
+Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ONLYOFFICE DocSpace Enterprise (включены 3 года поддержки и обновлений):
+
+$OrangeButton
+
+Вы можете обратиться напрямую к вашему менеджеру по продажам для обновления лицензии. 
+
+По вопросам оплаты напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}". Для решения технических проблем воспользуйтесь ссылкой: "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Срок действия вашей лицензии для ONLYOFFICE DocSpace Enterprise истекает через 7 дней. Это означает, что обновления и поддержка станут недоступны.*
+
+Для обновления лицензии, пожалуйста, свяжитесь с вашим менеджером по продажам или напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+По вопросам оплаты напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}". Для решения технических проблем воспользуйтесь ссылкой: "${__SupportLink}":"${__SupportLink}".
+
+*Вы можете использовать все функциональные возможности, доступные на момент приобретения лицензии, в течение неограниченного периода времени.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Срок действия вашей лицензии для ONLYOFFICE DocSpace Enterprise истекает сегодня. Это означает, что обновления и поддержка станут недоступны.*
+
+Для обновления лицензии, пожалуйста, свяжитесь с вашим менеджером по продажам или напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+По вопросам оплаты напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}". Для решения технических проблем воспользуйтесь ссылкой: "${__SupportLink}":"${__SupportLink}".
+
+*Вы можете использовать все функциональные возможности, доступные на момент приобретения лицензии, в течение неограниченного периода времени.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Здравствуйте! Пожалуйста, установите пароль для вашей учетной записи ONLYOFFICE DocSpace. Просто нажмите кнопку ниже:
+
+$OrangeButton
+
+Ссылка действительна в течение 7 дней.</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Льготный период для вашего ONLYOFFICE DocSpace Developer активирован</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Срок действия вашей лицензии для ONLYOFFICE DocSpace Developer скоро истекает</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Льготный период для вашего ONLYOFFICE DocSpace Developer скоро истекает</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Ваш ONLYOFFICE DocSpace Developer больше не доступен</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Льготный период для вашего ONLYOFFICE DocSpace Enterprise активирован</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Срок действия вашей лицензии для ONLYOFFICE DocSpace Enterprise скоро истекает</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Льготный период для вашего ONLYOFFICE DocSpace Enterprise скоро истекает</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Ваш ONLYOFFICE DocSpace Enterprise больше не доступен</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Срок действия вашей лицензии для ONLYOFFICE DocSpace Enterprise скоро истекает</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Срок действия вашей лицензии для ONLYOFFICE DocSpace Enterprise истекает сегодня</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Установить пароль для ONLYOFFICE DocSpace</value>
   </data>
 </root>

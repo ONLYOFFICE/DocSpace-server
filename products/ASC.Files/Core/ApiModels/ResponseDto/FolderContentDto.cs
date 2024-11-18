@@ -26,60 +26,51 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FolderContentDto<T>
 {
-    /// <summary>List of files</summary>
-    /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of files
+    /// </summary>
     public List<FileEntryDto> Files { get; set; }
 
-    /// <summary>List of folders</summary>
-    /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of folders
+    /// </summary>
     public List<FileEntryDto> Folders { get; set; }
 
-    /// <summary>Current folder information</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core</type>
+    /// <summary>
+    /// Current folder information
+    /// </summary>
     public FolderDto<T> Current { get; set; }
 
-    /// <summary>Folder path</summary>
-    /// <type>System.Object, System</type>
+    /// <summary>
+    /// Folder path
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
     public object PathParts { get; set; }
 
-    /// <summary>Folder start index</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Folder start index
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
     public int StartIndex { get; set; }
 
-    /// <summary>Number of folder elements</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Number of folder elements
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 4)]
     public int Count { get; set; }
 
-    /// <summary>Total number of elements in the folder</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Total number of elements in the folder
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 4)]
     public int Total { get; set; }
 
-    /// <summary>New element index</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// New element index
+    /// </summary>
     public int New { get; set; }
-
-    public static FolderContentDto<int> GetSample()
-    {
-        return new FolderContentDto<int>
-        {
-            Current = FolderDto<int>.GetSample(),
-            //Files = new List<FileEntryDto>(new[] { FileDto<int>.GetSample(), FileDto<int>.GetSample() }),
-            //Folders = new List<FileEntryDto>(new[] { FolderDto<int>.GetSample(), FolderDto<int>.GetSample() }),
-            PathParts = new
-            {
-                key = "Key",
-                path = "//path//to//folder"
-            },
-
-            StartIndex = 0,
-            Count = 4,
-            Total = 4
-        };
-    }
 }
 
 [Scope]
@@ -96,7 +87,9 @@ public class FolderContentDtoHelper(
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension = null)
     {
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, filterType ?? FilterType.None, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension, searchArea ?? SearchArea.Active);
+        var types = filterType.HasValue ? new[] { filterType.Value } : null;
+        
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension, searchArea ?? SearchArea.Active);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -231,7 +224,7 @@ public class FolderContentDtoHelper(
         }
     }
     
-    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, FilterType filterType, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension, SearchArea searchArea)
+    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, IEnumerable<FilterType> filterTypes, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension, SearchArea searchArea)
     {
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
@@ -240,7 +233,7 @@ public class FolderContentDtoHelper(
         }
 
         var startIndex = Convert.ToInt32(apiContext.StartIndex);
-        var items = await fileStorageService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(apiContext.Count), filterType, filterType == FilterType.ByUser, userIdOrGroupId.ToString(), apiContext.FilterValue, extension, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
+        var items = await fileStorageService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(apiContext.Count), filterTypes, filterTypes?.FirstOrDefault() == FilterType.ByUser, userIdOrGroupId.ToString(), apiContext.FilterValue, extension, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
             roomId: roomId, applyFilterOption: applyFilterOption, searchArea: searchArea);
 
         return await GetAsync(folderId, items, startIndex);

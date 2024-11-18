@@ -31,9 +31,7 @@ namespace ASC.Files.Core.Core.History;
 [Scope]
 public class HistoryService(
     IDbContextFactory<MessagesContext> dbContextFactory, 
-    TenantManager tenantManager, 
-    IDaoFactory daoFactory, 
-    FileSecurity fileSecurity, 
+    TenantManager tenantManager,
     AuditInterpreter interpreter)
 {
     public static HashSet<MessageAction> TrackedActions => [
@@ -49,7 +47,10 @@ public class HistoryService(
         MessageAction.FileCopiedWithOverwriting, 
         MessageAction.FileDeleted, 
         MessageAction.FileConverted, 
-        MessageAction.FileRestoreVersion, 
+        MessageAction.FileRestoreVersion,
+        MessageAction.FileIndexChanged,
+        MessageAction.FileLocked,
+        MessageAction.FileUnlocked,
         MessageAction.FolderCreated,
         MessageAction.FolderRenamed,
         MessageAction.FolderMoved,
@@ -58,6 +59,8 @@ public class HistoryService(
         MessageAction.FolderCopiedWithOverwriting,
         MessageAction.FolderMovedToTrash,
         MessageAction.FolderDeleted,
+        MessageAction.FolderIndexChanged,
+        MessageAction.FolderIndexReordered,
         MessageAction.RoomCreateUser,
         MessageAction.RoomUpdateAccessForUser,
         MessageAction.RoomRemoveUser,
@@ -76,50 +79,79 @@ public class HistoryService(
         MessageAction.RoomExternalLinkDeleted,
         MessageAction.RoomExternalLinkRevoked,
         MessageAction.FormSubmit,
-        MessageAction.FormOpenedForFilling
+        MessageAction.FormOpenedForFilling,
+        MessageAction.RoomIndexingEnabled,
+        MessageAction.RoomIndexingDisabled,
+        MessageAction.RoomLifeTimeSet,
+        MessageAction.RoomLifeTimeDisabled,
+        MessageAction.RoomArchived,
+        MessageAction.RoomUnarchived,
+        MessageAction.RoomDenyDownloadEnabled,
+        MessageAction.RoomDenyDownloadDisabled,
+        MessageAction.RoomWatermarkSet,
+        MessageAction.RoomWatermarkDisabled,
+        MessageAction.RoomColorChanged,
+        MessageAction.RoomCoverChanged,
+        MessageAction.RoomIndexExportSaved,
+        MessageAction.RoomInviteResend
+    ];
+
+    private static HashSet<int> FilterFolderActions => [
+        (int)MessageAction.FolderCreated,
+        (int)MessageAction.FolderMovedWithOverwriting,
+        (int)MessageAction.FolderMovedToTrash,
+        (int)MessageAction.FolderRenamed
+    ];
+
+    private static HashSet<int> FilterFileActions => [
+        (int)MessageAction.FileCopied,
+        (int)MessageAction.FileUploaded,
+        (int)MessageAction.FileMoved,
+        (int)MessageAction.FileRenamed,
+        (int)MessageAction.FormSubmit,
+        (int)MessageAction.FormOpenedForFilling
     ];
     
-    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count)
+    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(
+        FileEntry<int> entry,
+        int offset,
+        int count,
+        bool needFiltering,
+        List<int> filterFolderIds,
+        List<int> filterFilesIds,
+        DateTime? fromDate,
+        DateTime? toDate)
     {
-        FileEntry<int> entry = entryType switch
-        {
-            FileEntryType.File => await daoFactory.GetFileDao<int>().GetFileAsync(entryId),
-            FileEntryType.Folder => await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId),
-            _ => throw new ArgumentOutOfRangeException(nameof(entryType), entryType, null)
-        };
-        
-        if (entry == null)
-        {
-            throw new ItemNotFoundException(entryType == FileEntryType.File 
-                ? FilesCommonResource.ErrorMessage_FileNotFound 
-                : FilesCommonResource.ErrorMessage_FolderNotFound
-                );
-        }
-
-        if (!await fileSecurity.CanReadAsync(entry))
-        {
-            throw new SecurityException(entryType == FileEntryType.File 
-                ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile 
-                : FilesCommonResource.ErrorMessage_SecurityException_ReadFolder
-                );
-        }
-        
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        var events = messageDbContext.GetAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count);
+        var events = needFiltering 
+            ? messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate) 
+            : messageDbContext.GetAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, fromDate, toDate);
 
-        await foreach (var hEntry in events.SelectAwait(interpreter.ToHistoryAsync).Where(x => x != null))
+        await foreach (var hEntry in events.SelectAwait(e => interpreter.ToHistoryAsync(e, entry)).Where(x => x != null))
         {
             yield return hEntry;
         }
     }
 
-    public async Task<int> GetHistoryCountAsync(int entryId, FileEntryType entryType)
+    public async Task<int> GetHistoryCountAsync(
+        int entryId,
+        FileEntryType entryType,
+        bool needFiltering,
+        List<int> filterFolderIds,
+        List<int> filterFilesIds,
+        DateTime? fromDate,
+        DateTime? toDate)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType);
+        if (needFiltering)
+        {
+            return await messageDbContext.GetFilteredAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate);
+        }
+        
+        return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, fromDate, toDate);
     }
 }

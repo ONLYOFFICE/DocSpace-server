@@ -26,106 +26,135 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FolderDto<T> : FileEntryDto<T>
 {
-    /// <summary>Parent folder ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Parent folder ID
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 10)]
     public T ParentId { get; set; }
 
-    /// <summary>Number of files</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Number of files
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 5)]
     public int FilesCount { get; set; }
 
-    /// <summary>Number of folders</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Number of folders
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 7)]
     public int FoldersCount { get; set; }
 
-    /// <summary>Specifies if a folder is shareable or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if a folder is shareable or not
+    /// </summary>
     public bool? IsShareable { get; set; }
 
-    /// <summary>Specifies if a folder is favorite or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if a folder is favorite or not
+    /// </summary>
     public bool? IsFavorite { get; set; }
 
-    /// <summary>Number for a new folder</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Number for a new folder
+    /// </summary>
     public int New { get; set; }
 
-    /// <summary>Specifies if a folder is muted or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if a folder is muted or not
+    /// </summary>
     public bool Mute { get; set; }
 
-    /// <summary>List of tags</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of tags
+    /// </summary>
     public IEnumerable<string> Tags { get; set; }
 
-    /// <summary>Logo</summary>
-    /// <type>ASC.Files.Core.VirtualRooms.Logo, ASC.Files.Core</type>
+    /// <summary>
+    /// Logo
+    /// </summary>
     public Logo Logo { get; set; }
 
-    /// <summary>Specifies if a folder is pinned or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if a folder is pinned or not
+    /// </summary>
     public bool Pinned { get; set; }
 
-    /// <summary>Room type</summary>
-    /// <type>System.Nullable{ASC.Files.Core.ApiModels.RequestDto.RoomType}, System</type>
+    /// <summary>
+    /// Room type
+    /// </summary>
     public RoomType? RoomType { get; set; }
 
-    /// <summary>Specifies if a folder is private or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if a folder is private or not
+    /// </summary>
     public bool Private { get; set; }
+
+    /// <summary>
+    /// Indexing
+    /// </summary>
     public bool Indexing { get; set; }
+
+    /// <summary>
+    /// Deny download
+    /// </summary>
     public bool DenyDownload { get; set; }
 
-    /// <summary>Room data lifetime settings</summary>
-    /// <type>ASC.Files.Core.ApiModels.RoomDataLifetimeDto, ASC.Files.Core</type>
+    /// <summary>
+    /// Room data lifetime settings
+    /// </summary>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
+    /// <summary>
+    /// Watermark settings
+    /// </summary>
     public WatermarkDto Watermark { get; set; }
-    
-    /// <summary>Folder type</summary>
-    /// <type>System.Nullable{ASC.Files.Core.FolderType}, System</type>
+
+    /// <summary>
+    /// Folder type
+    /// </summary>
     public FolderType? Type { get; set; }
 
+    /// <summary>
+    /// InRoom
+    /// </summary>
     public bool? InRoom { get; set; }
 
-    /// <summary>Quota</summary>
-    /// <type>System.Nullable{System.Int64}, System</type>
+    /// <summary>
+    /// Quota
+    /// </summary>
     public long? QuotaLimit { get; set; }
 
-    /// <summary>Specifies if the room has a custom quota or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if the room has a custom quota or not
+    /// </summary>
     public bool? IsCustomQuota { get; set; }
 
-    /// <summary>Counter</summary>
-    /// <type>System.Nullable{System.Int64}, System</type>
+    /// <summary>
+    /// Counter
+    /// </summary>
     public long? UsedSpace { get; set; }
 
-    public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
+    /// <summary>
+    /// Specifies if the link external
+    /// </summary>
+    public bool? External { get; set; }
 
-    public static FolderDto<int> GetSample()
-    {
-        return new FolderDto<int>
-        {
-            Access = FileShare.ReadWrite,
-            //Updated = ApiDateTime.GetSample(),
-            //Created = ApiDateTime.GetSample(),
-            //CreatedBy = EmployeeWraper.GetSample(),
-            Id = 10,
-            RootFolderType = FolderType.BUNCH,
-            Shared = false,
-            Title = "Some titile",
-            //UpdatedBy = EmployeeWraper.GetSample(),
-            FilesCount = 5,
-            FoldersCount = 7,
-            ParentId = 10,
-            IsShareable = null,
-            IsFavorite = null
-        };
-    }
+    /// <summary>
+    /// Specifies if the password protected
+    /// </summary>
+    public bool? PasswordProtected { get; set; }
+
+    /// <summary>
+    /// Expired
+    /// </summary>
+    public bool? Expired { get; set; }
+
+    /// <summary>
+    /// File entry type
+    /// </summary>
+    public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
 }
 
 [Scope]
@@ -143,12 +172,11 @@ public class FolderDtoHelper(
     FilesSettingsHelper filesSettingsHelper,
     FileDateTime fileDateTime,
     SettingsManager settingsManager,
-    CoreBaseSettings coreBaseSettings,
     BreadCrumbsManager breadCrumbsManager,
     TenantManager tenantManager,
-    WatermarkManager watermarkManager,
     WatermarkDtoHelper watermarkHelper,
-    IMapper mapper)
+    IMapper mapper,
+    ExternalShare externalShare)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
@@ -200,9 +228,7 @@ public class FolderDtoHelper(
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
-            if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 
-                    ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate) || 
-                     (result.RootFolderType is FolderType.Archive or FolderType.TRASH && (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete))))
+            if ((await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
             {
                 var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
                 result.UsedSpace = folder.Counter;
@@ -214,8 +240,18 @@ public class FolderDtoHelper(
                 }
             }
             
-            var watermarkSettings = await watermarkManager.GetWatermarkAsync(folder);
-            result.Watermark = watermarkHelper.Get(watermarkSettings);
+            result.Watermark = watermarkHelper.Get(folder.SettingsWatermark);
+
+            if (folder.ShareRecord is { IsLink: true })
+            {
+                result.External = true;
+                result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
+                                           folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
+                                           !canRead;
+
+                result.Expired = folder.ShareRecord.Options?.IsExpired;
+                result.RequestToken = await externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
+            }
         }
 
         if (folder.Order != 0)
@@ -269,8 +305,12 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        result.FilesCount = folder.FilesCount;
-        result.FoldersCount = folder.FoldersCount;
+        if (folder.FolderType != FolderType.VirtualRooms)
+        {
+            result.FilesCount = folder.FilesCount;
+            result.FoldersCount = folder.FoldersCount;
+        }
+
         result.IsShareable = folder.Shareable.NullIfDefault();
         result.IsFavorite = folder.IsFavorite.NullIfDefault();
         result.New = newBadges;

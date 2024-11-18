@@ -27,33 +27,33 @@
 namespace ASC.ElasticSearch.Log;
 internal static partial class FactoryIndexerLogger
 {
-    [LoggerMessage(Level = LogLevel.Critical, Message = "IndexAll")]
+    [LoggerMessage(LogLevel.Critical, "IndexAll")]
     public static partial void CriticalIndexAll(this ILogger logger, Exception exception); 
     
-    [LoggerMessage(Level = LogLevel.Debug, Message = "CheckState ping {debugInfo}")]
+    [LoggerMessage(LogLevel.Debug, "CheckState ping {debugInfo}")]
     public static partial void DebugCheckStatePing(this ILogger logger, string debugInfo); 
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "Select")]
+    [LoggerMessage(LogLevel.Error, "Select")]
     public static partial void ErrorSelect(this ILogger logger, Exception exception); 
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "Index")]
+    [LoggerMessage(LogLevel.Error, "Index")]
     public static partial void ErrorIndex(this ILogger logger, Exception exception);  
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "inner")]
+    [LoggerMessage(LogLevel.Error, "inner")]
     public static partial void ErrorInner(this ILogger logger, Exception exception);  
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "Update")]
+    [LoggerMessage(LogLevel.Error, "Update")]
     public static partial void ErrorUpdate(this ILogger logger, Exception exception);  
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "Delete")]
+    [LoggerMessage(LogLevel.Error, "Delete")]
     public static partial void ErrorDelete(this ILogger logger, Exception exception);    
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "FactoryIndexer CheckState")]
+    [LoggerMessage(LogLevel.Error, "FactoryIndexer CheckState")]
     public static partial void ErrorFactoryIndexerCheckState(this ILogger logger, Exception exception);
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "Queue")]
+    [LoggerMessage(LogLevel.Error, "Queue")]
     public static partial void ErrorQueue(this ILogger logger, Exception exception);  
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "Ping false")]
+    [LoggerMessage(LogLevel.Error, "Ping false")]
     public static partial void ErrorPingFalse(this ILogger logger, Exception exception); 
 }

@@ -24,105 +24,311 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// Member request parameters
 /// </summary>
-public class MemberRequestDto
+public class EmailMemberRequestDto
 {
-    /// <summary>Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)</summary>
-    /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
-    public EmployeeType Type { get; set; }
-
-    /// <summary>Specifies if this is a guest or a user</summary>
-    /// <type>System.Boolean, System</type>
-    public bool? IsUser { get; set; }
-
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
-    [StringLength(255)]
+    /// <summary>
+    /// Email
+    /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
-
-    /// <summary>First name</summary>
-    /// <type>System.String, System</type>
-    public string Firstname { get; set; }
-
-    /// <summary>Last name</summary>
-    /// <type>System.String, System</type>
-    public string Lastname { get; set; }
-
-    /// <summary>List of user departments</summary>
-    /// <type>System.Guid[], System</type>
-    public Guid[] Department { get; set; }
-
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
-
-    /// <summary>Location</summary>
-    /// <type>System.String, System</type>
-    public string Location { get; set; }
-
-    /// <summary>Sex (male or female)</summary>
-    /// <type>System.String, System</type>
-    public string Sex { get; set; }
-
-    /// <summary>Birthday</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
-    public ApiDateTime Birthday { get; set; }
-
-    /// <summary>Registration date (if it is not specified, then the current date will be set)</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
-    public ApiDateTime Worksfrom { get; set; }
-
-    /// <summary>Comment</summary>
-    /// <type>System.String, System</type>
-    public string Comment { get; set; }
-
-    /// <summary>List of user contacts</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Web.Api.Models.Contact}, System.Collections.Generic</type>
-    public IEnumerable<Contact> Contacts { get; set; }
-
-    /// <summary>Avatar photo URL</summary>
-    /// <type>System.String, System</type>
-    public string Files { get; set; }
-
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
-    public string Password { get; set; }
-
-    /// <summary>Password hash</summary>
-    /// <type>System.String, System</type>
-    public string PasswordHash { get; set; }
-
-    /// <summary>Specifies if the user is added via the invitation link or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool FromInviteLink { get; set; }
-
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
-    public string Key { get; set; }
-
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
-    public string CultureName { get; set; }
-
-    /// <summary>Target</summary>
-    /// <type>System.Guid, System</type>
-    public Guid Target { get; set; }
 }
 
 /// <summary>
+/// Request parameters for setting new password
+/// </summary>
+public class MemberBaseRequestDto : EmailMemberRequestDto
+{
+    /// <summary>
+    /// Password
+    /// </summary>
+    public string Password { get; set; }
+
+    /// <summary>
+    /// Password hash
+    /// </summary>
+    public string PasswordHash { get; set; }
+}
+
+/// <summary>
+/// Request parameters for setting new password
+/// </summary>
+public class MemberBaseByIdRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public Guid UserId { get; set; }
+
+    /// <summary>
+    /// Member base
+    /// </summary>
+    [FromBody]
+    public MemberBaseRequestDto MemberBase { get; set; }
+}
+
+/// <summary>
+/// Member request parameters
+/// </summary>
+public class MemberRequestDto : MemberBaseRequestDto
+{
+    /// <summary>
+    /// Employee type
+    /// </summary>
+    public EmployeeType Type { get; set; }
+
+    /// <summary>
+    /// Specifies if this is a guest or a user
+    /// </summary>
+    public bool? IsUser { get; set; }
+
+    /// <summary>
+    /// First name
+    /// </summary>
+    [StringLength(255)]
+    public string FirstName { get; set; }
+
+    /// <summary>
+    /// Last name
+    /// </summary>
+    [StringLength(255)]
+    public string LastName { get; set; }
+
+    /// <summary>
+    /// List of user departments
+    /// </summary>
+    public Guid[] Department { get; set; }
+
+    /// <summary>
+    /// Title
+    /// </summary>
+    [StringLength(255)]
+    public string Title { get; set; }
+
+    /// <summary>
+    /// Location
+    /// </summary>
+    public string Location { get; set; }
+
+    /// <summary>
+    /// Sex (male or female)
+    /// </summary>
+    public SexEnum? Sex { get; set; }
+
+    /// <summary>
+    /// Birthday
+    /// </summary>
+    public ApiDateTime Birthday { get; set; }
+
+    /// <summary>
+    /// Registration date (if it is not specified, then the current date will be set)
+    /// </summary>
+    public ApiDateTime Worksfrom { get; set; }
+
+    /// <summary>
+    /// Comment
+    /// </summary>
+    public string Comment { get; set; }
+
+    /// <summary>
+    /// List of user contacts
+    /// </summary>
+    public IEnumerable<Contact> Contacts { get; set; }
+
+    /// <summary>
+    /// Avatar photo URL
+    /// </summary>
+    public string Files { get; set; }
+
+    /// <summary>
+    /// Specifies if the user is added via the invitation link or not
+    /// </summary>
+    public bool FromInviteLink { get; set; }
+
+    /// <summary>
+    /// Key
+    /// </summary>
+    public string Key { get; set; }
+
+    /// <summary>
+    /// Language
+    /// </summary>
+    public string CultureName { get; set; }
+
+    /// <summary>
+    /// Target
+    /// </summary>
+    public Guid Target { get; set; }
+
+    /// <summary>Spam</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? Spam { get; set; }
+}
+
+/// <summary>
+/// Request parameters for updating user information
 /// </summary>
 public class UpdateMemberRequestDto : MemberRequestDto
 {
-    /// <summary>User ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// User ID
+    /// </summary>
     public string UserId { get; set; }
 
-    /// <summary>Specifies whether to disable a user or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies whether to disable a user or not
+    /// </summary>
     public bool? Disable { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class UpdateMemberByIdRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public string UserId { get; set; }
+
+    /// <summary>
+    /// Update member
+    /// </summary>
+    [FromBody]
+    public UpdateMemberRequestDto UpdateMember { get; set; }
+}
+
+public enum SexEnum
+{
+    [SwaggerEnum("Female")]
+    Female = 0,
+
+    [SwaggerEnum("Male")]
+    Male = 1,
+}
+
+/// <summary>
+/// Request parameters for updating user photo
+/// </summary>
+public class UpdatePhotoMemberRequest
+{
+    /// <summary>
+    /// Avatar photo URL
+    /// </summary>
+    public string Files { get; set; }
+}
+
+/// <summary>
+/// Request parameters for updating user photo
+/// </summary>
+public class UpdatePhotoMemberRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public string UserId { get; set; }
+
+    /// <summary>
+    /// Update photo
+    /// </summary>
+    [FromBody]
+    public UpdatePhotoMemberRequest UpdatePhoto { get; set; }
+}
+
+
+/// <summary>
+/// 
+/// </summary>
+public class GetMemberByIdRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public string UserId { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class GetMemberByEmailRequestDto
+{
+    /// <summary>
+    /// User email address
+    /// </summary>
+    [FromQuery(Name = "email")]
+    [EmailAddress]
+    public string Email { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class GetMemberByQueryRequestDto
+{
+    /// <summary>
+    /// Search query
+    /// </summary>
+    [FromRoute(Name = "query")]
+    public string Query { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class GetPeopleByQueryRequestDto
+{
+    /// <summary>
+    /// Search query
+    /// </summary>
+    [FromQuery(Name = "query")]
+    public string Query { get; set; }
+}
+
+/// <summary>
+/// Request parameters for updating user contacts
+/// </summary>
+public class UpdateMemberSimpleRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    public string UserId { get; set; }
+}
+
+/// <summary>
+/// Parameters for updating user contacts
+/// </summary>
+public class ContactsRequest
+{
+    /// <summary>
+    /// List of user contacts
+    /// </summary>
+    public IEnumerable<Contact> Contacts { get; set; }
+}
+
+
+/// <summary>
+/// Request parameters for updating user contacts
+/// </summary>
+public class ContactsRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public string UserId { get; set; }
+
+    /// <summary>
+    /// Contacts
+    /// </summary>
+    [FromBody]
+    public ContactsRequest Contacts { get; set; }
 }

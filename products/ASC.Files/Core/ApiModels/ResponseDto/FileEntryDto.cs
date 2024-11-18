@@ -36,72 +36,88 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public partial class FileEntryDtoContext : JsonSerializerContext;
 
 
-/// <summary>
-/// </summary>
 [JsonDerivedType(typeof(FileDto<int>))]
 [JsonDerivedType(typeof(FileDto<string>))]
 [JsonDerivedType(typeof(FolderDto<int>))]
 [JsonDerivedType(typeof(FolderDto<string>))]
 public abstract class FileEntryDto
 {
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Title
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Some titile.txt/ Some title")]
     public string Title { get; set; }
 
-    /// <summary>Access rights</summary>
-    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
+    /// <summary>
+    /// Access rights
+    /// </summary>
     public FileShare Access { get; set; }
 
-    /// <summary>Specifies if the file is shared or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the file is shared or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool Shared { get; set; }
 
-    /// <summary>Creation time</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    /// <summary>
+    /// Creation time
+    /// </summary>
     public ApiDateTime Created { get; set; }
 
-    /// <summary>Author</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    /// <summary>
+    /// Author
+    /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
     private ApiDateTime _updated;
 
-    /// <summary>Time of the last file update</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    /// <summary>
+    /// Time of the last file update
+    /// </summary>
     public ApiDateTime Updated
     {
         get => _updated < Created ? Created : _updated;
         set => _updated = value;
     }
 
-    /// <summary>Time when the file will be automatically deleted</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    /// <summary>
+    /// Time when the file will be automatically deleted
+    /// </summary>
     public ApiDateTime AutoDelete { get; set; }
 
-    /// <summary>Root folder type</summary>
-    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    /// <summary>
+    /// Root folder type
+    /// </summary>
     public FolderType RootFolderType { get; set; }
 
-    /// <summary>First parent folder type</summary>
-    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    /// <summary>
+    /// First parent folder type
+    /// </summary>
     public FolderType? ParentRoomType { get; set; }
 
-    /// <summary>A user who updated a file</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    /// <summary>
+    /// A user who updated a file
+    /// </summary>
     public EmployeeDto UpdatedBy { get; set; }
 
-    /// <summary>Provider is specified or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Provider is specified or not
+    /// </summary>
     public bool? ProviderItem { get; set; }
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Provider key
+    /// </summary>
     public string ProviderKey { get; set; }
 
-    /// <summary>Provider ID</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    /// <summary>
+    /// Provider ID
+    /// </summary>
     public int? ProviderId { get; set; }
 
+    /// <summary>
+    /// Order
+    /// </summary>
     public string Order { get; set; }
     
     public abstract FileEntryType FileEntryType { get; }
@@ -123,18 +139,49 @@ public abstract class FileEntryDto
 
 public abstract class FileEntryDto<T> : FileEntryDto
 {
+    /// <summary>
+    /// Id
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 10)]
     public T Id { get; set; }
+
+    /// <summary>
+    /// Root folder id
+    /// </summary>
     public T RootFolderId { get; set; }
 
+    /// <summary>
+    /// Origin id
+    /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
+    /// <summary>
+    /// Origin room id
+    /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
+
+    /// <summary>
+    /// Origin title
+    /// </summary>
     public string OriginTitle { get; set; }
+
+    /// <summary>
+    /// Origin room title
+    /// </summary>
     public string OriginRoomTitle { get; set; }
+
+    /// <summary>
+    /// Can share
+    /// </summary>
     public bool CanShare { get; set; }
+
+    /// <summary>
+    /// Security
+    /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
+    public string RequestToken { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)

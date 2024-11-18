@@ -27,39 +27,39 @@
 namespace ASC.Web.Core.Log;
 internal static partial class StudioPeriodicNotifyLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "SendSaasLettersAsync")]
+    [LoggerMessage(LogLevel.Error, "SendSaasLettersAsync")]
     public static partial void ErrorSendSaasLettersAsync(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "SendEnterpriseLetters")]
+    [LoggerMessage(LogLevel.Error, "SendEnterpriseLetters")]
     public static partial void ErrorSendEnterpriseLetters(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "SendOpensourceLetters")]
+    [LoggerMessage(LogLevel.Error, "SendOpensourceLetters")]
     public static partial void ErrorSendOpensourceLetters(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "SendMsgWhatsNew")]
+    [LoggerMessage(LogLevel.Error, "SendMsgWhatsNew")]
     public static partial void ErrorSendMsgWhatsNew(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Start SendSaasTariffLetters")]
+    [LoggerMessage(LogLevel.Information, "Start SendSaasTariffLetters")]
     public static partial void InformationStartSendSaasTariffLetters(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "End SendSaasTariffLetters")]
+    [LoggerMessage(LogLevel.Information, "End SendSaasTariffLetters")]
     public static partial void InformationEndSendSaasTariffLetters(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Start SendTariffEnterpriseLetters")]
+    [LoggerMessage(LogLevel.Information, "Start SendTariffEnterpriseLetters")]
     public static partial void InformationStartSendTariffEnterpriseLetters(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "End SendTariffEnterpriseLetters")]
+    [LoggerMessage(LogLevel.Information, "End SendTariffEnterpriseLetters")]
     public static partial void InformationEndSendTariffEnterpriseLetters(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Start SendOpensourceTariffLetters")]
+    [LoggerMessage(LogLevel.Information, "Start SendOpensourceTariffLetters")]
     public static partial void InformationStartSendOpensourceTariffLetters(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "End SendOpensourceTariffLetters")]
+    [LoggerMessage(LogLevel.Information, "End SendOpensourceTariffLetters")]
     public static partial void InformationEndSendOpensourceTariffLetters(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Current tenant: {tenantId}")]
+    [LoggerMessage(LogLevel.Information, "Current tenant: {tenantId}")]
     public static partial void InformationCurrentTenant(this ILogger logger, int tenantId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Total send count: {sendCount}")]
+    [LoggerMessage(LogLevel.Information, "Total send count: {sendCount}")]
     public static partial void InformationTotalSendCount(this ILogger logger, int sendCount);
 }

@@ -29,6 +29,7 @@ namespace ASC.ApiSystem.Controllers;
 [Scope]
 [ApiController]
 [Route("[controller]")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class CalDavController(CommonMethods commonMethods,
         EmailValidationKeyProvider emailValidationKeyProvider,
         CoreSettings coreSettings,
@@ -40,6 +41,11 @@ public class CalDavController(CommonMethods commonMethods,
 {
     #region For TEST api
 
+    /// <summary>
+    /// Test api
+    /// </summary>
+    /// <path>apisystem/caldav/test</path>
+    [SwaggerResponse(200, "CalDav api works")]
     [HttpGet("test")]
     public IActionResult Check()
     {
@@ -53,6 +59,12 @@ public class CalDavController(CommonMethods commonMethods,
 
     #region API methods
 
+    /// <summary>
+    /// Changes to storage
+    /// </summary>
+    /// <path>apisystem/caldav/change_to_storage</path>
+    [Tags("CalDav")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpGet("change_to_storage")]
     public async Task<IActionResult> СhangeOfCalendarStorageAsync(string change)
     {
@@ -83,6 +95,12 @@ public class CalDavController(CommonMethods commonMethods,
         return Ok();
     }
 
+    /// <summary>
+    /// Delete
+    /// </summary>
+    /// <path>apisystem/caldav/caldav_delete_event</path>
+    [Tags("CalDav")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpGet("caldav_delete_event")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<IActionResult> CaldavDeleteEventAsync(string eventInfo)
@@ -114,6 +132,12 @@ public class CalDavController(CommonMethods commonMethods,
         return Ok();
     }
 
+    /// <summary>
+    /// Caldav authenticated
+    /// </summary>
+    /// <path>apisystem/caldav/is_caldav_authenticated</path>
+    [Tags("CalDav")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("is_caldav_authenticated")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<IActionResult> IsCaldavAuthenticatedAsync(UserPassword userPassword)

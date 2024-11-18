@@ -27,133 +27,133 @@
 namespace ASC.ActiveDirectory.Log;
 internal static partial class LdapOperationJobLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "Can't save default LDAP settings.")]
+    [LoggerMessage(LogLevel.Error, "Can't save default LDAP settings.")]
     public static partial void ErrorSaveDefaultLdapSettings(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Start '{operationtype}' operation")]
+    [LoggerMessage(LogLevel.Information, "Start '{operationtype}' operation")]
     public static partial void InfoStartOperation(this ILogger<LdapOperationJob> logger, string operationtype);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "PrepareSettings()")]
+    [LoggerMessage(LogLevel.Debug, "PrepareSettings()")]
     public static partial void DebugPrepareSettings(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "PrepareSettings() Error: {error}")]
+    [LoggerMessage(LogLevel.Debug, "PrepareSettings() Error: {error}")]
     public static partial void DebugPrepareSettingsError(this ILogger<LdapOperationJob> logger, string error);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "ldapSettingsChecker.CheckSettings() Error: {error}")]
+    [LoggerMessage(LogLevel.Debug, "ldapSettingsChecker.CheckSettings() Error: {error}")]
     public static partial void DebugCheckSettingsError(this ILogger<LdapOperationJob> logger, string error);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "{error}")]
+    [LoggerMessage(LogLevel.Error, "{error}")]
     public static partial void ErrorAuthorizing(this ILogger<LdapOperationJob> logger, string error, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "TenantQuotaException")]
+    [LoggerMessage(LogLevel.Error, "TenantQuotaException")]
     public static partial void ErrorTenantQuota(this ILogger<LdapOperationJob> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "FormatException")]
+    [LoggerMessage(LogLevel.Error, "FormatException")]
     public static partial void ErrorFormatException(this ILogger<LdapOperationJob> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Internal server error")]
+    [LoggerMessage(LogLevel.Error, "Internal server error")]
     public static partial void ErrorInternal(this ILogger<LdapOperationJob> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "LdapOperation finalization problem")]
+    [LoggerMessage(LogLevel.Error, "LdapOperation finalization problem")]
     public static partial void ErrorLdapOperationFinalizationlProblem(this ILogger<LdapOperationJob> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Can't save LDAP settings.")]
+    [LoggerMessage(LogLevel.Error, "Can't save LDAP settings.")]
     public static partial void ErrorSaveLdapSettings(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "{setting}")]
+    [LoggerMessage(LogLevel.Debug, "{setting}")]
     public static partial void DebugLdapSettings(this ILogger<LdapOperationJob> logger, string setting);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "TurnOffLDAP()")]
+    [LoggerMessage(LogLevel.Debug, "TurnOffLDAP()")]
     public static partial void DebugTurnOffLDAP(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "CheckSettings(acceptCertificate={acceptCertificate}, cert thumbprint: {acceptCertificatehash})")]
+    [LoggerMessage(LogLevel.Error, "CheckSettings(acceptCertificate={acceptCertificate}, cert thumbprint: {acceptCertificatehash})")]
     public static partial void ErrorCheckSettings(this ILogger<LdapOperationJob> logger, bool acceptCertificate, string acceptCertificatehash, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "CoreContext.UserManager.SaveUserInfo({userInfo})")]
+    [LoggerMessage(LogLevel.Debug, "CoreContext.UserManager.SaveUserInfo({userInfo})")]
     public static partial void DebugSaveUserInfo(this ILogger<LdapOperationJob> logger, string userInfo);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "SyncLDAPUsers()")]
+    [LoggerMessage(LogLevel.Debug, "SyncLDAPUsers()")]
     public static partial void DebugSyncLDAPUsers(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "SyncLDAPUsersInGroups()")]
+    [LoggerMessage(LogLevel.Debug, "SyncLDAPUsersInGroups()")]
     public static partial void DebugSyncLDAPUsersInGroups(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "SyncLdapAvatar() Removing photo for '{guid}'")]
+    [LoggerMessage(LogLevel.Information, "SyncLdapAvatar() Removing photo for '{guid}'")]
     public static partial void InfoSyncLdapAvatarsRemovingPhoto(this ILogger<LdapOperationJob> logger, Guid guid);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "SyncLdapAvatar() Found photo for '{sid}'")]
+    [LoggerMessage(LogLevel.Debug, "SyncLdapAvatar() Found photo for '{sid}'")]
     public static partial void DebugSyncLdapAvatarsFoundPhoto(this ILogger<LdapOperationJob> logger, string sid);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "SyncLdapAvatar() Same hash, skipping.")]
+    [LoggerMessage(LogLevel.Debug, "SyncLdapAvatar() Same hash, skipping.")]
     public static partial void DebugSyncLdapAvatarsSkipping(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "SyncLdapAvatar() Couldn't save photo for '{guid}'")]
+    [LoggerMessage(LogLevel.Debug, "SyncLdapAvatar() Couldn't save photo for '{guid}'")]
     public static partial void DebugSyncLdapAvatarsCouldNotSavePhoto(this ILogger<LdapOperationJob> logger, Guid guid);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "TakeUsersRights() CurrentAccessRights is empty, skipping")]
+    [LoggerMessage(LogLevel.Debug, "TakeUsersRights() CurrentAccessRights is empty, skipping")]
     public static partial void DebugAccessRightsIsEmpty(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "TakeUsersRights() Attempting to take admin rights from yourself `{user}`, skipping")]
+    [LoggerMessage(LogLevel.Debug, "TakeUsersRights() Attempting to take admin rights from yourself `{user}`, skipping")]
     public static partial void DebugAttemptingTakeAdminRights(this ILogger<LdapOperationJob> logger, string user);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "TakeUsersRights() Taking admin rights ({accessRight}) from '{user}'")]
+    [LoggerMessage(LogLevel.Debug, "TakeUsersRights() Taking admin rights ({accessRight}) from '{user}'")]
     public static partial void DebugTakingAdminRights(this ILogger<LdapOperationJob> logger, LdapSettings.AccessRight accessRight, string user);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "GiveUsersRights() No ldap groups found for ({accessRight}) access rights, skipping")]
+    [LoggerMessage(LogLevel.Debug, "GiveUsersRights() No ldap groups found for ({accessRight}) access rights, skipping")]
     public static partial void DebugGiveUsersRightsNoLdapGroups(this ILogger<LdapOperationJob> logger, LdapSettings.AccessRight accessRight);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "GiveUsersRights() Couldn't find portal group for '{sid}'")]
+    [LoggerMessage(LogLevel.Debug, "GiveUsersRights() Couldn't find portal group for '{sid}'")]
     public static partial void DebugGiveUsersRightsCouldNotFindPortalGroup(this ILogger<LdapOperationJob> logger, string sid);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "GiveUsersRights() Found '{countUsers}' users for group '{groupName}' ({groupId})")]
+    [LoggerMessage(LogLevel.Debug, "GiveUsersRights() Found '{countUsers}' users for group '{groupName}' ({groupId})")]
     public static partial void DebugGiveUsersRightsFoundUsersForGroup(this ILogger<LdapOperationJob> logger, int countUsers,string groupName, Guid groupId);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "GiveUsersRights() Cleared manually added user rights for '{userName}'")]
+    [LoggerMessage(LogLevel.Debug, "GiveUsersRights() Cleared manually added user rights for '{userName}'")]
     public static partial void DebugGiveUsersRightsClearedAndAddedRights(this ILogger<LdapOperationJob> logger, string userName);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Importer.GetDiscoveredUsersByAttributes() Success: Users count: {countUsers}")]
+    [LoggerMessage(LogLevel.Debug, "Importer.GetDiscoveredUsersByAttributes() Success: Users count: {countUsers}")]
     public static partial void DebugGetDiscoveredUsersByAttributes(this ILogger<LdapOperationJob> logger, int countUsers);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Importer.GetDiscoveredGroupsByAttributes() Success: Groups count: {countGroups}")]
+    [LoggerMessage(LogLevel.Debug, "Importer.GetDiscoveredGroupsByAttributes() Success: Groups count: {countGroups}")]
     public static partial void DebugGetDiscoveredGroupsByAttributes(this ILogger<LdapOperationJob> logger, int countGroups);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "GetGroupsUsers() Success: Users count: {countUsers}")]
+    [LoggerMessage(LogLevel.Debug, "GetGroupsUsers() Success: Users count: {countUsers}")]
     public static partial void DebugGetGroupsUsers(this ILogger<LdapOperationJob> logger, int countUsers);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "RemoveOldDbUsers() Attempting to exclude yourself `{id}` from group or user filters, skipping.")]
+    [LoggerMessage(LogLevel.Debug, "RemoveOldDbUsers() Attempting to exclude yourself `{id}` from group or user filters, skipping.")]
     public static partial void DebugRemoveOldDbUsersAttemptingExcludeYourself(this ILogger<LdapOperationJob> logger, Guid id);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Progress: {percentage}% {status} {source}")]
+    [LoggerMessage(LogLevel.Information, "Progress: {percentage}% {status} {source}")]
     public static partial void InfoProgress(this ILogger<LdapOperationJob> logger,double percentage, string status, string source);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Wrong LDAP settings were received from client.")]
+    [LoggerMessage(LogLevel.Error, "Wrong LDAP settings were received from client.")]
     public static partial void ErrorWrongLdapSettings(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "settings.Server is null or empty.")]
+    [LoggerMessage(LogLevel.Error, "settings.Server is null or empty.")]
     public static partial void ErrorServerIsNullOrEmpty(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "settings.UserDN is null or empty.")]
+    [LoggerMessage(LogLevel.Error, "settings.UserDN is null or empty.")]
     public static partial void ErrorUserDnIsNullOrEmpty(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "settings.LoginAttribute is null or empty.")]
+    [LoggerMessage(LogLevel.Error, "settings.LoginAttribute is null or empty.")]
     public static partial void ErrorLoginAttributeIsNullOrEmpty(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "settings.GroupDN is null or empty.")]
+    [LoggerMessage(LogLevel.Error, "settings.GroupDN is null or empty.")]
     public static partial void ErrorGroupDnIsNullOrEmpty(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "settings.GroupAttribute is null or empty.")]
+    [LoggerMessage(LogLevel.Error, "settings.GroupAttribute is null or empty.")]
     public static partial void ErrorGroupAttributeIsNullOrEmpty(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "settings.UserAttribute is null or empty.")]
+    [LoggerMessage(LogLevel.Error, "settings.UserAttribute is null or empty.")]
     public static partial void ErrorUserAttributeIsNullOrEmpty(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "settings.Login is null or empty.")]
+    [LoggerMessage(LogLevel.Error, "settings.Login is null or empty.")]
     public static partial void ErrorloginIsNullOrEmpty(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "settings.PasswordBytes is null.")]
+    [LoggerMessage(LogLevel.Error, "settings.PasswordBytes is null.")]
     public static partial void ErrorPasswordBytesIsNullOrEmpty(this ILogger<LdapOperationJob> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "settings.Password is null or empty.")]
+    [LoggerMessage(LogLevel.Error, "settings.Password is null or empty.")]
     public static partial void ErrorPasswordIsNullOrEmpty(this ILogger<LdapOperationJob> logger);
 
 }

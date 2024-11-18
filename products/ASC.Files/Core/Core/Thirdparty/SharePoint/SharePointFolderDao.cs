@@ -80,16 +80,16 @@ internal class SharePointFolderDao(
         return Task.FromResult(SharePointProviderInfo.ToFolder(SharePointProviderInfo.RootFolder));
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null)
+    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null)
     {
-        if (CheckInvalidFilter(filterType) || (provider != ProviderFilter.None && provider != SharePointProviderInfo.ProviderFilter))
+        if (CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != SharePointProviderInfo.ProviderFilter))
         {
             yield break;
         }
 
         var rooms = roomsIds.ToAsyncEnumerable().SelectAwait(async e => await GetFolderAsync(e).ConfigureAwait(false));
 
-        rooms = FilterByRoomType(rooms, filterType);
+        rooms = FilterByRoomType(rooms, filterTypes);
         rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectEntriesIds);
 
         if (!string.IsNullOrEmpty(searchText))
@@ -352,7 +352,7 @@ internal class SharePointFolderDao(
     {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark)
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
     {
         return await RenameFolderAsync(folder, newTitle);
     }
@@ -453,9 +453,9 @@ internal class SharePointFolderDao(
         throw new NotImplementedException();
     }
 
-    public Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    public Task<int> SetCustomOrder(string folderId, string parentFolderId, int order)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(0);
     }
 
     public Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)

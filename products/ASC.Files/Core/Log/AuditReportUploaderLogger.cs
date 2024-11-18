@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.Log;
 internal static partial class AuditReportUploaderLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "Error while uploading login report:")]
+    [LoggerMessage(LogLevel.Error, "Error while uploading login report:")]
     public static partial void ErrorWhileUploading(this ILogger<AuditReportUploader> logger, Exception exception);
 }

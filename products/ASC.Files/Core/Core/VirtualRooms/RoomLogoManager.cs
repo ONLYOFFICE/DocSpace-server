@@ -26,7 +26,6 @@
 
 using System.Reflection;
 
-using Folder = Microsoft.OneDrive.Sdk.Folder;
 using Image = SixLabors.ImageSharp.Image;
 using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
@@ -392,14 +391,15 @@ public class RoomLogoManager(
     public static bool ColorChanged<T>(string color, Folder<T> room)
     {
         var colorChanged = false;
-        if (!string.IsNullOrEmpty(color))
+        
+        if (color != null && room.SettingsColor != color)
         {
-            if (!Color.TryParse(color, out _))
+            if (color != "" && !Color.TryParse(color, out _))
             {
                 throw new ArgumentException(null, nameof(color));
             }
-            
-            room.SettingsColor = color;
+
+            room.SettingsColor = color == "" ? null : color;
             colorChanged = true;
         }
 
@@ -409,20 +409,16 @@ public class RoomLogoManager(
     public static async Task<bool> CoverChanged<T>(string cover, Folder<T> room)
     {
         var coverChanged = false;
-        if (!string.IsNullOrEmpty(cover))
+        
+        if (cover != null && room.SettingsCover != cover)
         {
             var covers = await GetCoversAsync();
-            if (!covers.ContainsKey(cover))
+            if (cover != "" && !covers.ContainsKey(cover))
             {
                 throw new ArgumentException(null, nameof(cover));
             }
 
-            room.SettingsCover = cover;
-            coverChanged = true;
-        }
-        else if(!string.IsNullOrEmpty(room.SettingsCover))
-        {
-            room.SettingsCover = null;
+            room.SettingsCover = cover == "" ? null : cover;
             coverChanged = true;
         }
 

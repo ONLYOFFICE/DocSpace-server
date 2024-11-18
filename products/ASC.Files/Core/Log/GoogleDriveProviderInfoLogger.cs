@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.Log;
 internal static partial class GoogleDriveProviderInfoLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "GoogleDrive error")]
+    [LoggerMessage(LogLevel.Error, "GoogleDrive error")]
     public static partial void ErrorGoogleDrive(this ILogger logger, Exception exception);
 }

@@ -27,18 +27,18 @@
 namespace ASC.Web.Core.Log;
 internal static partial class RemovePortalOperationLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Start remove tenant: {tenantId}")]
+    [LoggerMessage(LogLevel.Debug, "Start remove tenant: {tenantId}")]
     public static partial void DebugStartRemoveTenant(this ILogger<RemovePortalOperation> logger, int tenantId);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Remove module: {module}")]
+    [LoggerMessage(LogLevel.Debug, "Remove module: {module}")]
     public static partial void DebugRemoveModule(this ILogger<RemovePortalOperation> logger, string module);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Remove tenant from db")]
+    [LoggerMessage(LogLevel.Debug, "Remove tenant from db")]
     public static partial void DebugRemoveTenantFromDb(this ILogger<RemovePortalOperation> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "End remove tenant: {tenantId}")]
+    [LoggerMessage(LogLevel.Debug, "End remove tenant: {tenantId}")]
     public static partial void DebugEndRemoveTenant(this ILogger<RemovePortalOperation> logger, int tenantId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Error remove tenant: {tenantId}")]
+    [LoggerMessage(LogLevel.Error, "Error remove tenant: {tenantId}")]
     public static partial void ErrorRemoveTenant(this ILogger<RemovePortalOperation> logger, int tenantId, Exception exception);
 }

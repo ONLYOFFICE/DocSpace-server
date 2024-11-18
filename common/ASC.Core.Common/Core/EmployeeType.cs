@@ -26,16 +26,44 @@
 
 namespace ASC.Core.Users;
 
-/// <summary>
-/// </summary>
 [Flags]
 [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter<EmployeeType>))]
 [EnumExtensions]
 public enum EmployeeType
 {
+    [SwaggerEnum("All")]
     All = 0,
+
+    [SwaggerEnum("Room admin")]
     RoomAdmin = 1,
-    User = 2,
+
+    [SwaggerEnum("Guest")]
+    Guest = 2,
+
+    [SwaggerEnum("DocSpace admin")]
     DocSpaceAdmin = 3,
-    Collaborator = 4
+	
+    [SwaggerEnum("User")]
+    User = 4
+}
+
+public class EmployeeTypeComparer : IComparer<EmployeeType>
+{
+    private static readonly FrozenDictionary<EmployeeType, int> _priority = new Dictionary<EmployeeType, int>
+    {
+        { EmployeeType.DocSpaceAdmin, 4 },
+        { EmployeeType.RoomAdmin, 3 },
+        { EmployeeType.User, 2 },
+        { EmployeeType.Guest, 1 },
+        { EmployeeType.All, 0 }
+    }.ToFrozenDictionary();
+
+    private EmployeeTypeComparer() { }
+
+    public static EmployeeTypeComparer Instance { get; } = new();
+
+    public int Compare(EmployeeType x, EmployeeType y)
+    {
+        return _priority[x].CompareTo(_priority[y]);
+    }
 }

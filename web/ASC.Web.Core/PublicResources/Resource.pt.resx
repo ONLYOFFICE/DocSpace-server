@@ -176,7 +176,7 @@
     <value>O número de administradores não deve exceder {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>O número de administradores/utilizadores com poder</value>
+    <value>O número de administradores</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Cópia de Segurança automática e recuperação</value>
@@ -1037,7 +1037,7 @@
     <value>Cota de espaço do usuário excedida</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administradores/usuários avançados adicionados:</value>
+    <value>Administradores adicionados:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>O limite de convites foi excedido</value>
@@ -1055,6 +1055,12 @@
     <value>Cotas de armazenamento e estatística</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} por administrador/usuário avançado e capacidade de adicionar espaço mediante solicitação</value>
+    <value>{0} por administrador e capacidade de adicionar espaço mediante solicitação</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir cota por quarto. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota por utilizador. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
   </data>
 </root>

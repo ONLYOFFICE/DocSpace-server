@@ -27,9 +27,9 @@
 namespace ASC.Webhooks.Service.Log;
 internal static partial class WorkerServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Procedure: Waiting for data. Sleep {waitingPeriod}.")]
+    [LoggerMessage(LogLevel.Trace, "Procedure: Waiting for data. Sleep {waitingPeriod}.")]
     public static partial void TraceProcedure(this ILogger<WorkerService> logger, TimeSpan waitingPeriod);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Response: {response}")]
+    [LoggerMessage(LogLevel.Debug, "Response: {response}")]
     public static partial void DebugResponse(this ILogger logger, HttpResponseMessage response);
 }

@@ -1654,18 +1654,18 @@ $TrulyYours</value>
   </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. 致 &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; 协作空间！
- 
- 
+
+
 尊敬的 $UserName，您好！
- 
+
 您刚创建了 ONLYOFFICE 协作空间。您可以使用它作为文档管理中心，提升与团队、客户、合作伙伴等的协作。其地址是 "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 您当前的资费方案是初创版。这个方案完全免费，包括：
 
-&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 名管理员/高级用户&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;最多 100 个房间&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB 储存空间&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
- 
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 名管理员&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;最多 100 个房间&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB 储存空间&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
 *用新方式开启文档协作！*
- 
+
 $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
@@ -1711,7 +1711,7 @@ $activity
 
 您好！
 
-邀请您在“${__VirtualRootPath}”完成 ONLYOFFICE 协作空间的注册：“${__VirtualRootPath}”。点击链接输入您的姓名并设置密码：
+邀请您在 "${__VirtualRootPath}":"${__VirtualRootPath}" 完成 ONLYOFFICE 协作空间的注册。点击链接输入您的姓名并设置密码：
 
 
 $OrangeButton
@@ -1762,5 +1762,207 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG6" alt="Drupal" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE 协作空间 &amp; Drupal&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;让您的网站访问者轻松访问办公文档并通过协作空间管理文件。&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-drupal.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;了解更多&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 64px; padding-top: 0; text-align: center;"&gt;$OrangeButton4&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>立即购买</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>设置密码</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间开发者版宽限期已激活</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间开发者版许可证即将到期</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间开发者版宽限期即将到期</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间开发者版已停用</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版宽限期已激活</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版许可证即将到期</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版宽限期即将到期</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版已停用</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版许可证即将到期</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>您的 ONLYOFFICE 协作空间企业版许可证将于今日到期</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间开发者版许可证于今日到期。
+
+我们已为您激活 $PaymentDelay 天的宽限期。在此期间，文档编辑的访问数量限制为20个同时连接（且不再提供支持和更新）。
+
+若需要更新许可证，请直接联系您的专属销售经理，或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间开发者版许可证将在7天内到期。
+
+要更新许可证，请直接联系您的专属销售经理，或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间开发者版许可证的宽限期将在7天内到期。届时协作空间将无法使用。
+
+要更新许可证，请直接联系您的专属销售经理，或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间开发者版许可证的宽限期于今日到期。协作空间即将停用。
+
+要更新许可证，请直接联系您的专属销售经理，或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证于今日到期。
+
+我们已为您激活 *$PaymentDelay‎ 天的宽限期* 。在此期间，协作空间将仅为3名指定用户提供访问权限*（且不再提供支持和更新）。
+
+如需 *无限期* 使用购买的所有功能，我们建议您 *获取 ONLYOFFICE 协作空间企业版的终身许可证* （包括3年的支持和更新）：
+
+$OrangeButton
+
+您也可以直接联系您的专属销售经理进行许可证更新。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+*前3名打开文件进行编辑的用户的 ID 将被记录。可以同时编辑的文档数量没有限制。其他用户只能查看文档。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证将在7天内到期。
+
+如需 *无限期* 使用购买的所有功能，我们建议您 *获取 ONLYOFFICE 协作空间企业版的终身许可证* （包括3年的支持和更新）。
+
+$OrangeButton
+
+您也可以直接联系您的专属销售经理进行许可证更新。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证的宽限期将在7天内到期。届时协作空间将停用。
+
+如需 *无限期* 使用购买的全部功能，我们建议您 *获取 ONLYOFFICE 协作空间企业版的终身许可证* （包括3年的支持和更新）：
+
+$OrangeButton
+
+您也可以直接联系您的专属销售经理进行许可证更新。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证的宽限期于今日到期。协作空间即将停用。
+
+如需 *无限期* 使用购买的所有功能，我们建议您 *获取 ONLYOFFICE 协作空间企业版的终身许可证* （包括3年的支持和更新）：
+
+$OrangeButton
+
+您也可以直接联系您的专属销售经理进行许可证更新。
+
+如有付款相关问题，请联系我们 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证将在7天内到期。届时更新和支持将停用。*
+
+若需要更新许可证，请直接联系您的专属销售经理或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+*您可以无限期使用购买的所有功能。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>您好，$UserName！
+
+您的 ONLYOFFICE 协作空间企业版许可证于今日到期。更新和支持即将停用。
+
+若需要更新许可证，请直接联系您的专属销售经理或通过 "${__SalesEmail}":"mailto:${__SalesEmail}" 与我们联系。
+
+如有付款相关问题，请联系 "${__SalesEmail}":"mailto:${__SalesEmail}"。
+
+如需解决任何技术问题，请使用 "${__SupportLink}":"${__SupportLink}"。
+
+您可以无限期使用购买的所有功能。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>您好！请为您的 ONLYOFFICE 协作空间账户设置密码。点击下方按钮设置密码：
+
+$OrangeButton
+
+该链接有效期为7天。</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>设置 ONLYOFFICE 协作空间的密码</value>
   </data>
 </root>

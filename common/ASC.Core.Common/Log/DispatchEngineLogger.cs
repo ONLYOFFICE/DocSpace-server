@@ -32,18 +32,18 @@ internal static partial class DispatchEngineLogger
 {
     public const string ResponseMessage = "[{subject}] sended to [{recipient}] over {senderName}, status: {result}";
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "[{action}]->[{recipient}] by [{senderName}] to [{address}] at {date}\r\n\r\n[{subject}]\r\n{body}\r\n{dots}")]
+    [LoggerMessage(LogLevel.Debug, "[{action}]->[{recipient}] by [{senderName}] to [{address}] at {date}\r\n\r\n[{subject}]\r\n{body}\r\n{dots}")]
     public static partial void LogMessage(this ILogger logger, INotifyAction action, string recipient, string senderName, string address, DateTime date, string subject, string body, string dots);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = ResponseMessage)]
+    [LoggerMessage(LogLevel.Debug, ResponseMessage)]
     public static partial void LogDebugResponce(this ILogger logger, string subject, IDirectRecipient recipient, string senderName, SendResult result);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = ResponseMessage)]
+    [LoggerMessage(LogLevel.Debug, ResponseMessage)]
     public static partial void LogDebugResponceWithException(this ILogger logger, string subject, IDirectRecipient recipient, string senderName, SendResult result, Exception? exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = ResponseMessage)]
+    [LoggerMessage(LogLevel.Error, ResponseMessage)]
     public static partial void LogErrorResponceWithException(this ILogger logger, string subject, IDirectRecipient recipient, string senderName, SendResult result, Exception? exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "LogOnly: {LogOnly}")]
+    [LoggerMessage(LogLevel.Debug, "LogOnly: {LogOnly}")]
     public static partial void LogOnly(this ILogger logger, bool logOnly);
 }

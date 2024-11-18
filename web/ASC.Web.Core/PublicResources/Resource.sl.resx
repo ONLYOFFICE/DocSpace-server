@@ -281,7 +281,7 @@
     <value>Število skrbnikov ne sme presegati {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Število skrbnikov/naprednih uporabnikov</value>
+    <value>Število skrbnikov</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Samodejno varnostno kopiranje &amp; obnovitev</value>
@@ -1037,7 +1037,7 @@
     <value>Para muitos arquivos de entrada</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Dodani skrbniki/Super uporabniki:</value>
+    <value>Dodani skrbniki:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Kvota povabil je presežena</value>
@@ -1053,5 +1053,11 @@
   </data>
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Kvote za shranjevanje in statistika</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Kvote na sobo ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupnega prostora za shranjevanje DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Kvote na uporabnika ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupnega prostora za shranjevanje DocSpace.</value>
   </data>
 </root>

@@ -335,9 +335,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrador de la sala</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Usuario</value>
   </data>
@@ -361,9 +358,6 @@
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Editor</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrador de la sala</value>
   </data>
   <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
     <value>Este proveedor ya está conectado a la sala</value>
@@ -467,12 +461,6 @@
   <data name="Date" xml:space="preserve">
     <value>Fecha</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Usuario avanzado</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Usuario avanzado</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Usuario</value>
   </data>
@@ -496,5 +484,8 @@
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Número de formulario</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Usuario externo</value>
   </data>
 </root>

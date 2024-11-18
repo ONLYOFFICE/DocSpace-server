@@ -27,15 +27,15 @@
 namespace ASC.Common.Log;
 internal static partial class RabbitMQCacheLogger
 {
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Creating RabbitMQ consumer channel")]
+    [LoggerMessage(LogLevel.Trace, "Creating RabbitMQ consumer channel")]
     public static partial void TraceCreatingRabbitMQ(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Starting RabbitMQ basic consume")]
+    [LoggerMessage(LogLevel.Trace, "Starting RabbitMQ basic consume")]
     public static partial void TraceStartingRabbitMQ(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Recreating RabbitMQ consumer channel")]
+    [LoggerMessage(LogLevel.Warning, "Recreating RabbitMQ consumer channel")]
     public static partial void WarningRecreatingRabbitMQ(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "StartBasicConsume can't call on _consumerChannel == null")]
+    [LoggerMessage(LogLevel.Error, "StartBasicConsume can't call on _consumerChannel == null")]
     public static partial void ErrorStartBasicConsumeCanNotCall(this ILogger logger);
 }

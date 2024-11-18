@@ -36,6 +36,8 @@ public class FileShareRecord<T>
     public Guid Owner { get; set; }
     public FileShare Share { get; set; }
     public FileShareOptions Options { get; set; }
+    public T ParentId { get; set; }
+    
     public int Level { get; set; }
     public bool IsLink => SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink;
 
@@ -44,8 +46,8 @@ public class FileShareRecord<T>
         private static readonly int[] _roomShareOrder =
         [
             (int)FileShare.None,
-            (int)FileShare.RoomAdmin,
-            (int)FileShare.PowerUser,
+            (int)FileShare.RoomManager,
+            (int)FileShare.ContentCreator,
             (int)FileShare.Editing,
             (int)FileShare.FillForms,
             (int)FileShare.Review,
@@ -73,8 +75,8 @@ public class FileShareRecord<T>
             
             // Not used
             (int)FileShare.ReadWrite,
-            (int)FileShare.RoomAdmin,
-            (int)FileShare.PowerUser,
+            (int)FileShare.RoomManager,
+            (int)FileShare.ContentCreator,
             (int)FileShare.Varies
         ];
         

@@ -147,9 +147,6 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>مراجعة</value>
   </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>مسئول الغرفة</value>
-  </data>
   <data name="Admin" xml:space="preserve">
     <value>المسئول</value>
   </data>
@@ -454,9 +451,6 @@
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>مراجع</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>مسئول الغرفة</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>مستخدم</value>
   </data>
@@ -526,12 +520,6 @@
   <data name="Date" xml:space="preserve">
     <value>التاريخ</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>قوة المستخدم</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>قوة المستخدم</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>مستخدم</value>
   </data>
@@ -555,5 +543,20 @@
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>رقم النموذج</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>مستخدم خارجي</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>صانع المحتوى</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>مدير الغرفة</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>صانع المحتوى</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>مدير الغرفة</value>
   </data>
 </root>

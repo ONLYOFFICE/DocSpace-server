@@ -335,9 +335,6 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redakteur</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator des Raums</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Benutzer</value>
   </data>
@@ -361,9 +358,6 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Redakteur</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator des Raums</value>
   </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Die neue Version kann nicht mit der aktuellen identisch sein</value>
@@ -467,12 +461,6 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="Date" xml:space="preserve">
     <value>Datum</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Power-Benutzer</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Power-Benutzer</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Benutzer</value>
   </data>
@@ -496,5 +484,20 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Formularnummer</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Externer Benutzer</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Inhaltsersteller</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Raum-Manager</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Raum-Manager</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Inhaltsersteller</value>
   </data>
 </root>

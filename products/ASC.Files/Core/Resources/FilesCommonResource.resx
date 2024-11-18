@@ -427,9 +427,6 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="UnlockComment" xml:space="preserve">
     <value>The file is unlocked</value>
   </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Room Administrator</value>
-  </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
@@ -441,9 +438,6 @@ Highest compatibility with docx, xlsx, pptx.</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
-  </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Room Administrator</value>
   </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>User</value>
@@ -550,16 +544,22 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
     <value>The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form.</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Power User</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Power User</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Form number</value>
   </data>
   <data name="ExternalUser" xml:space="preserve">
     <value>External user</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Room Manager</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Room Manager</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Content Creator</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Content Creator</value>
   </data>
 </root>
