@@ -45,8 +45,5 @@ public enum ProductType
     People = 5,
 
     [SwaggerEnum("Settings")]
-    Settings = 7,
-    
-    [SwaggerEnum("DeveloperTools")]
-    DeveloperTools = 8
+    Settings = 7
 }

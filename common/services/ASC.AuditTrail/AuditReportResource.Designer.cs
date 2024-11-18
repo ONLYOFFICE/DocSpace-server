@@ -384,15 +384,6 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Developer Tools.
-        /// </summary>
-        public static string DeveloperToolsProduct {
-            get {
-                return ResourceManager.GetString("DeveloperToolsProduct", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to DNS Settings Updated.
         /// </summary>
         public static string DnsSettingsUpdated {

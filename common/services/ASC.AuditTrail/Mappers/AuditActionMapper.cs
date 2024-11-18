@@ -35,8 +35,7 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
         new LoginActionsMapper(),
         new OthersActionsMapper(),
         new PeopleActionMapper(),
-        new SettingsActionsMapper(),
-        new DeveloperToolsActionMapper()
+        new SettingsActionsMapper()
     ];
 
     public string GetActionText(MessageMaps action, AuditEvent evt)
