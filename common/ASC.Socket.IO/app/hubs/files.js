@@ -344,11 +344,11 @@ module.exports = (io) => {
   }
 
   function backupProgress({ tenantId, percentage } = {}) {
-    filesIO.to(`${tenantId}-restore-backup`).emit("s:backup-progress", percentage);
+    filesIO.to(`${tenantId}-backup-restore`).emit("s:backup-progress", percentage);
   }
 
   function restoreProgress({ tenantId, percentage } = {}) {
-    filesIO.to(`${tenantId}-restore-backup`).emit("s:restore-progress", percentage);
+    filesIO.to(`${tenantId}-backup-restore`).emit("s:restore-progress", percentage);
   }
 
   return {
