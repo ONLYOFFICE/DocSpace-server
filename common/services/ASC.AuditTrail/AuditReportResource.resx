@@ -900,4 +900,37 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Invitation sent again: {0}</value>
   </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Client created</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Client {0} updated</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Client's {0} secret regenerated</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Client {0} deleted</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Client's {0} activation changed</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Client's {0} visibility changed</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Revoked client {0} access</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Generated authorization code for client {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Generated personal access token for client {0}</value>
+  </data>
+  <data name="DeveloperToolsProduct" xml:space="preserve">
+    <value>Developer Tools</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
 </root>
