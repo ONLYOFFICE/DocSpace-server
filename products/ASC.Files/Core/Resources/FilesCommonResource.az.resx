@@ -500,4 +500,7 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Otaq meneceri</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Faylı açın</value>
+  </data>
 </root>

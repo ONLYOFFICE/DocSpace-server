@@ -198,9 +198,9 @@ public class FileDtoHelper(
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null)
     {
-        var result = await GetFileWrapperAsync(file, order, expiration);
+        var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
 
         result.FolderId = file.ParentId;
         
@@ -217,7 +217,7 @@ public class FileDtoHelper(
     }
 
     private Dictionary<string, AceWrapper> shareCache = new();
-    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration)
+    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration, IFolder contextFolder = null)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
@@ -333,7 +333,7 @@ public class FileDtoHelper(
 
         if (file.Order != 0)
         {
-            if (string.IsNullOrEmpty(order))
+            if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(file.ParentId);
             }

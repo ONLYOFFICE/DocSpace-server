@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="YamlDotNet" Version="16.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="ASC.ApiSystem">
       <HintPath>..\..\..\services\ASC.ApiSystem\bin\Debug\ASC.ApiSystem.dll</HintPath>
     </Reference>

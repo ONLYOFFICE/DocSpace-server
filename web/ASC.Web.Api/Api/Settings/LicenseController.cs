@@ -41,7 +41,8 @@ public class LicenseController(ILoggerProvider option,
         IMemoryCache memoryCache,
         FirstTimeTenantSettings firstTimeTenantSettings,
         ITariffService tariffService,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        DocumentServiceLicense documentServiceLicense)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
@@ -62,7 +63,7 @@ public class LicenseController(ILoggerProvider option,
             return false;
         }
 
-        await licenseReader.RefreshLicenseAsync();
+        await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
         return true;
     }
 
@@ -89,7 +90,7 @@ public class LicenseController(ILoggerProvider option,
 
         try
         {
-            await licenseReader.RefreshLicenseAsync();
+            await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
         }
         catch (BillingNotFoundException)
         {

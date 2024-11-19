@@ -745,15 +745,15 @@ public class FileSecurity(IDaoFactory daoFactory,
                 yield return entry;
             }
 
-            var tasks = Enum.GetValues<FilesSecurityActions>()
-                .Where(r => _securityEntries[entry.FileEntryType].Contains(r))
-                .Select(async e =>
-                {
-                    var t = await FilterEntryAsync(entry, e, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser);
-                    return new KeyValuePair<FilesSecurityActions, bool>(e, t);
-                });
+            var security = new Dictionary<FilesSecurityActions, bool>();
+            
+            foreach (var action in Enum.GetValues<FilesSecurityActions>().Where(r => _securityEntries[entry.FileEntryType].Contains(r)))
+            {
+                var result = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser);
+                security[action] = result;
+            }
 
-            entry.Security = (await Task.WhenAll(tasks)).ToDictionary(a => a.Key, b => b.Value);
+            entry.Security = security;
 
             yield return entry;
         }

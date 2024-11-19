@@ -1105,7 +1105,7 @@ public class FileMarker(
                         rootFolderId = IdConverter.Convert<T>(await globalFolder.GetFolderVirtualRoomsAsync(daoFactory));
                     }
 
-                    if (rootFolderId != null)
+                    if (!Equals(rootFolderId, default(T)))
                     {
                         parentsList.Add(await daoFactory.GetFolderDao<T>().GetFolderAsync(rootFolderId));
                     }

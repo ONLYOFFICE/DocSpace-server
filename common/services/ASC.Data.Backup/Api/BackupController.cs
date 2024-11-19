@@ -91,7 +91,7 @@ public class BackupController(
         {
             Period = inDto.CronParams.Period ?? BackupPeriod.EveryDay,
             Hour = inDto.CronParams.Hour,
-            Day = inDto.CronParams.Day
+            Day = inDto.CronParams.Day.HasValue ? inDto.CronParams.Day.Value : 0
         };
         if(backupStored is > 30 or < 1)
         {

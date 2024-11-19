@@ -500,4 +500,7 @@
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Διαχειριστής δωματίου</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Άνοιγμα αρχείου</value>
+  </data>
 </root>

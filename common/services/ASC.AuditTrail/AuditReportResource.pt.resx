@@ -861,4 +861,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Usuários [{0}]. Formulário enviado: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Exportando o índice de salas salvo em Documentos</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Reenviar convites: {0}</value>
+  </data>
 </root>

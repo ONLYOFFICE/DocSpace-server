@@ -191,7 +191,7 @@ public class DownloadModelBinder : BaseBatchModelBinder
 
         result.FileIds = baseResult.FileIds;
         result.FolderIds = baseResult.FolderIds;
-        result.FileConvertIds = (IDictionary<JsonElement, string>)bindingContext.ParseDictionary(nameof(result.FileConvertIds));
+        result.FileConvertIds = bindingContext.ParseDictionary(nameof(result.FileConvertIds));
 
         bindingContext.Result = ModelBindingResult.Success(result);
 

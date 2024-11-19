@@ -108,7 +108,7 @@ internal class FileConverterService<T>(
 
                     var toExtension = fileUtility.GetInternalConvertExtension(file.Title);
                     
-                    if (!string.IsNullOrEmpty(outputType) && await fileConverter.EnableConvertAsync(file, outputType))
+                    if (!string.IsNullOrEmpty(outputType) && await fileConverter.EnableConvertAsync(file, outputType, false))
                     {
                         toExtension = outputType;
                     }

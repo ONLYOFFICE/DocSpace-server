@@ -500,4 +500,7 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Huoneen johtaja</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Avaa tiedosto</value>
+  </data>
 </root>
