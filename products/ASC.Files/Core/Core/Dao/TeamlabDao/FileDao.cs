@@ -679,7 +679,7 @@ internal class FileDao(
                         }
                         else if (!await IsExistOnStorageAsync(file))
                         {
-                            await DeleteVersionAsync(file);
+                            await DeleteFileVersionAsync(file);
                         }
                     }
                     catch (Exception deleteException)
@@ -817,7 +817,7 @@ internal class FileDao(
             {
                 if (!await IsExistOnStorageAsync(file))
                 {
-                    await DeleteVersionAsync(file);
+                    await DeleteFileVersionAsync(file);
                 }
 
                 throw;
@@ -828,16 +828,21 @@ internal class FileDao(
 
         return await GetFileAsync(file.Id);
     }
-
-    private async ValueTask DeleteVersionAsync(File<int> file)
+    
+    public async Task DeleteFileVersionAsync(File<int> file, int version = 0)
     {
-        if (file == null
-            || file.Id == default
-            || file.Version <= 1)
+        if (file == null || 
+            file.Id == default || 
+            file.Version <= 1)
         {
             return;
         }
 
+        if (version == 0)
+        {
+            version = file.Version;
+        }
+        
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -847,8 +852,11 @@ internal class FileDao(
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tr = await context.Database.BeginTransactionAsync();
 
-            await context.DeleteDbFilesByVersionAsync(tenantId, file.Id, file.Version);
-            await context.UpdateDbFilesByVersionAsync(tenantId, file.Id, file.Version - 1);
+            await context.DeleteDbFilesByVersionAsync(tenantId, file.Id, version);
+            if (version == file.Version)
+            {
+                await context.UpdateDbFilesByVersionAsync(tenantId, file.Id, version - 1);
+            }
 
             await tr.CommitAsync();
         });

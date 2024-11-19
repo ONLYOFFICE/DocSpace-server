@@ -344,10 +344,17 @@ internal class SharePointFileDao(
     {
         return await SaveFileAsync(file, fileStream);
     }
-    public async Task DeleteFileAsync(string fileId,Guid ownerId)
+
+    public async Task DeleteFileVersionAsync(File<string> file, int version)
+    {
+        await DeleteFileAsync(file.Id);
+    }
+
+    public async Task DeleteFileAsync(string fileId, Guid ownerId)
     {
         await DeleteFileAsync(fileId);
     }
+    
     public async Task DeleteFileAsync(string fileId)
     {
         await SharePointProviderInfo.DeleteFileAsync(fileId);

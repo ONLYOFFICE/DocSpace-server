@@ -316,6 +316,33 @@ internal class ProviderFileDao(
     {
         await DeleteFileAsync(fileId, Guid.Empty);
     }
+
+    public async Task DeleteFileVersionAsync(File<string> file, int version)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        if (file.Id == null)
+        {
+            throw new ArgumentException("No file id or folder id toFolderId determine provider");
+        }
+
+        var fileId = file.Id;
+        var folderId = file.ParentId;
+
+        //Convert
+        var selector = _selectorFactory.GetSelector(fileId);
+
+        file.Id = selector.ConvertId(fileId);
+        if (folderId != null)
+        {
+            file.ParentId = selector.ConvertId(folderId);
+        }
+
+        var fileDao = selector.GetFileDao(fileId);
+
+        await fileDao.DeleteFileVersionAsync(file, version);
+    }
+
     public async Task DeleteFileAsync(string fileId, Guid ownerId)
     {
         var selector = _selectorFactory.GetSelector(fileId);
