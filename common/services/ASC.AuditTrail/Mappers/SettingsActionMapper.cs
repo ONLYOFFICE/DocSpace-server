@@ -31,7 +31,8 @@ internal class SettingsActionsMapper : IProductActionMapper
     public List<IModuleActionMapper> Mappers { get; } =
     [
         new GeneralActionMapper(),
-        new ProductsActionMapper()
+        new ProductsActionMapper(),
+        new OAuthActionMapper()
     ];
 
     public ProductType Product => ProductType.Settings;
@@ -121,5 +122,40 @@ internal class ProductsActionMapper : IModuleActionMapper
         Actions.Add(MessageAction.UsersOpenedProductAccess, new MessageMaps("ProductAccessOpenedForUsers", ActionType.UpdateAccess, productType, Module));
         Actions.Add(MessageAction.GroupsOpenedProductAccess, new MessageMaps("ProductAccessOpenedForGroups", ActionType.UpdateAccess, productType, Module));
         Actions.Add(MessageAction.OwnerUpdated, new MessageMaps("OwnerChanged", ActionType.Update, productType, Module));
+    }
+}
+
+public class OAuthActionMapper : IModuleActionMapper
+{
+    public ModuleType Module { get; }
+    public IDictionary<MessageAction, MessageMaps> Actions { get; }
+
+    public OAuthActionMapper()
+    {
+        Module = ModuleType.OAuth;
+        Actions = new MessageMapsDictionary(ProductType.Settings, Module)
+        {
+            {
+                ActionType.Create, [
+                    MessageAction.CreateClient
+                ]
+            },
+            {
+                ActionType.Update, [
+                    MessageAction.UpdateClient,
+                    MessageAction.RegenerateSecret,
+                    MessageAction.ChangeClientActivation,
+                    MessageAction.ChangeClientVisibility,
+                    MessageAction.RevokeUserClient,
+                    MessageAction.GenerateAuthorizationCodeToken,
+                    MessageAction.GeneratePersonalAccessToken
+                ]
+            },
+            {
+                ActionType.Delete, [
+                    MessageAction.DeleteClient
+                ]
+            }
+        };
     }
 }

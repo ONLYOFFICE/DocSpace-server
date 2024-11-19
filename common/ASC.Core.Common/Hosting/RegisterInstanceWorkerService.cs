@@ -50,9 +50,16 @@ public class RegisterInstanceWorkerService<T>(
         {
             var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
 
-            await registerInstanceService.Register();
+            try
+            {
+                await registerInstanceService.Register();
 
-            logger.TraceWorkingRunnging(DateTimeOffset.Now);
+                logger.TraceWorkingRunnging(DateTimeOffset.Now);
+            }
+            catch (Exception ex)
+            {
+                logger.WarningUnableToRegister(_settings.InstanceId, DateTimeOffset.Now, ex);
+            }
 
             await Task.Delay(TimeSpan.FromSeconds(_settings.IntervalCheckRegisterInstanceInSeconds), stoppingToken);
         }
@@ -71,9 +78,9 @@ public class RegisterInstanceWorkerService<T>(
 
                 logger.InformationUnRegister(_settings.InstanceId, DateTimeOffset.Now);
             }
-            catch
+            catch (Exception ex)
             {
-                logger.ErrorUnableToUnRegister(_settings.InstanceId, DateTimeOffset.Now);
+                logger.WarningUnableToUnRegister(_settings.InstanceId, DateTimeOffset.Now, ex);
             }
         }
 

@@ -500,4 +500,7 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Kamer Beheerder</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Open bestand</value>
+  </data>
 </root>

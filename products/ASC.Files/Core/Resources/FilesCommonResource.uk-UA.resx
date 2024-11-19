@@ -500,4 +500,7 @@
   <data name="ExternalUser" xml:space="preserve">
     <value>Зовнішній користувач</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Відкрити файл</value>
+  </data>
 </root>

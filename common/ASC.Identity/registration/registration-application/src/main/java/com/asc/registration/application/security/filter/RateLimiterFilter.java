@@ -99,9 +99,11 @@ public class RateLimiterFilter extends OncePerRequestFilter {
     var probe = bucket.tryConsumeAndReturnRemaining(1);
     response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
     response.setHeader(X_RATE_RESET, String.valueOf(probe.getNanosToWaitForReset()));
-    response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-    if (probe.isConsumed()) {
-      chain.doFilter(request, response);
+    if (!probe.isConsumed()) {
+      response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+      return;
     }
+
+    chain.doFilter(request, response);
   }
 }

@@ -304,7 +304,7 @@ public class FileConverter(
             .ToDictionary(x => x.Key, x => x.Value.ToString());
     }
 
-    public async Task<bool> EnableConvertAsync<T>(File<T> file, string toExtension)
+    public async Task<bool> EnableConvertAsync<T>(File<T> file, string toExtension, bool watermarkEnabled)
     {
         if (file == null || string.IsNullOrEmpty(toExtension))
         {
@@ -319,7 +319,7 @@ public class FileConverter(
         var fileExtension = file.ConvertedExtension;
         if (fileExtension.Trim('.').Equals(toExtension.Trim('.'), StringComparison.OrdinalIgnoreCase))
         {
-            return FileUtility.WatermarkedDocumentExt.Equals(fileExtension, StringComparison.OrdinalIgnoreCase);
+            return watermarkEnabled && FileUtility.WatermarkedDocumentExt.Equals(fileExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         fileExtension = FileUtility.GetFileExtension(file.Title);
@@ -339,15 +339,6 @@ public class FileConverter(
 
     public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null, bool toForm = false)
     {
-        if (!await EnableConvertAsync(file, toExtension))
-        {
-            var fileDao = daoFactory.GetFileDao<T>();
-            return await fileDao.GetFileStreamAsync(file);
-        }
-
-        var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
-        fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
-
         Options options = null;
         if (file.RootFolderType == FolderType.VirtualRooms || file.RootFolderType == FolderType.Archive)
         {
@@ -355,6 +346,15 @@ public class FileConverter(
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
             options = documentServiceHelper.GetOptions(room);
         }
+
+        if (!await EnableConvertAsync(file, toExtension, options?.WatermarkOnDraw != null))
+        {
+            var fileDao = daoFactory.GetFileDao<T>();
+            return await fileDao.GetFileStreamAsync(file);
+        }
+
+        var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
+        fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
         var docKey = await documentServiceHelper.GetDocKeyAsync(file, options?.GetMD5Hash());
 
@@ -384,7 +384,7 @@ public class FileConverter(
         var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
         var fileExtension = file.ConvertedExtension;
         var toExtension = fileUtility.GetInternalExtension(file.Title);
-        if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType))
+        if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType, false))
         {
             toExtension = outputType;
         }

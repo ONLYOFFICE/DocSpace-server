@@ -1903,7 +1903,8 @@ public class UserController(
 
     private async IAsyncEnumerable<UserInfo> GetByFilterAsync(UserFilter filter)
     {
-        if (await _userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
+        if (await _userManager.IsGuestAsync(securityContext.CurrentAccount.ID) ||
+            await _userManager.IsUserAsync(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }

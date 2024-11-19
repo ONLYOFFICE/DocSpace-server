@@ -700,4 +700,12 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folderDao.DeleteWatermarkSettings(room);
     }
+    public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
+    {
+        ArgumentNullException.ThrowIfNull(room);
+        var selector = _selectorFactory.GetSelector(room.Id);
+        var folderDao = selector.GetFolderDao(room.Id);
+
+        return folderDao.DeleteLifetimeSettings(room);
+    }
 }

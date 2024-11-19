@@ -1761,4 +1761,186 @@ $TrulyYours</value>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>Laipni aicināti pievienoties ONLYOFFICE DocSpace telpai</value>
   </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Iegādāties tagad</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Iestatīt paroli</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu ONLYOFFICE DocSpace Developer licences derīguma termiņš beidzas šodien.
+
+Mēs aktivizējām jums $PaymentDelay dienu pagarinājuma periodu. Šajā laikā piekļuve dokumentu rediģēšanai ir ierobežota līdz 20 vienlaicīgiem savienojumiem (atbalsts un atjauninājumi vairs netiek nodrošināti).
+
+Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Ja jums ir jautājumi par maksājumu, sazinieties ar mums, rakstot e-pastu uz "${__SalesEmail}":"mailto:${__SalesEmail}". Tehnisku problēmu risināšanai izmantojiet "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu ONLYOFFICE DocSpace Developer licences derīguma termiņš beigsies pēc 7 dienām.
+
+Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Ja jums ir jautājumi par maksājumu, sazinieties ar mums, rakstot e-pastu uz "${__SalesEmail}":"mailto:${__SalesEmail}". Tehnisku problēmu risināšanai izmantojiet "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Pagarinājuma periods jūsu ONLYOFFICE DocSpace Developer licencei beigsies pēc 7 dienām. Tas nozīmē, ka DocSpace vairs nebūs pieejams.
+
+Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Ja jums ir jautājumi par maksājumu, sazinieties ar mums, rakstot e-pastu uz "${__SalesEmail}":"mailto:${__SalesEmail}". Tehnisku problēmu risināšanai izmantojiet "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu ONLYOFFICE DocSpace Developer licences pagarinājuma periods beidzas šodien. Tas nozīmē, ka DocSpace vairs nebūs pieejams.
+
+Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Ja jums ir jautājumi par maksājumu, sazinieties ar mums, rakstot e-pastu uz "${__SalesEmail}":"mailto:${__SalesEmail}". Tehnisku problēmu risināšanai izmantojiet "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu ONLYOFFICE DocSpace Developer licences derīguma termiņš beidzas šodien.
+
+Mēs aktivizējām *$PaymentDelay‎ ‎dienu pagarinājuma periodu*. Šajā laikā piekļuve DocSpace tiek nodrošināta trīs nosauktajiem lietotājiem* (atbalsts un atjauninājumi vairs netiek nodrošināti).
+
+Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ONLYOFFICE DocSpace Enterprise (ar trīs gadu atbalstu un atjauninājumiem):
+
+$OrangeButton
+
+Lai atjauninātu licenci, varat arī tieši sazināties ar savu tirdzniecības vadītāju.
+
+Ja jums ir jautājumi par maksājumu, sazinieties ar mums, rakstot e-pastu uz "${__SalesEmail}":"mailto:${__SalesEmail}". Tehnisku problēmu risināšanai izmantojiet "${__SupportLink}":"${__SupportLink}".
+
+*Pirmo trīs lietotāju, kuri atvērs jebkuru failu rediģēšanai, ierakstītie ID. Vienlaikus rediģējamo dokumentu skaits nav ierobežots. Citi lietotāji varēs atvērt dokumentus tikai skatīšanai.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu ONLYOFFICE DocSpace Enterprise licences derīguma termiņš beigsies pēc septiņām dienām.
+
+Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ONLYOFFICE DocSpace Enterprise (ar trīs gadu atbalstu un atjauninājumiem).
+
+$OrangeButton
+
+Lai atjauninātu licenci, varat arī tieši sazināties ar savu tirdzniecības vadītāju.
+
+Ja jums ir jautājumi par maksājumu, sazinieties ar mums, rakstot e-pastu uz "${__SalesEmail}":"mailto:${__SalesEmail}". Tehnisku problēmu risināšanai izmantojiet "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu ONLYOFFICE DocSpace Enterprise licences derīguma termiņš beigsies pēc septiņām dienām.
+
+Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ONLYOFFICE DocSpace Enterprise (ar trīs gadu atbalstu un atjauninājumiem).
+
+$OrangeButton
+
+Lai atjauninātu licenci, varat arī tieši sazināties ar savu tirdzniecības vadītāju.
+
+Ja jums ir jautājumi par maksājumu, sazinieties ar mums, rakstot e-pastu uz "${__SalesEmail}":"mailto:${__SalesEmail}". Tehnisku problēmu risināšanai izmantojiet "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu ONLYOFFICE DocSpace Enterprise licences pagarinājuma periods beidzas šodien. Tas nozīmē, ka DocSpace vairs nebūs pieejams.
+
+Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ONLYOFFICE DocSpace Enterprise (ar trīs gadu atbalstu un atjauninājumiem):
+
+$OrangeButton
+
+Lai atjauninātu licenci, varat arī tieši sazināties ar savu tirdzniecības vadītāju. 
+
+Ja jums ir jautājumi par maksājumu, sazinieties ar mums, rakstot e-pastu uz "${__SalesEmail}":"mailto:${__SalesEmail}". Tehnisku problēmu risināšanai izmantojiet "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu ONLYOFFICE DocSpace Enterprise licences derīguma termiņš beigsies pēc septiņām dienām. Tas nozīmē, ka atjauninājumi un atbalsts vairs nebūs pieejams.*
+
+Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Ja jums ir jautājumi par maksājumu, sazinieties ar mums, rakstot e-pastu uz "${__SalesEmail}":"mailto:${__SalesEmail}". Tehnisku problēmu risināšanai izmantojiet "${__SupportLink}":"${__SupportLink}".
+
+*Jūs varat izmantot visas iespējas, kas pieejamas licences iegādes brīdī, neierobežotu laiku.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu ONLYOFFICE DocSpace Developer licences derīguma termiņš beidzas šodien. Tas nozīmē, ka atjauninājumi un atbalsts vairs nebūs pieejami.*
+
+Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Ja jums ir jautājumi par maksājumu, sazinieties ar mums, rakstot e-pastu uz "${__SalesEmail}":"mailto:${__SalesEmail}". Tehnisku problēmu risināšanai izmantojiet "${__SupportLink}":"${__SupportLink}".
+
+*Jūs varat izmantot visas iespējas, kas pieejamas licences iegādes brīdī, neierobežotu laiku.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Sveiki! Iestatiet paroli savam ONLYOFFICE DocSpace kontam. Vienkārši noklikšķiniet uz tālāk redzamās pogas:
+
+$OrangeButton
+
+Saite ir derīga septiņas dienas.</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Pagarinājuma periods jūsu ONLYOFFICE DocSpace ir aktivizēts</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Jūsu ONLYOFFICE DocSpace izstrādātāja licences derīguma termiņš drīz beigsies</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Pagarinājuma periods jūsu ONLYOFFICE DocSpace izstrādātājam drīz beigsies</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Jūsu ONLYOFFICE DocSpace izstrādātājs vairs nav pieejams</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Pagarinājuma periods jūsu ONLYOFFICE DocSpace Enterprise ir aktivizēts</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Jūsu ONLYOFFICE DocSpace Enterprise licences derīguma termiņš drīz beigsies</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Pagarinājuma periods jūsu ONLYOFFICE DocSpace Enterprise izstrādātājam drīz beigsies</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Jūsu ONLYOFFICE DocSpace Enterprise vairs nav pieejams</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Jūsu ONLYOFFICE DocSpace Enterprise licences derīguma termiņš drīz beigsies</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Jūsu ONLYOFFICE DocSpace Enterprise licences derīguma termiņš beidzas šodien</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Iestatiet ONLYOFFICE DocSpace paroli</value>
+  </data>
 </root>
