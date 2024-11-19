@@ -65,13 +65,13 @@ public class IpRestrictionsController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        inDto.IpRestrictions = inDto.IpRestrictions ?? new List<IpRestrictionBase>();
+        inDto.IpRestrictions ??= new List<IpRestrictionBase>();
         var isEmpty = !inDto.IpRestrictions.Any();
 
         bool enable;
         if (!inDto.Enable.HasValue)
         {
-            enable = isEmpty ? false : true;
+            enable = !isEmpty;
         }
         else
         {
@@ -124,13 +124,13 @@ public class IpRestrictionsController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        inDto.IpRestrictions = inDto.IpRestrictions ?? new List<IpRestrictionBase>();
+        inDto.IpRestrictions ??= new List<IpRestrictionBase>();
         var isEmpty = !inDto.IpRestrictions.Any();
 
         bool enable;
         if (!inDto.Enable.HasValue)
         {
-            enable = isEmpty ? false : true;
+            enable = !isEmpty;
         }
         else
         {
