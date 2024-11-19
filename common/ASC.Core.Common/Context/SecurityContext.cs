@@ -49,7 +49,7 @@ public class SecurityContext(
         ArgumentNullException.ThrowIfNull(login);
         ArgumentNullException.ThrowIfNull(passwordHash);
 
-        var tenantid = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantid = tenantManager.GetCurrentTenantId();
         var u = await userManager.GetUsersByPasswordHashAsync(tenantid, login, passwordHash);
 
         return await AuthenticateMeAsync(new UserAccount(u, tenantid, userFormatter), funcLoginEvent, additionalClaims);
@@ -99,7 +99,7 @@ public class SecurityContext(
             return false;
         }
 
-        if (tenant != await tenantManager.GetCurrentTenantIdAsync())
+        if (tenant != tenantManager.GetCurrentTenantId())
         {
             return false;
         }
@@ -160,7 +160,7 @@ public class SecurityContext(
 
     public async Task<string> AuthenticateMeAsync(Guid userId, Func<Task<int>> funcLoginEvent = null, List<Claim> additionalClaims = null)
     {
-        var account = await authentication.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId);
+        var account = await authentication.GetAccountByIDAsync(tenantManager.GetCurrentTenantId(), userId);
         return await AuthenticateMeAsync(account, funcLoginEvent, additionalClaims);
     }
 
@@ -178,7 +178,7 @@ public class SecurityContext(
                 loginEventId = await funcLoginEvent();
             }
 
-            cookie = await cookieStorage.EncryptCookieAsync(await tenantManager.GetCurrentTenantIdAsync(), account.ID, loginEventId);
+            cookie = await cookieStorage.EncryptCookieAsync(tenantManager.GetCurrentTenantId(), account.ID, loginEventId);
         }
 
         return cookie;
@@ -208,7 +208,7 @@ public class SecurityContext(
 
         if (account is IUserAccount)
         {
-            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var tenant = tenantManager.GetCurrentTenant();
 
             var u = await userManager.GetUsersAsync(account.ID);
 
@@ -257,7 +257,7 @@ public class SecurityContext(
 
     public async Task AuthenticateMeWithoutCookieAsync(Guid userId, List<Claim> additionalClaims = null)
     {
-        await AuthenticateMeWithoutCookieAsync(await tenantManager.GetCurrentTenantIdAsync(), userId, additionalClaims);
+        await AuthenticateMeWithoutCookieAsync(tenantManager.GetCurrentTenantId(), userId, additionalClaims);
     }
 
     public async Task AuthenticateMeWithoutCookieAsync(int tenantId, Guid userId, List<Claim> additionalClaims = null)
@@ -273,7 +273,7 @@ public class SecurityContext(
 
     public async Task SetUserPasswordHashAsync(Guid userID, string passwordHash)
     {
-        var tenantid = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantid = tenantManager.GetCurrentTenantId();
         var u = await userManager.GetUsersByPasswordHashAsync(tenantid, userID.ToString(), passwordHash);
         if (!Equals(u, Users.Constants.LostUser))
         {

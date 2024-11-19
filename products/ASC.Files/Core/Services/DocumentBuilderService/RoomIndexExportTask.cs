@@ -121,7 +121,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
         var logoPath = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.LightSmall);
 
-        logoPath = await documentServiceConnector.ReplaceCommunityAddressAsync(logoPath);
+        logoPath = documentServiceConnector.ReplaceCommunityAddress(logoPath);
 
         var items = new List<object>
         {

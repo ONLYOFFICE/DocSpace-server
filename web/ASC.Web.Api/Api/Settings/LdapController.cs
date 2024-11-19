@@ -142,7 +142,7 @@ public class LdapController(
         settings.Cron = cron;
         await settingsManager.SaveAsync(settings);
 
-        var t = await tenantManager.GetCurrentTenantAsync();
+        var t = tenantManager.GetCurrentTenant();
         if (!string.IsNullOrEmpty(cron))
         {
             ldapNotifyHelper.UnregisterAutoSync(t);
@@ -173,7 +173,7 @@ public class LdapController(
 
         var userId = authContext.CurrentAccount.ID.ToString();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.SyncLdapAsync(ldapSettings, tenant, userId);
 
@@ -197,7 +197,7 @@ public class LdapController(
 
         var ldapSettings = await settingsManager.LoadAsync<LdapSettings>();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.TestLdapSyncAsync(ldapSettings, tenant);
 
@@ -228,7 +228,7 @@ public class LdapController(
 
         var userId = authContext.CurrentAccount.ID.ToString();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.SaveLdapSettingsAsync(ldapSettings, tenant, userId);
 
@@ -252,7 +252,7 @@ public class LdapController(
 
         var userId = authContext.CurrentAccount.ID.ToString();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.TestLdapSaveAsync(inDto, tenant, userId);
 
@@ -274,7 +274,7 @@ public class LdapController(
     {
         await CheckLdapPermissionsAsync();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.ToLdapOperationStatus(tenant.Id);
 

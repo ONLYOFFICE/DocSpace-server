@@ -446,7 +446,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         {
             await documentServiceConnector.CheckDocServiceUrlAsync();
 
-            await messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
+            messageService.Send(MessageAction.DocumentServiceLocationSetting);
 
             var settings = await cspSettingsHelper.LoadAsync();
 

@@ -185,7 +185,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
 
         await PrivacyRoomSettings.SetEnabledAsync(settingsManager, inDto.Enable);
 
-        await messageService.SendAsync(inDto.Enable ? MessageAction.PrivacyRoomEnable : MessageAction.PrivacyRoomDisable);
+        messageService.Send(inDto.Enable ? MessageAction.PrivacyRoomEnable : MessageAction.PrivacyRoomDisable);
 
         return inDto.Enable;
     }

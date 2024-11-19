@@ -42,16 +42,16 @@ public static class SecureHelper
         }
     }
 
-    public static async Task<string> GenerateSecureKeyHeaderAsync(string path, EmailValidationKeyProvider keyProvider)
+    public static string GenerateSecureKeyHeader(string path, EmailValidationKeyProvider keyProvider)
     {
         var ticks = DateTime.UtcNow.Ticks;
         var data = path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + '.' + ticks;
-        var key = await keyProvider.GetEmailKeyAsync(data);
+        var key = keyProvider.GetEmailKey(data);
 
         return Constants.SecureKeyHeader + ':' + ticks + '-' + key;
     }
 
-    public static async Task<bool> CheckSecureKeyHeader(string queryHeaders, string path, EmailValidationKeyProvider keyProvider)
+    public static bool CheckSecureKeyHeader(string queryHeaders, string path, EmailValidationKeyProvider keyProvider)
     {
         if (string.IsNullOrEmpty(queryHeaders))
         {
@@ -72,7 +72,7 @@ public static class SecureHelper
         var ticks = headerKey[..separatorPosition];
         var key = headerKey[(separatorPosition + 1)..];
 
-        var result = await keyProvider.ValidateEmailKeyAsync(path + '.' + ticks, key);
+        var result = keyProvider.ValidateEmailKey(path + '.' + ticks, key);
 
         return result == EmailValidationKeyProvider.ValidationResult.Ok;
     }

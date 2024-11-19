@@ -77,7 +77,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         Guid? withoutUserId = null,
         string description = null)
     {
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
         await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
 
         var q1 = auditTrailContext.AuditEvents

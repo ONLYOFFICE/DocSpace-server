@@ -180,7 +180,7 @@ public class SecurityController(
 
         await settingsManager.SaveAsync(userPasswordSettings);
 
-        await messageService.SendAsync(MessageAction.PasswordStrengthSettingsUpdated);
+        messageService.Send(MessageAction.PasswordStrengthSettingsUpdated);
 
         return passwordSettingsConverter.Convert(userPasswordSettings);
     }
@@ -213,7 +213,7 @@ public class SecurityController(
 
         if (!inDto.Subjects.Any())
         {
-            await messageService.SendAsync(MessageAction.ProductAccessOpened, productName);
+            messageService.Send(MessageAction.ProductAccessOpened, productName);
         }
         else
         {
@@ -221,13 +221,13 @@ public class SecurityController(
             {
                 if (info.Groups.Count != 0)
                 {
-                    await messageService.SendAsync(MessageAction.GroupsOpenedProductAccess, productName,
+                    messageService.Send(MessageAction.GroupsOpenedProductAccess, productName,
                         info.Groups.Select(x => x.Name));
                 }
 
                 if (info.Users.Count != 0)
                 {
-                    await messageService.SendAsync(MessageAction.UsersOpenedProductAccess, productName,
+                    messageService.Send(MessageAction.UsersOpenedProductAccess, productName,
                         info.Users.Select(x => HttpUtility.HtmlDecode(x.DisplayName)));
                 }
             }
@@ -288,7 +288,7 @@ public class SecurityController(
             await webItemSecurity.SetSecurityAsync(item.Key, item.Value, subjects);
         }
 
-        await messageService.SendAsync(MessageAction.ProductsListUpdated);
+        messageService.Send(MessageAction.ProductsListUpdated);
 
         return await GetWebItemSettingsSecurityInfo(new SecuritySettingsRequestDto { Ids = itemList.Keys.ToList() }).ToListAsync();
     }
@@ -361,7 +361,7 @@ public class SecurityController(
             var messageAction = inDto.Administrator
                 ? MessageAction.AdministratorOpenedFullAccess
                 : MessageAction.AdministratorDeleted;
-            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
+            messageService.Send(messageAction, MessageTarget.Create(admin.Id),
                 admin.DisplayUserName(false, displayUserSettingsHelper));
         }
         else
@@ -369,7 +369,7 @@ public class SecurityController(
             var messageAction = inDto.Administrator
                 ? MessageAction.ProductAddedAdministrator
                 : MessageAction.ProductDeletedAdministrator;
-            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
+            messageService.Send(messageAction, MessageTarget.Create(admin.Id),
                 GetProductName(inDto.ProductId), admin.DisplayUserName(false, displayUserSettingsHelper));
         }
 

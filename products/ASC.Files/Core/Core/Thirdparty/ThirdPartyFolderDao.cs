@@ -78,7 +78,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             return folder;
         }
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         folder.Shared = await Queries.SharedAsync(filesDbContext, tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
 
@@ -253,7 +253,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
     public async Task DeleteFolderAsync(string folderId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var folder = await dao.GetFolderAsync(folderId);
         var id = dao.MakeId(folder);
 

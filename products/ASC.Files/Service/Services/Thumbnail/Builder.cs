@@ -273,8 +273,8 @@ public class Builder<T>(ThumbnailSettings settings,
 
     private async Task<(int, string)> GetThumbnailUrl(File<T> file, string toExtension, int width, int height)
     {
-        var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
-        fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
+        var fileUri = pathProvider.GetFileStreamUrl(file);
+        fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
 
         var fileExtension = file.ConvertedExtension;
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);

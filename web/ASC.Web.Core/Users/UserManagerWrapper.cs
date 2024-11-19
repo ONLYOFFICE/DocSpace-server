@@ -248,7 +248,7 @@ public sealed class UserManagerWrapper(
 
     public async Task<bool> UpdateUserTypeAsync(UserInfo user, EmployeeType type)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var initiatorType = await userManager.GetUserTypeAsync(initiator.Id);
         var changed = false;
@@ -382,7 +382,7 @@ public sealed class UserManagerWrapper(
 
             var @event = await auditEventsRepository.GetByFilterAsync(action: MessageAction.SendJoinInvite, target: userInfo.Email);
             var createBy = @event.LastOrDefault()?.UserId;
-            var link = await commonLinkUtility.GetInvitationLinkAsync(userInfo.Email, type, createBy ??  (await tenantManager.GetCurrentTenantAsync()).OwnerId, userInfo.GetCulture()?.Name);
+            var link = commonLinkUtility.GetInvitationLink(userInfo.Email, type, createBy ??  (tenantManager.GetCurrentTenant()).OwnerId, userInfo.GetCulture()?.Name);
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
             await studioNotifyService.SendDocSpaceRegistration(userInfo.Email, shortenLink);
