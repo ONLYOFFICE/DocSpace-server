@@ -32,10 +32,8 @@ public abstract class ActionInterpreter
     {
         { MessageAction.FileMovedWithOverwriting, MessageAction.FileMoved },
         { MessageAction.FileCopiedWithOverwriting, MessageAction.FileCopied },
-        { MessageAction.FileMovedToTrash, MessageAction.FileMovedToTrash },
         { MessageAction.FolderMovedWithOverwriting, MessageAction.FolderMoved },
         { MessageAction.FolderCopiedWithOverwriting, MessageAction.FolderCopied },
-        { MessageAction.FolderMovedToTrash, MessageAction.FolderMovedToTrash },
         { MessageAction.FileRestoreVersion, MessageAction.UserFileUpdated },
         { MessageAction.FileUploadedWithOverwriting, MessageAction.UserFileUpdated }
     }.ToFrozenDictionary();
