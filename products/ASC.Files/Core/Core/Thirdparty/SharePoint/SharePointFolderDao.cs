@@ -477,6 +477,11 @@ internal class SharePointFolderDao(
     {
         throw new NotImplementedException();
     }
+
+    public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 static file class Queries

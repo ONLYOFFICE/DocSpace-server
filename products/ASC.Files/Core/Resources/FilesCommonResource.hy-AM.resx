@@ -559,4 +559,7 @@
   <data name="RoleEnum_ContentCreator" xml:space="preserve">
     <value>Բովանդակության ստեղծող</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Բացել ֆայլը</value>
+  </data>
 </root>

@@ -802,4 +802,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Потребители [{0}]. Формулярът е изпратен: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Експортиране индекса на стаята, запазен в Документи</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Повторно изпратени покани: {0}</value>
+  </data>
 </root>

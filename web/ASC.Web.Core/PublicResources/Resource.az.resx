@@ -1063,4 +1063,10 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>İstifadəçi üçün kvota təyin etmək alınmadı. Daxil edilmiş dəyər ümumi DocSpace yaddaşından böyükdür.</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Ən azı 1 etibarlı domen əlavə edin.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Administratorların sayı limiti keçir: {0}/{1}.</value>
+  </data>
 </root>

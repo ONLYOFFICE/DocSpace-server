@@ -315,13 +315,20 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         if (file != null && fileData.Actions != null && fileData.Actions.Any(r => r.Type == 1))
         {
-            if (Guid.TryParse(fileData.Actions.Last().UserId, out var userId))
+            if (Guid.TryParse(fileData.Actions.Last().UserId, out var userId) && userId != ASC.Core.Configuration.Constants.Guest.ID)
             {
-                await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
+                try
+                {
+                    await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
+                }
+                catch
+                { 
+                    // ignored
+                }
             }
 
             var parentFolder = file.IsForm ? await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId) : null;
-            if (parentFolder != null && parentFolder.FolderType == FolderType.FormFillingFolderInProgress)
+            if (parentFolder is { FolderType: FolderType.FormFillingFolderInProgress })
             {
                 var user = await userManager.GetUsersAsync(userId);
                 await filesMessageService.SendAsync(MessageAction.FormOpenedForFilling, file, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), file.Title);

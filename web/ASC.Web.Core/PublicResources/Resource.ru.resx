@@ -1066,4 +1066,13 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Количество администраторов превышает лимит: {0}/{1}.</value>
   </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Добавьте хотя бы 1 разрешенный IP-адрес.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Добавьте хотя бы 1 доверенный домен.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Некоммерческий</value>
+  </data>
 </root>

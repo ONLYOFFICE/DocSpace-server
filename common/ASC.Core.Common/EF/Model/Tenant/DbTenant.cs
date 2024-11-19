@@ -309,7 +309,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.TrustedDomainsEnabled)
                 .HasColumnName("trusteddomainsenabled")
-                .HasDefaultValueSql("'1'");
+                .HasDefaultValueSql("'0'");
 
             entity.Property(e => e.Version)
                 .HasColumnName("version")
@@ -405,7 +405,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.TrustedDomainsEnabled)
                 .HasColumnName("trusteddomainsenabled")
-                .HasDefaultValueSql("1");
+                .HasDefaultValueSql("0");
 
             entity.Property(e => e.Version)
                 .HasColumnName("version")

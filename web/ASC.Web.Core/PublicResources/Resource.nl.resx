@@ -1063,4 +1063,10 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Fout bij het instellen van quota per gebruiker. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Voeg minstens 1 vertrouwd domein toe.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Het aantal beheerders overschrijdt de limiet: {0}/{1}.</value>
+  </data>
 </root>

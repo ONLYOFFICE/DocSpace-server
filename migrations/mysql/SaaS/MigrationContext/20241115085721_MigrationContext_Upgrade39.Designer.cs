@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20241009092523_MigrationContext_Upgrade35")]
-    partial class MigrationContext_Upgrade35
+    [Migration("20241115085721_MigrationContext_Upgrade39")]
+    partial class MigrationContext_Upgrade39
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,7 +21,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.Core.Common.EF.Acl", b =>
@@ -784,6 +784,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
                             Name = "nonprofit",
                             Price = 0m,
+                            ProductId = "1007",
                             Visible = false
                         },
                         new
@@ -1549,12 +1550,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<bool>("Spam")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("spam")
-                        .HasDefaultValueSql("'1'");
-
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -1575,7 +1570,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("trusteddomainsenabled")
-                        .HasDefaultValueSql("'1'");
+                        .HasDefaultValueSql("'0'");
 
                     b.Property<string>("TrustedDomainsRaw")
                         .HasColumnType("varchar(1024)")
@@ -1623,7 +1618,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Web Office",
                             OwnerId = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
-                            Spam = false,
                             Status = 0,
                             TrustedDomainsEnabled = 0,
                             Version = 0
@@ -1638,7 +1632,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Web Office",
                             OwnerId = "00000000-0000-0000-0000-000000000000",
-                            Spam = false,
                             Status = 1,
                             TrustedDomainsEnabled = 0,
                             Version = 0
@@ -5125,6 +5118,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("sid")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool?>("Spam")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("spam");
 
                     b.Property<string>("SsoNameId")
                         .HasColumnType("varchar(512)")

@@ -60,6 +60,7 @@ public class RabbitMQGenericQueueConfiguration {
   private boolean nonDurable = false;
   private boolean autoDelete = false;
   private boolean fanOut = false;
+  private boolean singleActiveConsumer = false;
 
   /**
    * Validates the queue configuration to ensure all required fields are set correctly. If any

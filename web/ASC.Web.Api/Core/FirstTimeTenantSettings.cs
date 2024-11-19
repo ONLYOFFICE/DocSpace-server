@@ -42,7 +42,8 @@ public class FirstTimeTenantSettings(
     CoreBaseSettings coreBaseSettings,
     IHttpClientFactory clientFactory,
     CookiesManager cookiesManager,
-    CspSettingsHelper cspSettingsHelper)
+    CspSettingsHelper cspSettingsHelper,
+    DocumentServiceLicense documentServiceLicense)
 {
     public async Task<WizardSettings> SaveDataAsync(WizardRequestsDto inDto)
     {
@@ -102,7 +103,7 @@ public class FirstTimeTenantSettings(
                 await TariffSettings.SetLicenseAcceptAsync(settingsManager);
                 await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
 
-                await licenseReader.RefreshLicenseAsync();
+                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
             }
 
             settings.Completed = true;

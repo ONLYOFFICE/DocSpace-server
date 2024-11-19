@@ -802,4 +802,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Käyttäjät [{0}]. Lomake lähetetty: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Vie asiakirjoihin tallennetun huoneen hakemisto</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Kutsut on jälleen lähetetty: {0}</value>
+  </data>
 </root>

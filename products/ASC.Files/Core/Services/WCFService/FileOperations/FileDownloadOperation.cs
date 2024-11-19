@@ -264,7 +264,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var extsConvertible = await fileUtility.GetExtsConvertibleAsync();
         var convertible = extsConvertible.TryGetValue(fileExt, out var convertibleToExt);
 
-        if (convertible && convertibleToExt.Contains(FileUtility.WatermarkedDocumentExt) && await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+        if (convertible && await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
         {
             _files[file.Id] = FileUtility.WatermarkedDocumentExt;
         }
@@ -435,7 +435,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     await compressTo.CreateEntry(newTitle, file.ModifiedOn);
                     try
                     {
-                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt) ?
+                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ?
                             await fileConverter.ExecAsync(file, convertToExt) :
                             await fileDao.GetFileStreamAsync(file);
                         
