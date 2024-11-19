@@ -343,20 +343,17 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
-  function addUser({ tenantId, userId } = {}) {
-    console.log(userId);
+  function addUser({ tenantId, user } = {}) {
     var room = `${tenantId}-accounts`;
-    filesIO.to(room).emit("s:add-user", userId);
+    filesIO.to(room).emit("s:add-user",  {id: user.id, data: user});
   }
 
-  function updateUser({ tenantId, userId } = {}) {
-    console.log(userId);
+  function updateUser({ tenantId, user } = {}) {
     var room = `${tenantId}-accounts`;
-    filesIO.to(room).emit("s:update-user", userId);
+    filesIO.to(room).emit("s:update-user", {id: user.id, data: user});
   }
 
   function deleteUser({ tenantId, userId } = {}) {
-    console.log(userId);
     var room = `${tenantId}-accounts`;
     filesIO.to(room).emit("s:delete-user", userId);
   }

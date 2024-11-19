@@ -397,7 +397,7 @@ public class UserController(
 
             await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
             await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
-            await socketManager.AddUserAsync(user.Id);
+            await socketManager.AddUserAsync(user);
         }
 
         var result = new List<EmployeeDto>();
@@ -1281,7 +1281,7 @@ public class UserController(
             await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
 
-        await socketManager.AddUserAsync(user.Id);
+        await socketManager.AddUserAsync(user);
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
 
@@ -1553,7 +1553,7 @@ public class UserController(
         if (changed)
         {
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-            await socketManager.UpdateUserAsync(user.Id);
+            await socketManager.UpdateUserAsync(user);
 
             await messageService.SendAsync(MessageAction.UserUpdated, MessageTarget.Create(user.Id),
                 user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
@@ -1632,7 +1632,7 @@ public class UserController(
                             }
 
                             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-                            await socketManager.UpdateUserAsync(user.Id);
+                            await socketManager.UpdateUserAsync(user);
                         }
                         finally
                         {
@@ -1650,7 +1650,7 @@ public class UserController(
 
                     await cookiesManager.ResetUserCookieAsync(user.Id);
                     await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
-                    await socketManager.UpdateUserAsync(user.Id);
+                    await socketManager.UpdateUserAsync(user);
                     break;
             }
         }
@@ -1688,7 +1688,7 @@ public class UserController(
         foreach (var user in users)
         {
             await userManagerWrapper.UpdateUserTypeAsync(user, inDto.Type);
-            await socketManager.UpdateUserAsync(user.Id);
+            await socketManager.UpdateUserAsync(user);
         }
 
         await messageService.SendAsync(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),

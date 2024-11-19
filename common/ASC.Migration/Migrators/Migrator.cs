@@ -193,7 +193,7 @@ public abstract class Migrator(
                     user.Info.UserName = await UserManagerWrapper.MakeUniqueNameAsync(user.Info);
                     user.Info.ActivationStatus = EmployeeActivationStatus.Pending;
                     saved = await UserManager.SaveUserInfo(user.Info, user.UserType);
-                    await SocketManager.AddUserAsync(saved.Id);
+                    await SocketManager.AddUserAsync(saved);
                     var groupId = user.UserType switch
                     {
                         EmployeeType.User => Constants.GroupUser.ID,

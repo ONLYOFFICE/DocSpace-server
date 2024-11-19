@@ -26,6 +26,7 @@
 
 using System.Threading.Channels;
 using ASC.Core.Billing;
+using ASC.Web.Api.Models;
 
 namespace ASC.Web.Files.Utils;
 
@@ -38,7 +39,8 @@ public class SocketManager(
         FileDtoHelper filesWrapperHelper,
         FolderDtoHelper folderDtoHelper,
         FileSecurity fileSecurity,
-        UserManager userManager)
+        UserManager userManager,
+        EmployeeFullDtoHelper employeeFullDtoHelper)
     : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
@@ -95,16 +97,18 @@ public class SocketManager(
         await MakeRequest("restore-progress", new { tenantId, percentage });
     }
 
-    public async Task AddUserAsync(Guid userId)
+    public async Task AddUserAsync(UserInfo userInfo)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await MakeRequest("add-user", new { tenantId, userId});
+        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
+        await MakeRequest("add-user", new { tenantId, user = dto });
     }
 
-    public async Task UpdateUserAsync(Guid userId)
+    public async Task UpdateUserAsync(UserInfo userInfo)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await MakeRequest("update-user", new { tenantId, userId });
+        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
+        await MakeRequest("update-user", new { tenantId, user = dto });
     }
 
     public async Task DeleteUserAsync(Guid userId)
