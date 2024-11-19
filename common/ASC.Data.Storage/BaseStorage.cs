@@ -152,38 +152,69 @@ public abstract class BaseStorage(TempStream tempStream,
     public abstract Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length);
     
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream);
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token);
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId);
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token);
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl);
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token);
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName)
     {
         return await SaveAsync(domain, path, Guid.Empty, stream, attachmentFileName);
     }
+
+    public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token)
+    {
+        return await SaveAsync(domain, path, Guid.Empty, stream, attachmentFileName, token);
+    }
+
     public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+    {
+        return await SaveAsync(domain, path, ownerId, stream, attachmentFileName, CancellationToken.None);
+    }
+    
+    public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token)
     {
         if (!string.IsNullOrEmpty(attachmentFileName))
         {
             return await SaveWithAutoAttachmentAsync(domain, path, ownerId, stream, attachmentFileName);
         }
-        return await SaveAsync(domain, path, stream, ownerId);
+        return await SaveAsync(domain, path, stream, ownerId, token);
     }
 
     protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName);
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
                             string contentDisposition);
+    
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
+                            string contentDisposition, CancellationToken token);
 
     public abstract Task<Uri> SaveAsync(string domain, string path,Guid ownerId, Stream stream, string contentType,
                             string contentDisposition);
+    
+    public abstract Task<Uri> SaveAsync(string domain, string path,Guid ownerId, Stream stream, string contentType,
+                            string contentDisposition, CancellationToken token);
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays);
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token);
 
     public async Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName)
     {
         return await SaveAsync(string.Empty, path, stream, attachmentFileName);
     }
+    
+    public async Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName, CancellationToken token)
+    {
+        return await SaveAsync(string.Empty, path, stream, attachmentFileName, token);
+    }
 
     public async Task<Uri> SaveAsync(string path, Stream stream)
     {
         return await SaveAsync(string.Empty, path, stream);
+    }
+    
+    public async Task<Uri> SaveAsync(string path, Stream stream, CancellationToken token)
+    {
+        return await SaveAsync(string.Empty, path, stream, token);
     }
     
     protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName);

@@ -144,15 +144,32 @@ public class DiscDataStore(TempStream tempStream,
     {
         return SaveAsync(domain, path, stream, ownerId);
     }
+    
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition, CancellationToken token)
+    {
+        return SaveAsync(domain, path, stream, ownerId, token);
+    }
+
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition)
     {
         return SaveAsync(domain, path, stream);
+    }
+    
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition, CancellationToken token)
+    {
+        return SaveAsync(domain, path, stream, token);
     }
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays)
     {
         return SaveAsync(domain, path, stream);
     }
+    
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token)
+    {
+        return SaveAsync(domain, path, stream, token);
+    }
+
     private bool EnableQuotaCheck(string domain)
     {
         return (QuotaController != null) && !domain.EndsWith("_temp");
@@ -162,7 +179,18 @@ public class DiscDataStore(TempStream tempStream,
     {
         return await SaveAsync(domain, path, stream, Guid.Empty);
     }
+    
+    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token)
+    {
+        return await SaveAsync(domain, path, stream, Guid.Empty, token);
+    }
+
     public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
+    {
+        return await SaveAsync(domain, path, stream, ownerId, CancellationToken.None);
+    }
+
+    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token)
     {
         Logger.DebugSavePath(path);
 
@@ -188,19 +216,10 @@ public class DiscDataStore(TempStream tempStream,
             CreateDirectory(target);
             //Copy stream
 
-            //optimaze disk file copy
-            long fslen;
-            if (buffered is FileStream fileStream)
-            {
-                File.Copy(fileStream.Name, target, true);
-                fslen = fileStream.Length;
-            }
-            else
-            {
-                await using var fs = File.Open(target, FileMode.Create);
-                await buffered.CopyToAsync(fs);
-                fslen = fs.Length;
-            }
+            
+            await using var fs = File.Open(target, FileMode.Create);
+            await buffered.CopyToAsync(fs, token);
+            var fslen = fs.Length;
 
             await QuotaUsedAddAsync(domain, fslen, ownerId);
 
@@ -220,6 +239,11 @@ public class DiscDataStore(TempStream tempStream,
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
     {
         return SaveAsync(domain, path, stream);
+    }
+    
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token)
+    {
+        return SaveAsync(domain, path, stream, token);
     }
 
     #region chunking

@@ -129,6 +129,7 @@ public interface IDataStore
     /// <param name="stream"> flow. Is read from the current position! Desirable to set to 0 when the transmission MemoryStream instance </param>
     /// <returns> </returns>
     Task<Uri> SaveAsync(string domain, string path, Stream stream);
+    Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token);
 
     /// <summary>
     /// Saves the contents of the stream in the repository.
@@ -139,6 +140,7 @@ public interface IDataStore
     /// <param name="acl"></param>
     /// <returns></returns>
     Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl);
+    Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token);
 
     /// <summary>
     /// Saves the contents of the stream in the repository.
@@ -149,6 +151,7 @@ public interface IDataStore
     /// <param name="attachmentFileName"></param>
     /// <returns></returns>
     Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName);
+    Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token);
 
     /// <summary>
     /// Saves the contents of the stream in the repository.
@@ -160,6 +163,7 @@ public interface IDataStore
     /// <param name="attachmentFileName"></param>
     /// <returns></returns>
     Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName);
+    Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token);
 
     /// <summary>
     /// Saves the contents of the stream in the repository.
@@ -171,6 +175,7 @@ public interface IDataStore
     /// <param name="contentDisposition"></param>
     /// <returns></returns>
     Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition);
+    Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition, CancellationToken token);
 
     /// <summary>
     /// Saves the contents of the stream in the repository.
@@ -182,6 +187,7 @@ public interface IDataStore
     /// <param name="cacheDays"></param>
     /// <returns></returns>
     Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays);
+    Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token);
 
     Task<string> InitiateChunkedUploadAsync(string domain, string path);
 
@@ -333,7 +339,9 @@ public interface IDataStore
 #pragma warning disable 1591
     Task<Stream> GetReadStreamAsync(string path);
     Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName);
+    Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName, CancellationToken token);
     Task<Uri> SaveAsync(string path, Stream stream);
+    Task<Uri> SaveAsync(string path, Stream stream, CancellationToken token);
     Task DeleteAsync(string path);
     Task DeleteFilesAsync(string folderPath, string pattern, bool recursive);
     Task<Uri> MoveAsync(string srcPath, string newDomain, string newPath);

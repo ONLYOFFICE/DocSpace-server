@@ -274,10 +274,22 @@ public class S3Storage(TempStream tempStream,
     {
         return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto);
     }
+
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition, CancellationToken token)
+    {
+        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto, token);
+    }
+
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
                 string contentDisposition)
     {
         return SaveAsync(domain, path, stream, contentType, contentDisposition, ACL.Auto);
+    }
+    
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
+                string contentDisposition, CancellationToken token)
+    {
+        return SaveAsync(domain, path, stream, contentType, contentDisposition, ACL.Auto, token);
     }
 
     private bool EnableQuotaCheck(string domain)
@@ -291,8 +303,22 @@ public class S3Storage(TempStream tempStream,
         return await SaveAsync(domain, path, Guid.Empty, stream, contentType,
                          contentDisposition, acl, contentEncoding, cacheDays);
     }
+    
+    public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
+                         string contentDisposition, ACL acl, CancellationToken token, string contentEncoding = null, int cacheDays = 5)
+    {
+        return await SaveAsync(domain, path, Guid.Empty, stream, contentType,
+                         contentDisposition, acl, token, contentEncoding, cacheDays);
+    }
+
     public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
                          string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
+    {
+        return await SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, acl, CancellationToken.None, contentEncoding, cacheDays);
+    }
+
+    public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
+                         string contentDisposition, ACL acl, CancellationToken token, string contentEncoding = null, int cacheDays = 5)
     {
         var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
 
@@ -346,7 +372,7 @@ public class S3Storage(TempStream tempStream,
                 request.Headers.ContentEncoding = contentEncoding;
             }
 
-            await uploader.UploadAsync(request);
+            await uploader.UploadAsync(request, token);
 
             //await InvalidateCloudFrontAsync(MakePath(domain, path));
 
@@ -367,19 +393,40 @@ public class S3Storage(TempStream tempStream,
     {
         return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty);
     }
+    
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token)
+    {
+        return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty, token);
+    }
+
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream)
     {
         return SaveAsync(domain, path, stream, string.Empty, string.Empty);
+    }
+    
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token)
+    {
+        return SaveAsync(domain, path, stream, string.Empty, string.Empty, token);
     }
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays)
     {
         return SaveAsync(domain, path, stream, string.Empty, string.Empty, ACL.Auto, contentEncoding, cacheDays);
     }
+    
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token)
+    {
+        return SaveAsync(domain, path, stream, string.Empty, string.Empty, ACL.Auto, token, contentEncoding, cacheDays);
+    }
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
     {
         return SaveAsync(domain, path, stream, null, null, acl);
+    }
+    
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token)
+    {
+        return SaveAsync(domain, path, stream, null, null, acl, token);
     }
 
     #region chunking

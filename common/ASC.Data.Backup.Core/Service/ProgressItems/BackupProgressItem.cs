@@ -123,7 +123,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
             string hash;
             if (writer.NeedUpload)
             {
-                storagePath = await backupStorage.UploadAsync(_storageBasePath, tempFile, _userId);
+                storagePath = await backupStorage.UploadAsync(_storageBasePath, tempFile, _userId, CancellationToken);
                 hash = BackupWorker.GetBackupHashSHA(tempFile);
             }
             else

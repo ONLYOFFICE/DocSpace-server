@@ -46,7 +46,7 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
         _sessionHolder = new FilesChunkedUploadSessionHolder(daoFactory, store, "", cache, setupInfo.ChunkUploadSize);
     }
 
-    public async Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId)
+    public async Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId, CancellationToken token)
     {
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         if (!userId.Equals(Guid.Empty))
@@ -61,10 +61,10 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
 
         if (int.TryParse(storageBasePath, out var fId))
         {
-            return (await Upload(fId, localPath)).ToString();
+            return (await UploadAsync(fId, localPath, token)).ToString();
         }
 
-        return await Upload(storageBasePath, localPath);
+        return await UploadAsync(storageBasePath, localPath, token);
     }
 
     public async Task<string> DownloadAsync(string storagePath, string targetLocalPath)
@@ -109,7 +109,7 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
         return Task.FromResult(String.Empty);
     }
 
-    private async Task<T> Upload<T>(T folderId, string localPath)
+    private async Task<T> UploadAsync<T>(T folderId, string localPath, CancellationToken token)
     {
         var folderDao = GetFolderDao<T>();
         var fileDao = await GetFileDaoAsync<T>();
@@ -135,6 +135,10 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
 
         while ((bytesRead = await source.ReadAsync(buffer.AsMemory(0, (int)setupInfo.ChunkUploadSize))) > 0)
         {
+            if (token.IsCancellationRequested)
+            {
+                throw new OperationCanceledException();
+            }
             using var theMemStream = new MemoryStream();
             await theMemStream.WriteAsync(buffer.AsMemory(0, bytesRead));
             theMemStream.Position = 0;
