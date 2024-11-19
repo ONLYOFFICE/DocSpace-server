@@ -861,4 +861,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>المستخدمين [{0}]. النموذج المعتمد: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>تم حفظ تصدير فهرس الغرفة في المستندات</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>تم إرسال الدعوات مرة أخرى: {0}</value>
+  </data>
 </root>

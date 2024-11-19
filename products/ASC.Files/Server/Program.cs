@@ -71,6 +71,8 @@ try
 
     var app = builder.Build();
 
+    ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<FileTrackerHelper>().Subscribe();
+
     startup.Configure(app, app.Environment);
 
     logger.Info("Starting web host ({applicationContext})...", AppName);

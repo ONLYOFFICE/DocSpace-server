@@ -36,6 +36,8 @@ internal class CleanupLifetimeExpiredService(
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
+    private TimeSpan DelayInterval { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:cleanupLifetimeExpired:delay") ?? "6:0:0");
+
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:cleanupLifetimeExpired:period") ?? "0:5:0");
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
@@ -128,7 +130,11 @@ internal class CleanupLifetimeExpiredService(
 
     private async Task<List<LifetimeEnabledRoom>> GetLifetimeEnabledRoomsAsync(FilesDbContext dbContext)
     {
-        return await Queries.LifetimeEnabledRoomsAsync(dbContext).ToListAsync();
+        var delayedStartDate = DateTime.UtcNow.Subtract(DelayInterval);
+
+        return await Queries.LifetimeEnabledRoomsAsync(dbContext)
+            .Where(x => x.Lifetime.StartDate == null || x.Lifetime.StartDate < delayedStartDate)
+            .ToListAsync();
     }
 
     private async Task<List<int>> GetExpiredFilesAsync(FilesDbContext dbContext, int tenantId, int roomId, DateTime expiration)
@@ -161,7 +167,7 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, int roomId, DateTime expiration) =>
                 ctx.Tree
                     .Join(ctx.Files, a => a.FolderId, b => b.ParentId, (tree, file) => new { tree, file })
-                    .Where(x => x.tree.ParentId == roomId && x.file.TenantId == tenantId && x.file.ModifiedOn < expiration)
+                    .Where(x => x.tree.ParentId == roomId && x.file.TenantId == tenantId && x.file.Version == 1 && x.file.ModifiedOn < expiration)
                     .Select(r => r.file.Id));
 }
 

@@ -802,4 +802,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>用户 [{0}]。表单已提交：{1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>导出的房间索引已保存至文档</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>邀请已重新发送：{0}</value>
+  </data>
 </root>

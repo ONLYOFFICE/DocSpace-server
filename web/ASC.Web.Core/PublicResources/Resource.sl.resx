@@ -1060,4 +1060,13 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Kvote na uporabnika ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupnega prostora za shranjevanje DocSpace.</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Dodajte vsaj 1 zaupanja vredno domeno.</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} na skrbnika in možnost dodajanja prostora na zahtevo</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Število skrbnikov presega omejitev: {0}/{1}.</value>
+  </data>
 </root>

@@ -116,7 +116,7 @@ public class UserManager(
         return await users.ToArrayAsync();
     }
 
-    public async Task<UserInfo> GetUsersAsync(Guid id)
+    public async Task<UserInfo> GetUsersAsync(Guid id, bool returnLostUserIfRemoved = true)
     {
         if (IsSystemUser(id))
         {
@@ -125,7 +125,12 @@ public class UserManager(
 
         var u = await userService.GetUserAsync(Tenant.Id, id);
 
-        return u is { Removed: false } ? u : Constants.LostUser;
+        if (returnLostUserIfRemoved)
+        {
+            return u is { Removed: false } ? u : Constants.LostUser;
+        }
+
+        return u ?? Constants.LostUser;
     }
     
     public async Task<UserInfo> GetUserAsync(Guid id, Expression<Func<User, UserInfo>> exp)

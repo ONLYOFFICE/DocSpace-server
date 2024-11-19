@@ -34,12 +34,13 @@ public class BackupDto
     /// <summary>
     /// Storage type
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
     /// Storage parameters
     /// </summary>
-    public IDictionary<object, object> StorageParams { get; set; }
+    public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
     /// Specifies if a dump will be created or not

@@ -802,4 +802,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Kullanıcılar [{0}]. Form gönderildi: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Oda dizininin dışa aktarımı Belgeler’e kaydedildi</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Davetiyeler yeniden gönderildi: {0}</value>
+  </data>
 </root>

@@ -802,4 +802,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Utilisateurs [{0}]. Formulaire soumis : {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Exportation de l'index des salles sauvegardé dans les Documents</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Les invitations ont été envoyées à nouveau : {0}</value>
+  </data>
 </root>
