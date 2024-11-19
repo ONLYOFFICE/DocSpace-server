@@ -1952,6 +1952,57 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    public async Task SetOrderAsync<T>(IEnumerable<OrdersItemRequestDto<T>> items)
+    {
+        var contextId = Guid.NewGuid().ToString();
+        
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        
+        var folders = await folderDao.GetFoldersAsync(items.Where(x => x.EntryType == FileEntryType.Folder)
+                .Select(x => x.EntryId))
+            .ToDictionaryAsync(x => x.Id);
+        
+        var files = await fileDao.GetFilesAsync(items.Where(x => x.EntryType == FileEntryType.File)
+                .Select(x => x.EntryId))
+            .ToDictionaryAsync(x => x.Id);
+
+        foreach (var item in items)
+        {
+            FileEntry<T> entry = item.EntryType == FileEntryType.File ? files.Get(item.EntryId) : folders.Get(item.EntryId);
+            entry.NotFoundIfNull();
+
+            if (!await fileSecurity.CanEditAsync(entry))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
+            switch (entry)
+            {
+                case File<T> file:
+                    {
+                        var newOrder = await fileDao.SetCustomOrder(file.Id, file.ParentId, item.Order);
+                        if (newOrder != 0)
+                        {
+                            await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), item.Order.ToString(), contextId);
+                        }
+
+                        break;
+                    }
+                case Folder<T> folder:
+                    {
+                        var newOrder = await folderDao.SetCustomOrder(folder.Id, folder.ParentId, item.Order);
+                        if (newOrder != 0)
+                        {
+                            await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), item.Order.ToString(), contextId);
+                        }
+
+                        break;
+                    }
+            }
+        }
+    }
+
     public async Task SetFolderOrder<T>(T folderId, int order)
     {
         var folderDao = daoFactory.GetFolderDao<T>();

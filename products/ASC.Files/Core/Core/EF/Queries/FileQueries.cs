@@ -449,7 +449,6 @@ static file class FileQueries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => fileIds.Contains(r.Id) && r.CurrentVersion)
-
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -462,7 +461,20 @@ static file class FileQueries
                                       ).FirstOrDefault()
                                 where f.TenantId == r.TenantId
                                 select f
-                            ).FirstOrDefault()
+                            ).FirstOrDefault(),
+                        Order = (
+                            from f in ctx.FileOrder
+                            where (
+                                from rs in ctx.RoomSettings 
+                                where rs.TenantId == f.TenantId && rs.RoomId ==
+                                    (from t in ctx.Tree
+                                        where t.FolderId == r.ParentId
+                                        orderby t.Level descending
+                                        select t.ParentId
+                                    ).Skip(1).FirstOrDefault()
+                                select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                            select f.Order
+                        ).FirstOrDefault()
                     }));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> FileIdsAsync =
