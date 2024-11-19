@@ -65,6 +65,8 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         
         var fileDao = daoFactory.GetFileDao<int>();
 
+        file.ContentLength = stream.Length;
+
         file = await fileDao.SaveFileAsync(file, stream);
         await socketManager.CreateFileAsync(file);
         
