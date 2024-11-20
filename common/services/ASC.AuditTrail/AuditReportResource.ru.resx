@@ -841,4 +841,7 @@
   <data name="FileIndexChanged" xml:space="preserve">
     <value>Файл: {0}. Индекс изменен с {1} на {2}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
 </root>

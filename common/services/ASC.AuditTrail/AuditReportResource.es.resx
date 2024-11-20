@@ -808,4 +808,25 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Invitacion enviada de nuevo: {0}</value>
   </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Sala: {0}. Marca de agua desactivada</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Sala: {0}. Marca de agua activada</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Sala: {0}. La opción Denegar descarga está desactivada</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Carpeta: {0}. Índice cambiado de {1} a {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Carpeta: {0}. Índices reordenados</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Archivo: {0}. Índice cambiado de {1} a {2}</value>
+  </data>
 </root>

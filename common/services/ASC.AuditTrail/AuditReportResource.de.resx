@@ -802,4 +802,43 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Benutzer [{0}]. Formular abgeschickt: {1}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Datei: {0}. Index geändert von {1} nach {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Ordner: {0}. Index geändert von {1} nach {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Ordner: {0}. Indizes neu geordnet</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Raum: {0}. Download-Einschränkung deaktiviert</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Raum: {0}. Download-Einschränkung aktiviert</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Export des in Dokumente gespeicherten Raumverzeichnisses</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Raumindizierung deaktiviert</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Raumindizierung aktiviert</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Lebensdauer deaktiviert</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Lebensdauer aktiviert. Wert: {0}. Zeitraum: {1}. Dauerhaft löschen: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Raum: {0}. Wasserzeichen deaktiviert</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Raum: {0}. Wasserzeichen aktiviert</value>
+  </data>
 </root>

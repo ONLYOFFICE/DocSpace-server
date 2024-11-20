@@ -806,6 +806,42 @@
     <value>Exportation de l'index des salles sauvegardé dans les Documents</value>
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
-    <value>Les invitations ont été envoyées à nouveau : {0}</value>
+    <value>Invitation envoyée à nouveau : {0}</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Fichier : {0}. Index changé de {1} à {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Dossier : {0}. L'index est changé de {1} à {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Dossier : {0}. Index réorganisés</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Salle : {0}. Téléchargement restreint désactivé</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Salle : {0}. Téléchargement restreint activé</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indexation de la salle désactivée</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indexation de la salle activée</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Durée de vie désactivée</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>La durée de vie est définie. Valeur : {0}. Période : {1} : {1}. Suppression définitive : {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Salle : {0}. Filigrane désactivé</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Salle : {0}. Filigrane activé</value>
   </data>
 </root>
