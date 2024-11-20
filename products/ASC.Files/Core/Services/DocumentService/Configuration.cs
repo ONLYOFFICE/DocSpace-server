@@ -894,7 +894,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// Embed url
     /// </summary>
-    public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam);
+    public string EmbedUrl => ShareLinkParam.IndexOf(FilesLinkUtility.ShareKey) != -1 ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null;
 
     /// <summary>
     /// Save url
@@ -909,7 +909,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// Share url
     /// </summary>
-    public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam);
+    public string ShareUrl => ShareLinkParam.IndexOf(FilesLinkUtility.ShareKey) != -1 ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null;
 
     /// <summary>
     /// Toolbar docked
