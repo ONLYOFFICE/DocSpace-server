@@ -363,7 +363,12 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 {
                     try
                     {
-                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner()));
+                        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
+                        var tagDao = daoFactory.GetTagDao<T>();
+                        var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
+                        var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
+
+                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.DeleteFileAsync(file.Id, fromRoomTag == null ? file.GetFileQuotaOwner() : ASC.Core.Configuration.Constants.CoreSystem.ID));
                         
                         var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
                         
