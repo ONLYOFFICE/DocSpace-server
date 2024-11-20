@@ -146,15 +146,11 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public async Task<FileDto<T>> CreateHtmlFileAsync<T>(T folderId, string title, string content, bool updateIfExist)
     {
-        ArgumentNullException.ThrowIfNull(title);
-
         return await CreateFileAsync(folderId, title, content, ".html", updateIfExist);
     }
 
     public async Task<FileDto<T>> CreateTextFileAsync<T>(T folderId, string title, string content, bool updateIfExist)
     {
-        ArgumentNullException.ThrowIfNull(title);
-
         //Try detect content
         var extension = ".txt";
         if (!string.IsNullOrEmpty(content) && Regex.IsMatch(content, @"<([^\s>]*)(\s[^<]*)>"))

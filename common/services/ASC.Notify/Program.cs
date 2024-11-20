@@ -72,7 +72,7 @@ try
     await eventBus.SubscribeAsync<NotifySendMessageRequestedIntegrationEvent, NotifySendMessageRequestedIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
-    await app.RunWithTasksAsync();
+    await app.RunWithTasksAsync(awaitTasks: false);
 }
 catch (Exception ex)
 {

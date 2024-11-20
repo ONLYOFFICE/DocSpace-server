@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.Files.Core.VirtualRooms;
 
 public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataLifetimeDto>
@@ -33,6 +31,7 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
     public bool DeletePermanently { get; set; }
     public RoomDataLifetimePeriod Period { get; set; }
     public int? Value { get; set; }
+    public DateTime? StartDate { get; set; }
     public bool? Enabled { get; set; }
 
     public DateTime GetExpirationUtc()
@@ -56,8 +55,29 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
 
         return expiration;
     }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is not RoomDataLifetime lifetime)
+        {
+            return false;
+        }
+        
+        return DeletePermanently == lifetime.DeletePermanently && Period == lifetime.Period && Value == lifetime.Value;
+    }
+
+    protected bool Equals(RoomDataLifetime other)
+    {
+        return DeletePermanently == other.DeletePermanently && Period == other.Period && Value == other.Value;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(DeletePermanently, (int)Period, Value);
+    }
 }
 
+[EnumExtensions]
 public enum RoomDataLifetimePeriod
 {
     Day = 0,

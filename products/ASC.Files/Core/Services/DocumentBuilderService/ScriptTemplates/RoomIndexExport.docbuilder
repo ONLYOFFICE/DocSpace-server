@@ -41,21 +41,21 @@ function prepareInfo() {
             height: 15.5,
             dataArray: [
                 { "value": inputData.resources.company, "bold": true },
-                { "value": inputData.info.company, "fontColor": defaultFontColorGray }
+                { "value": inputData.info.company, "fontColor": defaultFontColorGray, "format": "@" }
             ]
         },
         {
             height: 15.5,
             dataArray: [
                 { "value": inputData.resources.room, "bold": true },
-                { "value": inputData.info.room, "fontColor": defaultFontColorGray }
+                { "value": inputData.info.room, "fontColor": defaultFontColorGray, "format": "@" }
             ]
         },
         {
             height: 15.5,
             dataArray: [
                 { "value": inputData.resources.exportAuthor, "bold": true },
-                { "value": inputData.info.exportAuthor, "fontColor": defaultFontColorGray }
+                { "value": inputData.info.exportAuthor, "fontColor": defaultFontColorGray, "format": "@" }
             ]
         },
         {
@@ -97,7 +97,18 @@ function prepareData(startColIndex, startRowIndex) {
     ];
 
     var sortedData = inputData.data.sort(function(a, b) {
-        return (a.index ?? "").localeCompare(b.index ?? "")
+        var i, diff;
+        var segmentsA = (a.index ?? "").split('.');
+        var segmentsB = (b.index ?? "").split('.');
+        var l = Math.min(segmentsA.length, segmentsB.length);
+
+        for (i = 0; i < l; i++) {
+            diff = parseInt(segmentsA[i]) - parseInt(segmentsB[i]);
+            if (diff) {
+                return diff;
+            }
+        }
+        return segmentsA.length - segmentsB.length;
     });
 
     for (var i = 0; i < sortedData.length; i++) {
@@ -108,10 +119,10 @@ function prepareData(startColIndex, startRowIndex) {
             height: 19.5,
             dataArray: [
                 { "value": item.index, "fontSize": (defaultFontSize + 1), "bgColor": indexBgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": "@" },
-                { "value": item.name, "url": item.url, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
+                { "value": item.name, "url": item.url, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": "@" },
                 { "value": item.type, "bold": !item.type.startsWith('.'), "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": item.size, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.numberFormat },
-                { "value": item.author, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
+                { "value": item.author, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": "@" },
                 { "value": item.created, "fontColor": defaultFontColorGray, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.dateFormat },
                 { "value": item.modified, "fontColor": defaultFontColorGray, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.dateFormat }
             ]

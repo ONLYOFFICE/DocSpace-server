@@ -37,7 +37,6 @@ global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Web;
-
 global using ASC.ActiveDirectory;
 global using ASC.ActiveDirectory.Base;
 global using ASC.ActiveDirectory.Base.Settings;
@@ -150,25 +149,18 @@ global using ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;
 global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;
 global using ASC.Webhooks.Core.EF.Model;
-
 global using Autofac;
-
 global using AutoMapper;
-
 global using Google.Authenticator;
-
 global using MailKit.Security;
-
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
-
 global using MimeKit;
-
+global using Swashbuckle.AspNetCore.Annotations;
 global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
-
 global using SecurityContext = ASC.Core.SecurityContext;
 global using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult;

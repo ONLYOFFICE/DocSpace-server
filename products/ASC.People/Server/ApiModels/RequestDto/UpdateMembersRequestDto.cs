@@ -27,17 +27,71 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for updating user information
 /// </summary>
 public class UpdateMembersRequestDto
 {
-    /// <summary>List of user IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    /// <summary>
+    /// List of user IDs
+    /// </summary>
     public IEnumerable<Guid> UserIds { get; set; }
 
-    /// <summary>Specifies whether to resend invitation letters to all the users or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>true</example>
+    /// <summary>
+    /// Specifies whether to resend invitation letters to all the users or not
+    /// </summary>
     public bool ResendAll { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class UpdateMemberStatusRequestDto
+{
+    /// <summary>
+    /// New user status
+    /// </summary>
+    [FromRoute(Name = "status")]
+    public EmployeeStatus Status { get; set; }
+
+    /// <summary>
+    /// Update members
+    /// </summary>
+    [FromBody]
+    public UpdateMembersRequestDto UpdateMembers { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class UpdateMemberTypeRequestDto
+{
+    /// <summary>
+    /// New user type
+    /// </summary>
+    [FromRoute(Name = "type")]
+    public EmployeeType Type { get; set; }
+
+    /// <summary>
+    /// Update members
+    /// </summary>
+    [FromBody]
+    public UpdateMembersRequestDto UpdateMembers { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class UpdateMemberActivationStatusRequestDto
+{
+    /// <summary>
+    /// Activation status
+    /// </summary>
+    [FromRoute(Name = "activationstatus")]
+    public EmployeeActivationStatus ActivationStatus { get; set; }
+
+    /// <summary>
+    /// Update members
+    /// </summary>
+    [FromBody]
+    public UpdateMembersRequestDto UpdateMembers { get; set; }
 }

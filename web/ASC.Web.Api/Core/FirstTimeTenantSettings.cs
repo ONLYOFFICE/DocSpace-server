@@ -42,7 +42,8 @@ public class FirstTimeTenantSettings(
     CoreBaseSettings coreBaseSettings,
     IHttpClientFactory clientFactory,
     CookiesManager cookiesManager,
-    CspSettingsHelper cspSettingsHelper)
+    CspSettingsHelper cspSettingsHelper,
+    DocumentServiceLicense documentServiceLicense)
 {
     public async Task<WizardSettings> SaveDataAsync(WizardRequestsDto inDto)
     {
@@ -57,7 +58,9 @@ public class FirstTimeTenantSettings(
                 throw new Exception("Wizard passed.");
             }
 
-            if (!string.IsNullOrEmpty(setupInfo.AmiMetaUrl) && await IncorrectAmiId(amiid))
+            var ami = !string.IsNullOrEmpty(setupInfo.AmiMetaUrl);
+
+            if (ami && await IncorrectAmiId(amiid))
             {
                 throw new Exception(Resource.EmailAndPasswordIncorrectAmiId);
             }
@@ -95,12 +98,12 @@ public class FirstTimeTenantSettings(
 
             await userManager.UpdateUserInfoAsync(currentUser);
 
-            if (await tenantExtra.GetEnableTariffSettings() && tenantExtra.Enterprise)
+            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
             {
                 await TariffSettings.SetLicenseAcceptAsync(settingsManager);
                 await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
 
-                await licenseReader.RefreshLicenseAsync();
+                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
             }
 
             settings.Completed = true;
@@ -181,8 +184,8 @@ public class FirstTimeTenantSettings(
         {
             var httpClient = clientFactory.CreateClient();
 
-            var amiToken = await GetResponseString(httpClient, setupInfo.AmiTokenUrl, null);
-            var amiId = await GetResponseString(httpClient, setupInfo.AmiMetaUrl, amiToken);
+            var amiToken = await GetResponseString(httpClient, HttpMethod.Put, setupInfo.AmiTokenUrl, new Dictionary<string, string> { { "X-aws-ec2-metadata-token-ttl-seconds", "21600" } });
+            var amiId = await GetResponseString(httpClient, HttpMethod.Get, setupInfo.AmiMetaUrl, new Dictionary<string, string> { { "X-aws-ec2-metadata-token", amiToken } });
 
             return string.IsNullOrEmpty(amiId) || amiId != customAmiId;
         }
@@ -193,7 +196,7 @@ public class FirstTimeTenantSettings(
         }
     }
 
-    private async Task<string> GetResponseString(HttpClient httpClient, string requestUrl, string token)
+    private async Task<string> GetResponseString(HttpClient httpClient, HttpMethod method, string requestUrl, Dictionary<string, string> headers)
     {
         string responseString = null;
 
@@ -204,12 +207,13 @@ public class FirstTimeTenantSettings(
 
         var request = new HttpRequestMessage
         {
-            RequestUri = new Uri(requestUrl)
+            RequestUri = new Uri(requestUrl),
+            Method = method
         };
 
-        if (!string.IsNullOrEmpty(token))
+        foreach (var header in headers)
         {
-            request.Headers.Add("X-aws-ec2-metadata-token", token);
+            request.Headers.Add(header.Key, header.Value);
         }
 
         try

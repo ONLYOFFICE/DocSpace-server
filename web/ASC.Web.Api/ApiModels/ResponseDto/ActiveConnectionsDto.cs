@@ -28,49 +28,66 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class ActiveConnectionsDto
 {
+    /// <summary>
+    /// Login event
+    /// </summary>
     public int LoginEvent { get; set; }
+
+    /// <summary>
+    /// Items
+    /// </summary>
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
 public class ActiveConnectionsItemDto
 {
-    /// <summary>Login event id</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Id
+    /// </summary>
     public int Id { get; set; }
 
-    /// <summary>User id</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// User id
+    /// </summary>
     public Guid UserId { get; set; }
 
-    /// <summary>Mobile</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Mobile
+    /// </summary>
     public bool Mobile {  get; set; }
 
-    /// <summary>Ip</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Ip
+    /// </summary>
     public string Ip { get; set; }
 
-    /// <summary>Country</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Country
+    /// </summary>
     public string Country { get; set; }
 
-    /// <summary>City</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// City
+    /// </summary>
     public string City { get; set; }
 
-    /// <summary>Browser</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Browser
+    /// </summary>
     public string Browser { get; set; }
 
-    /// <summary>Platform</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Platform
+    /// </summary>
     public string Platform { get; set; }
 
-    /// <summary>Date</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    /// <summary>
+    /// Date
+    /// </summary>
     public ApiDateTime Date { get; set; }
 
-    /// <summary>Page</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Page
+    /// </summary>
     public string Page { get; set; }
 }

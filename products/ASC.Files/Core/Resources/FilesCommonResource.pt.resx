@@ -485,4 +485,22 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Número do formulário</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Criador de conteúdo</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Criador de conteúdo</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Gestor de sala</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Gestor de sala</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Utilizador externo</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Abrir ficheiro</value>
+  </data>
 </root>

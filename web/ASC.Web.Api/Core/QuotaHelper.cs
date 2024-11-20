@@ -48,11 +48,11 @@ public class QuotaHelper(
         }
     }
 
-    public async Task<QuotaDto> GetCurrentQuotaAsync(bool refresh = false)
+    public async Task<QuotaDto> GetCurrentQuotaAsync(bool refresh = false, bool getUsed = true)
     {
         var quota = await tenantManager.GetCurrentTenantQuotaAsync(refresh);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        return await ToQuotaDto(quota, userType, true);
+        return await ToQuotaDto(quota, userType, getUsed);
     }
 
     private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false)
@@ -127,6 +127,7 @@ public class QuotaHelper(
             result.Id = feature.Name;
 
             object used = null;
+            var availableFeature = true;
             var isUsedAvailable = employeeType != EmployeeType.Guest && 
                                   (employeeType != EmployeeType.User || 
                                    feature.Name == MaxTotalSizeFeature.MaxTotalSizeFeatureName);
@@ -150,6 +151,8 @@ public class QuotaHelper(
             {
                 result.Value = flag.Value;
                 result.Type = "flag";
+
+                availableFeature = flag.Value;
             }
 
             if (getUsed)
@@ -167,7 +170,7 @@ public class QuotaHelper(
             {
                 var img = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.img.{feature.Name}.svg");
 
-                if (img != null)
+                if (availableFeature && img != null)
                 {
                     try
                     {

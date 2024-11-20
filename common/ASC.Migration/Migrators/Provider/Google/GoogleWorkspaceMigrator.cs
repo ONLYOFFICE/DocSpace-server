@@ -148,18 +148,26 @@ public class GoogleWorkspaceMigrator : Migrator
                     {
                         MigrationInfo.WithoutEmailUsers.Add(key, user);
                     }
-                    else if (await UserManager.GetUserByEmailAsync(user.Info.Email) != ASC.Core.Users.Constants.LostUser)
-                    {
-                        if (!MigrationInfo.ExistUsers.TryAdd(user.Info.Email, user))
-                        {
-                            MergeStorages(MigrationInfo.ExistUsers[user.Info.Email], user);
-                        }
-                    }
                     else
                     {
-                        if (!MigrationInfo.Users.TryAdd(user.Info.Email, user))
+                        var ascUser = await UserManager.GetUserByEmailAsync(user.Info.Email);
+                        if (ascUser.Status == EmployeeStatus.Terminated)
                         {
-                            MergeStorages(MigrationInfo.Users[user.Info.Email], user);
+                            continue;
+                        }
+                        if (ascUser != ASC.Core.Users.Constants.LostUser)
+                        {
+                            if (!MigrationInfo.ExistUsers.TryAdd(user.Info.Email, user))
+                            {
+                                MergeStorages(MigrationInfo.ExistUsers[user.Info.Email], user);
+                            }
+                        }
+                        else
+                        {
+                            if (!MigrationInfo.Users.TryAdd(user.Info.Email, user))
+                            {
+                                MergeStorages(MigrationInfo.Users[user.Info.Email], user);
+                            }
                         }
                     }
                 }

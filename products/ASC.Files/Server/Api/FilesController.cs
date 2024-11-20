@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -56,16 +54,16 @@ public class FilesControllerInternal(
     /// <short>
     /// Get file history
     /// </short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" name="fileId">File ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.HistoryDto, ASC.Files.Core">List of actions performed on the file</returns>
     /// <path>api/2.0/files/file/{fileId}/log</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "List of actions performed on the file", typeof(HistoryDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "The required file was not found")]
     [HttpGet("file/{fileId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int fileId)
+    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(HistoryRequestDto inDto)
     {
-        return historyApiHelper.GetFileHistoryAsync(fileId);
+        return historyApiHelper.GetFileHistoryAsync(inDto.FileId, inDto.FromDate, inDto.ToDate);
     }
 }
 
@@ -104,37 +102,32 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Changes the version history of a file with the ID specified in the request.
     /// </summary>
     /// <short>Change version history</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.ChangeHistoryRequestDto, ASC.Files.Core" name="inDto">Request parameters for changing version history</param>
-    /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Updated information about file versions</returns>
     /// <path>api/2.0/files/file/{fileId}/history</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Updated information about file versions", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("file/{fileId}/history")]
-    public IAsyncEnumerable<FileDto<T>> ChangeHistoryAsync(T fileId, ChangeHistoryRequestDto inDto)
+    public IAsyncEnumerable<FileDto<T>> ChangeHistoryAsync(ChangeHistoryRequestDto<T> inDto)
     {
-        return filesControllerHelper.ChangeHistoryAsync(fileId, inDto.Version, inDto.ContinueVersion);
+        return filesControllerHelper.ChangeHistoryAsync(inDto.FileId, inDto.File.Version, inDto.File.ContinueVersion);
     }
 
     /// <summary>
     /// Checks the conversion status of a file with the ID specified in the request.
     /// </summary>
     /// <short>Get conversion status</short>
-    /// <category>Operations</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="System.Boolean, System" name="start">Specifies if a conversion operation is started or not</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConversationResultDto, ASC.Files.Core">Conversion result</returns>
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Conversion result", typeof(ConversationResultDto))]
     [HttpGet("file/{fileId}/checkconversion")]
-    public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync(T fileId, bool start)
+    public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync(CheckConversionStatusRequestDto<T> inDto)
     {
         await foreach (var r in filesControllerHelper.CheckConversionAsync(new CheckConversionRequestDto<T>
         {
-            FileId = fileId,
-            StartConvert = start
+            FileId = inDto.FileId,
+            StartConvert = inDto.Start
         }))
         {
             yield return r;
@@ -145,51 +138,49 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Returns a link to download a file with the ID specified in the request.
     /// </summary>
     /// <short>Get file download link</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <returns type="System.String, System">File download link</returns>
     /// <path>api/2.0/files/file/{fileId}/presigneduri</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File download link", typeof(string))]
     [HttpGet("file/{fileId}/presigneduri")]
-    public async Task<string> GetPresignedUri(T fileId)
+    public async Task<string> GetPresignedUri(FileIdRequestDto<T> inDto)
     {
-        return await filesControllerHelper.GetPresignedUri(fileId);
+        return await filesControllerHelper.GetPresignedUri(inDto.FileId);
     }
 
     /// <summary>
     /// Checks if the PDF file is form or not.
     /// </summary>
     /// <short>Check the PDF file</short>
-    /// <returns type="System.Boolean, System">Boolean value: true - the PDF file is form, false - the PDF file is not a form.</returns>
     /// <path>api/2.0/files/file/{fileId}/isformpdf</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Boolean value: true - the PDF file is form, false - the PDF file is not a form", typeof(bool))]
     [HttpGet("file/{fileId}/isformpdf")]
-    public async Task<bool> isFormPDF(T fileId)
+    public async Task<bool> isFormPDF(FileIdRequestDto<T> inDto)
     {
-        return await filesControllerHelper.isFormPDF(fileId);
+        return await filesControllerHelper.isFormPDF(inDto.FileId);
     }
 
     /// <summary>
     /// Copies (and converts if possible) an existing file to the specified folder.
     /// </summary>
     /// <short>Copy a file</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CopyAsRequestDto{System.Text.Json.JsonElement}, ASC.Files.Core" name="inDto">Request parameters for copying a file</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core">Copied file entry information</returns>
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Copied file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "File not found")]
     [HttpPost("file/{fileId}/copyas")]
-    public async Task<FileEntryDto> CopyFileAs(T fileId, CopyAsRequestDto<JsonElement> inDto)
+    public async Task<FileEntryDto> CopyFileAs(CopyAsRequestDto<T> inDto)
     {
-        if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
+        if (inDto.File.DestFolderId.ValueKind == JsonValueKind.Number)
         {
-            return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetInt32(), inDto.DestTitle, inDto.Password, inDto.ToForm);
+            return await filesControllerHelper.CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetInt32(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm);
         }
 
-        if (inDto.DestFolderId.ValueKind == JsonValueKind.String)
+        if (inDto.File.DestFolderId.ValueKind == JsonValueKind.String)
         {
-            return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetString(), inDto.DestTitle, inDto.Password, inDto.ToForm);
+            return await filesControllerHelper.CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetString(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm);
         }
 
         return null;
@@ -199,66 +190,55 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Creates a new file in the specified folder with the title specified in the request.
     /// </summary>
     /// <short>Create a file</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="folderId">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateFileRequestDto{System.Text.Json.JsonElement}, ASC.Files.Core" name="inDto">Request parameters for creating a file</param>
     /// <remarks>If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.</remarks>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/{folderId}/file</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("{folderId}/file")]
-    public async Task<FileDto<T>> CreateFileAsync(T folderId, CreateFileRequestDto<JsonElement> inDto)
+    public async Task<FileDto<T>> CreateFileAsync(CreateFileRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateFileAsync(folderId, inDto.Title, inDto.TemplateId, inDto.FormId, inDto.EnableExternalExt);
+        return await filesControllerHelper.CreateFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.TemplateId, inDto.File.FormId, inDto.File.EnableExternalExt);
     }
 
     /// <summary>
     /// Creates an HTML (.html) file in the selected folder with the title and contents specified in the request.
     /// </summary>
     /// <short>Create an HTML file</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="folderId">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating an HTML file</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/{folderId}/html</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("{folderId}/html")]
-    public async Task<FileDto<T>> CreateHtmlFileAsync(T folderId, CreateTextOrHtmlFileRequestDto inDto)
+    public async Task<FileDto<T>> CreateHtmlFileAsync(CreateTextOrHtmlFileRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateHtmlFileAsync(folderId, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
+        return await filesControllerHelper.CreateHtmlFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.Content, !inDto.File.CreateNewIfExist);
     }
 
     /// <summary>
     /// Creates a text (.txt) file in the selected folder with the title and contents specified in the request.
     /// </summary>
     /// <short>Create a txt file</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="folderId">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a text file</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/{folderId}/text</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("{folderId}/text")]
-    public async Task<FileDto<T>> CreateTextFileAsync(T folderId, CreateTextOrHtmlFileRequestDto inDto)
+    public async Task<FileDto<T>> CreateTextFileAsync(CreateTextOrHtmlFileRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateTextFileAsync(folderId, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
+        return await filesControllerHelper.CreateTextFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.Content, !inDto.File.CreateNewIfExist);
     }
 
     /// <summary>
     /// Deletes a file with the ID specified in the request.
     /// </summary>
     /// <short>Delete a file</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DeleteRequestDto, ASC.Files.Core" name="inDto">Request parameters for deleting a file</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileOperationDto, ASC.Files.Core">List of file operations</returns>
     /// <path>api/2.0/files/file/{fileId}</path>
-    /// <httpMethod>DELETE</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpDelete("file/{fileId}")]
-    public async IAsyncEnumerable<FileOperationDto> DeleteFile(T fileId, [FromBody] DeleteRequestDto inDto)
+    public async IAsyncEnumerable<FileOperationDto> DeleteFile(DeleteRequestDto<T> inDto)
     {
-        await fileOperationsManager.PublishDelete(new List<T>(), new List<T> { fileId }, false, !inDto.DeleteAfter, inDto.Immediately);
+        await fileOperationsManager.PublishDelete(new List<T>(), new List<T> { inDto.FileId }, false, !inDto.File.DeleteAfter, inDto.File.Immediately);
         
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
@@ -266,12 +246,17 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         }
     }
 
-
+    /// <summary>
+    /// Gets fill result
+    /// </summary>
+    /// <path>api/2.0/files/file/fillresult</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Ok", typeof(FillingFormResultDto<int>))]
     [AllowAnonymous]
     [HttpGet("file/fillresult")]
-    public async Task<FillingFormResultDto<T>> GetFillResultAsync(string fillingSessionId)
+    public async Task<FillingFormResultDto<T>> GetFillResultAsync(GetFillResulteRequestDto inDto)
     {
-        var completedFormId = await distributedCache.GetStringAsync(fillingSessionId);
+        var completedFormId = await distributedCache.GetStringAsync(inDto.FillingSessionId);
 
         return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
     }
@@ -280,54 +265,46 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Returns a URL to the changes of a file version specified in the request.
     /// </summary>
     /// <short>Get changes URL</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="System.Int32, System" name="version">File version</param>
-    /// <returns type="ASC.Files.Core.EditHistoryDataDto, ASC.Files.Core">File version history data</returns>
     /// <path>api/2.0/files/file/{fileId}/edit/diff</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File version history data", typeof(EditHistoryDataDto))]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/diff")]
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync(T fileId, int version = 0)
+    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync(EditDiffUrlRequestDto<T> inDto)
     {
-        return await filesControllerHelper.GetEditDiffUrlAsync(fileId, version);
+        return await filesControllerHelper.GetEditDiffUrlAsync(inDto.FileId, inDto.Version);
     }
 
     /// <summary>
     /// Returns the version history of a file with the ID specified in the request.
     /// </summary>
     /// <short>Get version history</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.EditHistoryDto, ASC.Files.Core">Version history data</returns>
     /// <path>api/2.0/files/file/{fileId}/edit/history</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Version history data", typeof(EditHistoryDto))]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/history")]
-    public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync(T fileId)
+    public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync(FileIdRequestDto<T> inDto)
     {
-        return filesControllerHelper.GetEditHistoryAsync(fileId);
+        return filesControllerHelper.GetEditHistoryAsync(inDto.FileId);
     }
 
     /// <summary>
     /// Returns the detailed information about a file with the ID specified in the request.
     /// </summary>
     /// <short>Get file information</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="System.Int32, System" name="version">File version</param>
-    /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">File information</returns>
     /// <path>api/2.0/files/file/{fileId}</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
     [AllowAnonymous]
     [HttpGet("file/{fileId}")]
-    public async Task<FileDto<T>> GetFileInfoAsync(T fileId, int version = -1)
+    public async Task<FileDto<T>> GetFileInfoAsync(FileInfoRequestDto<T> inDto)
     {
-        return await filesControllerHelper.GetFileInfoAsync(fileId, version);
+        return await filesControllerHelper.GetFileInfoAsync(inDto.FileId, inDto.Version);
     }
 
     /// <summary>
@@ -349,172 +326,202 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Returns the detailed information about all the available file versions with the ID specified in the request.
     /// </summary>
     /// <short>Get file versions</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Information about file versions: folder ID, version, version group, content length, pure content length, file status, URL to view a file, web URL, file type, file extension, comment, encrypted or not, thumbnail URL, thumbnail status, locked or not, user ID who locked a file, denies file downloading or not, denies file sharing or not, file accessibility</returns>
     /// <path>api/2.0/files/file/{fileId}/history</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Information about file versions: folder ID, version, version group, content length, pure content length, file status, URL to view a file, web URL, file type, file extension, comment, encrypted or not, thumbnail URL, thumbnail status, locked or not, user ID who locked a file, denies file downloading or not, denies file sharing or not, file accessibility", typeof(FileDto<int>))]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/history")]
-    public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync(T fileId)
+    public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync(FileIdRequestDto<T> inDto)
     {
-        return filesControllerHelper.GetFileVersionInfoAsync(fileId);
+        return filesControllerHelper.GetFileVersionInfoAsync(inDto.FileId);
     }
 
     /// <summary>
     /// Locks a file with the ID specified in the request.
     /// </summary>
     /// <short>Lock a file</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.LockFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for locking a file</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Locked file information</returns>
     /// <path>api/2.0/files/file/{fileId}/lock</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Locked file information", typeof(FileDto<int>))]
     [HttpPut("file/{fileId}/lock")]
-    public async Task<FileDto<T>> LockFileAsync(T fileId, LockFileRequestDto inDto)
+    public async Task<FileDto<T>> LockFileAsync(LockFileRequestDto<T> inDto)
     {
-        return await filesControllerHelper.LockFileAsync(fileId, inDto.LockFile);
+        return await filesControllerHelper.LockFileAsync(inDto.FileId, inDto.File.LockFile);
     }
 
     /// <summary>
     /// Restores a file version specified in the request.
     /// </summary>
     /// <short>Restore a file version</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="System.Int32, System" name="version">File version</param>
-    /// <param type="System.String, System" name="url">File version URL</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.EditHistoryDto, ASC.Files.Core">Version history data: file ID, key, file version, version group, a user who updated a file, creation time, history changes in the string format, list of history changes, server version</returns>
     /// <path>api/2.0/files/file/{fileId}/restoreversion</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Version history data: file ID, key, file version, version group, a user who updated a file, creation time, history changes in the string format, list of history changes, server version", typeof(EditHistoryDto))]
+    [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/restoreversion")]
-    public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync(T fileId, int version = 0, string url = null)
+    public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync(RestoreVersionRequestDto<T> inDto)
     {
-        return filesControllerHelper.RestoreVersionAsync(fileId, version, url);
+        return filesControllerHelper.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url);
     }
 
     /// <summary>
     /// Starts a conversion operation of a file with the ID specified in the request.
     /// </summary>
     /// <short>Start file conversion</short>
-    /// <category>Operations</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CheckConversionRequestDto, ASC.Files.Core" name="inDto">Request parameters for starting file conversion</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConversationResultDto, ASC.Files.Core">Conversion result</returns>
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Conversion result", typeof(ConversationResultDto))]
     [HttpPut("file/{fileId}/checkconversion")]
-    public IAsyncEnumerable<ConversationResultDto> StartConversion(T fileId, [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] CheckConversionRequestDto<T> inDto)
+    public IAsyncEnumerable<ConversationResultDto> StartConversion(StartConversionRequestDto<T> inDto)
     {
-        inDto ??= new CheckConversionRequestDto<T>();
-        inDto.FileId = fileId;
+        inDto.CheckConversion ??= new CheckConversionRequestDto<T>();
+        inDto.CheckConversion.FileId = inDto.FileId;
 
-        return filesControllerHelper.StartConversionAsync(inDto);
+        return filesControllerHelper.StartConversionAsync(inDto.CheckConversion);
     }
 
     /// <summary>
     /// Updates a comment in a file with the ID specified in the request.
     /// </summary>
     /// <short>Update a comment</short>
-    /// <category>Operations</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateCommentRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating a comment</param>
-    /// <returns type="System.Object, System">Updated comment</returns>
     /// <path>api/2.0/files/file/{fileId}/comment</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Updated comment", typeof(object))]
     [HttpPut("file/{fileId}/comment")]
-    public async Task<object> UpdateCommentAsync(T fileId, UpdateCommentRequestDto inDto)
+    public async Task<object> UpdateCommentAsync(UpdateCommentRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UpdateCommentAsync(fileId, inDto.Version, inDto.Comment);
+        return await filesControllerHelper.UpdateCommentAsync(inDto.FileId, inDto.File.Version, inDto.File.Comment);
     }
 
     /// <summary>
     /// Updates the information of the selected file with the parameters specified in the request.
     /// </summary>
     /// <short>Update a file</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating a file</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Updated file information</returns>
     /// <path>api/2.0/files/file/{fileId}</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [AllowAnonymous]
     [HttpPut("file/{fileId}")]
-    public async Task<FileDto<T>> UpdateFileAsync(T fileId, UpdateFileRequestDto inDto)
+    public async Task<FileDto<T>> UpdateFileAsync(UpdateFileRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UpdateFileAsync(fileId, inDto.Title, inDto.LastVersion);
+        return await filesControllerHelper.UpdateFileAsync(inDto.FileId, inDto.File.Title, inDto.File.LastVersion);
     }
 
     /// <summary>
     /// Updates the contents of a file with the ID specified in the request.
     /// </summary>
     /// <short>Update file contents</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.FileStreamRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating file contents</param>
     /// <path>api/2.0/files/{fileId}/update</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Updated file information</returns>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    [SwaggerResponse(404, "File not found")]
     [HttpPut("{fileId}/update")]
-    public async Task<FileDto<T>> UpdateFileStreamFromFormAsync(T fileId, [FromForm] FileStreamRequestDto inDto)
+    public async Task<FileDto<T>> UpdateFileStreamFromFormAsync(FileStreamRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UpdateFileStreamAsync(filesControllerHelper.GetFileFromRequest(inDto).OpenReadStream(), fileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
+        return await filesControllerHelper.UpdateFileStreamAsync(filesControllerHelper.GetFileFromRequest(inDto).OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
+    }
+
+    /// <summary>
+    /// Creates a primary external link by the identifier specified in the request.
+    /// </summary>
+    /// <short>Create primary external link</short>
+    /// <path>api/2.0/files/file/{id}/link</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [SwaggerResponse(404, "Not Found")]
+    [HttpPost("file/{id}/link")]
+    public async Task<FileShareDto> CreatePrimaryExternalLinkAsync(FileLinkRequestDto<T> inDto)
+    {
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.Access, expirationDate: inDto.File.ExpirationDate, requiredAuth: inDto.File.Internal, allowUnlimitedDate: true);
+        return await fileShareDtoHelper.Get(linkAce);
     }
 
     /// <summary>
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
     /// <short>Get primary external link</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security information</returns>
     /// <path>api/2.0/files/file/{id}/link</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [SwaggerResponse(404, "Not Found")]
     [AllowAnonymous]
     [HttpGet("file/{id}/link")]
-    public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
+    public async Task<FileShareDto> GetFilePrimaryExternalLinkAsync(FilePrimaryIdRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.File);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
 
+    /// <summary>
+    /// Sets order of a file with ID specified in the request
+    /// </summary>
+    /// <path>api/2.0/files/{fileId}/order</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Order is set")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "Not Found")]
     [HttpPut("{fileId}/order")]
-    public async Task SetOrder(T fileId, OrderRequestDto inDto)
+    public async Task SetOrder(OrderFileRequestDto<T> inDto)
     {
-        await fileStorageService.SetFileOrder(fileId, inDto.Order);
+        await fileStorageService.SetFileOrder(inDto.FileId, inDto.Order.Order);
+    }
+
+    /// <summary>
+    /// Sets order
+    /// </summary>
+    /// <path>api/2.0/files/order</path>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Order is set")]
+    [HttpPut("order")]
+    public async Task SetOrder(OrdersRequestDto<T> inDto)
+    {
+        foreach (var item in inDto.Items)
+        {
+            switch (item.EntryType)
+            {
+                case FileEntryType.Folder:
+                    await fileStorageService.SetFolderOrder(item.EntryId, item.Order);
+                    break;
+                case FileEntryType.File:
+                    await fileStorageService.SetFileOrder(item.EntryId, item.Order);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 
     /// <summary>
     /// Returns the external links of a file with the ID specified in the request.
     /// </summary>
     /// <short>Get file external links</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security information</returns>
-    /// <path>api/2.0/files/file/{fileId}/links</path>
-    /// <httpMethod>GET</httpMethod>
+    /// <path>api/2.0/files/file/{id}/links</path>
     /// <collection>list</collection>
-    [HttpGet("file/{fileId}/links")]
-    public async IAsyncEnumerable<FileShareDto> GetLinksAsync(T fileId)
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [HttpGet("file/{id}/links")]
+    public async IAsyncEnumerable<FileShareDto> GetLinksAsync(FilePrimaryIdRequestDto<T> inDto)
     {
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
 
-        var totalCount = await fileStorageService.GetPureSharesCountAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, null);
+        var totalCount = await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.File, ShareFilterType.ExternalLink, null);
 
         apiContext.SetCount(Math.Min(totalCount - offset, count)).SetTotalCount(totalCount);
 
-        await foreach (var ace in fileStorageService.GetPureSharesAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, null, offset, count))
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.File, ShareFilterType.ExternalLink, null, offset, count))
         {
             yield return await fileShareDtoHelper.Get(ace);
         }
@@ -524,17 +531,14 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Sets an external link to a file with the ID specified in the request.
     /// </summary>
     /// <short>Set an external link</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.FileLinkRequestDto, ASC.Files.Core" name="inDto">External link request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security information</returns>
     /// <path>api/2.0/files/file/{id}/links</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
     [HttpPut("file/{id}/links")]
-    public async Task<FileShareDto> SetExternalLinkAsync(T id, FileLinkRequestDto inDto)
+    public async Task<FileShareDto> SetExternalLinkAsync(FileLinkRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal, 
-            primary: inDto.Primary, expirationDate: inDto.ExpirationDate);
+        var linkAce = await fileStorageService.SetExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.LinkId, null, inDto.File.Access, requiredAuth: inDto.File.Internal, 
+            primary: inDto.File.Primary, expirationDate: inDto.File.ExpirationDate);
 
         return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
@@ -543,16 +547,14 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Saves a file with the identifier specified in the request as a PDF document
     /// </summary>
     /// <short>Save as pdf</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SaveAsPdfRequestDto, ASC.Files.Core" name="inDto">Request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [SwaggerResponse(404, "File not found")]
     [HttpPost("file/{id}/saveaspdf")]
-    public async Task<FileDto<T>> SaveAsPdf(T id, SaveAsPdfRequestDto<T> inDto)
+    public async Task<FileDto<T>> SaveAsPdf(SaveAsPdfRequestDto<T> inDto)
     {
-        return await filesControllerHelper.SaveAsPdf(id, inDto.FolderId, inDto.Title);
+        return await filesControllerHelper.SaveAsPdf(inDto.Id, inDto.File.FolderId, inDto.File.Title);
     }
 }
 
@@ -568,14 +570,12 @@ public class FilesControllerCommon(
     /// Creates a new file in the "My documents" section with the title specified in the request.
     /// </summary>
     /// <short>Create a file in the "My documents" section</short>
-    /// <category>Files</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateFileRequestDto{System.Text.Json.JsonElement}, ASC.Files.Core" name="inDto">Request parameters for creating a file</param>
     /// <remarks>If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.</remarks>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/@my/file</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("@my/file")]
-    public async Task<FileDto<int>> CreateFileAsync(CreateFileRequestDto<JsonElement> inDto)
+    public async Task<FileDto<int>> CreateFileMyDocumentsAsync(CreateFile<JsonElement> inDto)
     {
         return await filesControllerHelperInternal.CreateFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.TemplateId, inDto.FormId, inDto.EnableExternalExt);
     }
@@ -584,14 +584,13 @@ public class FilesControllerCommon(
     /// Creates an HTML (.html) file in the "Common" section with the title and contents specified in the request.
     /// </summary>
     /// <short>Create an HTML file in the "Common" section</short>
-    /// <category>Files</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating an HTML file</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/@common/html</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("@common/html")]
-    public async Task<FileDto<int>> CreateHtmlFileInCommonAsync(CreateTextOrHtmlFileRequestDto inDto)
+    public async Task<FileDto<int>> CreateHtmlFileInCommonAsync(CreateTextOrHtmlFile inDto)
     {
         return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
@@ -600,13 +599,12 @@ public class FilesControllerCommon(
     /// Creates an HTML (.html) file in the "My documents" section with the title and contents specified in the request.
     /// </summary>
     /// <short>Create an HTML file in the "My documents" section</short>
-    /// <category>Files</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating an HTML file</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/@my/html</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("@my/html")]
-    public async Task<FileDto<int>> CreateHtmlFileInMyAsync(CreateTextOrHtmlFileRequestDto inDto)
+    public async Task<FileDto<int>> CreateHtmlFileInMyAsync(CreateTextOrHtmlFile inDto)
     {
         return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
@@ -615,14 +613,12 @@ public class FilesControllerCommon(
     /// Creates a text (.txt) file in the "Common" section with the title and contents specified in the request.
     /// </summary>
     /// <short>Create a text file in the "Common" section</short>
-    /// <category>Files</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a text file</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/@common/text</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("@common/text")]
-    public async Task<FileDto<int>> CreateTextFileInCommonAsync(CreateTextOrHtmlFileRequestDto inDto)
+    public async Task<FileDto<int>> CreateTextFileInCommonAsync(CreateTextOrHtmlFile inDto)
     {
         return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
@@ -631,13 +627,11 @@ public class FilesControllerCommon(
     /// Creates a text (.txt) file in the "My documents" section with the title and contents specified in the request.
     /// </summary>
     /// <short>Create a text file in the "My documents" section</short>
-    /// <category>Files</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a text file</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/@my/text</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("@my/text")]
-    public async Task<FileDto<int>> CreateTextFileInMyAsync(CreateTextOrHtmlFileRequestDto inDto)
+    public async Task<FileDto<int>> CreateTextFileInMyAsync(CreateTextOrHtmlFile inDto)
     {
         return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
@@ -646,13 +640,11 @@ public class FilesControllerCommon(
     /// Creates thumbnails for the files with the IDs specified in the request.
     /// </summary>
     /// <short>Create thumbnails</short>
-    /// <category>Files</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
-    /// <returns type="System.Text.Json.JsonElement, System.Text.Json">List of file IDs</returns>
     /// <path>api/2.0/files/thumbnails</path>
-    /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "List of file IDs", typeof(JsonElement))]
     [AllowAnonymous]
     [HttpPost("thumbnails")]
     public async Task<IEnumerable<JsonElement>> CreateThumbnailsAsync(BaseBatchRequestDto inDto)

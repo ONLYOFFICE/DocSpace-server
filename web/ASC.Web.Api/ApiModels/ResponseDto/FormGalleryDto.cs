@@ -28,11 +28,38 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class FormGalleryDto : IMapFrom<OFormSettings>
 {
+    /// <summary>
+    /// Path
+    /// </summary>
     public string Path { get; set; }
+
+    /// <summary>
+    /// Domain
+    /// </summary>
     public string Domain { get; set; }
+
+    /// <summary>
+    /// Ext
+    /// </summary>
     public string Ext { get; set; }
+
+    /// <summary>
+    /// Upload path
+    /// </summary>
     public string UploadPath { get; set; }
+
+    /// <summary>
+    /// Upload domain
+    /// </summary>
     public string UploadDomain { get; set; }
+
+    /// <summary>
+    /// Upload ext
+    /// </summary>
     public string UploadExt { get; set; }
+
+    /// <summary>
+    /// Upload dashboard
+    /// </summary>
     public string UploadDashboard { get; set; }
 }

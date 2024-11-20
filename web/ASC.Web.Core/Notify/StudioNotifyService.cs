@@ -722,16 +722,18 @@ public class StudioNotifyService(
                     new TagValue(Tags.OwnerName, u.DisplayUserName(displayUserSettingsHelper)));
     }
 
-    public async Task SendMsgPortalDeletionAsync(Tenant t, string url, bool showAutoRenewText)
+    public async Task SendMsgPortalDeletionAsync(Tenant t, string url, bool showAutoRenewText, bool checkActivation = true)
     {
         var u = await userManager.GetUsersAsync(t.OwnerId);
         var culture = await GetCulture(u);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonDeletePortal", culture);
         var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
 
+        var recipient = checkActivation ? [u] : await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false);
+
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 Actions.PortalDelete,
-                [u],
+                recipient,
                 [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, url),
                 TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt),

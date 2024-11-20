@@ -34,7 +34,6 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = RequestNotPermitted.class)
   public ResponseEntity<ErrorResponse> handleRequestNotPermitted(
       RequestNotPermitted ex, HttpServletRequest request) {
-    log.warn("Rate limiter has blocked current call", ex);
     return new ResponseEntity<>(
         ErrorResponse.builder().reason("too many requests").build(), HttpStatus.TOO_MANY_REQUESTS);
   }
@@ -48,7 +47,6 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = {MethodArgumentNotValidException.class})
   public ResponseEntity<ErrorResponse> handleValidationException(
       MethodArgumentNotValidException e) {
-    log.error("Could not validate a model", e);
     var errors =
         e.getAllErrors().stream()
             .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -65,7 +63,6 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(value = HandlerMethodValidationException.class)
   public ResponseEntity<?> handleValidationException(HandlerMethodValidationException e) {
-    log.error("Could not validate a model", e);
     var errors =
         e.getAllValidationResults().stream()
             .flatMap(result -> result.getResolvableErrors().stream())
@@ -83,7 +80,6 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(value = ValidationException.class)
   public ResponseEntity<?> handleValidationException(ValidationException e) {
-    log.error("Could not validate a model", e);
     return new ResponseEntity<>(
         ErrorResponse.builder().reason(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
   }

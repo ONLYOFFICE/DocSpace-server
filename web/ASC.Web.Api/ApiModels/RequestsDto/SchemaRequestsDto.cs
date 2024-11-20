@@ -27,50 +27,68 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// Team template parameters
 /// </summary>
-public class SchemaRequestsDto
+public class SchemaBaseRequestsDto
 {
-    /// <summary>Team template ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Team template ID
+    /// </summary>
     public string Id { get; init; }
+}
 
-    /// <summary>Team template name</summary>
-    /// <type>System.String, System</type>
+/// <summary>
+/// Team template parameters
+/// </summary>
+public class SchemaRequestsDto : SchemaBaseRequestsDto
+{
+    /// <summary>
+    /// Team template name
+    /// </summary>
     public string Name { get; set; }
 
-    /// <summary>User caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// User caption
+    /// </summary>
     public string UserCaption { get; init; }
 
-    /// <summary>Users caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Users caption
+    /// </summary>
     public string UsersCaption { get; init; }
 
-    /// <summary>Group caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Group caption
+    /// </summary>
     public string GroupCaption { get; init; }
 
-    /// <summary>Groups caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Groups caption
+    /// </summary>
     public string GroupsCaption { get; init; }
 
-    /// <summary>User status caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// User status caption
+    /// </summary>
     public string UserPostCaption { get; init; }
 
-    /// <summary>Registration date caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Registration date caption
+    /// </summary>
     public string RegDateCaption { get; init; }
 
-    /// <summary>Group lead caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Group lead caption
+    /// </summary>
     public string GroupHeadCaption { get; init; }
 
-    /// <summary>Guest caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Guest caption
+    /// </summary>
     public string GuestCaption { get; init; }
 
-    /// <summary>Guests caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Guests caption
+    /// </summary>
     public string GuestsCaption { get; init; }
 }

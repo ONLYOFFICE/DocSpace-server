@@ -57,6 +57,11 @@ public class TenantExtra(
         get => tenantExtraConfig.Enterprise;
     }
 
+    public bool Developer
+    {
+        get => tenantExtraConfig.Developer;
+    }
+
     public bool Opensource
     {
         get => tenantExtraConfig.Opensource;

@@ -41,23 +41,22 @@ public class ContactsController(UserManager userManager,
     /// <short>
     /// Delete user contacts
     /// </short>
-    /// <category>Contacts</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Deleted user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>
-    /// <httpMethod>DELETE</httpMethod>
+    [Tags("People / Contacts")]
+    [SwaggerResponse(200, "Deleted user profile with the detailed information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "User not found")]
     [HttpDelete("{userid}/contacts")]
-    public async Task<EmployeeFullDto> DeleteMemberContacts(string userid, UpdateMemberRequestDto inDto)
+    public async Task<EmployeeFullDto> DeleteMemberContacts(ContactsRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await  GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
             throw new SecurityException();
         }
 
-        await DeleteContactsAsync(inDto.Contacts, user);
+        await DeleteContactsAsync(inDto.Contacts.Contacts, user);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -69,16 +68,15 @@ public class ContactsController(UserManager userManager,
     /// <short>
     /// Set user contacts
     /// </short>
-    /// <category>Contacts</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Updated user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("People / Contacts")]
+    [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "User not found")]
     [HttpPost("{userid}/contacts")]
-    public async Task<EmployeeFullDto> SetMemberContacts(string userid, UpdateMemberRequestDto inDto)
+    public async Task<EmployeeFullDto> SetMemberContacts(ContactsRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
@@ -86,7 +84,7 @@ public class ContactsController(UserManager userManager,
         }
 
         user.ContactsList.Clear();
-        await UpdateContactsAsync(inDto.Contacts, user);
+        await UpdateContactsAsync(inDto.Contacts.Contacts, user);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -98,23 +96,22 @@ public class ContactsController(UserManager userManager,
     /// <short>
     /// Update user contacts
     /// </short>
-    /// <category>Contacts</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Updated user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("People / Contacts")]
+    [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "User not found")]
     [HttpPut("{userid}/contacts")]
-    public async Task<EmployeeFullDto> UpdateMemberContacts(string userid, UpdateMemberRequestDto inDto)
+    public async Task<EmployeeFullDto> UpdateMemberContacts(ContactsRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
             throw new SecurityException();
         }
 
-        await UpdateContactsAsync(inDto.Contacts, user);
+        await UpdateContactsAsync(inDto.Contacts.Contacts, user);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
         return await employeeFullDtoHelper.GetFullAsync(user);

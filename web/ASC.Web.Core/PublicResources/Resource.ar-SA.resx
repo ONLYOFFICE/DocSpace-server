@@ -1114,12 +1114,18 @@
     <value>حصص التخزين والإحصائيات</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} لكل مسؤول/مستخدم مميز إمكانية إضافة مساحة عند الطلب</value>
+    <value>{0} لكل مسؤول إمكانية إضافة مساحة عند الطلب</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>فشل في تحديد حصة لكل غرفة. القيمة المدخلة تتجاوز السعة الإجمالية لـ "DocSpace".</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>فشل في تحديد حصة لكل مستخدم. القيمة المدخلة تتجاوز السعة الإجمالية لـ "DocSpace".</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>أضف على الأقل نطاقًا موثوقًا واحدًا.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>عدد المسؤولين يتجاوز الحد المسموح به: {0}/{1}.</value>
   </data>
 </root>

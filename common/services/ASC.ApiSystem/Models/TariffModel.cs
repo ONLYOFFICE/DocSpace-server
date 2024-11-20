@@ -26,22 +26,45 @@
 
 namespace ASC.ApiSystem.Models;
 
+/// <summary>
+/// Request parameters for tariff
+/// </summary>
 public class TariffModel : IModel
 {
+    /// <summary>
+    /// Portal name
+    /// </summary>
     [StringLength(255)]
     public string PortalName { get; set; }
 
+    /// <summary>
+    /// Tenant id
+    /// </summary>
     public int? TenantId { get; set; }
 
-
+    /// <summary>
+    /// Active users
+    /// </summary>
     public int ActiveUsers { get; set; }
 
+    /// <summary>
+    /// Due date
+    /// </summary>
     public DateTime DueDate { get; set; }
 
+    /// <summary>
+    /// Features
+    /// </summary>
     [StringLength(255)]
     public string Features { get; set; }
 
+    /// <summary>
+    /// Max file size
+    /// </summary>
     public long MaxFileSize { get; set; }
 
+    /// <summary>
+    /// Max total size
+    /// </summary>
     public long MaxTotalSize { get; set; }
 }

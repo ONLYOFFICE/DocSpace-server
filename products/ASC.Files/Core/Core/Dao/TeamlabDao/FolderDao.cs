@@ -374,7 +374,7 @@ internal class FolderDao(
                                                     ? s.MatchAll(searchText)
                                                     : s.MatchAll(searchText).In(r => r.Id, folderIds.ToArray()));
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
-            }
+        }
 
 
         if (subjectID.HasValue && subjectID != Guid.Empty)
@@ -390,7 +390,7 @@ internal class FolderDao(
             }
         }
 
-        await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable().Distinct())
+        await foreach (var e in FromQuery(filesDbContext, q).Distinct().AsAsyncEnumerable())
         {
             yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
         }
@@ -568,30 +568,58 @@ internal class FolderDao(
 
     public async Task<int> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<int> room)
     {
+        ArgumentNullException.ThrowIfNull(room);
+
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
 
-        var toUpdate = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
-
-        toUpdate.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermarkSettings);
-
-        filesDbContext.Update(toUpdate);
-
-        await filesDbContext.SaveChangesAsync();
+        if (roomSettings != null)
+        {
+            roomSettings.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermarkSettings);
+            filesDbContext.Update(roomSettings);
+            await filesDbContext.SaveChangesAsync();
+        }
 
         return room.Id;
     }
 
     public async Task<Folder<int>> DeleteWatermarkSettings(Folder<int> room)
     {
+        ArgumentNullException.ThrowIfNull(room);
+
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
-        roomSettings.Watermark = null;
-        filesDbContext.Update(roomSettings);
-        await filesDbContext.SaveChangesAsync();
+
+        if (roomSettings != null)
+        {
+            roomSettings.Watermark = null;
+            filesDbContext.Update(roomSettings);
+            await filesDbContext.SaveChangesAsync();
+        }
+
+        return room;
+    }
+
+    public async Task<Folder<int>> DeleteLifetimeSettings(Folder<int> room)
+    {
+        ArgumentNullException.ThrowIfNull(room);
+
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
+
+        if (roomSettings?.Lifetime != null)
+        {
+            roomSettings.Lifetime = null;
+            filesDbContext.Update(roomSettings);
+            await filesDbContext.SaveChangesAsync();
+        }
+
         return room;
     }
 
@@ -1649,10 +1677,10 @@ internal class FolderDao(
         return (parentFolders[0].ParentId, parentFolders[0].Title);
     }
 
-    public async Task SetCustomOrder(int folderId, int parentFolderId, int order = 0)
+    public async Task<int> SetCustomOrder(int folderId, int parentFolderId, int order = 0)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        await SetCustomOrder(filesDbContext, folderId, parentFolderId, order);
+        return await SetCustomOrder(filesDbContext, folderId, parentFolderId, order);
     }
 
     public async Task InitCustomOrder(Dictionary<int, int> folderIds, int parentFolderId)
@@ -1660,9 +1688,9 @@ internal class FolderDao(
         await InitCustomOrder(folderIds, parentFolderId, FileEntryType.Folder);
     }
     
-    private async Task SetCustomOrder(FilesDbContext filesDbContext, int folderId, int parentFolderId, int order = 0)
+    private async Task<int> SetCustomOrder(FilesDbContext filesDbContext, int folderId, int parentFolderId, int order = 0)
     {
-        await SetCustomOrder(filesDbContext, folderId, parentFolderId, FileEntryType.Folder, order);
+        return await SetCustomOrder(filesDbContext, folderId, parentFolderId, FileEntryType.Folder, order);
     }
 
     private async Task DeleteCustomOrder(FilesDbContext filesDbContext, int folderId)

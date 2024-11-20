@@ -28,13 +28,44 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class DocumentBuilderTaskDto
 {
+    /// <summary>
+    /// Id
+    /// </summary>
     public string Id { get; set; }
+
+    /// <summary>
+    /// Error
+    /// </summary>
     public string Error { get; set; }
+
+    /// <summary>
+    /// Percentage
+    /// </summary>
     public int Percentage { get; set; }
+
+    /// <summary>
+    /// Is completed
+    /// </summary>
     public bool IsCompleted { get; set; }
+
+    /// <summary>
+    /// Status
+    /// </summary>
     public DistributedTaskStatus Status { get; set; }
+
+    /// <summary>
+    /// Result file id
+    /// </summary>
     public object ResultFileId { get; set; }
+
+    /// <summary>
+    /// Result file name
+    /// </summary>
     public string ResultFileName { get; set; }
+
+    /// <summary>
+    /// Result file url
+    /// </summary>
     public string ResultFileUrl { get; set; }
 
     public static DocumentBuilderTaskDto Get(DistributedTaskProgress task)

@@ -45,7 +45,6 @@ public class FileSharingAceHelper(
     IUrlShortener urlShortener,
     IDistributedLockProvider distributedLockProvider,
     SocketManager socketManager,
-    FilesLinkUtility filesLinkUtility,
     IDaoFactory daoFactory)
 {
     private const int MaxInvitationLinks = 1;
@@ -86,8 +85,8 @@ public class FileSharingAceHelper(
             }
 
             var emailInvite = !string.IsNullOrEmpty(w.Email);
-            var currentUser = await userManager.GetUsersAsync(w.Id);
-            if (currentUser.Status == EmployeeStatus.Terminated && w.Access != FileShare.None)
+            var currentUser = await userManager.GetUsersAsync(w.Id, false);
+            if ((currentUser.Status == EmployeeStatus.Terminated || currentUser.Removed) && w.Access != FileShare.None)
             {
                 continue;
             }
@@ -133,11 +132,6 @@ public class FileSharingAceHelper(
                 {
                     w.FileShareOptions.Password = null;
                     w.FileShareOptions.DenyDownload = false;
-                }
-
-                if (eventType == EventType.Create && w.FileShareOptions.ExpirationDate == DateTime.MinValue)
-                {
-                    w.FileShareOptions.ExpirationDate = DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime);
                 }
             }
 
@@ -356,13 +350,6 @@ public class FileSharingAceHelper(
 
         if (recipients.Count > 0)
         {
-            if (entryType == FileEntryType.File
-                || ((Folder<T>)entry).FoldersCount + ((Folder<T>)entry).FilesCount > 0
-                || entry.ProviderEntry)
-            {
-                await fileMarker.MarkAsNewAsync(entry, recipients.Keys.ToList());
-            }
-
             if (entry.RootFolderType is FolderType.USER or FolderType.Privacy
                 && notify)
             {

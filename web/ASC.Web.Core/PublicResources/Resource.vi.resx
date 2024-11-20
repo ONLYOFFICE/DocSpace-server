@@ -1055,6 +1055,18 @@
     <value>Hạn mức lưu trữ &amp; thống kê</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} mỗi quản trị viên/người dùng cấp cao và khả năng thêm không gian theo yêu cầu</value>
+    <value>{0} mỗi quản trị viên và khả năng thêm không gian theo yêu cầu</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Không thể đặt hạn mức cho mỗi phòng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Không thể đặt hạn mức cho mỗi người dùng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Thêm ít nhất 1 tên miền đáng tin cậy.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Số lượng quản trị viên vượt quá giới hạn: {0}/{1}.</value>
   </data>
 </root>

@@ -33,7 +33,12 @@ public class FilesMessageService(
     IHttpContextAccessor httpContextAccessor,
     IDaoFactory daoFactory)
 {
-    private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
+    private static readonly JsonSerializerOptions _serializerOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
+    };
+    
     private static readonly HashSet<MessageAction> _moveCopyActions =
     [
         MessageAction.FolderMoved,

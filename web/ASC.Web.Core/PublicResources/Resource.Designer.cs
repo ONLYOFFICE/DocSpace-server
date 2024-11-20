@@ -1771,6 +1771,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add at least 1 allowed IP address..
+        /// </summary>
+        public static string ErrorIpRestriction {
+            get {
+                return ResourceManager.GetString("ErrorIpRestriction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The access to the portal is restricted.
         /// </summary>
         public static string ErrorIpSecurity {
@@ -1911,6 +1920,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ErrorTooManyLoginAttempts {
             get {
                 return ResourceManager.GetString("ErrorTooManyLoginAttempts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add at least 1 trusted domain..
+        /// </summary>
+        public static string ErrorTrustedMailDomain {
+            get {
+                return ResourceManager.GetString("ErrorTrustedMailDomain", resourceCulture);
             }
         }
         
@@ -2797,6 +2815,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Non-profit.
+        /// </summary>
+        public static string Tariffs_nonprofit {
+            get {
+                return ResourceManager.GetString("Tariffs_nonprofit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Startup.
         /// </summary>
         public static string Tariffs_startup {
@@ -2914,7 +2941,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} per admin/power user and ability to add space on request.
+        ///   Looks up a localized string similar to {0} per admin and ability to add space on request.
         /// </summary>
         public static string TariffsFeature_total_size {
             get {
@@ -3009,6 +3036,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_usersInRoom_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_usersInRoom_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of admins exceeds the limit: {0}/{1}..
+        /// </summary>
+        public static string TariffsFeature_usersQuotaExceeds_exception {
+            get {
+                return ResourceManager.GetString("TariffsFeature_usersQuotaExceeds_exception", resourceCulture);
             }
         }
         

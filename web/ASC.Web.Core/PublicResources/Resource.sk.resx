@@ -1055,6 +1055,18 @@
     <value>Kvóty a štatistiky úložiska</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} na administrátora/oprávneného používateľa a možnosť pridať priestor na požiadanie</value>
+    <value>{0} na administrátora a možnosť pridať priestor na požiadanie</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Nepodarilo sa nastaviť kvótu pre miestnosť. Zadaná hodnota je väčšia ako celkové úložisko DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Nepodarilo sa nastaviť kvótu pre používateľa. Zadaná hodnota je väčšia ako celkové úložisko DocSpace.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Pridajte aspoň 1 dôveryhodnú doménu.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Počet administrátorov prekročil limit: {0}/{1}.</value>
   </data>
 </root>

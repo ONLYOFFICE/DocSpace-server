@@ -480,7 +480,7 @@ public class FilesLinkUtility
             return FilesBaseAbsolutePath + $"share/preview/{id}";
         }
         
-        return FilesBaseAbsolutePath + $"#preview/{id}";
+        return FilesBaseAbsolutePath + $"media/view/{id}";
     }
 
     public static string AddQueryString(string uri, Dictionary<string, string> queryString)

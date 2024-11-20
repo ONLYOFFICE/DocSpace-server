@@ -1662,7 +1662,7 @@ Olet juuri luonut ONLYOFFICE DocSpacen, asiakirjakeskuksen, jossa voit tehostaa 
 
 Tämänhetkinen tilauksesi on STARTUP. Se on täysin ilmainen ja sisältää:
 
-&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 järjestelmänvalvojaa/tehokäyttäjää&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Jopa 100 huonetta&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB levytilaa&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 järjestelmänvalvojaa&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Jopa 100 huonetta&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB levytilaa&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
 *nauti uudesta tavasta tehdä yhteistyötä asiakirjoilla!*
 
@@ -1757,6 +1757,189 @@ $TrulyYours</value>
 $__AuthorName kutsui sinut liittymään huoneeseen "$Message":"$InviteLink" "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Osta nyt</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Aseta salasana</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Hei! Ole hyvä ja aseta salasana ONLYOFFICE DocSpace-tilillesi. Klikkaa vain alla olevaa painiketta:
+
+$OrangeButton
+
+Linkki on voimassa 7 päivää.</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developerin lisäaika on aktivoitu</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developer-lisenssisi päättyy pian</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developerin lisäaika päättyy pian</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developer ei ole enää käytettävissä</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprisen lisäaika on aktivoitu</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise-lisenssi päättyy pian</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprisen lisäaika päättyy pian</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise ei ole enää käytettävissä</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise-lisenssi päättyy pian</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise-lisenssi päättyy tänään</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Aseta ONLYOFFICE DocSpacelle salasana</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Hei, $UserName!
+
+ONLYOFFICE DocSpace Developer-lisenssisi päättyy tänään.
+
+Olemme aktivoineet sinulle $PaymentDelay päivän lisäajan. Tämän lisäajan aikana pääsy asiakirjojen muokkaamiseen on rajoitettu 20 samanaikaiseen yhteyteen (tuki ja päivitykset eivät ole enää tarjolla).
+
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+
+
+Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Hei, $UserName!
+
+ONLY OFFICE DocSpace Developer-lisenssi päättyy 7 päivän päästä.
+
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+
+Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Hei, $UserName!
+
+ONLY OFFICE DocSpace Developer-lisenssin lisäaika päättyy 7 päivän päästä.Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
+
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+
+Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Hei, $UserName!
+
+ONLY OFFICE DocSpace Developer-lisenssin lisäaika päättyy tänään. Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
+
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+
+Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Hei, $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisenssisi vanhenee tänään.
+
+Olemme aktivoineet sinulle *$PaymentDelay‎ päivän lisäajan*. Sen aikana DocSpaceen pääsee 3 nimettyä käyttäjää * (tukea ja päivityksiä ei enää tarjota).
+
+Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ONLYOFFICE DocSpace Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
+
+$OrangeButton
+
+Voit myös ottaa yhteyttä suoraan myyntijohtajaan halutessasi päivittää lisenssin.
+
+Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
+
+*Kolmen ensimmäisen käyttäjän tiedot, jotka avaavat minkä tahansa tiedoston muokattavaksi. Samanaikaisesti muokattavien asiakirjojen määrää ei ole rajoitettu. Muilla käyttäjillä on vain katseluoikeudet.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Hei, $UserName!
+
+ONLYOFFICE DocSpace Enterprise lisenssisi vanhenee 7 päivän kuluttua.
+
+Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ONLYOFFICE DocSpace Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
+
+$OrangeButton
+
+Voit myös ottaa yhteyttä suoraan myyntijohtajaan halutessasi päivittää lisenssin.
+
+Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Hei, $UserName!
+
+ONLYOFFICE DocSpace Enterprisen lisenssisi lisäaika päättyy 7 päivän kuluttua. Se tarkoittaa sitä, että DocSpace ei ole enää käytössä.
+
+Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ONLYOFFICE DocSpace Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
+
+$OrangeButton
+
+Voit myös ottaa yhteyttä suoraan myyntijohtajaan halutessasi päivittää lisenssin.
+
+Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Hei, $UserName!
+
+ONLYOFFICE DocSpace Enterprise- lisenssisi vanhenee tänään. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.*
+
+Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ONLYOFFICE DocSpace Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
+
+$OrangeButton
+
+Voit myös ottaa yhteyttä suoraan myyntijohtajaan halutessasi päivittää lisenssin.
+
+Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Hei, $UserName!
+
+ONLYOFFICE DocSpace Enterprise- lisenssisi vanhenee 7 päivän päästä. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.* 
+
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+
+Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
+
+*Voit rajattomasti käyttää kaikkia saatavilla olevia ominaisuuksia lisenssin ostohetkestä alkaen.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Hei, $UserName!
+
+ONLYOFFICE DocSpace Enterprise- lisenssisi vanhenee tänään. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.*
+
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+
+Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
+
+*Voit rajattomasti käyttää kaikkia saatavilla olevia ominaisuuksia lisenssin ostohetkestä alkaen.
 
 $TrulyYours</value>
   </data>

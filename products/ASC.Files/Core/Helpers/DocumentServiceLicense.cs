@@ -36,7 +36,7 @@ public class DocumentServiceLicense(ICache cache,
     private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(15);
 
 
-    private async Task<CommandResponse> GetDocumentServiceLicenseAsync()
+    private async Task<CommandResponse> GetDocumentServiceLicenseAsync(bool useCache)
     {
         if (!coreBaseSettings.Standalone)
         {
@@ -49,7 +49,7 @@ public class DocumentServiceLicense(ICache cache,
         }
 
         var cacheKey = "DocumentServiceLicense";
-        var commandResponse = cache.Get<CommandResponse>(cacheKey);
+        var commandResponse = useCache ? cache.Get<CommandResponse>(cacheKey) : null;
         if (commandResponse == null)
         {
             commandResponse = await CommandRequestAsync(
@@ -63,15 +63,25 @@ public class DocumentServiceLicense(ICache cache,
                    fileUtility.SignatureSecret,
                    clientFactory
                    );
-            cache.Insert(cacheKey, commandResponse, DateTime.UtcNow.Add(_cacheExpiration));
+
+            if (useCache)
+            {
+                cache.Insert(cacheKey, commandResponse, DateTime.UtcNow.Add(_cacheExpiration));
+            }
         }
 
         return commandResponse;
     }
 
+    public async Task<bool> ValidateLicense()
+    {
+        var commandResponse = await GetDocumentServiceLicenseAsync(false);
+        return commandResponse == null || commandResponse.Error == ErrorTypes.NoError;
+    }
+
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()
     {
-        var commandResponse = await GetDocumentServiceLicenseAsync();
+        var commandResponse = await GetDocumentServiceLicenseAsync(true);
         return commandResponse == null ? 
             (null, null) : 
             (commandResponse.Quota?.Users?.ToDictionary(r=> r.UserId, r=> r.Expire), commandResponse.License);

@@ -26,11 +26,14 @@
 
 namespace ASC.Files.Core.Core;
 
-/// <summary>
-/// </summary>
 public enum ApplyFilterOption
 {
+    [SwaggerEnum("All")]
     All,
+
+    [SwaggerEnum("Files")]
     Files,
+
+    [SwaggerEnum("Folders")]
     Folders
 }

@@ -51,16 +51,20 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
         {
             var actionText = action.GetActionText();
 
+            if (evt.Action is >= (int)MessageAction.CreateClient and <= 10000 && evt.Target != null)
+            {
+                return string.Format(actionText, evt.Target.GetItems().ToArray<object>());
+            }
+            
             if (evt.Description == null || evt.Description.Count == 0)
             {
                 return actionText;
             }
-
+            
             var description = evt.Description
-                                 .Select(t => t.Split([','], StringSplitOptions.RemoveEmptyEntries))
-                                 .Select(split => string.Join(", ", split.Select(ToLimitedText)))
-                                 .ToArray();
-
+                .Select(t => t.Split([','], StringSplitOptions.RemoveEmptyEntries))
+                .Select(split => string.Join(", ", split.Select(ToLimitedText)))
+                .ToArray();
 
             return string.Format(actionText, description);
         }

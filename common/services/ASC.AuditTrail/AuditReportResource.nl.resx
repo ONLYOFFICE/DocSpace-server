@@ -802,4 +802,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Gebruikers [{0}]. Formulier ingediend: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Exporteren van de kamer index opgeslagen in Documenten</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Uitnodigingen opnieuw verstuurd: {0}</value>
+  </data>
 </root>
