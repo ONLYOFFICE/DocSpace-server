@@ -344,17 +344,17 @@ module.exports = (io) => {
   }
 
   function addUser({ tenantId, user } = {}) {
-    var room = `${tenantId}-accounts`;
+    var room = `${tenantId}-contacts`;
     filesIO.to(room).emit("s:add-user",  {id: user.id, data: user});
   }
 
   function updateUser({ tenantId, user } = {}) {
-    var room = `${tenantId}-accounts`;
+    var room = `${tenantId}-contacts`;
     filesIO.to(room).emit("s:update-user", {id: user.id, data: user});
   }
 
   function deleteUser({ tenantId, userId } = {}) {
-    var room = `${tenantId}-accounts`;
+    var room = `${tenantId}-contacts`;
     filesIO.to(room).emit("s:delete-user", userId);
   }
 
