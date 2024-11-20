@@ -1069,4 +1069,10 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>El número de administradores supera el límite: {0}/{1}.</value>
   </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Añada al menos 1 dirección IP permitida.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Sin ánimo de lucro</value>
+  </data>
 </root>

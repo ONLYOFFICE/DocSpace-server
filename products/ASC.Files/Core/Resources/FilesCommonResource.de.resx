@@ -500,4 +500,7 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="RoleEnum_ContentCreator" xml:space="preserve">
     <value>Inhaltsersteller</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Datei öffnen</value>
+  </data>
 </root>
