@@ -86,6 +86,8 @@ internal class CleanupLifetimeExpiredService(
 
         try
         {
+            CustomSynchronizationContext.CreateContext();
+
             await using var scope = _scopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
