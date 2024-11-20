@@ -80,6 +80,7 @@ public class FilesLinkUtility
     public const string IsFile = "is_file";
     public const string View = "view";
     public const string ShardKey = "shardkey";
+    public const string Password = "password";
 
     public string FileHandlerPath
     {

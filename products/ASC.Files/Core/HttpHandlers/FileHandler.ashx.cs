@@ -335,6 +335,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         var ext = FileUtility.GetFileExtension(file.Title);
 
                         var outType = (context.Request.Query[FilesLinkUtility.OutType].FirstOrDefault() ?? "").Trim();
+                        var password = context.Request.Query[FilesLinkUtility.Password].FirstOrDefault();
                         var extsConvertible = await fileUtility.GetExtsConvertibleAsync();
                         var convertible = extsConvertible.TryGetValue(ext, out var value);
 
@@ -400,7 +401,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                             else
                             {
                                 title = FileUtility.ReplaceFileExtension(title, ext);
-                                fileStream = await fileConverter.ExecAsync(file, ext);
+                                fileStream = await fileConverter.ExecAsync(file, ext, password);
                                 
                                 length = fileStream.Length;
                                 fullLength = length;
