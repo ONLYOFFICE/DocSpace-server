@@ -131,7 +131,15 @@ module.exports = async (io) => {
       socket.on("getSessions", async (obj) => {
         var id = obj.id;
         var user = getUser(portalUsers, id, tenantId);
-        var sessions = user.sessions.concat(user.offlineSessions);
+        let sessions = [];
+        let ids = [];
+        user.sessions.forEach(element => {
+          if (!ids.includes(element.id)) {
+            sessions.push(element);
+            ids.push(element.id);
+          }
+        });
+        sessions = sessions.concat(user.offlineSessions);
         onlineIO.to(socket.id).emit("user-sessions",  sessions );
       });
 
@@ -230,7 +238,7 @@ module.exports = async (io) => {
             var users = JSON.parse(await redisClient.get(`allusers-${key}`));
             if(users)
             {
-           //   allUsers[key] = users;
+              allUsers[key] = users;
             }
             if(allUsers[key].length != 0)
             {
