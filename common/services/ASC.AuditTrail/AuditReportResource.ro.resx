@@ -862,10 +862,10 @@
     <value>Utilizatorul {0} a trimis invitația de asociere la DocSpace către {1}</value>
   </data>
   <data name="FileIndexChanged" xml:space="preserve">
-    <value>Fișierul: {0}. Indexul s-a schimbat din  {1} în {2}</value>
+    <value>Fișierul: {0}. Indexul s-a schimbat din {1} în {2}</value>
   </data>
   <data name="FolderIndexChanged" xml:space="preserve">
-    <value>Folderul: {0}. Indexul s-a schimbat din  {1} în {2}</value>
+    <value>Folderul: {0}. Indexul s-a schimbat din {1} în {2}</value>
   </data>
   <data name="FolderIndexReordered" xml:space="preserve">
     <value>Folderul: {0}. Indexuri au fost înregistrate</value>

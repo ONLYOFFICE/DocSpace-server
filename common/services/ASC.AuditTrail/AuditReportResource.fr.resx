@@ -836,7 +836,7 @@
     <value>Durée de vie désactivée</value>
   </data>
   <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>La durée de vie est définie. Valeur : {0}. Période : {1} : {1}. Suppression définitive : {2}</value>
+    <value>La durée de vie est définie. Valeur : {0}. Période : {1}. Suppression définitive : {2}</value>
   </data>
   <data name="RoomWatermarkDisabled" xml:space="preserve">
     <value>Salle : {0}. Filigrane désactivé</value>
