@@ -844,4 +844,31 @@
   <data name="OAuthModule" xml:space="preserve">
     <value>OAuth</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Клиент {0} удален</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Секрет клиента {0} создан повторно</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Отменен доступ клиента {0}</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Клиент {0} обновлен</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Сгенерирован код авторизации для клиента {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Сгенерирован персональный токен доступа для клиента {0}</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Клиент создан</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Видимость клиента {0} изменилась</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Активация клиента {0} изменилась</value>
+  </data>
 </root>
