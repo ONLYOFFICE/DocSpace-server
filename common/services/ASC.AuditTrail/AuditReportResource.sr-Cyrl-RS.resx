@@ -867,4 +867,40 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Позивнице поново послате: {0}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Датотека: {0}. Индекс промењен из {1} у {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Фолдер: {0}. Индекс промењен из {1} у {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Фолдер: {0}. Индекси су преуређени</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Соба: {0}. Забрани преузимање онемогућено</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Соба: {0}. Забрани преузимање омогућено</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Индексирање соба онемогућено</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Индексирање соба омогућено</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>LifeTime онемогућен</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Животно време је постављено. вредност : {0}. Период: {1}. Трајно избриши: {2}</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Соба: {0}. Водени жиг омогућен</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Соба: {0}. Водени жиг онемогућен</value>
+  </data>
 </root>

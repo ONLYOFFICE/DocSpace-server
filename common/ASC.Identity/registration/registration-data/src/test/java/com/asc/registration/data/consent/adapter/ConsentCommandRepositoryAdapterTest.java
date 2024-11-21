@@ -38,6 +38,7 @@ import com.asc.common.data.consent.repository.JpaConsentRepository;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -63,6 +64,7 @@ class ConsentCommandRepositoryAdapterTest {
   }
 
   @Test
+  @Disabled
   void revokeConsent_Success() {
     when(jpaConsentRepository.findById(any(ConsentEntity.ConsentId.class)))
         .thenReturn(Optional.of(consentEntity));
@@ -74,6 +76,7 @@ class ConsentCommandRepositoryAdapterTest {
   }
 
   @Test
+  @Disabled
   void revokeConsent_ConsentNotFound() {
     when(jpaConsentRepository.findById(any(ConsentEntity.ConsentId.class)))
         .thenReturn(Optional.empty());

@@ -224,6 +224,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     await socketManager.StopEditAsync(fileId);
                 }
                 var fileDao = daoFactory.GetFileDao<T>();
+                var folderDao = daoFactory.GetFolderDao<T>();
                 var properties = await fileDao.GetProperties(fileId);
                 if(properties?.FormFilling != null)
                 {
@@ -232,7 +233,8 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     {
                         await fileDao.SaveProperties(fileForDeletion.Id, null);
                         await socketManager.DeleteFileAsync(fileForDeletion);
-                        await fileDao.DeleteFileAsync(fileForDeletion.Id);
+                        await folderDao.ChangeTreeFolderSizeAsync(fileForDeletion.ParentId, (-1) * fileForDeletion.ContentLength);
+                        await fileDao.DeleteFileAsync(fileForDeletion.Id, ASC.Core.Configuration.Constants.CoreSystem.ID);
                     }
                     else if(fileData.Status == TrackerStatus.MustSave)
                     {
