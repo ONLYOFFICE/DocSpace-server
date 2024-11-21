@@ -277,7 +277,7 @@ public interface IFileDao<T>
     #region chunking
 
     Task<ChunkedUploadSession<T>> CreateUploadSessionAsync(File<T> file, long contentLength);
-    Task<File<T>> UploadChunkAsync(ChunkedUploadSession<T> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null, CancellationToken token = default);
+    Task<File<T>> UploadChunkAsync(ChunkedUploadSession<T> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null);
     Task<File<T>> FinalizeUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task AbortUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<T> uploadSession);
