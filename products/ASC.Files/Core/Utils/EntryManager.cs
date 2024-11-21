@@ -505,6 +505,8 @@ public class EntryManager(IDaoFactory daoFactory,
                 entries = new List<FileEntry>(folders.Count + files.Count);
                 entries.AddRange(folders);
                 entries.AddRange(files);
+
+                filesToUpdate = files;
             }
 
             var fileStatusTask = entryStatusManager.SetFileStatusAsync(filesToUpdate);
