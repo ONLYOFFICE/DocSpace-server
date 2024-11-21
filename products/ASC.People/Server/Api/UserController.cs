@@ -544,7 +544,14 @@ public class UserController(
         await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
 
         await messageService.SendAsync(MessageAction.UserDeleted, MessageTarget.Create(user.Id), userName);
-        await socketManager.DeleteUserAsync(user.Id);
+        if (isGuest) 
+        {
+            await socketManager.DeleteGuestAsync(user.Id);
+        }
+        else
+        {
+            await socketManager.DeleteUserAsync(user.Id);
+        }
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
@@ -1632,7 +1639,14 @@ public class UserController(
                             }
 
                             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-                            await socketManager.UpdateUserAsync(user);
+                            if (await _userManager.IsGuestAsync(user)) 
+                            {
+                                await socketManager.UpdateGuestAsync(user);
+                            }
+                            else
+                            {
+                                await socketManager.UpdateUserAsync(user);
+                            }
                         }
                         finally
                         {
@@ -1687,8 +1701,17 @@ public class UserController(
 
         foreach (var user in users)
         {
+            var isGuest = await userManager.IsGuestAsync(user);
             await userManagerWrapper.UpdateUserTypeAsync(user, inDto.Type);
-            await socketManager.UpdateUserAsync(user);
+            if (isGuest && !await userManager.IsGuestAsync(user)) 
+            {
+                await socketManager.AddUserAsync(user);
+                await socketManager.DeleteGuestAsync(user.Id);
+            }
+            else
+            {
+                await socketManager.UpdateUserAsync(user);
+            }
         }
 
         await messageService.SendAsync(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),

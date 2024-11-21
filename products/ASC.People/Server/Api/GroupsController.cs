@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Utils;
+
 namespace ASC.People.Api;
 
 ///<summary>
@@ -41,7 +43,8 @@ public class GroupController(
     GroupFullDtoHelper groupFullDtoHelper,
     MessageService messageService,
     PermissionContext permissionContext,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    SocketManager socketManager)
     : ControllerBase
 {
     /// <summary>
@@ -158,7 +161,10 @@ public class GroupController(
 
         await messageService.SendAsync(MessageAction.GroupCreated, MessageTarget.Create(group.ID), group.Name);
 
-        return await groupFullDtoHelper.Get(group, true);
+        var dto = await groupFullDtoHelper.Get(group, true);
+
+        await socketManager.AddGroupAsync(dto);
+        return dto;
     }
 
     /// <summary>
@@ -201,7 +207,9 @@ public class GroupController(
 
         await messageService.SendAsync(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
 
-        return await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
+        var dto = await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
+        await socketManager.UpdateGroupAsync(dto);
+        return dto;
     }
 
     /// <summary>
@@ -225,6 +233,7 @@ public class GroupController(
         await fileSecurity.RemoveSubjectAsync(inDto.Id, false);
 
         await messageService.SendAsync(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
+        await socketManager.DeleteGroupAsync(inDto.Id);
 
         return NoContent();
     }

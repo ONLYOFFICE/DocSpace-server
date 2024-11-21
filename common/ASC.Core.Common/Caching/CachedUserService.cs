@@ -303,6 +303,22 @@ public class CachedUserService : IUserService, ICachedService
         return relations;
     }
 
+    public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsByTargetAsync(int tenantId, Guid targetUserId)
+    {
+        var key = UserServiceCache.GetRelationCacheKey(tenantId, targetUserId.ToString());
+        var relations = _cache.Get<Dictionary<Guid, UserRelation>>(key);
+
+        if (relations != null)
+        {
+            return relations;
+        }
+
+        relations = await _service.GetUserRelationsByTargetAsync(tenantId, targetUserId);
+        _cache.Insert(key, relations, _cacheExpiration);
+
+        return relations;
+    }
+
     public async Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
     {
         await _service.DeleteUserRelationAsync(tenantId, sourceUserId, targetUserId);

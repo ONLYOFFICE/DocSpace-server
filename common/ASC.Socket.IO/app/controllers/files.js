@@ -127,5 +127,35 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/add-group", (req, res) => {
+    files.addGroup(req.body);
+    res.end();
+  });
+
+  router.post("/update-group", (req, res) => {
+    files.updateGroup(req.body);
+    res.end();
+  });
+
+  router.post("/delete-group", (req, res) => {
+    files.deleteGroup(req.body);
+    res.end();
+  });
+
+  router.post("/add-guest", (req, res) => {
+    files.addGuest(req.body);
+    res.end();
+  });
+
+  router.post("/update-guest", (req, res) => {
+    files.updateGuest(req.body);
+    res.end();
+  });
+
+  router.post("/delete-guest", (req, res) => {
+    files.deleteGuest(req.body);
+    res.end();
+  });
+
   return router;
 };

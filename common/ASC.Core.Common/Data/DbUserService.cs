@@ -709,7 +709,17 @@ public class EFUserService(
         
         return await q.ToDictionaryAsync(r => r.TargetUserId, mapper.Map<UserRelation>);
     }
-    
+
+    public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsByTargetAsync(int tenantId, Guid targetUserId)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var q = userDbContext.UserRelations
+            .Where(r => r.TenantId == tenantId && r.TargetUserId == targetUserId);
+
+        return await q.ToDictionaryAsync(r => r.TargetUserId, mapper.Map<UserRelation>);
+    }
+
     public async Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
