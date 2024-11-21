@@ -30,15 +30,15 @@ namespace ASC.Files.Service.Log;
 
 internal static partial class CleanupLifetimeExpiredServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "CleanupLifetimeExpired Found: tenant {tenant}, room {room}, expired files {count}")]
+    [LoggerMessage(LogLevel.Information, "CleanupLifetimeExpired Found: tenant {tenant}, room {room}, expired files {count}")]
     public static partial void InfoCleanupLifetimeExpiredFound(this ILogger<CleanupLifetimeExpiredService> logger, int tenant, int room, int count);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "CleanupLifetimeExpired Start: tenant {tenant}, room {room}, user {user}, files [{files}]")]
+    [LoggerMessage(LogLevel.Information, "CleanupLifetimeExpired Start: tenant {tenant}, room {room}, user {user}, files [{files}]")]
     public static partial void InfoCleanupLifetimeExpiredStart(this ILogger<CleanupLifetimeExpiredService> logger, int tenant, int room, Guid user, string files);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "CleanupLifetimeExpired Waiting: tenant {tenant}, room {room}, user {user}...")]
+    [LoggerMessage(LogLevel.Information, "CleanupLifetimeExpired Waiting: tenant {tenant}, room {room}, user {user}...")]
     public static partial void InfoCleanupLifetimeExpiredWait(this ILogger<CleanupLifetimeExpiredService> logger, int tenant, int room, Guid user);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "CleanupLifetimeExpired Finish: tenant {tenant}, room {room}, user {user}")]
+    [LoggerMessage(LogLevel.Information, "CleanupLifetimeExpired Finish: tenant {tenant}, room {room}, user {user}")]
     public static partial void InfoCleanupLifetimeExpiredFinish(this ILogger<CleanupLifetimeExpiredService> logger, int tenant, int room, Guid user);
 }

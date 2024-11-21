@@ -28,15 +28,15 @@ namespace ASC.Web.Api.Log;
 
 internal static partial class StorageControllerLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetStorageEncryptionSettings")]
+    [LoggerMessage(LogLevel.Error, "GetStorageEncryptionSettings")]
     public static partial void ErrorGetStorageEncryptionSettings(this ILogger logger, Exception exception);   
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "UpdateStorage")]
+    [LoggerMessage(LogLevel.Error, "UpdateStorage")]
     public static partial void ErrorUpdateStorage(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "ResetStorageToDefault")]
+    [LoggerMessage(LogLevel.Error, "ResetStorageToDefault")]
     public static partial void ErrorResetStorageToDefault(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "UpdateCdn")]
+    [LoggerMessage(LogLevel.Error, "UpdateCdn")]
     public static partial void ErrorUpdateCdn(this ILogger logger, Exception exception);
 }

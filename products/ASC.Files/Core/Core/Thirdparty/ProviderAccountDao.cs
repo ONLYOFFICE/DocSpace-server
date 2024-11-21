@@ -36,7 +36,9 @@ public enum ProviderTypes
     SharePoint,
     WebDav,
     kDrive,
-    Yandex
+    Yandex,
+    NextCloud,
+    OwnCloud
 }
 
 [Scope(typeof(IProviderDao))]
@@ -111,10 +113,18 @@ internal class ProviderAccountDao(
         try
         {
             prKey = (ProviderTypes)Enum.Parse(typeof(ProviderTypes), providerKey, true);
+            switch (prKey)
+            {
+                case ProviderTypes.NextCloud:
+                case ProviderTypes.OwnCloud:
+                    prKey = ProviderTypes.WebDav;
+                    providerKey = prKey.ToStringFast();
+                    break;
+            }
         }
         catch (Exception)
         {
-            throw new ArgumentException("Unrecognize ProviderType");
+            throw new ArgumentException("Unrecognized ProviderType");
         }
 
         authData = GetEncodedAccessToken(authData, prKey);
@@ -127,7 +137,7 @@ internal class ProviderAccountDao(
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var now = tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow());
 
-        var dbFilesThirdpartyAccount = new DbFilesThirdpartyAccount
+        var dbFilesThirdPartyAccount = new DbFilesThirdpartyAccount
         {
             Id = 0,
             TenantId = tenantId,
@@ -144,7 +154,7 @@ internal class ProviderAccountDao(
         };
 
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var res = await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyAccount, dbFilesThirdpartyAccount);
+        var res = await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyAccount, dbFilesThirdPartyAccount);
         await filesDbContext.SaveChangesAsync();
 
         return res.Id;
@@ -266,7 +276,16 @@ internal class ProviderAccountDao(
 
             if (!ProviderTypesExtensions.TryParse(input.Provider, true, out var key))
             {
-                throw new ArgumentException("Unrecognize ProviderType");
+                throw new ArgumentException("Unrecognized ProviderType");
+            }
+
+            switch (key)
+            {
+                case ProviderTypes.NextCloud:
+                case ProviderTypes.OwnCloud:
+                    key = ProviderTypes.WebDav;
+                    input.Provider = key.ToStringFast();
+                    break;
             }
 
             authData = new AuthData(
@@ -343,6 +362,15 @@ internal class ProviderAccountDao(
         if (!ProviderTypesExtensions.TryParse(providerKey, true, out var key))
         {
             throw new ArgumentException("Unrecognize ProviderType");
+        }
+        
+        switch (key)
+        {
+            case ProviderTypes.NextCloud:
+            case ProviderTypes.OwnCloud:
+                key = ProviderTypes.WebDav;
+                providerKey = key.ToStringFast();
+                break;
         }
 
         if (newAuthData != null && !newAuthData.IsEmpty())
@@ -459,7 +487,7 @@ internal class ProviderAccountDao(
             box.ProviderId = id;
             box.CustomerTitle = providerTitle;
             box.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            box.ProviderKey = input.Provider;
+            box.ProviderKey = ProviderTypes.Box.ToStringFast();
             box.RootFolderType = rootFolderType;
             box.CreateOn = createOn;
             box.ModifiedOn = modifiedOn;
@@ -484,7 +512,7 @@ internal class ProviderAccountDao(
             drop.ProviderId = id;
             drop.CustomerTitle = providerTitle;
             drop.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            drop.ProviderKey = input.Provider;
+            drop.ProviderKey = ProviderTypes.DropboxV2.ToStringFast();
             drop.RootFolderType = rootFolderType;
             drop.CreateOn = createOn;
             drop.ModifiedOn = modifiedOn;
@@ -509,7 +537,7 @@ internal class ProviderAccountDao(
             sh.ProviderId = id;
             sh.CustomerTitle = providerTitle;
             sh.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            sh.ProviderKey = input.Provider;
+            sh.ProviderKey = ProviderTypes.SharePoint.ToStringFast();
             sh.RootFolderType = rootFolderType;
             sh.CreateOn = createOn;
             sh.ModifiedOn = modifiedOn;
@@ -534,7 +562,7 @@ internal class ProviderAccountDao(
             gd.ProviderId = id;
             gd.CustomerTitle = providerTitle;
             gd.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            gd.ProviderKey = input.Provider;
+            gd.ProviderKey = ProviderTypes.GoogleDrive.ToStringFast();
             gd.RootFolderType = rootFolderType;
             gd.CreateOn = createOn;
             gd.ModifiedOn = modifiedOn;
@@ -559,7 +587,7 @@ internal class ProviderAccountDao(
             od.ProviderId = id;
             od.CustomerTitle = providerTitle;
             od.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            od.ProviderKey = input.Provider;
+            od.ProviderKey = ProviderTypes.OneDrive.ToStringFast();
             od.RootFolderType = rootFolderType;
             od.CreateOn = createOn;
             od.ModifiedOn = modifiedOn;
@@ -592,7 +620,7 @@ internal class ProviderAccountDao(
         webDavProviderInfo.ProviderId = id;
         webDavProviderInfo.CustomerTitle = providerTitle;
         webDavProviderInfo.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-        webDavProviderInfo.ProviderKey = input.Provider;
+        webDavProviderInfo.ProviderKey = key.ToStringFast();
         webDavProviderInfo.RootFolderType = rootFolderType;
         webDavProviderInfo.CreateOn = createOn;
         webDavProviderInfo.ModifiedOn = modifiedOn;
@@ -658,6 +686,8 @@ internal class ProviderAccountDao(
                 return new AuthData(token: token.ToJson());
             case ProviderTypes.SharePoint:
             case ProviderTypes.WebDav:
+            case ProviderTypes.NextCloud:
+            case ProviderTypes.OwnCloud:
                 break;
 
             default:

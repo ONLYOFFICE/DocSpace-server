@@ -335,17 +335,22 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         var ext = FileUtility.GetFileExtension(file.Title);
 
                         var outType = (context.Request.Query[FilesLinkUtility.OutType].FirstOrDefault() ?? "").Trim();
-                        var extsConvertibleAsync = await fileUtility.GetExtsConvertibleAsync();
-                        if (!string.IsNullOrEmpty(outType) && extsConvertibleAsync.TryGetValue(ext, out var value) && value.Contains(outType))
+                        var extsConvertible = await fileUtility.GetExtsConvertibleAsync();
+                        var convertible = extsConvertible.TryGetValue(ext, out var value);
+
+                        if (!string.IsNullOrEmpty(outType) && convertible && value.Contains(outType))
                         {
                             ext = outType;
                         }
 
-                        if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)))
+                        var watermarkEnabled = false;
+
+                        if (convertible)
                         {
                             var folderDao = daoFactory.GetFolderDao<T>();
                             if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
                             {
+                                watermarkEnabled = true;
                                 ext = FileUtility.WatermarkedDocumentExt;
                             }
                         }
@@ -379,7 +384,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         }
                         else
                         {
-                            if (!await fileConverter.EnableConvertAsync(file, ext))
+                            if (!await fileConverter.EnableConvertAsync(file, ext, watermarkEnabled))
                             {
                                 if (await fileDao.IsSupportedPreSignedUriAsync(file))
                                 {
@@ -455,6 +460,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             if (!flushed && !context.RequestAborted.IsCancellationRequested)
             {
                 context.Response.StatusCode = 400;
+                context.Response.ContentType = "text/html; charset=utf-8";
                 await context.Response.WriteAsync(HttpUtility.HtmlEncode(ex.Message));
             }
         }
@@ -467,8 +473,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             return true;
         }
 
-        return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) &&
-               file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict } or { IsLink: false, Share: FileShare.Read, SubjectType: SubjectType.User  };
+        return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) && 
+               (file.ShareRecord is 
+                   { IsLink: true, Share: not FileShare.Restrict } or 
+                   { Share: FileShare.Read, SubjectType: SubjectType.User or SubjectType.Group }) || 
+               (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID));
     }
 
     private async Task TryMarkAsRecentByLink<T>(File<T> file)

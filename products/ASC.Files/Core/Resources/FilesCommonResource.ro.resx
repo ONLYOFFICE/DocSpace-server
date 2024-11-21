@@ -488,4 +488,19 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ExternalUser" xml:space="preserve">
     <value>Utilizator extern</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Creator de conținut</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Manager de sală</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Manager de sală</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Creator de conținut</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Deschidere fișier</value>
+  </data>
 </root>

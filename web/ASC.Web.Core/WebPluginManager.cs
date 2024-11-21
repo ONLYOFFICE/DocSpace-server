@@ -301,7 +301,10 @@ public class WebPluginManager(
         var webPlugins = new List<WebPlugin>();
 
         webPlugins.AddRange((await GetWebPluginsFromCacheAsync(Tenant.DefaultTenant)).Select(x => x.Clone()));
-        webPlugins.AddRange((await GetWebPluginsFromCacheAsync(tenantId)).Select(x => x.Clone()));
+
+        webPlugins.AddRange((await GetWebPluginsFromCacheAsync(tenantId))
+            .Where(tenantPlugin => webPlugins.All(systemPlugin => systemPlugin.Name != tenantPlugin.Name))
+            .Select(x => x.Clone()));
 
         if (webPlugins.Count == 0)
         {

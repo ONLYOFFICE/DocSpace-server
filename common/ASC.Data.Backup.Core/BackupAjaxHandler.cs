@@ -427,36 +427,55 @@ public class BackupAjaxHandler(
         return Path.Combine(folder, $"{tenantId}-{BackupFileName}");
     }
 
-    /// <summary>
-    /// </summary>
     public class Schedule
     {
-        /// <summary>Storage type</summary>
-        /// <type>ASC.Data.Backup.Contracts.BackupStorageType, ASC.Data.Backup.Core</type>
+        /// <summary>
+        /// Storage type
+        /// </summary>
         public BackupStorageType StorageType { get; set; }
 
-        /// <summary>Storage parameters</summary>
-        /// <type>System.Collections.Generic.Dictionary{System.String, System.String}, System.Collections.Generic</type>
+        /// <summary>
+        /// Storage parameters
+        /// </summary>
         public Dictionary<string, string> StorageParams { get; set; }
 
-        /// <summary>Cron parameters</summary>
-        /// <type>ASC.Data.Backup.BackupAjaxHandler.CronParams, ASC.Data.Backup.Core</type>
+        /// <summary>
+        /// Cron parameters
+        /// </summary>
         public CronParams CronParams { get; init; }
 
-        /// <summary>Maximum number of the stored backup copies</summary>
-        /// <type>System.Nullable{System.Int32}, System</type>
+        /// <summary>
+        /// Maximum number of the stored backup copies
+        /// </summary>
         public int? BackupsStored { get; init; }
 
-        /// <summary>Last backup creation time</summary>
-        /// <type>System.DateTime, System</type>
+        /// <summary>
+        /// Last backup creation time
+        /// </summary>
         public DateTime LastBackupTime { get; set; }
+
+        /// <summary>
+        /// Dump
+        /// </summary>
+        [SwaggerSchemaCustom(Example = false)]
         public bool Dump { get; set; }
     }
 
     public class CronParams
     {
+        /// <summary>
+        /// Period
+        /// </summary>
         public BackupPeriod Period { get; init; }
+
+        /// <summary>
+        /// Hour
+        /// </summary>
         public int Hour { get; init; }
+
+        /// <summary>
+        /// Day
+        /// </summary>
         public int Day { get; init; }
 
         public CronParams() { }
@@ -495,8 +514,13 @@ public class BackupAjaxHandler(
 
     public enum BackupPeriod
     {
+        [SwaggerEnum(Description = "Every day")]
         EveryDay = 0,
+
+        [SwaggerEnum(Description = "Every week")]
         EveryWeek = 1,
+
+        [SwaggerEnum(Description = "Every month")]
         EveryMonth = 2
     }
 }

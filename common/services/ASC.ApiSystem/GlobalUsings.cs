@@ -83,3 +83,4 @@ global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Options;
 
 global using NLog;
+global using Swashbuckle.AspNetCore.Annotations;

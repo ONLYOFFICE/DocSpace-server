@@ -544,4 +544,22 @@
   <data name="FormNumber" xml:space="preserve">
     <value>Број формулара</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Менаџер собе</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Креатор садржаја</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Спољни корисник</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Менаџер собе</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Креатор садржаја</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Отвори фајл</value>
+  </data>
 </root>

@@ -27,20 +27,17 @@
 
 package com.asc.registration.data.consent.adapter;
 
-import com.asc.common.core.domain.exception.ConsentNotFoundException;
 import com.asc.common.core.domain.value.ClientId;
-import com.asc.common.data.consent.entity.ConsentEntity;
 import com.asc.common.data.consent.repository.JpaConsentRepository;
 import com.asc.registration.service.ports.output.repository.ConsentCommandRepository;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 /**
  * Adapter class for handling consent command operations. Implements the {@link
- * ConsentCommandRepository} interface.
+ * ConsentCommandRepository} interface and provides the necessary logic for interacting with the JPA
+ * repository to manage consent state.
  */
 @Slf4j
 @Repository
@@ -49,27 +46,25 @@ public class ConsentCommandRepositoryAdapter implements ConsentCommandRepository
   private final JpaConsentRepository jpaConsentRepository;
 
   /**
-   * Revokes a user's consent for a specific client by marking it as invalidated.
+   * Revokes a specific user's consent for a given client by marking it as invalidated.
    *
-   * @param clientId the client ID
-   * @param principalId the principal (user) ID
+   * @param clientId the unique identifier of the client
+   * @param principalId the unique identifier of the principal (user)
    */
   public void revokeConsent(ClientId clientId, String principalId) {
-    log.debug("Persisting user's consent for current client as invalidated");
+    var cid = clientId.getValue().toString();
+    jpaConsentRepository.deleteAllConsentsByPrincipalIdAndClientId(principalId, cid);
+    jpaConsentRepository.deleteAllAuthorizationsByPrincipalIdAndClientId(principalId, cid);
+  }
 
-    jpaConsentRepository
-        .findById(new ConsentEntity.ConsentId(clientId.getValue().toString(), principalId))
-        .ifPresentOrElse(
-            entity -> {
-              entity.setInvalidated(true);
-              entity.setModifiedAt(ZonedDateTime.now(ZoneId.of("UTC")));
-              jpaConsentRepository.save(entity);
-            },
-            () -> {
-              throw new ConsentNotFoundException(
-                  String.format(
-                      "User %s consent for client %s was not found",
-                      principalId, clientId.getValue().toString()));
-            });
+  /**
+   * Revokes all consents associated with a given client by marking them as invalidated.
+   *
+   * @param clientId the unique identifier of the client
+   */
+  public void revokeAllConsents(ClientId clientId) {
+    var cid = clientId.getValue().toString();
+    jpaConsentRepository.deleteAllConsentsByClientId(cid);
+    jpaConsentRepository.deleteAllAuthorizationsByClientId(cid);
   }
 }

@@ -453,9 +453,9 @@ internal class SharePointFolderDao(
         throw new NotImplementedException();
     }
 
-    public Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    public Task<int> SetCustomOrder(string folderId, string parentFolderId, int order)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(0);
     }
 
     public Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
@@ -474,6 +474,11 @@ internal class SharePointFolderDao(
     }
 
     public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
     {
         throw new NotImplementedException();
     }

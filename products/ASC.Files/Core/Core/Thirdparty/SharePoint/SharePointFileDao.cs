@@ -505,9 +505,9 @@ internal class SharePointFileDao(
         return file;
     }
 
-    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    public Task<int> SetCustomOrder(string fileId, string parentFolderId, int order)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(0);
     }
 
     public Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)

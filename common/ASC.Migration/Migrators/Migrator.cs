@@ -303,7 +303,7 @@ public abstract class Migrator(
 
     private async Task MigrateStorageAsync(MigrationStorage storage, MigrationUser user = null)
     {
-        if (!storage.ShouldImport || storage.Files.Count == 0)
+        if (!storage.ShouldImport || storage.Files.Count == 0 && storage.Folders.Count == 0)
         {
             return;
         }

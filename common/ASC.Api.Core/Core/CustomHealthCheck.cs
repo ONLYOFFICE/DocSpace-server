@@ -76,14 +76,14 @@ public static class CustomHealthCheck
             hcBuilder.AddMySql(connectionString.ConnectionString,
                                name: "mysqldb",
                                tags: ["mysqldb", "services"],
-                               timeout: new TimeSpan(0, 0, 15));
+                               timeout: new TimeSpan(0, 0, 30));
         }
         else if (string.Equals(connectionString.ProviderName, "Npgsql"))
         {
             hcBuilder.AddNpgSql(connectionString.ConnectionString,
                                name: "postgredb",
                                tags: ["postgredb", "services"],
-                               timeout: new TimeSpan(0, 0, 15));
+                               timeout: new TimeSpan(0, 0, 30));
         }
 
         return hcBuilder;
@@ -96,11 +96,10 @@ public static class CustomHealthCheck
 
         if (rabbitMQConfiguration != null)
         {
-            // TODO: add healthcheck for rabbitmq
             //hcBuilder.AddRabbitMQ(x => x.ConnectionFactory = rabbitMQConfiguration.GetConnectionFactory(),
-            //                  name: "rabbitMQ",
-            //                  tags: new[] { "rabbitMQ", "services" },
-            //                  timeout: new TimeSpan(0, 0, 15));
+            //                    name: "rabbitMQ",
+            //                    tags: new[] { "rabbitMQ", "services" },
+            //                    timeout: new TimeSpan(0, 0, 30));
         }
         else
         {

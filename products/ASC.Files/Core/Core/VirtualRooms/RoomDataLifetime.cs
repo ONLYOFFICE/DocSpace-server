@@ -31,6 +31,7 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
     public bool DeletePermanently { get; set; }
     public RoomDataLifetimePeriod Period { get; set; }
     public int? Value { get; set; }
+    public DateTime? StartDate { get; set; }
     public bool? Enabled { get; set; }
 
     public DateTime GetExpirationUtc()
@@ -54,8 +55,29 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
 
         return expiration;
     }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is not RoomDataLifetime lifetime)
+        {
+            return false;
+        }
+        
+        return DeletePermanently == lifetime.DeletePermanently && Period == lifetime.Period && Value == lifetime.Value;
+    }
+
+    protected bool Equals(RoomDataLifetime other)
+    {
+        return DeletePermanently == other.DeletePermanently && Period == other.Period && Value == other.Value;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(DeletePermanently, (int)Period, Value);
+    }
 }
 
+[EnumExtensions]
 public enum RoomDataLifetimePeriod
 {
     Day = 0,

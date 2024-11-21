@@ -802,4 +802,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Χρήστες [{0}]. Φόρμα που υποβλήθηκε: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Εξαγωγή του ευρετηρίου δωματίων που έχει αποθηκευτεί στα Έγγραφα</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Οι προσκλήσεις στάλθηκαν ξανά: {0}</value>
+  </data>
 </root>

@@ -25,38 +25,56 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.application.exception.handler;
+package com.asc.common.utilities.validation;
 
-import com.asc.registration.application.transfer.ErrorResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.concurrent.ExecutionException;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * The OperationExceptionHandler class handles exceptions related to operations that could not be
- * performed.
+ * Annotation to validate the size of a base64-encoded logo string. Ensures that the logo does not
+ * exceed a specified byte size and character length.
  */
-@Slf4j
-@ControllerAdvice
-public class OperationExceptionHandler {
+@Constraint(validatedBy = LogoSizeValidator.class)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface LogoSize {
+
   /**
-   * Handles the ExecutionException and UnsupportedOperationException and returns a ResponseEntity
-   * with a bad request status.
+   * The error message to be returned if validation fails.
    *
-   * @param ex the Throwable representing the exception that was raised
-   * @param request the HttpServletRequest associated with the exception
-   * @return a ResponseEntity containing an ErrorResponse and HTTP status code BAD_REQUEST
+   * @return the error message
    */
-  @ExceptionHandler(value = {ExecutionException.class, UnsupportedOperationException.class})
-  public ResponseEntity<ErrorResponse> handleExecutionException(
-      Throwable ex, HttpServletRequest request) {
-    log.error("Could not perform an operation", ex);
-    return new ResponseEntity<ErrorResponse>(
-        ErrorResponse.builder().reason("could not perform operation").build(),
-        HttpStatus.BAD_REQUEST);
-  }
+  String message() default "Logo size exceeds the maximum allowed size";
+
+  /**
+   * The maximum allowed size of the logo in bytes.
+   *
+   * @return the maximum size in bytes
+   */
+  long maxBytes() default 5242888;
+
+  /**
+   * The maximum allowed length of the base64-encoded string.
+   *
+   * @return the maximum character length
+   */
+  int maxLength() default 5600000;
+
+  /**
+   * Groups for categorizing the validation.
+   *
+   * @return the validation groups
+   */
+  Class<?>[] groups() default {};
+
+  /**
+   * Payload for carrying metadata information during validation.
+   *
+   * @return the payload class
+   */
+  Class<? extends Payload>[] payload() default {};
 }

@@ -30,34 +30,47 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// </summary>
 public class WebhooksConfigDto : IMapFrom<DbWebhooksConfig>
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; set; }
 
-    /// <summary>URI</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// URI
+    /// </summary>
     public string Uri { get; set; }
 
-    /// <summary>Secret key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Secret key
+    /// </summary>
     public string SecretKey { get; set; }
 
-    /// <summary>Specifies if the webhooks are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the webhooks are enabled or not
+    /// </summary>
     public bool Enabled { get; set; }
 
-    /// <summary>SSL</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// SSL
+    /// </summary>
     public bool SSL { get; set; }
 }
 
 public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
 {
+    /// <summary>
+    /// Configs
+    /// </summary>
     public WebhooksConfigDto Configs { get; set; }
+
+    /// <summary>
+    /// Status
+    /// </summary>
     public int Status { get; set; }
 
     public void Mapping(Profile profile)

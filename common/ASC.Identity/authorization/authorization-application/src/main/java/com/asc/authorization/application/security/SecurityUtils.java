@@ -45,6 +45,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class SecurityUtils {
   private final AnonymousFilterSecurityConfigurationProperties securityConfigProperties;
+  private final HttpUtils httpUtils;
 
   /**
    * Retrieves the value of the authentication cookie.
@@ -94,7 +95,7 @@ public class SecurityUtils {
       throws IOException {
     var errorRedirectUri =
         UriComponentsBuilder.fromUriString(
-                String.format("%s://%s", request.getScheme(), HttpUtils.getFirstRequestIP(request)))
+                String.format("%s://%s", request.getScheme(), httpUtils.getFirstRequestIP(request)))
             .path("/login")
             .queryParam("type", "oauth2")
             .queryParam("client_id", clientId)

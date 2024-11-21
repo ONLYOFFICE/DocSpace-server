@@ -26,39 +26,51 @@
 
 namespace ASC.People.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class GroupDto
 {
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; set; }
 
-    /// <summary>Parent</summary>
-    /// <type>System.Nullable{System.Guid}, System</type>
+    /// <summary>
+    /// Parent
+    /// </summary>
     public Guid? Parent { get; set; }
 
-    /// <summary>Category</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// Category
+    /// </summary>
     public Guid Category { get; set; }
 
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public Guid Id { get; set; }
 
-    /// <summary>Specifies if the LDAP settings are enabled for the group or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the LDAP settings are enabled for the group or not
+    /// </summary>
     public bool IsLDAP { get; set; }
 
-    /// <summary>Manager</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    /// <summary>
+    /// Manager
+    /// </summary>
     public EmployeeFullDto Manager { get; set; }
 
-    /// <summary>List of members</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.EmployeeDto,}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of members
+    /// </summary>
     public List<EmployeeFullDto> Members { get; set; }
-    
+
+    /// <summary>
+    /// Shared
+    /// </summary>
     public bool? Shared { get; set; }
+
+    /// <summary>
+    /// Members count
+    /// </summary>
     public int MembersCount { get; set; }
 }
 

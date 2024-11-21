@@ -33,7 +33,12 @@ public class FilesMessageService(
     IHttpContextAccessor httpContextAccessor,
     IDaoFactory daoFactory)
 {
-    private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
+    private static readonly JsonSerializerOptions _serializerOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
+    };
+    
     private static readonly HashSet<MessageAction> _moveCopyActions =
     [
         MessageAction.FolderMoved,
@@ -170,7 +175,7 @@ public class FilesMessageService(
             throw new ArgumentException(null, nameof(action));
         }
         
-        var folderDao = daoFactory.GetFolderDao<int>();
+        var folderDao = daoFactory.GetCacheFolderDao<int>();
         var fromParents = await folderDao.GetParentFoldersAsync(from.Id).ToListAsync();
         
         var rootFolderTitle = GetRootFolderTitle(target.RootFolderType);

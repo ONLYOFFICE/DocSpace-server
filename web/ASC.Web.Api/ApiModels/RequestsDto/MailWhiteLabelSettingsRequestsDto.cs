@@ -27,10 +27,12 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// Request parameters for mail white label settings
 /// </summary>
 public class MailWhiteLabelSettingsRequestsDto
 {
-    /// <summary>Specifies if the mail footer will be enabled or note</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the mail footer will be enabled or note
+    /// </summary>
     public bool FooterEnabled { get; set; }
 }

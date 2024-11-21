@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.Log;
 internal static partial class FileMarkerLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "ExecMarkFileAsNew")]
+    [LoggerMessage(LogLevel.Error, "ExecMarkFileAsNew")]
     public static partial void ErrorExecMarkFileAsNew(this ILogger logger, Exception exception);
 }

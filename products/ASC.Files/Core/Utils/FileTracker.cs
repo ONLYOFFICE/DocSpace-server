@@ -44,12 +44,38 @@ public class FileTrackerHelper
     {
         _cacheNotify = cacheNotify;
         _cache = cache;
-        _cacheNotify.Subscribe(a => _cache.Insert(GetCacheKey(a.FileId), a.FileTracker, _cacheTimeout, _callbackAction), CacheNotifyAction.InsertOrUpdate);
-        _cacheNotify.Subscribe(a => _cache.Remove(GetCacheKey(a.FileId)), CacheNotifyAction.Remove);
-        
         _serviceProvider = serviceProvider;
         _logger = logger;
         _callbackAction = EvictionCallback();
+    }
+
+    public void Subscribe()
+    {
+        _cacheNotify.Subscribe(a =>
+        {
+            try
+            {
+                _cache.Insert(GetCacheKey(a.FileId), a.FileTracker, _cacheTimeout, _callbackAction);
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+
+        }, CacheNotifyAction.InsertOrUpdate);
+        
+        _cacheNotify.Subscribe(a =>
+        {
+            try
+            {
+                _cache.Remove(GetCacheKey(a.FileId));
+            }
+            catch (ObjectDisposedException)
+            {
+                
+            }
+        }, CacheNotifyAction.Remove);
+        
+        _logger.Debug("FileTracker subscribed");
     }
 
     public async Task<bool> ProlongEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, string baseUri, bool editingAlone = false, string token = null)
@@ -252,12 +278,22 @@ public class FileTrackerHelper
                 var tracker = scope.ServiceProvider.GetRequiredService<DocumentServiceTrackerHelper>();
                 var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
 
-                var docKey = await helper.GetDocKeyAsync(await daoFactory.GetFileDao<T>().GetFileAsync(fileId));
+                var file = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+                if (file == null)
+                {
+                    return;
+                }
+
+                var docKey = await helper.GetDocKeyAsync(file);
                 using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}") }))
                 {
                     if (await tracker.StartTrackAsync(fileId.ToString(), docKey, token))
                     {
                         await SetTrackerAsync(fileId, fileTracker);
+                    }
+                    else
+                    {
+                        await RemoveTrackerAsync(fileId);
                     }
                 }
             }

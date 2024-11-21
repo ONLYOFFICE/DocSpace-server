@@ -403,7 +403,7 @@
     <value>Չհաջողվեց մուտք գործել API-ի միջոցով</value>
   </data>
   <data name="LoginFailViaApiSms" xml:space="preserve">
-    <value>Չհաջողվեց մուտք գործել API-ի միջոցով &amp;amp; SMS կոդ</value>
+    <value>Չհաջողվեց մուտք գործել API-ի միջոցով &amp; SMS կոդ</value>
   </data>
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
     <value>Մուտք գործել API-ի միջոցով &amp; Սոցիալական մեդիան ձախողվեց</value>
@@ -860,5 +860,8 @@
   </data>
   <data name="FormSubmit" xml:space="preserve">
     <value>Օգտատերեր [{0}]: Ներկայացված ձևը՝ {1}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
   </data>
 </root>

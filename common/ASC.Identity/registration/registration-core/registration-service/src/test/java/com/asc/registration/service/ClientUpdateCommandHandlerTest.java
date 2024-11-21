@@ -54,6 +54,7 @@ import com.asc.registration.core.domain.value.ClientTenantInfo;
 import com.asc.registration.service.mapper.ClientDataMapper;
 import com.asc.registration.service.ports.output.repository.ClientCommandRepository;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
+import com.asc.registration.service.ports.output.repository.ConsentCommandRepository;
 import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import java.time.ZoneId;
@@ -72,6 +73,7 @@ public class ClientUpdateCommandHandlerTest {
   @Mock private ClientDomainService clientDomainService;
   @Mock private EncryptionService encryptionService;
   @Mock private ClientQueryRepository clientQueryRepository;
+  @Mock private ConsentCommandRepository consentCommandRepository;
   @Mock private ClientCommandRepository clientCommandRepository;
   @Mock private DomainEventPublisher<ClientEvent> messagePublisher;
   @Mock private ClientDataMapper clientDataMapper;

@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Polly" Version="8.4.2" />
-    <PackageReference Include="RabbitMQ.Client" Version="7.0.0-rc.12" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>

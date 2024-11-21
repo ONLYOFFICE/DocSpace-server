@@ -27,14 +27,17 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
+/// Portal theme settings
 /// </summary>
 public class CustomColorThemesSettingsRequestsDto
 {
-    /// <summary>Custom color theme settings</summary>
-    /// <type>System.CustomColorThemesSettingsItem, System</type>
+    /// <summary>
+    /// Custom color theme settings
+    /// </summary>
     public CustomColorThemesSettingsItem Theme { get; set; }
 
-    /// <summary>Selected or not</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    /// <summary>
+    /// Selected or not
+    /// </summary>
     public int? Selected { get; set; }
 }

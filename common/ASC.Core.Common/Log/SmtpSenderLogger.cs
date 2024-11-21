@@ -27,6 +27,6 @@
 namespace ASC.Core.Common.Log;
 internal static partial class SmtpSenderLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "SmtpSender - host={host}; port={port}; enableSsl={ssl} enableAuth={enableAuth}")]
+    [LoggerMessage(LogLevel.Debug, "SmtpSender - host={host}; port={port}; enableSsl={ssl} enableAuth={enableAuth}")]
     public static partial void DebugSmtpSender(this ILogger logger, string host, int port, bool ssl, bool enableAuth);
 }

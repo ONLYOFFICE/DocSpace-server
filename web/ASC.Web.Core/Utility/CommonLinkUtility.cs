@@ -209,7 +209,9 @@ public class CommonLinkUtility(
 
     public async Task<string> GetInvitationLinkAsync(string email, EmployeeType employeeType, Guid createdBy, string culture = null)
     {
-        var link = await GetConfirmationEmailUrlAsync(email, ConfirmType.LinkInvite, employeeType, createdBy)
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        var link = await GetConfirmationEmailUrlAsync(email, ConfirmType.LinkInvite, employeeType.ToStringFast() + tenant.Alias, createdBy)
                    + $"&emplType={employeeType:d}";
         
         if (!string.IsNullOrEmpty(culture))

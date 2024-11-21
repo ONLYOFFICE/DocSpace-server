@@ -27,34 +27,61 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// Settings request parameters
+/// </summary>
+public class OwnerIdSettingsRequestDto
+{
+    /// <summary>
+    /// Owner ID
+    /// </summary>
+    public Guid OwnerId { get; set; }
+}
+
+/// <summary>
+/// Settings request parameters
 /// </summary>
 public class SettingsRequestsDto
 {
-    /// <summary>Default product ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid DefaultProductID { get; set; }
+    /// <summary>
+    /// Version ID
+    /// </summary>
+    public int VersionId { get; set; }
+}
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+/// <summary>
+/// Settings request parameters
+/// </summary>
+public class TipsRequestDto
+{
+    /// <summary>
+    /// Specifies whether to show tips for the user or not
+    /// </summary>
+    public bool Show { get; set; } //tips
+}
+
+/// <summary>
+/// Settings request parameters
+/// </summary>
+public class DefaultProductRequestDto
+{
+    /// <summary>
+    /// Default product ID
+    /// </summary>
+    public Guid DefaultProductID { get; set; }
+}
+
+/// <summary>
+/// Settings request parameters
+/// </summary>
+public class TimeZoneRequestDto
+{
+    /// <summary>
+    /// Language
+    /// </summary>
     public string Lng { get; set; }
 
-    /// <summary>Time zone ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Time zone ID
+    /// </summary>
     public string TimeZoneID { get; set; }
-
-    /// <summary>Theme</summary>
-    /// <type>System.String, System</type>
-    public string Theme { get; set; }
-
-    /// <summary>Specifies whether to show tips for the user or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Show { get; set; } //tips
-
-    /// <summary>Version ID</summary>
-    /// <type>System.Int32, System</type>
-    public int VersionId { get; set; }
-
-    /// <summary>Owner ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid OwnerId { get; set; }
 }

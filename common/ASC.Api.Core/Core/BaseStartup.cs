@@ -25,17 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Diagnostics;
-
-using ASC.Api.Core.Cors.Middlewares;
 using ASC.Api.Core.Cors;
+using ASC.Api.Core.Cors.Enums;
+using ASC.Api.Core.Cors.Middlewares;
 using ASC.Common.Mapping;
 using ASC.Core.Notify.Socket;
 using ASC.MessagingSystem;
-
 using Flurl.Util;
-
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
-using ASC.Api.Core.Cors.Enums;
 
 namespace ASC.Api.Core;
 
@@ -353,6 +350,7 @@ public abstract class BaseStartup
         {
             options.JsonSerializerOptions.WriteIndented = false;
             options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
         };
 
         services.AddControllers().AddJsonOptions(jsonOptions);
@@ -419,7 +417,7 @@ public abstract class BaseStartup
         if (OpenApiEnabled)
         {
             mvcBuilder.AddApiExplorer();
-            services.AddOpenApi();
+            services.AddOpenApi(_configuration);
         }
 
         services.AddScoped<CookieAuthHandler>();

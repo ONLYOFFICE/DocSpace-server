@@ -485,4 +485,22 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Veidlapas numurs</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Satura veidotājs</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Satura veidotājs</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Telpas pārvaldnieks</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Telpas pārvaldnieks</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Ārējais lietotājs</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Atvērt failu</value>
+  </data>
 </root>

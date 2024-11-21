@@ -390,12 +390,23 @@ static file class FolderQueries
                                     where f.TenantId == r.TenantId
                                     select f
                                 ).FirstOrDefault(),
-                            Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom || r.FolderType == FolderType.FillingFormsRoom) && 
-                                     ctx.Security.Any(s => 
-                                         s.TenantId == tenantId && 
-                                         s.EntryId == r.Id.ToString() && 
-                                         s.EntryType == FileEntryType.Folder && 
-                                         s.SubjectType == SubjectType.PrimaryExternalLink),
+                            Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom || r.FolderType == FolderType.FillingFormsRoom) 
+                                ? ctx.Security.Any(s => 
+                                    s.TenantId == r.TenantId && 
+                                    s.EntryId == r.Id.ToString() && 
+                                    s.EntryType == FileEntryType.Folder && 
+                                    s.SubjectType == SubjectType.PrimaryExternalLink)
+                                : r.FolderType == FolderType.DEFAULT && ctx.Security.Any(x => 
+                                    x.TenantId == r.TenantId && 
+                                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) && 
+                                    x.EntryType == FileEntryType.Folder && 
+                                    x.EntryId == ctx.Tree
+                                        .Where(t => t.FolderId == r.ParentId)
+                                        .OrderByDescending(t => t.Level)
+                                        .Select(t => t.ParentId)
+                                        .Skip(1)
+                                        .FirstOrDefault()
+                                        .ToString()),
                             Settings = (from f in ctx.RoomSettings 
                                 where f.TenantId == r.TenantId && f.RoomId == r.Id 
                                 select f).FirstOrDefault(),
