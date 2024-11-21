@@ -38,13 +38,18 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
     [ProtoMember(9)]
     public bool IsEmptyTrash { get; set; }
 
+    [ProtoMember(10)]
+    public IEnumerable<int> FilesVersions { get; set; }
+    
     public FileDeleteOperationData()
     {
         
     }
 
-    public FileDeleteOperationData(IEnumerable<T> folders,
+    public FileDeleteOperationData(
+        IEnumerable<T> folders,
         IEnumerable<T> files,
+        IEnumerable<int> versions,
         int tenantId,
         IDictionary<string, string> headers,
         ExternalSessionSnapshot sessionSnapshot,
@@ -56,6 +61,7 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
         IgnoreException = ignoreException;
         Immediately = immediately;
         IsEmptyTrash = isEmptyTrash;
+        FilesVersions = versions;
     }
 }
 
@@ -80,6 +86,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     private readonly bool _immediately;
     private readonly bool _isEmptyTrash;
     private readonly IDictionary<string, StringValues> _headers;
+    private readonly IEnumerable<int> _filesVersions;
 
     public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
     : base(serviceProvider, fileOperationData)
@@ -88,9 +95,20 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         _immediately = fileOperationData.Immediately;
         _headers = fileOperationData.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
+        _filesVersions = fileOperationData.FilesVersions;
         this[OpType] = (int)FileOperationType.Delete;
     }
-
+    
+    protected override int InitTotalProgressSteps()
+    {
+        if (_filesVersions != null && _filesVersions.Any() && Files.Count > 0)
+        {
+            return _filesVersions.Count();
+        }
+        
+        return base.InitTotalProgressSteps();
+    }
+    
     protected override async Task DoJob(IServiceScope serviceScope)
     {
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
@@ -116,18 +134,26 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         {
             this[Res] += string.Format("folder_{0}{1}", root.Id, SplitChar);
         }
-        if (_isEmptyTrash)
+
+        if (_filesVersions != null && _filesVersions.Any() && Files.Count > 0)
         {
-            await DeleteFilesAsync(Files, serviceScope);
-            await DeleteFoldersAsync(Folders, serviceScope);
-            
-            var trash = await folderDao.GetFolderAsync(_trashId);
-            await filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, _headers);
+            await DeleteFileVersionAsync(Files.FirstOrDefault(), _filesVersions, serviceScope);
         }
         else
         {
-            await DeleteFilesAsync(Files, serviceScope, true);
-            await DeleteFoldersAsync(Folders, serviceScope, true);
+            if (_isEmptyTrash)
+            {
+                await DeleteFilesAsync(Files, serviceScope);
+                await DeleteFoldersAsync(Folders, serviceScope);
+
+                var trash = await folderDao.GetFolderAsync(_trashId);
+                await filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, _headers);
+            }
+            else
+            {
+                await DeleteFilesAsync(Files, serviceScope, true);
+                await DeleteFoldersAsync(Folders, serviceScope, true);
+            }
         }
     }
 
@@ -401,6 +427,63 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             }
 
             await ProgressStep(fileId: FolderDao.CanCalculateSubitems(fileId) ? default : fileId);
+        }
+    }
+    
+    private async Task DeleteFileVersionAsync(T fileId, IEnumerable<int> versions, IServiceScope scope)
+    {
+        var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        var filesMessageService = scope.ServiceProvider.GetService<FilesMessageService>();
+        
+        var file = await FileDao.GetFileAsync(fileId);
+        
+        if (file == null)
+        {
+            this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
+        } else if (file.RootFolderType is FolderType.Archive or FolderType.TRASH)
+        {
+            this[Err] = FilesCommonResource.ErrorMessage_SecurityException;
+        }
+        else
+        {
+            foreach (var v in versions)
+            {
+                CancellationToken.ThrowIfCancellationRequested();
+
+                var (isError, message) = await WithErrorAsync(scope, [file], false, true);
+
+                if (file.Version == v)
+                {
+                    this[Err] = FilesCommonResource.ErrorMessage_SecurityException_FileVersion;
+                }
+                else if (!_ignoreException && isError)
+                {
+                    this[Err] = message;
+                }
+                else
+                {
+                    try
+                    {
+                        await FileDao.DeleteFileVersionAsync(file, v);
+                        await socketManager.UpdateFileAsync(file);
+
+                        if (_headers is { Count: > 0 })
+                        {
+                            await filesMessageService.SendAsync(MessageAction.FileVersionRemoved, file, _headers, file.Title, file.Version.ToString());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this[Err] = ex.Message;
+                        Logger.ErrorWithException(ex);
+                    }
+
+                    this[Process]++;
+                    this[Res] += $"file_{fileId}{SplitChar}";
+                }
+
+                await ProgressStep();
+            }
         }
     }
 

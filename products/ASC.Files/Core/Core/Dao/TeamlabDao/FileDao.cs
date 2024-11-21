@@ -833,7 +833,7 @@ internal class FileDao(
     {
         if (file == null || 
             file.Id == default || 
-            file.Version <= 1)
+            file.Version < 1)
         {
             return;
         }

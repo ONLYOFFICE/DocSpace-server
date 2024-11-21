@@ -753,6 +753,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. Version Deleted: {1}.
+        /// </summary>
+        public static string FileVersionRemoved {
+            get {
+                return ResourceManager.GetString("FileVersionRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folders [{0}]. Copied To Folder: {1}.
         /// </summary>
         public static string FolderCopied {

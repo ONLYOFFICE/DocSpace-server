@@ -322,6 +322,9 @@ public enum MessageAction
 
     [SwaggerEnum("File deleted")]
     FileDeleted = 5018,
+    
+    [SwaggerEnum("File version deleted")]
+    FileVersionRemoved = 5119,
 
     [SwaggerEnum("File index changed")]
     FileIndexChanged = 5111,

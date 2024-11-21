@@ -100,6 +100,20 @@ public class OperationController(
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
+    
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(403, "You don't have enough permission to delete")]
+    [HttpPut("deleteversion")]
+    public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteVersionBatchRequestDto inDto)
+    {
+        await fileOperationsManager.PublishDelete([], [inDto.FileId], false, !inDto.DeleteAfter, true, versions: inDto.Versions);
+        
+        foreach (var e in await fileOperationsManager.GetOperationResults())
+        {
+            yield return await fileOperationDtoHelper.GetAsync(e);
+        }
+    }
 
     /// <summary>
     /// Deletes all the files and folders from the "Trash" folder.

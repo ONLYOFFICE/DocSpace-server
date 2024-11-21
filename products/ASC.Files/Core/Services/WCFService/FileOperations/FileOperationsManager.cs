@@ -309,11 +309,12 @@ public class FileOperationsManager(
 
     public Task PublishDelete<T>(
         IEnumerable<T> folders, 
-        IEnumerable<T> files, 
+        IEnumerable<T> files,
         bool ignoreException, 
         bool holdResult,
         bool immediately,
-        bool isEmptyTrash = false)
+        bool isEmptyTrash = false,
+        IEnumerable<int> versions = null)
     {        
         if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
@@ -323,7 +324,7 @@ public class FileOperationsManager(
         var folderIds = (folders.OfType<int>().ToList(), folders.OfType<string>().ToList());
         var fileIds = (files.OfType<int>().ToList(), files.OfType<string>().ToList());
         
-        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
+        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash, versions);
     }
 
     public Task PublishDelete(
@@ -332,7 +333,8 @@ public class FileOperationsManager(
         bool ignoreException, 
         bool holdResult,
         bool immediately,
-        bool isEmptyTrash = false)
+        bool isEmptyTrash = false,
+        IEnumerable<int> versions = null)
     {        
         if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
@@ -342,7 +344,7 @@ public class FileOperationsManager(
         var folderIds = GetIds(folders);
         var fileIds = GetIds(files);
         
-        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
+        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash, versions);
     }
 
     private async Task PublishDelete(
@@ -351,7 +353,8 @@ public class FileOperationsManager(
         bool ignoreException, 
         bool holdResult,
         bool immediately,
-        bool isEmptyTrash = false)
+        bool isEmptyTrash = false,
+        IEnumerable<int> versions = null)
     {        
         if (folders.Item1.Count == 0 && folders.Item2.Count == 0 && files.Item1.Count == 0 && files.Item2.Count == 0)
         {
@@ -365,8 +368,8 @@ public class FileOperationsManager(
         op.Init(holdResult);
         var taskId = await fileOperationsManagerHolder.Publish(op);
         
-        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
-        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
+        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, versions, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
+        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, versions, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
         
         IntegrationEvent toPublish;
         if (isEmptyTrash)
