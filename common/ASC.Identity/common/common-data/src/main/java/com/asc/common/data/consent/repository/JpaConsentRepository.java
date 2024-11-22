@@ -32,17 +32,28 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 /**
  * JPA repository interface for performing CRUD operations on {@link ConsentEntity} objects. This
- * interface extends {@link JpaRepository}, providing basic CRUD functionality and pagination
- * support.
+ * interface extends {@link JpaRepository}, providing built-in CRUD functionality and pagination
+ * support. Additionally, it defines custom queries for managing and retrieving consent-related
+ * data.
  */
 public interface JpaConsentRepository
     extends JpaRepository<ConsentEntity, ConsentEntity.ConsentId> {
 
+  /**
+   * Retrieves a paginated list of consents associated with a specific principal (user), including
+   * the client and scope details, where the consents are not invalidated.
+   *
+   * @param principalId the unique identifier of the principal (user) whose consents are being
+   *     retrieved
+   * @param pageable the pagination information
+   * @return a page of consents matching the given principal ID
+   */
   @EntityGraph(value = "ConsentEntity.withClientAndScopes", type = EntityGraph.EntityGraphType.LOAD)
   @Query(
       "SELECT c FROM ConsentEntity c JOIN c.client cl WHERE c.principalId = :principalId AND c.invalidated = false")
@@ -50,17 +61,72 @@ public interface JpaConsentRepository
       @Param("principalId") String principalId, Pageable pageable);
 
   /**
-   * Finds all consent entities by principal id and tenant, joining with the client entity to ensure
-   * the client is not invalidated.
+   * Retrieves a paginated list of consents associated with a specific principal (user) and tenant,
+   * including the client and scope details, ensuring the client is not invalidated.
    *
-   * @param principalId the principal id associated with the consent.
-   * @param tenant the tenant ID.
-   * @param pageable the pagination information.
-   * @return a page of consent entities matching the criteria.
+   * @param principalId the unique identifier of the principal (user) whose consents are being
+   *     retrieved
+   * @param tenant the tenant ID
+   * @param pageable the pagination information
+   * @return a page of consents matching the given principal ID and tenant ID
    */
   @EntityGraph(value = "ConsentEntity.withClientAndScopes", type = EntityGraph.EntityGraphType.LOAD)
   @Query(
       "SELECT c FROM ConsentEntity c JOIN c.client cl WHERE c.principalId = :principalId AND cl.tenantId = :tenant AND c.invalidated = false")
   Page<ConsentEntity> findAllConsentsByPrincipalIdAndTenant(
       @Param("principalId") String principalId, @Param("tenant") int tenant, Pageable pageable);
+
+  // TODO: Move the logic into interaction with Authorization service
+  /**
+   * Deletes all consents for a specific principal and client.
+   *
+   * @param principalId the unique identifier of the principal (user)
+   * @param registeredClientId the unique identifier of the client
+   */
+  @Modifying
+  @Query(
+      value =
+          "DELETE FROM identity_consents WHERE principal_id = :principalId AND registered_client_id = :registeredClientId",
+      nativeQuery = true)
+  void deleteAllConsentsByPrincipalIdAndClientId(
+      @Param("principalId") String principalId,
+      @Param("registeredClientId") String registeredClientId);
+
+  /**
+   * Deletes all authorizations for a specific principal and client.
+   *
+   * @param principalId the unique identifier of the principal (user)
+   * @param registeredClientId the unique identifier of the client
+   */
+  @Modifying
+  @Query(
+      value =
+          "DELETE FROM identity_authorizations WHERE principal_id = :principalId AND registered_client_id = :registeredClientId",
+      nativeQuery = true)
+  void deleteAllAuthorizationsByPrincipalIdAndClientId(
+      @Param("principalId") String principalId,
+      @Param("registeredClientId") String registeredClientId);
+
+  /**
+   * Deletes all consents associated with a specific client.
+   *
+   * @param registeredClientId the unique identifier of the client
+   */
+  @Modifying
+  @Query(
+      value = "DELETE FROM identity_consents WHERE registered_client_id = :registeredClientId",
+      nativeQuery = true)
+  void deleteAllConsentsByClientId(@Param("registeredClientId") String registeredClientId);
+
+  /**
+   * Deletes all authorizations associated with a specific client.
+   *
+   * @param registeredClientId the unique identifier of the client
+   */
+  @Modifying
+  @Query(
+      value =
+          "DELETE FROM identity_authorizations WHERE registered_client_id = :registeredClientId",
+      nativeQuery = true)
+  void deleteAllAuthorizationsByClientId(@Param("registeredClientId") String registeredClientId);
 }

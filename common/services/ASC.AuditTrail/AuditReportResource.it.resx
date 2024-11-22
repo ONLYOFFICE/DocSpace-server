@@ -802,4 +802,43 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Utenti [{0}]. Moduli inviati: {1}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>File: {0}. Indice cambiato da {1} a {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Cartella: {0}. Indice cambiato da {1} a {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Cartella: {0}. Indici riordinati</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Stanza: {0}. Rifiuta il download disabilitato</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Stanza: {0}. Rifiuta download abilitato</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Esportazione dell'indice della stanza salvato in Documents</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indicizzazione stanza disabilitata</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indicizzazione stanza abilitata</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Tempo di durata disabilitato</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Il tempo di durata è impostato. Valore: {0}. Periodo: {1}. Elimina definitivamente: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Stanza: {0}. Filigrana disattivata</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Stanza: {0}. Filigrana abilitata</value>
+  </data>
 </root>
