@@ -337,11 +337,12 @@ module.exports = async (io) => {
             }
             if(!logout)
             {
-              if(user.sessions[user.sessions.length - 1].id != session.id)
+              var find =  user.sessions.find(q=> q.id == session.id)
+              if(!find)
               {
                 onlineIO.to(socketKey).emit(`new-session-in-${socketDest}`, {userId: user.id, displayName: user.displayName, isAdmin: user.isAdmin, isCollaborator: user.isCollaborator, isOwner: user.isOwner, isRoomAdmin: user.isRoomAdmin, avatar: user.avatar, session: user.sessions[user.sessions.length - 1]} );
+                onlineIO.to(`${socketKey}-${userId}`).emit(`leave-session-in-${socketDest}`, {userId, sessionId} );
               }
-              onlineIO.to(`${socketKey}-${userId}`).emit(`leave-session-in-${socketDest}`, {userId, sessionId} );
             }
             else
             {
