@@ -1085,7 +1085,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                     switch (action)
                     {
-                        case FilesSecurityActions.Read or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory:
+                        case FilesSecurityActions.Read or FilesSecurityActions.Copy:
                         case FilesSecurityActions.CopySharedLink when e.Shared:
                             return true;
                     }
@@ -1199,7 +1199,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                     }
                     
-                    if (action is FilesSecurityActions.Read or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory)
+                    if (action is FilesSecurityActions.Read or FilesSecurityActions.Copy)
                     {
                         return true;
                     }
