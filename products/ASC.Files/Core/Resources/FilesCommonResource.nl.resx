@@ -317,9 +317,6 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Kamerbeheerder</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Gebruiker</value>
   </data>
@@ -395,9 +392,6 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Kamerbeheerder</value>
-  </data>
   <data name="CommentCreateFillFormDraft" xml:space="preserve">
     <value>Gemaakt om het formulier in te vullen</value>
   </data>
@@ -467,12 +461,6 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="Date" xml:space="preserve">
     <value>Datum</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Power user</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Power user</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Gebruiker</value>
   </data>
@@ -496,5 +484,23 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Formuliernummer</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Content maker</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Kamer Beheerder</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Externe gebruiker</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Content maker</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Kamer Beheerder</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Open bestand</value>
   </data>
 </root>

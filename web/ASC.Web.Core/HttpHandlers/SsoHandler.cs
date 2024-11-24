@@ -60,7 +60,6 @@ public class SsoHandlerService
     private readonly TenantUtil _tenantUtil;
     private readonly Action<string> _signatureResolver;
     private readonly CountPaidUserChecker _countPaidUserChecker;
-    private readonly IDistributedLockProvider _distributedLockProvider;
     private const string MOB_PHONE = "mobphone";
     private const string EXT_MOB_PHONE = "extmobphone";
 
@@ -82,8 +81,7 @@ public class SsoHandlerService
         MessageService messageService,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         TenantUtil tenantUtil,
-        CountPaidUserChecker countPaidUserChecker, 
-        IDistributedLockProvider distributedLockProvider)
+        CountPaidUserChecker countPaidUserChecker)
     {
         _log = log;
         _coreBaseSettings = coreBaseSettings;
@@ -100,7 +98,6 @@ public class SsoHandlerService
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _tenantUtil = tenantUtil;
         _countPaidUserChecker = countPaidUserChecker;
-        _distributedLockProvider = distributedLockProvider;
         _signatureResolver = s =>
         {
             int.TryParse(s[^1..], out var lastSignChar);
@@ -191,7 +188,7 @@ public class SsoHandlerService
                 }
                 try
                 {
-                    userInfo = await AddUserAsync(userInfo);
+                    userInfo = await AddUserAsync(userInfo, (EmployeeType)settings.UsersType);
                 }
                 catch (Exception ex)
                 {
@@ -263,7 +260,7 @@ public class SsoHandlerService
         await context.Response.WriteAsync(((int)messageKey).ToString());
     }
 
-    private async Task<UserInfo> AddUserAsync(UserInfo userInfo)
+    private async Task<UserInfo> AddUserAsync(UserInfo userInfo, EmployeeType employeeType)
     {
         UserInfo newUserInfo;
 
@@ -282,8 +279,7 @@ public class SsoHandlerService
 
             if (string.IsNullOrEmpty(newUserInfo.UserName))
             {
-                var type = EmployeeType.RoomAdmin;
-                var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+                var type = employeeType is EmployeeType.User or EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin ? employeeType : EmployeeType.User;
 
                 try
                 {
@@ -383,7 +379,7 @@ public class SsoHandlerService
             userInfo.Location = location;
             userInfo.Title = title;
 
-            var portalUserContacts = userInfo.ContactsList ?? new List<string>();
+            var portalUserContacts = userInfo.ContactsList ?? [];
 
             var newContacts = new List<string>();
             var phones = new List<string>();

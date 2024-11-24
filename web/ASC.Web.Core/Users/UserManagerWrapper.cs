@@ -90,12 +90,12 @@ public sealed class UserManagerWrapper(
         return Equals(foundUser, Constants.LostUser) || foundUser.Id == userId;
     }
 
-    public async Task<UserInfo> AddInvitedUserAsync(string email, EmployeeType type, string culture)
+    public async Task<UserInfo> AddInvitedUserAsync(string email, EmployeeType type, string culture, bool existenceCheck = true)
     {
         var mail = new MailAddress(email);
         var emailLinkedCheckTask = IsEmailLinkedAsync(mail.Address);
 
-        if ((await userManager.GetUserByEmailAsync(mail.Address)).Id != Constants.LostUser.Id)
+        if (existenceCheck && (await userManager.GetUserByEmailAsync(mail.Address)).Id != Constants.LostUser.Id)
         {
             throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
@@ -109,6 +109,8 @@ public sealed class UserManagerWrapper(
             throw new Exception(string.Format(pattern, linkedUser.DisplayUserName(displayUserSettingsHelper)));
         }
 
+        var currentUserId = securityContext.CurrentAccount.ID;
+        
         var user = new UserInfo
         {
             Email = mail.Address,
@@ -117,7 +119,8 @@ public sealed class UserManagerWrapper(
             FirstName = string.Empty,
             ActivationStatus = EmployeeActivationStatus.Pending,
             Status = EmployeeStatus.Pending,
-            CultureName = culture
+            CultureName = culture,
+            CreatedBy = currentUserId
         };
 
         user.UserName = await MakeUniqueNameAsync(user);
@@ -126,9 +129,9 @@ public sealed class UserManagerWrapper(
 
         var groupId = type switch
         {
-            EmployeeType.User => Constants.GroupUser.ID,
+            EmployeeType.Guest => Constants.GroupGuest.ID,
             EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
-            EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
+            EmployeeType.User => Constants.GroupUser.ID,
             _ => Guid.Empty
         };
 
@@ -141,6 +144,8 @@ public sealed class UserManagerWrapper(
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
         }
+        
+        await userManager.AddUserRelationAsync(currentUserId, newUser.Id);
 
         return newUser;
     }
@@ -189,7 +194,7 @@ public sealed class UserManagerWrapper(
             //NOTE: Notify user only if it's active
             if (afterInvite)
             {
-                if (type is EmployeeType.User)
+                if (type is EmployeeType.Guest)
                 {
                     await studioNotifyService.GuestInfoAddedAfterInviteAsync(newUserInfo);
                 }
@@ -206,7 +211,7 @@ public sealed class UserManagerWrapper(
             else
             {
                 //Send user invite
-                if (type is EmployeeType.User)
+                if (type is EmployeeType.Guest)
                 {
                     await studioNotifyService.GuestInfoActivationAsync(newUserInfo);
                 }
@@ -225,14 +230,14 @@ public sealed class UserManagerWrapper(
 
         switch (type)
         {
-            case EmployeeType.User:
-                await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupUser.ID, true);
+            case EmployeeType.Guest:
+                await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupGuest.ID, true);
                 break;
             case EmployeeType.DocSpaceAdmin:
                 await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupAdmin.ID, true);
                 break;
-            case EmployeeType.Collaborator:
-                await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupCollaborator.ID, true);
+            case EmployeeType.User:
+                await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupUser.ID, true);
                 break;
         }
 
@@ -244,10 +249,11 @@ public sealed class UserManagerWrapper(
     public async Task<bool> UpdateUserTypeAsync(UserInfo user, EmployeeType type)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var initiatorType = await userManager.GetUserTypeAsync(initiator.Id);
         var changed = false;
 
-        if (user.IsOwner(tenant) || user.IsMe(currentUser.Id))
+        if (user.IsOwner(tenant) || user.IsMe(initiator.Id) || initiatorType is EmployeeType.Guest)
         {
             return await Task.FromResult(false);
         }
@@ -257,7 +263,7 @@ public sealed class UserManagerWrapper(
 
         try
         {
-            if (type is EmployeeType.DocSpaceAdmin && currentUser.IsOwner(tenant))
+            if (type is EmployeeType.DocSpaceAdmin && initiator.IsOwner(tenant))
             {
                 if (currentType is EmployeeType.RoomAdmin)
                 {
@@ -265,13 +271,6 @@ public sealed class UserManagerWrapper(
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
-                else if (currentType is EmployeeType.Collaborator)
-                {
-                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupCollaborator.ID);
-                    await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
-                    changed = true;
-                }
                 else if (currentType is EmployeeType.User)
                 {
                     lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
@@ -282,21 +281,25 @@ public sealed class UserManagerWrapper(
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
+                else if (currentType is EmployeeType.Guest)
+                {
+                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
+                    
+                    await countPaidUserChecker.CheckAppend();
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
+                    await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
+                    webItemSecurityCache.ClearCache(tenant.Id);
+                    changed = true;
+                }
             }
-            else if (type is EmployeeType.RoomAdmin)
+            else if (type is EmployeeType.RoomAdmin && initiatorType is EmployeeType.DocSpaceAdmin)
             {
-                if (currentType is EmployeeType.DocSpaceAdmin && currentUser.IsOwner(tenant))
+                if (currentType is EmployeeType.DocSpaceAdmin && initiator.IsOwner(tenant))
                 {
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupAdmin.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
-                else if (currentType is EmployeeType.Collaborator)
-                {
-                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupCollaborator.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
-                    changed = true;
-                }
                 else if (currentType is EmployeeType.User)
                 {
                     lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
@@ -306,14 +309,20 @@ public sealed class UserManagerWrapper(
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
+                else if (currentType is EmployeeType.Guest)
+                {
+                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
+                    
+                    await countPaidUserChecker.CheckAppend();
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
+                    webItemSecurityCache.ClearCache(tenant.Id);
+                    changed = true;
+                }
             }
-            else if (type is EmployeeType.Collaborator && currentType is EmployeeType.User)
+            else if (type is EmployeeType.User && currentType is EmployeeType.Guest)
             {
-                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
-                
-                await countPaidUserChecker.CheckAppend();
-                await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-                await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupCollaborator.ID);
+                await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
+                await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
                 webItemSecurityCache.ClearCache(tenant.Id);
                 changed = true;
             }
@@ -336,15 +345,10 @@ public sealed class UserManagerWrapper(
             throw new Exception(Resource.ErrorPasswordEmpty);
         }
 
-        var passwordSettingsObj = await settingsManager.LoadAsync<PasswordSettings>();
+        var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
 
-        if (!passwordSettingsManager.CheckPasswordRegex(passwordSettingsObj, password) || !passwordSettingsManager.CheckLengthInRange(password.Length))
-        {
-            throw new Exception(GetPasswordHelpMessage(passwordSettingsObj));
-        }
+        passwordSettingsManager.CheckPassword(password, passwordSettings);
     }
-
-
 
     public async Task<string> SendUserPasswordAsync(string email)
     {
@@ -385,7 +389,7 @@ public sealed class UserManagerWrapper(
             return null;
         }
         
-        await studioNotifyService.UserPasswordChangeAsync(userInfo);
+        await studioNotifyService.UserPasswordChangeAsync(userInfo, false);
         return null;
     }
 
@@ -426,38 +430,6 @@ public sealed class UserManagerWrapper(
 
         await accountLinker.RemoveProviderAsync(profile.LinkId, profile.Provider, profile.HashId);
         return (false, Guid.Empty);
-    }
-
-    private static string GetPasswordHelpMessage(PasswordSettings passwordSettings)
-    {
-        var text = new StringBuilder();
-
-        text.Append($"{Resource.ErrorPasswordMessage} ");
-        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettingsManager.MaxLength);
-        text.Append($", {Resource.ErrorPasswordOnlyLatinLetters}");
-        text.Append($", {Resource.ErrorPasswordNoSpaces}");
-
-        if (passwordSettings.UpperCase)
-        {
-            text.Append($", {Resource.ErrorPasswordNoUpperCase}");
-        }
-
-        if (passwordSettings.Digits)
-        {
-            text.Append($", {Resource.ErrorPasswordNoDigits}");
-        }
-
-        if (passwordSettings.SpecSymbols)
-        {
-            text.Append($", {Resource.ErrorPasswordNoSpecialSymbols}");
-        }
-
-        return text.ToString();
-    }
-
-    public async Task<string> GetPasswordHelpMessageAsync()
-    {
-        return GetPasswordHelpMessage(await settingsManager.LoadAsync<PasswordSettings>());
     }
 
     #endregion

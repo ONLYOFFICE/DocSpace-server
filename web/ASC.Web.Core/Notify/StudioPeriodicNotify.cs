@@ -96,6 +96,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var orangeButtonUrl3 = string.Empty;
                 Func<CultureInfo, string> orangeButtonText4 = _ => string.Empty;
                 var orangeButtonUrl4 = string.Empty;
+                Func<CultureInfo, string> orangeButtonText5 = _ => string.Empty;
+                var orangeButtonUrl5 = string.Empty;
 
                 var img1 = string.Empty;
                 var img2 = string.Empty;
@@ -103,6 +105,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var img4 = string.Empty;
                 var img5 = string.Empty;
                 var img6 = string.Empty;
+                var img7 = string.Empty;
                 Func<CultureInfo, string> txtTrulyYours = c =>  WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
                 var topGif = string.Empty;
 
@@ -189,6 +192,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img4 = studioNotifyHelper.GetNotificationImageUrl("zapier.png");
                         img5 = studioNotifyHelper.GetNotificationImageUrl("wordpress.png");
                         img6 = studioNotifyHelper.GetNotificationImageUrl("drupal.png");
+                        img7 = studioNotifyHelper.GetNotificationImageUrl("pipedrive.png");
 
                         orangeButtonText1 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
                         orangeButtonUrl1 = "https://marketplace.zoom.us/apps/OW6rOq-nRgCihG5eps_p-g";
@@ -198,6 +202,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         orangeButtonUrl3 = "https://wordpress.org/plugins/onlyoffice-docspace/";
                         orangeButtonText4 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
                         orangeButtonUrl4 = "https://www.drupal.org/project/onlyoffice_docspace";
+                        orangeButtonText5 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
+                        orangeButtonUrl5 = "https://www.pipedrive.com/en/marketplace/app/onlyoffice-doc-space/4cb3b5d9d19a1918";
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("integration.gif");
 
@@ -256,7 +262,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         {
                             await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                         }
-                        eventBus.Publish(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
 
                     #endregion
@@ -348,7 +354,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         {
                             await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                         }
-                        eventBus.Publish(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
 
                     #endregion
@@ -372,7 +378,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     if (payer.Id != Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
                     {
-                        users = users.Concat(new[] { payer });
+                        users = users.Concat([payer]);
                     }
                 }
                 var asyncUsers = users.ToAsyncEnumerable();
@@ -447,10 +453,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var createdDate = tenant.CreationDateTime.Date;
 
                 var actualEndDate = tariff.DueDate != DateTime.MaxValue ? tariff.DueDate : tariff.LicenseDate;
-                // var dueDate = actualEndDate.Date;
-                //
-                // var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
-                // var delayDueDate = tariff.DelayDueDate.Date;
+                var dueDate = actualEndDate.Date;
+                var delayDueDate = tariff.DelayDueDate.Date;
 
                 INotifyAction action = null;
                 var paymentMessage = true;
@@ -470,6 +474,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var img5 = string.Empty;
 
                 var trulyYoursAsTableRow = false;
+
+                var siteUrl = commonLinkUtility.GetSiteLink();
+                var pricingPageUrl = $"{siteUrl}/docspace-prices.aspx";
 
                 if (quota.Trial && defaultRebranding)
                 {
@@ -522,8 +529,89 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     #endregion
 
                     #endregion
-
                 }
+
+                if (tariff.State == TariffState.Paid)
+                {
+                    #region Payment warning letters
+
+                    #region 7 days before ENTERPRISE PAID expired to admins
+
+                    if (dueDate.AddDays(-7) == nowDate)
+                    {
+                        action = quota.Lifetime
+                            ? Actions.EnterpriseAdminPaymentWarningLifetimeBeforeExpiration
+                            : quota.Customization
+                                ? Actions.DeveloperAdminPaymentWarningGracePeriodBeforeActivation
+                                : Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeActivation;
+
+                        toadmins = true;
+
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonPurchaseNow", c);
+                        orangeButtonUrl = $"{pricingPageUrl}?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_expire_7_days";
+                    }
+
+                    #endregion
+
+                    #region ENTERPRISE PAID expires today to admins
+
+                    else if (dueDate == nowDate)
+                    {
+                        action = quota.Lifetime
+                            ? Actions.EnterpriseAdminPaymentWarningLifetimeExpiration
+                            : quota.Customization
+                                ? Actions.DeveloperAdminPaymentWarningGracePeriodActivation
+                                : Actions.EnterpriseAdminPaymentWarningGracePeriodActivation;
+
+                        toadmins = true;
+
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonPurchaseNow", c);
+                        orangeButtonUrl = $"{pricingPageUrl}?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_grace_period";
+                    }
+
+                    #endregion
+
+                    #endregion
+                }
+                else if (tariff.State == TariffState.Delay)
+                {
+                    #region Payment warning letters
+
+                    #region 7 days before ENTERPRISE GRACE PERIOD expired to admins
+
+                    if (delayDueDate.AddDays(-7) == nowDate)
+                    {
+                        action = quota.Customization
+                                ? Actions.DeveloperAdminPaymentWarningGracePeriodBeforeExpiration
+                                : Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeExpiration;
+
+                        toadmins = true;
+
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonPurchaseNow", c);
+                        orangeButtonUrl = $"{pricingPageUrl}?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_grace_period_expire_soon";
+                    }
+
+                    #endregion
+
+                    #region ENTERPRISE GRACE PERIOD expires today to admins
+
+                    else if (delayDueDate == nowDate)
+                    {
+                        action = quota.Customization
+                                ? Actions.DeveloperAdminPaymentWarningGracePeriodExpiration
+                                : Actions.EnterpriseAdminPaymentWarningGracePeriodExpiration;
+
+                        toadmins = true;
+
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonPurchaseNow", c);
+                        orangeButtonUrl = $"{pricingPageUrl}?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_no_available";
+                    }
+
+                    #endregion
+
+                    #endregion
+                }
+
 
                 if (action == null)
                 {
@@ -549,6 +637,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
+                        new TagValue(Tags.PaymentDelay, tariffService.GetPaymentDelay()),
                         //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
                         //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
                         TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),

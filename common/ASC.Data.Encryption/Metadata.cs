@@ -173,12 +173,7 @@ public class Metadata(IConfiguration configuration)
             }
 
             readed = stream.Read(IV, 0, ivLength);
-            if (readed < ivLength)
-            {
-                return false;
-            }
-
-            return true;
+            return readed >= ivLength;
         }
         catch (Exception)
         {

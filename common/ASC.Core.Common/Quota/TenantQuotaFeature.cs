@@ -34,6 +34,8 @@ public class TenantQuotaFeature
     public virtual bool Paid { get; init; }
     public bool Standalone { get; init; }
 
+    public EmployeeType EmployeeType { get; init; } = EmployeeType.All;
+    
     protected internal virtual void Multiply(int quantity)
     {
 

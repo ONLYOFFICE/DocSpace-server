@@ -28,6 +28,18 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class TariffDto : Tariff
 {
+    /// <summary>
+    /// Open source
+    /// </summary>
     public bool? OpenSource { get; set; }
+
+    /// <summary>
+    /// Enterprise
+    /// </summary>
     public bool? Enterprise { get; set; }
+
+    /// <summary>
+    /// Developer
+    /// </summary>
+    public bool? Developer { get; set; }
 }

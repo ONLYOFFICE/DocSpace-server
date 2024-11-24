@@ -27,9 +27,9 @@
 namespace ASC.MessagingSystem.Log;
 internal static partial class MessagesRepositoryLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "FlushCache {id}")]
+    [LoggerMessage(LogLevel.Error, "FlushCache {id}")]
     public static partial void ErrorFlushCache(this ILogger<MessagesRepository> logger, int id, Exception exception);
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "Send Message")]
+    [LoggerMessage(LogLevel.Error, "Send Message")]
     public static partial void ErrorSendMassage(this ILogger<MessagesRepository> logger, Exception exception);
 }

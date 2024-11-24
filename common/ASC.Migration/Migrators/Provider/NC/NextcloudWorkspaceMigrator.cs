@@ -35,8 +35,8 @@ public class NextcloudWorkspaceMigrator : Migrator
     private CancellationToken _cancellationToken;
     private string _takeout;
 
-    private readonly Regex _emailRegex = new Regex(@"(\S*@\S*\.\S*)");
-    private readonly Regex _phoneRegex = new Regex(@"(\+?\d+)");
+    private readonly Regex _emailRegex = new(@"(\S*@\S*\.\S*)");
+    private readonly Regex _phoneRegex = new(@"(\+?\d+)");
 
     public NextcloudWorkspaceMigrator(SecurityContext securityContext,
         UserManager userManager,
@@ -129,8 +129,8 @@ public class NextcloudWorkspaceMigrator : Migrator
                 await ReportProgressAsync(50, MigrationResource.UnzippingFinished);
             }
 
-            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0]).Where(f=> f.EndsWith(".bak") || f.EndsWith(".sql")).FirstOrDefault();
-            dbFile = dbFile ?? Directory.GetFiles(TmpFolder).Where(f => f.EndsWith(".bak") || f.EndsWith(".sql")).FirstOrDefault();
+            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0]).FirstOrDefault(f => f.EndsWith(".bak") || f.EndsWith(".sql"));
+            dbFile ??= Directory.GetFiles(TmpFolder).FirstOrDefault(f => f.EndsWith(".bak") || f.EndsWith(".sql"));
             if (dbFile == null)
             {
                 throw new Exception("*.bak file not found");
@@ -184,13 +184,21 @@ public class NextcloudWorkspaceMigrator : Migrator
                         {
                             MigrationInfo.WithoutEmailUsers.Add(user.Key, user.Value);
                         }
-                        else if (!(await UserManager.GetUserByEmailAsync(user.Value.Info.Email)).Equals(ASC.Core.Users.Constants.LostUser))
-                        {
-                            MigrationInfo.ExistUsers.Add(user.Key, user.Value);
-                        }
                         else
                         {
-                            MigrationInfo.Users.Add(user.Key, user.Value);
+                            var ascUser = await UserManager.GetUserByEmailAsync(user.Value.Info.Email);
+                            if (ascUser.Status == EmployeeStatus.Terminated)
+                            {
+                                continue;
+                            }
+                            if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
+                            {
+                                MigrationInfo.ExistUsers.Add(user.Key, user.Value);
+                            }
+                            else
+                            {
+                                MigrationInfo.Users.Add(user.Key, user.Value);
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -231,7 +239,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         foreach (var g in groupList)
         {
-            var group = new MigrationGroup { Info = new(), UserKeys = new HashSet<string>() };
+            var group = new MigrationGroup { Info = new(), UserKeys = [] };
             group.Info.Name = g.Split(',').First().Trim('\'');
             MigrationInfo.Groups.Add(group.Info.Name, group);
         }
@@ -256,7 +264,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         var entryRegex = new Regex(@"(\(.*?\))[,;]");
         var accountDataMatches = entryRegex.Matches(match.Groups[1].Value + ";");
-        return accountDataMatches.Select(m => m.Groups[1].Value.Trim(['(', ')']));
+        return accountDataMatches.Select(m => m.Groups[1].Value.Trim('(', ')'));
     }
 
     private Dictionary<string, MigrationUser> DbExtractUser(string dbFile)
@@ -398,7 +406,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 {
                     FileId = int.Parse(values[0]),
                     Path = values[2],
-                    Share = new List<NCShare>()
+                    Share = []
                 });
             }
         }
@@ -512,21 +520,9 @@ public class NextcloudWorkspaceMigrator : Migrator
     {
         if (entryType)
         {
-            if (role == 1 || role == 17)
-            {
-                return ASCShare.Read;
-            }
-
-            return ASCShare.Editing;//permission = 19 => denySharing = true, permission = 3 => denySharing = false; ASCShare.ReadWrite
+            return role is 1 or 17 ? ASCShare.Read : ASCShare.Editing; //permission = 19 => denySharing = true, permission = 3 => denySharing = false; ASCShare.ReadWrite
         }
-        else
-        {
-            if (Array.Exists([1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27], el => el == role))
-            {
-                return ASCShare.Read;
-            }
 
-            return ASCShare.Editing;//permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
-        }
+        return Array.Exists([1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27], el => el == role) ? ASCShare.Read : ASCShare.Editing; //permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
     }
 }

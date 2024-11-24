@@ -42,7 +42,8 @@ public class FirstTimeTenantSettings(
     CoreBaseSettings coreBaseSettings,
     IHttpClientFactory clientFactory,
     CookiesManager cookiesManager,
-    CspSettingsHelper cspSettingsHelper)
+    CspSettingsHelper cspSettingsHelper,
+    DocumentServiceLicense documentServiceLicense)
 {
     public async Task<WizardSettings> SaveDataAsync(WizardRequestsDto inDto)
     {
@@ -57,9 +58,11 @@ public class FirstTimeTenantSettings(
                 throw new Exception("Wizard passed.");
             }
 
-            if (!string.IsNullOrEmpty(setupInfo.AmiMetaUrl) && await IncorrectAmiId(amiid))
+            var ami = !string.IsNullOrEmpty(setupInfo.AmiMetaUrl);
+
+            if (ami && await IncorrectAmiId(amiid))
             {
-                //throw new Exception(Resource.EmailAndPasswordIncorrectAmiId); TODO
+                throw new Exception(Resource.EmailAndPasswordIncorrectAmiId);
             }
 
             if (tenant.OwnerId == Guid.Empty)
@@ -95,12 +98,12 @@ public class FirstTimeTenantSettings(
 
             await userManager.UpdateUserInfoAsync(currentUser);
 
-            if (await tenantExtra.GetEnableTariffSettings() && tenantExtra.Enterprise)
+            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
             {
                 await TariffSettings.SetLicenseAcceptAsync(settingsManager);
                 await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
 
-                await licenseReader.RefreshLicenseAsync();
+                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
             }
 
             settings.Completed = true;
@@ -169,8 +172,6 @@ public class FirstTimeTenantSettings(
         }
     }
 
-    private static string _amiId;
-
     private async Task<bool> IncorrectAmiId(string customAmiId)
     {
         customAmiId = (customAmiId ?? "").Trim();
@@ -179,31 +180,57 @@ public class FirstTimeTenantSettings(
             return true;
         }
 
-        if (string.IsNullOrEmpty(_amiId))
+        try
         {
-            var getAmiIdUrl = setupInfo.AmiMetaUrl + "instance-id";
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(getAmiIdUrl)
-            };
+            var httpClient = clientFactory.CreateClient();
 
-            try
-            {
-                var httpClient = clientFactory.CreateClient();
-                using (var response = await httpClient.SendAsync(request))
-                {
-                    _amiId = await response.Content.ReadAsStringAsync();
-                }
+            var amiToken = await GetResponseString(httpClient, HttpMethod.Put, setupInfo.AmiTokenUrl, new Dictionary<string, string> { { "X-aws-ec2-metadata-token-ttl-seconds", "21600" } });
+            var amiId = await GetResponseString(httpClient, HttpMethod.Get, setupInfo.AmiMetaUrl, new Dictionary<string, string> { { "X-aws-ec2-metadata-token", amiToken } });
 
-                logger.DebugInstanceId(_amiId);
-            }
-            catch (Exception e)
-            {
-                logger.ErrorRequestAMIId(e);
-            }
+            return string.IsNullOrEmpty(amiId) || amiId != customAmiId;
+        }
+        catch (Exception e)
+        {
+            logger.ErrorRequestAMI(e);
+            return true;
+        }
+    }
+
+    private async Task<string> GetResponseString(HttpClient httpClient, HttpMethod method, string requestUrl, Dictionary<string, string> headers)
+    {
+        string responseString = null;
+
+        if (string.IsNullOrEmpty(requestUrl))
+        {
+            return responseString;
         }
 
-        return string.IsNullOrEmpty(_amiId) || _amiId != customAmiId;
+        var request = new HttpRequestMessage
+        {
+            RequestUri = new Uri(requestUrl),
+            Method = method
+        };
+
+        foreach (var header in headers)
+        {
+            request.Headers.Add(header.Key, header.Value);
+        }
+
+        try
+        {
+            using (var response = await httpClient.SendAsync(request))
+            {
+                responseString = await response.Content.ReadAsStringAsync();
+            }
+
+            logger.DebugRequestAMI(requestUrl, responseString);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorRequestAMI(e);
+        }
+
+        return responseString;
     }
 
     private async Task SubscribeFromSite(UserInfo user)

@@ -332,9 +332,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>编辑者</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>房间管理员</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>普通用户</value>
   </data>
@@ -358,9 +355,6 @@
   </data>
   <data name="AceStatusEnum_Collaborator" xml:space="preserve">
     <value>协作者</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>房间管理员</value>
   </data>
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>已提交表单</value>
@@ -464,14 +458,8 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>类型</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>高级用户</value>
-  </data>
   <data name="Date" xml:space="preserve">
     <value>日期</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>高级用户</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>普通用户</value>
@@ -496,5 +484,23 @@
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>表单编号</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>外部用户</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>内容创作者</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>房间管理员</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>内容创作者</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>房间管理员</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>打开文件</value>
   </data>
 </root>

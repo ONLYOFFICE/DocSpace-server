@@ -27,6 +27,6 @@
 namespace ASC.Api.Core.Log;
 internal static partial class ProductSecurityFilterLogger
 {
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Product {name} denied for user {userId}")]
+    [LoggerMessage(LogLevel.Warning, "Product {name} denied for user {userId}")]
     public static partial void WarningPaymentRequired(this ILogger<ProductSecurityFilter> logger, string name, Guid userId);
 }

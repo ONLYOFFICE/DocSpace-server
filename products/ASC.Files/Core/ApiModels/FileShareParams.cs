@@ -26,17 +26,22 @@
 
 namespace ASC.Files.Core.ApiModels;
 
-/// <summary>
-/// </summary>
 public class FileShareParams
 {
-    /// <summary>ID of the user with whom we want to share a file</summary>
+    /// <summary>
+    /// ID of the user with whom we want to share a file
+    /// </summary>
     public Guid ShareTo { get; set; }
 
-    /// <summary>User email address</summary>
+    /// <summary>
+    /// User email address
+    /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
-    /// <summary>Sharing rights</summary>
+    /// <summary>
+    /// Sharing rights
+    /// </summary>
     public FileShare Access { get; set; }
 }
 

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Utils;
-
 namespace ASC.Files.Helpers;
 
 [Scope]
@@ -70,8 +68,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     public async Task<bool> isFormPDF<T>(T fileId)
     {
         var file = await _fileStorageService.GetFileAsync(fileId, -1);
-        var extension = FileUtility.GetFileExtension(file.Title);
-        var fileType = FileUtility.GetFileTypeByExtention(extension);
+        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
         if (fileType == FileType.Pdf)
         {
@@ -148,21 +145,17 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public async Task<FileDto<T>> CreateHtmlFileAsync<T>(T folderId, string title, string content, bool updateIfExist)
     {
-        ArgumentNullException.ThrowIfNull(title);
-
         return await CreateFileAsync(folderId, title, content, ".html", updateIfExist);
     }
 
     public async Task<FileDto<T>> CreateTextFileAsync<T>(T folderId, string title, string content, bool updateIfExist)
     {
-        ArgumentNullException.ThrowIfNull(title);
-
         //Try detect content
         var extension = ".txt";
         if (!string.IsNullOrEmpty(content) && Regex.IsMatch(content, @"<([^\s>]*)(\s[^<]*)>"))
         {
                 extension = ".html";
-            }
+        }
 
         return await CreateFileAsync(folderId, title, content, extension, updateIfExist);
     }

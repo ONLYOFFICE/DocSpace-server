@@ -27,15 +27,15 @@
 namespace ASC.Common.Log;
 internal static partial class KafkaCacheNotifyLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "KafkaCacheNotify Publish")]
+    [LoggerMessage(LogLevel.Error, "KafkaCacheNotify Publish")]
     public static partial void ErrorKafkaCacheNotifyPublish(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "KafkaCacheNotify PublishAsync")]
+    [LoggerMessage(LogLevel.Error, "KafkaCacheNotify PublishAsync")]
     public static partial void ErrorKafkaCacheNotifyPublishAsync(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Kafka onmessage")]
+    [LoggerMessage(LogLevel.Error, "Kafka onmessage")]
     public static partial void ErrorKafkaOnmessage(this ILogger logger, Exception exception);   
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "Subscribe")]
+    [LoggerMessage(LogLevel.Error, "Subscribe")]
     public static partial void ErrorSubscribe(this ILogger logger, Exception exception);
 }

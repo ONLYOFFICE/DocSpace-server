@@ -35,9 +35,17 @@ public class License
     /// <type>System.String, System</type>
     public string OriginalLicense { get; set; }
 
+    /// <summary>Specifies if the license supports branding or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Branding { get; set; }
+
     /// <summary>Specifies if the license is customizable or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Customization { get; set; }
+
+    /// <summary>Specifies if the license is time limited or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool TimeLimited { get; set; }
 
     /// <summary>License due date</summary>
     /// <type>System.DateTime, System</type>

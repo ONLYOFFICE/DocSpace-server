@@ -27,23 +27,28 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
+/// Restoring parameters
 /// </summary>
 public class BackupRestoreDto
 {
-    /// <summary>Backup ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Backup ID
+    /// </summary>
     public string BackupId { get; set; }
 
-    /// <summary>Storage type</summary>
-    /// <type>System.Object, System</type>
-    /// <example>Documents</example>
-    public object StorageType { get; set; }
+    /// <summary>
+    /// Storage type
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public BackupStorageType? StorageType { get; set; }
 
-    /// <summary>Storage parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Object, System.Object}}, System.Collections.Generic</type>
+    /// <summary>
+    /// Storage parameters
+    /// </summary>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
-    /// <summary>Notifies users about portal restoring process or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Notifies users about portal restoring process or not
+    /// </summary>
     public bool Notify { get; set; }
 }

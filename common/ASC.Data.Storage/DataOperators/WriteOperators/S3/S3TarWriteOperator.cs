@@ -34,7 +34,7 @@ public class S3TarWriteOperator : IDataWriteOperator
     private readonly string _domain;
     private readonly string _key;
     private const int Limit = 10;
-    private readonly List<Task> _tasks = new();
+    private readonly List<Task> _tasks = [];
     private readonly TaskScheduler _scheduler = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, Limit).ConcurrentScheduler;
     private readonly ConcurrentQueue<int> _queue = new();
     private readonly CancellationTokenSource _cts = new();

@@ -371,7 +371,7 @@
     <value>Het aantal beheerders mag niet groter zijn dan {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Aantal beheerders/power users</value>
+    <value>Aantal beheerders</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatische back-up en herstel</value>
@@ -412,7 +412,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Het aantal gebruikers in de kamer mag niet groter zijn dan {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding &amp; aanpassing</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
@@ -1037,7 +1037,7 @@
     <value>Gebruikersruimte quota overschreden</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Beheerders/Power users toegevoegd:</value>
+    <value>Beheerders toegevoegd:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Uitnodigingslimiet is overschreden</value>
@@ -1055,6 +1055,18 @@
     <value>Opslagquota &amp; statistieken</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} per beheerder/power user en mogelijkheid om ruimte op verzoek toe te voegen</value>
+    <value>{0} per beheerder en mogelijkheid om ruimte op verzoek toe te voegen</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Fout bij het instellen van quota per kamer. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Fout bij het instellen van quota per gebruiker. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Voeg minstens 1 vertrouwd domein toe.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Het aantal beheerders overschrijdt de limiet: {0}/{1}.</value>
   </data>
 </root>

@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Extensions;
 using ASC.Files.Service.Services;
 using ASC.Files.Service.Services.Thumbnail;
 using ASC.Web.Files.Configuration;
@@ -65,8 +64,9 @@ public class Startup : BaseWorkerStartup
             services.AddHostedService<ThumbnailBuilderService>();
             services.AddActivePassiveHostedService<AutoCleanTrashService>(Configuration);
             services.AddActivePassiveHostedService<DeleteExpiredService>(Configuration);
+            services.AddActivePassiveHostedService<CleanupLifetimeExpiredService>(Configuration);
         }
-        
+
         services.RegisterQuotaFeature();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddScoped<IWebItem, ProductEntryPoint>();

@@ -67,27 +67,26 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);
 }
 
-/// <summary>
-/// </summary>
 public class AceShortWrapper(string subjectName, string permission, bool isLink)
 {
-    /// <summary>User</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// User
+    /// </summary>
     public string User { get; init; } = subjectName;
 
-    /// <summary>User access rights to the file</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// User access rights to the file
+    /// </summary>
     public string Permissions { get; init; } = permission;
 
-    /// <summary>Is link</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Is link
+    /// </summary>
     public bool isLink { get; init; } = isLink;
 }
 
 public class AceAdvancedSettingsWrapper
 {
-    public bool DenyDownload { get; set; }
-    public bool DenySharing { get; set; }
     public bool AllowSharingPrivateRoom { get; set; }
     public bool InvitationLink { get; init; }
 }

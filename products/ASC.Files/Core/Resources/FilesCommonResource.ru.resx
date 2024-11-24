@@ -335,9 +335,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Администратор комнаты</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Пользователь</value>
   </data>
@@ -361,9 +358,6 @@
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Администратор комнаты</value>
   </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Новая версия не может совпадать с текущей</value>
@@ -470,12 +464,6 @@
   <data name="User" xml:space="preserve">
     <value>Пользователь</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Опытный пользователь</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Опытный пользователь</value>
-  </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
     <value>Перемещение нескольких файлов в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме ONLYOFFICE.</value>
   </data>
@@ -496,5 +484,23 @@
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Номер формы</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Внешний пользователь</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Создатель контента</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Менеджер комнат</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Создатель контента</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Менеджер комнат</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Открыть файл</value>
   </data>
 </root>

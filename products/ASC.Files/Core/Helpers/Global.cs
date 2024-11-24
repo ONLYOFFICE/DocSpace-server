@@ -282,13 +282,13 @@ public partial class Global(
 }
 
 [Scope]
-public class GlobalStore(StorageFactory storageFactory, TenantManager tenantManager)
-{    
+public class GlobalStore(StorageFactory storageFactory, TenantManager tenantManager, CoreBaseSettings coreBaseSettings)
+{
     public async Task<IDataStore> GetStoreAsync(bool currentTenant = true)
     {
         return await GetStoreAsync(currentTenant ? await tenantManager.GetCurrentTenantIdAsync() : -1);
     }
-    
+
     private readonly ConcurrentDictionary<int, IDataStore> _currentTenantStore = new();
     internal async Task<IDataStore> GetStoreAsync(int tenantId)
     {
@@ -302,10 +302,49 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
 
         return result;
     }
-    
+
     public async Task<IDataStore> GetStoreTemplateAsync()
     {
         return await storageFactory.GetStorageAsync(-1, FileConstant.StorageTemplate);
+    }
+
+    public async Task<string> GetNewDocTemplatePath(IDataStore storeTemplate, string extension, CultureInfo culture = null)
+    {
+        var defaultPath = coreBaseSettings.CustomMode
+                ? FileConstant.NewDocDefaultCustomModePath
+                : FileConstant.NewDocDefaultPath;
+
+        var path = await GetPathDependingOnCulture(storeTemplate, FileConstant.NewDocPath, defaultPath, culture);
+
+        return $"{path}{FileConstant.NewDocFileName}{extension}";
+    }
+
+    public async Task<string> GetStartDocsPath(IDataStore storeTemplate, bool my, CultureInfo culture = null)
+    {
+        var path = await GetPathDependingOnCulture(storeTemplate, FileConstant.StartDocPath, FileConstant.StartDocDefaultPath, culture);
+
+        return $"{path}{(my ? FileConstant.StartDocMyPath : FileConstant.StartDocCorporatePath)}";
+    }
+
+    private async Task<string> GetPathDependingOnCulture(IDataStore storeTemplate, string targetDir, string defaultSubDir, CultureInfo culture)
+    {
+        var path = $"{targetDir}{defaultSubDir}";
+
+        if (culture != null)
+        {
+            var ciltureName = culture.ToString();
+
+            await foreach (var dirName in storeTemplate.ListDirectoriesRelativeAsync(targetDir, false))
+            {
+                if (dirName.StartsWith(ciltureName))
+                {
+                    path = $"{targetDir}{dirName}/";
+                    break;
+                }
+            }
+        }
+
+        return path;
     }
 }
 
@@ -390,7 +429,7 @@ public class GlobalFolder(
             return default;
         }
 
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return default;
         }
@@ -517,7 +556,7 @@ public class GlobalFolder(
             return 0;
         }
 
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return 0;
         }
@@ -551,7 +590,7 @@ public class GlobalFolder(
             return 0;
         }
 
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return 0;
         }
@@ -652,15 +691,8 @@ public class GlobalFolder(
 
             var globalStore = scope.ServiceProvider.GetRequiredService<GlobalStore>();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
-            
-            var path = FileConstant.StartDocPath + culture + "/";
-            
-            if (!await storeTemplate.IsDirectoryAsync(path))
-            {
-                path = FileConstant.StartDocPath + "en-US/";
-            }
-        
-            path += my ? "my/" : "corporate/";
+
+            var path = await globalStore.GetStartDocsPath(storeTemplate, my, culture);
 
             var fileMarker = scope.ServiceProvider.GetRequiredService<FileMarker>();
             var fileDao = (FileDao)scope.ServiceProvider.GetRequiredService<IFileDao<int>>();
@@ -733,8 +765,8 @@ public class GlobalFolder(
             newFile.ParentId = folderId;
             newFile.Comment = FilesCommonResource.CommentCreate;
 
-            var fileExt = FileUtility.GetFileExtension(fileName);
-            if (FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
+            var fileType = FileUtility.GetFileTypeByFileName(fileName);
+            if (fileType == FileType.Pdf)
             {
                 newFile.Category = (int)FilterType.PdfForm;
             }

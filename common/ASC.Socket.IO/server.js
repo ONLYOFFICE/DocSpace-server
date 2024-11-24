@@ -138,6 +138,7 @@ app.get("/", (req, res) => {
 const filesHub = require("./app/hubs/files.js")(io);
 
 app.use("/controller", require("./app/controllers")(filesHub));
+app.use("/", require("./app/controllers/healthCheck.js") ());
 
 httpServer.listen(port, () => winston.info(`Server started on port: ${port}`));
 

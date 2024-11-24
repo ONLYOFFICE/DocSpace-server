@@ -27,11 +27,35 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// User invitation parameters
 /// </summary>
-public class UserInvitationRequestDto
+public class UserInvitation
 {
-    /// <summary>List of user IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of user IDs
+    /// </summary>
     public IEnumerable<Guid> UsersIds { get; set; }
+
+    /// <summary>
+    /// Resend all
+    /// </summary>
     public bool ResendAll { get; set; }
+}
+
+/// <summary>
+/// User invitation request parameters
+/// </summary>
+public class UserInvitationRequestDto<T>
+{
+    /// <summary>
+    /// Room Id
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// User invitation
+    /// </summary>
+    [FromBody]
+    public UserInvitation UserInvitation { get; set; }
 }

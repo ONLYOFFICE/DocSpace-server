@@ -29,18 +29,18 @@ using ASC.Files.Service.Services.Thumbnail;
 namespace ASC.Files.Service.Log;
 internal static partial class ThumbnailBuilderServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "Thumbnail Worker running.")]
+    [LoggerMessage(LogLevel.Information, "Thumbnail Worker running.")]
     public static partial void InformationThumbnailWorkerRunnig(this ILogger<ThumbnailBuilderService> logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Thumbnail Worker is stopping.")]
+    [LoggerMessage(LogLevel.Information, "Thumbnail Worker is stopping.")]
     public static partial void InformationThumbnailWorkerStopping(this ILogger<ThumbnailBuilderService> logger);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Procedure: Start.")]
+    [LoggerMessage(LogLevel.Trace, "Procedure: Start.")]
     public static partial void TraceProcedureStart(this ILogger<ThumbnailBuilderService> logger);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Procedure: Waiting for data. Sleep {frequency}.")]
+    [LoggerMessage(LogLevel.Trace, "Procedure: Waiting for data. Sleep {frequency}.")]
     public static partial void TraceProcedureWaiting(this ILogger<ThumbnailBuilderService> logger, int frequency);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Procedure: Finish.")]
+    [LoggerMessage(LogLevel.Trace, "Procedure: Finish.")]
     public static partial void TraceProcedureFinish(this ILogger<ThumbnailBuilderService> logger);
 }

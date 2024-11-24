@@ -289,7 +289,7 @@ public abstract class BaseIndexer<T>(Client client,
                     }
 
                     portionStart = i;
-                    portion = new List<T>();
+                    portion = [];
                     currentLength = 0L;
                     GC.Collect();
                 }
@@ -598,7 +598,7 @@ public abstract class BaseIndexer<T>(Client client,
         if (member == null && expr is UnaryExpression unary)
         {
                 member = unary.Operand as MemberExpression;
-            }
+        }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();
     }

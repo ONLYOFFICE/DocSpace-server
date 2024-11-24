@@ -120,16 +120,16 @@
   <data name="TextForFooterUnsubsribe" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
     &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 40px 0 8px; vertical-align: top;"&gt;
-        ご購入に関するご質問は、 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:%SALESEMAIL%"&gt;%SALESEMAIL%&lt;/a&gt;.
+        ご購入に関するご質問は、 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:%SALESEMAIL%"&gt;%SALESEMAIL%&lt;/a&gt;までご送信ください。
     &lt;/td&gt;
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
     &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 0; vertical-align: top;"&gt;
-        技術的な問題の場合は &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="%SUPPORTURL%"&gt;サポートチームまで。配信停止は&lt;/a&gt;.
+        技術的な問題の場合は &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="%SUPPORTURL%"&gt;サポートチーム&lt;/a&gt;までご連絡ください。
     &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
     &lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 8px 0 0; vertical-align: top;"&gt;
-        &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;こちら&lt;/a&gt;
+        &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;配信停止はこちら&lt;/a&gt;
     &lt;/td&gt;
 &lt;/tr&gt;</value>
   </data>
@@ -228,7 +228,7 @@
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
     &lt;td style="margin: 0; text-align: center; vertical-align: top; width: 600px;"&gt;
         &lt;a href="%SITEURL%" style="color: #333333; display: block; font-size: 16px; font-weight: bold; line-height: 22px; margin-bottom: 32px; text-decoration: none;" target="_blank"&gt;
-            &lt;img src="%LOGO%" style="border: 0 none; height: 360px; width: 600px; color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 40px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em;" alt="%LOGOTEXT%" /&gt;
+            &lt;img src="%LOGO%" style="border: 0 none; height: 360px; width: 600px; color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 32px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em;" alt="%LOGOTEXT%" /&gt;
         &lt;/a&gt;
     &lt;/td&gt;
 &lt;/tr&gt;</value>
@@ -238,7 +238,7 @@
           &lt;td colspan="3" style="margin: 0; padding: 0; background-color: #f6f6f6; height: 65px; padding: 20px 0 0 30px;"&gt;
             &lt;div style="text-align: left; height: 65px; width: 570px; margin: 0; padding: 0;"&gt;
                 &lt;a href="%SITEURL%" style="text-decoration: none; display: inline-block; width: 386px; height: 44px; margin: 0; padding: 0;" target="_blank"&gt;
-                    &lt;img src="%LOGO%" style="border: 0px none; width: 386px; height: 44px; margin: 0; padding: 0;" alt="%LOGOTEXT%" /&gt;
+                    &lt;img src="%LOGO%" style="border: 0px none; width: 386px; height: 44px; margin: 0; padding: 0; color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 32px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em;" alt="%LOGOTEXT%" /&gt;
                 &lt;/a&gt;
             &lt;/div&gt;
           &lt;/td&gt;

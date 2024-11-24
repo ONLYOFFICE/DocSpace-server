@@ -25,14 +25,16 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Polly;
+using Polly.Contrib.WaitAndRetry;
 using Polly.Extensions.Http;
+using Polly.Timeout;
 
 namespace ASC.Files.Core.Helpers;
 
 public static class DocumentService
 {
     private const int Timeout = 120000;
-    
+
 
     private static readonly JsonSerializerOptions _bodySettings = new()
     {
@@ -76,6 +78,7 @@ public static class DocumentService
     /// <param name="region"></param>
     /// <param name="thumbnail">Thumbnail settings</param>
     /// <param name="spreadsheetLayout"></param>
+    /// <param name="options"></param>
     /// <param name="isAsync">Perform conversions asynchronously</param>
     /// <param name="signatureSecret">Secret key to generate the token</param>
     /// <param name="clientFactory"></param>
@@ -99,6 +102,7 @@ public static class DocumentService
         string region,
         ThumbnailData thumbnail,
         SpreadsheetLayout spreadsheetLayout,
+        Options options,
         bool isAsync,
         string signatureSecret,
        IHttpClientFactory clientFactory,
@@ -115,7 +119,7 @@ public static class DocumentService
             throw new ArgumentNullException(nameof(toExtension), "Extension for conversion is not known");
         }
 
-        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, isAsync, signatureSecret, clientFactory, toForm);
+        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, options, isAsync, signatureSecret, clientFactory, toForm);
     }
 
     private static async Task<(int ResultPercent, string ConvertedDocumentUri, string convertedFileType)> InternalGetConvertedUriAsync(
@@ -129,6 +133,7 @@ public static class DocumentService
        string region,
        ThumbnailData thumbnail,
        SpreadsheetLayout spreadsheetLayout,
+       Options options,
        bool isAsync,
        string signatureSecret,
        IHttpClientFactory clientFactory,
@@ -140,7 +145,12 @@ public static class DocumentService
         documentRevisionId = string.IsNullOrEmpty(documentRevisionId)
                                  ? documentUri
                                  : documentRevisionId;
+
         documentRevisionId = GenerateRevisionId(documentRevisionId);
+
+        documentConverterUrl = FilesLinkUtility.AddQueryString(documentConverterUrl, new Dictionary<string, string>() {
+            { FilesLinkUtility.ShardKey, documentRevisionId }
+        });
 
         var request = new HttpRequestMessage
         {
@@ -160,6 +170,7 @@ public static class DocumentService
             Title = title,
             Thumbnail = thumbnail,
             SpreadsheetLayout = spreadsheetLayout,
+            Watermark = options?.WatermarkOnDraw,
             Url = documentUri,
             Region = region
         };
@@ -189,9 +200,9 @@ public static class DocumentService
         string dataResponse;
 
         using (var response = await httpClient.SendAsync(request))
-        {
+            {
             dataResponse = await response.Content.ReadAsStringAsync();
-        }
+            }
 
         return GetResponseUri(dataResponse);
     }
@@ -220,8 +231,11 @@ public static class DocumentService
         string signatureSecret,
         IHttpClientFactory clientFactory)
     {
-        var defaultTimeout = Timeout;
-        var commandTimeout = defaultTimeout;
+        documentTrackerUrl = FilesLinkUtility.AddQueryString(documentTrackerUrl, new Dictionary<string, string>() {
+            { FilesLinkUtility.ShardKey, documentRevisionId }
+        });
+
+        var commandTimeout = Timeout;
 
         if (method == CommandMethod.Version)
         {
@@ -261,7 +275,7 @@ public static class DocumentService
         if (!string.IsNullOrEmpty(signatureSecret))
         {
             var token = JsonWebToken.Encode(new { payload = body }, signatureSecret);
-            
+
             //todo: remove old scheme
             request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
 
@@ -277,7 +291,7 @@ public static class DocumentService
         {
             using var response = await httpClient.SendAsync(request, cancellationTokenSource.Token);
             dataResponse = await response.Content.ReadAsStringAsync(cancellationTokenSource.Token);
-        }
+            }
         catch (HttpRequestException e) when (e.HttpRequestError == HttpRequestError.NameResolutionError)
         {
             return new CommandResponse
@@ -286,7 +300,7 @@ public static class DocumentService
                 ErrorString = e.Message
             };
         }
-        
+
         try
         {
             var commandResponse = JsonSerializer.Deserialize<CommandResponse>(dataResponse, _commonSettings);
@@ -297,7 +311,7 @@ public static class DocumentService
             return new CommandResponse
             {
                 Error = ErrorTypes.ParseError,
-                ErrorString = ex.Message
+                ErrorString = $"{ex.Message} Content: {dataResponse}"
             };
         }
     }
@@ -330,6 +344,10 @@ public static class DocumentService
        string signatureSecret,
        IHttpClientFactory clientFactory)
     {
+        docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string>() {
+            { FilesLinkUtility.ShardKey, requestKey }
+        });
+
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(docbuilderUrl),
@@ -434,17 +452,17 @@ public static class DocumentService
     public class CommandResponse
     {
         public ErrorTypes Error { get; set; }
-        
+
         public string ErrorString { get; set; }
-        
+
         public string Key { get; set; }
-        
+
         public License License { get; set; }
-        
+
         public ServerInfo Server { get; set; }
-        
+
         public QuotaInfo Quota { get; set; }
-        
+
         public string Version { get; set; }
 
         public enum ErrorTypes
@@ -463,14 +481,14 @@ public static class DocumentService
         public class ServerInfo
         {
             public DateTime BuildDate { get; set; }
-            
+
             public int BuildNumber { get; set; }
             public string BuildVersion { get; set; }
-            
+
             public PackageTypes PackageType { get; set; }
-            
+
             public ResultTypes ResultType { get; set; }
-            
+
             public int WorkersCount { get; set; }
 
             public enum PackageTypes
@@ -505,7 +523,7 @@ public static class DocumentService
             {
                 [JsonPropertyName("userid")]
                 public string UserId { get; set; }
-                
+
                 public DateTime Expire { get; set; }
             }
         }
@@ -523,12 +541,12 @@ public static class DocumentService
         }
 
         public string Callback { get; set; }
-        
+
         public string Key { get; init; }
         public MetaData Meta { get; set; }
-        
+
         public string[] Users { get; set; }
-        
+
         public string Token { get; set; }
 
         //not used
@@ -603,7 +621,7 @@ public static class DocumentService
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
         public required string Url { get; set; }
         public required string Region { get; set; }
-        public string Token { get; set; }
+        public WatermarkOnDraw Watermark { get; set; }        public string Token { get; set; }
         public PdfData Pdf { get; set; }
 
     }
@@ -619,9 +637,21 @@ public static class DocumentService
 
     public class FileLink
     {
+        /// <summary>
+        /// File type
+        /// </summary>
         [JsonPropertyName("filetype")]
         public string FileType { get; set; }
+
+        /// <summary>
+        /// Token
+        /// </summary>
         public string Token { get; set; }
+
+        /// <summary>
+        /// Url
+        /// </summary>
+        [Url]
         public string Url { get; set; }
     }
 
@@ -719,15 +749,16 @@ public static class DocumentServiceHttpClientExtension
 {
     public static void AddDocumentServiceHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
-        
+        var httpClientTimeout = Convert.ToInt32(configuration["files:docservice:timeout"] ?? "100000");
+        var policyTimeout = httpClientTimeout / 1000;
+        var retryCount = Convert.ToInt32(configuration["files:docservice:try"] ?? "6");
+        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: retryCount);
+
         services.AddHttpClient(nameof(DocumentService))
-            .SetHandlerLifetime(TimeSpan.FromMilliseconds(Convert.ToInt32(configuration["files:docservice:timeout"] ?? "5000")))
-            .AddPolicyHandler((_, _) => 
-                HttpPolicyExtensions
-                .HandleTransientHttpError() 
-                .OrResult(response => response.IsSuccessStatusCode
-                    ? false
-                    : throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode))
-                .WaitAndRetryAsync(Convert.ToInt32(configuration["files:docservice:try"] ?? "3"), retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+                .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(policyTimeout))
+                .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
+                                                                .Or<TimeoutRejectedException>()
+                                                                .WaitAndRetryAsync(delay));
     }
 }

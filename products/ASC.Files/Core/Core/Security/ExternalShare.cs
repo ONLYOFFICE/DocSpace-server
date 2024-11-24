@@ -84,7 +84,7 @@ public class ExternalShare(Global global,
     
     public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
     {
-        var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync(new [] { linkId }).FirstOrDefaultAsync();
+        var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync([linkId]).FirstOrDefaultAsync();
 
         return record == null ? Status.Invalid : await ValidateRecordAsync(record, null, isAuthenticated);
     }
@@ -411,11 +411,22 @@ public class ExternalSessionSnapshot
 
 public enum Status
 {
+    [SwaggerEnum(Description = "Ok")]
     Ok,
+
+    [SwaggerEnum(Description = "Invalid")]
     Invalid,
+
+    [SwaggerEnum(Description = "Expired")]
     Expired,
+
+    [SwaggerEnum(Description = "Required password")]
     RequiredPassword,
+
+    [SwaggerEnum(Description = "Invalid password")]
     InvalidPassword,
+
+    [SwaggerEnum(Description = "External access denied")]
     ExternalAccessDenied
 }
 

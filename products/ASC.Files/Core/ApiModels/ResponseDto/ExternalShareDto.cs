@@ -24,44 +24,43 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
 using Status = ASC.Files.Core.Security.Status;
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class ExternalShareDto : IMapFrom<ValidationInfo>
 {
-    /// <summary>External data status</summary>
-    /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
+    /// <summary>
+    /// External data status
+    /// </summary>
     public Status Status { get; set; }
 
-    /// <summary>External data ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// External data ID
+    /// </summary>
     public string Id { get; set; }
 
-    /// <summary>External data title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// External data title
+    /// </summary>
     public string Title { get; set; }
-    
-    /// <summary>Entity ID</summary>
-    /// <type>System.String, System</type>
-    public string EntityId { get; set; }
-   
-    /// <summary>Entity title</summary>
-    /// <type>System.String, System</type>
-    public string EntryTitle { get; set; }
-    
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+
+    /// <summary>
+    /// Tenant ID
+    /// </summary>
     public int TenantId { get; set; }
 
-    /// <summary>Specifies whether to share the external data or not</summary>
-    /// <type>System.Boolean, System</type>
+    public string EntityId { get; set; }
+   
+    public string EntryTitle { get; set; }
+
+    /// <summary>
+    /// Specifies whether to share the external data or not
+    /// </summary>
     public bool Shared { get; set; }
-    
-    /// <summary>Link ID</summary>
-    /// <type>System.Guid, System</type>
+
+    /// <summary>
+    /// Link ID
+    /// </summary>
     public Guid LinkId { get; set; }
 }

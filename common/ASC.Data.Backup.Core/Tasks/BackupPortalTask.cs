@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Newtonsoft.Json;
+
 namespace ASC.Data.Backup.Tasks;
 
 [Scope]
@@ -434,7 +436,9 @@ public class BackupPortalTask(
                         {
                             sw.Write("0x");
                             foreach (var b in byteArray)
+                            {
                                 sw.Write("{0:x2}", b);
+                            }
                         }
                         else
                         {

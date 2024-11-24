@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 using ASC.Core.Configuration;
 
 namespace ASC.Data.Backup.Services;
@@ -81,10 +83,10 @@ public sealed class BackupSchedulerService(
 
                         logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
 
-                        _eventBus.Publish(new BackupRequestIntegrationEvent(
+                        await _eventBus.PublishAsync(new BackupRequestIntegrationEvent(
                                                  tenantId: schedule.TenantId,
                                                  storageBasePath: schedule.StorageBasePath,
-                                                 storageParams: JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.StorageParams),
+                                                 storageParams: JsonSerializer.Deserialize<Dictionary<string, string>>(schedule.StorageParams),
                                                  storageType: schedule.StorageType,
                                                  createBy: Constants.CoreSystem.ID,
                                                  isScheduled: true,

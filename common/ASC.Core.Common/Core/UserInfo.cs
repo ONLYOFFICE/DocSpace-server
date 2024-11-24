@@ -26,62 +26,74 @@
 
 namespace ASC.Core.Users;
 
-/// <summary>
-/// </summary>
 public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
 {
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public Guid Id { get; set; }
 
-    /// <summary>First name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// First name
+    /// </summary>
     public string FirstName { get; set; }
 
-    /// <summary>Last name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Last name
+    /// </summary>
     public string LastName { get; set; }
 
-    /// <summary>Username</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Username
+    /// </summary>
     public string UserName { get; set; }
 
-    /// <summary>Birthday</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    /// <summary>
+    /// Birthday
+    /// </summary>
     public DateTime? BirthDate { get; set; }
 
-    /// <summary>Sex (male or female)</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Sex (male or female)
+    /// </summary>
     public bool? Sex { get; set; }
 
-    /// <summary>Status</summary>
-    /// <type>ASC.Core.Users.EmployeeStatus, ASC.Core.Common</type>
+    /// <summary>
+    /// Status
+    /// </summary>
     public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
 
-    /// <summary>Activation status</summary>
-    /// <type>ASC.Core.Users.EmployeeActivationStatus, ASC.Core.Common</type>
+    /// <summary>
+    /// Activation status
+    /// </summary>
     public EmployeeActivationStatus ActivationStatus { get; set; } = EmployeeActivationStatus.NotActivated;
 
-    /// <summary>The date and time when the user account was terminated</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    /// <summary>
+    /// The date and time when the user account was terminated
+    /// </summary>
     public DateTime? TerminatedDate { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Registration date</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    /// <summary>
+    /// Registration date
+    /// </summary>
     public DateTime? WorkFromDate { get; set; }
 
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Email
+    /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
     private string _contacts;
 
-    /// <summary>List of contacts in the string format</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// List of contacts in the string format
+    /// </summary>
     public string Contacts
     {
         get => _contacts;
@@ -92,65 +104,84 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
         }
     }
 
-    /// <summary>List of contacts</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of contacts
+    /// </summary>
     public List<string> ContactsList { get; set; }
 
-    /// <summary>Location</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Location
+    /// </summary>
     public string Location { get; set; }
 
-    /// <summary>Notes</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Notes
+    /// </summary>
     public string Notes { get; set; }
 
-    /// <summary>Specifies if the user account was removed or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user account was removed or not
+    /// </summary>
     public bool Removed { get; set; }
 
-    /// <summary>Last modified date</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// Last modified date
+    /// </summary>
     public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Tenant ID
+    /// </summary>
     public int TenantId { get; set; }
 
-    /// <summary>Spceifies if the user is active or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Spceifies if the user is active or not
+    /// </summary>
     public bool IsActive => ActivationStatus.HasFlag(EmployeeActivationStatus.Activated);
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Language
+    /// </summary>
     public string CultureName { get; set; }
 
-    /// <summary>Mobile phone</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Mobile phone
+    /// </summary>
     public string MobilePhone { get; set; }
 
-    /// <summary>Mobile phone activation status</summary>
-    /// <type>ASC.Core.Users.MobilePhoneActivationStatus, ASC.Core.Common</type>
+    /// <summary>
+    /// Mobile phone activation status
+    /// </summary>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
-    /// <summary>LDAP user identificator</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// LDAP user identificator
+    /// </summary>
     public string Sid { get; set; } // LDAP user identificator
 
-    /// <summary>LDAP user quota attribute</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// LDAP user quota attribute
+    /// </summary>
     public long LdapQouta { get; init; } // LDAP user quota attribute
 
-    /// <summary>SSO SAML user identificator</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// SSO SAML user identificator
+    /// </summary>
     public string SsoNameId { get; set; } // SSO SAML user identificator
 
-    /// <summary>SSO SAML user session identificator</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// SSO SAML user session identificator
+    /// </summary>
     public string SsoSessionId { get; set; } // SSO SAML user session identificator
 
-    /// <summary>Creation date</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// Creation date
+    /// </summary>
     public DateTime CreateDate { get; set; }
+
+    public Guid? CreatedBy { get; set; }
+
+    public bool? Spam { get; set; }
 
     public override string ToString()
     {
@@ -220,7 +251,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
             ContactsList.Clear();
         }
 
-        ContactsList.AddRange(contacts.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries));
+        ContactsList.AddRange(contacts.Split(['|'], StringSplitOptions.RemoveEmptyEntries));
 
         return this;
     }

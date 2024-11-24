@@ -61,7 +61,7 @@ public class Builder<T>(ThumbnailSettings settings,
         {
             await tenantManager.SetCurrentTenantAsync(fileData.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(fileData.CreatedBy);
-
+            
             _dataStore = await storageFactory.GetStorageAsync(fileData.TenantId, FileConstant.StorageModule, (IQuotaController)null);
 
             var fileDao = daoFactory.GetFileDao<T>();
@@ -182,7 +182,7 @@ public class Builder<T>(ThumbnailSettings settings,
     }
 
     private async Task MakeThumbnailFromDocs(IFileDao<T> fileDao, File<T> file)
-    {
+    {            
         _logger.DebugMakeThumbnail1(file.Id.ToString());
 
         string thumbnailUrl = null;
@@ -192,15 +192,12 @@ public class Builder<T>(ThumbnailSettings settings,
         var maxSize = settings.Sizes.MaxBy(r => r.Width + r.Height);
         var thumbnailHeight = maxSize.Height;
         var thumbnailWidth = maxSize.Width;
-
+        
         if (maxSize.ResizeMode == ResizeMode.Manual)
         {
             if (maxSize.Width > maxSize.Height) // change thumbnail orientation
             {
-                var originThumbnailHeight = thumbnailHeight;
-
-                thumbnailHeight = thumbnailWidth;
-                thumbnailWidth = originThumbnailHeight;
+                (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
             }
         }
 
@@ -252,7 +249,7 @@ public class Builder<T>(ThumbnailSettings settings,
             await Task.Delay(settings.AttemptWaitInterval);
         }
         while (string.IsNullOrEmpty(thumbnailUrl));
-
+        
         _logger.DebugMakeThumbnail3(file.Id.ToString(), thumbnailUrl);
 
         using var request = new HttpRequestMessage();
@@ -306,7 +303,7 @@ public class Builder<T>(ThumbnailSettings settings,
             PageSize = new SpreadsheetLayout.LayoutPageSize()
         };
 
-        var (operationResultProgress, url, _) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentCulture.Name, thumbnail, spreadsheetLayout, false, false);
+        var (operationResultProgress, url, _) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentCulture.Name, thumbnail, spreadsheetLayout, null, false, false);
 
         operationResultProgress = Math.Min(operationResultProgress, 100);
         return (operationResultProgress, url);
@@ -436,10 +433,7 @@ public class Builder<T>(ThumbnailSettings settings,
             if (sourceBitmap.Bounds.Width > sourceBitmap.Bounds.Height && thumbnailWidth < thumbnailHeight ||
                 sourceBitmap.Bounds.Width < sourceBitmap.Bounds.Height && thumbnailWidth > thumbnailHeight)
             {
-                var originThumbnailHeight = thumbnailHeight;
-
-                thumbnailHeight = thumbnailWidth;
-                thumbnailWidth = originThumbnailHeight;
+                (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
             }
         }
 

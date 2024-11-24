@@ -33,7 +33,6 @@ public class ProductEntryPoint : Product
 
     private readonly FilesSpaceUsageStatManager _filesSpaceUsageStatManager;
     private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly AuthContext _authContext;
     private readonly UserManager _userManager;
     private readonly NotifyConfiguration _notifyConfiguration;
     private readonly AuditEventsRepository _auditEventsRepository;
@@ -54,7 +53,6 @@ public class ProductEntryPoint : Product
     public ProductEntryPoint(
         FilesSpaceUsageStatManager filesSpaceUsageStatManager,
         CoreBaseSettings coreBaseSettings,
-        AuthContext authContext,
         UserManager userManager,
         NotifyConfiguration notifyConfiguration,
         AuditEventsRepository auditEventsRepository,
@@ -72,7 +70,6 @@ public class ProductEntryPoint : Product
     {
         _filesSpaceUsageStatManager = filesSpaceUsageStatManager;
         _coreBaseSettings = coreBaseSettings;
-        _authContext = authContext;
         _userManager = userManager;
         _notifyConfiguration = notifyConfiguration;
         _auditEventsRepository = auditEventsRepository;
@@ -279,7 +276,7 @@ public class ProductEntryPoint : Product
 
         foreach (var record in currentUsersRecords)
         {
-            if (record.Owner == userId || record.Share == FileShare.RoomAdmin)
+            if (record.Owner == userId || record.Share == FileShare.RoomManager)
             {
                 result.TryAdd(record.EntryId, true);
             }
@@ -297,7 +294,7 @@ public class ProductEntryPoint : Product
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
         var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
 
-        var rooms = await folderDao.GetRoomsAsync(new List<int> { virtualRoomsFolderId, archiveFolderId }, FilterType.None, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+        var rooms = await folderDao.GetRoomsAsync(new List<int> { virtualRoomsFolderId, archiveFolderId }, null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
 
         foreach (var room in rooms)
         {
@@ -356,32 +353,28 @@ public class ProductEntryPoint : Product
 
     private static string GetDocSpaceRoleString(EmployeeType employeeType)
     {
-        switch (employeeType)
+        return employeeType switch
         {
-            case EmployeeType.User:
-            case EmployeeType.RoomAdmin:
-            case EmployeeType.DocSpaceAdmin:
-            case EmployeeType.Collaborator:
-                return FilesCommonResource.ResourceManager.GetString("RoleEnum_" + employeeType.ToStringFast());
-            default:
-                return string.Empty;
-        }
+            EmployeeType.Guest or 
+            EmployeeType.RoomAdmin or 
+            EmployeeType.DocSpaceAdmin or 
+            EmployeeType.User => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + employeeType.ToStringFast()),
+            _ => string.Empty
+        };
     }
 
     private static string GetRoomRoleString(FileShare userRoomRole)
     {
-        switch (userRoomRole)
+        return userRoomRole switch
         {
-            case FileShare.Read:
-            case FileShare.Review:
-            case FileShare.Comment:
-            case FileShare.FillForms:
-            case FileShare.RoomAdmin:
-            case FileShare.Editing:
-            case FileShare.PowerUser:
-                return FilesCommonResource.ResourceManager.GetString("RoleEnum_" + userRoomRole.ToStringFast());
-            default:
-                return string.Empty;
-        }
+            FileShare.Read or 
+            FileShare.Review or 
+            FileShare.Comment or 
+            FileShare.FillForms or 
+            FileShare.RoomManager or 
+            FileShare.Editing or 
+            FileShare.ContentCreator => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + userRoomRole.ToStringFast()),
+            _ => string.Empty
+        };
     }
 }

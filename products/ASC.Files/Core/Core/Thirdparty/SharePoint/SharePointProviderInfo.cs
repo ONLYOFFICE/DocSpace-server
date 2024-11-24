@@ -54,8 +54,8 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
     public bool HasLogo { get; set; }
     public string Color { get; set; }
 
-    public Selector Selector { get; } = Selectors.SharePoint;
-    public ProviderFilter ProviderFilter { get; } = ProviderFilter.SharePoint;
+    public Selector Selector => Selectors.SharePoint;
+    public ProviderFilter ProviderFilter => ProviderFilter.SharePoint;
     public bool MutableEntityId => true;
 
     public Task<bool> CheckAccessAsync()

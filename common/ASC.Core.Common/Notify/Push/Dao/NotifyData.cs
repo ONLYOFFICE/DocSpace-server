@@ -28,18 +28,13 @@ namespace ASC.Core.Common.Notify.Push.Dao;
 
 public class NotifyData
 {
-    [JsonProperty("portal")]
     public string Portal { get; set; }
 
-    [JsonProperty("email")]
     public string Email { get; set; }
 
-    [JsonProperty("file")]
     public NotifyFileData File { get; set; }
 
-    [JsonProperty("folder")]
     public NotifyFolderData Folder { get; set; }
 
-    [JsonProperty("originalUrl")]
     public string OriginalUrl { get; set; }
 }

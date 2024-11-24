@@ -26,25 +26,197 @@
 
 namespace ASC.Files.Core.Core.History.Interpreters;
 
-public class FileCreateInterpreter : ActionInterpreter
+public abstract class FileActionInterpreterBase : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected static IDictionary<Accessibility, bool> GetAccessibility(IServiceProvider serviceProvider, string fileName)
     {
-        var desc = GetAdditionalDescription(description);
+        var fileUtility = serviceProvider.GetRequiredService<FileUtility>();
+
+        var result = new Dictionary<Accessibility, bool>();
+
+        foreach (var r in Enum.GetValues<Accessibility>())
+        {
+            var val = r switch
+            {
+                Accessibility.ImageView => fileUtility.CanImageView(fileName),
+                Accessibility.MediaView => fileUtility.CanMediaView(fileName),
+                Accessibility.WebView => fileUtility.GetWebViewAccessibility(fileName),
+                Accessibility.WebEdit => fileUtility.CanWebEdit(fileName),
+                Accessibility.WebReview => fileUtility.CanWebReview(fileName),
+                Accessibility.WebCustomFilterEditing => fileUtility.CanWebCustomFilterEditing(fileName),
+                Accessibility.WebRestrictedEditing => fileUtility.CanWebRestrictedEditing(fileName),
+                Accessibility.WebComment => fileUtility.CanWebComment(fileName),
+                Accessibility.CoAuhtoring => fileUtility.CanCoAuthoring(fileName),
+                Accessibility.MustConvert => fileUtility.MustConvert(fileName),
+                _ => false
+            };
+
+            result.Add(r, val);
+        }
+
+        return result;
+    }
+    
+    protected static string GetViewUrl(IServiceProvider serviceProvider, string fileId)
+    {
+        var filesLinkUtility = serviceProvider.GetRequiredService<FilesLinkUtility>();
+        var commonLinkUtility = serviceProvider.GetRequiredService<CommonLinkUtility>();
         
-        return new ValueTask<HistoryData>(new EntryData(target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType));
+        return commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(fileId));
     }
 }
 
-public class FileMovedInterpreter : ActionInterpreter
+#region Data
+
+public record FileData : EntryData
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    public IDictionary<Accessibility, bool> Accessibility { get; }
+    public string ViewUrl { get; }
+    
+    public FileData(
+        string id,
+        string title,
+        int? parentId = null,
+        string parentTitle = null,
+        int? parentType = null,
+        int? currentType = null,
+        IDictionary<Accessibility, bool> accessibility = null,
+        string viewUrl = null) 
+        : base(id, title, parentId, parentTitle, parentType, currentType)
+    {
+        Accessibility = accessibility;
+        ViewUrl = viewUrl;
+    }
+}
+
+public record FileOperationData : EntryOperationData
+{
+    public IDictionary<Accessibility, bool> Accessibility { get; }
+    public string ViewUrl { get; }
+    
+    public FileOperationData(string id,
+        string title,
+        string toFolderId,
+        string parentTitle,
+        int? parentType,
+        string fromParentTitle,
+        int? fromParentType,
+        int? fromFolderId,
+        IDictionary<Accessibility, bool> accessibility = null,
+        string viewUrl = null) 
+        : base(id, title, toFolderId, parentTitle, parentType, fromParentTitle, fromParentType, fromFolderId)
+    {
+        Accessibility = accessibility;
+        ViewUrl = viewUrl;
+    }
+}
+
+public record UserFileUpdateData : EntryData
+{
+    public string UserName { get; }
+    public IDictionary<Accessibility, bool> Accessibility { get; }
+    public string ViewUrl { get; }
+    public override string InitiatorName => UserName;
+
+    public UserFileUpdateData(string id,
+        string title,
+        int? parentId = null,
+        string parentTitle = null,
+        int? parentType = null,
+        string userName = null,
+        IDictionary<Accessibility, bool> accessibility = null,
+        string viewUrl = null) : base(id,
+        title,
+        parentId,
+        parentTitle,
+        parentType)
+    {
+        UserName = userName;
+        Accessibility = accessibility;
+        ViewUrl = viewUrl;
+    }
+}
+
+public record FileRenameData : RenameEntryData
+{
+    public IDictionary<Accessibility, bool> Accessibility { get; }
+    public string ViewUrl { get; }
+    
+    public FileRenameData(string id,
+        string oldTitle,
+        string newTitle,
+        int? parentId = null,
+        string parentTitle = null,
+        int? parentType = null,
+        IDictionary<Accessibility, bool> accessibility = null,
+        string viewUrl = null) 
+        : base(id, oldTitle, newTitle, parentId, parentTitle, parentType)
+    {
+        Accessibility = accessibility;
+        ViewUrl = viewUrl;
+    }
+}
+
+public record FileIndexChangedData : EntryData
+{
+    public int OldIndex { get; }
+    public int NewIndex { get; }
+    public IDictionary<Accessibility, bool> Accessibility { get; }
+    public string ViewUrl { get; }
+    
+    public FileIndexChangedData(
+        int oldIndex,
+        int newIndex,
+        string id,
+        string title,
+        int? parentId = null,
+        string parentTitle = null,
+        int? parentType = null,
+        IDictionary<Accessibility, bool> accessibility = null,
+        string viewUrl = null) : base(id,
+        title,
+        parentId,
+        parentTitle,
+        parentType)
+    {
+        OldIndex = oldIndex;
+        NewIndex = newIndex;
+        Accessibility = accessibility;
+        ViewUrl = viewUrl;
+    }
+
+    public override int GetId()
+    {
+        return ParentId.HasValue ? ParentId.GetHashCode() : 0;
+    }
+}
+
+#endregion
+
+#region Interpreters
+
+public class FileCreateInterpreter : FileActionInterpreterBase
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {
+        var desc = GetAdditionalDescription(description);
+        var accessibility = GetAccessibility(serviceProvider, description[0]);
+        
+        return new ValueTask<HistoryData>(new FileData(target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType, accessibility: accessibility));
+    }
+}
+
+public class FileMovedInterpreter : FileActionInterpreterBase
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
+        var accessibility = GetAccessibility(serviceProvider, description[0]);
+        var viewUrl = GetViewUrl(serviceProvider, splitTarget[0]);
 
         return new ValueTask<HistoryData>(
-            new EntryOperationData(
+            new FileOperationData(
                 splitTarget[0],
                 description[0],
                 splitTarget[1],
@@ -52,68 +224,109 @@ public class FileMovedInterpreter : ActionInterpreter
                 desc.ParentType,
                 desc.FromParentTitle,
                 desc.FromParentType,
-                desc.FromFolderId));
+                desc.FromFolderId,
+                accessibility,
+                viewUrl));
     }
 }
 
-public class UserFileUpdatedInterpreter : ActionInterpreter
+public class UserFileUpdatedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var desc = GetAdditionalDescription(description);
+        var accessibility = GetAccessibility(serviceProvider, description[1]);
+        var viewUrl = GetViewUrl(serviceProvider, target);
 
-        return new ValueTask<HistoryData>(new UserFileUpdateData(target, description[1], desc.ParentId, desc.ParentTitle, desc.ParentType, description[0]));
+        return new ValueTask<HistoryData>(new UserFileUpdateData(
+            target,
+            description[1],
+            desc.ParentId,
+            desc.ParentTitle,
+            desc.ParentType,
+            description[0],
+            accessibility,
+            viewUrl));
     }
 }
 
-public class FileUpdatedInterpreter : ActionInterpreter
+public class FileUpdatedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var desc = GetAdditionalDescription(description);
+        var accessibility = GetAccessibility(serviceProvider, description[1]);
+        var viewUrl = GetViewUrl(serviceProvider, target);
 
-        return new ValueTask<HistoryData>(new EntryData(target, description[1], desc.ParentId, desc.ParentTitle, desc.ParentType));
+        return new ValueTask<HistoryData>(new FileData(
+            target,
+            description[1],
+            desc.ParentId,
+            desc.ParentTitle,
+            desc.ParentType,
+            accessibility: accessibility,
+            viewUrl: viewUrl));
     }
 }
 
 public class FileDeletedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         return new ValueTask<HistoryData>(new EntryData(target, description[0]));
     }
 }
 
-public class FileRenamedInterpreter : ActionInterpreter
+public class FileRenamedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var desc = GetAdditionalDescription(description);
+        var accessibility = GetAccessibility(serviceProvider, description[0]);
+        var viewUrl = GetViewUrl(serviceProvider, target);
         
-        return new ValueTask<HistoryData>(new RenameEntryData(target, description[1], description[0], desc.ParentId, 
-            desc.ParentTitle, desc.ParentType));
+        return new ValueTask<HistoryData>(new FileRenameData(
+            target,
+            description[1],
+            description[0],
+            desc.ParentId,
+            desc.ParentTitle,
+            desc.ParentType,
+            accessibility: accessibility,
+            viewUrl: viewUrl));
     }
 }
 
-public class FileUploadedInterpreter : ActionInterpreter
+public class FileUploadedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var desc = GetAdditionalDescription(description);
+        var accessibility = GetAccessibility(serviceProvider, description[0]);
+        var viewUrl = GetViewUrl(serviceProvider, target);
 
-        return new ValueTask<HistoryData>(new EntryData(target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType));
+        return new ValueTask<HistoryData>(new FileData(
+            target,
+            description[0],
+            desc.ParentId,
+            desc.ParentTitle,
+            desc.ParentType,
+            accessibility: accessibility,
+            viewUrl: viewUrl));
     }
 }
 
-public class FileCopiedInterpreter : ActionInterpreter
+public class FileCopiedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
+        var accessibility = GetAccessibility(serviceProvider, description[0]);
+        var viewUrl = GetViewUrl(serviceProvider, splitTarget[0]);
 
         return new ValueTask<HistoryData>(
-            new EntryOperationData(
+            new FileOperationData(
                 splitTarget[0], 
                 description[0], 
                 splitTarget[1], 
@@ -121,16 +334,62 @@ public class FileCopiedInterpreter : ActionInterpreter
                 desc.ParentType,
                 desc.FromParentTitle,
                 desc.FromParentType,
-                desc.FromFolderId));
+                desc.FromFolderId,
+                accessibility,
+                viewUrl));
     }
 }
 
-public class FileConvertedInterpreter : ActionInterpreter
+public class FileConvertedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var desc = GetAdditionalDescription(description);
 
         return new ValueTask<HistoryData>(new EntryData(target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType));
     }
 }
+
+public class FileLockInterpreter : FileActionInterpreterBase
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {
+        var desc = GetAdditionalDescription(description);
+        var accessibility = GetAccessibility(serviceProvider, description[0]);
+        var viewUrl = GetViewUrl(serviceProvider, target);
+
+        return new ValueTask<HistoryData>(new FileData(
+            target,
+            description[0],
+            desc.ParentId,
+            desc.ParentTitle,
+            desc.ParentType,
+            accessibility: accessibility,
+            viewUrl: viewUrl));
+    }
+}
+
+public class FileIndexChangedInterpreter : FileActionInterpreterBase
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {
+        var desc = GetAdditionalDescription(description);
+        var oldIndex = int.Parse(description[1]);
+        var newIndex = int.Parse(description[2]);
+        var accessibility = GetAccessibility(serviceProvider, description[0]);
+        var viewUrl = GetViewUrl(serviceProvider, target);
+        
+        return new ValueTask<HistoryData>(new FileIndexChangedData(
+            oldIndex,
+            newIndex,
+            target,
+            description[0],
+            desc.ParentId,
+            desc.ParentTitle,
+            desc.ParentType,
+            accessibility,
+            viewUrl));
+    }
+}
+
+#endregion

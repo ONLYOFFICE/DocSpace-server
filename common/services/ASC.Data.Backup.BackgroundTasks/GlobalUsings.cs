@@ -31,7 +31,6 @@ global using ASC.Api.Core.Extensions;
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Threading;
-global using ASC.Common.Utils;
 global using ASC.Core;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
@@ -56,5 +55,3 @@ global using ASC.Web.Studio.Core.Notify;
 global using Autofac;
 
 global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using Newtonsoft.Json;

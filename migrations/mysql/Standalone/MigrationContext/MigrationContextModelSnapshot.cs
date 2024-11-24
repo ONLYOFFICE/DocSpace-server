@@ -69,7 +69,7 @@ namespace ASC.Migrations.MySql.Migrations.CoreDb
                     new
                     {
                         Tenant = -1,
-                        Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,file_size:102400",
+                        Features = "audit,ldap,sso,thirdparty,restore,oauth,contentsearch,file_size:102400,statistic",
                         Name = "default",
                         Price = 0m,
                         Visible = false

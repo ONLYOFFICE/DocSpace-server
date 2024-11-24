@@ -27,27 +27,36 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FillingFormResultDto<T>
 {
-    /// <summary>Form number</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Form number
+    /// </summary>
     public int FormNumber { get; set; }
 
-    /// <summary>Completed form</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core</type>
+    /// <summary>
+    /// Completed form
+    /// </summary>
     public FileDto<T> CompletedForm { get; set; }
 
-    /// <summary>Original form</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core</type>
+    /// <summary>
+    /// Original form
+    /// </summary>
     public FileDto<T> OriginalForm { get; set; }
 
-    /// <summary>Manager</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    /// <summary>
+    /// Manager
+    /// </summary>
     public EmployeeFullDto Manager { get; set; }
 
+    /// <summary>
+    /// Room Id
+    /// </summary>
     public T RoomId { get; set; }
+
+    /// <summary>
+    /// Is room member
+    /// </summary>
     public bool isRoomMember { get; set; }
 
 }
@@ -71,14 +80,14 @@ public class FillingFormResultDtoHelper(
 
         var linkId = await externalShare.GetLinkIdAsync();
         var securityDao = daoFactory.GetSecurityDao<int>();
-        var record = await securityDao.GetSharesAsync(new[] { linkId }).FirstOrDefaultAsync();
+        var record = await securityDao.GetSharesAsync([linkId]).FirstOrDefaultAsync();
 
 
         if (file != null)
         {
             var properties = await fileDao.GetProperties(file.Id);
 
-            if (properties != null && properties.FormFilling != null)
+            if (properties is { FormFilling: not null })
             {
 
                 var originalForm = await fileStorageService.GetFileAsync(properties.FormFilling.OriginalFormId, -1);
@@ -91,13 +100,13 @@ public class FillingFormResultDtoHelper(
 
                 var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
 
-                var result = new FillingFormResultDto<T>()
+                var result = new FillingFormResultDto<T>
                 {
                     CompletedForm = await fileDtoHelper.GetAsync(file),
                     OriginalForm = await fileDtoHelper.GetAsync(originalForm),
                     FormNumber = properties.FormFilling.ResultFormNumber,
                     Manager = await employeeFullDtoHelper.GetSimpleWithEmail(manager),
-                    RoomId = record == null || record.EntryType == FileEntryType.Folder ? properties.FormFilling.RoomId : default(T),
+                    RoomId = record == null || record.EntryType == FileEntryType.Folder ? properties.FormFilling.RoomId : default,
                     isRoomMember = currentType == EmployeeType.DocSpaceAdmin || aces.Exists(u => u.Id == authContext.CurrentAccount.ID)
                 };
                 return result;

@@ -121,49 +121,55 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
     public override void PrepareData(DataTable data)
     {
-        if(data.TableName == "files_file")
+        switch (data.TableName)
         {
-            for (var i = 0; i < data.Rows.Count; i++)
-            {
-                data.Rows[i]["thumb"] = "0";
-            }
-        }
-        if (data.TableName == "files_thirdparty_account")
-        {
-            var providerColumn = data.Columns.Cast<DataColumn>().Single(c => c.ColumnName == "provider");
-            var pwdColumn = data.Columns.Cast<DataColumn>().Single(c => c.ColumnName == "password");
-            var tokenColumn = data.Columns.Cast<DataColumn>().Single(c => c.ColumnName == "token");
-            for (var i = 0; i < data.Rows.Count; i++)
-            {
-                var row = data.Rows[i];
-                try
+            case "files_file":
                 {
-                    row[pwdColumn] = Helpers.CreateHash2(row[pwdColumn] as string);
-                    row[tokenColumn] = Helpers.CreateHash2(row[tokenColumn] as string);
+                    for (var i = 0; i < data.Rows.Count; i++)
+                    {
+                        data.Rows[i]["thumb"] = "0";
+                    }
+
+                    break;
                 }
-                catch (Exception ex)
+            case "files_thirdparty_account":
                 {
-                    logger.ErrorCanNotPrepareData(row[providerColumn] as string, ex);
-                    data.Rows.Remove(row);
-                    i--;
+                    var providerColumn = data.Columns.Cast<DataColumn>().Single(c => c.ColumnName == "provider");
+                    var pwdColumn = data.Columns.Cast<DataColumn>().Single(c => c.ColumnName == "password");
+                    var tokenColumn = data.Columns.Cast<DataColumn>().Single(c => c.ColumnName == "token");
+                    for (var i = 0; i < data.Rows.Count; i++)
+                    {
+                        var row = data.Rows[i];
+                        try
+                        {
+                            row[pwdColumn] = Helpers.CreateHash2(row[pwdColumn] as string);
+                            row[tokenColumn] = Helpers.CreateHash2(row[tokenColumn] as string);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.ErrorCanNotPrepareData(row[providerColumn] as string, ex);
+                            data.Rows.Remove(row);
+                            i--;
+                        }
+                    }
+
+                    break;
                 }
-            }
         }
     }
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
     {
-        if (table.Name == "files_folder_tree")
+        switch (table.Name)
         {
-            return "inner join files_folder as t1 on t1.id = t.folder_id where t1.tenant_id = " + tenantId;
+            case "files_folder_tree":
+                return "inner join files_folder as t1 on t1.id = t.folder_id where t1.tenant_id = " + tenantId;
+            case "files_file":
+                // do not backup previus backup files
+                return "where not exists(select 1 from backup_backup b where b.tenant_id = t.tenant_id and b.storage_path = t.id) and t.tenant_id = " + tenantId;
+            default:
+                return base.GetSelectCommandConditionText(tenantId, table);
         }
-        if (table.Name == "files_file")
-        {
-            // do not backup previus backup files
-            return "where not exists(select 1 from backup_backup b where b.tenant_id = t.tenant_id and b.storage_path = t.id) and t.tenant_id = " + tenantId;
-        }
-
-        return base.GetSelectCommandConditionText(tenantId, table);
     }
 
     protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
@@ -260,27 +266,26 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
     {
-        if (table.Name == "files_thirdparty_account" && columnName is "password" or "token" && value != null)
+        switch (table.Name)
         {
-            try
-            {
-                value = Helpers.CreateHash(value as string); // save original hash
-            }
-            catch (Exception err)
-            {
-                logger.ErrorCanNotPrepareValue(value, err);
-                value = null;
-            }
-            return true;
-        }
-        if (table.Name == "files_folder" && columnName is "create_by" or "modified_by")
-        {
-            base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
+            case "files_thirdparty_account" when columnName is "password" or "token" && value != null:
+                try
+                {
+                    value = Helpers.CreateHash(value as string); // save original hash
+                }
+                catch (Exception err)
+                {
+                    logger.ErrorCanNotPrepareValue(value, err);
+                    value = null;
+                }
+                return true;
+            case "files_folder" when columnName is "create_by" or "modified_by":
+                base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
 
-            return true;
+                return true;
+            default:
+                return base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
         }
-
-        return base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
     }
 
     private static string GetStart(string value)

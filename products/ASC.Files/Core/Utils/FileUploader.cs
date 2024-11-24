@@ -132,7 +132,7 @@ public class FileUploader(
     {
         return file != null
                && await fileSecurity.CanEditAsync(file)
-               && !await userManager.IsUserAsync(authContext.CurrentAccount.ID)
+               && !await userManager.IsGuestAsync(authContext.CurrentAccount.ID)
                && !await lockerManager.FileLockedForMeAsync(file.Id)
                && !await fileTracker.IsEditingAsync(file.Id)
                && file.RootFolderType != FolderType.TRASH
@@ -274,8 +274,7 @@ public class FileUploader(
             throw FileSizeComment.GetFileSizeException(await setupInfo.MaxUploadSize(tenantManager, maxTotalSizeStatistic));
         }
 
-        var extension = FileUtility.GetFileExtension(uploadSession.File.Title);
-        var fileType = FileUtility.GetFileTypeByExtention(extension);
+        var fileType = FileUtility.GetFileTypeByFileName(uploadSession.File.Title);
         var dao = daoFactory.GetFileDao<T>();
 
         if (fileType == FileType.Pdf)
@@ -305,7 +304,7 @@ public class FileUploader(
                 var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);
 
-                var isForm = false;
+                bool isForm;
                 var cloneStreamForCheck = await tempStream.CloneMemoryStream(memoryStream, 300);
                 try
                 {
@@ -313,7 +312,7 @@ public class FileUploader(
                 }
                 finally
                 {
-                    cloneStreamForCheck.Dispose();
+                    await cloneStreamForCheck.DisposeAsync();
                 }
 
                 uploadSession.File.Category = isForm ? (int)FilterType.PdfForm : (int)FilterType.Pdf;
@@ -334,8 +333,8 @@ public class FileUploader(
                 }
                 finally
                 {
-                    memoryStream.Dispose();
-                    cloneStreamForSave.Dispose();
+                    await memoryStream.DisposeAsync();
+                    await cloneStreamForSave.DisposeAsync();
                 }
 
                 return uploadSession;

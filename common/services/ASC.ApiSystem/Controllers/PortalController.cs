@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 using ASC.Web.Api.Core;
 
 namespace ASC.ApiSystem.Controllers;
@@ -54,6 +56,12 @@ public class PortalController(
 {
     #region For TEST api
 
+    /// <summary>
+    /// Test api
+    /// </summary>
+    /// <path>apisystem/portal/test</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [SwaggerResponse(200, "Portal api works")]
     [HttpGet("test")]
     public IActionResult Check()
     {
@@ -67,6 +75,12 @@ public class PortalController(
 
     #region API methods
 
+    /// <summary>
+    /// Register
+    /// </summary>
+    /// <path>apisystem/portal/register</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("register")]
     //[AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal,auth:portalbasic")]
@@ -83,7 +97,7 @@ public class PortalController(
 
         if (!ModelState.IsValid)
         {
-            var message = new JArray();
+            List<string> message = new();
 
             foreach (var k in ModelState.Keys)
             {
@@ -93,7 +107,7 @@ public class PortalController(
             return BadRequest(new
             {
                 error = "params",
-                message
+                message = JsonSerializer.Serialize(message.ToArray())
             });
         }
 
@@ -301,11 +315,26 @@ public class PortalController(
         });
     }
 
+    /// <summary>
+    /// Remove
+    /// </summary>
+    /// <path>apisystem/portal/remove</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpDelete("remove")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> RemoveAsync([FromQuery] TenantModel model)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "error",
+                message = "Method for server edition only."
+            });
+        }
+
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
@@ -329,19 +358,67 @@ public class PortalController(
             });
         }
 
-        await hostedSolution.RemoveTenantAsync(tenant);
+        var isLastFullAccessSpace = true;
+
+        var activeTenants = await hostedSolution.GetTenantsAsync(default);
+
+        foreach (var t in activeTenants.Where(t => t.Id != tenant.Id))
+        {
+            var settings = await settingsManager.LoadAsync<TenantAccessSpaceSettings>(t.Id);
+            if (!settings.LimitedAccessSpace)
+            {
+                isLastFullAccessSpace = false;
+                break;
+            }
+        }
+
+        if (isLastFullAccessSpace)
+        {
+            return BadRequest(new
+            {
+                error = "error",
+                message = "The last full access space cannot be deleted."
+            });
+        }
+
+        var wizardSettings = await settingsManager.LoadAsync<WizardSettings>(tenant.Id);
+
+        if (!wizardSettings.Completed)
+        {
+            await hostedSolution.RemoveTenantAsync(tenant);
+        }
+        else
+        {
+            await commonMethods.SendRemoveInstructions(commonMethods.GetRequestScheme(), tenant);
+        }
 
         return Ok(new
         {
-            tenant = commonMethods.ToTenantWrapper(tenant)
+            tenant = commonMethods.ToTenantWrapper(tenant),
+            removed = !wizardSettings.Completed,
         });
     }
 
+    /// <summary>
+    /// Status
+    /// </summary>
+    /// <path>apisystem/portal/status</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPut("status")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> ChangeStatusAsync(TenantModel model)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "error",
+                message = "Method for server edition only."
+            });
+        }
+
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
@@ -382,6 +459,12 @@ public class PortalController(
         });
     }
 
+    /// <summary>
+    /// Checks if portal exists
+    /// </summary>
+    /// <path>apisystem/portal/validateportalname</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("validateportalname")]
     [AllowCrossSiteJson]
     public async ValueTask<IActionResult> CheckExistingNamePortalAsync(TenantModel model)
@@ -408,6 +491,12 @@ public class PortalController(
         });
     }
 
+    /// <summary>
+    /// Gets a list of portals
+    /// </summary>
+    /// <path>apisystem/portal</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpGet("get")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -446,7 +535,9 @@ public class PortalController(
                 {
                     var quotaUsage = await quotaUsageManager.Get(t);
                     var owner = owners.FirstOrDefault(o => o.Id == t.OwnerId);
-                    tenantsWrapper.Add(commonMethods.ToTenantWrapper(t, quotaUsage, owner));
+                    var wizardSettings = await settingsManager.LoadAsync<WizardSettings>(t.Id);
+
+                    tenantsWrapper.Add(commonMethods.ToTenantWrapper(t, quotaUsage, owner, wizardSettings));
                 }
                 else
                 {
@@ -472,9 +563,14 @@ public class PortalController(
         }
     }
 
+    /// <summary>
+    /// Signs in to portal
+    /// </summary>
+    /// <path>apisystem/portal/signin</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("signin")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> SignInToPortalAsync(TenantModel model)
     {
         try
@@ -497,7 +593,10 @@ public class PortalController(
                 {
                     var error = await GetRecaptchaError(model, clientIP, sw);
 
-                    return StatusCode(StatusCodes.Status401Unauthorized, error);
+                    if (error != null)
+                    {
+                        return StatusCode(StatusCodes.Status401Unauthorized, error);
+                    }
                 }
             }
 

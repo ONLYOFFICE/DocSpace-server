@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Services.WCFService.FileOperations;
-
 using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Files.Service.Services;
@@ -47,13 +45,10 @@ public class AutoCleanTrashService(
         await using (var scope = _scopeFactory.CreateAsyncScope())
         {
             await using var userDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<UserDbContext>>().CreateDbContextAsync(stoppingToken);
-
-            var filesSettingsId = new FilesSettings().ID;
-
             activeTenantsUsers = await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(stoppingToken);
         }
 
-        if (!activeTenantsUsers.Any())
+        if (activeTenantsUsers.Count == 0)
         {
             return;
         }

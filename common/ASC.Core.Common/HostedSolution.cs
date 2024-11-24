@@ -113,7 +113,6 @@ public class HostedSolution(ITenantService tenantService,
             AffiliateId = registrationInfo.AffiliateId,
             Campaign = registrationInfo.Campaign,
             Industry = registrationInfo.Industry,
-            Spam = registrationInfo.Spam,
             Calls = registrationInfo.Calls
         };
 
@@ -128,7 +127,8 @@ public class HostedSolution(ITenantService tenantService,
             Email = registrationInfo.Email,
             MobilePhone = registrationInfo.MobilePhone,
             WorkFromDate = tenantUtil.DateTimeNow(tenant.TimeZone),
-            ActivationStatus = registrationInfo.ActivationStatus
+            ActivationStatus = registrationInfo.ActivationStatus,
+            Spam = registrationInfo.Spam
         };
 
         user = await userService.SaveUserAsync(tenant.Id, user);

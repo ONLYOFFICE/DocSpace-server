@@ -43,6 +43,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
     private readonly int _retryCount;
     private string _queueName;
+    private readonly Task _initializeTask;
 
     public EventBusActiveMQ(IActiveMQPersistentConnection persistentConnection,
                             ILogger<EventBusActiveMQ> logger,
@@ -60,44 +61,56 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         _autofac = autofac;
         _retryCount = retryCount;
         _rejectedEvents = new ConcurrentQueue<Guid>();
-        _consumerSession = CreateConsumerSession();
         _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
         _consumers = [];
+        _initializeTask = InitializeAsync();
     }
 
-    private void SubsManager_OnEventRemoved(object sender, string eventName)
+    private async Task InitializeAsync()
+    {
+        if (_consumerSession is not null)
+        {
+            return;
+        }
+
+        _consumerSession = await CreateConsumerSessionAsync();
+    }
+
+    private async void SubsManager_OnEventRemoved(object sender, string eventName)
     {
         if (!_persistentConnection.IsConnected)
         {
-            _persistentConnection.TryConnect();
+            await _persistentConnection.TryConnectAsync();
         }
 
-        using (_persistentConnection.CreateSession())
+        using var session = await _persistentConnection.CreateSessionAsync(AcknowledgementMode.ClientAcknowledge);
+
+        var messageSelector = $"eventName='{eventName}'";
+
+        var findedConsumer = _consumers.Find(x => x.MessageSelector == messageSelector);
+
+        if (findedConsumer != null)
         {
-            var messageSelector = $"eventName='{eventName}'";
+            await findedConsumer.CloseAsync();
 
-            var findedConsumer = _consumers.Find(x => x.MessageSelector == messageSelector);
-
-            if (findedConsumer != null)
-            {
-                findedConsumer.Close();
-
-                _consumers.Remove(findedConsumer);
-            }
-
-            if (_subsManager.IsEmpty)
-            {
-                _queueName = string.Empty;
-                _consumerSession.Close();
-            }
+            _consumers.Remove(findedConsumer);
         }
+
+        if (_subsManager.IsEmpty)
+        {
+            _queueName = string.Empty;
+            await _consumerSession.CloseAsync();
+        }
+
     }
 
-    public void Publish(IntegrationEvent @event)
+    public async Task PublishAsync(IntegrationEvent @event)
     {
+        await _initializeTask;
+
         if (!_persistentConnection.IsConnected)
         {
-            _persistentConnection.TryConnect();
+            await _persistentConnection.TryConnectAsync();
         }
 
         Policy.Handle<SocketException>()
@@ -106,75 +119,79 @@ public class EventBusActiveMQ : IEventBus, IDisposable
                 _logger.WarningCouldNotPublishEvent(@event.Id, time.TotalSeconds, ex);
             });
 
-        using var session = _persistentConnection.CreateSession(AcknowledgementMode.ClientAcknowledge);
-        var destination = session.GetQueue(_queueName);
+        using var session = await _persistentConnection.CreateSessionAsync(AcknowledgementMode.ClientAcknowledge);
+        var destination = await session.GetQueueAsync(_queueName);
 
-        using var producer = session.CreateProducer(destination);
+        using var producer = await session.CreateProducerAsync(destination);
         producer.DeliveryMode = MsgDeliveryMode.Persistent;
 
         var body = _serializer.Serialize(@event);
 
-        var request = session.CreateStreamMessage();
+        var request = await session.CreateStreamMessageAsync();
         var eventName = @event.GetType().Name;
-                        
+
         request.Properties["eventName"] = eventName;
 
         request.WriteBytes(body);
 
-        producer.Send(request);
+        await producer.SendAsync(request);
     }
 
-    public void Subscribe<T, TH>()
+    public async Task SubscribeAsync<T, TH>()
     where T : IntegrationEvent
     where TH : IIntegrationEventHandler<T>
     {
+        await _initializeTask;
+
         var eventName = _subsManager.GetEventKey<T>();
 
         _logger.InformationSubscribing(eventName, typeof(TH).GetGenericTypeName());
 
         _subsManager.AddSubscription<T, TH>();
 
-        StartBasicConsume(eventName);
+        await StartBasicConsumeAsync(eventName);
     }
 
-    public void SubscribeDynamic<TH>(string eventName) where TH : IDynamicIntegrationEventHandler
+    public async Task SubscribeDynamicAsync<TH>(string eventName) where TH : IDynamicIntegrationEventHandler
     {
+        await _initializeTask;
+
         _logger.InformationSubscribingDynamic(eventName, typeof(TH).GetGenericTypeName());
 
         _subsManager.AddDynamicSubscription<TH>(eventName);
 
-        StartBasicConsume(eventName);
+        await StartBasicConsumeAsync(eventName);
     }
 
-    private ISession CreateConsumerSession()
+    private async Task<ISession> CreateConsumerSessionAsync()
     {
         if (!_persistentConnection.IsConnected)
         {
-            _persistentConnection.TryConnect();
+            await _persistentConnection.TryConnectAsync();
         }
 
         _logger.TraceCreatingConsumerSession();
 
-        _consumerSession = _persistentConnection.CreateSession(AcknowledgementMode.ClientAcknowledge);
+        _consumerSession = await _persistentConnection.CreateSessionAsync(AcknowledgementMode.ClientAcknowledge);
 
         return _consumerSession;
     }
 
-    private void StartBasicConsume(string eventName)
+    private async Task StartBasicConsumeAsync(string eventName)
     {
         _logger.TraceStartingBasicConsume();
 
         if (!_persistentConnection.IsConnected)
         {
-            _persistentConnection.TryConnect();
+           await  _persistentConnection.TryConnectAsync();
         }
 
-        var destination = _consumerSession.GetQueue(_queueName);
+        var destination = await _consumerSession.GetQueueAsync(_queueName);
 
         var messageSelector = $"eventName='{eventName}'";
 
-        var consumer = _consumerSession.CreateConsumer(destination, messageSelector);
-       
+        var consumer = await _consumerSession.CreateConsumerAsync(destination, messageSelector);
+
         _consumers.Add(consumer);
 
         if (_consumerSession != null)
@@ -187,12 +204,12 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         }
     }
 
-    private void Consumer_Listener(IMessage objMessage)
+    private async void Consumer_Listener(IMessage objMessage)
     {
         var streamMessage = objMessage as IStreamMessage;
 
         var eventName = streamMessage.Properties["eventName"].ToString();
-    
+
         var buffer = new byte[4 * 1024];
 
         byte[] serializedMessage;
@@ -224,11 +241,9 @@ public class EventBusActiveMQ : IEventBus, IDisposable
                 throw new InvalidOperationException($"Fake exception requested: \"{message}\"");
             }
 
-            ProcessEvent(eventName, @event)
-                .GetAwaiter()
-                .GetResult();
-
-            streamMessage.Acknowledge();
+            await ProcessEventAsync(eventName, @event);
+               
+            await streamMessage.AcknowledgeAsync();
         }
         catch (IntegrationEventRejectExeption ex)
         {
@@ -237,7 +252,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             if (_rejectedEvents.TryPeek(out var result) && result.Equals(ex.EventId))
             {
                 _rejectedEvents.TryDequeue(out _);
-                streamMessage.Acknowledge();
+                await streamMessage.AcknowledgeAsync();
             }
             else
             {
@@ -249,7 +264,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         {
             _logger.WarningProcessingMessage(message, ex);
 
-            streamMessage.Acknowledge();
+            await streamMessage.AcknowledgeAsync();
         }
     }
 
@@ -292,7 +307,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         }
     }
 
-    private async Task ProcessEvent(string eventName, IntegrationEvent @event)
+    private async Task ProcessEventAsync(string eventName, IntegrationEvent @event)
     {
         _logger.TraceProcessingEvent(eventName);
 

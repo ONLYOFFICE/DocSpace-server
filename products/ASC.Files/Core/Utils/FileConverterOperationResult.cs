@@ -56,4 +56,7 @@ public class FileConverterOperationResult : FileOperationResult
     
     [ProtoMember(9)]
     public IDictionary<string, string> Headers { get; set; }
+    
+    [ProtoMember(10)]
+    public string OutputType { get; set; }
 }

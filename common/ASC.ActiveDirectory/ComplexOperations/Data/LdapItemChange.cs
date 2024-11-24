@@ -28,7 +28,7 @@ namespace ASC.ActiveDirectory.ComplexOperations.Data;
 
 public class LdapItemChange
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter<LdapItemChangeKey>))]
     public LdapItemChangeKey Key { get; private set; }
 
     public string Before { get; private set; }

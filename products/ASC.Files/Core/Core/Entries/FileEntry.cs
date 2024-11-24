@@ -133,10 +133,6 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
         set => _folderIdDisplay = value;
     }
 
-    public bool DenyDownload { get; set; }
-
-    public bool DenySharing { get; set; }
-
     public T RootId { get; set; }
 
     [JsonIgnore]
@@ -168,7 +164,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
             RootFolderType == FolderType.VirtualRooms ?
                 ASC.Core.Configuration.Constants.CoreSystem.ID :
 
-                RootFolderType == FolderType.USER || RootFolderType == FolderType.DEFAULT || RootFolderType == FolderType.TRASH ?
+                RootFolderType is FolderType.USER or FolderType.DEFAULT or FolderType.TRASH ?
                     RootCreateBy :
 
                     RootFolderType == FolderType.Privacy && CreateBy == _securityContext.CurrentAccount.ID ?

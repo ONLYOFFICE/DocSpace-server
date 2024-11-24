@@ -24,26 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
+/// Login settings request parameters
 /// </summary>
 public class LoginSettingsRequestDto
 {
-    /// <summary>Maximum number of the user attempts to log in</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Maximum number of the user attempts to log in
+    /// </summary>
     [Range(1, 9999)]
     public int AttemptCount { get; set; }
 
-    /// <summary>The duration of the account suspension for unsuccessful login attempts</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The duration of the account suspension for unsuccessful login attempts
+    /// </summary>
     [Range(1, 9999)]
     public int BlockTime { get; set; }
 
-    /// <summary>Expected server response time</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Expected server response time
+    /// </summary>
     [Range(1, 9999)]
     public int CheckPeriod { get; set; }
 }

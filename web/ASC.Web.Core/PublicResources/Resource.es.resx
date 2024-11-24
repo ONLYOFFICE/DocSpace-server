@@ -799,7 +799,7 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Qué hay de nuevo</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Personalización de marca</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
@@ -815,7 +815,7 @@
     <value>El número de administradores no debe superar {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>El número de administradores/usuarios avanzados</value>
+    <value>El número de administradores</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Copias de seguridad y recuperación automáticas</value>
@@ -1037,7 +1037,7 @@
     <value>Se ha superado la cuota de espacio de usuario</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} por administrador/usuario avanzado y posibilidad de añadir espacio bajo solicitud</value>
+    <value>{0} por administrador y posibilidad de añadir espacio bajo solicitud</value>
   </data>
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Cuotas de almacenamiento y estadísticas</value>
@@ -1052,9 +1052,27 @@
     <value>Le istruzioni per la modifica della password sono state inviate all'indirizzo email {0}.</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Amministratori/utenti esperti aggiunti:</value>
+    <value>Amministratori aggiunti:</value>
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Este correo electrónico se adjunta al usuario {0} como proveedor externo</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Error al establecer la cuota por sala. El valor introducido es mayor que el almacenamiento total de DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Error al establecer la cuota por usuario. El valor introducido es mayor que el almacenamiento total de DocSpace.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Añada al menos 1 dominio de confianza.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>El número de administradores supera el límite: {0}/{1}.</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Añada al menos 1 dirección IP permitida.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Sin ánimo de lucro</value>
   </data>
 </root>

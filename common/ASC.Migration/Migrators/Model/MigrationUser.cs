@@ -28,7 +28,7 @@ namespace ASC.Migration.Core.Migrators.Model;
 public class MigrationUser(DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     public UserInfo Info { get; set; }
-    public EmployeeType UserType { get; set; } = EmployeeType.Collaborator;
+    public EmployeeType UserType { get; set; } = EmployeeType.User;
     public MigrationStorage Storage { get; set; }
     public bool ShouldImport { get; set; }
     public bool HasPhoto { get; set; }

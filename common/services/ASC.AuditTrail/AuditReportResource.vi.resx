@@ -802,4 +802,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Người dùng [{0}]. Đã gửi biểu mẫu: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Xuất chỉ mục phòng đã lưu vào Tài liệu</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Đã gửi lại lời mời: {0}</value>
+  </data>
 </root>

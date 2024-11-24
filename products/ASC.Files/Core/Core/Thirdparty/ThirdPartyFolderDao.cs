@@ -38,11 +38,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     IDaoSelector<TFile, TFolder, TItem> daoSelector,
     IDaoBase<TFile, TFolder, TItem> dao,
     IDbContextFactory<FilesDbContext> dbContextFactory,
-    UserManager userManager,
-    CrossDao crossDao,
-    IFileDao<int> fileDao,
-    IFolderDao<int> folderDao,
-    SetupInfo setupInfo,
+        UserManager userManager,
+        CrossDao crossDao,
+        IFileDao<int> fileDao,
+        IFolderDao<int> folderDao,
+        SetupInfo setupInfo,
     TenantManager tenantManager,
     Global global)
     : BaseFolderDao, IFolderDao<string>
@@ -97,17 +97,17 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return dao.GetRootFolderAsync();
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider,
+    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider,
         SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null)
     {
-        if (dao.CheckInvalidFilter(filterType) || (provider != ProviderFilter.None && provider != _providerInfo.ProviderFilter))
+        if (dao.CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != _providerInfo.ProviderFilter))
         {
             yield break;
         }
 
         var rooms = roomsIds.ToAsyncEnumerable().SelectAwait(async e => await GetFolderAsync(e).ConfigureAwait(false));
 
-        rooms = FilterByRoomType(rooms, filterType);
+        rooms = FilterByRoomType(rooms, filterTypes);
         rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectEntriesIds);
 
         if (!string.IsNullOrEmpty(searchText))
@@ -239,17 +239,17 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         }
 
         folder.Title = await global.GetAvailableTitleAsync(folder.Title, dao.MakeThirdId(folder.ParentId), IsExistAsync, FileEntryType.Folder);
-        
-        var thirdFolder = await dao.CreateFolderAsync(folder.Title, folder.ParentId);
-            
-        var parentFolderId = dao.GetParentFolderId(thirdFolder);
-        if (parentFolderId != null)
-        {
-            await _providerInfo.CacheResetAsync(parentFolderId);
-        }
 
-        return dao.MakeId(thirdFolder);
-    }
+        var thirdFolder = await dao.CreateFolderAsync(folder.Title, folder.ParentId);
+
+            var parentFolderId = dao.GetParentFolderId(thirdFolder);
+            if (parentFolderId != null)
+            {
+                await _providerInfo.CacheResetAsync(parentFolderId);
+            }
+
+            return dao.MakeId(thirdFolder);
+        }
 
     public async Task DeleteFolderAsync(string folderId)
     {
@@ -315,7 +315,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(folder), newId);
-        }
+    }
 
         return newId;
     }
@@ -414,12 +414,12 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
-    
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota)
+
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
     {
         return await RenameFolderAsync(folder, newTitle);
     }
-
+    
     public Task<string> ChangeFolderTypeAsync(Folder<string> folder, FolderType folderType)
     {
         return Task.FromResult<string>(null);
@@ -455,7 +455,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(thirdFolder), newId);
-        }
+    }
 
         return newId;
     }
@@ -603,19 +603,19 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText,
+    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
         bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, 
+    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, 
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
+    public IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
@@ -630,8 +630,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         throw new NotImplementedException();
     }
-    
-    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    public Task<Folder<string>> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
     {
         throw new NotImplementedException();
     }
@@ -658,16 +657,20 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
-    public Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    public Task<int> SetCustomOrder(string folderId, string parentFolderId, int order)
+    {
+        return Task.FromResult(0);
+    }
+
+    public Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
     {
         return Task.CompletedTask;
     }
 
-    public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    public Task<string> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<string> folder)
     {
-        return Task.CompletedTask;
+        throw new NotImplementedException();
     }
-    
     public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
     {
         throw new NotImplementedException();
@@ -677,12 +680,27 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         throw new NotImplementedException();
     }
+
+    public Task<WatermarkSettings> GetWatermarkSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
     
     public async Task<bool> IsExistAsync(string title, string folderId)
     {
         var items = await dao.GetItemsAsync(folderId, true);
 
         return items.Exists(item => dao.GetName(item).Equals(title, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
     }
 }
 
@@ -712,26 +730,16 @@ internal abstract class BaseFolderDao
         return filtered;
     }
 
-    protected IAsyncEnumerable<Folder<string>> FilterByRoomType(IAsyncEnumerable<Folder<string>> rooms, FilterType filterType)
+    protected IAsyncEnumerable<Folder<string>> FilterByRoomType(IAsyncEnumerable<Folder<string>> rooms, IEnumerable<FilterType> filterTypes)
     {
-        if (filterType is FilterType.None or FilterType.FoldersOnly)
+        if (filterTypes == null || !filterTypes.Any() || filterTypes.Contains(FilterType.None) || filterTypes.Contains(FilterType.FoldersOnly))
         {
             return rooms;
         }
 
-        var typeFilter = filterType switch
-        {
-            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
-            FilterType.EditingRooms => FolderType.EditingRoom,
-            FilterType.ReviewRooms => FolderType.ReviewRoom,
-            FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
-            FilterType.CustomRooms => FolderType.CustomRoom,
-            FilterType.PublicRooms => FolderType.PublicRoom,
-            FilterType.FormRooms => FolderType.FormRoom,
-            _ => FolderType.DEFAULT
-        };
+        var typeFilter = DocSpaceHelper.MapToFolderTypes(filterTypes);
 
-        return rooms.Where(f => f.FolderType == typeFilter);
+        return rooms.Where(f => typeFilter.Contains(f.FolderType));
     }
 
     protected IAsyncEnumerable<Folder<string>> FilterBySubject(IAsyncEnumerable<Folder<string>> rooms, Guid subjectId, bool excludeSubject, SubjectFilter subjectFilter,

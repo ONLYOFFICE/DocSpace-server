@@ -36,7 +36,6 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
     private readonly ILogger<DefaultActiveMQPersistentConnection> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private IConnection _connection;
     private bool _disposed;
-    readonly object sync_root = new();
 
     public bool IsConnected
     {
@@ -46,9 +45,9 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
         }
     }
 
-    public ISession CreateSession()
+    public async Task<ISession> CreateSessionAsync()
     {
-        return CreateSession(AcknowledgementMode.AutoAcknowledge);
+        return await CreateSessionAsync(AcknowledgementMode.AutoAcknowledge);
     }
 
     public void Dispose()
@@ -62,9 +61,9 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
 
         try
         {
-            _connection.ExceptionListener -= OnExceptionListener;
-            _connection.ConnectionInterruptedListener -= OnConnectionInterruptedListener;
-            _connection.ConnectionResumedListener -= OnConnectionResumedListener;
+            //_connection.ExceptionListener -= OnExceptionListener;
+            //_connection.ConnectionInterruptedListener -= OnConnectionInterruptedListener;
+            //_connection.ConnectionResumedListener -= OnConnectionResumedListener;
 
             _connection.Dispose();
         }
@@ -74,7 +73,7 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
         }
     }
 
-    private void OnExceptionListener(Exception exception)
+    private async Task OnExceptionListenerAsync(Exception exception)
     {
         if (_disposed)
         {
@@ -83,10 +82,10 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
 
         _logger.WarningActiveMQConnectionThrowException();
 
-        TryConnect();
+        await TryConnectAsync();
     }
 
-    private void OnConnectionResumedListener()
+    private async Task OnConnectionResumedListenerAsync()
     {
         if (_disposed)
         {
@@ -95,10 +94,10 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
 
         _logger.WarningActiveMQConnectionThrowException();
 
-        TryConnect();
+        await TryConnectAsync();
     }
 
-    private void OnConnectionInterruptedListener()
+    private async Task OnConnectionInterruptedListenerAsync()
     {
         if (_disposed)
         {
@@ -107,60 +106,58 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
 
         _logger.WarningActiveMQConnectionThrowException();
 
-        TryConnect();
+        await TryConnectAsync();
     }
 
-    public bool TryConnect()
+    public async Task<bool> TryConnectAsync()
     {
         _logger.InformationActiveMQTryingConnect();
 
-        lock (sync_root)
+        var policy = Policy.Handle<SocketException>()
+            .WaitAndRetryAsync(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+            {
+                _logger.WarningActiveMQCouldNotConnect(time.TotalSeconds, ex);
+            }
+        );
+
+        await policy.ExecuteAsync(async () =>
         {
-            var policy = Policy.Handle<SocketException>()
-                .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
-                {
-                    _logger.WarningActiveMQCouldNotConnect(time.TotalSeconds, ex);
-                }
-            );
+            _connection = await _connectionFactory
+                    .CreateConnectionAsync();
 
-            policy.Execute(() =>
+            await _connection.StartAsync();
+        });
+
+        if (IsConnected)
+        {
+            _connection.ExceptionListener += async (e) => { await OnExceptionListenerAsync(e); };
+            _connection.ConnectionInterruptedListener += async () => { await OnConnectionInterruptedListenerAsync(); };
+            _connection.ConnectionResumedListener += async () => { await OnConnectionResumedListenerAsync(); };
+
+            if (_connection is NmsConnection connection)
             {
-                _connection = _connectionFactory
-                        .CreateConnection();
-                _connection.Start();
-            });
+                var hostname = connection.ConnectionInfo.ConfiguredUri.Host;
 
-            if (IsConnected)
-            {
-                _connection.ExceptionListener += OnExceptionListener;
-                _connection.ConnectionInterruptedListener += OnConnectionInterruptedListener;
-                _connection.ConnectionResumedListener += OnConnectionResumedListener;
+                _logger.InformationActiveMQAcquiredPersistentConnection(hostname);
 
-                if (_connection is NmsConnection connection)
-                {
-                    var hostname = connection.ConnectionInfo.ConfiguredUri.Host;
-
-                    _logger.InformationActiveMQAcquiredPersistentConnection(hostname);
-
-                }
-
-
-                return true;
             }
 
-            _logger.CriticalActiveMQCouldNotBeCreated();
 
-            return false;
+            return true;
         }
+
+        _logger.CriticalActiveMQCouldNotBeCreated();
+
+        return false;
     }
 
-    public ISession CreateSession(AcknowledgementMode acknowledgementMode)
+    public async Task<ISession> CreateSessionAsync(AcknowledgementMode acknowledgementMode)
     {
         if (!IsConnected)
         {
             throw new InvalidOperationException("No ActiveMQ connections are available to perform this action");
         }
 
-        return _connection.CreateSession(acknowledgementMode);
+        return await _connection.CreateSessionAsync(acknowledgementMode);
     }
 }

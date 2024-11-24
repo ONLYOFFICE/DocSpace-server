@@ -27,27 +27,78 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for starting file conversion
 /// </summary>
 public class CheckConversionRequestDto<T>
 {
-    /// <summary>File ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// File ID
+    /// </summary>
     public T FileId { get; set; }
 
-    /// <summary>Specifies if the conversion process is synchronous or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the conversion process is synchronous or not
+    /// </summary>
     public bool Sync { get; set; }
 
-    /// <summary>Specifies whether to start a conversion process or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to start a conversion process or not
+    /// </summary>
     public bool StartConvert { get; set; }
 
-    /// <summary>File version</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// File version
+    /// </summary>
     public int Version { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Password
+    /// </summary>
     public string Password { get; set; }
+    
+    /// <summary>
+    /// Output type
+    /// </summary>
+    public string OutputType { get; set; }
+
+    /// <summary>
+    /// Create new if exists
+    /// </summary>
     public bool CreateNewIfExist { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class StartConversionRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// Check conversion  
+    /// </summary>
+    [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)]
+    public CheckConversionRequestDto<T> CheckConversion { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class CheckConversionStatusRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// Specifies if a conversion operation is started or not
+    /// </summary>
+    [FromQuery(Name = "start")]
+    public bool Start { get; set; }
 }

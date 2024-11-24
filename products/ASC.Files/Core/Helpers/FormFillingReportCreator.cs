@@ -71,21 +71,21 @@ public class FormFillingReportCreator(
         var data = await response.Content.ReadAsStringAsync();
 
         var tenantCulture = (await tenantManager.GetCurrentTenantAsync()).GetCulture();
-        var formNumber = new List<FormsItemData>()
+        var formNumber = new List<FormsItemData>
         {
-            new FormsItemData()
+            new()
             {
                 Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture),
                 Value = resultFormNumber
             },
         };
 
-        var formLink = new FormsItemData()
+        var formLink = new FormsItemData
         {
             Key = FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture),
             Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture)}\")"
         };
-        var date = new FormsItemData()
+        var date = new FormsItemData
         {
             Key = FilesCommonResource.ResourceManager.GetString("Date", tenantCulture),
             Value = $"=\"{tenantUtil.DateTimeNow().ToString("G", tenantCulture)}\""

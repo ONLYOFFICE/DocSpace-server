@@ -107,7 +107,7 @@ public static class HttpRequestExtensions
 
     public static Uri PopRewritenUri(this HttpContext context)
     {
-        if (context != null && context.Items["oldUri"] != null)
+        if (context?.Items["oldUri"] != null)
         {
             var rewriteTo = context.Items["oldUri"] as Uri;
 

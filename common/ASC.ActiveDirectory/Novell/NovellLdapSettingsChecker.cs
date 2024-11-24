@@ -45,51 +45,47 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
     {
         const int timeoutMilliseconds = 5000;
 
-        using (var ldapConnection = new LdapConnection())
+        using var ldapConnection = new LdapConnection();
+        try
         {
-            try
+            if (Settings.Ssl)
             {
-                if (Settings.Ssl)
-                {
-                    ldapConnection.SecureSocketLayer = true;
-                }
-
-                ldapConnection.ConnectionTimeout = timeoutMilliseconds;
-                ldapConnection.Connect(Settings.Server["LDAP://".Length..], Settings.PortNumber);
-
-                using (var cts = new CancellationTokenSource(timeoutMilliseconds))
-                {
-                    var bindTask = Task.Run(() => ldapConnection.Bind(Settings.Login, Settings.Password), cts.Token);
-
-                    if (await Task.WhenAny(bindTask, Task.Delay(timeoutMilliseconds, cts.Token)) == bindTask)
-                    {
-                        return !bindTask.IsFaulted;
-                    }
-                    return false;
-                }
+                ldapConnection.SecureSocketLayer = true;
             }
-            catch (LdapException ex)
+
+            ldapConnection.ConnectionTimeout = timeoutMilliseconds;
+            ldapConnection.Connect(Settings.Server["LDAP://".Length..], Settings.PortNumber);
+
+            using var cts = new CancellationTokenSource(timeoutMilliseconds);
+            var bindTask = Task.Run(() => ldapConnection.Bind(Settings.Login, Settings.Password), cts.Token);
+
+            if (await Task.WhenAny(bindTask, Task.Delay(timeoutMilliseconds, cts.Token)) == bindTask)
             {
-                _logger.ErrorSocketException(ex);
+                return !bindTask.IsFaulted;
+            }
+            return false;
+        }
+        catch (LdapException ex)
+        {
+            _logger.ErrorSocketException(ex);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message.StartsWith("Connect Error") || ex.Message.StartsWith("Unavailable"))
+            {
+                _logger.ErrorCheckSettingsException(ex);
                 return false;
             }
-            catch (Exception ex)
-            {
-                if (ex.Message.StartsWith("Connect Error") || ex.Message.StartsWith("Unavailable"))
-                {
-                    _logger.ErrorCheckSettingsException(ex);
-                    return false;
-                }
-                return true;
-            }
-            finally
-            {
-                ldapConnection.Disconnect();
-            }
+            return true;
+        }
+        finally
+        {
+            ldapConnection.Disconnect();
         }
     }
 
-    public async override Task<LdapSettingsStatus> CheckSettings()
+    public override async Task<LdapSettingsStatus> CheckSettings()
     {
         if (!Settings.EnableLdapAuthentication)
         {

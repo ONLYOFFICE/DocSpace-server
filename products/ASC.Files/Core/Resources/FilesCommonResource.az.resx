@@ -332,9 +332,6 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redaktor</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Otaq Administratoru</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>İstifadəçi</value>
   </data>
@@ -355,9 +352,6 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   </data>
   <data name="AceStatusEnum_Collaborator" xml:space="preserve">
     <value>Əməkdaş</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Otaq Administratoru</value>
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Redaktor</value>
@@ -467,12 +461,6 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="Date" xml:space="preserve">
     <value>Tarix</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Ekspert istifadəçi</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Ekspert istifadəçi</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>İstifadəçi</value>
   </data>
@@ -496,5 +484,23 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Forma nömrəsi</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Məzmun yaradıcısı</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Otaq meneceri</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Xarici istifadəçi</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Məzmun yaradıcısı</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Otaq meneceri</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Faylı açın</value>
   </data>
 </root>

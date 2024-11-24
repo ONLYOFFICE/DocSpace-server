@@ -26,11 +26,16 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<FileConflictResolveType>))]
 [EnumExtensions]
 public enum FileConflictResolveType
 {
+    [SwaggerEnum(Description = "Skip")]
     Skip = 0,
+
+    [SwaggerEnum(Description = "Overwrite")]
     Overwrite = 1,
+
+    [SwaggerEnum(Description = "Duplicate")]
     Duplicate = 2
 }

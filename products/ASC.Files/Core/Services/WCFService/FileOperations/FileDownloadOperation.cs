@@ -256,11 +256,22 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
         await fileMarker.RemoveMarkAsNewAsync(file);
 
+        var folderDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFolderDao<T>();
+        var fileUtility = scope.ServiceProvider.GetService<FileUtility>();
         var title = file.Title;
+
+        var fileExt = FileUtility.GetFileExtension(title);
+        var extsConvertible = await fileUtility.GetExtsConvertibleAsync();
+        var convertible = extsConvertible.TryGetValue(fileExt, out var convertibleToExt);
+
+        if (convertible && await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+        {
+            _files[file.Id] = FileUtility.WatermarkedDocumentExt;
+        }
 
         if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
         {
-                title = FileUtility.ReplaceFileExtension(title, convertToExt);
+            title = FileUtility.ReplaceFileExtension(title, convertToExt);
         }
 
         var entriesPathId = new ItemNameValueCollection<T>();
@@ -399,7 +410,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                     if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
                     {
-                        newTitle = FileUtility.ReplaceFileExtension(path, convertToExt);
+                        var sourceFileName = Path.GetFileName(path);
+                        var targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
+                        newTitle = path.Replace(sourceFileName, targetFileName);
                     }
                 }
 
@@ -422,7 +435,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     await compressTo.CreateEntry(newTitle, file.ModifiedOn);
                     try
                     {
-                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt) ?
+                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ?
                             await fileConverter.ExecAsync(file, convertToExt) :
                             await fileDao.GetFileStreamAsync(file);
                         
@@ -501,7 +514,7 @@ internal class ItemNameValueCollection<T>
     {
         if (!_dic.ContainsKey(name))
         {
-            _dic.Add(name, new List<T>());
+            _dic.Add(name, []);
         }
 
         _dic[name].Add(value);
@@ -522,7 +535,7 @@ internal class ItemNameValueCollection<T>
     {
         if (!_dic.ContainsKey(name))
         {
-            _dic.Add(name, new List<T>());
+            _dic.Add(name, []);
         }
 
         _dic[name].AddRange(values);

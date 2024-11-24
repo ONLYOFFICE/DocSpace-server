@@ -33,6 +33,7 @@ namespace ASC.Web.Api.Controllers;
 [DefaultRoute, Route("api/2.0/capabilities.json")]
 [ApiController]
 [AllowAnonymous]
+[ControllerName("capabilities")]
 public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         TenantManager tenantManager,
         ProviderManager providerManager,
@@ -50,10 +51,10 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     ///<short>
     ///Get portal capabilities
     ///</short>
-    ///<returns type="ASC.Web.Api.ApiModel.ResponseDto.CapabilitiesDto, ASC.Web.Api">Portal capabilities</returns>
     ///<path>api/2.0/capabilities</path>
-    ///<httpMethod>GET</httpMethod>
     ///<requiresAuthorization>false</requiresAuthorization>
+    [Tags("Capabilities")]
+    [SwaggerResponse(200, "Portal capabilities", typeof(CapabilitiesDto))]
     [HttpGet] //NOTE: this method doesn't requires auth!!!  //NOTE: this method doesn't check payment!!!
     [AllowNotPayment]
     public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()
@@ -63,9 +64,10 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         {
             LdapEnabled = false,
             OauthEnabled = coreBaseSettings.Standalone || quota.Oauth,
-            Providers = new List<string>(0),
+            Providers = [],
             SsoLabel = string.Empty,
-            SsoUrl = string.Empty
+            SsoUrl = string.Empty,
+            IdentityServerEnabled = false
         };
 
         try
@@ -125,6 +127,11 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         catch (Exception ex)
         {
             _log.ErrorWithException(ex);
+        }
+
+        if (SetupInfo.IsVisibleSettings(ManagementType.IdentityServer.ToString()))
+        {
+            result.IdentityServerEnabled = true;
         }
 
         return result;

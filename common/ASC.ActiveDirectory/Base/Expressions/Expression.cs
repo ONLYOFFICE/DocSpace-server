@@ -109,30 +109,15 @@ public class Expression : ICloneable
     /// <returns>Expression string</returns>
     public override string ToString()
     {
-        string sop;
-        switch (_op)
+        var sop = _op switch
         {
-            case Op.NotExists:
-            case Op.Exists:
-            case Op.Equal:
-            case Op.NotEqual:
-                sop = EQUIAL;
-                break;
-            case Op.Greater:
-                sop = GREATER;
-                break;
-            case Op.GreaterOrEqual:
-                sop = GREATER_OR_EQUAL;
-                break;
-            case Op.Less:
-                sop = LESS;
-                break;
-            case Op.LessOrEqual:
-                sop = LESS_OR_EQUAL;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            Op.NotExists or Op.Exists or Op.Equal or Op.NotEqual => EQUIAL,
+            Op.Greater => GREATER,
+            Op.GreaterOrEqual => GREATER_OR_EQUAL,
+            Op.Less => LESS,
+            Op.LessOrEqual => LESS_OR_EQUAL,
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
         var expressionString = "({0}{1}{2}{3})";
         expressionString = string.Format(expressionString,

@@ -42,7 +42,7 @@ public class Tenant : IMapFrom<DbTenant>
         Id = DefaultTenant;
         TimeZone = TimeZoneInfo.Utc.Id;
         Language = CultureInfo.CurrentCulture.Name;
-        TrustedDomains = new List<string>();
+        TrustedDomains = [];
         TrustedDomainsType = TenantTrustedDomainsType.None;
         CreationDateTime = DateTime.UtcNow;
         Status = TenantStatus.Active;
@@ -89,7 +89,6 @@ public class Tenant : IMapFrom<DbTenant>
     public Guid OwnerId { get; set; }
     public string PartnerId { get; set; }
     public string PaymentId { get; set; }
-    public bool Spam { get; set; }
     public TenantStatus Status { get; internal set; }
     public DateTime StatusChangeDate { get; internal set; }
     public string TimeZone { get; set; }
@@ -99,7 +98,7 @@ public class Tenant : IMapFrom<DbTenant>
         {
             if (_domains.Count == 0 && !string.IsNullOrEmpty(TrustedDomainsRaw))
             {
-                _domains = TrustedDomainsRaw.Split(new[] { '|' },
+                _domains = TrustedDomainsRaw.Split(['|'],
                     StringSplitOptions.RemoveEmptyEntries).ToList();
             }
 
@@ -190,7 +189,7 @@ public class Tenant : IMapFrom<DbTenant>
         }
         else
         {
-            TrustedDomains.AddRange(trustedDomains.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries));
+            TrustedDomains.AddRange(trustedDomains.Split(['|'], StringSplitOptions.RemoveEmptyEntries));
         }
     }
 }

@@ -138,8 +138,10 @@ public class InvitationService(
                         validation.Result = EmailValidationKeyProvider.ValidationResult.UserExcluded;
                         return false;
                     }
+
+                    var type = await userManager.GetUserTypeAsync(currentUserId);
                     
-                    if (FileSecurity.PaidShares.Contains(data.Share) && await userManager.GetUserTypeAsync(currentUserId) is EmployeeType.User)
+                    if (FileSecurity.PaidShares.Contains(data.Share) && type is EmployeeType.Guest or EmployeeType.User)
                     {
                         data.Share = FileSecurity.GetHighFreeRole(folder.FolderType);
 
@@ -229,7 +231,7 @@ public class InvitationService(
         }
 
         var securityDao = daoFactory.GetSecurityDao<string>();
-        var record = await securityDao.GetSharesAsync(new[] { result.LinkId })
+        var record = await securityDao.GetSharesAsync([result.LinkId])
             .FirstOrDefaultAsync(s => s.SubjectType == SubjectType.InvitationLink);
         
         if (record is not { SubjectType: SubjectType.InvitationLink })

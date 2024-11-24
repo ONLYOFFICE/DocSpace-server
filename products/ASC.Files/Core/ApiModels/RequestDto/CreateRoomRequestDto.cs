@@ -26,48 +26,63 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
+
 public enum RoomType
 {
+    [SwaggerEnum(Description = "Form filling room")]
     FillingFormsRoom = 1,
+
+    [SwaggerEnum(Description = "Collaboration room")]
     EditingRoom = 2,
-    ReviewRoom = 3,
-    ReadOnlyRoom = 4,
+
+    [SwaggerEnum(Description = "Custom room")]
     CustomRoom = 5,
+
+    [SwaggerEnum(Description = "Public room")]
     PublicRoom = 6,
-    FormRoom = 7
+
+    [SwaggerEnum(Description = "Virtual data room")]
+    VirtualDataRoom = 8
+}
+
+public static class RoomTypeExtensions
+{
+    public static IEnumerable<FilterType> MapToFilterType(IEnumerable<RoomType> types)
+    {
+        if (types == null || !types.Any())
+        {
+            return null;
+        }
+        
+        return types.Select(x => x switch
+        {
+            RoomType.FillingFormsRoom => FilterType.FillingFormsRooms,
+            RoomType.EditingRoom => FilterType.EditingRooms,
+            RoomType.CustomRoom => FilterType.CustomRooms,
+            RoomType.PublicRoom => FilterType.PublicRooms,
+            RoomType.VirtualDataRoom => FilterType.VirtualDataRooms,
+            _ => FilterType.CustomRooms
+        }).ToHashSet();
+    }
 }
 
 /// <summary>
+/// Request parameters for creating a room
 /// </summary>
-public class CreateRoomRequestDto
+public class CreateRoomRequestDto : UpdateRoomRequest
 {
-    /// <summary>Room name</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
-
-    /// <summary>Room type</summary>
-    /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
+    /// <summary>
+    /// Room type
+    /// </summary>
     public RoomType RoomType { get; set; }
 
+    /// <summary>
+    /// Private
+    /// </summary>
     public bool Private { get; set; }
 
-    /// <summary>Collection of sharing parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.FileShareParams}, System.Collections.Generic</type>
+    /// <summary>
+    /// Collection of sharing parameters
+    /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
-
-    /// <summary>Notifies users about the shared room or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Notify { get; set; }
-
-    /// <summary>Message to send when notifying about the shared room</summary>
-    /// <type>System.String, System</type>
-    public string SharingMessage { get; set; }
-
-    /// <summary>Room quota</summary>
-    /// <type>System.Int64, System</type>
-    public long Quota { get; set; }
-    
-    public bool Indexing { get; set; }
 }

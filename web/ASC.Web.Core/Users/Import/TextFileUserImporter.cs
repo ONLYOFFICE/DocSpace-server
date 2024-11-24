@@ -122,7 +122,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
 
     private int GetFieldsMapping(string firstLine, IEnumerable<PropertyInfo> infos, IDictionary<int, PropertyInfo> mappedProperties)
     {
-        var fields = firstLine.Split(new[] { Separator }, StringSplitOptions.RemoveEmptyEntries);
+        var fields = firstLine.Split([Separator], StringSplitOptions.RemoveEmptyEntries);
         for (var i = 0; i < fields.Length; i++)
         {
             var field = fields[i];
@@ -137,10 +137,9 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
                     mappedProperties.Add(i, info);
                 }
             }
-            if (!mappedProperties.ContainsKey(i))
+            if (mappedProperties.TryAdd(i, null))
             {
                 //No property was found
-                mappedProperties.Add(i, null);
             }
         }
         return fields.Length;

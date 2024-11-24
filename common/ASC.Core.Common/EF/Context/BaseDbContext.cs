@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Extensions;
-
 namespace ASC.Core.Common.EF;
 
 public enum Provider
@@ -67,6 +65,8 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
 
                     //Configuring Connection Resiliency: https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency 
                     providerOptions.EnableRetryOnFailure(maxRetryCount: 15, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+
+                    providerOptions.UseMicrosoftJson();
                 });
                 break;
             case Provider.PostgreSql:

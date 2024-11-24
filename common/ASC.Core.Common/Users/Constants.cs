@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Action = ASC.Common.Security.Authorizing.Action;
-using AuthConst = ASC.Common.Security.Authorizing.Constants;
 
 namespace ASC.Core.Users;
 
@@ -51,41 +50,41 @@ public sealed class Constants(IConfiguration configuration)
 
     public static readonly GroupInfo GroupEveryone = new(SysGroupCategoryId)
     {
-        ID = AuthConst.Everyone.ID,
-        Name = AuthConst.Everyone.Name
+        ID = AuthConstants.Everyone.ID,
+        Name = AuthConstants.Everyone.Name,
     };
 
-    public static readonly GroupInfo GroupUser = new(SysGroupCategoryId)
+    public static readonly GroupInfo GroupGuest = new(SysGroupCategoryId)
     {
-        ID = AuthConst.User.ID,
-        Name = AuthConst.User.Name
+        ID = AuthConstants.Guest.ID,
+        Name = AuthConstants.Guest.Name,
     };
 
-    public static readonly GroupInfo GroupManager = new(SysGroupCategoryId)
+    public static readonly GroupInfo GroupRoomAdmin = new(SysGroupCategoryId)
     {
-        ID = AuthConst.RoomAdmin.ID,
-        Name = AuthConst.RoomAdmin.Name
+        ID = AuthConstants.RoomAdmin.ID,
+        Name = AuthConstants.RoomAdmin.Name,
     };
 
     public static readonly GroupInfo GroupAdmin = new(SysGroupCategoryId)
     {
-        ID = AuthConst.DocSpaceAdmin.ID,
-        Name = AuthConst.DocSpaceAdmin.Name
+        ID = AuthConstants.DocSpaceAdmin.ID,
+        Name = AuthConstants.DocSpaceAdmin.Name,
     };
 
-    public static readonly GroupInfo GroupCollaborator = new(SysGroupCategoryId)
+    public static readonly GroupInfo GroupUser = new(SysGroupCategoryId)
     {
-        ID = AuthConst.Collaborator.ID, 
-        Name = AuthConst.Collaborator.Name
+        ID = AuthConstants.User.ID, 
+        Name = AuthConstants.User.Name,
     };
 
     public static readonly GroupInfo[] SystemGroups =
     [
         GroupEveryone, 
-        GroupUser, 
-        GroupManager, 
+        GroupGuest, 
+        GroupRoomAdmin, 
         GroupAdmin, 
-        GroupCollaborator
+        GroupUser
     ];
 
     public static readonly UserInfo LostUser = new()

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
@@ -41,7 +43,7 @@ public class CommonMethods(
     TenantManager tenantManager,
     IHttpClientFactory clientFactory)
 {
-    public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null)
+    public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null, WizardSettings wizardSettings = null)
     {
         var tenantQuotaSettings = hostedSolution.GetTenantQuotaSettings(t.Id).Result;
         var tariffMaxTotalSize = hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize;
@@ -64,7 +66,8 @@ public class CommonMethods(
             customQuota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ? 
                     tenantQuotaSettings.Quota :
                     tariffMaxTotalSize == long.MaxValue ? -1 : tariffMaxTotalSize,
-            owner
+            owner,
+            wizardSettings
         };
     }
 
@@ -76,28 +79,39 @@ public class CommonMethods(
 
     public async Task<string> SendCongratulations(string requestUriScheme, Tenant tenant, bool skipWelcome)
     {
-        var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, tenant.OwnerId.ToString() + ConfirmType.Auth);
+        return await CallSendMethod(requestUriScheme, "portal/sendcongratulations", HttpMethod.Post, tenant, ConfirmType.Auth, skipWelcome);
+    }
+
+    public async Task<string> SendRemoveInstructions(string requestUriScheme, Tenant tenant)
+    {
+        return await CallSendMethod(requestUriScheme, "portal/sendremoveinstructions", HttpMethod.Post, tenant, ConfirmType.PortalRemove, false);
+    }
+
+    private async Task<string> CallSendMethod(string requestUriScheme, string apiMethod, HttpMethod httpMethod, Tenant tenant, ConfirmType confirmType, bool skipAndReturnUrl)
+    {
+        var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, tenant.OwnerId.ToString() + confirmType);
 
         var url = string.Format("{0}{1}{2}{3}{4}?userid={5}&key={6}",
                             requestUriScheme,
                             Uri.SchemeDelimiter,
                             tenant.GetTenantDomain(coreSettings),
                             commonConstants.WebApiBaseUrl,
-                            "portal/sendcongratulations",
+                            apiMethod,
                             tenant.OwnerId,
                             validationKey);
 
-        if (skipWelcome)
+        if (skipAndReturnUrl)
         {
-            log.LogDebug("congratulations skiped");
+            log.LogDebug($"SendMethod {apiMethod} skiped");
             return url;
         }
 
         var request = new HttpRequestMessage
         {
-            Method = HttpMethod.Post,
+            Method = httpMethod,
             RequestUri = new Uri(url)
         };
+
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
         try
@@ -105,7 +119,7 @@ public class CommonMethods(
             var httpClient = clientFactory.CreateClient();
             using var response = await httpClient.SendAsync(request);
 
-            log.LogDebug("congratulations result = {0}", response.StatusCode);
+            log.LogDebug($"SendMethod {apiMethod} result = {response.StatusCode}");
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -115,7 +129,7 @@ public class CommonMethods(
         }
         catch (Exception ex)
         {
-            log.LogError(ex, "SendCongratulations error");
+            log.LogError(ex, $"SendMethod {apiMethod} error");
             return url;
         }
 
@@ -324,17 +338,19 @@ public class CommonMethods(
 
             var httpClient = clientFactory.CreateClient();
             using var httpClientResponse = await httpClient.SendAsync(request);
-            var resp =  await httpClientResponse.Content.ReadAsStringAsync();
-            var resObj = JObject.Parse(resp);
+            var resp = await httpClientResponse.Content.ReadAsStringAsync();
+            var recaptchData = JsonSerializer.Deserialize<Web.Core.RecaptchData>(resp, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (resObj["success"] != null && resObj.Value<bool>("success"))
+            if (recaptchData.Success.GetValueOrDefault())
             {
                 return true;
             }
+            
+
 
             log.LogDebug("Recaptcha error: {0}", resp);
-
-            if (resObj["error-codes"] != null && resObj["error-codes"].HasValues)
+            
+            if (recaptchData.ErrorCodes is { Count: > 0 })
             {
                 log.LogDebug("Recaptcha api returns errors: {0}", resp);
             }
@@ -345,5 +361,13 @@ public class CommonMethods(
         }
         return false;
     }
+}
+
+public class RecaptchData
+{
+    public bool? Success { get; set; }
+    
+    [JsonPropertyName("error-codes")]
+    public List<string> ErrorCodes { get; set; }
 }
 

@@ -26,18 +26,18 @@
 
 namespace ASC.Web.Api.Models;
 
-/// <summary>
-/// </summary>
 public class Contact
 {
-    /// <summary>Contact type</summary>
-    /// <type>System.String, System</type>
-    /// <example>GTalk</example>
+    /// <summary>
+    /// Contact type
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "GTalk")]
     public string Type { get; set; }
 
-    /// <summary>Contact value</summary>
-    /// <type>System.String, System</type>
-    /// <example>my@gmail.com</example>
+    /// <summary>
+    /// Contact value
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "my@gmail.com")]
     public string Value { get; set; }
 
     //For binder
@@ -47,10 +47,5 @@ public class Contact
     {
         Type = type;
         Value = value;
-    }
-
-    public static Contact GetSample()
-    {
-        return new Contact("GTalk", "my@gmail.com");
     }
 }

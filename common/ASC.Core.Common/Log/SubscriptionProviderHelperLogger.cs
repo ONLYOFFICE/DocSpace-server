@@ -28,6 +28,6 @@ namespace ASC.Core.Common.Log;
 public static partial class SubscriptionProviderHelperLogger
 {
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "IsSubscribed")]
+    [LoggerMessage(LogLevel.Error, "IsSubscribed")]
     public static partial void ErrorIsSubscribed(this ILogger logger, Exception exception);
 }

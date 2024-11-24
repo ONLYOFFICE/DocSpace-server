@@ -53,6 +53,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                                       string region,
                                       ThumbnailData thumbnail,
                                       SpreadsheetLayout spreadsheetLayout,
+                                      Options options,
                                       bool isAsync,
                                       bool toForm)
     {
@@ -70,6 +71,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 region,
                 thumbnail,
                 spreadsheetLayout,
+                options,
                 isAsync,
                 fileUtility.SignatureSecret,
                 clientFactory,
@@ -134,7 +136,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 scriptUrl = await pathProvider.GetTempUrlAsync(stream, ".docbuilder");
             }
             scriptUrl = await ReplaceCommunityAddressAsync(scriptUrl);
-            requestKey = null;
+            requestKey = scriptUrl;
         }
 
         logger.DebugDocServiceBuilderRequestKey(requestKey, isAsync);
@@ -253,7 +255,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 var fileUri = await ReplaceCommunityAddressAsync(url);
 
                 var key = GenerateRevisionId(Guid.NewGuid().ToString());
-                var uriTuple = await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(fileUtility, filesLinkUtility.DocServiceConverterUrl, fileUri, fileExtension, toExtension, key, null, null, null, null, false, fileUtility.SignatureSecret, clientFactory, false);
+                var uriTuple = await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(fileUtility, filesLinkUtility.DocServiceConverterUrl, fileUri, fileExtension, toExtension, key, null, null, null, null, null, false, fileUtility.SignatureSecret, clientFactory, false);
                 convertedFileUri = uriTuple.ConvertedDocumentUri;
             }
             catch (Exception ex)
@@ -343,7 +345,12 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
             docServicePortalUrl = "https://" + tenant.GetTenantDomain(coreSettings, false);
         }
 
-        var uri = new UriBuilder(url);
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var absoluteUri))
+        {
+            return url;
+        }
+
+        var uri = new UriBuilder(absoluteUri);
         if (new UriBuilder(baseCommonLinkUtility.ServerRootPath).Host != uri.Host)
         {
             return url;

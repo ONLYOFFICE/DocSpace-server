@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Core;
-
 namespace ASC.People.Api;
 
 public class RemoveUserDataController(PermissionContext permissionContext,
@@ -42,18 +40,16 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// Returns the progress of the started data deletion for the user with the ID specified in the request.
     /// </summary>
     /// <short>Get the deletion progress</short>
-    /// <param type="System.Guid, System" name="userId">User ID</param>
-    /// <category>User data</category>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Deletion progress</returns>
     /// <path>api/2.0/people/remove/progress/{userid}</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("People / User data")]
+    [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpGet("remove/progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetRemoveProgressAsync(Guid userId)
+    public async Task<TaskProgressResponseDto> GetRemoveProgressAsync(ProgressRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var progressItem = await queueWorkerRemove.GetProgressItemStatus(tenant.Id, userId);
+        var progressItem = await queueWorkerRemove.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         return TaskProgressResponseDto.Get(progressItem);
     }
@@ -64,10 +60,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <short>
     /// Send the deletion instructions
     /// </short>
-    /// <category>Profiles</category>
-    /// <returns type="System.Object, System">Information message</returns>
     /// <path>api/2.0/people/self/delete</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("People / User data")]
+    [SwaggerResponse(200, "Information message", typeof(object))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("self/delete")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<object> SendInstructionsToDeleteAsync()
@@ -90,11 +86,12 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// Starts the data deletion for the user with the ID specified in the request.
     /// </summary>
     /// <short>Start the data deletion</short>
-    /// <param type="ASC.People.ApiModels.RequestDto.TerminateRequestDto, ASC.People" name="inDto">Request parameters for starting the deletion process</param>
-    /// <category>User data</category>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Deletion progress</returns>
     /// <path>api/2.0/people/remove/start</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("People / User data")]
+    [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(400, "User exception")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "User not found")]
     [HttpPost("remove/start")]
     public async Task<TaskProgressResponseDto> StartRemoveAsync(TerminateRequestDto inDto)
     {
@@ -107,13 +104,27 @@ public class RemoveUserDataController(PermissionContext permissionContext,
             throw new ArgumentException("User with id = " + inDto.UserId + " not found");
         }
 
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserType = await userManager.GetUserTypeAsync(currentUser.Id); 
+        
         var tenant = await tenantManager.GetCurrentTenantAsync();
         if (user.IsOwner(tenant) || user.IsMe(authContext) || user.Status != EmployeeStatus.Terminated)
         {
             throw new ArgumentException("Can not delete user with id = " + inDto.UserId);
         }
+        
+        var userType = await userManager.GetUserTypeAsync(user); 
 
-        var progressItem = await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, true, true);
+        switch (userType)
+        {
+            case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+            case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
+        var isGuest = await userManager.IsGuestAsync(user);
+
+        var progressItem = await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, true, true, isGuest);
 
         return TaskProgressResponseDto.Get(progressItem);
     }
@@ -122,11 +133,8 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// Terminates the data deletion for the user with the ID specified in the request.
     /// </summary>
     /// <short>Terminate the data deletion</short>
-    /// <param type="ASC.People.ApiModels.RequestDto.TerminateRequestDto, ASC.People" name="inDto">Request parameters for terminating the deletion process</param>
-    /// <category>User data</category>
     /// <path>api/2.0/people/remove/terminate</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns></returns>
+    [Tags("People / User data")]
     [HttpPut("remove/terminate")]
     public async Task TerminateRemoveAsync(TerminateRequestDto inDto)
     {

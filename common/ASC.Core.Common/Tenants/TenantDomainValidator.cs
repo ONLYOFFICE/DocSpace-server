@@ -31,9 +31,22 @@ public class TenantDomainValidator
 {
     private readonly Regex _validDomain;
     private readonly Regex _validName;
+    private const string DomainContainsInvalidCharacters = "Domain contains invalid characters.";
 
+    /// <summary>
+    /// Regex
+    /// </summary>
     public string Regex { get; }
+
+    /// <summary>
+    /// Min length
+    /// </summary>
     public int MinLength { get; }
+
+    /// <summary>
+    /// Max length
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 63)]
     public int MaxLength { get; }
 
     public TenantDomainValidator(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
@@ -80,9 +93,9 @@ public class TenantDomainValidator
 
     public void ValidateDomainCharacters(string domain)
     {
-        if (!_validDomain.IsMatch(domain))
+        if (!_validDomain.IsMatch(domain) || domain.TestPunnyCode())
         {
-            throw new TenantIncorrectCharsException("Domain contains invalid characters.");
+            throw new TenantIncorrectCharsException(DomainContainsInvalidCharacters);
         }
     }
 

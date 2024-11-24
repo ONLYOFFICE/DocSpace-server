@@ -86,7 +86,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     {
         _ignoreException = fileOperationData.IgnoreException;
         _immediately = fileOperationData.Immediately;
-        _headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+        _headers = fileOperationData.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
         this[OpType] = (int)FileOperationType.Delete;
     }
@@ -159,7 +159,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             }
             else if (folder.FolderType != FolderType.DEFAULT && folder.FolderType != FolderType.BUNCH
                 && !DocSpaceHelper.IsRoom(folder.FolderType)
-                && ((folder.FolderType == FolderType.InProcessFormFolder || folder.FolderType == FolderType.ReadyFormFolder) && folder.RootFolderType != FolderType.Archive))
+                && (folder.FolderType is FolderType.InProcessFormFolder or FolderType.ReadyFormFolder && folder.RootFolderType != FolderType.Archive))
             {
                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
@@ -248,7 +248,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
                         var (isError, message) = await WithErrorAsync(scope, files, true, checkPermissions);
                         
-                        if (folder.FolderType == FolderType.FormFillingFolderInProgress || folder.FolderType == FolderType.FormFillingFolderDone)
+                        if (folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
                         {
                             await FolderDao.ChangeFolderTypeAsync(folder, FolderType.DEFAULT);
                             foreach (var file in files)
@@ -320,7 +320,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var file = await FileDao.GetFileAsync(fileId);
-            var (isError, message) = await WithErrorAsync(scope, new[] { file }, false, checkPermissions);
+            var (isError, message) = await WithErrorAsync(scope, [file], false, checkPermissions);
             if (file == null)
             {
                 this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
@@ -363,7 +363,12 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 {
                     try
                     {
-                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner()));
+                        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
+                        var tagDao = daoFactory.GetTagDao<T>();
+                        var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
+                        var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
+
+                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.DeleteFileAsync(file.Id, fromRoomTag == null ? file.GetFileQuotaOwner() : ASC.Core.Configuration.Constants.CoreSystem.ID));
                         
                         var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
                         
@@ -378,7 +383,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             await folderDao.ChangeTreeFolderSizeAsync(_trashId, (-1) * file.ContentLength);
                         }
                         
-                        if (_headers != null)
+                        if (_headers != null && _headers.Count > 0)
                         {
                             if (isNeedSendActions)
                             {

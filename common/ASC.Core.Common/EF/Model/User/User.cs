@@ -53,6 +53,8 @@ public class User : BaseEntity, IMapFrom<UserInfo>
     public bool Removed { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime LastModified { get; set; }
+    public Guid? CreatedBy { get; set; }
+    public bool? Spam { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -84,7 +86,7 @@ public static class DbUserExtension
                 ActivationStatus = 0,
                 WorkFromDate = new DateTime(2021, 3, 9, 9, 52, 55, 764, DateTimeKind.Utc).AddTicks(9157),
                 LastModified = new DateTime(2021, 3, 9, 9, 52, 55, 765, DateTimeKind.Utc).AddTicks(1420),
-                CreateDate = new DateTime(2022, 7, 8)
+                CreateDate = new DateTime(2022, 7, 8),
             });
 
         return modelBuilder;
@@ -248,6 +250,16 @@ public static class DbUserExtension
             entity.Property(e => e.WorkFromDate)
                 .HasColumnName("workfromdate")
                 .HasColumnType("datetime");
+
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasColumnType("varchar(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
+            entity.Property(e => e.Spam)
+                .HasColumnName("spam")
+                .HasColumnType("tinyint(1)");
         });
     }
 
@@ -266,7 +278,7 @@ public static class DbUserExtension
 
             entity.HasIndex(e => new { e.UserName, e.TenantId })
                 .HasDatabaseName("username");
-            
+
             entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.FirstName })
                 .HasDatabaseName("tenant_activation_status_firstname");
 
@@ -370,6 +382,12 @@ public static class DbUserExtension
                 .HasMaxLength(255);
 
             entity.Property(e => e.WorkFromDate).HasColumnName("workfromdate");
+
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasMaxLength(36);
+
+            entity.Property(e => e.Spam).HasColumnName("spam");
         });
     }
 }

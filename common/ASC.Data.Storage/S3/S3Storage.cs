@@ -50,7 +50,7 @@ public class S3Storage(TempStream tempStream,
     public override bool IsSupportChunking => true;
     public override bool ContentAsAttachment => _contentAsAttachment;
 
-    private readonly List<string> _domains = new();
+    private readonly List<string> _domains = [];
     private Dictionary<string, S3CannedACL> _domainsAcl;
     private S3CannedACL _moduleAcl;
     private string _accessKeyId = string.Empty;
@@ -325,16 +325,12 @@ public class S3Storage(TempStream tempStream,
                 request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
             }
 
-            switch (acl)
+            request.CannedACL = acl switch
             {
-                case ACL.Auto:
-                    request.CannedACL = GetDomainACL(domain);
-                    break;
-                case ACL.Read:
-                case ACL.Private:
-                    request.CannedACL = GetS3Acl(acl);
-                    break;
-            }
+                ACL.Auto => GetDomainACL(domain),
+                ACL.Read or ACL.Private => GetS3Acl(acl),
+                _ => request.CannedACL
+            };
 
             if (!string.IsNullOrEmpty(contentDisposition))
             {
@@ -720,7 +716,9 @@ public class S3Storage(TempStream tempStream,
     public override async IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
-        var obj = tmp.Select(x => x.Key[(MakePath(domain, path) + "/").Length..]);
+        var obj = tmp
+            .Where(x => x.Key.EndsWith("/"))
+            .Select(x => x.Key[(MakePath(domain, path) + "/").Length..]);
         foreach (var e in obj)
         {
             yield return e;
@@ -899,7 +897,8 @@ public class S3Storage(TempStream tempStream,
     public override async IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
-        var obj = tmp.Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x.Key)))
+        var obj = tmp.Where(x=> !x.Key.EndsWith("/"))
+            .Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x.Key)))
             .Select(x => x.Key[(MakePath(domain, path) + "/").Length..].TrimStart('/'));
 
         foreach (var e in obj)
@@ -1338,7 +1337,7 @@ public class S3Storage(TempStream tempStream,
 
     private async ValueTask RecycleAsync(IAmazonS3 client, string domain, string key)
     {
-        if (string.IsNullOrEmpty(_recycleDir) || string.IsNullOrEmpty(domain) || domain.EndsWith("_temp") || !_recycleUse)
+        if (string.IsNullOrEmpty(_recycleDir) || (!string.IsNullOrEmpty(domain) && domain.EndsWith("_temp")) || !_recycleUse)
         {
             return;
         }
@@ -1817,7 +1816,7 @@ public class S3Storage(TempStream tempStream,
             return _response.ResponseStream.ReadAsync(buffer, offset, count, cancellationToken);
         }
 
-        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = new())
         {
             return _response.ResponseStream.ReadAsync(buffer, cancellationToken);
         }
@@ -1842,7 +1841,7 @@ public class S3Storage(TempStream tempStream,
             return _response.ResponseStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
-        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = new())
         {
             return _response.ResponseStream.WriteAsync(buffer, cancellationToken);
         }

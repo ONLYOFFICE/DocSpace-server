@@ -26,6 +26,8 @@
 
 global using System.Collections;
 global using System.Collections.Concurrent;
+global using System.Collections.Frozen;
+global using System.ComponentModel.DataAnnotations;
 global using System.Configuration;
 global using System.Data.Common;
 global using System.Diagnostics;
@@ -47,21 +49,18 @@ global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Web;
 global using System.Xml;
-
 global using Amazon;
 global using Amazon.Runtime;
 global using Amazon.SimpleEmail;
 global using Amazon.SimpleEmail.Model;
-
+global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Models;
 global using ASC.Collections;
 global using ASC.Common;
 global using ASC.Common.Caching;
-global using ASC.Core.Common.Core;
 global using ASC.Common.Log;
 global using ASC.Common.Logging;
 global using ASC.Common.Mapping;
-global using ASC.Core.Common.Messaging;
 global using ASC.Common.Module;
 global using ASC.Common.Notify.Engine;
 global using ASC.Common.Notify.Patterns;
@@ -71,7 +70,6 @@ global using ASC.Common.Security;
 global using ASC.Common.Security.Authentication;
 global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
-global using ASC.Core.Common.Users;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
@@ -79,12 +77,14 @@ global using ASC.Core.Billing;
 global using ASC.Core.Caching;
 global using ASC.Core.Common;
 global using ASC.Core.Common.Configuration;
+global using ASC.Core.Common.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Hosting.Extensions;
 global using ASC.Core.Common.Hosting.Interfaces;
 global using ASC.Core.Common.Log;
+global using ASC.Core.Common.Messaging;
 global using ASC.Core.Common.Notify;
 global using ASC.Core.Common.Notify.IntegrationEvents.Events;
 global using ASC.Core.Common.Notify.Jabber;
@@ -95,6 +95,7 @@ global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Common.Users;
 global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Configuration;
 global using ASC.Core.Data;
@@ -124,16 +125,11 @@ global using ASC.Notify.Sinks;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Utility;
-
 global using Autofac;
-
 global using AutoMapper;
 global using AutoMapper.QueryableExtensions;
-
 global using Google.Apis.Auth.OAuth2;
-
 global using MailKit.Security;
-
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
@@ -149,35 +145,22 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
-
 global using Microsoft.Net.Http.Headers;
-
 global using MimeKit;
-
 global using NetEscapades.EnumGenerators;
-
-global using Newtonsoft.Json;
-
 global using NVelocity;
 global using NVelocity.App.Events;
-
 global using Polly;
-
 global using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
 global using Pomelo.EntityFrameworkCore.MySql.Migrations;
-
 global using ProtoBuf;
-
 global using Telegram.Bot;
-
 global using Textile;
 global using Textile.Blocks;
 global using Textile.States;
-
 global using static ASC.Security.Cryptography.EmailValidationKeyProvider;
-
 global using AppOptions = FirebaseAdmin.AppOptions;
-global using FirebaseApp = FirebaseAdmin.FirebaseApp;
 global using FirebaseAdminMessaging = FirebaseAdmin.Messaging;
-global using JsonSerializer = System.Text.Json.JsonSerializer;
-global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
+global using FirebaseApp = FirebaseAdmin.FirebaseApp;
+global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute; 
+global using JsonSerializer = System.Text.Json.JsonSerializer; 

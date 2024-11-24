@@ -28,64 +28,66 @@ using System.Collections.Concurrent;
 
 namespace ASC.Web.Api.Models;
 
-/// <summary>
-/// </summary>
 public class EmployeeDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
     public Guid Id { get; set; }
 
-    /// <summary>Display name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Display name
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Mike Zanyatski")]
     public string DisplayName { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Title
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Manager")]
     public string Title { get; set; }
-    
-    /// <summary>Avatar</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// Avatar
+    /// </summary>
     public string Avatar { get; set; }
-    
-    /// <summary>Original size avatar</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// Original size avatar
+    /// </summary>
     public string AvatarOriginal { get; set; }
 
-    /// <summary>Maximum size avatar</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Maximum size avatar
+    /// </summary>
     public string AvatarMax { get; set; }
 
-    /// <summary>Medium size avatar</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Medium size avatar
+    /// </summary>
     public string AvatarMedium { get; set; }
 
-    /// <summary>Small avatar</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Small avatar
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "url to small avatar")]
     public string AvatarSmall { get; set; }
 
-    /// <summary>Profile URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Profile URL
+    /// </summary>
     public string ProfileUrl { get; set; }
 
-    /// <summary>Specifies if the user has an avatar or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user has an avatar or not
+    /// </summary>
     public bool HasAvatar { get; set; }
 
-    /// <summary>Specifies if the user is an anonim or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user is an anonim or not
+    /// </summary>
     public bool IsAnonim { get; set; }
-
-    public static EmployeeDto GetSample()
-    {
-        return new EmployeeDto
-        {
-            Id = Guid.Empty,
-            DisplayName = "Mike Zanyatski",
-            Title = "Manager",
-            AvatarSmall = "url to small avatar"
-        };
-    }
 }
 
 [Scope]
@@ -100,11 +102,11 @@ public class EmployeeDtoHelper(
 {
     private readonly ConcurrentDictionary<Guid, EmployeeDto> _dictionary = new();
     protected readonly ApiContext _httpContext = httpContext;
-    protected  readonly UserPhotoManager _userPhotoManager = userPhotoManager;
-    protected  readonly UserManager _userManager = userManager;
-    protected  readonly AuthContext _authContext = authContext;
-    protected  readonly DisplayUserSettingsHelper _displayUserSettingsHelper = displayUserSettingsHelper;
-    
+    protected readonly UserPhotoManager _userPhotoManager = userPhotoManager;
+    protected readonly UserManager _userManager = userManager;
+    protected readonly AuthContext _authContext = authContext;
+    protected readonly DisplayUserSettingsHelper _displayUserSettingsHelper = displayUserSettingsHelper;
+
     public async Task<EmployeeDto> GetAsync(UserInfo userInfo)
     {
         if (!_dictionary.TryGetValue(userInfo.Id, out var employee))

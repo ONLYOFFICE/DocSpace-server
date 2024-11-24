@@ -46,25 +46,13 @@ public class SmtpSettings
 
     private SmtpSettings() { }
 
-    public SmtpSettings(string host, string senderAddress)
-        : this(host, senderAddress, DefaultSenderDisplayName)
-    {
-
-    }
-
-    public SmtpSettings(string host, string senderAddress, string senderDisplayName)
+    public SmtpSettings(string host, string senderAddress, string senderDisplayName = DefaultSenderDisplayName)
         : this(host, DefaultSmtpPort, senderAddress, senderDisplayName)
     {
 
     }
 
-    public SmtpSettings(string host, int port, string senderAddress)
-        : this(host, port, senderAddress, DefaultSenderDisplayName)
-    {
-
-    }
-
-    public SmtpSettings(string host, int port, string senderAddress, string senderDisplayName)
+    public SmtpSettings(string host, int port, string senderAddress, string senderDisplayName = DefaultSenderDisplayName)
     {
         if (string.IsNullOrEmpty(host))
         {
@@ -114,7 +102,7 @@ public class SmtpSettings
             return Empty;
         }
 
-        var props = value.Split(new[] { '#' }, StringSplitOptions.None);
+        var props = value.Split(['#'], StringSplitOptions.None);
         props = Array.ConvertAll(props, p => !string.IsNullOrEmpty(p) ? p : null);
 
         var host = HttpUtility.UrlDecode(props[3]);
