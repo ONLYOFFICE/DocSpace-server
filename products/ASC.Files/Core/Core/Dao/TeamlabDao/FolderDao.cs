@@ -1559,9 +1559,7 @@ internal class FolderDao(
                              select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
                          select f.Order
                                 ).FirstOrDefault(),
-                Settings = (from f in filesDbContext.RoomSettings 
-                            where f.TenantId == r.TenantId && f.RoomId == r.Id 
-                            select f).FirstOrDefault()
+                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == r.TenantId && x.RoomId == r.Id).Distinct().FirstOrDefault()
             });
     }
 
@@ -1599,9 +1597,7 @@ internal class FolderDao(
                         select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
                     select f.Order
                 ).FirstOrDefault(),
-                Settings = (from f in filesDbContext.RoomSettings 
-                    where f.TenantId == r.TenantId && f.RoomId == r.Id 
-                    select f).FirstOrDefault()
+                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == r.TenantId && x.RoomId == r.Id).Distinct().FirstOrDefault()
             });
     }
 
