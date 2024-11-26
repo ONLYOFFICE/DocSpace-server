@@ -167,8 +167,6 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
                 file.LockedBy = lockedBy != Guid.Empty && lockedBy != authContext.CurrentAccount.ID
                     ? await global.GetUserNameAsync(lockedBy)
                     : null;
-
-                continue;
             }
 
             if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))

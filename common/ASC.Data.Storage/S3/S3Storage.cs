@@ -953,7 +953,7 @@ public class S3Storage(TempStream tempStream,
     }
     public override async Task DeleteDirectoryAsync(string domain, string path, Guid ownerId)
     {
-        await DeleteFilesAsync(domain, path, "*", true);
+        await DeleteFilesAsync(domain, path, "*", true, ownerId);
     }
 
     public override async Task<long> GetFileSizeAsync(string domain, string path)
