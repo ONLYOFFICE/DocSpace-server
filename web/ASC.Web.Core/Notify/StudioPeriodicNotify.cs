@@ -240,7 +240,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #endregion
 
-                    #region 6 months after SAAS TRIAL expired
+                    #region 6 months after SAAS TRIAL expired or has no activity for 6 months
 
                     else if ((dueDateIsNotMax && dueDate.AddMonths(6) == nowDate) || (lastAuditEventDate.AddMonths(6) == nowDate))
                     {
