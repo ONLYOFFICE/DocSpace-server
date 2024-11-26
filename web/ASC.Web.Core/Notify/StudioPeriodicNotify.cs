@@ -44,6 +44,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         CoreSettings coreSettings,
         IServiceProvider serviceProvider,
+        AuditEventsRepository auditEventsRepository,
         IEventBus eventBus)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
@@ -77,6 +78,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
                 var delayDueDate = tariff.DelayDueDate.Date;
+
+                var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
+                var lastAuditEventDate = lastAuditEvent != null ? lastAuditEvent.Date.Date : tenant.CreationDateTime.Date;
 
                 INotifyAction action = null;
                 var paymentMessage = true;
@@ -154,7 +158,6 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         trulyYoursAsTebleRow = true;
                     }
 
-
                     #endregion
 
                     #region 7 days after registration to admins and users SAAS TRIAL
@@ -179,6 +182,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
 
                     #endregion
+
+                    #region 10 days after registration to admins SAAS TRIAL
 
                     else if (createdDate.AddDays(10) == nowDate)
                     {
@@ -210,6 +215,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         trulyYoursAsTebleRow = true;
                     }
 
+                    #endregion
+
                     #region 14 days after registration to admins and users SAAS TRIAL
 
                     else if (createdDate.AddDays(14) == nowDate)
@@ -235,7 +242,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #region 6 months after SAAS TRIAL expired
 
-                    else if (dueDateIsNotMax && dueDate.AddMonths(6) == nowDate)
+                    else if ((dueDateIsNotMax && dueDate.AddMonths(6) == nowDate) || (lastAuditEventDate.AddMonths(6) == nowDate))
                     {
                         action = Actions.SaasAdminTrialWarningAfterHalfYearV1;
                         toowner = true;
@@ -254,7 +261,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         trulyYoursAsTebleRow = true;
                     }
-                    else if (dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
+                    else if ((dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate) || (lastAuditEventDate.AddMonths(6).AddDays(7) <= nowDate))
                     {
                         await tenantManager.RemoveTenantAsync(tenant.Id, true);
 

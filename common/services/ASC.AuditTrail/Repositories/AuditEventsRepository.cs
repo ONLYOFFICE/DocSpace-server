@@ -215,6 +215,16 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         return q;
     }
 
+    public async Task<DbAuditEvent> GetLastEventAsync(int tenantId)
+    {
+        await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await auditTrailContext.AuditEvents
+            .Where(r => r.TenantId == tenantId)
+            .OrderByDescending(r => r.Id)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<IEnumerable<int>> GetTenantsAsync(DateTime? from = null, DateTime? to = null)
     {
         await using var feedDbContext = await dbContextFactory.CreateDbContextAsync();
