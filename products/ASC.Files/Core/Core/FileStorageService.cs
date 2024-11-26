@@ -1423,7 +1423,9 @@ public class FileStorageService //: IFileStorageService
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue))
+            var (file, _) = await documentServiceHelper.GetCurFileInfoAsync(fileId, -1);
+            
+            if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue) && docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(file.Id, file.Version,  file.ProviderEntry ? file.ModifiedOn : file.CreateOn))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
