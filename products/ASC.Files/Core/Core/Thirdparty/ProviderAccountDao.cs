@@ -487,7 +487,7 @@ internal class ProviderAccountDao(
             box.ProviderId = id;
             box.CustomerTitle = providerTitle;
             box.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            box.ProviderKey = input.Provider;
+            box.ProviderKey = ProviderTypes.Box.ToStringFast();
             box.RootFolderType = rootFolderType;
             box.CreateOn = createOn;
             box.ModifiedOn = modifiedOn;
@@ -512,7 +512,7 @@ internal class ProviderAccountDao(
             drop.ProviderId = id;
             drop.CustomerTitle = providerTitle;
             drop.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            drop.ProviderKey = input.Provider;
+            drop.ProviderKey = ProviderTypes.DropboxV2.ToStringFast();
             drop.RootFolderType = rootFolderType;
             drop.CreateOn = createOn;
             drop.ModifiedOn = modifiedOn;
@@ -537,7 +537,7 @@ internal class ProviderAccountDao(
             sh.ProviderId = id;
             sh.CustomerTitle = providerTitle;
             sh.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            sh.ProviderKey = input.Provider;
+            sh.ProviderKey = ProviderTypes.SharePoint.ToStringFast();
             sh.RootFolderType = rootFolderType;
             sh.CreateOn = createOn;
             sh.ModifiedOn = modifiedOn;
@@ -562,7 +562,7 @@ internal class ProviderAccountDao(
             gd.ProviderId = id;
             gd.CustomerTitle = providerTitle;
             gd.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            gd.ProviderKey = input.Provider;
+            gd.ProviderKey = ProviderTypes.GoogleDrive.ToStringFast();
             gd.RootFolderType = rootFolderType;
             gd.CreateOn = createOn;
             gd.ModifiedOn = modifiedOn;
@@ -587,7 +587,7 @@ internal class ProviderAccountDao(
             od.ProviderId = id;
             od.CustomerTitle = providerTitle;
             od.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            od.ProviderKey = input.Provider;
+            od.ProviderKey = ProviderTypes.OneDrive.ToStringFast();
             od.RootFolderType = rootFolderType;
             od.CreateOn = createOn;
             od.ModifiedOn = modifiedOn;
@@ -620,7 +620,7 @@ internal class ProviderAccountDao(
         webDavProviderInfo.ProviderId = id;
         webDavProviderInfo.CustomerTitle = providerTitle;
         webDavProviderInfo.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-        webDavProviderInfo.ProviderKey = input.Provider;
+        webDavProviderInfo.ProviderKey = key.ToStringFast();
         webDavProviderInfo.RootFolderType = rootFolderType;
         webDavProviderInfo.CreateOn = createOn;
         webDavProviderInfo.ModifiedOn = modifiedOn;

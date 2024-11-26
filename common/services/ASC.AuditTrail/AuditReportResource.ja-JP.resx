@@ -808,4 +808,7 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>招待状を再度送信しました：{0}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
 </root>

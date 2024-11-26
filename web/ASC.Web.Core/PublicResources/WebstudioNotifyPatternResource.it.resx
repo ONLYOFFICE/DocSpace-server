@@ -1877,4 +1877,7 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Imposta una password per ONLYOFFICE DocSpace</value>
+  </data>
 </root>

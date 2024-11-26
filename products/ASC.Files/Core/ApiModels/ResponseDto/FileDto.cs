@@ -225,11 +225,12 @@ public class FileDtoHelper(
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
+        var fileDao = daoFactory.GetFileDao<T>();
+
         if (fileType == FileType.Pdf)
         {
             var linkDao = daoFactory.GetLinkDao<T>();
             var folderDao = daoFactory.GetCacheFolderDao<T>();
-            var fileDao = daoFactory.GetFileDao<T>();
 
             var linkedIdTask = linkDao.GetLinkedAsync(file.Id);
             var propertiesTask = fileDao.GetProperties(file.Id);
@@ -328,7 +329,15 @@ public class FileDtoHelper(
 
         if (expiration.HasValue && expiration.Value != TimeSpan.MaxValue)
         {
-            result.Expired = new ApiDateTime(result.Updated.UtcTime + expiration.Value, result.Updated.TimeZoneOffset);
+            var update = result.Updated;
+
+            if (result.Version > 1)
+            {
+                var firstVersion = await fileDao.GetFileAsync(result.Id, 1);
+                update = _apiDateTimeHelper.Get(firstVersion.ModifiedOn);
+            }
+
+            result.Expired = new ApiDateTime(update.UtcTime + expiration.Value, update.TimeZoneOffset);
         }
 
         if (file.Order != 0)

@@ -93,7 +93,6 @@ public class FileStorageService //: IFileStorageService
     CommonLinkUtility commonLinkUtility,
     ShortUrl shortUrl,
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
-    PasswordSettingsManager passwordSettingsManager,
     WatermarkManager watermarkManager,
     CustomTagsService customTagsService,
     IMapper mapper)
@@ -3277,7 +3276,7 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture, socket, beforeOwnerChange);
+                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, culture, socket, beforeOwnerChange);
                 warning ??= result.Warning;
 
                 if (!result.Changed)
@@ -4326,10 +4325,7 @@ public class FileStorageService //: IFileStorageService
 
         if (!string.IsNullOrEmpty(password))
         {
-            var settings = await settingsManager.LoadAsync<PasswordSettings>();
-            passwordSettingsManager.CheckPassword(password, settings);
-            
-            options.Password = await externalShare.CreatePasswordKeyAsync(password);
+            options.Password = password;
         }
 
         var actions = entry.FileEntryType == FileEntryType.File
@@ -4414,7 +4410,7 @@ public class FileStorageService //: IFileStorageService
 
         try
         {
-            var result = await fileSharingAceHelper.SetAceObjectAsync(aces, entry, false, null, null);
+            var result = await fileSharingAceHelper.SetAceObjectAsync(aces, entry, false, null);
             if (!string.IsNullOrEmpty(result.Warning))
             {
                 throw GenerateException(new InvalidOperationException(result.Warning));

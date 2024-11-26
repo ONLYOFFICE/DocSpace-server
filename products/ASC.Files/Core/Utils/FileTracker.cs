@@ -219,7 +219,6 @@ public class FileTrackerHelper
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default) && tracker != null)
         {
-            _cache.Insert(GetCacheKey(fileId), tracker with { }, _cacheTimeout, _callbackAction);
             await _cacheNotify.PublishAsync(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = tracker }, CacheNotifyAction.Insert);
         }
     }
