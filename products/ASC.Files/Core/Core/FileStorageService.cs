@@ -540,6 +540,8 @@ public class FileStorageService //: IFileStorageService
         {
             return null;
         }
+        
+        await filesMessageService.SendAsync(MessageAction.RoomCreated, folder, folder.Title);
 
         switch (folder.FolderType)
         {
@@ -557,7 +559,6 @@ public class FileStorageService //: IFileStorageService
         }
 
         await socketManager.CreateFolderAsync(folder);
-        await filesMessageService.SendAsync(MessageAction.RoomCreated, folder, folder.Title);
 
         if (folder.ProviderEntry)
         {
@@ -582,6 +583,11 @@ public class FileStorageService //: IFileStorageService
                 folder.SettingsLifetime.Value.ToString(), 
                 folder.SettingsLifetime.Period.ToStringFast(), 
                 folder.SettingsLifetime.DeletePermanently.ToString());
+        }
+
+        if (folder.SettingsWatermark != null)
+        {
+            await filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, folder, folder.Title);
         }
         
         return folder;
