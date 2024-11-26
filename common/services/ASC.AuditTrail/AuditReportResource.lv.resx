@@ -802,4 +802,7 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Lietotāji [{0}]. Veidlapa ir iesniegta: {1}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
 </root>

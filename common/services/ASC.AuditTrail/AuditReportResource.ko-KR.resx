@@ -867,4 +867,7 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>초대장이 다시 전송되었습니다: {0}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
 </root>

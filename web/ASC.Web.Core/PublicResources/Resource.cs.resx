@@ -1066,4 +1066,7 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Počet správců překročil limit: {0}/{1}.</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Přidejte alespoň 1 důvěryhodnou doménu.</value>
+  </data>
 </root>

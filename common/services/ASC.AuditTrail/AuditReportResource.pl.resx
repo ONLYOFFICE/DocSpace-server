@@ -802,4 +802,7 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Użytkownicy [{0}]. Przesłany formularz: {1}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
 </root>

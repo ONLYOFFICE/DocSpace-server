@@ -867,4 +867,7 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Reenviar convites: {0}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
 </root>
