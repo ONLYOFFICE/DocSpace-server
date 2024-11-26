@@ -568,7 +568,7 @@ public class FileUtility(
                 ".bmp", ".cod", ".gif", ".ief", ".jpe", ".jpeg", ".jpg",
                 ".jfif", ".tiff", ".tif", ".cmx", ".ico", ".pnm", ".pbm",
                 ".png", ".ppm", ".rgb", ".svg", ".xbm", ".xpm", ".xwd",
-                ".svgt", ".svgy", ".gdraw", ".webp"
+                ".svgt", ".svgy", ".gdraw", ".webp", ".heic"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsSpreadsheet = new List<string>
