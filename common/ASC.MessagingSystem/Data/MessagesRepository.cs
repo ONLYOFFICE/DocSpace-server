@@ -47,7 +47,8 @@ public class MessagesRepository(
         MessageAction.UserSentPasswordChangeInstructions, 
         MessageAction.SendJoinInvite, 
         MessageAction.RoomRemoveUser,
-        MessageAction.PortalRenamed
+        MessageAction.PortalRenamed,
+        MessageAction.RoomCreated
     ];
 
     public async Task<int> AddAsync(EventMessage message)
