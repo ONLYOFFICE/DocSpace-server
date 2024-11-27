@@ -76,14 +76,7 @@ public class BaseProtobufSerializer
 
     public static T Deserialize<T>(ReadOnlySpan<byte> data)
     {
-        try
-        {
-            return Serializer.Deserialize<T>(data);
-        }
-        catch (ArgumentException) // concurrency handling
-        {
-            return Serializer.Deserialize<T>(data);
-        }
+        return Serializer.Deserialize<T>(data);
     }
 }
 
