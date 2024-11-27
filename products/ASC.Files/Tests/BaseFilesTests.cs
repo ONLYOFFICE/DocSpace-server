@@ -45,7 +45,7 @@ class FilesApplication : WebApplicationFactory<Program>
     {
         _args = args;
     }
-
+ 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         foreach (var s in _args)
@@ -84,11 +84,12 @@ public class MySetUpClass
                     { "ConnectionStrings:default:connectionString", BaseFilesTests.TestConnection },
                     { "migration:enabled", "true" },
                     { "core:products:folder", Path.Combine("..", "..", "..", "products") },
-                    { "web:hub:internal", "" }
+                    { "web:hub:internal", "" },
+                    { "log:dir", Path.Combine("..", "..", "..", "Logs", "Test") }
                 };
 
         var host = new FilesApplication(args);
-        Migrate(host.Services, "ASC.Migrations.MySql");
+        Migrate(host.Services, "ASC.Migrations.MySql.SaaS");
 
         host = new FilesApplication(args);
         Migrate(host.Services, Assembly.GetExecutingAssembly().GetName().Name);

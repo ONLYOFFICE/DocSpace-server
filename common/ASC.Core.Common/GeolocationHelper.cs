@@ -113,7 +113,7 @@ public class GeolocationHelper(IDbContextFactory<CustomDbContext> dbContextFacto
         {
             var ip = httpContextAccessor.HttpContext.Connection.RemoteIpAddress;
 
-            if (!ip.Equals(IPAddress.Loopback))
+            if (ip != null && !ip.Equals(IPAddress.Loopback))
             {
                 logger.TraceRemoteIpAddress(ip.ToString());
 
