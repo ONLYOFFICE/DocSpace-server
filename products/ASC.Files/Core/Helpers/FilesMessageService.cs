@@ -51,9 +51,9 @@ public class FilesMessageService(
         MessageAction.FileCopiedWithOverwriting
     ];
 
-    public async Task SendAsync(MessageAction action, params string[] description)
+    public void Send(MessageAction action, params string[] description)
     {
-        await messageService.SendHeadersMessageAsync(action, description);
+        messageService.SendHeadersMessage(action, description);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, IDictionary<string, StringValues> headers, params string[] description)
@@ -66,9 +66,9 @@ public class FilesMessageService(
         await SendAsync(action, entry, null, Guid.Empty, FileShare.None, description);
     }
 
-    public async Task SendAsync(MessageAction action, string d1, IEnumerable<string> d2)
+    public void Send(MessageAction action, string d1, IEnumerable<string> d2)
     {
-        await SendAsync(action, description: [d1, string.Join(", ", d2)]);
+        Send(action, description: [d1, string.Join(", ", d2)]);
     }
 
     public async Task SendAsync<T>(MessageAction action, string oldTitle, FileEntry<T> entry, params string[] description)
@@ -111,7 +111,7 @@ public class FilesMessageService(
             return;
         }
 
-        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create(entry.Id), headers, description, additionalParam.References);
+        messageService.SendHeadersMessage(action, MessageTarget.Create(entry.Id), headers, description, additionalParam.References);
     }
 
     private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string oldTitle = null, Guid userId = default, FileShare userRole = FileShare.None, params string[] description)
@@ -124,7 +124,7 @@ public class FilesMessageService(
         var additionalParam = await GetAdditionalEntryDataAsync(entry, action, oldTitle, userId, userRole);
         description = Append(description, additionalParam.DescriptionPart);
 
-        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create(entry.Id), null, description, additionalParam.References);
+        messageService.SendHeadersMessage(action, MessageTarget.Create(entry.Id), null, description, additionalParam.References);
     }
 
     public async Task SendCopyMessageAsync<T1, T2>(FileEntry<T2> target, Folder<T1> from, Folder<T2> to, List<Folder<T2>> toParents, bool overwrite,
@@ -237,7 +237,7 @@ public class FilesMessageService(
             references.Add(new FilesAuditReference { EntryId = target.Id, EntryType = (byte)target.FileEntryType });
             
             var json = JsonSerializer.Serialize(eventDescriptionTo, _serializerOptions);
-            await messageService.SendHeadersMessageAsync(action, MessageTarget.Create([target.Id, to.Id]), headers, Append(description, json), references);
+            messageService.SendHeadersMessage(action, MessageTarget.Create([target.Id, to.Id]), headers, Append(description, json), references);
             
             return;
         }
@@ -251,12 +251,10 @@ public class FilesMessageService(
         toReferences.Add(new FilesAuditReference { EntryId = target.Id, EntryType = (byte)target.FileEntryType });
         
         var jsonTo = JsonSerializer.Serialize(eventDescriptionTo, _serializerOptions);
-        var t1= messageService.SendHeadersMessageAsync(action, MessageTarget.Create([target.Id, to.Id]), headers, Append(description, jsonTo), toReferences);
+        messageService.SendHeadersMessage(action, MessageTarget.Create([target.Id, to.Id]), headers, Append(description, jsonTo), toReferences);
         
         var jsonFrom = JsonSerializer.Serialize(eventDescriptionFrom, _serializerOptions);
-        var t2= messageService.SendHeadersMessageAsync(action, MessageTarget.Create([target.Id, to.Id]), headers, Append(description, jsonFrom), fromReferences);
-        
-        await Task.WhenAll(t1, t2);
+        messageService.SendHeadersMessage(action, MessageTarget.Create([target.Id, to.Id]), headers, Append(description, jsonFrom), fromReferences);
     }
 
     private static List<FilesAuditReference> GetReferences(List<Folder<int>> parents)
@@ -290,7 +288,7 @@ public class FilesMessageService(
             return;
         }
 
-        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create([entry1.Id.ToString(), entry2.Id.ToString()]), headers, description, additionalParams.References);
+        messageService.SendHeadersMessage(action, MessageTarget.Create([entry1.Id.ToString(), entry2.Id.ToString()]), headers, description, additionalParams.References);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string description)
@@ -309,7 +307,7 @@ public class FilesMessageService(
 
         var additionalParam = await GetAdditionalEntryDataAsync(entry, action);
         
-        await messageService.SendAsync(action, MessageTarget.Create(entry.Id), description, additionalParam.DescriptionPart, additionalParam.References);
+        messageService.Send(action, MessageTarget.Create(entry.Id), description, additionalParam.DescriptionPart, additionalParam.References);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string d1, string d2)
@@ -327,7 +325,7 @@ public class FilesMessageService(
             return;
         }
 
-        await messageService.SendAsync(action, MessageTarget.Create(entry.Id), [d1, d2, additionalParam?.DescriptionPart], additionalParam?.References);
+        messageService.Send(action, MessageTarget.Create(entry.Id), [d1, d2, additionalParam?.DescriptionPart], additionalParam?.References);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, MessageInitiator initiator, params string[] description)
@@ -340,7 +338,7 @@ public class FilesMessageService(
         var additionalParam = await GetAdditionalEntryDataAsync(entry, action);
         description = Append(description, additionalParam.DescriptionPart);
 
-        await messageService.SendAsync(initiator, action, MessageTarget.Create(entry.Id), additionalParam.References, description);
+        messageService.Send(initiator, action, MessageTarget.Create(entry.Id), additionalParam.References, description);
     }
 
     private async Task<FileEntryData> GetAdditionalEntryDataAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default,

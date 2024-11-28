@@ -38,7 +38,7 @@ class JabberSenderSink(INotifySender sender) : Sink
         try
         {
             var result = SendResult.OK;
-            var m = await scope.ServiceProvider.GetRequiredService<JabberSenderSinkMessageCreator>().CreateNotifyMessageAsync(message, _senderName);
+            var m = await scope.ServiceProvider.GetRequiredService<JabberSenderSinkMessageCreator>().CreateNotifyMessage(message, _senderName);
 
             if (string.IsNullOrEmpty(m.Reciever))
             {
@@ -61,7 +61,7 @@ class JabberSenderSink(INotifySender sender) : Sink
 [Scope]
 public class JabberSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager) : SinkMessageCreator
 {
-    public override async Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName)
+    public override async Task<NotifyMessage> CreateNotifyMessage(INoticeMessage message, string senderName)
     {
         var username = (await userManager.GetUsersAsync(new Guid(message.Recipient.ID))).UserName;
 
@@ -75,7 +75,7 @@ public class JabberSenderSinkMessageCreator(UserManager userManager, TenantManag
             CreationDate = DateTime.UtcNow
         };
 
-        var tenant = await tenantManager.GetCurrentTenantAsync(false);
+        var tenant = tenantManager.GetCurrentTenant(false);
         m.TenantId = tenant?.Id ?? Tenant.DefaultTenant;
         return m;
     }

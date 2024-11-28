@@ -83,7 +83,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                 return;
             }
 
-            if ((await tenantManager.GetCurrentTenantAsync()).Status != TenantStatus.Active)
+            if ((tenantManager.GetCurrentTenant()).Status != TenantStatus.Active)
             {
                 await WriteError(context, "Can't perform upload for deleted or transferring portals");
 

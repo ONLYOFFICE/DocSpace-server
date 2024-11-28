@@ -64,7 +64,7 @@ public class PaymentController(UserManager userManager,
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
             !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
@@ -97,7 +97,7 @@ public class PaymentController(UserManager userManager,
     [HttpPut("update")]
     public async Task<bool> PaymentUpdateAsync(QuantityRequestDto inDto)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
@@ -127,7 +127,7 @@ public class PaymentController(UserManager userManager,
             return null;
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
@@ -256,7 +256,7 @@ public class PaymentController(UserManager userManager,
         CheckCache("salesrequest");
 
         await studioNotifyService.SendMsgToSalesAsync(inDto.Email, inDto.UserName, inDto.Message);
-        await messageService.SendAsync(MessageAction.ContactSalesMailSent);
+        messageService.Send(MessageAction.ContactSalesMailSent);
     }
 
     private void CheckCache(string baseKey)

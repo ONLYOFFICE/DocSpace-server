@@ -406,7 +406,7 @@ public class FileMarker(
         var newTags = new List<Tag>();
         var updateTags = new List<Tag>();
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"${LockKey}_{tenantId}", TimeSpan.FromMinutes(5)))
         {
@@ -484,7 +484,7 @@ public class FileMarker(
 
         var taskData = new AsyncTaskData<T>
         {
-            TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+            TenantId = tenantManager.GetCurrentTenantId(),
             CurrentAccountId = authContext.CurrentAccount.ID,
             FileEntry = (FileEntry<T>)fileEntry.Clone(),
             UserIDs = userIDs

@@ -390,17 +390,17 @@ public abstract class BaseIndexer<T>(Client client,
     {
         var func = expression.Compile();
         var selector = new Selector<T>(serviceProvider);
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = _tenantManager.GetCurrentTenant();
         var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
 
         return (await client.Instance.SearchAsync(descriptor.GetDescriptor(this, onlyId))).Documents;
     }
 
-    internal async Task<(IReadOnlyCollection<T>, long)> SelectWithTotalAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId)
+    internal (IReadOnlyCollection<T>, long) SelectWithTotal(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId)
     {
         var func = expression.Compile();
         var selector = new Selector<T>(serviceProvider);
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = _tenantManager.GetCurrentTenant();
         var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
         var result = client.Instance.Search(descriptor.GetDescriptor(this, onlyId));
         var total = result.Total;

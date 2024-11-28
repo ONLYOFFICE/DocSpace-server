@@ -93,7 +93,7 @@ public class DynamicCorsPolicyResolver(
         var claimIdClaim = token.Claims.Single(c => string.Equals(c.Type, "cid", StringComparison.OrdinalIgnoreCase));
         var clientId = Guid.Parse(claimIdClaim.Value);
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var cookieValue = await cookieStorage.EncryptCookieAsync(tenantId, userId, 0);
         var cookieName = cookiesManager.GetAscCookiesName();
 

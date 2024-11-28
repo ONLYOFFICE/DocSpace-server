@@ -401,7 +401,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         var id = Dao.MakeId(Dao.GetId(file));
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
