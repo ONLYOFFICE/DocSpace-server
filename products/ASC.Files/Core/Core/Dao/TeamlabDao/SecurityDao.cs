@@ -1235,7 +1235,7 @@ internal class SecurityTreeRecord
     public Guid Owner { get; set; }
     public FileShare Share { get; set; }
     public DateTime TimeStamp { get; set; }
-    public string Options { get; init; }
+    public FileShareOptions Options { get; init; }
     public int FolderId { get; init; }
     public int ParentId { get; set; }
     public int Level { get; set; }

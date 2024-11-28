@@ -36,7 +36,7 @@ public class DbFilesSecurity : BaseEntity, IDbFile
     public Guid Owner { get; set; }
     public FileShare Share { get; set; }
     public DateTime TimeStamp { get; set; }
-    public string Options { get; set; }
+    public FileShareOptions Options { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -108,7 +108,7 @@ public static class DbFilesSecurityExtension
 
             entity.Property(e => e.Options)
                 .HasColumnName("options")
-                .HasColumnType("text")
+                .HasColumnType("json")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });
