@@ -167,8 +167,6 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
                 file.LockedBy = lockedBy != Guid.Empty && lockedBy != authContext.CurrentAccount.ID
                     ? await global.GetUserNameAsync(lockedBy)
                     : null;
-
-                continue;
             }
 
             if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))
@@ -1434,7 +1432,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 if (stream != null)
                 {
                     downloadUri = await pathProvider.GetTempUrlAsync(stream, newExtension);
-                    downloadUri = await documentServiceConnector.ReplaceCommunityAddressAsync(downloadUri);
+                    downloadUri = documentServiceConnector.ReplaceCommunityAddress(downloadUri);
                 }
 
                 var key = DocumentServiceConnector.GenerateRevisionId(downloadUri);
@@ -1780,7 +1778,7 @@ public class EntryManager(IDaoFactory daoFactory,
             }
             else
             {
-                var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+                var tenantId = tenantManager.GetCurrentTenantId();
                 var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
                 if (quotaUserSettings.EnableQuota)
                 {

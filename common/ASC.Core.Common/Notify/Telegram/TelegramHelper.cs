@@ -130,7 +130,7 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
     {
         try
         {
-            if (!telegramBotClient.TestApiAsync().GetAwaiter().GetResult())
+            if (!telegramBotClient.TestApi().GetAwaiter().GetResult())
             {
                 return false;
             }

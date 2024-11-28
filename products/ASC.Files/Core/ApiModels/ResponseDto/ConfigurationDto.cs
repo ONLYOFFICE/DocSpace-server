@@ -576,9 +576,9 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
             Permissions = source.Permissions,
             SharedLinkParam = source.SharedLinkParam,
             SharedLinkKey = source.SharedLinkKey,
-            ReferenceData = await source.GetReferenceData(file),
+            ReferenceData = source.GetReferenceData(file),
             Title = source.Title ?? file.Title,
-            Url = await source.GetUrl(file),
+            Url = source.GetUrl(file),
             Options = source.Options,
         };
 

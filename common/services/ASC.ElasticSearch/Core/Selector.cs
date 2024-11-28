@@ -118,7 +118,7 @@ public class Selector<T>(IServiceProvider serviceProvider)
         {
             _queryContainer &= Wrap(selector, (a, w) => w.MatchPhrase(r => r.Field(a).Query(value.TrimQuotes())));
         }
-        else if (value.HasOtherLetter() || IsExactly(value))
+        else if (IsExactly(value))
         {
             _queryContainer &= Wrap(selector, (a, w) => w.Match(r => r.Field(a).Query(value.TrimQuotes())));
         }
@@ -306,7 +306,7 @@ public class Selector<T>(IServiceProvider serviceProvider)
         {
             _queryContainer = _queryContainer && MultiPhrase(props, value.TrimQuotes());
         }
-        else if (value.HasOtherLetter() || IsExactly(value))
+        else if (IsExactly(value))
         {
             _queryContainer = _queryContainer && MultiMatch(props, value.TrimQuotes());
         }
@@ -431,12 +431,6 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
 internal static class StringExtension
 {
-    public static bool HasOtherLetter(this string value)
-    {      
-        var specialChar = @"-=+;/\|№&#^<>()[]{}$%";
-        return specialChar.Any(value.Contains);
-    }
-
     public static string WrapAsterisk(this string value)
     {
         var result = value;

@@ -61,7 +61,7 @@ public class CustomTagsService(
 
         var savedTag = await tagDao.SaveTagInfoAsync(tagInfo);
 
-        await filesMessageService.SendAsync(MessageAction.TagCreated, savedTag.Name);
+        filesMessageService.Send(MessageAction.TagCreated, savedTag.Name);
 
         return savedTag;
     }
@@ -85,7 +85,7 @@ public class CustomTagsService(
 
         await tagDao.RemoveTagsAsync(tags);
 
-        await filesMessageService.SendAsync(MessageAction.TagsDeleted, string.Join(',', tags.Select(t => t.Name).ToArray()));
+        filesMessageService.Send(MessageAction.TagsDeleted, string.Join(',', tags.Select(t => t.Name).ToArray()));
     }
 
     public async Task<Folder<T>> AddRoomTagsAsync<T>(T folderId, IEnumerable<string> names)

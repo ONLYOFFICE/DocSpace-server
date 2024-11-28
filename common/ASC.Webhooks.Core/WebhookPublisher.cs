@@ -25,7 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Tenants;
-using ASC.Web.Webhooks;
+using Microsoft.AspNetCore.Http;
+
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -37,7 +38,8 @@ public class WebhookPublisher(
     IEventBus eventBus,
     SecurityContext securityContext,
     TenantManager tenantManager,
-    TenantUtil tenantUtil)
+    TenantUtil tenantUtil,
+    IHttpContextAccessor httpContextAccessor)
     : IWebhookPublisher
 {
     public async Task PublishAsync(int webhookId, string requestPayload)
@@ -61,8 +63,8 @@ public class WebhookPublisher(
         {
             return null;
         }
-
-        var tenantId = (await tenantManager.GetCurrentTenantAsync()).Id;
+        
+        var tenantId = (await tenantManager.GetCurrentTenantAsync(false, httpContextAccessor?.HttpContext)).Id;
 
         var webhooksLog = new DbWebhooksLog
         {

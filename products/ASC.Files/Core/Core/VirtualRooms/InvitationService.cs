@@ -51,10 +51,10 @@ public class InvitationService(
         return commonLinkUtility.GetConfirmationUrl(key, ConfirmType.LinkInvite, createdBy);
     }
 
-    public async Task<string> GetInvitationLinkAsync(string email, FileShare share, Guid createdBy, string roomId, string culture = null)
+    public string GetInvitationLink(string email, FileShare share, Guid createdBy, string roomId, string culture = null)
     {
         var type = FileSecurity.GetTypeByShare(share);
-        var link = await commonLinkUtility.GetInvitationLinkAsync(email, type, createdBy, culture) + $"&roomId={roomId}";
+        var link = commonLinkUtility.GetInvitationLink(email, type, createdBy, culture) + $"&roomId={roomId}";
         return link;
     }
     
@@ -103,7 +103,7 @@ public class InvitationService(
                         return true;
                     }
                     
-                    var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+                    var tenantId = tenantManager.GetCurrentTenantId();
                     await using var context = await dbContextFactory.CreateDbContextAsync();
 
                     var query = context.AuditEvents.Where(x => x.TenantId == tenantId && x.Action == (int)MessageAction.RoomRemoveUser);
@@ -259,7 +259,7 @@ public class InvitationService(
         }
 
         var success = int.TryParse(data.RoomId, out var id);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
         {

@@ -29,7 +29,9 @@ namespace ASC.Webhooks.Core.EF.Model;
 public class DbWebhooksConfig : BaseEntity
 {
     public int Id { get; set; }
+    [MaxLength(50)]
     public string Name { get; set; }
+    [MaxLength(50)]
     public string SecretKey { get; set; }
     public int TenantId { get; set; }
     public string Uri { get; set; }
@@ -98,12 +100,10 @@ public static class WebhooksConfigExtension
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.SecretKey)
-                .HasMaxLength(50)
                 .HasColumnName("secret_key")
                 .HasDefaultValueSql("''");
 
             entity.Property(e => e.Name)
-                .HasMaxLength(50)
                 .HasColumnName("name")
                 .IsRequired();
 
@@ -153,12 +153,10 @@ public static class WebhooksConfigExtension
                 .HasDefaultValueSql("''");
 
             entity.Property(e => e.SecretKey)
-                .HasMaxLength(50)
                 .HasColumnName("secret_key")
                 .HasDefaultValueSql("''");
 
             entity.Property(e => e.Name)
-                .HasMaxLength(50)
                 .HasColumnName("name")
                 .IsRequired();
 

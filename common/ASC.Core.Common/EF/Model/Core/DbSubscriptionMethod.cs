@@ -29,9 +29,13 @@ namespace ASC.Core.Common.EF;
 public class DbSubscriptionMethod : BaseEntity
 {
     public int TenantId { get; set; }
+    [MaxLength(38)]
     public string Source { get; set; }
+    [MaxLength(128)]
     public string Action { get; set; }
+    [MaxLength(38)]
     public string Recipient { get; set; }
+    [MaxLength(1024)]
     public string Sender { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -103,26 +107,26 @@ public static class SubscriptionMethodExtension
 
             entity.Property(e => e.Source)
                 .HasColumnName("source")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Action)
                 .HasColumnName("action")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Recipient)
                 .HasColumnName("recipient")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Sender)
                 .IsRequired()
                 .HasColumnName("sender")
-                .HasColumnType("varchar(1024)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });
@@ -139,21 +143,17 @@ public static class SubscriptionMethodExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Source)
-                .HasColumnName("source")
-                .HasMaxLength(38);
+                .HasColumnName("source");
 
             entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .HasMaxLength(128);
+                .HasColumnName("action");
 
             entity.Property(e => e.Recipient)
-                .HasColumnName("recipient")
-                .HasMaxLength(38);
+                .HasColumnName("recipient");
 
             entity.Property(e => e.Sender)
                 .IsRequired()
-                .HasColumnName("sender")
-                .HasMaxLength(1024);
+                .HasColumnName("sender");
         });
     }
 }

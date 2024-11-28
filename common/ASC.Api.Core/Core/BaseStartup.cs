@@ -536,6 +536,8 @@ public abstract class BaseStartup
 
         app.UseSynchronizationContextMiddleware();
 
+        app.UseTenantMiddleware();
+        
         app.UseAuthentication();
 
         // TODO: if some client requests very slow, this line will need to remove
