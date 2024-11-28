@@ -29,6 +29,7 @@ using System.Net.Mail;
 using static ASC.Security.Cryptography.EmailValidationKeyProvider;
 
 using SecurityContext = ASC.Core.SecurityContext;
+using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult;
 
 namespace ASC.Api.Core.Security;
 

@@ -29,9 +29,11 @@ namespace ASC.Data.Backup.EF.Model;
 public class BackupSchedule : BaseEntity
 {
     public int TenantId { get; set; }
+    [MaxLength(255)]
     public string Cron { get; set; }
     public int BackupsStored { get; set; }
     public BackupStorageType StorageType { get; set; }
+    [MaxLength(255)]
     public string StorageBasePath { get; set; }
     public DateTime LastBackupTime { get; set; }
     public string StorageParams { get; set; }
@@ -76,7 +78,7 @@ public static class BackupScheduleExtension
             entity.Property(e => e.Cron)
                 .IsRequired()
                 .HasColumnName("cron")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -92,7 +94,7 @@ public static class BackupScheduleExtension
 
             entity.Property(e => e.StorageBasePath)
                 .HasColumnName("storage_base_path")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
                 .HasDefaultValueSql("NULL");
@@ -137,7 +139,6 @@ public static class BackupScheduleExtension
             entity.Property(e => e.Cron)
                 .IsRequired()
                 .HasColumnName("cron")
-                .HasMaxLength(255)
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -155,8 +156,7 @@ public static class BackupScheduleExtension
                 .HasColumnName("storage_base_path")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
-                .HasDefaultValueSql("NULL")
-                .HasMaxLength(255);
+                .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.LastBackupTime)
                 .IsRequired()

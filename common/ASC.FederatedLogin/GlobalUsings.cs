@@ -61,6 +61,6 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.IdentityModel.Tokens;
-global using Newtonsoft.Json;
+
 global using Newtonsoft.Json.Linq;
 global using JsonSerializer = System.Text.Json.JsonSerializer;
