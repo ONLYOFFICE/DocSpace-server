@@ -27,6 +27,6 @@
 namespace ASC.Data.Storage.Log;
 internal static partial class CrossModuleTransferUtilityLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "Copy File")]
+    [LoggerMessage(LogLevel.Error, "Copy File")]
     public static partial void ErrorCopyFile(this ILogger logger, Exception exception);
 }

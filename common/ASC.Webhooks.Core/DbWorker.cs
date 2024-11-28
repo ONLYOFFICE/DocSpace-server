@@ -52,7 +52,7 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var objForCreate = await webhooksDbContext.WebhooksConfigByUriAsync(tenantId, uri, name);
 
         if (objForCreate != null)
@@ -87,7 +87,7 @@ public class DbWorker(
 
     public async IAsyncEnumerable<WebhooksConfigWithStatus> GetTenantWebhooksWithStatus()
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
         
@@ -101,7 +101,7 @@ public class DbWorker(
 
     public async IAsyncEnumerable<WebhooksConfig> GetWebhookConfigs()
     {        
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -115,7 +115,7 @@ public class DbWorker(
 
     public async Task<WebhooksConfig> UpdateWebhookConfig(int id, string name, string uri, string key, bool? enabled, bool? ssl)
     {        
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -157,7 +157,7 @@ public class DbWorker(
 
     public async Task<WebhooksConfig> RemoveWebhookConfigAsync(int id)
     {        
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -214,7 +214,7 @@ public class DbWorker(
 
     public async Task<WebhooksLog> WriteToJournal(WebhooksLog webhook)
     {
-        webhook.TenantId = await tenantManager.GetCurrentTenantIdAsync();
+        webhook.TenantId = tenantManager.GetCurrentTenantId();
         webhook.Uid = authContext.CurrentAccount.ID;
 
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
@@ -293,7 +293,7 @@ public class DbWorker(
 
     private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? hookId, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -368,15 +368,24 @@ public class DbWebhooks
     public WebhooksConfig Config { get; init; }
 }
 
-/// <summary>
-/// </summary>
 [Flags]
 public enum WebhookGroupStatus
 {
+    [SwaggerEnum("None")]
     None = 0,
+
+    [SwaggerEnum("Not sent")]
     NotSent = 1,
+
+    [SwaggerEnum("Status2xx")]
     Status2xx = 2,
+
+    [SwaggerEnum("Status3xx")]
     Status3xx = 4,
+
+    [SwaggerEnum("Status4xx")]
     Status4xx = 8,
+
+    [SwaggerEnum("Status5xx")]
     Status5xx = 16
 }

@@ -26,60 +26,71 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class LoginEventDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    /// <summary>Date</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    /// <summary>
+    /// Date
+    /// </summary>
     public ApiDateTime Date { get; set; }
 
-    /// <summary>User</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// User
+    /// </summary>
     public string User { get; set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// User ID
+    /// </summary>
     public Guid UserId { get; set; }
 
-    /// <summary>Login</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Login
+    /// </summary>
     public string Login { get; set; }
 
-    /// <summary>Action</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Action
+    /// </summary>
     public string Action { get; set; }
 
-    /// <summary>Action ID</summary>
-    /// <type>ASC.MessagingSystem.Core.MessageAction, ASC.Core.Common</type>
+    /// <summary>
+    /// Action ID
+    /// </summary>
     public MessageAction ActionId { get; set; }
 
-    /// <summary>IP</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// IP
+    /// </summary>
     public string IP { get; set; }
 
-    /// <summary>Country</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Country
+    /// </summary>
     public string Country { get; set; }
 
-    /// <summary>City</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// City
+    /// </summary>
     public string City { get; set; }
 
-    /// <summary>Browser</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Browser
+    /// </summary>
     public string Browser { get; set; }
 
-    /// <summary>Platform</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Platform
+    /// </summary>
     public string Platform { get; set; }
 
-    /// <summary>Page</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Page
+    /// </summary>
     public string Page { get; set; }
     
     public LoginEventDto(LoginEvent loginEvent, ApiDateTimeHelper apiDateTimeHelper)

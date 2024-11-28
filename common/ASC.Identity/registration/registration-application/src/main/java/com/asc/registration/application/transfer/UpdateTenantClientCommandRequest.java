@@ -31,6 +31,7 @@ import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Set;
 import lombok.*;
@@ -82,7 +83,8 @@ public class UpdateTenantClientCommandRequest implements Serializable {
   /** The name of the client. This field must not be blank. */
   @NotBlank private String name;
 
-  /** The description of the client. This field must not be blank. */
+  /** The description of the client. */
+  @Size(max = 255, message = "client description length is expected to be less than 256 characters")
   private String description;
 
   /**

@@ -1665,7 +1665,7 @@ Bạn vừa tạo ONLYOFFICE DocSpace, một trung tâm tài liệu nơi bạn c
 
 Gói dịch vụ hiện tại của bạn là STARTUP. Nó hoàn toàn miễn phí và bao gồm:
 
-&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 quản trị viên/người dùng cấp cao&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Lên đến 100 phòng&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;Dung lượng đĩa 100 GB&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 quản trị viên&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Lên đến 100 phòng&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;Dung lượng đĩa 100 GB&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
 *Tận hưởng một cách cộng tác tài liệu mới!*
 
@@ -1761,5 +1761,187 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>Bạn được mời vào phòng ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Mua Ngay</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Đặt mật khẩu</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Giấy phép của bạn cho ONLYOFFICE DocSpace Developer sẽ hết hạn vào hôm nay.
+
+Chúng tôi đã kích hoạt thời gian ân hạn $PaymentDelay ngày cho bạn. Trong thời gian này, quyền truy cập để chỉnh sửa tài liệu bị giới hạn ở 20 kết nối cùng lúc (không còn hỗ trợ và cập nhật nữa).
+
+Để cập nhật giấy phép, xin vui lòng liên hệ trực tiếp với người quản lý bán hàng của bạn hoặc liên hệ với chúng tôi qua "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Đối với các câu hỏi về thanh toán, xin hãy liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}". Để giải quyết bất kỳ vấn đề kỹ thuật nào, xin hãy truy cập "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Giấy phép ONLYOFFICE DocSpace Developer của bạn sẽ hết hạn sau 7 ngày.
+
+Để cập nhật giấy phép, xin vui lòng liên hệ trực tiếp với người quản lý bán hàng của bạn hoặc liên hệ với chúng tôi qua "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Đối với các câu hỏi về thanh toán, xin hãy liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}". Để giải quyết bất kỳ vấn đề kỹ thuật nào, xin hãy truy cập "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Giấy phép ONLYOFFICE DocSpace Developer của bạn sẽ hết hạn sau 7 ngày. Điều này có nghĩa là DocSpace sẽ không còn khả dụng nữa.
+
+Để cập nhật giấy phép, xin vui lòng liên hệ trực tiếp với người quản lý bán hàng của bạn hoặc liên hệ với chúng tôi qua "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Đối với các câu hỏi về thanh toán, xin hãy liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}". Để giải quyết bất kỳ vấn đề kỹ thuật nào, xin hãy truy cập "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Thời gian ân hạn giấy phép ONLYOFFICE DocSpace Developer của bạn sẽ hết hạn vào hôm nay. Điều này có nghĩa là DocSpace sẽ không còn khả dụng nữa.
+
+Để cập nhật giấy phép, xin vui lòng liên hệ trực tiếp với người quản lý bán hàng của bạn hoặc liên hệ với chúng tôi qua "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Đối với các câu hỏi về thanh toán, xin hãy liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}". Để giải quyết bất kỳ vấn đề kỹ thuật nào, xin hãy truy cập "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Giấy phép ONLYOFFICE DocSpace Enterprise của bạn sẽ hết hạn vào hôm nay.
+
+Chúng tôi đã kích hoạt *thời gian ân hạn $PaymentDelay‎ ngày* cho bạn. Trong thời gian này, quyền truy cập vào DocSpace được cung cấp cho 3 người dùng có tên * (không còn hỗ trợ và cập nhật nữa).
+
+Để có thể sử dụng tất cả các tính năng có sẵn tại thời điểm mua gói dịch vụ trong một *khoảng thời gian không giới hạn*, chúng tôi khuyên bạn nên *mua giấy phép TRỌN ĐỜI * cho ONLYOFFICE DocSpace Enterprise (bao gồm 3 năm hỗ trợ và cập nhật):
+
+$OrangeButton
+
+Bạn cũng có thể liên hệ trực tiếp với người quản lý bán hàng của mình để cập nhật giấy phép.
+
+Đối với các câu hỏi về thanh toán, xin hãy liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}". Để giải quyết bất kỳ vấn đề kỹ thuật nào, xin hãy truy cập "${__SupportLink}":"${__SupportLink}".
+
+*ID được ghi lại của 3 người dùng đầu tiên sẽ mở bất kỳ tập tin nào để chỉnh sửa. Số lượng tài liệu có thể chỉnh sửa cùng một lúc không giới hạn. Những người dùng khác sẽ chỉ có thể mở tài liệu để xem.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Giấy phép ONLYOFFICE DocSpace Enterprise của bạn sẽ hết hạn sau 7 ngày.
+
+Để có thể sử dụng tất cả các tính năng có sẵn tại thời điểm mua gói dịch vụ trong một *khoảng thời gian không giới hạn*, chúng tôi khuyên bạn nên *mua giấy phép TRỌN ĐỜI * cho ONLYOFFICE DocSpace Enterprise (bao gồm 3 năm hỗ trợ và cập nhật).
+
+$OrangeButton
+
+Bạn cũng có thể liên hệ trực tiếp với người quản lý bán hàng của mình để cập nhật giấy phép.
+
+Đối với các câu hỏi về thanh toán, xin hãy liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}". Để giải quyết bất kỳ vấn đề kỹ thuật nào, xin hãy truy cập "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Thời gian ân hạn giấy phép ONLYOFFICE DocSpace Enterprise của bạn sẽ hết hạn sau 7 ngày. Điều này có nghĩa là DocSpace sẽ không còn khả dụng nữa.
+
+Để có thể sử dụng tất cả các tính năng có sẵn tại thời điểm mua gói dịch vụ trong một *khoảng thời gian không giới hạn*, chúng tôi khuyên bạn nên *mua giấy phép TRỌN ĐỜI * cho ONLYOFFICE DocSpace Enterprise (bao gồm 3 năm hỗ trợ và cập nhật):
+
+$OrangeButton
+
+Bạn cũng có thể liên hệ trực tiếp với người quản lý bán hàng của mình để cập nhật giấy phép.
+
+Đối với các câu hỏi về thanh toán, xin hãy liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}". Để giải quyết bất kỳ vấn đề kỹ thuật nào, xin hãy truy cập "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Thời gian ân hạn cho giấy phép ONLYOFFICE DocSpace Enterprise của bạn sẽ hết hạn vào hôm nay. Điều này có nghĩa là DocSpace sẽ không còn khả dụng nữa.
+
+Để có thể sử dụng tất cả các tính năng có sẵn tại thời điểm mua gói dịch vụ trong một *khoảng thời gian không giới hạn*, chúng tôi khuyên bạn nên *mua giấy phép TRỌN ĐỜI * cho ONLYOFFICE DocSpace Enterprise (bao gồm 3 năm hỗ trợ và cập nhật):
+
+$OrangeButton
+
+Bạn cũng có thể liên hệ trực tiếp với người quản lý bán hàng của mình để cập nhật giấy phép. 
+
+Đối với các câu hỏi về thanh toán, xin hãy liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}". Để giải quyết bất kỳ vấn đề kỹ thuật nào, xin hãy truy cập "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Giấy phép ONLYOFFICE DocSpace Enterprise của bạn sẽ hết hạn sau 7 ngày. Điều này có nghĩa là không còn cập nhật và hỗ trợ nữa.*
+
+Để cập nhật giấy phép, xin vui lòng liên hệ trực tiếp với người quản lý bán hàng của bạn hoặc liên hệ với chúng tôi qua "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Đối với các câu hỏi về thanh toán, xin hãy liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}". Để giải quyết bất kỳ vấn đề kỹ thuật nào, xin hãy truy cập "${__SupportLink}":"${__SupportLink}".
+
+*Bạn có thể sử dụng tất cả các tính năng có sẵn tại thời điểm mua giấy phép trong một khoảng thời gian không giới hạn.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Giấy phép ONLYOFFICE DocSpace Enterprise của bạn sẽ hết hạn vào hôm nay. Điều này có nghĩa là không còn cập nhật và hỗ trợ nữa.*
+
+Để cập nhật giấy phép, xin vui lòng liên hệ trực tiếp với người quản lý bán hàng của bạn hoặc liên hệ với chúng tôi qua "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Đối với các câu hỏi về thanh toán, xin hãy liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}". Để giải quyết bất kỳ vấn đề kỹ thuật nào, xin hãy truy cập "${__SupportLink}":"${__SupportLink}".
+
+*Bạn có thể sử dụng tất cả các tính năng có sẵn tại thời điểm mua giấy phép trong một khoảng thời gian không giới hạn.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Chào bạn! Vui lòng thiết lập mật khẩu cho tài khoản ONLYOFFICE DocSpace của bạn. Chỉ cần nhấp vào nút bên dưới:
+
+$OrangeButton
+
+Liên kết có hiệu lực trong 7 ngày.</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Thời gian ân hạn cho ONLYOFFICE DocSpace Developer của bạn đã được kích hoạt</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Giấy phép ONLYOFFICE DocSpace Developer của bạn sẽ sớm hết hạn</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Thời gian ân hạn cho ONLYOFFICE DocSpace Developer của bạn sẽ sớm hết hạn</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Developer của bạn không còn khả dụng</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Thời gian ân hạn cho ONLYOFFICE DocSpace Enterprise của bạn đã được kích hoạt</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Giấy phép ONLYOFFICE DocSpace Enterprise của bạn sẽ sớm hết hạn</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Thời gian ân hạn cho ONLYOFFICE DocSpace Enterprise của bạn sẽ sớm hết hạn</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace Enterprise của bạn không còn khả dụng</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Giấy phép ONLYOFFICE DocSpace Enterprise của bạn sẽ sớm hết hạn</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Giấy phép ONLYOFFICE DocSpace Enterprise của bạn sẽ hết hạn vào hôm nay</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Thiết lập mật khẩu cho ONLYOFFICE DocSpace</value>
   </data>
 </root>

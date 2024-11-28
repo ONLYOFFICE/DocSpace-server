@@ -40,6 +40,12 @@ public class SettingsController(CommonMethods commonMethods,
 
     #region For TEST api
 
+    /// <summary>
+    /// Test api
+    /// </summary>
+    /// <path>apisystem/settings/test</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [SwaggerResponse(200, "Settings api works")]
     [HttpGet("test")]
     public IActionResult Check()
     {
@@ -53,6 +59,12 @@ public class SettingsController(CommonMethods commonMethods,
 
     #region API methods
 
+    /// <summary>
+    /// Gets settings
+    /// </summary>
+    /// <path>apisystem/settings</path>
+    [Tags("Settings")]
+    [SwaggerResponse(200, "Settings", typeof(IActionResult))]
     [HttpGet("get")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> GetSettingsAsync([FromQuery] SettingsModel model)
@@ -80,6 +92,12 @@ public class SettingsController(CommonMethods commonMethods,
         });
     }
 
+    /// <summary>
+    /// Saves settings
+    /// </summary>
+    /// <path>apisystem/settings/save</path>
+    [Tags("Settings")]
+    [SwaggerResponse(200, "Settings", typeof(IActionResult))]
     [HttpPost("save")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> SaveSettingsAsync([FromBody] SettingsModel model)
@@ -132,6 +150,12 @@ public class SettingsController(CommonMethods commonMethods,
         });
     }
 
+    /// <summary>
+    /// Checks domain
+    /// </summary>
+    /// <path>apisystem/settings/checkdomain</path>
+    [Tags("Settings")]
+    [SwaggerResponse(200, "True if success", typeof(IActionResult))]
     [HttpPost("checkdomain")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> CheckDomain([FromBody] DomainModel model)

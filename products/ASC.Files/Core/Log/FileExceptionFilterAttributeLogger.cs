@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.Log;
 internal static partial class FileExceptionFilterAttributeLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "LogException")]
+    [LoggerMessage(LogLevel.Error, "LogException")]
     public static partial void ErrorLogException(this ILogger logger, Exception exception);
 }

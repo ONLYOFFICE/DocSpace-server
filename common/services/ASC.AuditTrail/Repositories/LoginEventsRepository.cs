@@ -40,7 +40,7 @@ public class LoginEventsRepository(TenantManager tenantManager,
         int startIndex = 0,
         int limit = 0)
     {
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
         await using var messagesContext = await dbContextFactory.CreateDbContextAsync();
 
         var query =

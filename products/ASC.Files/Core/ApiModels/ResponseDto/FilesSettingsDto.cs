@@ -28,60 +28,285 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FilesSettingsDto
 {
+    /// <summary>
+    /// Exts image previewed
+    /// </summary>
     public List<string> ExtsImagePreviewed { get; set; }
+
+    /// <summary>
+    /// Exts media previewed
+    /// </summary>
     public List<string> ExtsMediaPreviewed { get; set; }
+
+    /// <summary>
+    /// Exts web previewed
+    /// </summary>
     public List<string> ExtsWebPreviewed { get; set; }
+
+    /// <summary>
+    /// Exts web edited
+    /// </summary>
     public List<string> ExtsWebEdited { get; set; }
+
+    /// <summary>
+    /// Exts web encrypt
+    /// </summary>
     public List<string> ExtsWebEncrypt { get; set; }
+
+    /// <summary>
+    /// Exts web reviewed
+    /// </summary>
     public List<string> ExtsWebReviewed { get; set; }
+
+    /// <summary>
+    /// Exts web custom filter editing
+    /// </summary>
     public List<string> ExtsWebCustomFilterEditing { get; set; }
+
+    /// <summary>
+    /// Exts web restricted editing
+    /// </summary>
     public List<string> ExtsWebRestrictedEditing { get; set; }
+
+    /// <summary>
+    /// Exts web commented
+    /// </summary>
     public List<string> ExtsWebCommented { get; set; }
+
+    /// <summary>
+    /// Exts web template
+    /// </summary>
     public List<string> ExtsWebTemplate { get; set; }
+
+    /// <summary>
+    /// Exts co authoring
+    /// </summary>
     public List<string> ExtsCoAuthoring { get; set; }
+
+    /// <summary>
+    /// Exts must convert
+    /// </summary>
     public List<string> ExtsMustConvert { get; set; }
+
+    /// <summary>
+    /// Exts convertible
+    /// </summary>
     public IDictionary<string, List<string>> ExtsConvertible { get; set; }
+
+    /// <summary>
+    /// Exts uploadable
+    /// </summary>
     public List<string> ExtsUploadable { get; set; }
+
+    /// <summary>
+    /// Exts archive
+    /// </summary>
     public ImmutableList<string> ExtsArchive { get; set; }
+
+    /// <summary>
+    /// Exts video
+    /// </summary>
     public ImmutableList<string> ExtsVideo { get; set; }
+
+    /// <summary>
+    /// Exts audio
+    /// </summary>
     public ImmutableList<string> ExtsAudio { get; set; }
+
+    /// <summary>
+    /// Exts image
+    /// </summary>
     public ImmutableList<string> ExtsImage { get; set; }
+
+    /// <summary>
+    /// Exts spreadsheet
+    /// </summary>
     public ImmutableList<string> ExtsSpreadsheet { get; set; }
+
+    /// <summary>
+    /// Exts presentation
+    /// </summary>
     public ImmutableList<string> ExtsPresentation { get; set; }
+
+    /// <summary>
+    /// Exts document
+    /// </summary>
     public ImmutableList<string> ExtsDocument { get; set; }
+
+    /// <summary>
+    /// Internal formats
+    /// </summary>
     public Dictionary<FileType, string> InternalFormats { get; set; }
+
+    /// <summary>
+    /// Master form extension
+    /// </summary>
     public string MasterFormExtension { get; set; }
+
+    /// <summary>
+    /// Param version
+    /// </summary>
     public string ParamVersion { get; set; }
+
+    /// <summary>
+    /// Param out type
+    /// </summary>
     public string ParamOutType { get; set; }
+
+    /// <summary>
+    /// File download url string
+    /// </summary>
+    [Url]
     public string FileDownloadUrlString { get; set; }
+
+    /// <summary>
+    /// File web viewer url string
+    /// </summary>
     public string FileWebViewerUrlString { get; set; }
+
+    /// <summary>
+    /// File web viewer external url string
+    /// </summary>
+    [Url]
     public string FileWebViewerExternalUrlString { get; set; }
+
+    /// <summary>
+    /// File web editor url string
+    /// </summary>
     public string FileWebEditorUrlString { get; set; }
+
+    /// <summary>
+    /// File web editor external url string
+    /// </summary>
+    [Url]
     public string FileWebEditorExternalUrlString { get; set; }
+
+    /// <summary>
+    /// File redirect preview url string
+    /// </summary>
+    [Url]
     public string FileRedirectPreviewUrlString { get; set; }
+
+    /// <summary>
+    /// File thumbnail url string
+    /// </summary>
+    [Url]
     public string FileThumbnailUrlString { get; set; }
+
+    /// <summary>
+    /// Confirm delete
+    /// </summary>
     public bool ConfirmDelete { get; set; }
+
+    /// <summary>
+    /// EnableT third party
+    /// </summary>
     public bool EnableThirdParty { get; set; }
+
+    /// <summary>
+    /// External share
+    /// </summary>
     public bool ExternalShare { get; set; }
+
+    /// <summary>
+    /// External share social media
+    /// </summary>
     public bool ExternalShareSocialMedia { get; set; }
+
+    /// <summary>
+    /// Store original files
+    /// </summary>
     public bool StoreOriginalFiles { get; set; }
+
+    /// <summary>
+    /// Keep new file name
+    /// </summary>
     public bool KeepNewFileName { get; set; }
+
+    /// <summary>
+    /// Display file extension
+    /// </summary>
     public bool DisplayFileExtension { get; set; }
+
+    /// <summary>
+    /// Convert notify
+    /// </summary>    
     public bool ConvertNotify { get; set; }
+
+    /// <summary>
+    /// HideC confirm convert save
+    /// </summary>
     public bool HideConfirmConvertSave { get; set; }
+
+    /// <summary>
+    /// Hide confirm convert open
+    /// </summary>
     public bool HideConfirmConvertOpen { get; set; }
+
+    /// <summary>
+    /// Default order
+    /// </summary>
     public OrderBy DefaultOrder { get; set; }
+
+    /// <summary>
+    /// Forcesave
+    /// </summary>
     public bool Forcesave { get; set; }
+
+    /// <summary>
+    /// Store forcesave
+    /// </summary>
     public bool StoreForcesave { get; set; }
+
+    /// <summary>
+    /// Recent section
+    /// </summary>
     public bool RecentSection { get; set; }
+
+    /// <summary>
+    /// Favorites section
+    /// </summary>
     public bool FavoritesSection { get; set; }
+
+    /// <summary>
+    /// Templates section
+    /// </summary>
     public bool TemplatesSection { get; set; }
+
+    /// <summary>
+    /// Download tar gz
+    /// </summary>
     public bool DownloadTarGz { get; set; }
+
+    /// <summary>
+    /// Automatically clean up
+    /// </summary>
     public AutoCleanUpData AutomaticallyCleanUp { get; set; }
+
+    /// <summary>
+    /// Can search by content
+    /// </summary>
     public bool CanSearchByContent { get; set; }
+
+    /// <summary>
+    /// Default sharing access rights
+    /// </summary>
     public List<FileShare> DefaultSharingAccessRights { get; set; }
+
+
+    /// <summary>
+    /// Max upload thread count
+    /// </summary>    
     public int MaxUploadThreadCount { get; set; }
+
+    /// <summary>
+    /// Chunk upload size
+    /// </summary>    
     public long ChunkUploadSize { get; set; }
+
+    /// <summary>
+    /// Open editor in same tab
+    /// </summary>
     public bool OpenEditorInSameTab { get; set; }
 }
 
@@ -137,7 +362,6 @@ public class FilesSettingsDtoConverter(
             StoreOriginalFiles = await filesSettingsHelper.GetStoreOriginalFiles(),
             KeepNewFileName = await filesSettingsHelper.GetKeepNewFileName(),
             DisplayFileExtension = await filesSettingsHelper.GetDisplayFileExtension(),
-            ConvertNotify = await filesSettingsHelper.GetConvertNotify(),
             HideConfirmConvertSave = await filesSettingsHelper.GetHideConfirmConvertSave(),
             HideConfirmConvertOpen = await filesSettingsHelper.GetHideConfirmConvertOpen(),
             DefaultOrder = await filesSettingsHelper.GetDefaultOrder(),

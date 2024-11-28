@@ -31,12 +31,25 @@ public class EmailValidationKeyProvider
 {
     public enum ValidationResult
     {
+        [SwaggerEnum("Ok")]
         Ok,
+
+        [SwaggerEnum("Invalid")]
         Invalid,
+
+        [SwaggerEnum("Expired")]
         Expired,
+
+        [SwaggerEnum("Tariff limit")]
         TariffLimit,
+
+        [SwaggerEnum("User existed")]
         UserExisted,
+
+        [SwaggerEnum("User excluded")]
         UserExcluded,
+
+        [SwaggerEnum("Quota failed")]
         QuotaFailed
     }
 
@@ -72,9 +85,9 @@ public class EmailValidationKeyProvider
         _logger = logger;
     }
 
-    public async Task<string> GetEmailKeyAsync(string email)
+    public string GetEmailKey(string email)
     {
-        return GetEmailKey(await _tenantManager.GetCurrentTenantIdAsync(), email);
+        return GetEmailKey(_tenantManager.GetCurrentTenantId(), email);
     }
 
     public string GetEmailKey(int tenantId, string email)
@@ -105,14 +118,14 @@ public class EmailValidationKeyProvider
         }
     }
 
-    public async Task<ValidationResult> ValidateEmailKeyAsync(string email, string key)
+    public ValidationResult ValidateEmailKey(string email, string key)
     {
-        return await ValidateEmailKeyAsync(email, key, TimeSpan.MaxValue);
+        return ValidateEmailKey(email, key, TimeSpan.MaxValue);
     }
 
-    public async Task<ValidationResult> ValidateEmailKeyAsync(string email, string key, TimeSpan validInterval)
+    public ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var result = ValidateEmailKey(email, key, validInterval, tenantId);
         _logger.DebugValidationResult(result, email, key, validInterval, tenantId);
         return result;
@@ -167,35 +180,44 @@ public class EmailValidationKeyProvider
 }
 
 /// <summary>
+/// Confirmation email parameters
 /// </summary>
 public class EmailValidationKeyModel
 {
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; set; }
 
-    /// <summary>Employee type</summary>
-    /// <type>System.Nullabel{ASC.Core.Users.EmployeeType}, System</type>
+    /// <summary>
+    /// Employee type
+    /// </summary>
     public EmployeeType? EmplType { get; init; }
 
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Email
+    /// </summary>
+    [EmailAddress]
     public string Email { get; init; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.Nullabel{System.Guid}, System</type>
+    /// <summary>
+    /// User ID
+    /// </summary>
     public Guid? UiD { get; init; }
 
-    /// <summary>Confirmation email type</summary>
-    /// <type>System.Nullabel{ASC.Web.Studio.Utility.ConfirmType}, System</type>
+    /// <summary>
+    /// Confirmation email type
+    /// </summary>
     public ConfirmType? Type { get; init; }
 
-    /// <summary>Access an account for the first time or not</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Access an account for the first time or not
+    /// </summary>
     public string First { get; init; }
 
-    /// <summary>Room ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Room ID
+    /// </summary>
     public string RoomId { get; init; }
 
     public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first)

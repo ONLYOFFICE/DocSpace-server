@@ -150,7 +150,7 @@ public class ProductSecurityInterceptor(TenantManager tenantManager,
     {
         try
         {
-            await tenantManager.GetCurrentTenantAsync();
+            tenantManager.GetCurrentTenant();
 
             var u = await userManager.SearchUserAsync(r.Recipient.ID);
 
@@ -202,7 +202,7 @@ public class NotifyTransferRequest(TenantManager tenantManager,
     {
         var aid = Guid.Empty;
         var aname = string.Empty;
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         if (authContext.IsAuthenticated)
         {

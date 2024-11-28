@@ -655,7 +655,7 @@
     <value>Mențiune: dimensiunea fișierului nu poate depăși {1}{0}{2}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Numărul de administratori/utilizatori avansați</value>
+    <value>Numărul de administratori</value>
   </data>
   <data name="ConsumersSkyDrive" xml:space="preserve">
     <value>OneDrive</value>
@@ -1099,13 +1099,13 @@
     <value>Cote de stocare și statistici</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} per adminastrator/utilizator avansat și posibilitatea de a adăuga mai mult spațiu de stocare la cerere</value>
+    <value>{0} per adminastrator și posibilitatea de a adăuga mai mult spațiu de stocare la cerere</value>
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Utilizatorul este dezactivat</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administratori/Utilizatori avansați adăugați:</value>
+    <value>Administratori adăugați:</value>
   </data>
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>Instrucțiuni de schimbare a parolei au fost trimise la adresa de e-mail {0}.</value>
@@ -1121,5 +1121,17 @@
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Definirea cotei de stocare per utilizator nu a reușit. Valoarea introdusă depășește cota spațiului de stocare DocSpace.</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Adăugați cel puțin o adresă IP permisă.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Adăugați cel puțin o adresă IP permisă.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Non-profit</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Numărul de administratori depășește limita permisă: {0}/{1}.</value>
   </data>
 </root>

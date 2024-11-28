@@ -802,4 +802,13 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>ユーザー [{0}]。フォームが送信された：{1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>ドキュメントに保存したルームインデックスのエクスポート</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>招待状を再度送信しました：{0}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
 </root>

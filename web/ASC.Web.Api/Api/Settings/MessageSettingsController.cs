@@ -50,19 +50,17 @@ public class MessageSettingsController(MessageService messageService,
     /// <short>
     /// Enable the administrator message settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AdminMessageSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for administrator message settings</param>
-    /// <category>Messages</category>
-    /// <returns type="System.Object, System">Message about the result of saving new settings</returns>
     /// <path>api/2.0/settings/messagesettings</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Messages")]
+    [SwaggerResponse(200, "Message about the result of saving new settings", typeof(object))]
     [HttpPost("messagesettings")]
-    public async Task<object> EnableAdminMessageSettingsAsync(AdminMessageSettingsRequestsDto inDto)
+    public async Task<object> EnableAdminMessageSettingsAsync(TurnOnAdminMessageSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await settingsManager.SaveAsync(new StudioAdminMessageSettings { Enable = inDto.TurnOn });
 
-        await messageService.SendAsync(MessageAction.AdministratorMessageSettingsUpdated);
+        messageService.Send(MessageAction.AdministratorMessageSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -73,10 +71,9 @@ public class MessageSettingsController(MessageService messageService,
     /// <short>
     /// Get cookies lifetime
     /// </short>
-    /// <category>Cookies</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CookieSettingsDto, ASC.Web.Api">Lifetime value in minutes</returns>
     /// <path>api/2.0/settings/cookiesettings</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Cookies")]
+    [SwaggerResponse(200, "Lifetime value in minutes", typeof(CookieSettingsDto))]
     [HttpGet("cookiesettings")]
     public async Task<CookieSettingsDto> GetCookieSettings()
     {        
@@ -95,11 +92,10 @@ public class MessageSettingsController(MessageService messageService,
     /// <short>
     /// Update cookies lifetime
     /// </short>
-    /// <category>Cookies</category>
-    /// <param type="ASC.Web.Api.Models.CookieSettingsRequestsDto, ASC.Web.Api" name="inDto">Cookies settings request parameters</param>
-    /// <returns type="System.Object, System">Message about the result of saving new settings</returns>
     /// <path>api/2.0/settings/cookiesettings</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Cookies")]
+    [SwaggerResponse(200, "Message about the result of saving new settings", typeof(object))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("cookiesettings")]
     public async Task<object> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
     {
@@ -112,7 +108,7 @@ public class MessageSettingsController(MessageService messageService,
 
         await cookiesManager.SetLifeTimeAsync(inDto.LifeTime, inDto.Enabled);
 
-        await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+        messageService.Send(MessageAction.CookieSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -123,12 +119,12 @@ public class MessageSettingsController(MessageService messageService,
     /// <short>
     /// Send a message to the administrator
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AdminMessageSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for administrator message settings</param>
-    /// <category>Messages</category>
-    /// <returns type="System.Object, System">Message about the result of sending a message</returns>
     /// <path>api/2.0/settings/sendadmmail</path>
-    /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Settings / Messages")]
+    [SwaggerResponse(200, "Message about the result of sending a message", typeof(object))]
+    [SwaggerResponse(400, "Incorrect email or message text is empty")]
+    [SwaggerResponse(429, "Request limit is exceeded")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
     public async Task<object> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
@@ -156,7 +152,7 @@ public class MessageSettingsController(MessageService messageService,
         CheckCache("sendadmmail");
 
         await studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message, inDto.Culture);
-        await messageService.SendAsync(MessageAction.ContactAdminMailSent);
+        messageService.Send(MessageAction.ContactAdminMailSent);
 
         return Resource.AdminMessageSent;
     }
@@ -167,19 +163,20 @@ public class MessageSettingsController(MessageService messageService,
     /// <short>
     /// Sends an invitation email
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AdminMessageSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for administrator message settings</param>
-    /// <category>Messages</category>
-    /// <returns type="System.Object, System">Message about sending a link to confirm joining the DocSpace</returns>
     /// <path>api/2.0/settings/sendjoininvite</path>
-    /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Settings / Messages")]
+    [SwaggerResponse(200, "Message about sending a link to confirm joining the DocSpace", typeof(object))]
+    [SwaggerResponse(400, "Incorrect email or email already exists")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(429, "Request limit is exceeded")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
-    public async Task<object> SendJoinInviteMail(AdminMessageSettingsRequestsDto inDto)
+    public async Task<object> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)
     {
         try
         {
-            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var tenant = tenantManager.GetCurrentTenant();
             var email = inDto.Email;
             if (!(
                 (tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
@@ -227,7 +224,7 @@ public class MessageSettingsController(MessageService messageService,
                         if (tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
                         {
                             await studioNotifyService.SendJoinMsgAsync(email, employeeType, inDto.Culture, true);
-                            await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
+                            messageService.Send(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                             return Resource.FinishInviteJoinEmailMessage;
                         }
 
@@ -236,7 +233,7 @@ public class MessageSettingsController(MessageService messageService,
                 case TenantTrustedDomainsType.All:
                     {
                         await studioNotifyService.SendJoinMsgAsync(email, employeeType, inDto.Culture, true);
-                        await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
+                        messageService.Send(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                         return Resource.FinishInviteJoinEmailMessage;
                     }
                 default:

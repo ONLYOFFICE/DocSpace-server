@@ -28,6 +28,13 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class CspDto
 {
+    /// <summary>
+    /// Domains
+    /// </summary>
     public IEnumerable<string> Domains { get; set; }
+
+    /// <summary>
+    /// Header
+    /// </summary>
     public string Header { get; set; }
 }

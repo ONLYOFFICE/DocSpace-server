@@ -75,12 +75,14 @@ public class BaseStorageSettingsListener(IServiceProvider serviceProvider, ICach
 /// <typeparam name="T"></typeparam>
 public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>> where T : class, ISettings<T>, new()
 {
-    /// <summary>Storage name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Storage name
+    /// </summary>
     public string Module { get; set; }
 
-    /// <summary>Storage properties</summary>
-    /// <type>System.Collections.Generic.Dictionary{System.String, System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// Storage properties
+    /// </summary>
     public Dictionary<string, string> Props { get; set; }
     public virtual Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d;
     public abstract Guid ID { get; }
@@ -203,12 +205,12 @@ public class StorageSettingsHelper
         }
 
         return _dataStore = ((IDataStore)_serviceProvider.GetService(handlerType))
-            .Configure((await _tenantManager.GetCurrentTenantIdAsync()).ToString(), null, null, dataStoreConsumer, null);
+            .Configure((_tenantManager.GetCurrentTenantId()).ToString(), null, null, dataStoreConsumer, null);
     }
 
     internal async Task ClearDataStoreCacheAsync()
     {
-        var path = TenantPath.CreatePath(await _tenantManager.GetCurrentTenantIdAsync());
+        var path = TenantPath.CreatePath(_tenantManager.GetCurrentTenantId());
 
         foreach (var module in _storageFactoryConfig.GetModuleList("", true))
         {

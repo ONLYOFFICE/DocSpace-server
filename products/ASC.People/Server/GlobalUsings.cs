@@ -30,7 +30,6 @@ global using System.Security;
 global using System.Security.Claims;
 global using System.Text.Json;
 global using System.Web;
-
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Core;
@@ -54,6 +53,7 @@ global using ASC.Core.Common.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;
+global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Common.Users;
 global using ASC.Core.Security.Authentication;
@@ -91,16 +91,15 @@ global using ASC.Web.Files;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
-
 global using Autofac;
-
 global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.Hosting.WindowsServices;
-
 global using SixLabors.ImageSharp;
 global using SixLabors.ImageSharp.Formats;
+
+global using Swashbuckle.AspNetCore.Annotations;
 
 global using AllowAnonymousAttribute = Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute;
 global using AuthorizeAttribute = Microsoft.AspNetCore.Authorization.AuthorizeAttribute;

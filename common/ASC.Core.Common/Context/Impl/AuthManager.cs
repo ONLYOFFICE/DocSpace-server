@@ -33,12 +33,12 @@ public class AuthManager(IUserService service, UserManager userManager, UserForm
 {
     public async Task SetUserPasswordHashAsync(Guid userID, string passwordHash)
     {
-        await service.SetUserPasswordHashAsync(await tenantManager.GetCurrentTenantIdAsync(), userID, passwordHash);
+        await service.SetUserPasswordHashAsync(tenantManager.GetCurrentTenantId(), userID, passwordHash);
     }
 
     public async Task<DateTime> GetUserPasswordStampAsync(Guid userID)
     {
-        return await service.GetUserPasswordStampAsync(await tenantManager.GetCurrentTenantIdAsync(), userID);
+        return await service.GetUserPasswordStampAsync(tenantManager.GetCurrentTenantId(), userID);
     }
 
     public async Task<IAccount> GetAccountByIDAsync(int tenantId, Guid id)

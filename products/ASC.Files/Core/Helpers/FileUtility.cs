@@ -97,16 +97,37 @@ public class LogoColor
 
 public enum Accessibility
 {
+    [SwaggerEnum("Image view")]
     ImageView,
+
+    [SwaggerEnum("Media view")]
     MediaView,
+
+    [SwaggerEnum("Web view")]
     WebView,
+
+    [SwaggerEnum("Web edit")]
     WebEdit,
+
+    [SwaggerEnum("Web review")]
     WebReview,
+
+    [SwaggerEnum("Web custom filter editing")]
     WebCustomFilterEditing,
+
+    [SwaggerEnum("Web restricted editing")]
     WebRestrictedEditing,
+
+    [SwaggerEnum("Web comment")]
     WebComment,
+
+    [SwaggerEnum("CoAuhtoring")]
     CoAuhtoring,
+
+    [SwaggerEnum("Can convert")]
     CanConvert,
+
+    [SwaggerEnum("Must convert")]
     MustConvert
 }
 
@@ -265,7 +286,7 @@ public class FileUtility(
         return ExtsMediaPreviewed.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
 
-    private bool GetWebViewAccessibility(string fileName)
+    public bool GetWebViewAccessibility(string fileName)
     {
         var ext = GetFileExtension(fileName).ToLower();
         return !ext.Equals(".pdf") && ExtsWebPreviewed.Contains(ext);
@@ -315,7 +336,7 @@ public class FileUtility(
 
     public async Task<bool> CanConvert<T>(File<T> file)
     {
-        var folderDao = daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetCacheFolderDao<T>();
         if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
         {
             return false;
@@ -547,7 +568,7 @@ public class FileUtility(
                 ".bmp", ".cod", ".gif", ".ief", ".jpe", ".jpeg", ".jpg",
                 ".jfif", ".tiff", ".tif", ".cmx", ".ico", ".pnm", ".pbm",
                 ".png", ".ppm", ".rgb", ".svg", ".xbm", ".xpm", ".xwd",
-                ".svgt", ".svgy", ".gdraw", ".webp"
+                ".svgt", ".svgy", ".gdraw", ".webp", ".heic"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsSpreadsheet = new List<string>

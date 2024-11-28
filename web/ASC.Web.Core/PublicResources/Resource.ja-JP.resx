@@ -287,7 +287,7 @@
     <value>管理者の数は {0} を超えないこと</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>管理者/パワーユーザー数</value>
+    <value>管理者数</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>自動バックアップ＆回復</value>
@@ -1037,7 +1037,7 @@
     <value>ユーザーの容量制限を超えています</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} 管理者/パワーユーザーごとに、リクエストに応じて容量を追加できる</value>
+    <value>{0} 管理者ごとに、リクエストに応じて容量を追加できる</value>
   </data>
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>ストレージ容量制限と統計</value>
@@ -1052,7 +1052,7 @@
     <value>パスワード変更指示が{0}メールアドレスに送信されました。</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>管理者/パワーユーザーが追加されました：</value>
+    <value>管理者が追加されました：</value>
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>このメールアドレスはサードパーティプロバイダとしてユーザー {0} に添付されます</value>
@@ -1062,5 +1062,11 @@
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>ユーザーごとの容量制限の設定に失敗しました。入力された値はDocSpaceストレージの合計容量を超えています。</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>少なくとも1つの信頼済みドメインを追加してください。</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>管理者の数が制限を超えています：{0}/{1}。</value>
   </data>
 </root>

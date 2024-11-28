@@ -80,7 +80,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     public async Task<string> GetPresignedUri<T>(T fileId)
     {
         var file = await _fileStorageService.GetFileAsync(fileId, -1);
-        return await pathProvider.GetFileStreamUrlAsync(file);
+        return pathProvider.GetFileStreamUrl(file);
     }
 
     public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync<T>(CheckConversionRequestDto<T> checkConversionRequestDto)
@@ -145,15 +145,11 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public async Task<FileDto<T>> CreateHtmlFileAsync<T>(T folderId, string title, string content, bool updateIfExist)
     {
-        ArgumentNullException.ThrowIfNull(title);
-
         return await CreateFileAsync(folderId, title, content, ".html", updateIfExist);
     }
 
     public async Task<FileDto<T>> CreateTextFileAsync<T>(T folderId, string title, string content, bool updateIfExist)
     {
-        ArgumentNullException.ThrowIfNull(title);
-
         //Try detect content
         var extension = ".txt";
         if (!string.IsNullOrEmpty(content) && Regex.IsMatch(content, @"<([^\s>]*)(\s[^<]*)>"))

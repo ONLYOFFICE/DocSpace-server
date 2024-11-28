@@ -207,9 +207,11 @@ public class CommonLinkUtility(
 
     #region confirm links
 
-    public async Task<string> GetInvitationLinkAsync(string email, EmployeeType employeeType, Guid createdBy, string culture = null)
+    public string GetInvitationLink(string email, EmployeeType employeeType, Guid createdBy, string culture = null)
     {
-        var link = await GetConfirmationEmailUrlAsync(email, ConfirmType.LinkInvite, employeeType, createdBy)
+        var tenant = _tenantManager.GetCurrentTenant();
+        
+        var link = GetConfirmationEmailUrl(email, ConfirmType.LinkInvite, employeeType.ToStringFast() + tenant.Alias, createdBy)
                    + $"&emplType={employeeType:d}";
         
         if (!string.IsNullOrEmpty(culture))
@@ -220,18 +222,18 @@ public class CommonLinkUtility(
         return link;
     }
     
-    public async Task<(string, string)> GetConfirmationUrlAndKeyAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public (string, string) GetConfirmationUrlAndKey(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
         var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(email, confirmType, userId)}");
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var key = emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
         return (url, key);
     }
 
-    public async Task<string> GetConfirmationEmailUrlAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public string GetConfirmationEmailUrl(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
-        return GetFullAbsolutePath(await GetConfirmationUrlRelativeAsync(email, confirmType, postfix, userId));
+        return GetFullAbsolutePath(GetConfirmationUrlRelative(email, confirmType, postfix, userId));
     }
     
     public string GetConfirmationUrl(string key, ConfirmType confirmType, Guid userId = default)
@@ -239,9 +241,9 @@ public class CommonLinkUtility(
         return GetFullAbsolutePath(GetConfirmationUrlRelative(key, confirmType, userId));
     }
 
-    public async Task<string> GetConfirmationUrlRelativeAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public string GetConfirmationUrlRelative(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
-        return GetConfirmationUrlRelative(await _tenantManager.GetCurrentTenantIdAsync(), email, confirmType, postfix, userId);
+        return GetConfirmationUrlRelative(_tenantManager.GetCurrentTenantId(), email, confirmType, postfix, userId);
     }
 
     public string GetConfirmationUrlRelative(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)

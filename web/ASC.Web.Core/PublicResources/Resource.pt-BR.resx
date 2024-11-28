@@ -458,7 +458,7 @@
     <value>O número de administradores não deve exceder {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Número de administradores/usuários avançados</value>
+    <value>Número de administradores</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Backup e recuperação automática</value>
@@ -1040,13 +1040,13 @@
     <value>Cotas e estatísticas de armazenamento</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} por administrador/usuário avançado e capacidade de adicionar espaço mediante solicitação</value>
+    <value>{0} por administrador e capacidade de adicionar espaço mediante solicitação</value>
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Usuário desativado</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administradores/usuários avançados adicionados:</value>
+    <value>Administradores adicionados:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>O limite de convites foi excedido</value>
@@ -1062,5 +1062,11 @@
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Falha ao definir a cota por usuário. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Adicione pelo menos um domínio confiável.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>O número de administradores excede o limite: {0}/{1}.</value>
   </data>
 </root>

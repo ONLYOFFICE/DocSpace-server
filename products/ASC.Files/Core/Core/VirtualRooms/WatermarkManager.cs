@@ -29,10 +29,19 @@ namespace ASC.Files.Core.VirtualRooms;
 [Flags]
 public enum WatermarkAdditions
 {
+    [SwaggerEnum("User name")]
     UserName = 1,
+
+    [SwaggerEnum("User email")]
     UserEmail = 2,
+
+    [SwaggerEnum("User ip adress")]
     UserIpAdress = 4,
+
+    [SwaggerEnum("Current date")]
     CurrentDate = 8,
+
+    [SwaggerEnum("Room name")]
     RoomName = 16
 }
 public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRequestDto>
@@ -52,28 +61,27 @@ public class WatermarkManager
     private readonly IDaoFactory _daoFactory;
     private readonly FileSecurity _fileSecurity;
     private readonly RoomLogoManager _roomLogoManager;
+    private readonly FilesMessageService _filesMessageService;
+    
     public WatermarkManager(
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
-        RoomLogoManager roomLogoManager)
+        RoomLogoManager roomLogoManager,
+        FilesMessageService filesMessageService)
     {
         _daoFactory = daoFactory;
         _fileSecurity = fileSecurity;
         _roomLogoManager = roomLogoManager;
-    }
-
-    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarkRequestDto)
-    {
-        var folderDao = _daoFactory.GetFolderDao<T>();
-
-        var room = await folderDao.GetFolderAsync(roomId);
-
-        return await SetWatermarkAsync(room, watermarkRequestDto);
+        _filesMessageService = filesMessageService;
     }
 
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
+        if(watermarkRequestDto == null)
+        {
+            return new WatermarkSettings();
+        }
 
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
         {
@@ -142,28 +150,5 @@ public class WatermarkManager
         var watermarkSettings = await folderDao.GetWatermarkSettings(room);
 
         return watermarkSettings;
-    }
-
-    public async Task<Folder<T>> DeleteWatermarkAsync<T>(T roomId)
-    {
-        var folderDao = _daoFactory.GetFolderDao<T>();
-
-        var room = await folderDao.GetFolderAsync(roomId);
-
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
-        {
-            throw new ItemNotFoundException();
-        }
-
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
-        }
-
-        await folderDao.DeleteWatermarkSettings(room);
-
-        await _roomLogoManager.DeleteWatermarkImageAsync(room);
-
-        return room;
     }
 }

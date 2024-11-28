@@ -145,15 +145,20 @@ public class FileOperationsManager(
             return;
         }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
+        
+        var (folderIntIds, folderStringIds) = GetIds(folderIds);
+        var (fileIntIds, fileStringIds) = GetIds(fileIds);
+        if (folderIntIds.Count == 0 && folderStringIds.Count == 0 && fileIntIds.Count == 0 && fileStringIds.Count == 0)
+        {
+            return;
+        }
         
         var op = fileOperationsManagerHolder.GetService<FileMarkAsReadOperation>();
         op.Init(true);
         var taskId = await fileOperationsManagerHolder.Publish(op);
         
-        var (folderIntIds, folderStringIds) = GetIds(folderIds);
-        var (fileIntIds, fileStringIds) = GetIds(fileIds);
         var data = new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         
@@ -173,15 +178,19 @@ public class FileOperationsManager(
             return;
         }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
+        
+        var (folderIntIds, folderStringIds) = GetIds(folders);
+        var (fileIntIds, fileStringIds) = GetIds(files);
+        if (folderIntIds.Count == 0 && folderStringIds.Count == 0 && fileIntIds.Count == 0 && fileStringIds.Count == 0)
+        {
+            return;
+        }
         
         var op = fileOperationsManagerHolder.GetService<FileDownloadOperation>();
         op.Init(true);
         var taskId = await fileOperationsManagerHolder.Publish(op);
-        
-        var (folderIntIds, folderStringIds) = GetIds(folders);
-        var (fileIntIds, fileStringIds) = GetIds(files);
         
         var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
         var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
@@ -213,11 +222,15 @@ public class FileOperationsManager(
             return;
         }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
         var (fileIntIds, fileStringIds) = GetIds(fileIds);
+        if (folderIntIds.Count == 0 && folderStringIds.Count == 0 && fileIntIds.Count == 0 && fileStringIds.Count == 0)
+        {
+            return;
+        }
         
         if (content)
         {        
@@ -269,12 +282,15 @@ public class FileOperationsManager(
             return;
         }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
         var (fileIntIds, fileStringIds) = GetIds(fileIds);
-        
+        if (folderIntIds.Count == 0 && folderStringIds.Count == 0 && fileIntIds.Count == 0 && fileStringIds.Count == 0)
+        {
+            return;
+        }
         
         var op = fileOperationsManagerHolder.GetService<FileDuplicateOperation>();
         op.Init(true);
@@ -304,8 +320,8 @@ public class FileOperationsManager(
             return Task.CompletedTask;
         }
         
-        var folderIds = (folders.OfType<int>(), folders.OfType<string>());
-        var fileIds = (files.OfType<int>(), files.OfType<string>());
+        var folderIds = (folders.OfType<int>().ToList(), folders.OfType<string>().ToList());
+        var fileIds = (files.OfType<int>().ToList(), files.OfType<string>().ToList());
         
         return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
     }
@@ -325,26 +341,29 @@ public class FileOperationsManager(
         
         var folderIds = GetIds(folders);
         var fileIds = GetIds(files);
-
+        
         return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
     }
 
     private async Task PublishDelete(
-        (IEnumerable<int>, IEnumerable<string>) folders, 
-        (IEnumerable<int>, IEnumerable<string>) files, 
+        (List<int>, List<string>) folders, 
+        (List<int>, List<string>) files, 
         bool ignoreException, 
         bool holdResult,
         bool immediately,
         bool isEmptyTrash = false)
     {        
+        if (folders.Item1.Count == 0 && folders.Item2.Count == 0 && files.Item1.Count == 0 && files.Item2.Count == 0)
+        {
+            return;
+        }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
         op.Init(holdResult);
         var taskId = await fileOperationsManagerHolder.Publish(op);
-        
         
         var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
         var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
@@ -403,7 +422,7 @@ public class FileOperationsManager(
         return (resultInt, resultString);
     }
 
-    private static (IEnumerable<FilesDownloadOperationItem<int>>, IEnumerable<FilesDownloadOperationItem<string>>) GetIds(IEnumerable<FilesDownloadOperationItem<JsonElement>> items)
+    private static (List<FilesDownloadOperationItem<int>>, List<FilesDownloadOperationItem<string>>) GetIds(IEnumerable<FilesDownloadOperationItem<JsonElement>> items)
     {
         var (resultInt, resultString) = (new List<FilesDownloadOperationItem<int>>(), new List<FilesDownloadOperationItem<string>>());
 

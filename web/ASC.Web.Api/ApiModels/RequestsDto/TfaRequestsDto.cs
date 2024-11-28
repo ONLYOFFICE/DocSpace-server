@@ -27,40 +27,56 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// TFA settings request parameters
 /// </summary>
 public class TfaRequestsDto
 {
-    /// <summary>TFA type (None, Sms, or App)</summary>
-    /// <type>System.String, System</type>
-    public string Type { get; set; }
+    /// <summary>
+    /// TFA type (None, Sms, or App)
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TfaRequestsDtoType? Type { get; set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.Nullable{System.Guid}, System</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
+    /// <summary>
+    /// User ID
+    /// </summary>
     public Guid? Id { get; set; }
 
-    /// <summary>List of trusted IP addresses</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of trusted IP addresses
+    /// </summary>
     public List<string> TrustedIps { get; set; }
 
-    /// <summary>List of users who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    /// <summary>
+    /// List of users who must use the TFA verification
+    /// </summary>
     public List<Guid> MandatoryUsers { get; set; }
 
-    /// <summary>List of groups who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    /// <summary>
+    /// List of groups who must use the TFA verification
+    /// </summary>
     public List<Guid> MandatoryGroups { get; set; }
 }
 
+public enum TfaRequestsDtoType
+{
+    [SwaggerEnum("None")]
+    None = 0,
+
+    [SwaggerEnum("Sms")]
+    Sms = 1,
+
+    [SwaggerEnum("App")]
+    App = 2
+}
+
 /// <summary>
+/// TFA validation request parameters
 /// </summary>
 public class TfaValidateRequestsDto
 {
-    /// <summary>TFA code</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// TFA code
+    /// </summary>
     public string Code { get; set; }
 }

@@ -26,14 +26,21 @@
 
 namespace ASC.Core.Users;
 
-/// <summary>
-/// </summary>
 [Flags]
 public enum EmployeeStatus
 {
+    [SwaggerEnum("Active")]
     Active = 1,
+
+    [SwaggerEnum("Terminated")]
     Terminated = 2,
+
+    [SwaggerEnum("Pending")]
     Pending = 4,
+
+    [SwaggerEnum("All")]
     All = Active | Terminated | Pending,
+
+    [SwaggerEnum("Default")]
     Default = Active | Pending
 }

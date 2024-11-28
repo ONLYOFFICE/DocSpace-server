@@ -485,4 +485,22 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Forma nömrəsi</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Məzmun yaradıcısı</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Otaq meneceri</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Xarici istifadəçi</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Məzmun yaradıcısı</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Otaq meneceri</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Faylı açın</value>
+  </data>
 </root>

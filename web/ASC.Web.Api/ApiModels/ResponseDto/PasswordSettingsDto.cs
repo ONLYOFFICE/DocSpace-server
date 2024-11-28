@@ -28,20 +28,44 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class PasswordSettingsDto
 {
+    /// <summary>
+    /// Min length
+    /// </summary>
     public int MinLength { get; set; }
-    
+
+    /// <summary>
+    /// Upper case
+    /// </summary>
     public bool UpperCase { get; set; }
 
+    /// <summary>
+    /// Digits
+    /// </summary>
     public bool Digits { get; set; }
-    
+
+    /// <summary>
+    /// Spec symbols
+    /// </summary>
     public bool SpecSymbols { get; set; }
-    
+
+    /// <summary>
+    /// Allowed characters regex str
+    /// </summary>
     public string AllowedCharactersRegexStr { get; set; }
-    
+
+    /// <summary>
+    /// Digits regex str
+    /// </summary>
     public string DigitsRegexStr { get; set; }
 
+    /// <summary>
+    /// Upper case regex str
+    /// </summary>
     public string UpperCaseRegexStr { get; set; }
 
+    /// <summary>
+    /// Spec symbols regex str
+    /// </summary>
     public string SpecSymbolsRegexStr { get; set; }
 }
 

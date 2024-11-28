@@ -33,6 +33,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private readonly ILogger<RestoreProgressItem> _logger;
     private readonly ICache _cache;
     private TenantManager _tenantManager;
+    private TariffService _tariffService;
     private BackupStorageFactory _backupStorageFactory;
     private readonly NotifyHelper _notifyHelper;
     private BackupRepository _backupRepository;
@@ -90,6 +91,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             await using var scope = _serviceScopeProvider.CreateAsyncScope();
 
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+            _tariffService = scope.ServiceProvider.GetService<TariffService>();
             _backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
             _backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
 
@@ -169,6 +171,8 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 await _tenantManager.RestoreTenantAsync(tenant.Id, restoredTenant);
                 TenantId = restoredTenant.Id;
 
+                await _tariffService.GetTariffAsync(tenant.Id, true);
+                await _tenantManager.GetCurrentTenantQuotaAsync(true);
                 await _notifyHelper.SendAboutRestoreCompletedAsync(restoredTenant, Notify);
             }
 

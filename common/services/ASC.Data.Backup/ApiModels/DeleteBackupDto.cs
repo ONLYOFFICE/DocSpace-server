@@ -24,17 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModel.RequestsDto;
+namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
+/// Delete backup parameters
 /// </summary>
-public class IpRestrictionsRequestsDto
+public class DeleteBackupDto
 {
-    /// <summary>List of IP addresses</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.IPSecurity.IpRestrictionBase}, System.Collections.Generic</type>
-    public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
-
-    /// <summary>Enables IP restrictions or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Enable { get; set; }
+    /// <summary>
+    /// Backup Id
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public Guid BackupId { get; set; }
 }

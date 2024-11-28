@@ -103,7 +103,7 @@ public abstract class BaseStorage(TempStream tempStream,
             var expireString = expire.TotalMinutes.ToString(CultureInfo.InvariantCulture);
 
             int currentTenantId;
-            var currentTenant = await tenantManager.GetCurrentTenantAsync(false);
+            var currentTenant = tenantManager.GetCurrentTenant(false);
             if (currentTenant != null)
             {
                 currentTenantId = currentTenant.Id;
@@ -395,7 +395,7 @@ public abstract class BaseStorage(TempStream tempStream,
         var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
         if (ownerId != Guid.Empty && ownerId != Core.Configuration.Constants.CoreSystem.ID)
         {
-            var currentTenant = await tenantManager.GetCurrentTenantAsync(false);
+            var currentTenant = tenantManager.GetCurrentTenant(false);
             var user = await userManager.GetUsersAsync(ownerId);
             var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;

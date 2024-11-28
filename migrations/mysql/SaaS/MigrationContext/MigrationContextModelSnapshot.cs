@@ -1567,7 +1567,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("trusteddomainsenabled")
-                        .HasDefaultValueSql("'1'");
+                        .HasDefaultValueSql("'0'");
 
                     b.Property<string>("TrustedDomainsRaw")
                         .HasColumnType("varchar(1024)")
@@ -5877,7 +5877,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Options")
-                        .HasColumnType("text")
+                        .HasColumnType("json")
                         .HasColumnName("options")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");

@@ -31,4 +31,5 @@ public class DbRoomDataLifetime : IMapFrom<RoomDataLifetime>
     public bool DeletePermanently { get; set; }
     public RoomDataLifetimePeriod Period { get; set; }
     public int Value { get; set; }
+    public DateTime? StartDate { get; set; }
 }

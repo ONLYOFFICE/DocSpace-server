@@ -412,12 +412,13 @@ public interface IFolderDao<T>
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
         T roomId = default);
     Task<FilesStatisticsResultDto> GetFilesUsedSpace();
-    Task SetCustomOrder(T folderId, T parentFolderId, int order);
+    Task<int> SetCustomOrder(T folderId, T parentFolderId, int order);
 
     Task InitCustomOrder(Dictionary<T, int> folderIds, T parentFolderId);
     Task<T> SetWatermarkSettings(WatermarkSettings waterMarks, Folder<T> folder);
     Task<WatermarkSettings> GetWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteWatermarkSettings(Folder<T> room);
+    Task<Folder<T>> DeleteLifetimeSettings(Folder<T> room);
     #endregion
 }
 

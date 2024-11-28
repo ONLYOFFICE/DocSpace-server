@@ -55,7 +55,7 @@ internal class SharePointFolderDao(
             return folder;
         }
         
-        var tenantId = await _tenantManager1.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager1.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         folder.Shared = await Queries.SharedAsync(filesDbContext, tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
 
@@ -234,7 +234,7 @@ internal class SharePointFolderDao(
     public async Task DeleteFolderAsync(string folderId)
     {
         var folder = await SharePointProviderInfo.GetFolderByIdAsync(folderId);
-        var tenantId = await _tenantManager1.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager1.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -453,9 +453,9 @@ internal class SharePointFolderDao(
         throw new NotImplementedException();
     }
 
-    public Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    public Task<int> SetCustomOrder(string folderId, string parentFolderId, int order)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(0);
     }
 
     public Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
@@ -474,6 +474,11 @@ internal class SharePointFolderDao(
     }
 
     public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
     {
         throw new NotImplementedException();
     }

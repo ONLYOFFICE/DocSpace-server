@@ -45,7 +45,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
     {
         var s = new SubscriptionRecord
         {
-            Tenant = await GetTenantAsync(),
+            Tenant = GetTenant(),
             Subscribed = true
         };
 
@@ -76,7 +76,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
     {
         var s = new SubscriptionRecord
         {
-            Tenant = await GetTenantAsync(),
+            Tenant = GetTenant(),
             Subscribed = false
         };
 
@@ -105,12 +105,12 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
 
     public async Task UnsubscribeAllAsync(string sourceID, string actionID, string objectID)
     {
-        await _service.RemoveSubscriptionsAsync(await GetTenantAsync(), sourceID, actionID, objectID);
+        await _service.RemoveSubscriptionsAsync(GetTenant(), sourceID, actionID, objectID);
     }
 
     public async Task UnsubscribeAllAsync(string sourceID, string actionID)
     {
-        await _service.RemoveSubscriptionsAsync(await GetTenantAsync(), sourceID, actionID);
+        await _service.RemoveSubscriptionsAsync(GetTenant(), sourceID, actionID);
     }
 
     public async Task<string[]> GetSubscriptionMethodAsync(string sourceID, string actionID, string recipientID)
@@ -123,7 +123,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
         }
         else
         {
-            methods = await _service.GetSubscriptionMethodsAsync(await GetTenantAsync(), sourceID, actionID, recipientID);
+            methods = await _service.GetSubscriptionMethodsAsync(GetTenant(), sourceID, actionID, recipientID);
         }
 
         var m = methods.FirstOrDefault(x => x.Action.Equals(actionID, StringComparison.OrdinalIgnoreCase)) ?? 
@@ -134,29 +134,29 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
 
     public async Task<string[]> GetRecipientsAsync(string sourceID, string actionID, string objectID)
     {
-        return await _service.GetRecipientsAsync(await GetTenantAsync(), sourceID, actionID, objectID);
+        return await _service.GetRecipientsAsync(GetTenant(), sourceID, actionID, objectID);
     }
 
     public async Task<object> GetSubscriptionRecordAsync(string sourceID, string actionID, string recipientID, string objectID)
     {
-        return await _service.GetSubscriptionAsync(await GetTenantAsync(), sourceID, actionID, recipientID, objectID);
+        return await _service.GetSubscriptionAsync(GetTenant(), sourceID, actionID, recipientID, objectID);
     }
 
     public async Task<string[]> GetSubscriptionsAsync(string sourceID, string actionID, string recipientID, bool checkSubscribe = true)
     {
-        return await _service.GetSubscriptionsAsync(await GetTenantAsync(), sourceID, actionID, recipientID, checkSubscribe);
+        return await _service.GetSubscriptionsAsync(GetTenant(), sourceID, actionID, recipientID, checkSubscribe);
     }
 
     public async Task<bool> IsUnsubscribeAsync(string sourceID, string recipientID, string actionID, string objectID)
     {
-        return await _service.IsUnsubscribeAsync(await GetTenantAsync(), sourceID, actionID, recipientID, objectID);
+        return await _service.IsUnsubscribeAsync(GetTenant(), sourceID, actionID, recipientID, objectID);
     }
 
     public async Task UpdateSubscriptionMethodAsync(string sourceID, string actionID, string recipientID, string[] senderNames)
     {
         var m = new SubscriptionMethod
         {
-            Tenant = await GetTenantAsync()
+            Tenant = GetTenant()
         };
 
         if (sourceID != null)
@@ -204,8 +204,8 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
         }
     }
 
-    private async Task<int> GetTenantAsync()
+    private int GetTenant()
     {
-        return await tenantManager.GetCurrentTenantIdAsync();
+        return tenantManager.GetCurrentTenantId();
     }
 }

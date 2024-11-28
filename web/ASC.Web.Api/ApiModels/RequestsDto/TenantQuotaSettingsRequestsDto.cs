@@ -27,14 +27,17 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// Request parameters for the tenant quota settings
 /// </summary>
 public class TenantQuotaSettingsRequestsDto
 {
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Tenant ID
+    /// </summary>
     public int TenantId { get; set; }
 
-    /// <summary>Quota</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// Quota
+    /// </summary>
     public long Quota { get; set; }
 }

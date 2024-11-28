@@ -32,7 +32,6 @@ public class RoomIndexExportIntegrationEventHandler(
     CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
     SecurityContext securityContext,
-    DocumentBuilderScriptHelper documentBuilderScriptHelper,
     DocumentBuilderTaskManager documentBuilderTaskManager,
     IServiceProvider serviceProvider)
     : IIntegrationEventHandler<RoomIndexExportIntegrationEvent>
@@ -63,11 +62,9 @@ public class RoomIndexExportIntegrationEventHandler(
 
                 await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
 
-                var (script, tempFileName, outputFileName) = await documentBuilderScriptHelper.GetRoomIndexExportScript(@event.CreateBy, @event.RoomId);
+                var task = serviceProvider.GetService<RoomIndexExportTask>();
 
-                var task = serviceProvider.GetService<DocumentBuilderTask<int>>();
-
-                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, script, tempFileName, outputFileName);
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new RoomIndexExportTaskData(@event.RoomId, @event.Headers));
 
                 await documentBuilderTaskManager.StartTask(task);
             }

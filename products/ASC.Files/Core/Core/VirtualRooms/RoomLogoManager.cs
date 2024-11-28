@@ -26,7 +26,6 @@
 
 using System.Reflection;
 
-using Folder = Microsoft.OneDrive.Sdk.Folder;
 using Image = SixLabors.ImageSharp.Image;
 using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
@@ -70,7 +69,7 @@ public class RoomLogoManager(
             return _logoStore;
         }
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         _logoStore = await storageFactory.GetStorageAsync(tenantId, LogoModuleName);
         return _logoStore;
     }
@@ -519,12 +518,13 @@ public class RoomLogoManager(
         }
 
         using var stream = new MemoryStream(imageData);
-            await store.SaveAsync(fileName, stream);
-        }
+        await store.SaveAsync(fileName, stream);
+    }
+    
     private async ValueTask<string> GetWatermarkImagePathAsync<T>(T id, int hash, bool secure = false)
     {
         var fileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
-        var headers = secure ? new[] { await SecureHelper.GenerateSecureKeyHeaderAsync(fileName, emailValidationKeyProvider) } : null;
+        var headers = secure ? new[] { SecureHelper.GenerateSecureKeyHeader(fileName, emailValidationKeyProvider) } : null;
 
         var store = await GetLogoStoreAsync();
 
@@ -532,10 +532,11 @@ public class RoomLogoManager(
 
         return uri + (secure ? "&" : "?") + $"hash={hash}";
     }
+    
     private async ValueTask<string> GetLogoPathAsync<T>(IDataStore store, T id, SizeName size, int hash, bool secure = false)
     {
         var fileName = GetFileName(id, size);
-        var headers = secure ? new[] { await SecureHelper.GenerateSecureKeyHeaderAsync(fileName, emailValidationKeyProvider) } : null;
+        var headers = secure ? new[] { SecureHelper.GenerateSecureKeyHeader(fileName, emailValidationKeyProvider) } : null;
 
         var uri = await store.GetPreSignedUriAsync(string.Empty, fileName, TimeSpan.MaxValue, headers);
 

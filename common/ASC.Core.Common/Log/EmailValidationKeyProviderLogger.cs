@@ -29,10 +29,10 @@ using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.Va
 namespace ASC.Core.Common.Log;
 internal static partial class EmailValidationKeyProviderLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "validation result: {result}, source: {email} with key: {key} interval: {interval} tenant: {tenantId}")]
-    public static partial void DebugValidationResult(this ILogger<EmailValidationKeyProvider> logger, ValidationResult result, string email, string key, TimeSpan interval, int tenantId);
+    [LoggerMessage(LogLevel.Debug, "validation result: {result}, source: {email} with key: {key} interval: {interval} tenant: {tenantId}")]
+    public static partial void DebugValidationResult(this ILogger<EmailValidationKeyProvider> logger, EmailValidationKeyProvider.ValidationResult result, string email, string key, TimeSpan interval, int tenantId);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Failed to format tenant specific email")]
+    [LoggerMessage(LogLevel.Debug, "Failed to format tenant specific email")]
     public static partial void CriticalFormatEmail(this ILogger<EmailValidationKeyProvider> logger, Exception exception);
 
 }

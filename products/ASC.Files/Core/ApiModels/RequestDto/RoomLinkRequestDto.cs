@@ -27,24 +27,49 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Link parameters
 /// </summary>
-public class RoomLinkRequestDto : LinkRequestDtoBase
+public class RoomLinkRequest : LinkRequestDtoBase
 {
-    /// <summary>Link name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Link name
+    /// </summary>
     [StringLength(255)]
     public string Title { get; set; }
 
-    /// <summary>Link type (Invitation or External)</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.LinkType, ASC.Files.Core</type>
+    /// <summary>
+    /// Link type
+    /// </summary>
     public LinkType LinkType { get; set; }
 
-    /// <summary>Link password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Link password
+    /// </summary>
     [StringLength(255)]
     public string Password { get; set; }
-    
-    /// <summary>Specifies whether downloading a file from a link is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
+
+    /// <summary>
+    /// Specifies whether downloading a file from a link is disabled or not
+    /// </summary>
     public bool DenyDownload { get; set; }
+}
+
+
+
+/// <summary>
+/// Link request parameters
+/// </summary>
+public class RoomLinkRequestDto<T>
+{
+    /// <summary>
+    /// Room ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// Room link
+    /// </summary>
+    [FromBody]
+    public RoomLinkRequest RoomLink { get; set; }
 }
