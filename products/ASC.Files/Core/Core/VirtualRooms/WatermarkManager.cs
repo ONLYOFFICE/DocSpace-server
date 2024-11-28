@@ -112,15 +112,6 @@ public class WatermarkManager
 
         await folderDao.SetWatermarkSettings(watermarkSettings, room);
 
-        if (watermarkRequestDto.Enabled.HasValue && !watermarkRequestDto.Enabled.Value)
-        {
-            await _filesMessageService.SendAsync(MessageAction.RoomWatermarkDisabled, room, room.Title);
-        }
-        else
-        {
-            await _filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, room, room.Title);
-        }
-
         return watermarkSettings;
     }
 

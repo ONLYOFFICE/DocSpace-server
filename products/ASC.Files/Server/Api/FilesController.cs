@@ -418,6 +418,21 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     }
 
     /// <summary>
+    /// Creates a primary external link by the identifier specified in the request.
+    /// </summary>
+    /// <short>Create primary external link</short>
+    /// <path>api/2.0/files/file/{id}/link</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [SwaggerResponse(404, "Not Found")]
+    [HttpPost("file/{id}/link")]
+    public async Task<FileShareDto> CreatePrimaryExternalLinkAsync(FileLinkRequestDto<T> inDto)
+    {
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.Access, expirationDate: inDto.File.ExpirationDate, requiredAuth: inDto.File.Internal, allowUnlimitedDate: true);
+        return await fileShareDtoHelper.Get(linkAce);
+    }
+
+    /// <summary>
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
     /// <short>Get primary external link</short>
@@ -439,29 +454,26 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
+    [SwaggerResponse(200, "Order is set")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "Not Found")]
     [HttpPut("{fileId}/order")]
     public async Task SetOrder(OrderFileRequestDto<T> inDto)
     {
         await fileStorageService.SetFileOrder(inDto.FileId, inDto.Order.Order);
     }
 
+    /// <summary>
+    /// Sets order
+    /// </summary>
+    /// <path>api/2.0/files/order</path>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Order is set")]
     [HttpPut("order")]
     public async Task SetOrder(OrdersRequestDto<T> inDto)
     {
-        foreach (var item in inDto.Items)
-        {
-            switch (item.EntryType)
-            {
-                case FileEntryType.Folder:
-                    await fileStorageService.SetFolderOrder(item.EntryId, item.Order);
-                    break;
-                case FileEntryType.File:
-                    await fileStorageService.SetFileOrder(item.EntryId, item.Order);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+        await fileStorageService.SetOrderAsync(inDto.Items);
     }
 
     /// <summary>

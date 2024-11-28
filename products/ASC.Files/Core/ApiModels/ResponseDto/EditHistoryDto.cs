@@ -98,4 +98,6 @@ public class EditHistoryChangesWrapper(EditHistoryChanges historyChanges, ApiDat
     /// Created
     /// </summary>
     public ApiDateTime Created { get; set; } = apiDateTimeHelper.Get(historyChanges.Date);
+
+    public string DocumentSha256 { get; set; } = historyChanges.DocumentSha256;
 }

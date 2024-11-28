@@ -34,6 +34,7 @@ public class TfaRequestsDto
     /// <summary>
     /// TFA type (None, Sms, or App)
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public TfaRequestsDtoType? Type { get; set; }
 
     /// <summary>

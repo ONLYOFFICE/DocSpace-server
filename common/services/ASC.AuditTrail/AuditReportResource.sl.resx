@@ -802,4 +802,10 @@
   <data name="FormOpenedForFilling" xml:space="preserve">
     <value>Datoteka odprta za izpolnjevanje: {0}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Izvoz indeksa sobe shranjen v Dokumentih</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Ponovno poslana vabila: {0}</value>
+  </data>
 </root>

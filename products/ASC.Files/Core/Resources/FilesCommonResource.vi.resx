@@ -500,4 +500,7 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="ExternalUser" xml:space="preserve">
     <value>Người dùng bên ngoài</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Mở tập tin</value>
+  </data>
 </root>

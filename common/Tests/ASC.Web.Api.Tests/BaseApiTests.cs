@@ -48,16 +48,13 @@ class ApiApplication : WebApplicationFactory<Program>
 
         builder.ConfigureServices(services =>
         {
-            services.AddBaseDbContext<UserDbContext>();
-            services.AddBaseDbContext<TenantDbContext>();
-            services.AddBaseDbContext<WebstudioDbContext>();
+            services.AddBaseDbContextPool<UserDbContext>();
+            services.AddBaseDbContextPool<TenantDbContext>();
+            services.AddBaseDbContextPool<WebstudioDbContext>();
 
-            var DIHelper = new ASC.Common.DIHelper();
+            var DIHelper = new Common.DIHelper();
             DIHelper.Configure(services);
-            foreach (var a in Assembly.Load("ASC.Web.Api").GetTypes().Where(r => r.IsAssignableTo<ControllerBase>()))
-            {
-                DIHelper.TryAdd(a);
-            }
+            DIHelper.Scan();
         });
 
         base.ConfigureWebHost(builder);
@@ -128,7 +125,7 @@ class BaseApiTests
     protected FirstTimeTenantSettings _firstTimeTenantSettings;
 
     public const string TestConnection = "Server=localhost;Database=onlyoffice_test;User ID=root;Password=root;Pooling=true;Character Set=utf8;AutoEnlist=false;SSL Mode=none;AllowPublicKeyRetrieval=True";
-    public virtual void SetUp()
+    public virtual async Task SetUp()
     {
         var host = new ApiApplication(new Dictionary<string, string>
             {
@@ -142,7 +139,7 @@ class BaseApiTests
         _scope = host.Services.CreateScope();
 
         var tenantManager = _scope.ServiceProvider.GetService<TenantManager>();
-        var tenant = tenantManager.GetTenant(1);
+        var tenant = await tenantManager.GetTenantAsync(1);
         tenantManager.SetCurrentTenant(tenant);
         _currentTenant = tenant;
 
@@ -153,7 +150,7 @@ class BaseApiTests
         _securityContext = _scope.ServiceProvider.GetService<SecurityContext>();
         _userOptions = _scope.ServiceProvider.GetService<IOptions<UserOptions>>().Value;
         _log = _scope.ServiceProvider.GetService<ILogger<BaseApiTests>>();
-        _securityContext.AuthenticateMe(_currentTenant.OwnerId);
+        await _securityContext.AuthenticateMeAsync(_currentTenant.OwnerId);
     }
 
 

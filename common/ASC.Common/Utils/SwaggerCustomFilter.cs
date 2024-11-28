@@ -173,9 +173,13 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 result.Example = array;
             }
 
-            if(arraySchema.OneOf != null)
+            if(arraySchema.OneOf.Count != 0)
             {
                 result.Items = new OpenApiSchema { AnyOf = arraySchema.OneOf };
+            }
+            else if(checkType == typeof(object))
+            {
+                result.Items = new OpenApiSchema { Type = "object" };
             }
 
         }
@@ -261,7 +265,6 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
         return result;
     }
-    
     private IOpenApiAny GetExample(object exampleValue)
     {
         return exampleValue switch

@@ -802,4 +802,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Používatelia [{0}]. Formulár odoslaný: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Export indexu miestnosti uloženého v Dokumentoch</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Pozvánky boli znovu odoslané: {0}</value>
+  </data>
 </root>

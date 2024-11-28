@@ -34,12 +34,13 @@ public class BackupScheduleDto
     /// <summary>
     /// Storage type
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
     /// Storage parameters
     /// </summary>
-    public IDictionary<object, object> StorageParams { get; set; }
+    public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
     /// Maximum number of the stored backup copies
@@ -65,6 +66,7 @@ public class Cron
     /// <summary>
     /// Period
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupPeriod? Period { get; set; }
 
     /// <summary>
@@ -77,5 +79,5 @@ public class Cron
     /// Day
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
-    public int Day { get; set; }
+    public int? Day { get; set; }
 }

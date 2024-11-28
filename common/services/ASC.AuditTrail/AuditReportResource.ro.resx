@@ -861,4 +861,43 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Utilizatorul {0} a trimis invitația de asociere la DocSpace către {1}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Fișierul: {0}. Indexul s-a schimbat din {1} în {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Folderul: {0}. Indexul s-a schimbat din {1} în {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Folderul: {0}. Indexuri au fost înregistrate</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Sală: {0}. Interzicerea încărcării a fost dezactivată</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Sală: {0}. Interzicerea încărcării a fost activată</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Exportul indexelor de săli din secțiunea Documente</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indexarea sălilor a fost dezactivată</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indexarea sălilor a fost activată</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Durată de viaţă este dezactivată</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Durată de viaţă este definită. Valoarea: {0}. Perioadă: {1}. Ștergerea definitivă {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Sală: {0}. Inscripționare a fost dezactivată</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Sală: {0}. Inscripționare a fost activată</value>
+  </data>
 </root>

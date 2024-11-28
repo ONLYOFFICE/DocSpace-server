@@ -65,6 +65,11 @@ public class Startup : BaseWorkerStartup
             services.AddActivePassiveHostedService<AutoCleanTrashService>(Configuration);
             services.AddActivePassiveHostedService<DeleteExpiredService>(Configuration);
             services.AddActivePassiveHostedService<CleanupLifetimeExpiredService>(Configuration);
+
+            if (Configuration["core:base-domain"] == "localhost" && !string.IsNullOrEmpty(Configuration["license:file:path"]))
+            {
+                services.AddActivePassiveHostedService<RefreshLicenseService>(Configuration);
+            }
         }
 
         services.RegisterQuotaFeature();

@@ -437,7 +437,7 @@ public class Builder<T>(ThumbnailSettings settings,
             }
         }
 
-        return sourceBitmap.Clone(x =>
+        var response = sourceBitmap.Clone(x =>
         {
             x.Resize(new ResizeOptions
             {
@@ -447,5 +447,9 @@ public class Builder<T>(ThumbnailSettings settings,
                 Sampler = KnownResamplers.Lanczos8
             });
         });
+
+        response.Mutate(i => i.AutoOrient());
+
+        return response;
     }
 }

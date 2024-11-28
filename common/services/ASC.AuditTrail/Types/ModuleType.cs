@@ -111,5 +111,8 @@ public enum ModuleType
     Products,
 
     [SwaggerEnum("Rooms")]
-    Rooms
+    Rooms,
+    
+    [SwaggerEnum("OAuth")]
+    OAuth
 }

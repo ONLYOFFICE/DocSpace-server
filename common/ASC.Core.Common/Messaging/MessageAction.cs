@@ -775,4 +775,35 @@ public enum MessageAction
     ContactSalesMailSent = 7004,
 
     #endregion
+    
+    #region Oauth
+    
+    [SwaggerEnum("Create client")]
+    CreateClient = 9901,
+    
+    [SwaggerEnum("Update client")]
+    UpdateClient = 9902,
+    
+    [SwaggerEnum("Regenerate secret")]
+    RegenerateSecret = 9903,
+    
+    [SwaggerEnum("Delete client")]
+    DeleteClient = 9904,
+    
+    [SwaggerEnum("Change client activation")]
+    ChangeClientActivation = 9905,
+    
+    [SwaggerEnum("Change client visibility")]
+    ChangeClientVisibility = 9906,
+    
+    [SwaggerEnum("Revoke user client")]
+    RevokeUserClient = 9907,
+    
+    [SwaggerEnum("Generate authorization code token")]
+    GenerateAuthorizationCodeToken = 9908,
+    
+    [SwaggerEnum("Generate personal access token")]
+    GeneratePersonalAccessToken = 9909,
+    
+    #endregion
 }

@@ -343,11 +343,14 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                             ext = outType;
                         }
 
+                        var watermarkEnabled = false;
+
                         if (convertible)
                         {
                             var folderDao = daoFactory.GetFolderDao<T>();
-                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao) && value.Contains(FileUtility.WatermarkedDocumentExt))
+                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
                             {
+                                watermarkEnabled = true;
                                 ext = FileUtility.WatermarkedDocumentExt;
                             }
                         }
@@ -381,7 +384,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         }
                         else
                         {
-                            if (!await fileConverter.EnableConvertAsync(file, ext))
+                            if (!await fileConverter.EnableConvertAsync(file, ext, watermarkEnabled))
                             {
                                 if (await fileDao.IsSupportedPreSignedUriAsync(file))
                                 {
@@ -457,6 +460,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             if (!flushed && !context.RequestAborted.IsCancellationRequested)
             {
                 context.Response.StatusCode = 400;
+                context.Response.ContentType = "text/html; charset=utf-8";
                 await context.Response.WriteAsync(HttpUtility.HtmlEncode(ex.Message));
             }
         }
@@ -469,10 +473,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             return true;
         }
 
-        return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) &&
-               file.ShareRecord is 
+        return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) && 
+               ((file.ShareRecord is 
                    { IsLink: true, Share: not FileShare.Restrict } or 
-                   { Share: FileShare.Read, SubjectType: SubjectType.User or SubjectType.Group  };
+                   { Share: FileShare.Read, SubjectType: SubjectType.User or SubjectType.Group }) || 
+               (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)));
     }
 
     private async Task TryMarkAsRecentByLink<T>(File<T> file)

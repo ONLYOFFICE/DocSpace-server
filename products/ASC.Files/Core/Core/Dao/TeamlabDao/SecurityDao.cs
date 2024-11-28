@@ -496,7 +496,7 @@ internal abstract class SecurityBaseDao<T>(
             case ShareFilterType.ExternalLink:
                 {
                     var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
-                    q = q.OrderBy(predicate).ThenByDescending(s => s.SubjectType);
+                    q = q.OrderByDescending(x => x.SubjectType).ThenBy(predicate);
                     break;
                 }
             default:

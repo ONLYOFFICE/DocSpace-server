@@ -1122,4 +1122,16 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Podešavanje kvote po sobi nije uspelo. Unesena vrednost je veća od ukupnog DocSpace skladišta.</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Dodajte barem jedan pouzdani domen.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Broj administratora premašuje limit: {0}/{1}.</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Dodajte najmanje 1 dozvoljenu IP adresu.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Neprofitabilno</value>
+  </data>
 </root>

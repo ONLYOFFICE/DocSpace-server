@@ -24,31 +24,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.ApiModels;
+namespace ASC.Files.Service.Services;
 
-/// <summary>
-/// Restoring parameters
-/// </summary>
-public class BackupRestoreDto
+[Singleton]
+public class RefreshLicenseService(
+        IServiceScopeFactory scopeFactory,
+        ILogger<RefreshLicenseService> logger,
+        LicenseReader licenseReader,
+        DocumentServiceLicense documentServiceLicense,
+        IConfiguration configuration)
+    : ActivePassiveBackgroundService<RefreshLicenseService>(logger, scopeFactory)
 {
-    /// <summary>
-    /// Backup ID
-    /// </summary>
-    public string BackupId { get; set; }
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["files:refreshLicense:period"] ?? "1", CultureInfo.InvariantCulture);
 
-    /// <summary>
-    /// Storage type
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public BackupStorageType? StorageType { get; set; }
-
-    /// <summary>
-    /// Storage parameters
-    /// </summary>
-    public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
-
-    /// <summary>
-    /// Notifies users about portal restoring process or not
-    /// </summary>
-    public bool Notify { get; set; }
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(licenseReader.LicensePath))
+            {
+                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+        }
+    }
 }
