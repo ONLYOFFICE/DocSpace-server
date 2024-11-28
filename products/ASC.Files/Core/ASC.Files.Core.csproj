@@ -15,7 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Box.V2.Core" Version="5.8.0" />
-    <PackageReference Include="DocuSign.eSign.dll" Version="8.0.0" />
+    <PackageReference Include="DocuSign.eSign.dll" Version="8.0.2" />
     <PackageReference Include="Dropbox.Api" Version="7.0.0" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.68.0.3601" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="5.0.0" />
