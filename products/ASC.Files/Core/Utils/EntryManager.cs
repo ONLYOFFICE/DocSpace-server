@@ -167,8 +167,6 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
                 file.LockedBy = lockedBy != Guid.Empty && lockedBy != authContext.CurrentAccount.ID
                     ? await global.GetUserNameAsync(lockedBy)
                     : null;
-
-                continue;
             }
 
             if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))
@@ -505,6 +503,8 @@ public class EntryManager(IDaoFactory daoFactory,
                 entries = new List<FileEntry>(folders.Count + files.Count);
                 entries.AddRange(folders);
                 entries.AddRange(files);
+
+                filesToUpdate = files;
             }
 
             var fileStatusTask = entryStatusManager.SetFileStatusAsync(filesToUpdate);
@@ -1266,9 +1266,9 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
 
                 var aces = await fileSharing.GetSharedInfoAsync(folderIfNew);
-                var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
+                var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id);
 
-                await fileMarker.MarkAsNewAsync(linkedFile, users);
+                await fileMarker.MarkAsNewAsync(linkedFile, users.Where(x => x != authContext.CurrentAccount.ID).ToList());
                 await socketManager.CreateFileAsync(linkedFile, users);
 
                 if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
@@ -1579,12 +1579,9 @@ public class EntryManager(IDaoFactory daoFactory,
                             await fileDao.SaveProperties(result.Id, resProp);
 
                             var aces = await fileSharing.GetSharedInfoAsync(room);
-                            var users = aces
-                                .Where(ace => ace is not { Access: FileShare.FillForms } && ace.Id != userId)
-                                .Select(ace => ace.Id)
-                                .ToList();
+                            var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id);
 
-                            await fileMarker.MarkAsNewAsync(result, users);
+                            await fileMarker.MarkAsNewAsync(result, users.Where(x => x != userId).ToList());
                             await socketManager.CreateFileAsync(result, users);
 
                             var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, result.Title, result.Id, result.Version));

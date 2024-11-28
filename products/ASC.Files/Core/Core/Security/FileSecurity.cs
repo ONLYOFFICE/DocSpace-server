@@ -1052,14 +1052,45 @@ public class FileSecurity(IDaoFactory daoFactory,
                 
                 if (isDocSpaceAdmin)
                 {
+                    if (action == FilesSecurityActions.Download)
+                    {
+                        if (e.ProviderEntry)
+                        {
+                            return true;
+                        }
+
+                        if (isRoom)
+                        {
+                            if (!folder.SettingsDenyDownload)
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            var parentFolders = await GetFileParentFolders(e.ParentId);
+                            var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+
+                            if (room is not { SettingsDenyDownload: true })
+                            {
+                                return true;
+                            }
+                        }
+                    }
+
+                    if (action == FilesSecurityActions.Duplicate && isRoom && !folder.SettingsDenyDownload)
+                    {
+                        return true;
+                    }
+
                     switch (action)
                     {
-                        case FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory:
+                        case FilesSecurityActions.Read or FilesSecurityActions.Copy:
                         case FilesSecurityActions.CopySharedLink when e.Shared:
                             return true;
                     }
 
-                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.Duplicate or FilesSecurityActions.ChangeOwner or 
+                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.ChangeOwner or 
                             FilesSecurityActions.IndexExport)
                     {
                         return true;
@@ -1142,7 +1173,33 @@ public class FileSecurity(IDaoFactory daoFactory,
                 
                 if (isDocSpaceAdmin)
                 {
-                    if (action is FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy or FilesSecurityActions.ReadHistory)
+                    if (action == FilesSecurityActions.Download)
+                    {
+                        if (e.ProviderEntry)
+                        {
+                            return true;
+                        }
+
+                        if (isRoom)
+                        {
+                            if (!folder.SettingsDenyDownload)
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            var parentFolders = await GetFileParentFolders(e.ParentId);
+                            var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+
+                            if (room is not { SettingsDenyDownload: true })
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                    
+                    if (action is FilesSecurityActions.Read or FilesSecurityActions.Copy)
                     {
                         return true;
                     }
@@ -1565,9 +1622,12 @@ public class FileSecurity(IDaoFactory daoFactory,
                             return true;
                         }
 
+                        if (isDocSpaceAdmin && isRoom && (!folder.SettingsDenyDownload || e.Access is not (FileShare.Restrict or FileShare.Read or FileShare.None)))
+                        {
+                            return true;
+                        }
                         break;
                 }
-
                 break;
             case FilesSecurityActions.EditAccess:
             case FilesSecurityActions.ReadLinks:
@@ -1616,7 +1676,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (e.RootFolderType == FolderType.USER || e.Access != FileShare.Read)
+                if (e.RootFolderType == FolderType.USER || (e.Access != FileShare.Read && e.Access != FileShare.None))
                 {
                     return true;
                 }

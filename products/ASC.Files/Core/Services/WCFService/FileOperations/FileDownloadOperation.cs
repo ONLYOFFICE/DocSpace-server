@@ -86,18 +86,37 @@ public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFi
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
         var daoOperation = DaoOperation as FileDownloadOperation<int>;
-        await thirdPartyOperation.CompressToZipAsync(stream, scope);
-        await daoOperation.CompressToZipAsync(stream, scope);
+        
+        var thirdPartyFileOnly = thirdPartyOperation.Files.Count == 1 && thirdPartyOperation.Folders.Count == 0;
+        var daoFileOnly = daoOperation.Files.Count == 1 && daoOperation.Folders.Count == 0;
+        var compress = !((thirdPartyFileOnly || daoFileOnly) && (thirdPartyFileOnly != daoFileOnly));
 
-        if (stream != null)
-        {
-            string archiveExtension;
-
+        string archiveExtension;
+        
+        if (compress)
+        {           
             using (var zip = scope.ServiceProvider.GetService<CompressToArchive>())
             {
                 archiveExtension = await zip.GetArchiveExtension();
             }
+            
+            await thirdPartyOperation.CompressToZipAsync(stream, scope);
+            await daoOperation.CompressToZipAsync(stream, scope);
+        }
+        else
+        {
+            if (thirdPartyFileOnly)
+            {
+                archiveExtension = await thirdPartyOperation.GetFileAsync(stream, scope);
+            }
+            else
+            {
+                archiveExtension = await daoOperation.GetFileAsync(stream, scope);
+            }
+        }
 
+        if (stream != null)
+        {
             stream.Position = 0;
             string fileName;
 
@@ -108,6 +127,10 @@ public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFi
                 fileName = $@"{(thirdPartyFolderOnly ?
                     (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title :
                     (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title)}{archiveExtension}";
+            }
+            else if (!compress)
+            {
+                fileName = archiveExtension;
             }
             else
             {
@@ -373,7 +396,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var fileConverter = scope.ServiceProvider.GetService<FileConverter>();
         var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
 
-        using var compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
+        using ICompress compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
         await compressTo.SetStream(stream);
 
         foreach (var path in _entriesPathId.AllKeys)
@@ -477,6 +500,88 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
             await ProgressStep();
         }
+    }
+    
+    internal async Task<string> GetFileAsync(Stream stream, IServiceScope scope)
+    {
+        if (_entriesPathId == null)
+        {
+            return null;
+        }
+
+        var fileConverter = scope.ServiceProvider.GetService<FileConverter>();
+        var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
+
+        var path = _entriesPathId.AllKeys.FirstOrDefault();
+        if (string.IsNullOrEmpty(path))
+        {
+            await ProgressStep();
+            return null;
+        }
+
+        var entryId = _entriesPathId[path].FirstOrDefault();
+        if (CancellationToken.IsCancellationRequested)
+        {
+            CancellationToken.ThrowIfCancellationRequested();
+        }
+
+        var newTitle = path;
+
+        File<T> file = null;
+        var convertToExt = string.Empty;
+
+        if (!Equals(entryId, default(T)))
+        {
+            await fileDao.InvalidateCacheAsync(entryId);
+            file = await fileDao.GetFileAsync(entryId);
+
+            if (file == null)
+            {
+                this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
+                return null;
+            }
+
+            if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
+            {
+                var sourceFileName = Path.GetFileName(path);
+                var targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
+                newTitle = path.Replace(sourceFileName, targetFileName);
+            }
+        }
+
+        if (!Equals(entryId, default(T)))
+        {
+            try
+            {
+                await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ?
+                    await fileConverter.ExecAsync(file, convertToExt) :
+                    await fileDao.GetFileStreamAsync(file);
+                
+                await readStream.CopyToAsync(stream);
+            }
+            catch (Exception ex)
+            {
+                this[Err] = ex.Message;
+
+                Logger.ErrorWithException(ex);
+            }
+        }
+
+
+        if (!Equals(entryId, default(T)))
+        {
+            ProcessedFile(entryId);
+        }
+        else
+        {
+            ProcessedFolder(default);
+        }
+        
+
+        await ProgressStep();
+        
+
+        return newTitle;
     }
 
     private void ReplaceLongPath(ItemNameValueCollection<T> entriesPathId)

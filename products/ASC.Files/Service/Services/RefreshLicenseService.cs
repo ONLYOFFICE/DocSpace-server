@@ -24,46 +24,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-const nconf = require('nconf');
-const path = require('path');
-const fs = require("fs");
+namespace ASC.Files.Service.Services;
 
-nconf.argv()
-    .env()
-    .file("config", path.join(__dirname, 'config.json'));
+[Singleton]
+public class RefreshLicenseService(
+        IServiceScopeFactory scopeFactory,
+        ILogger<RefreshLicenseService> logger,
+        LicenseReader licenseReader,
+        DocumentServiceLicense documentServiceLicense,
+        IConfiguration configuration)
+    : ActivePassiveBackgroundService<RefreshLicenseService>(logger, scopeFactory)
+{
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["files:refreshLicense:period"] ?? "1", CultureInfo.InvariantCulture);
 
-getAndSaveAppsettings();
-
-module.exports = nconf;
-
-function getAndSaveAppsettings(){
-    var appsettings = nconf.get("app").appsettings;
-    if(!path.isAbsolute(appsettings)){
-        appsettings = path.join(__dirname, appsettings);
-    }
-
-    var env = nconf.get("app").environment;
-
-    console.log('environment: ' + env);
-    nconf.file("appsettingsWithEnv", path.join(appsettings, 'appsettings.' + env + '.json'));
-    nconf.file("appsettings", path.join(appsettings, 'appsettings.json'));
-
-    nconf.file("appsettingsServices", path.join(appsettings, 'appsettings.services.json'));
-
-    nconf.file("redisWithEnv", path.join(appsettings, 'redis.' + env + '.json'));
-    nconf.file("redis", path.join(appsettings, 'redis.json'));
-
-    var redis = nconf.get("Redis");
-    if(redis != null)
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        redis.connect_timeout = redis.ConnectTimeout;
-        redis.database = redis.Database;
-        redis.username = redis.User;
-        redis.password = redis.Password;
-        redis.socket = {
-            host: redis.Hosts[0].Host,
-            port: redis.Hosts[0].Port
-        };
-        nconf.set("Redis", redis);
+        try
+        {
+            if (!string.IsNullOrEmpty(licenseReader.LicensePath))
+            {
+                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+        }
     }
 }

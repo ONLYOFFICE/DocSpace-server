@@ -139,7 +139,8 @@ public sealed class UserManagerWrapper(
         {
             await userManager.AddUserIntoGroupAsync(newUser.Id, groupId, true);
         }
-        else if (type == EmployeeType.RoomAdmin)
+        
+        if (groupId == Guid.Empty && type == EmployeeType.RoomAdmin || type == EmployeeType.DocSpaceAdmin && user.Status == EmployeeStatus.Pending)
         {
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);

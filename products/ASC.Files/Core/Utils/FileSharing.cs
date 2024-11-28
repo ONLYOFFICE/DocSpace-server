@@ -45,14 +45,17 @@ public class FileSharingAceHelper(
     IUrlShortener urlShortener,
     IDistributedLockProvider distributedLockProvider,
     SocketManager socketManager,
-    IDaoFactory daoFactory)
+    IDaoFactory daoFactory,
+    ExternalShare externalShare,
+    SettingsManager settingsManager,
+    PasswordSettingsManager passwordSettingsManager)
 {
     private const int MaxInvitationLinks = 1;
     private const int MaxAdditionalExternalLinks = 5;
     private const int MaxPrimaryExternalLinks = 1;
 
-    public async Task<AceProcessingResult<T>> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message,
-        AceAdvancedSettingsWrapper advancedSettings, string culture = null, bool socket = true, bool beforeOwnerChange = false)
+    public async Task<AceProcessingResult<T>> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, string culture = null, 
+        bool socket = true, bool beforeOwnerChange = false)
     {
         if (entry == null)
         {
@@ -67,7 +70,6 @@ public class FileSharingAceHelper(
         }
 
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
-        var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
         var room = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
         var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString()) : null;
         var entryType = entry.FileEntryType;
@@ -153,6 +155,17 @@ public class FileSharingAceHelper(
                     if (w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
                     {
                         w.FileShareOptions.Internal = false;
+                    }
+                    
+                    if (!string.IsNullOrEmpty(w.FileShareOptions.Password))
+                    {
+                        if (eventType != EventType.Remove)
+                        {
+                            var settings = await settingsManager.LoadAsync<PasswordSettings>();
+                            passwordSettingsManager.CheckPassword(w.FileShareOptions.Password, settings);
+                        }
+            
+                        w.FileShareOptions.Password = await externalShare.CreatePasswordKeyAsync(w.FileShareOptions.Password);
                     }
                 }
             }

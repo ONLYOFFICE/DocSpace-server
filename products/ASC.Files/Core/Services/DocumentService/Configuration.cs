@@ -616,13 +616,13 @@ public class WatermarkOnDraw(double widthInPixels, double heightInPixels, string
     /// Defines the watermark width measured in millimeters.
     /// </summary>
     [JsonPropertyName("width")]
-    public double Width { get; init; } = widthInPixels == 0 ? 200 : widthInPixels / DotsPerMm;
+    public double Width { get; init; } = widthInPixels == 0 ? 100 : widthInPixels / DotsPerMm;
 
     /// <summary>
     /// Defines the watermark height measured in millimeters.
     /// </summary>
     [JsonPropertyName("height")]
-    public double Height { get; init; } = heightInPixels == 0 ? 200 : heightInPixels / DotsPerMm;
+    public double Height { get; init; } = heightInPixels == 0 ? 100 : heightInPixels / DotsPerMm;
 
     [JsonPropertyName("margins")]
     public int[] Margins { get; init; } = [0, 0, 0, 0];
@@ -661,7 +661,7 @@ public class Run
 
     public Run(string text, bool usedInHash = true)
     {
-        FontSize = "28";
+        FontSize = "26";
         Fill = [124, 124, 124];
         Text = text;
 
@@ -894,7 +894,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// Embed url
     /// </summary>
-    public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam);
+    public string EmbedUrl => ShareLinkParam != null && ShareLinkParam.IndexOf(FilesLinkUtility.ShareKey) != -1 ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null;
 
     /// <summary>
     /// Save url
@@ -909,7 +909,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// Share url
     /// </summary>
-    public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam);
+    public string ShareUrl => ShareLinkParam != null && ShareLinkParam.IndexOf(FilesLinkUtility.ShareKey) != -1 ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null;
 
     /// <summary>
     /// Toolbar docked

@@ -93,7 +93,6 @@ public class FileStorageService //: IFileStorageService
     CommonLinkUtility commonLinkUtility,
     ShortUrl shortUrl,
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
-    PasswordSettingsManager passwordSettingsManager,
     WatermarkManager watermarkManager,
     CustomTagsService customTagsService,
     IMapper mapper)
@@ -541,6 +540,8 @@ public class FileStorageService //: IFileStorageService
         {
             return null;
         }
+        
+        await filesMessageService.SendAsync(MessageAction.RoomCreated, folder, folder.Title);
 
         switch (folder.FolderType)
         {
@@ -558,7 +559,6 @@ public class FileStorageService //: IFileStorageService
         }
 
         await socketManager.CreateFolderAsync(folder);
-        await filesMessageService.SendAsync(MessageAction.RoomCreated, folder, folder.Title);
 
         if (folder.ProviderEntry)
         {
@@ -583,6 +583,11 @@ public class FileStorageService //: IFileStorageService
                 folder.SettingsLifetime.Value.ToString(), 
                 folder.SettingsLifetime.Period.ToStringFast(), 
                 folder.SettingsLifetime.DeletePermanently.ToString());
+        }
+
+        if (folder.SettingsWatermark != null)
+        {
+            await filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, folder, folder.Title);
         }
         
         return folder;
@@ -1418,7 +1423,9 @@ public class FileStorageService //: IFileStorageService
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue))
+            var (file, _) = await documentServiceHelper.GetCurFileInfoAsync(fileId, -1);
+            
+            if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue) && docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(file.Id, file.Version,  file.ProviderEntry ? file.ModifiedOn : file.CreateOn))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
@@ -1949,6 +1956,57 @@ public class FileStorageService //: IFileStorageService
         if (newOrder != 0 && newOrder != file.Order)
         {
             await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), order.ToString());
+        }
+    }
+
+    public async Task SetOrderAsync<T>(IEnumerable<OrdersItemRequestDto<T>> items)
+    {
+        var contextId = Guid.NewGuid().ToString();
+        
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        
+        var folders = await folderDao.GetFoldersAsync(items.Where(x => x.EntryType == FileEntryType.Folder)
+                .Select(x => x.EntryId))
+            .ToDictionaryAsync(x => x.Id);
+        
+        var files = await fileDao.GetFilesAsync(items.Where(x => x.EntryType == FileEntryType.File)
+                .Select(x => x.EntryId))
+            .ToDictionaryAsync(x => x.Id);
+
+        foreach (var item in items)
+        {
+            FileEntry<T> entry = item.EntryType == FileEntryType.File ? files.Get(item.EntryId) : folders.Get(item.EntryId);
+            entry.NotFoundIfNull();
+
+            if (!await fileSecurity.CanEditAsync(entry))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
+            switch (entry)
+            {
+                case File<T> file:
+                    {
+                        var newOrder = await fileDao.SetCustomOrder(file.Id, file.ParentId, item.Order);
+                        if (newOrder != 0)
+                        {
+                            await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), item.Order.ToString(), contextId);
+                        }
+
+                        break;
+                    }
+                case Folder<T> folder:
+                    {
+                        var newOrder = await folderDao.SetCustomOrder(folder.Id, folder.ParentId, item.Order);
+                        if (newOrder != 0)
+                        {
+                            await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), item.Order.ToString(), contextId);
+                        }
+
+                        break;
+                    }
+            }
         }
     }
 
@@ -3226,7 +3284,7 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture, socket, beforeOwnerChange);
+                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, culture, socket, beforeOwnerChange);
                 warning ??= result.Warning;
 
                 if (!result.Changed)
@@ -4275,10 +4333,7 @@ public class FileStorageService //: IFileStorageService
 
         if (!string.IsNullOrEmpty(password))
         {
-            var settings = await settingsManager.LoadAsync<PasswordSettings>();
-            passwordSettingsManager.CheckPassword(password, settings);
-            
-            options.Password = await externalShare.CreatePasswordKeyAsync(password);
+            options.Password = password;
         }
 
         var actions = entry.FileEntryType == FileEntryType.File
@@ -4363,7 +4418,7 @@ public class FileStorageService //: IFileStorageService
 
         try
         {
-            var result = await fileSharingAceHelper.SetAceObjectAsync(aces, entry, false, null, null);
+            var result = await fileSharingAceHelper.SetAceObjectAsync(aces, entry, false, null);
             if (!string.IsNullOrEmpty(result.Warning))
             {
                 throw GenerateException(new InvalidOperationException(result.Warning));
