@@ -920,12 +920,7 @@ public class FileStorageService //: IFileStorageService
                         folder, folder.Title);
                 }
                 
-                if (colorChanged)
-                {
-                    await filesMessageService.SendAsync(MessageAction.RoomColorChanged, folder, folder.Title);
-                }
-
-                if (coverChanged)
+                if ((colorChanged || coverChanged) && !folder.SettingsHasLogo)
                 {
                     await filesMessageService.SendAsync(MessageAction.RoomCoverChanged, folder, folder.Title);
                 }
