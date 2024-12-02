@@ -159,8 +159,7 @@ public class AuthenticationController(
                                                                           ? MessageAction.LoginFailViaApiSms
                                                                           : MessageAction.LoginFailViaApiTfa,
                                 MessageTarget.Create(user.Id));
-            logger.ErrorWithException(ex);
-            throw new AuthenticationException("User authentication failed");
+            throw new AuthenticationException("User authentication failed", ex);
         }
         finally
         {
@@ -275,8 +274,7 @@ public class AuthenticationController(
         catch (Exception ex)
         {
             await messageService.SendAsync(user.DisplayUserName(false, displayUserSettingsHelper), viaEmail ? MessageAction.LoginFailViaApi : MessageAction.LoginFailViaApiSocialAccount);
-            logger.ErrorWithException(ex);
-            throw new AuthenticationException("User authentication failed");
+            throw new AuthenticationException("User authentication failed", ex);
         }
         finally
         {
@@ -519,8 +517,7 @@ public class AuthenticationController(
         catch (Exception ex)
         {
             await messageService.SendAsync(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, action);
-            logger.ErrorWithException(ex);
-            throw new AuthenticationException("User authentication failed");
+            throw new AuthenticationException("User authentication failed", ex);
         }
         wrapper.UserInfo = user;
         return wrapper;
