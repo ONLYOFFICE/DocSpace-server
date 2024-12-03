@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCWebApi;
-using WebApiProgram = ASCWebApi::Program;
 
 namespace ASC.Files.Tests1;
 

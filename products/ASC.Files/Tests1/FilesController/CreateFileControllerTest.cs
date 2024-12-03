@@ -25,28 +25,25 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCWebApi;
-using ASCWebApi::ASC.Web.Api.ApiModel.RequestsDto;
-using ASCWebApi::ASC.Web.Api.ApiModel.ResponseDto;
-
-using WebApiProgram = ASCWebApi::Program;
 
 namespace ASC.Files.Tests1.FilesController;
 
 [Collection("Test Collection")]
-public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicationFactory<WebApiProgram> factory) : IAsyncLifetime
+public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicationFactory<WebApiProgram> apiFactory) : IAsyncLifetime
 {
     private readonly HttpClient _filesClient = filesFactory.HttpClient;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
-    private FolderContentDto? _myFolder;
     
     [Fact]
     public async Task Create_ReturnsOk()
     {
         //Arrange
         var file = new CreateFile<JsonElement> { Title = "test.docx" };
+        var response = await filesFactory.HttpClient.GetAsync("files/@my");
+        var myFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
         
         //Act
-        var response = await _filesClient.PostAsJsonAsync($"api/2.0/files/{_myFolder.Current.Id}/file", file, filesFactory.JsonRequestSerializerOptions);
+        response = await _filesClient.PostAsJsonAsync($"files/{myFolder.Current.Id}/file", file, filesFactory.JsonRequestSerializerOptions);
         var createdFile = await HttpClientHelper.ReadFromJson<FileDto<int>>(response);
         
         //Assert
@@ -55,46 +52,22 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
         Assert.Equal("test.docx", createdFile.Title);
     }
     
-    public async Task InitializeAsync()  
+    [Fact]
+    public async Task Create_FolderDoesNotExist_ReturnsFail()
     {
-        var passwordHasher = filesFactory.Services.GetRequiredService<PasswordHasher>();
+        //Arrange
+        var file = new CreateFile<JsonElement> { Title = "test.docx" };
         
-        var apiClient = factory.WithWebHostBuilder(builder =>
-        {
-            builder.UseSetting("log:dir", Path.Combine("..", "..", "..", "Logs", "Test"));
-            builder.UseSetting("ConnectionStrings:default:connectionString", filesFactory.ConnectionString);
-        }).CreateClient();
+        //Act
+        var response = await _filesClient.PostAsJsonAsync($"files/{Random.Shared.Next(10000, 20000)}/file", file, filesFactory.JsonRequestSerializerOptions);
         
-        var response = await apiClient.GetAsync("api/2.0/settings");
-        var settings = await HttpClientHelper.ReadFromJson<SettingsDto>(response);
-        
-        if (!string.IsNullOrEmpty(settings?.WizardToken))
-        {
-            apiClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", settings.WizardToken);
-
-            response = await apiClient.PutAsJsonAsync("api/2.0/settings/wizard/complete", new WizardRequestsDto
-            {
-                Email = "test@example.com",
-                PasswordHash = passwordHasher.GetClientPassword("11111111")
-            });
-            
-            _ = await HttpClientHelper.ReadFromJson<WizardSettings>(response);
-        }
-        
-        response = await apiClient.PostAsJsonAsync("api/2.0/authentication", new AuthRequestsDto
-        { 
-            UserName = "test@example.com",
-            PasswordHash = passwordHasher.GetClientPassword("11111111")
-        }, filesFactory.JsonRequestSerializerOptions);
-        
-        var authenticationTokenDto = await HttpClientHelper.ReadFromJson<AuthenticationTokenDto>(response);
-        if (authenticationTokenDto != null)
-        {
-            _filesClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationTokenDto.Token);
-        }
-        
-        response = await _filesClient.GetAsync("api/2.0/files/@my");
-        _myFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
+        //Assert
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+    }
+    
+    public async Task InitializeAsync()
+    {
+        await Initializer.InitializeAsync(filesFactory, apiFactory);
     }
 
     public async Task DisposeAsync()

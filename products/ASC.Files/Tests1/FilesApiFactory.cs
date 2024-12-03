@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCFiles;
-using FilesProgram = ASCFiles::Program;
 
 namespace ASC.Files.Tests1;
 
@@ -37,6 +36,8 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     
     private DbConnection _dbconnection = default!;
     private Respawner _respawner = default!;
+    readonly List<string> _tablesToBackup = ["files_folder"];
+    
     public string ConnectionString => _mySqlContainer.GetConnectionString(); 
     public HttpClient HttpClient { get; private set;} = default!;
     public JsonSerializerOptions JsonRequestSerializerOptions { get; } = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
@@ -48,8 +49,10 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             configBuilder.AddInMemoryCollection(new List<KeyValuePair<string, string?>>
             {
                 new("log:dir",  Path.Combine("..", "..", "..", "Logs", "Test")),
+                new("$STORAGE_ROOT", Path.Combine("..", "..", "..", "Data", "Test")),
                 new("ConnectionStrings:default:connectionString", ConnectionString),
                 new("testAssembly", $"ASC.Migrations.MySql.SaaS"),
+                new("web:hub:internal", "")
             }); 
         });
         
@@ -64,31 +67,63 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             services.AddBaseDbContext<MigrationContext>();
             using var scope = services.BuildServiceProvider().CreateScope();
             scope.ServiceProvider.GetRequiredService<MigrationContext>().Database.Migrate();
+            
+            BackupTables().Wait();
         });
     }
     
     public async Task ResetDatabaseAsync()
     {
         await _respawner.ResetAsync(_dbconnection);
+        
+        await ExecuteScriptAsync("INSERT INTO {0} SELECT * FROM {1};");
     }
 
     public async Task InitializeAsync()
     {
         await _mySqlContainer.StartAsync();
         _dbconnection = new MySqlConnection(_mySqlContainer.GetConnectionString());
-        
+
         HttpClient = CreateClient();
+        HttpClient.BaseAddress = new Uri(HttpClient.BaseAddress, "api/2.0/");
+        
+        List<Table> tablesToIgnore = [ "core_user", "core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "core_usersecurity", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
+        tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));
         
         await _dbconnection.OpenAsync();
-        
         _respawner = await Respawner.CreateAsync(_dbconnection, new RespawnerOptions
         {
-            DbAdapter = DbAdapter.MySql
+            DbAdapter = DbAdapter.MySql,
+            TablesToIgnore = tablesToIgnore.ToArray(),
+            WithReseed = true
         });
     }
-
+    
     public async Task DisposeAsync()
     {
         await _mySqlContainer.StopAsync();
+        await base.DisposeAsync();
+    }
+
+    public async Task BackupTables()
+    {
+        await ExecuteScriptAsync("CREATE TABLE IF NOT EXISTS {1} LIKE {0}; \nREPLACE INTO {1} SELECT * FROM {0};");
+    }
+    
+    private async Task ExecuteScriptAsync(string scriptTemplate)
+    {
+        var backupScript = new StringBuilder();
+                
+        foreach (var table in _tablesToBackup)
+        {
+            backupScript.AppendFormat(scriptTemplate, table, MakeCopyTableName(table));
+        }
+            
+        await _mySqlContainer.ExecScriptAsync(backupScript.ToString());
+    }
+
+    private string MakeCopyTableName(string tableName)
+    {
+        return $"{tableName}_copy";
     }
 }
