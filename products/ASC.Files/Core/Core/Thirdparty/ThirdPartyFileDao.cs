@@ -720,6 +720,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.FromResult<EntryProperties<string>>(null);
     }
 
+    public Task<Dictionary<string, EntryProperties<string>>> GetPropertiesAsync(IEnumerable<string> filesIds)
+    {
+        return Task.FromResult<Dictionary<string, EntryProperties<string>>>(null);
+    }
+
     public Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
     {
         return Task.CompletedTask;
