@@ -841,4 +841,7 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Stanza: {0}. Filigrana abilitata</value>
   </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Invito mandato di nuovo: {0}</value>
+  </data>
 </root>

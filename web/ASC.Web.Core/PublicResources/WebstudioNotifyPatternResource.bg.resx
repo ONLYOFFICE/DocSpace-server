@@ -2051,4 +2051,7 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Какво ново в портала ви ${__VirtualRootPath} през последния час</value>
+  </data>
 </root>

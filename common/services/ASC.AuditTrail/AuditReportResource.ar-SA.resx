@@ -870,4 +870,64 @@
   <data name="OAuthModule" xml:space="preserve">
     <value>OAuth</value>
   </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>تم تغيير تنشيط {0} للعميل</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>تم تغيير رؤية العميل {0}</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>تم إنشاء العميل</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>تم حذف العميل {0}</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>الملف: {0}. تم تغيير الفهرس من {1} إلى {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>المجلد: {0}. تم تغيير الفهرس من {1} إلى {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>المجلد: {0}. تم إعادة ترتيب الفهارس</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>رمز التفويض الذي تم إنشاؤه للعميل {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>تم إنشاء رمز وصول شخصي للعميل {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>تمت إعادة إنشاء سر {0} الخاص بالعميل</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>تم إبطال وصول العميل {0}</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>الغرفة: {0}. رفض التحميل معطل</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>الغرفة: {0}. تم تمكين رفض التنزيل</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>تم تعطيل فهرسة الغرفة</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>تم تمكين فهرسة الغرفة</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>تم تعطيل مدى الحياة</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>تم ضبط وقت الحياة. القيمة: {0}. الفترة: {1}. الحذف نهائيًا: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>الغرفة: {0}. تم تعطيل العلامة المائية</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>الغرفة: {0}. تم تمكين العلامة المائية</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>تم تحديث العميل {0}</value>
+  </data>
 </root>

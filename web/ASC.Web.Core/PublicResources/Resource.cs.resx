@@ -1069,4 +1069,10 @@
   <data name="ErrorTrustedMailDomain" xml:space="preserve">
     <value>Přidejte alespoň 1 důvěryhodnou doménu.</value>
   </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Neziskové</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Přidejte alespoň 1 povolenou IP adresu.</value>
+  </data>
 </root>

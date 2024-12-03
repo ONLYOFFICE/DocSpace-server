@@ -841,4 +841,7 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Raum: {0}. Wasserzeichen aktiviert</value>
   </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Einladung erneut gesendet: {0}</value>
+  </data>
 </root>

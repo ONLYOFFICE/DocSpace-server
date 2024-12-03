@@ -811,4 +811,7 @@
   <data name="OAuthModule" xml:space="preserve">
     <value>OAuth</value>
   </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Клієнта {0} оновлено</value>
+  </data>
 </root>
