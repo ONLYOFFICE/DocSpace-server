@@ -1656,8 +1656,14 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
+        
+        var history = await fileDao.GetFileHistoryAsync(fileId).ToListAsync();
+        
+        var t1 = entryStatusManager.SetFileStatusAsync(history);
+        var t2 = entryStatusManager.SetFormInfoAsync(history);
+        await Task.WhenAll(t1, t2);
 
-        await foreach (var r in fileDao.GetFileHistoryAsync(fileId))
+        foreach (var r in history)
         {
             await entryStatusManager.SetFileStatusAsync(r);
             yield return r;

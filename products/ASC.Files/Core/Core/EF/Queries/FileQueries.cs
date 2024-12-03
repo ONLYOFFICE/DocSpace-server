@@ -274,6 +274,12 @@ public partial class FilesDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public IAsyncEnumerable<DbFilesProperties> FilesPropertiesAsync(int tenantId, IEnumerable<string> filesIds)
+    {
+        return FileQueries.FilesPropertiesAsync(this, tenantId, filesIds);
+    }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteFilesPropertiesAsync(int tenantId, string entryId)
     {
         return FileQueries.DeleteFilesPropertiesAsync(this, tenantId, entryId);
@@ -830,6 +836,13 @@ static file class FileQueries
                     .Where(r => r.EntryId == entryId)
                     .Select(r => r.Data)
                     .FirstOrDefault());
+    
+    public static readonly Func<FilesDbContext, int, IEnumerable<string>, IAsyncEnumerable<DbFilesProperties>> FilesPropertiesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<string> filesIds) =>
+                ctx.FilesProperties
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => filesIds.Contains(r.EntryId)));
 
     public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteFilesPropertiesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
