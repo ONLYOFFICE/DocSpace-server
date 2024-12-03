@@ -844,4 +844,31 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Invito mandato di nuovo: {0}</value>
   </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Attivazione del cliente {0} cambiata</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Visibilità del cliente {0} cambiata</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Cliente creato</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Cliente {0} eliminato</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Codice di autorizzazione generato per il cliente {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Token personale di accesso generato per il cliente {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Segreto del cliente {0} rigenerato</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Accesso del cliente {0} revocato</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Cliente {0} aggiornato</value>
+  </data>
 </root>

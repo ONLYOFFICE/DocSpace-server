@@ -900,4 +900,7 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Sală: {0}. Inscripționare a fost activată</value>
   </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Invitația a trimis din nou: {0}</value>
+  </data>
 </root>
