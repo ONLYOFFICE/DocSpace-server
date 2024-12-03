@@ -24,10 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-extern alias ASCWebApi;
-using WebApiProgram = ASCWebApi::Program;
+using System.Text.Json.Serialization.Metadata;
 
 namespace ASC.Files.Tests1;
 
-[CollectionDefinition("Test Collection")]
-public class SharedTestCollection : ICollectionFixture<FilesApiFactory>, ICollectionFixture<WebApplicationFactory<WebApiProgram>>;
+public class HttpClientHelper
+{
+    private static JsonSerializerOptions JsonResponseSerializerOptions { get; } = new()
+    {
+        AllowTrailingCommas = true, 
+        PropertyNameCaseInsensitive = true,
+        Converters = { new ApiDateTimeConverter(), new FileShareConverter() }
+    };
+    
+    public static async Task<T?> ReadFromJson<T>(HttpResponseMessage? response)
+    {
+        if (response == null)
+        {
+            return default;
+        }
+        
+        var successApiResponse = await response.Content.ReadFromJsonAsync<SuccessApiResponse>();
+        T? parsed = default!;
+        
+        if (successApiResponse is { Response: JsonElement jsonElement })
+        {
+            parsed = jsonElement.Deserialize<T>(JsonResponseSerializerOptions);
+        }
+        
+        return parsed;
+    }
+}

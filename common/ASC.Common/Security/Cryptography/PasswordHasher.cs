@@ -44,6 +44,11 @@ public class PasswordHasher
     /// </summary>
     public string Salt { get; private set; }
 
+    public PasswordHasher()
+    {
+        
+    }
+    
     public PasswordHasher(IConfiguration configuration, MachinePseudoKeys machinePseudoKeys)
     {
         if (!int.TryParse(configuration["core:password:size"], out var size))

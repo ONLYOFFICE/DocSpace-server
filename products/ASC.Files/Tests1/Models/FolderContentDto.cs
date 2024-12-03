@@ -24,10 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-extern alias ASCWebApi;
-using WebApiProgram = ASCWebApi::Program;
+namespace ASC.Files.Tests1.Models;
 
-namespace ASC.Files.Tests1;
-
-[CollectionDefinition("Test Collection")]
-public class SharedTestCollection : ICollectionFixture<FilesApiFactory>, ICollectionFixture<WebApplicationFactory<WebApiProgram>>;
+public class FolderContentDto
+{
+    public List<FileDto<int>> Files { get; set; }
+    
+    public List<FolderDto<int>> Folders { get; set; }
+    
+    public FolderDto<int> Current { get; set; }
+    
+    public object PathParts { get; set; }
+    
+    public int StartIndex { get; set; }
+    
+    public int Count { get; set; }
+    
+    public int Total { get; set; }
+    
+    public int New { get; set; }
+}
