@@ -70,7 +70,6 @@ public class AuthenticationController(
     DbLoginEventsManager dbLoginEventsManager,
     BruteForceLoginManager bruteForceLoginManager,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-    ILogger<AuthenticationController> logger,
     InvitationService invitationService,
     LoginProfileTransport loginProfileTransport,
     IMapper mapper)
