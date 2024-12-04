@@ -48,8 +48,8 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         {
             configBuilder.AddInMemoryCollection(new List<KeyValuePair<string, string?>>
             {
-                new("log:dir",  Path.Combine("..", "..", "..", "Logs", "Test")),
-                new("$STORAGE_ROOT", Path.Combine("..", "..", "..", "Data", "Test")),
+                new("log:dir",  Path.Combine("..", "..", "..", "..", "Logs", "Test")),
+                new("$STORAGE_ROOT", Path.Combine("..", "..", "..", "..", "Data", "Test")),
                 new("ConnectionStrings:default:connectionString", ConnectionString),
                 new("testAssembly", $"ASC.Migrations.MySql.SaaS"),
                 new("web:hub:internal", "")
@@ -85,7 +85,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         _dbconnection = new MySqlConnection(_mySqlContainer.GetConnectionString());
 
         HttpClient = CreateClient();
-        HttpClient.BaseAddress = new Uri(HttpClient.BaseAddress, "api/2.0/");
+        HttpClient.BaseAddress = new Uri(HttpClient.BaseAddress, "api/2.0/files/");
         
         List<Table> tablesToIgnore = [ "core_user", "core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "core_usersecurity", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));

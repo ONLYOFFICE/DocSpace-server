@@ -28,9 +28,11 @@ extern alias ASCWebApi;
 
 namespace ASC.Files.Tests1.Data;
 
+using User = (string Email, string Password);
+
 public class Initializer
 {
-    private static readonly (string Email, string Password) _user = ("test@example.com", "11111111");
+    private static readonly User _user = ("test@example.com", "11111111");
     
     private static bool _initialized;
     private static HttpClient? _apiClient;
@@ -43,8 +45,8 @@ public class Initializer
         {
             _apiClient = factory.WithWebHostBuilder(builder =>
             {
-                builder.UseSetting("log:dir", Path.Combine("..", "..", "..", "Logs", "Test"));
-                builder.UseSetting("$STORAGE_ROOT", Path.Combine("..", "..", "..", "Data", "Test"));
+                builder.UseSetting("log:dir", Path.Combine("..", "..", "..", "..", "Logs", "Test"));
+                builder.UseSetting("$STORAGE_ROOT", Path.Combine("..", "..", "..", "..", "Data", "Test"));
                 builder.UseSetting("ConnectionStrings:default:connectionString", filesFactory.ConnectionString);
                 builder.UseSetting("web:hub:internal", "");
             }).CreateClient();
@@ -72,7 +74,7 @@ public class Initializer
             filesFactory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationTokenDto.Token);
         }
         
-        _ = await filesFactory.HttpClient.GetAsync("files/@root");
+        _ = await filesFactory.HttpClient.GetAsync("@root");
 
         if (!_initialized)
         {

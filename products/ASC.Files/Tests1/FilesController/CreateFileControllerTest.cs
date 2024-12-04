@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCWebApi;
+using FluentAssertions;
 
 namespace ASC.Files.Tests1.FilesController;
 
@@ -34,22 +35,26 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
     private readonly HttpClient _filesClient = filesFactory.HttpClient;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
     
-    [Fact]
-    public async Task Create_ReturnsOk()
+    [Theory]
+    [InlineData("test.docx")]
+    [InlineData("test.pptx")]
+    [InlineData("test.xlsx")]
+    [InlineData("test.pdf")]
+    public async Task Create_ReturnsOk(string? fileName)
     {
         //Arrange
-        var file = new CreateFile<JsonElement> { Title = "test.docx" };
-        var response = await filesFactory.HttpClient.GetAsync("files/@my");
+        var file = new CreateFile<JsonElement> { Title = fileName };
+        var response = await _filesClient.GetAsync("@my");
         var myFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
         
         //Act
-        response = await _filesClient.PostAsJsonAsync($"files/{myFolder.Current.Id}/file", file, filesFactory.JsonRequestSerializerOptions);
+        response = await _filesClient.PostAsJsonAsync($"{myFolder.Current.Id}/file", file, filesFactory.JsonRequestSerializerOptions);
         var createdFile = await HttpClientHelper.ReadFromJson<FileDto<int>>(response);
         
         //Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.NotNull(createdFile);
-        Assert.Equal("test.docx", createdFile.Title);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        createdFile.Should().NotBeNull();
+        createdFile.Title.Should().Be(fileName);
     }
     
     [Fact]
@@ -59,10 +64,10 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
         var file = new CreateFile<JsonElement> { Title = "test.docx" };
         
         //Act
-        var response = await _filesClient.PostAsJsonAsync($"files/{Random.Shared.Next(10000, 20000)}/file", file, filesFactory.JsonRequestSerializerOptions);
+        var response = await _filesClient.PostAsJsonAsync($"{Random.Shared.Next(10000, 20000)}/file", file, filesFactory.JsonRequestSerializerOptions);
         
         //Assert
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
     }
     
     public async Task InitializeAsync()
