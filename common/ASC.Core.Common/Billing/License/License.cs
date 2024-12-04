@@ -81,6 +81,11 @@ public class License
     [JsonPropertyName("signature")]
     public string Signature { get; set; }
 
+    /// <summary>Indicates whether the license is a developer license or not</summary>
+    /// <type>System.Boolean, System</type>
+    [JsonPropertyName("docspace_dev")] 
+    public bool Developer { get; set; }
+
     public static License Parse(string licenseString)
     {
         if (string.IsNullOrEmpty(licenseString))
