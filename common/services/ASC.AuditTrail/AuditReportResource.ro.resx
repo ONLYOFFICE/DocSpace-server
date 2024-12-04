@@ -903,4 +903,13 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Invitația a trimis din nou: {0}</value>
   </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Activarea Clientului {0} s-a schimbat</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Vizibilitatea Clientului {0} s-a schimbat</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Clientul a fost creat</value>
+  </data>
 </root>
