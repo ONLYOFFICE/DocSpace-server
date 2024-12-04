@@ -98,12 +98,9 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             WithReseed = true
         });
     }
-    
-    public async Task DisposeAsync()
-    {
-        await _mySqlContainer.StopAsync();
-        await base.DisposeAsync();
-    }
+
+    public new Task DisposeAsync() => _mySqlContainer.StopAsync();
+
 
     public async Task BackupTables()
     {
