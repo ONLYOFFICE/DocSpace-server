@@ -59,7 +59,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     [AllowNotPayment]
     public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()
     {
-        var quota = await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync());
+        var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
         var result = new CapabilitiesDto
         {
             LdapEnabled = false,

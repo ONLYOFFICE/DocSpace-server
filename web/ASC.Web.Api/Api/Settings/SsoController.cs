@@ -208,7 +208,7 @@ public class SsoController(TenantManager tenantManager,
 
         var messageAction = enableSso ? MessageAction.SSOEnabled : MessageAction.SSODisabled;
 
-        await messageService.SendAsync(messageAction);
+        messageService.Send(messageAction);
 
         return settings;
     }
@@ -236,7 +236,7 @@ public class SsoController(TenantManager tenantManager,
 
         await ConverSsoUsersToOrdinaryAsync();
 
-        await messageService.SendAsync(MessageAction.SSODisabled);
+        messageService.Send(MessageAction.SSODisabled);
 
         return defaultSettings;
     }

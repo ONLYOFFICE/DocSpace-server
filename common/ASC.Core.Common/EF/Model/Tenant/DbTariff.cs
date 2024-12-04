@@ -31,7 +31,9 @@ public class DbTariff : BaseEntity
     public int Id { get; set; }
     public int TenantId { get; set; }
     public DateTime Stamp { get; set; }
+    [MaxLength(255)]
     public string CustomerId { get; set; }
+    [MaxLength(255)]
     public string Comment { get; set; }
     public DateTime CreateOn { get; set; }
 
@@ -69,7 +71,7 @@ public static class DbTariffExtension
 
             entity.Property(e => e.Comment)
                 .HasColumnName("comment")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -84,7 +86,7 @@ public static class DbTariffExtension
             entity.Property(e => e.CustomerId)
                 .IsRequired()
                 .HasColumnName("customer_id")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -104,7 +106,6 @@ public static class DbTariffExtension
 
             entity.Property(e => e.Comment)
                 .HasColumnName("comment")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.CreateOn)
@@ -116,7 +117,6 @@ public static class DbTariffExtension
             entity.Property(e => e.CustomerId)
                 .IsRequired()
                 .HasColumnName("customer_id")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");

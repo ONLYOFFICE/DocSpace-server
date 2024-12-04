@@ -28,7 +28,9 @@ namespace ASC.Core.Common.EF.Model;
 
 public class FilesConverts
 {
+    [MaxLength(50)]
     public string Input { get; set; }
+    [MaxLength(50)]
     public string Output { get; set; }
 }
 
@@ -647,13 +649,13 @@ public static class FilesConvertsExtension
 
            entity.Property(e => e.Input)
                .HasColumnName("input")
-               .HasColumnType("varchar(50)")
+               .HasColumnType("varchar")
                .HasCharSet("utf8")
                .UseCollation("utf8_general_ci");
 
            entity.Property(e => e.Output)
                .HasColumnName("output")
-               .HasColumnType("varchar(50)")
+               .HasColumnType("varchar")
                .HasCharSet("utf8")
                .UseCollation("utf8_general_ci");
         });
@@ -668,12 +670,10 @@ public static class FilesConvertsExtension
             entity.ToTable("files_converts", "onlyoffice");
 
             entity.Property(e => e.Input)
-                .HasColumnName("input")
-                .HasMaxLength(50);
+                .HasColumnName("input");
 
             entity.Property(e => e.Output)
-                .HasColumnName("output")
-                .HasMaxLength(50);
+                .HasColumnName("output");
         });
     }
 }

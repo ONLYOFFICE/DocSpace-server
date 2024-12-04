@@ -135,7 +135,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
 
         CultureInfo culture = null;
 
-        var tenant = await tenantManager.GetCurrentTenantAsync(false);
+        var tenant = tenantManager.GetCurrentTenant(false);
 
         if (tenant != null)
         {

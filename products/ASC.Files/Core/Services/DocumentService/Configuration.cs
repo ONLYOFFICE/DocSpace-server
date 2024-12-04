@@ -187,23 +187,23 @@ public class DocumentConfig<T>(
 	public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
-    public async Task<FileReferenceData> GetReferenceData(File<T> file)
+    public FileReferenceData GetReferenceData(File<T> file)
     {
         return _referenceData ??= new FileReferenceData
         {
             FileKey = file.Id.ToString(), 
-            InstanceId = (await tenantManager.GetCurrentTenantIdAsync()).ToString()
+            InstanceId = (tenantManager.GetCurrentTenantId()).ToString()
         };
     }
 
     public string Title { get; set; }
 
-    public async Task SetUrl(string val)
+    public void SetUrl(string val)
     {
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(val);
+        _fileUri = documentServiceConnector.ReplaceCommunityAddress(val);
     }
     
-    public async Task<string> GetUrl(File<T> file)
+    public string GetUrl(File<T> file)
     {
         if (!string.IsNullOrEmpty(_fileUri))
         {
@@ -211,7 +211,7 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, last));
+        _fileUri = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file, last));
 
         return _fileUri;
     }
@@ -278,7 +278,7 @@ public class EditorConfiguration<T>(
             return null;
         }
 
-        var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(file.Id.ToString());
+        var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(file.Id.ToString());
 
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
         {

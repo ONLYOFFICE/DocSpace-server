@@ -24,21 +24,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.MessagingSystem.EF.Model;
+namespace ASC.Files.Service.Services;
 
-public class MessageEvent : IMapFrom<EventMessage>
+[Singleton]
+public class RefreshLicenseService(
+        IServiceScopeFactory scopeFactory,
+        ILogger<RefreshLicenseService> logger,
+        LicenseReader licenseReader,
+        DocumentServiceLicense documentServiceLicense,
+        IConfiguration configuration)
+    : ActivePassiveBackgroundService<RefreshLicenseService>(logger, scopeFactory)
 {
-    public int Id { get; set; }
-    [MaxLength(50)]
-    public string Ip { get; set; }
-    [MaxLength(200)]
-    public string Browser { get; set; }
-    [MaxLength(200)]
-    public string Platform { get; set; }
-    public DateTime Date { get; set; }
-    public int TenantId { get; set; }
-    public Guid? UserId { get; set; }
-    [MaxLength(300)]
-    public string Page { get; set; }
-    public int? Action { get; set; }
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["files:refreshLicense:period"] ?? "1", CultureInfo.InvariantCulture);
+
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(licenseReader.LicensePath))
+            {
+                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+        }
+    }
 }

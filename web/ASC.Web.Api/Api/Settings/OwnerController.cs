@@ -61,7 +61,7 @@ public class OwnerController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var curTenant = await tenantManager.GetCurrentTenantAsync();
+        var curTenant = tenantManager.GetCurrentTenant();
         var owner = await userManager.GetUsersAsync(curTenant.OwnerId);
         var newOwner = await userManager.GetUsersAsync(inDto.OwnerId);
 
@@ -77,10 +77,10 @@ public class OwnerController(
             return new { Status = 0, Message = Resource.ErrorAccessDenied };
         }
 
-        var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
+        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
         await studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, await urlShortener.GetShortenLinkAsync(confirmLink));
 
-        await messageService.SendAsync(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
 
         var emailLink = $"<a href=\"mailto:{owner.Email}\">{owner.Email}</a>";
         return new { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
@@ -135,10 +135,10 @@ public class OwnerController(
             }
         }
 
-        var curTenant = await tenantManager.GetCurrentTenantAsync();
+        var curTenant = tenantManager.GetCurrentTenant();
         curTenant.OwnerId = newOwner.Id;
         await tenantManager.SaveTenantAsync(curTenant);
 
-        await messageService.SendAsync(MessageAction.OwnerUpdated, newOwner.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.OwnerUpdated, newOwner.DisplayUserName(false, displayUserSettingsHelper));
     }
 }

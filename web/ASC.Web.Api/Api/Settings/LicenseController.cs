@@ -86,7 +86,7 @@ public class LicenseController(ILoggerProvider option,
         }
 
         await TariffSettings.SetLicenseAcceptAsync(settingsManager);
-        await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
+        messageService.Send(MessageAction.LicenseKeyUploaded);
 
         try
         {
@@ -175,7 +175,7 @@ public class LicenseController(ILoggerProvider option,
 
         await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
 
-        await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
+        messageService.Send(MessageAction.LicenseKeyUploaded);
 
         return true;
     }

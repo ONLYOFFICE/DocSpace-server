@@ -42,7 +42,7 @@ public class CultureMiddleware(RequestDelegate next)
             }
         }
 
-        culture ??= (await tenantManager.GetCurrentTenantAsync(false))?.GetCulture();
+        culture ??= (tenantManager.GetCurrentTenant(false))?.GetCulture();
 
         if (culture != null)
         {

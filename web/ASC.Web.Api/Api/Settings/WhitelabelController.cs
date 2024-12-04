@@ -79,7 +79,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await SaveWhiteLabelSettingsForTenantAsync(settings, null, tenant.Id, inDto);
     }
@@ -155,7 +155,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await SaveWhiteLabelSettingsFromFilesForTenantAsync(settings, null, tenant.Id);
     }
@@ -367,7 +367,7 @@ public class WhitelabelController(ApiContext apiContext,
     private async Task RestoreWhiteLabelOptionsForCurrentTenantAsync()
     {
         var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
 
         await RestoreWhiteLabelOptionsForTenantAsync(settings, null, tenant.Id);

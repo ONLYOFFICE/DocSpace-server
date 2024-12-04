@@ -347,7 +347,7 @@ public static class ServiceCollectionExtension
         }
 
         var configurationOption = redisConfiguration.ConfigurationOptions;
-
+        configurationOption.DefaultDatabase = redisConfiguration.Database;
         configurationOption.ClientName = clientName;
 
         var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
