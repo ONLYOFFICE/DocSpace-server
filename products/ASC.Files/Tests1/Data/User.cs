@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-extern alias ASCWebApi;
-extern alias ASCPeople;
+namespace ASC.Files.Tests1.Data;
 
-namespace ASC.Files.Tests1;
-
-[CollectionDefinition("Test Collection")]
-public class SharedTestCollection : ICollectionFixture<FilesApiFactory>, ICollectionFixture<WebApplicationFactory<WebApiProgram>>, ICollectionFixture<WebApplicationFactory<PeopleProgram>>;
+public record User(string Email, string Password);

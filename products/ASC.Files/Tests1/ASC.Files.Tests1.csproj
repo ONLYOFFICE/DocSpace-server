@@ -36,7 +36,8 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\common\Tools\ASC.Migrations.Core\ASC.Migrations.Core.csproj" />
       <ProjectReference Include="..\..\..\migrations\mysql\SaaS\ASC.Migrations.MySql.SaaS.csproj" />
-      <ProjectReference Include="..\..\..\web\ASC.Web.Api\ASC.Web.Api.csproj"  Aliases="ASCWebApi"/>
+      <ProjectReference Include="..\..\..\web\ASC.Web.Api\ASC.Web.Api.csproj" Aliases="ASCWebApi"/>
+      <ProjectReference Include="..\..\ASC.People\Server\ASC.People.csproj" Aliases="ASCPeople" />
       <ProjectReference Include="..\Server\ASC.Files.csproj" Aliases="ASCFiles"/>
     </ItemGroup>
 

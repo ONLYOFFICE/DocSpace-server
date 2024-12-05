@@ -25,23 +25,53 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCWebApi;
+extern alias ASCPeople;
 using FluentAssertions;
 
 namespace ASC.Files.Tests1.FilesController;
 
 [Collection("Test Collection")]
-public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicationFactory<WebApiProgram> apiFactory) : IAsyncLifetime
+public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicationFactory<WebApiProgram> apiFactory, WebApplicationFactory<PeopleProgram> peopleFactory) : IAsyncLifetime
 {
     private readonly HttpClient _filesClient = filesFactory.HttpClient;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
+    public static IEnumerable<object[]> Data =>
+        new List<object[]>
+        {
+            new object[] { "test.docx" },
+            new object[] { "test.pptx" },
+            new object[] { "test.xlsx" },
+            new object[] { "test.pdf" },
+        };
+
+    [Theory]
+    [MemberData(nameof(Data))]
+    public async Task CreateFile_Owner_ReturnsOk(string? fileName)
+    {
+        await Initializer.AuthenticateOwner(filesFactory, _filesClient);
+        
+        //Arrange
+        var file = new CreateFile<JsonElement> { Title = fileName };
+        var response = await _filesClient.GetAsync("@my");
+        var myFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
+        
+        //Act
+        response = await _filesClient.PostAsJsonAsync($"{myFolder.Current.Id}/file", file, filesFactory.JsonRequestSerializerOptions);
+        var createdFile = await HttpClientHelper.ReadFromJson<FileDto<int>>(response);
+        
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        createdFile.Should().NotBeNull();
+        createdFile.Title.Should().Be(fileName);
+    }
     
     [Theory]
-    [InlineData("test.docx")]
-    [InlineData("test.pptx")]
-    [InlineData("test.xlsx")]
-    [InlineData("test.pdf")]
-    public async Task Create_ReturnsOk(string? fileName)
+    [MemberData(nameof(Data))]
+    public async Task CreateFile_RoomAdmin_ReturnsOk(string? fileName)
     {
+        var roomAdmin = await Initializer.InviteUsers(filesFactory, EmployeeType.RoomAdmin);
+        await Initializer.Authenticate(filesFactory, _filesClient, roomAdmin.Email, roomAdmin.Password);
+        
         //Arrange
         var file = new CreateFile<JsonElement> { Title = fileName };
         var response = await _filesClient.GetAsync("@my");
@@ -60,6 +90,8 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
     [Fact]
     public async Task Create_FolderDoesNotExist_ReturnsFail()
     {
+        await Initializer.AuthenticateOwner(filesFactory, _filesClient);
+        
         //Arrange
         var file = new CreateFile<JsonElement> { Title = "test.docx" };
         
@@ -72,7 +104,7 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
     
     public async Task InitializeAsync()
     {
-        await Initializer.InitializeAsync(filesFactory, apiFactory);
+        await Initializer.InitializeAsync(filesFactory, apiFactory, peopleFactory);
     }
 
     public async Task DisposeAsync()

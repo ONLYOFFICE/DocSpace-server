@@ -36,7 +36,8 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     
     private DbConnection _dbconnection = default!;
     private Respawner _respawner = default!;
-    readonly List<string> _tablesToBackup = ["files_folder"];
+    readonly List<string> _tablesToBackup = ["files_folder", "core_user", "core_usersecurity" ];
+    readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
     
     public string ConnectionString => _mySqlContainer.GetConnectionString(); 
     public HttpClient HttpClient { get; private set;} = default!;
@@ -46,14 +47,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     {             
         builder.ConfigureHostConfiguration(configBuilder =>
         {
-            configBuilder.AddInMemoryCollection(new List<KeyValuePair<string, string?>>
-            {
-                new("log:dir",  Path.Combine("..", "..", "..", "..", "Logs", "Test")),
-                new("$STORAGE_ROOT", Path.Combine("..", "..", "..", "..", "Data", "Test")),
-                new("ConnectionStrings:default:connectionString", ConnectionString),
-                new("testAssembly", $"ASC.Migrations.MySql.SaaS"),
-                new("web:hub:internal", "")
-            }); 
+            configBuilder.AddInMemoryCollection(Initializer.GetSettings(ConnectionString)); 
         });
         
         return base.CreateHost(builder);
@@ -72,7 +66,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         });
     }
     
-    public async Task ResetDatabaseAsync()
+    internal async Task ResetDatabaseAsync()
     {
         await _respawner.ResetAsync(_dbconnection);
         
@@ -87,7 +81,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         HttpClient = CreateClient();
         HttpClient.BaseAddress = new Uri(HttpClient.BaseAddress, "api/2.0/files/");
         
-        List<Table> tablesToIgnore = [ "core_user", "core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "core_usersecurity", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
+        var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));
         
         await _dbconnection.OpenAsync();
@@ -102,7 +96,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     public new Task DisposeAsync() => _mySqlContainer.StopAsync();
 
 
-    public async Task BackupTables()
+    internal async Task BackupTables()
     {
         await ExecuteScriptAsync("CREATE TABLE IF NOT EXISTS {1} LIKE {0}; \nREPLACE INTO {1} SELECT * FROM {0};");
     }
