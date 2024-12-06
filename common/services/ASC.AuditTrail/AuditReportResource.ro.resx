@@ -912,4 +912,22 @@
   <data name="CreateClient" xml:space="preserve">
     <value>Clientul a fost creat</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Clientul {0} a fost șters</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Codul de autorizare a fost generat pentru clientul {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Token-ul de acces personal a fost generat pentru clientul {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Cheia secretă a clientului {0} a fost regenerată</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Accesul clientului {0} a fost revocat</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Clientul {0} a fost actualizat</value>
+  </data>
 </root>

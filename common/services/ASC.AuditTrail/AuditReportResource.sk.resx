@@ -811,4 +811,64 @@
   <data name="OAuthModule" xml:space="preserve">
     <value>OAuth</value>
   </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Aktivácia klienta {0} bola zmenená</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Zobrazenie klienta {0} bolo zmenené</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Klient vytvorený</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Klient {0} vymazaný</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Súbor: {0}. Index zmenený z {1} na {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Priečinok: {0}. Index zmenený z {1} na {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Priečinok: {0}. Poradie indexov zmenené</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Vygenerovaný autorizačný kód pre klienta {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Vygenerovaný osobný prístupový token pre klienta {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Znovu vygenerované tajný kód klienta {0}</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Prístup klienta {0} zrušený</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Miestnosť: {0}. Odmietnutie sťahovania zakázané</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Miestnosť: {0}. Odmietnutie sťahovania povolené</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indexovanie miestnosti vypnuté</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indexovanie miestnosti povolené</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Doba používania vypnutá</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Doba používania je nastavená. Hodnota: {0}. Čas: {1}. Navždy vymazať: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Miestnosť: {0}. Vodoznak vypnutý</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Miestnosť: {0}. Vodoznak povolený</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Klient {0} aktualizovaný</value>
+  </data>
 </root>
