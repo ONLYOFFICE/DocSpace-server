@@ -34,7 +34,7 @@ namespace ASC.Files.Tests1.Data;
 
 public static class Initializer
 {
-    private static readonly User _user = new("test@example.com", "11111111");
+    public static readonly User Owner = new("test@example.com", "11111111");
     
     private static bool _initialized;
     private static HttpClient? _apiClient;
@@ -97,7 +97,7 @@ public static class Initializer
             {
                 _apiClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", settings.WizardToken);
 
-                response = await _apiClient.PutAsJsonAsync("settings/wizard/complete", new WizardRequestsDto { Email = _user.Email, PasswordHash = passwordHasher.GetClientPassword(_user.Password) });
+                response = await _apiClient.PutAsJsonAsync("settings/wizard/complete", new WizardRequestsDto { Email = Owner.Email, PasswordHash = passwordHasher.GetClientPassword(Owner.Password) });
                 
                 _apiClient.DefaultRequestHeaders.Remove("confirm");
                 
@@ -105,7 +105,7 @@ public static class Initializer
             }
         }
         
-        await Authenticate(filesFactory, filesFactory.HttpClient, _user.Email, _user.Password);
+        await Authenticate(filesFactory, filesFactory.HttpClient, Owner.Email, Owner.Password);
         
         _ = await filesFactory.HttpClient.GetAsync("@root");
 
@@ -117,9 +117,9 @@ public static class Initializer
         _initialized = true;
     }
     
-    internal static async Task<User> InviteUsers(FilesApiFactory filesFactory, EmployeeType employeeType)
+    internal static async Task<User> InviteContact(FilesApiFactory filesFactory, EmployeeType employeeType)
     {
-        await Authenticate(filesFactory, _apiClient, _user.Email, _user.Password);
+        await Authenticate(filesFactory, _apiClient, Owner.Email, Owner.Password);
 
         var inviteResponse = await _apiClient.GetAsync($"portal/users/invite/{employeeType}");
         var shortLink = await HttpClientHelper.ReadFromJson<string>(inviteResponse);
@@ -131,7 +131,7 @@ public static class Initializer
 
         }
         
-        await Authenticate(filesFactory, _peopleClient, _user.Email, _user.Password);
+        await Authenticate(filesFactory, _peopleClient, Owner.Email, Owner.Password);
         _peopleClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
         
         var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
@@ -175,11 +175,6 @@ public static class Initializer
             var authenticationTokenDto = await HttpClientHelper.ReadFromJson<AuthenticationTokenDto>(authenticationResponse);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationTokenDto?.Token);
         }
-    }
-
-    public static async Task AuthenticateOwner(FilesApiFactory filesFactory, HttpClient client)
-    {
-        await Authenticate(filesFactory, client, _user.Email, _user.Password);
     }
     
     private static string Password(

@@ -26,7 +26,6 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using FluentAssertions;
 
 namespace ASC.Files.Tests1.FilesController;
 
@@ -46,51 +45,33 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
 
     [Theory]
     [MemberData(nameof(Data))]
-    public async Task CreateFile_Owner_ReturnsOk(string? fileName)
+    public async Task CreateFile_FolderMy_Owner_ReturnsOk(string? fileName)
     {
-        await Initializer.AuthenticateOwner(filesFactory, _filesClient);
-        
-        //Arrange
-        var file = new CreateFile<JsonElement> { Title = fileName };
-        var response = await _filesClient.GetAsync("@my");
-        var myFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
-        
-        //Act
-        response = await _filesClient.PostAsJsonAsync($"{myFolder.Current.Id}/file", file, filesFactory.JsonRequestSerializerOptions);
-        var createdFile = await HttpClientHelper.ReadFromJson<FileDto<int>>(response);
-        
-        //Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        createdFile.Should().NotBeNull();
-        createdFile.Title.Should().Be(fileName);
+        await CreateFile(fileName, FolderType.USER, Initializer.Owner);
     }
     
     [Theory]
     [MemberData(nameof(Data))]
-    public async Task CreateFile_RoomAdmin_ReturnsOk(string? fileName)
+    public async Task CreateFile_FolderMy_RoomAdmin_ReturnsOk(string? fileName)
     {
-        var roomAdmin = await Initializer.InviteUsers(filesFactory, EmployeeType.RoomAdmin);
-        await Initializer.Authenticate(filesFactory, _filesClient, roomAdmin.Email, roomAdmin.Password);
+        var roomAdmin = await Initializer.InviteContact(filesFactory, EmployeeType.RoomAdmin);
         
-        //Arrange
-        var file = new CreateFile<JsonElement> { Title = fileName };
-        var response = await _filesClient.GetAsync("@my");
-        var myFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
+        await CreateFile(fileName, FolderType.USER, roomAdmin);
+    }
+    
+    [Theory]
+    [MemberData(nameof(Data))]
+    public async Task CreateFile_FolderMy_User_ReturnsOk(string? fileName)
+    {
+        var user = await Initializer.InviteContact(filesFactory, EmployeeType.User);
         
-        //Act
-        response = await _filesClient.PostAsJsonAsync($"{myFolder.Current.Id}/file", file, filesFactory.JsonRequestSerializerOptions);
-        var createdFile = await HttpClientHelper.ReadFromJson<FileDto<int>>(response);
-        
-        //Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        createdFile.Should().NotBeNull();
-        createdFile.Title.Should().Be(fileName);
+        await CreateFile(fileName, FolderType.USER, user);
     }
     
     [Fact]
     public async Task Create_FolderDoesNotExist_ReturnsFail()
     {
-        await Initializer.AuthenticateOwner(filesFactory, _filesClient);
+        await Initializer.Authenticate(filesFactory, _filesClient, Initializer.Owner.Email, Initializer.Owner.Password);
         
         //Arrange
         var file = new CreateFile<JsonElement> { Title = "test.docx" };
@@ -102,6 +83,42 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
     }
     
+    [Fact]
+    public async Task CreateFile_FolderTrash_Owner_ReturnsOk()
+    {
+        var createdFile = await CreateFile("test.docx", FolderType.TRASH, Initializer.Owner);
+
+        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
+    }
+    
+    [Fact]
+    public async Task CreateFile_FolderRooms_Owner_ReturnsOk()
+    {
+        var createdFile = await CreateFile("test.docx", FolderType.VirtualRooms, Initializer.Owner);
+
+        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
+    }
+    
+    [Fact]
+    public async Task CreateFile_FolderArchive_Owner_ReturnsOk()
+    {
+        var createdFile = await CreateFile("test.docx", FolderType.Archive, Initializer.Owner);
+
+        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
+    }
+    
+    [Fact]
+    public async Task CreateFile_FolderRecent_Owner_ReturnsOk()
+    {
+        await Initializer.Authenticate(filesFactory, _filesClient, Initializer.Owner.Email, Initializer.Owner.Password);
+        
+        var response = await _filesClient.GetAsync("recent");
+        var recentFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
+        var createdFile = await CreateFile("test.docx", recentFolder.Current.Id);
+
+        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
+    }
+    
     public async Task InitializeAsync()
     {
         await Initializer.InitializeAsync(filesFactory, apiFactory, peopleFactory);
@@ -110,6 +127,34 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
     public async Task DisposeAsync()
     {
         await _resetDatabase();
+    }
+    
+    private async Task<FileDto<int>> CreateFile(string? fileName, FolderType folderType, User user)
+    {
+        await Initializer.Authenticate(filesFactory, _filesClient, user.Email, user.Password);
+        
+        var response = await _filesClient.GetAsync("@root");
+        var rootFolder = await HttpClientHelper.ReadFromJson<IEnumerable<FolderContentDto>>(response);
+        var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType == folderType).Current.Id;
+        
+        return await CreateFile(fileName, folderId);
+    }
+    
+    private async Task<FileDto<int>> CreateFile(string? fileName, int folderId)
+    {
+        //Arrange
+        var file = new CreateFile<JsonElement> { Title = fileName };
+        
+        //Act
+        var response = await _filesClient.PostAsJsonAsync($"{folderId}/file", file, filesFactory.JsonRequestSerializerOptions);
+        var createdFile = await HttpClientHelper.ReadFromJson<FileDto<int>>(response);
+        
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        createdFile.Should().NotBeNull();
+        createdFile.Title.Should().Be(fileName);
+        
+        return createdFile;
     }
 }
 

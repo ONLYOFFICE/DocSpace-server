@@ -13,6 +13,7 @@ global using System.Web;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Middleware;
 global using ASC.Core.Users;
+global using ASC.Files.Core;
 global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Core.Security;
@@ -27,6 +28,8 @@ global using ASCPeople::ASC.People.ApiModels.RequestDto;
 
 global using ASCWebApi::ASC.Web.Api.ApiModel.RequestsDto;
 global using ASCWebApi::ASC.Web.Api.ApiModel.ResponseDto;
+
+global using FluentAssertions;
 
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.AspNetCore.Mvc.Testing;
