@@ -50,7 +50,7 @@ public class MigrationLogger(
 
     private async Task SaveLogAsync()
     {
-        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "migration_log", (IQuotaController)null);
+        var store = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), "migration_log", (IQuotaController)null);
         _migrationStream.Position = 0;
         await store.SaveAsync("", _logName, _migrationStream);
     }
@@ -88,8 +88,8 @@ public class MigrationLogger(
 
     public async Task<Stream> GetStreamAsync()
     {
-        logger.Debug($"try get log {_logName} - {await tenantManager.GetCurrentTenantIdAsync()}");
-        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "migration_log", (IQuotaController)null);
+        logger.Debug($"try get log {_logName} - {tenantManager.GetCurrentTenantId()}");
+        var store = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), "migration_log", (IQuotaController)null);
         return await store.GetReadStreamAsync("", _logName);
     }
 

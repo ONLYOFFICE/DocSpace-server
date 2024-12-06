@@ -102,7 +102,7 @@ public class StorageController(ILoggerProvider option,
             return -1;
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         return serviceClient.GetProgress(tenant.Id);
     }
 
@@ -197,7 +197,7 @@ public class StorageController(ILoggerProvider option,
             settings.Status = EncryprtionStatus.DecryptionStarted;
         }
 
-        await messageService.SendAsync(settings.Status == EncryprtionStatus.EncryptionStarted ? MessageAction.StartStorageEncryption : MessageAction.StartStorageDecryption);
+        messageService.Send(settings.Status == EncryprtionStatus.EncryptionStarted ? MessageAction.StartStorageEncryption : MessageAction.StartStorageDecryption);
 
         var serverRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
@@ -233,7 +233,7 @@ public class StorageController(ILoggerProvider option,
               },
               serverRootPath: serverRootPath,
               createBy: securityContext.CurrentAccount.ID,
-              tenantId: await tenantManager.GetCurrentTenantIdAsync()
+              tenantId: tenantManager.GetCurrentTenantId()
 
         ));
     }
@@ -443,7 +443,7 @@ public class StorageController(ILoggerProvider option,
 
         try
         {
-            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var tenant = tenantManager.GetCurrentTenant();
             await serviceClient.UploadCdnAsync(tenant.Id, "/", webHostEnvironment.ContentRootPath, settings);
         }
         catch (Exception e)
@@ -510,7 +510,7 @@ public class StorageController(ILoggerProvider option,
 
     private async Task StartMigrateAsync(StorageSettings settings)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         await serviceClient.MigrateAsync(tenant.Id, settings);
 
         tenant.SetStatus(TenantStatus.Migrating);

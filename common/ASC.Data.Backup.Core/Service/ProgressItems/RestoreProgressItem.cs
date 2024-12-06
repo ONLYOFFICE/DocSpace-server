@@ -171,7 +171,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 await _tenantManager.RestoreTenantAsync(tenant.Id, restoredTenant);
                 TenantId = restoredTenant.Id;
 
-                await _tariffService.GetTariffAsync(tenant.Id, true);
+                await _tariffService.GetTariffAsync(tenant.Id);
                 await _tenantManager.GetCurrentTenantQuotaAsync(true);
                 await _notifyHelper.SendAboutRestoreCompletedAsync(restoredTenant, Notify);
             }

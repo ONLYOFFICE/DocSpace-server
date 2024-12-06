@@ -59,7 +59,7 @@ public class SocketServiceClient(
         var request = GenerateRequest(method, data);
         if (await channelWriter.WaitToWriteAsync())
         {
-            var tenant = tenantId ?? await _tenantManager.GetCurrentTenantIdAsync();
+            var tenant = tenantId ?? _tenantManager.GetCurrentTenantId();
             
             var tariff = await tariffService.GetTariffAsync(tenant);
             await channelWriter.WriteAsync(new SocketData(request, tariff.State));

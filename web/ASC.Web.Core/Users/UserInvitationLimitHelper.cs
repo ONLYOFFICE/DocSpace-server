@@ -38,9 +38,9 @@ public class UserInvitationLimitHelper(
         return setupInfo.InvitationLimit != int.MaxValue;
     }
 
-    private async Task<string> GetCacheKey()
+    private string GetCacheKey()
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         return $"invitation_limit:{tenantId}";
     }
@@ -52,7 +52,7 @@ public class UserInvitationLimitHelper(
             return setupInfo.InvitationLimit;
         }
 
-        var cacheKey = await GetCacheKey();
+        var cacheKey = GetCacheKey();
 
         var cacheValue = await distributedCache.GetStringAsync(cacheKey);
 
@@ -66,7 +66,7 @@ public class UserInvitationLimitHelper(
             return;
         }
 
-        var cacheKey = await GetCacheKey();
+        var cacheKey = GetCacheKey();
 
         var cacheValue = await distributedCache.GetStringAsync(cacheKey);
 
@@ -89,7 +89,7 @@ public class UserInvitationLimitHelper(
             return;
         }
 
-        var cacheKey = await GetCacheKey();
+        var cacheKey = GetCacheKey();
 
         var cacheValue = await distributedCache.GetStringAsync(cacheKey);
 

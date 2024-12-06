@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.AspNetCore.Builder;
+
 namespace ASC.Core;
 
 [Scope]
@@ -107,40 +109,7 @@ public class TenantManager(
 
         return t;
     }
-
-    private Tenant GetTenant(string domain)
-    {
-        if (string.IsNullOrEmpty(domain))
-        {
-            return null;
-        }
-
-        Tenant t = null;
-        if (_thisCompAddresses.Contains(domain, StringComparer.InvariantCultureIgnoreCase))
-        {
-            t = tenantService.GetTenant("localhost");
-        }
-
-        var isAlias = false;
-        if (t == null)
-        {
-            var baseUrl = coreSettings.BaseDomain;
-            if (!string.IsNullOrEmpty(baseUrl) && domain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
-            {
-                isAlias = true;
-                t = tenantService.GetTenant(domain[..(domain.Length - baseUrl.Length - 1)]);
-            }
-        }
-        
-        t ??= tenantService.GetTenant(domain);
-        
-        if (t == null && coreBaseSettings.Standalone && !isAlias)
-        {
-            t = tenantService.GetTenantForStandaloneWithoutAlias(domain);
-        }
-
-        return t;
-    }
+    
 
     public async Task SetTenantVersionAsync(Tenant tenant, int version)
     {
@@ -230,15 +199,11 @@ public class TenantManager(
         return tenant;
     }
 
-    public async Task<int> GetCurrentTenantIdAsync()
+    public int GetCurrentTenantId()
     {
-        return (await GetCurrentTenantAsync()).Id;
+        return GetCurrentTenant().Id;
     }
-
-    public Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound = true)
-    {
-        return GetCurrentTenantAsync(throwIfNotFound, httpContextAccessor?.HttpContext);
-    }
+    
     
     public Tenant GetCurrentTenant(bool throwIfNotFound = true)
     {
@@ -247,41 +212,12 @@ public class TenantManager(
             return _currentTenant;
         }
 
-        Tenant tenant = null;
-
-        var context = httpContextAccessor?.HttpContext;
-        
-        if (context != null)
-        {
-            tenant = context.Items[CurrentTenant] as Tenant;
-            if (tenant == null)
-            {
-                tenant = GetTenant(context.Request.Url().Host);
-                context.Items[CurrentTenant] = tenant;
-            }
-
-            if (tenant == null)
-            {
-                var origin = context.Request.Headers[HeaderNames.Origin].FirstOrDefault();
-
-                if (!string.IsNullOrEmpty(origin))
-                {
-                    var originUri = new Uri(origin);
-
-                    tenant = GetTenant(originUri.Host);
-                    context.Items[CurrentTenant] = tenant;
-                }
-            }
-        }
-
-        if (tenant == null && throwIfNotFound)
+        if (throwIfNotFound)
         {
             throw new Exception(CouldNotResolveCurrentTenant);
         }
 
-        _currentTenant = tenant;
-
-        return tenant;
+        return null;
     }
 
     public void SetCurrentTenant(Tenant tenant)
@@ -297,6 +233,30 @@ public class TenantManager(
             CultureInfo.CurrentCulture = tenant.GetCulture();
             CultureInfo.CurrentUICulture = tenant.GetCulture();
         }
+    }
+    
+    public async Task SetCurrentTenantAsync()
+    {
+        var context = httpContextAccessor?.HttpContext;
+        Tenant tenant = null;
+        if (context != null)
+        {
+
+            tenant = await GetTenantAsync(context.Request.Url().Host);
+
+            if (tenant == null)
+            {
+                var origin = context.Request.Headers[HeaderNames.Origin].FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(origin))
+                {
+                    var originUri = new Uri(origin);
+                    tenant = await GetTenantAsync(originUri.Host);
+                }
+            }
+        }
+        
+        SetCurrentTenant(tenant);
     }
 
     public async Task<Tenant> SetCurrentTenantAsync(int tenantId)
@@ -336,7 +296,7 @@ public class TenantManager(
 
     public async Task<TenantQuota> GetCurrentTenantQuotaAsync(bool refresh = false)
     {
-        return await GetTenantQuotaAsync(await GetCurrentTenantIdAsync(), refresh);
+        return await GetTenantQuotaAsync(GetCurrentTenantId(), refresh);
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int tenant, bool refresh = false)
@@ -372,7 +332,7 @@ public class TenantManager(
             .Distinct()
             .ToArray();
         
-        var tenant = await GetCurrentTenantAsync(false);
+        var tenant = GetCurrentTenant(false);
         var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, productIds);
         var result = prices.ToDictionary(price => quotas.First(quota => quota.ProductId == price.Key).Name, price => price.Value);
         return result;
@@ -413,5 +373,23 @@ public class TenantManager(
     public void ValidateTenantName(string name)
     {
         tenantService.ValidateTenantName(name);
+    }
+}
+
+public class TenantMiddleware(RequestDelegate next)
+{
+    public async Task Invoke(HttpContext context, TenantManager tenantManager)
+    {
+        await tenantManager.SetCurrentTenantAsync();
+
+        await next.Invoke(context);
+    }
+}
+
+public static class TenantMiddlewareExtensions
+{
+    public static IApplicationBuilder UseTenantMiddleware(this IApplicationBuilder builder)
+    {
+        return builder.UseMiddleware<TenantMiddleware>();
     }
 }

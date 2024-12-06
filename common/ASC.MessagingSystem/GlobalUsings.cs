@@ -26,14 +26,18 @@
 
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using System.Threading.Channels;
+
 global using ASC.Common;
 global using ASC.Common.Log;
+global using ASC.Common.Threading;
 global using ASC.Core;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Messaging;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Users;
+global using ASC.EventBus.Abstractions;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.Core.Sender;
 global using ASC.MessagingSystem.Data;
@@ -46,6 +50,8 @@ global using Microsoft.AspNetCore.Http;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Primitives;
+
 global using UAParser;

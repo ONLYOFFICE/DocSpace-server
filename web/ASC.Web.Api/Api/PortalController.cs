@@ -86,7 +86,7 @@ public class PortalController(
     [HttpGet("")]
     public async Task<TenantDto> Get()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();   
+        var tenant = tenantManager.GetCurrentTenant();   
 
         if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
         {
@@ -125,15 +125,15 @@ public class PortalController(
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync()))
+        if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenantManager.GetCurrentTenant()))
             || !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
         {
             return string.Empty;
         }
         
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
-        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, 
+        var link = commonLinkUtility.GetConfirmationEmailUrl(string.Empty, ConfirmType.LinkInvite, 
                 (int)inDto.EmployeeType + authContext.CurrentAccount.ID.ToString() + tenant.Alias, 
                 authContext.CurrentAccount.ID) + $"&emplType={inDto.EmployeeType:d}";
 
@@ -214,7 +214,7 @@ public class PortalController(
     public async Task<double> GetUsedSpaceAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         return Math.Round(
             (await tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
                         .Where(q => !string.IsNullOrEmpty(q.Tag) && new Guid(q.Tag) != Guid.Empty)
@@ -251,7 +251,7 @@ public class PortalController(
     [HttpGet("tariff")]
     public async Task<TariffDto> GetTariffAsync(CurrentPortalTariffRequestDto inDto)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var source = await tariffService.GetTariffAsync(tenant.Id, refresh: inDto.Refresh);
 
         var result = new TariffDto
@@ -294,7 +294,7 @@ public class PortalController(
             throw new SecurityException();
         }
         
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var result = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
         if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
@@ -457,7 +457,7 @@ public class PortalController(
             throw new ArgumentException(nameof(alias));
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
 
         var localhost = coreSettings.BaseDomain == "localhost" || tenant.Alias == "localhost";
@@ -484,7 +484,7 @@ public class PortalController(
             tenant = await tenantManager.SaveTenantAsync(tenant);
             tenantManager.SetCurrentTenant(tenant);
             
-            await messageService.SendAsync(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias, dateTime: messageDate);
+            messageService.Send(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias, dateTime: messageDate);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
@@ -528,7 +528,7 @@ public class PortalController(
     [HttpDelete("deleteportalimmediately")]
     public async Task DeletePortalImmediatelyAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
@@ -573,17 +573,17 @@ public class PortalController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
-        var suspendUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalSuspend);
-        var continueUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalContinue);
+        var suspendUrl = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalSuspend);
+        var continueUrl = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalContinue);
 
         await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, await urlShortener.GetShortenLinkAsync(suspendUrl), await urlShortener.GetShortenLinkAsync(continueUrl));
 
-        await messageService.SendAsync(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
 
     /// <summary>
@@ -599,7 +599,7 @@ public class PortalController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
@@ -609,7 +609,7 @@ public class PortalController(
                         (await tariffService.GetPaymentsAsync(tenant.Id)).Any() &&
                         !(await tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
-        var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove);
+        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove);
             
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
     }
@@ -625,7 +625,7 @@ public class PortalController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalContinue")]
     public async Task ContinuePortalAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         tenant.SetStatus(TenantStatus.Active);
         await tenantManager.SaveTenantAsync(tenant);
 
@@ -642,13 +642,13 @@ public class PortalController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalSuspend")]
     public async Task SuspendPortalAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
         tenant.SetStatus(TenantStatus.Suspended);
         await tenantManager.SaveTenantAsync(tenant);
-        await messageService.SendAsync(MessageAction.PortalDeactivated);
+        messageService.Send(MessageAction.PortalDeactivated);
 
         await cspSettingsHelper.UpdateBaseDomain();
     }
@@ -665,7 +665,7 @@ public class PortalController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]
     public async Task<object> DeletePortalAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
@@ -687,7 +687,7 @@ public class PortalController(
 
         await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 
-        await messageService.SendAsync(MessageAction.PortalDeleted);
+        messageService.Send(MessageAction.PortalDeleted);
 
         await cspSettingsHelper.UpdateBaseDomain();
         await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
@@ -709,11 +709,11 @@ public class PortalController(
     public async Task SendCongratulationsAsync([FromQuery] SendCongratulationsDto inDto)
     {
         var authInterval = TimeSpan.FromHours(1);
-        var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(inDto.Userid.ToString() + ConfirmType.Auth, inDto.Key, authInterval);
+        var checkKeyResult = emailValidationKeyProvider.ValidateEmailKey(inDto.Userid.ToString() + ConfirmType.Auth, inDto.Key, authInterval);
 
         switch (checkKeyResult)
         {
-            case EmailValidationKeyProvider.ValidationResult.Ok:
+            case ValidationResult.Ok:
                 var currentUser = await userManager.GetUsersAsync(inDto.Userid);
 
                 await studioNotifyService.SendCongratulationsAsync(currentUser);
@@ -750,12 +750,12 @@ public class PortalController(
     public async Task SendRemoveInstructionsAsync([FromQuery] SendRemoveInstructionsDto inDto)
     {
         var checkKeyResult = ValidationResult.Invalid;
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var authInterval = TimeSpan.FromHours(1);
 
         if (coreBaseSettings.Standalone && tenant.OwnerId == inDto.Userid)
         {
-            checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(inDto.Userid.ToString() + ConfirmType.PortalRemove, inDto.Key, authInterval);
+            checkKeyResult = emailValidationKeyProvider.ValidateEmailKey(inDto.Userid.ToString() + ConfirmType.PortalRemove, inDto.Key, authInterval);
         }
 
         if (checkKeyResult != ValidationResult.Ok)
@@ -764,7 +764,7 @@ public class PortalController(
         }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
-        var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove);
+        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove);
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), false, false);
     }

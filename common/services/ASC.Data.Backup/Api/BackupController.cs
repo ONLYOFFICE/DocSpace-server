@@ -192,7 +192,7 @@ public class BackupController(
             : default;
         
         var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
              tenantId: tenantId,
@@ -289,9 +289,9 @@ public class BackupController(
             ? commonLinkUtility.GetFullAbsolutePath("")
             : default;
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)(inDto.StorageType.Value);
+        var storageType = inDto.StorageType ?? BackupStorageType.Documents;
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments && storageParams.ContainsKey("filePath"))
         {
             if (int.TryParse(storageParams["filePath"], out var fId))

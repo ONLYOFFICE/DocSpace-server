@@ -51,7 +51,7 @@ public class FirstTimeTenantSettings(
         {
             var (email, passwordHash, lng, timeZone, amiid, subscribeFromSite) = inDto;
 
-            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var tenant = tenantManager.GetCurrentTenant();
             var settings = await settingsManager.LoadAsync<WizardSettings>();
             if (settings.Completed)
             {
@@ -75,7 +75,7 @@ public class FirstTimeTenantSettings(
                 }
             }
 
-            var currentUser = await userManager.GetUsersAsync((await tenantManager.GetCurrentTenantAsync()).OwnerId);
+            var currentUser = await userManager.GetUsersAsync((tenantManager.GetCurrentTenant()).OwnerId);
 
             if (!UserManagerWrapper.ValidateEmail(email))
             {
@@ -101,7 +101,7 @@ public class FirstTimeTenantSettings(
             if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
             {
                 await TariffSettings.SetLicenseAcceptAsync(settingsManager);
-                await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
+                messageService.Send(MessageAction.LicenseKeyUploaded);
 
                 await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
             }

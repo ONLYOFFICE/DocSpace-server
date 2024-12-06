@@ -77,7 +77,7 @@ public class OAuth20Token
     /// <summary>
     /// Origin json
     /// </summary>
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     public string OriginJson { get; set; }
 
     /// <summary>

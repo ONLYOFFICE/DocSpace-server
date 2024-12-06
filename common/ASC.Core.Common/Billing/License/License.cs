@@ -116,7 +116,7 @@ public class License
     }
 }
 
-public class LicenseConverter : System.Text.Json.Serialization.JsonConverter<object>
+public class LicenseConverter : JsonConverter<object>
 {
     public override bool CanConvert(Type typeToConvert)
     {
