@@ -435,7 +435,7 @@ public class AuthenticationController(
                     
                 var checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
 
-                if (checkKeyResult == Security.Cryptography.EmailValidationKeyProvider.ValidationResult.Ok)
+                if (checkKeyResult == ValidationResult.Ok)
                 {
                     user = email.Contains("@")
                                    ? await userManager.GetUserByEmailAsync(email)

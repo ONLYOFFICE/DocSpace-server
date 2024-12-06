@@ -32,7 +32,6 @@ global using System.Globalization;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Net.Mail;
-global using ASC.Core.Common.EF;
 global using System.Net.Mime;
 global using System.Reflection;
 global using System.Runtime.Serialization;

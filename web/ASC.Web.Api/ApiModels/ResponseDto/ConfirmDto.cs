@@ -31,7 +31,7 @@ public class ConfirmDto : IMapFrom<Validation>
     /// <summary>
     /// Result
     /// </summary>
-    public EmailValidationKeyProvider.ValidationResult Result { get; set; }
+    public ValidationResult Result { get; set; }
 
     /// <summary>
     /// Room id

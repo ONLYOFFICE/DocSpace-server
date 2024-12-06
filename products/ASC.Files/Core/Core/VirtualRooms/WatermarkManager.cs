@@ -61,18 +61,15 @@ public class WatermarkManager
     private readonly IDaoFactory _daoFactory;
     private readonly FileSecurity _fileSecurity;
     private readonly RoomLogoManager _roomLogoManager;
-    private readonly FilesMessageService _filesMessageService;
     
     public WatermarkManager(
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
-        RoomLogoManager roomLogoManager,
-        FilesMessageService filesMessageService)
+        RoomLogoManager roomLogoManager)
     {
         _daoFactory = daoFactory;
         _fileSecurity = fileSecurity;
         _roomLogoManager = roomLogoManager;
-        _filesMessageService = filesMessageService;
     }
 
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)

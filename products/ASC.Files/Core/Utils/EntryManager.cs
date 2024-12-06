@@ -1832,24 +1832,21 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                var copyThumbnailsAsync = async () =>
+                async Task CopyThumbnailsAsync()
                 {
                     await using var scope = serviceProvider.CreateAsyncScope();
-                        var _fileDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFileDao<T>();
-                        var _globalStoreLocal = scope.ServiceProvider.GetService<GlobalStore>();
+                    var dao = scope.ServiceProvider.GetService<IDaoFactory>().GetFileDao<T>();
+                    var globalStoreLocal = scope.ServiceProvider.GetService<GlobalStore>();
 
-                        foreach (var size in thumbnailSettings.Sizes)
-                        {
-                            await (await _globalStoreLocal.GetStoreAsync()).CopyAsync(String.Empty,
-                                                                    _fileDao.GetUniqThumbnailPath(file, size.Width, size.Height),
-                                                                    String.Empty,
-                                                                    _fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
-                        }
+                    foreach (var size in thumbnailSettings.Sizes)
+                    {
+                        await (await globalStoreLocal.GetStoreAsync()).CopyAsync(String.Empty, dao.GetUniqThumbnailPath(file, size.Width, size.Height), String.Empty, dao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
+                    }
 
-                        await _fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
-                };
+                    await dao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
+                }
 
-                _ = Task.Run(() => copyThumbnailsAsync().GetAwaiter().GetResult());
+                _ = Task.Run(() => CopyThumbnailsAsync().GetAwaiter().GetResult());
             }
 
 
@@ -2097,15 +2094,15 @@ public class EntryManager(IDaoFactory daoFactory,
     private async Task<T> CreateCsvResult<T>(T resultsFolderId, Guid createBy, string sourceTitle, IFileDao<T> fileDao)
     {
         using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(""));
-            var csvFile = serviceProvider.GetService<File<T>>();
-            csvFile.ParentId = resultsFolderId;
-            csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".csv");
-            csvFile.CreateBy = createBy;
+        var csvFile = serviceProvider.GetService<File<T>>();
+        csvFile.ParentId = resultsFolderId;
+        csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".csv");
+        csvFile.CreateBy = createBy;
 
-            var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
+        var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
 
-            return file.Id;
-        }
+        return file.Id;
+    }
     private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
     {
         var templatesFolderTask = CreateFormFillingFolder(sourceTitle, inProcessFormFolderId, FolderType.FormFillingFolderInProgress, createBy, folderDao);

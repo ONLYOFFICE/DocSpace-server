@@ -291,7 +291,7 @@ public class BackupController(
         
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)(inDto.StorageType.Value);
+        var storageType = inDto.StorageType ?? BackupStorageType.Documents;
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments && storageParams.ContainsKey("filePath"))
         {
             if (int.TryParse(storageParams["filePath"], out var fId))

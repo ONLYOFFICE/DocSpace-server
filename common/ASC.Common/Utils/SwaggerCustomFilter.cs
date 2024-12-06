@@ -72,7 +72,6 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             {
                 schema.Example = GetExample(swaggerSchemaCustomAttribute.Example);
             }
-            return;
         }
         else
         {
@@ -81,7 +80,6 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             {
                 schema.Example = example;
             }
-            return;
         }
     }
 
