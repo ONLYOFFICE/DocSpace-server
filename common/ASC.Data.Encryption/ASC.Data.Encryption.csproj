@@ -4,7 +4,6 @@
     <TargetFramework>net9.0</TargetFramework>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>12</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
