@@ -203,7 +203,7 @@ public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFac
         await userDbContext.SaveChangesAsync();
     }
 
-    private IEnumerable<SubscriptionRecord> GetSubscriptions(List<Subscription> subs, int tenant)
+    private List<SubscriptionRecord> GetSubscriptions(List<Subscription> subs, int tenant)
     {
         var result = new List<SubscriptionRecord>();
         var common = new Dictionary<string, SubscriptionRecord>();

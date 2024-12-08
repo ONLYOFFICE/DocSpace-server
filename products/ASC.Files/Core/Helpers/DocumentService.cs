@@ -200,9 +200,9 @@ public static class DocumentService
         string dataResponse;
 
         using (var response = await httpClient.SendAsync(request))
-            {
+        {
             dataResponse = await response.Content.ReadAsStringAsync();
-            }
+        }
 
         return GetResponseUri(dataResponse);
     }
@@ -291,7 +291,7 @@ public static class DocumentService
         {
             using var response = await httpClient.SendAsync(request, cancellationTokenSource.Token);
             dataResponse = await response.Content.ReadAsStringAsync(cancellationTokenSource.Token);
-            }
+        }
         catch (HttpRequestException e) when (e.HttpRequestError == HttpRequestError.NameResolutionError)
         {
             return new CommandResponse

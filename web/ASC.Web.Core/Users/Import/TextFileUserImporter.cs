@@ -74,7 +74,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
         return users;
     }
 
-    private UserInfo GetExportedUser(string line, IDictionary<int, PropertyInfo> mappedProperties, int fieldsCount)
+    private UserInfo GetExportedUser(string line, Dictionary<int, PropertyInfo> mappedProperties, int fieldsCount)
     {
         var exportedUser = new UserInfo
         {
@@ -120,7 +120,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
         return result;
     }
 
-    private int GetFieldsMapping(string firstLine, IEnumerable<PropertyInfo> infos, IDictionary<int, PropertyInfo> mappedProperties)
+    private int GetFieldsMapping(string firstLine, IEnumerable<PropertyInfo> infos, Dictionary<int, PropertyInfo> mappedProperties)
     {
         var fields = firstLine.Split([Separator], StringSplitOptions.RemoveEmptyEntries);
         for (var i = 0; i < fields.Length; i++)

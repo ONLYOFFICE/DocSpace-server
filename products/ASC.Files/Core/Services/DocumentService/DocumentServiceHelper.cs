@@ -370,7 +370,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             runs.Add(new Run(watermarkSettings.Text));
             runs.Add(new Run(Environment.NewLine, false));
         }
-        if (runs.Any())
+        if (runs.Count != 0)
         {
             runs.Remove(runs.Last());
         }

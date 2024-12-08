@@ -162,7 +162,7 @@ public class MigrationController(
             throw new Exception(MigrationResource.MigrationProgressException);
         }
         migrationLogger.Init(status.LogName);
-        using var stream = await migrationLogger.GetStreamAsync();
+        await using var stream = await migrationLogger.GetStreamAsync();
 
         httpContextAccessor.HttpContext.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("migration.log"));
         httpContextAccessor.HttpContext.Response.ContentType = "text/plain; charset=UTF-8";

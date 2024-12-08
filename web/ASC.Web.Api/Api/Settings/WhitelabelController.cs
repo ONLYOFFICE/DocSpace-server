@@ -216,7 +216,7 @@ public class WhitelabelController(ApiContext apiContext,
 
         var tenantWhiteLabelSettings = isDefault ? null : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        foreach (var logoType in (WhiteLabelLogoType[])Enum.GetValues(typeof(WhiteLabelLogoType)))
+        foreach (var logoType in Enum.GetValues<WhiteLabelLogoType>())
         {
             if (logoType == WhiteLabelLogoType.Notification)
             {
@@ -300,7 +300,7 @@ public class WhitelabelController(ApiContext apiContext,
             Name = "logotext",
             Default = tenantWhiteLabelSettings.LogoText.IsNullOrEmpty() || tenantWhiteLabelSettings.LogoText.Equals(TenantWhiteLabelSettings.DefaultLogoText)
         };
-        foreach (var logoType in (WhiteLabelLogoType[])Enum.GetValues(typeof(WhiteLabelLogoType)))
+        foreach (var logoType in Enum.GetValues<WhiteLabelLogoType>())
         {
             var result = new IsDefaultWhiteLabelLogosDto
             {

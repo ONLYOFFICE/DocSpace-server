@@ -1171,7 +1171,7 @@ internal class ThirdPartySecurityDao(
         return Task.FromResult(entry.RootFolderType is FolderType.VirtualRooms);
     }
 
-    private async ValueTask GetFoldersForShareAsync(string folderId, ICollection<FileEntry<string>> folders)
+    private async ValueTask GetFoldersForShareAsync(string folderId, List<FileEntry<string>> folders)
     {
         var selector = selectorFactory.GetSelector(folderId);
         var folderDao = selector.GetFolderDao(folderId);

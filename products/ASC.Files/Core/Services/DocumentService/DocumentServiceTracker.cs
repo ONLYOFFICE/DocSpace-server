@@ -553,7 +553,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             }
 
             var message = fileData.MailMerge.Message;
-            Stream attach = null;
+            MemoryStream attach = null;
             var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             switch (fileData.MailMerge.Type)
             {

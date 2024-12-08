@@ -82,7 +82,7 @@ internal class LinkDao<T>(
         if (Equals(fromDb, default))
         {
             return default;
-    }
+        }
 
         return (T)Convert.ChangeType(fromDb, typeof(T));
     }
@@ -101,7 +101,7 @@ internal class LinkDao<T>(
         if (Equals(fromDb, default))
         {
             return default;
-    }
+        }
 
         return (T)Convert.ChangeType(fromDb, typeof(T));
     }

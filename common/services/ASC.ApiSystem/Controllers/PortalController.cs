@@ -97,7 +97,7 @@ public class PortalController(
 
         if (!ModelState.IsValid)
         {
-            List<string> message = new();
+            List<string> message = [];
 
             foreach (var k in ModelState.Keys)
             {

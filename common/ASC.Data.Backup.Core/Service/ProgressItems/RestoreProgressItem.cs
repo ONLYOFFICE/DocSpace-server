@@ -134,7 +134,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             columnMapper.Commit();
 
             restoreTask.Init(_region, tempFile, TenantId, columnMapper, _upgradesPath);
-            restoreTask.ProgressChanged = async (args) =>
+            restoreTask.ProgressChanged = async args =>
             {
                 Percentage = Percentage = 10d + 0.65 * args.Progress;
                 await PublishChanges();

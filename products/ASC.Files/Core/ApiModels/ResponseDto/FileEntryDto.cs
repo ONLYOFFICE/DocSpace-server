@@ -259,11 +259,11 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             return default;
         }
 
-            var settings = await filesSettingsHelper.GetAutomaticallyCleanUp();
-            if (settings.IsAutoCleanUp)
-            {
-                return fileDateTime.GetModifiedOnWithAutoCleanUp(entry.ModifiedOn, settings.Gap);
-            }
+        var settings = await filesSettingsHelper.GetAutomaticallyCleanUp();
+        if (settings.IsAutoCleanUp)
+        {
+            return fileDateTime.GetModifiedOnWithAutoCleanUp(entry.ModifiedOn, settings.Gap);
+        }
 
         return default;
     }

@@ -56,25 +56,14 @@ public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRe
 }
 
 [Scope]
-public class WatermarkManager
+public class WatermarkManager(
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    RoomLogoManager roomLogoManager)
 {
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-    private readonly RoomLogoManager _roomLogoManager;
-    
-    public WatermarkManager(
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        RoomLogoManager roomLogoManager)
-    {
-        _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
-        _roomLogoManager = roomLogoManager;
-    }
-
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         if(watermarkRequestDto == null)
         {
             return new WatermarkSettings();
@@ -85,7 +74,7 @@ public class WatermarkManager
             throw new ItemNotFoundException();
         }
 
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
+        if (room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
@@ -124,7 +113,7 @@ public class WatermarkManager
             }
             else
             {
-                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(folder, imageUrlFromDto);
+                imageUrl = await roomLogoManager.CreateWatermarkImageAsync(folder, imageUrlFromDto);
             }
         }
 
@@ -137,12 +126,12 @@ public class WatermarkManager
             !DocSpaceHelper.IsRoom(room.FolderType) ||
             room.ProviderEntry ||
             room.RootFolderType == FolderType.Archive || 
-            !await _fileSecurity.CanEditRoomAsync(room))
+            !await fileSecurity.CanEditRoomAsync(room))
         {
             return null;
         }
 
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
 
         var watermarkSettings = await folderDao.GetWatermarkSettings(room);
 

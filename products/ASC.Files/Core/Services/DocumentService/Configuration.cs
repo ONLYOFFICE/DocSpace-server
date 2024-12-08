@@ -144,7 +144,7 @@ public class Configuration<T>(
     /// <type>System.String, System</type>
     public string Type
     {
-        set => EditorType = (EditorType)Enum.Parse(typeof(EditorType), value, true);
+        set => EditorType = Enum.Parse<EditorType>(value, true);
         get => EditorType.ToString().ToLower();
     }
 

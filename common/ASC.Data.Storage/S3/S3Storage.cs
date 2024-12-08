@@ -717,7 +717,7 @@ public class S3Storage(TempStream tempStream,
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
         var obj = tmp
-            .Where(x => x.Key.EndsWith("/"))
+            .Where(x => x.Key.EndsWith('/'))
             .Select(x => x.Key[(MakePath(domain, path) + "/").Length..]);
         foreach (var e in obj)
         {
@@ -897,7 +897,7 @@ public class S3Storage(TempStream tempStream,
     public override async IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
-        var obj = tmp.Where(x=> !x.Key.EndsWith("/"))
+        var obj = tmp.Where(x=> !x.Key.EndsWith('/'))
             .Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x.Key)))
             .Select(x => x.Key[(MakePath(domain, path) + "/").Length..].TrimStart('/'));
 

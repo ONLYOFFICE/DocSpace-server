@@ -939,8 +939,8 @@ internal class FolderDao(
             if (conflict != 0)
             {
                 result[folderId] = "";
-                }
-                }
+            }
+        }
 
         return result;
     }
@@ -1970,10 +1970,10 @@ internal class CacheFolderDao(
     public override async Task<Folder<int>> GetFolderAsync(int folderId)
                         {
         if (!_cache.TryGetValue(folderId, out var result))
-                        {
+        {
             result = await base.GetFolderAsync(folderId);
             _cache.TryAdd(folderId, result);
-                        }
+        }
 
         return result;
                         }

@@ -237,7 +237,6 @@ public class BackupPortalTask(
                     creates.Append(createScheme
                         .Select(r => Convert.ToString(r[1]).Replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS "))
                         .FirstOrDefault());
-                    creates.Append(';');
                 }
                 else
                 {
@@ -246,8 +245,9 @@ public class BackupPortalTask(
                     creates.Append(createScheme
                         .Select(r => Convert.ToString(r[1]))
                         .FirstOrDefault());
-                    creates.Append(';');
                 }
+
+                creates.Append(';');
 
                 var path = CrossPlatform.PathCombine(dir, t);
                 await using (var stream = File.OpenWrite(path))

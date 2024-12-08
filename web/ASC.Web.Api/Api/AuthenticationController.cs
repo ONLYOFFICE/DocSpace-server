@@ -437,7 +437,7 @@ public class AuthenticationController(
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {
-                    user = email.Contains("@")
+                    user = email.Contains('@')
                                    ? await userManager.GetUserByEmailAsync(email)
                                    : await userManager.GetUsersAsync(new Guid(email));
 

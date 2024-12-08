@@ -112,7 +112,7 @@ internal class ProviderAccountDao(
         ProviderTypes prKey;
         try
         {
-            prKey = (ProviderTypes)Enum.Parse(typeof(ProviderTypes), providerKey, true);
+            prKey = Enum.Parse<ProviderTypes>(providerKey, true);
             switch (prKey)
             {
                 case ProviderTypes.NextCloud:

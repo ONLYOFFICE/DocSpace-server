@@ -155,7 +155,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         return claims;
     }
 
-    private IEnumerable<SecurityKey> GetApplePublicKeys()
+    private List<SecurityKey> GetApplePublicKeys()
     {
         var applePublicKeys = _requestHelper.PerformRequest(AppleUrlKeys);
 

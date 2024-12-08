@@ -396,7 +396,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var fileConverter = scope.ServiceProvider.GetService<FileConverter>();
         var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
 
-        using ICompress compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
+        using var compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
         await compressTo.SetStream(stream);
 
         foreach (var path in _entriesPathId.AllKeys)
