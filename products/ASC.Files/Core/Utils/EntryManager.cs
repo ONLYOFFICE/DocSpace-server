@@ -1556,7 +1556,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         var resultFolder = await folderDao.GetFolderAsync(origProperties.FormFilling.ResultsFolderId);
                         var resultFile = await fileDao.GetFileAsync(origProperties.FormFilling.ResultsFileID);
 
-                        if (resultFolder == null || resultFolder.FolderType != FolderType.FormFillingFolderDone)
+                        if (resultFolder is not { FolderType: FolderType.FormFillingFolderDone })
                         {
                             logger.LogDebug("Result folder: {Folder} not found.", origProperties.FormFilling.ResultsFolderId);
 

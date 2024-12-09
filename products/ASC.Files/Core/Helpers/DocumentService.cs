@@ -148,7 +148,7 @@ public static class DocumentService
 
         documentRevisionId = GenerateRevisionId(documentRevisionId);
 
-        documentConverterUrl = FilesLinkUtility.AddQueryString(documentConverterUrl, new Dictionary<string, string>() {
+        documentConverterUrl = FilesLinkUtility.AddQueryString(documentConverterUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, documentRevisionId }
         });
 
@@ -231,7 +231,7 @@ public static class DocumentService
         string signatureSecret,
         IHttpClientFactory clientFactory)
     {
-        documentTrackerUrl = FilesLinkUtility.AddQueryString(documentTrackerUrl, new Dictionary<string, string>() {
+        documentTrackerUrl = FilesLinkUtility.AddQueryString(documentTrackerUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, documentRevisionId }
         });
 
@@ -344,7 +344,7 @@ public static class DocumentService
        string signatureSecret,
        IHttpClientFactory clientFactory)
     {
-        docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string>() {
+        docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, requestKey }
         });
 

@@ -376,7 +376,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
         paragrahs.Add(new Paragraph(runs));
 
-        var options = new Options()
+        var options = new Options
         {
             WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth * watermarkSettings.ImageScale / 100, watermarkSettings.ImageHeight * watermarkSettings.ImageScale / 100 , watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
         };

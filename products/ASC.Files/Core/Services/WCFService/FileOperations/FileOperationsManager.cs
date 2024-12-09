@@ -452,7 +452,7 @@ public class FileOperationsManager(
                 if (item.Id.TryGetProperty("password", out var p))
                 {
                     password = p.GetString();
-                };
+                }
 
                 if (key.ValueKind == JsonValueKind.Number)
                 {
