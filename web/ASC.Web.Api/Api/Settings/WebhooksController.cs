@@ -104,8 +104,8 @@ public class WebhooksController(ApiContext context,
         ArgumentNullException.ThrowIfNull(inDto.Uri);
         ArgumentNullException.ThrowIfNull(inDto.Name);
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
+        var tenantId = tenantManager.GetCurrentTenantId();
+            
         var DbWebhooksConfig = new DbWebhooksConfig
         {
             Id= inDto.Id,   

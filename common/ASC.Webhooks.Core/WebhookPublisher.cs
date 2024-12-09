@@ -38,8 +38,7 @@ public class WebhookPublisher(
     IEventBus eventBus,
     SecurityContext securityContext,
     TenantManager tenantManager,
-    TenantUtil tenantUtil,
-    IHttpContextAccessor httpContextAccessor)
+    TenantUtil tenantUtil)
     : IWebhookPublisher
 {
     public async Task PublishAsync(int webhookId, string requestPayload)
@@ -63,9 +62,9 @@ public class WebhookPublisher(
         {
             return null;
         }
-        
-        var tenantId = (await tenantManager.GetCurrentTenantAsync(false, httpContextAccessor?.HttpContext)).Id;
 
+        var tenantId = tenantManager.GetCurrentTenantId();
+            
         var webhooksLog = new DbWebhooksLog
         {
             WebhookId = webhookId,
