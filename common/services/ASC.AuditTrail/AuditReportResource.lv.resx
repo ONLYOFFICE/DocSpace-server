@@ -808,4 +808,67 @@
   <data name="RoomIndexExportSaved" xml:space="preserve">
     <value>Dokumentos saglabātā telpas rādītāja eksportēšana</value>
   </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Klienta {0} aktivizācija ir mainīta</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Klienta {0} redzamība ir mainīta</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Klients ir izveidots</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Klients {0} ir dzēsts</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Fails: {0}. Indekss ir mainīts no {1} uz {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Mape: {0}. Indekss ir mainīts no {1} uz {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Mape: {0}. Indeksi ir pārkārtoti</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Autorizācijas kods klientam {0} ir izveidots</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Piekļuves pilnvara klientam {0} ir izveidota</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Privātā atslēga klientam {0} ir izveidota</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Klienta {0} piekļuve ir anulēta</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Istaba: {0}. Aizliegt lejupielādi ir atspējots</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Istaba: {0}. Aizliegt lejupielādi ir iespējots</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Telpu indeksēšana ir atspējota</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Telpu indeksēšana ir iespējota</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Uzaicinājums ir vēlreiz nosūtīts: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Lietderīgās lietošanas laiks ir atspējots</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Lietderīgās lietošanas laiks ir iestatīts. Vērtība: {0}. Periods: {1}. Neatgriezeniski dzēst: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Istaba: {0}. Ūdenszīme ir atspējota</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Istaba: {0}. Ūdenszīme ir iespējota</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Klients {0} ir atjaunināts</value>
+  </data>
 </root>
