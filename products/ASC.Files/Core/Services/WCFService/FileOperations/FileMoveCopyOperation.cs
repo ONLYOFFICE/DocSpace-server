@@ -394,7 +394,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 (int.TryParse(parentRoomId, out var curRId) && curRId != -1) &&
                 toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
             {
-                var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+                var tenantId = tenantManager.GetCurrentTenantId();
                 var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
                 if (quotaUserSettings.EnableQuota)
                 {
@@ -771,6 +771,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     if (pins.Count > 0)
                                     {
                                         await TagDao.RemoveTagsAsync(pins);
+                                    }
+
+                                    if (!isThirdPartyRoom)
+                                    {
+                                        await FolderDao.DeleteLifetimeSettings(folder);
                                     }
 
                                     await filesMessageService.SendAsync(MessageAction.RoomArchived, folder, _headers, folder.Title);

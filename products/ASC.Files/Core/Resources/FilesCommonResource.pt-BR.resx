@@ -488,4 +488,19 @@
   <data name="ExternalUser" xml:space="preserve">
     <value>Usuário externo</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Gerente da sala</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Criador do conteúdo</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Criador do conteúdo</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Gerente da sala</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Abrir arquivo</value>
+  </data>
 </root>

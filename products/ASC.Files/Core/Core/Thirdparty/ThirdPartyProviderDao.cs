@@ -97,6 +97,11 @@ internal abstract class ThirdPartyProviderDao
     {
         return Task.FromResult<EntryProperties<string>>(null);
     }
+    
+    public Task<Dictionary<string, EntryProperties<string>>> GetPropertiesAsync(IEnumerable<string> filesIds)
+    {
+        return Task.FromResult<Dictionary<string, EntryProperties<string>>>(null);
+    }
 
     public Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
     {
@@ -502,7 +507,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             return;
         }
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();

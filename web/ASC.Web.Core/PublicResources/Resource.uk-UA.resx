@@ -1055,6 +1055,18 @@
     <value>Квота пам'яті й статистика</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} на адміністратора/досвідченого користувача та можливість додавати простір за запитом</value>
+    <value>{0} на адміністратора та можливість додавати простір за запитом</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не вдалося задати квоту на кімнату. Введене значення більше загального сховища DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не вдалося задати квоту на користувача. Введене значення більше загального сховища DocSpace.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Додайте мінімум 1 довірений домен.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Кількість адміністраторів перевищує обмеження: {0}/{1}.</value>
   </data>
 </root>

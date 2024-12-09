@@ -304,7 +304,7 @@ public class FileConverter(
             .ToDictionary(x => x.Key, x => x.Value.ToString());
     }
 
-    public async Task<bool> EnableConvertAsync<T>(File<T> file, string toExtension)
+    public async Task<bool> EnableConvertAsync<T>(File<T> file, string toExtension, bool watermarkEnabled)
     {
         if (file == null || string.IsNullOrEmpty(toExtension))
         {
@@ -319,7 +319,7 @@ public class FileConverter(
         var fileExtension = file.ConvertedExtension;
         if (fileExtension.Trim('.').Equals(toExtension.Trim('.'), StringComparison.OrdinalIgnoreCase))
         {
-            return FileUtility.WatermarkedDocumentExt.Equals(fileExtension, StringComparison.OrdinalIgnoreCase);
+            return watermarkEnabled && FileUtility.WatermarkedDocumentExt.Equals(fileExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         fileExtension = FileUtility.GetFileExtension(file.Title);
@@ -339,22 +339,22 @@ public class FileConverter(
 
     public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null, bool toForm = false)
     {
-        if (!await EnableConvertAsync(file, toExtension))
-        {
-            var fileDao = daoFactory.GetFileDao<T>();
-            return await fileDao.GetFileStreamAsync(file);
-        }
-
-        var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
-        fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
-
         Options options = null;
-        if (file.RootFolderType == FolderType.VirtualRooms)
+        if (file.RootFolderType == FolderType.VirtualRooms || file.RootFolderType == FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
             options = documentServiceHelper.GetOptions(room);
         }
+
+        if (!await EnableConvertAsync(file, toExtension, options?.WatermarkOnDraw != null))
+        {
+            var fileDao = daoFactory.GetFileDao<T>();
+            return await fileDao.GetFileStreamAsync(file);
+        }
+
+        var fileUri = pathProvider.GetFileStreamUrl(file);
+        fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
 
         var docKey = await documentServiceHelper.GetDocKeyAsync(file, options?.GetMD5Hash());
 
@@ -379,19 +379,19 @@ public class FileConverter(
             {
                 throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
             }
-            }
+        }
 
-        var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
+        var fileUri = pathProvider.GetFileStreamUrl(file);
         var fileExtension = file.ConvertedExtension;
         var toExtension = fileUtility.GetInternalExtension(file.Title);
-        if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType))
+        if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType, false))
         {
             toExtension = outputType;
         }
         
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 
-        fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
+        fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
 
         var (_, convertUri, convertType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
 
@@ -404,7 +404,7 @@ public class FileConverter(
             Result = string.Empty,
             Processed = "",
             Id = string.Empty,
-            TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+            TenantId = tenantManager.GetCurrentTenantId(),
             Account = authContext.CurrentAccount.ID,
             Delete = false,
             StartDateTime = DateTime.UtcNow,
@@ -455,7 +455,7 @@ public class FileConverter(
             file, 
             password, 
             outputType,
-            (await tenantManager.GetCurrentTenantAsync()).Id, 
+            (tenantManager.GetCurrentTenant()).Id, 
             authContext.CurrentAccount, 
             deleteAfter, 
             httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),

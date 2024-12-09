@@ -31,6 +31,7 @@ import com.asc.common.utilities.HttpUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.stereotype.Controller;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class FallbackController extends AbstractErrorController {
   private static final String PATH = "/error";
+  private HttpUtils httpUtils;
 
   /**
    * Constructs a new FallbackController with the given error attributes.
@@ -49,6 +51,11 @@ public class FallbackController extends AbstractErrorController {
    */
   public FallbackController(ErrorAttributes errorAttributes) {
     super(errorAttributes);
+  }
+
+  @Autowired
+  public void setHttpUtils(HttpUtils httpUtils) {
+    this.httpUtils = httpUtils;
   }
 
   /**
@@ -67,7 +74,7 @@ public class FallbackController extends AbstractErrorController {
     response.sendRedirect(
         String.format(
             "%s://%s/login?type=oauth2&client_id=%s",
-            request.getScheme(), HttpUtils.getFirstRequestIP(request), clientId));
+            request.getScheme(), httpUtils.getFirstRequestIP(request), clientId));
   }
 
   /**

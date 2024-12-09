@@ -488,4 +488,19 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="ExternalUser" xml:space="preserve">
     <value>外部ユーザー</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>コンテンツ作成者</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>ルーム管理者</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>コンテンツ作成者</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>ルーム管理者</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>ファイルを開く</value>
+  </data>
 </root>

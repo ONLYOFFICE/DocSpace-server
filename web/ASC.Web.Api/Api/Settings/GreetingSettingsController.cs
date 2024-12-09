@@ -42,14 +42,13 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// Returns the greeting settings for the current portal.
     /// </summary>
     /// <short>Get greeting settings</short>
-    /// <category>Greeting settings</category>
-    /// <returns type="System.Object, System">Greeting settings: tenant name</returns>
     /// <path>api/2.0/settings/greetingsettings</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Greeting settings")]
+    [SwaggerResponse(200, "Greeting settings: tenant name", typeof(object))]
     [HttpGet("")]
-    public async Task<object> GetGreetingSettings()
+    public object GetGreetingSettings()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         return tenant.Name == "" ? Resource.PortalName : tenant.Name;
     }
 
@@ -57,14 +56,13 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// Checks if the greeting settings of the current portal are set to default or not.
     /// </summary>
     /// <short>Check the default greeting settings</short>
-    /// <category>Greeting settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the greeting settings of the current portal are set to default</returns>
     /// <path>api/2.0/settings/greetingsettings/isdefault</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Greeting settings")]
+    [SwaggerResponse(200, "Boolean value: true if the greeting settings of the current portal are set to default", typeof(bool))]
     [HttpGet("isdefault")]
-    public async Task<bool> IsDefault()
+    public bool IsDefault()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         return tenant.Name == "";
     }
 
@@ -72,17 +70,15 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// Saves the greeting settings specified in the request to the current portal.
     /// </summary>
     /// <short>Save the greeting settings</short>
-    /// <category>Greeting settings</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.GreetingSettingsRequestsDto, ASC.Web.Api" name="inDto">Greeting settings</param>
-    /// <returns type="System.Object, System">Message about saving greeting settings successfully</returns>
     /// <path>api/2.0/settings/greetingsettings</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Greeting settings")]
+    [SwaggerResponse(200, "Message about saving greeting settings successfully", typeof(object))]
     [HttpPost("")]
     public async Task<object> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         if (!coreBaseSettings.Standalone)
         {
@@ -96,7 +92,7 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
         tenant.Name = inDto.Title;
         await tenantManager.SaveTenantAsync(tenant);
 
-        await messageService.SendAsync(MessageAction.GreetingSettingsUpdated);
+        messageService.Send(MessageAction.GreetingSettingsUpdated);
 
         return Resource.SuccessfullySaveGreetingSettingsMessage;
     }
@@ -105,10 +101,9 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// Restores the current portal greeting settings.
     /// </summary>
     /// <short>Restore the greeting settings</short>
-    /// <category>Greeting settings</category>
-    /// <returns type="System.Object, System">Greeting settings: tenant name</returns>
     /// <path>api/2.0/settings/greetingsettings/restore</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Greeting settings")]
+    [SwaggerResponse(200, "Greeting settings: tenant name", typeof(object))]
     [HttpPost("restore")]
     public async Task<object> RestoreGreetingSettingsAsync()
     {
@@ -116,7 +111,7 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
 
         await tenantInfoSettingsHelper.RestoreDefaultTenantNameAsync();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         return tenant.Name == "" ? Resource.PortalName : tenant.Name;
     }

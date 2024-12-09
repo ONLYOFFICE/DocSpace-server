@@ -26,9 +26,45 @@
 
 namespace ASC.Files.Core.Core.History.Interpreters;
 
+public record FolderIndexChangedData : EntryData
+{
+    public int OldIndex { get; }
+    public int NewIndex { get; }
+    private readonly string _context;
+    
+    public FolderIndexChangedData(
+        int oldIndex,
+        int newIndex,
+        string id,
+        string title,
+        int? parentId = null,
+        string parentTitle = null,
+        int? parentType = null,
+        string context = null) : base(id,
+        title,
+        parentId,
+        parentTitle,
+        parentType)
+    {
+        NewIndex = newIndex;
+        OldIndex = oldIndex;
+        _context = context;
+    }
+
+    public override int GetId()
+    {
+        if (!string.IsNullOrEmpty(_context))
+        {
+            return _context.GetHashCode();
+        }
+        
+        return ParentId.HasValue ? ParentId.GetHashCode() : 0;
+    }
+}
+
 public class FolderCreatedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var desc = GetAdditionalDescription(description);
 
@@ -38,7 +74,7 @@ public class FolderCreatedInterpreter : ActionInterpreter
 
 public class FolderMovedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
@@ -58,7 +94,7 @@ public class FolderMovedInterpreter : ActionInterpreter
 
 public class FolderRenamedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var desc = GetAdditionalDescription(description);
         
@@ -69,7 +105,7 @@ public class FolderRenamedInterpreter : ActionInterpreter
 
 public class FolderCopiedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
@@ -89,8 +125,51 @@ public class FolderCopiedInterpreter : ActionInterpreter
 
 public class FolderDeletedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         return new ValueTask<HistoryData>(new EntryData(target, description[0]));
+    }
+}
+
+public class FolderIndexReorderedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {
+        var desc = GetAdditionalDescription(description);
+        var title = description[0];
+        
+        var isRoom = desc.ParentType is (int)FolderType.VirtualRooms or (int)FolderType.Archive;
+        var parentId = isRoom ? int.Parse(target) : desc.ParentId;
+        var parentTitle = isRoom ? title : desc.ParentTitle;
+        var parentType = isRoom ? (int)FolderType.VirtualDataRoom : desc.ParentType;
+        
+        return new ValueTask<HistoryData>(new EntryData(target, title, parentId, parentTitle, parentType));
+    }
+}
+
+public class FolderIndexChangedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {
+        var oldIndex = int.Parse(description[1]);
+        var newIndex = int.Parse(description[2]);
+
+        string context = null;
+        if (description.Count >= 4)
+        {
+            context = description[3];
+        }
+        
+        var desc = GetAdditionalDescription(description);
+        
+        return new ValueTask<HistoryData>(new FolderIndexChangedData(
+            oldIndex, 
+            newIndex, 
+            target, 
+            description[0], 
+            desc.ParentId, 
+            desc.ParentTitle, 
+            desc.ParentType,
+            context));
     }
 }

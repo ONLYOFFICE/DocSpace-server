@@ -27,27 +27,36 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FillingFormResultDto<T>
 {
-    /// <summary>Form number</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Form number
+    /// </summary>
     public int FormNumber { get; set; }
 
-    /// <summary>Completed form</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core</type>
+    /// <summary>
+    /// Completed form
+    /// </summary>
     public FileDto<T> CompletedForm { get; set; }
 
-    /// <summary>Original form</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core</type>
+    /// <summary>
+    /// Original form
+    /// </summary>
     public FileDto<T> OriginalForm { get; set; }
 
-    /// <summary>Manager</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    /// <summary>
+    /// Manager
+    /// </summary>
     public EmployeeFullDto Manager { get; set; }
 
+    /// <summary>
+    /// Room Id
+    /// </summary>
     public T RoomId { get; set; }
+
+    /// <summary>
+    /// Is room member
+    /// </summary>
     public bool isRoomMember { get; set; }
 
 }

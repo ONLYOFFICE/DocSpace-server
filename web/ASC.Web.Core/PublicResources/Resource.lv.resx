@@ -1055,6 +1055,6 @@
     <value>Glabāšanas kvotas un statistika</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} katram administratoram/galvenajam lietotājam un iespēja pievienot vietu pēc pieprasījuma</value>
+    <value>{0} katram administratoram un iespēja pievienot vietu pēc pieprasījuma</value>
   </data>
 </root>

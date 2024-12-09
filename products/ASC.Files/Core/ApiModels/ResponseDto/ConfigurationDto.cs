@@ -26,174 +26,344 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class ConfigurationDto<T>
 {
-    /// <summary>Document config</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.DocumentConfig, ASC.Files.Core</type>
+    /// <summary>
+    /// Document config
+    /// </summary>
     public DocumentConfigDto Document { get; set; }
 
-    /// <summary>Document type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Document type
+    /// </summary>
     public string DocumentType { get; set; }
 
-    /// <summary>Editor config</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.EditorConfiguration, ASC.Files.Core</type>
+    /// <summary>
+    /// Editor config
+    /// </summary>
     public EditorConfigurationDto EditorConfig { get; set; }
 
-    /// <summary>Editor type</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core</type>
+    /// <summary>
+    /// Editor type
+    /// </summary>
     public EditorType EditorType { get; set; }
 
-    /// <summary>Editor URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Editor URL
+    /// </summary>
+    [Url]
     public string EditorUrl { get; set; }
 
-    /// <summary>Token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Token
+    /// </summary>
     public string Token { get; set; }
 
-    /// <summary>Platform type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Platform type
+    /// </summary>
     public string Type { get; set; }
 
-    /// <summary>File parameters</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core</type>
+    /// <summary>
+    /// File parameters
+    /// </summary>
     public FileDto<T> File { get; set; }
 
-    /// <summary>Error message</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Error message
+    /// </summary>
     public string ErrorMessage { get; set; }
 
-    /// <summary>Specifies if the filling has started or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the filling has started or not
+    /// </summary>
     public bool? StartFilling { get; set; }
 
-    /// <summary>Filling session Id</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Filling session Id
+    /// </summary>
     public string FillingSessionId { get; set; }
 }
 
 public class EditorConfigurationDto
 {
+    /// <summary>
+    /// Callback url
+    /// </summary>
+    [Url]
     public string CallbackUrl { get; set; }
 
+    /// <summary>
+    /// Co editing
+    /// </summary>
     public CoEditingConfig CoEditing { get; set; }
 
+    /// <summary>
+    /// Create url
+    /// </summary>
     public string CreateUrl { get; set; }
 
+    /// <summary>
+    /// Customization
+    /// </summary>
     public CustomizationConfigDto Customization { get; set; }
 
+    /// <summary>
+    /// Embedded
+    /// </summary>
     public EmbeddedConfig Embedded { get; set; }
 
+    /// <summary>
+    /// Encryption keys
+    /// </summary>
     public EncryptionKeysConfig EncryptionKeys { get; set; }
-    
+
+    /// <summary>
+    /// Lang
+    /// </summary>
     public string Lang { get; set; }
 
+    /// <summary>
+    /// Mode
+    /// </summary>
     public string Mode { get; set; }
-    
+
+    /// <summary>
+    /// Mode write
+    /// </summary>
     public bool ModeWrite { get; set; }
 
+    /// <summary>
+    /// Plugins
+    /// </summary>
     public PluginsConfig Plugins { get; set; }
 
+    /// <summary>
+    /// Recent
+    /// </summary>
     public List<RecentConfig> Recent { get; set; }
-    
+
+    /// <summary>
+    /// Templates
+    /// </summary>
     public List<TemplatesConfig> Templates { get; set; }
 
+    /// <summary>
+    /// User
+    /// </summary>
     public UserConfig User { get; set; }
 }
 public class CustomizationConfigDto
 {
+    /// <summary>
+    /// About
+    /// </summary>
     public bool About { get; set; }
 
+    /// <summary>
+    /// Customer
+    /// </summary>
     public CustomerConfigDto Customer { get; set; }
+
+    /// <summary>
+    /// Anonymous
+    /// </summary>
     public AnonymousConfigDto Anonymous { get; set; }
 
+    /// <summary>
+    /// Feedback
+    /// </summary>
     public FeedbackConfig Feedback  { get; set; }
 
+    /// <summary>
+    /// Forcesave
+    /// </summary>
     public bool? Forcesave { get; set; }
 
+    /// <summary>
+    /// Go back
+    /// </summary>
     public GobackConfig Goback { get; set; }
 
+    /// <summary>
+    /// Logo
+    /// </summary>
     public LogoConfigDto Logo { get; set; }
 
+    /// <summary>
+    /// MentionShare
+    /// </summary>
     public bool MentionShare { get; set; }
 
+    /// <summary>
+    /// Review display
+    /// </summary>
     public string ReviewDisplay { get; set; }
 
+    /// <summary>
+    /// Submit form
+    /// </summary>
     public bool SubmitForm { get; set; }
 }
 
 public class LogoConfigDto
 {
+    /// <summary>
+    /// Image
+    /// </summary>
     public string Image { get; set; }
 
+    /// <summary>
+    /// Image dark
+    /// </summary>
     public string ImageDark { get; set; }
 
+    /// <summary>
+    /// Image embedded
+    /// </summary>
     public string ImageEmbedded { get; set; }
 
+    /// <summary>
+    /// Url
+    /// </summary>
     public string Url { get; set; }
+
+    /// <summary>
+    /// Visible
+    /// </summary>
     public bool Visible { get; set; }
 }
 
 public class AnonymousConfigDto
 {
+    /// <summary>
+    /// Request
+    /// </summary>
     public bool Request { get; set; }
 }
 
 public class CustomerConfigDto
 {
+    /// <summary>
+    /// Address
+    /// </summary>
     public string Address { get; set; }
 
+    /// <summary>
+    /// Logo
+    /// </summary>
     public string Logo { get; set; }
 
+    /// <summary>
+    /// Dark logo
+    /// </summary>
     public string LogoDark { get; set; }
 
+    /// <summary>
+    /// Mail
+    /// </summary>
     public string Mail { get; set; }
 
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name  { get; set; }
 
+    /// <summary>
+    /// Site
+    /// </summary>
     public string Www  { get; set; }
 }
 
 public class DocumentConfigDto
 {
+    /// <summary>
+    /// File type
+    /// </summary>
     public string FileType  { get; set; }
-    
+
+    /// <summary>
+    /// Info
+    /// </summary>
     public InfoConfigDto Info { get; set; }
-    
+
+    /// <summary>
+    /// Is linked for me
+    /// </summary>
     public bool IsLinkedForMe { get; set; }
 
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; set; }
 
+    /// <summary>
+    /// Permissions
+    /// </summary>
     public PermissionsConfig Permissions { get; set; }
-    
+
+    /// <summary>
+    /// Shared link param
+    /// </summary>
     public string SharedLinkParam { get; set; }
-    
+
+    /// <summary>
+    /// Shared link key
+    /// </summary>
     public string SharedLinkKey { get; set; }
-    
+
+    /// <summary>
+    /// Reference data
+    /// </summary>
     public FileReferenceData ReferenceData { get; set; }
 
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
+    /// <summary>
+    /// Url
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 
+    /// <summary>
+    /// Options
+    /// </summary>
     public Options Options { get; set; }
 }
 
 public class InfoConfigDto
 {
+    /// <summary>
+    /// Favorite
+    /// </summary>
     public bool? Favorite { get; set; }
 
+    /// <summary>
+    /// Folder
+    /// </summary>
     public string Folder { get; set; }
 
+    /// <summary>
+    /// Owner
+    /// </summary>
     public string Owner { get; set; }
 
+    /// <summary>
+    /// Sharing settings
+    /// </summary>
     public List<AceShortWrapper> SharingSettings{ get; set; }
-    
+
+    /// <summary>
+    /// Type
+    /// </summary>
     public EditorType Type { get; set; }
 
+    /// <summary>
+    /// Uploaded
+    /// </summary>
     public string Uploaded { get; set; }
 }
 
@@ -224,8 +394,8 @@ public class ConfigurationConverter<T>(
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
             ErrorMessage = source.Error
         };
-
-        result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string>() {
+        
+        result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, result.Document?.Key }
         });
 
@@ -306,7 +476,7 @@ public class CustomizationConfigConverter<T>(
             Logo = await configConverter.Convert(configuration),
             MentionShare = await source.GetMentionShare(file),
             ReviewDisplay = source.GetReviewDisplay(configuration.EditorConfig.ModeWrite),
-            SubmitForm = await source.GetSubmitForm(file, configuration.EditorConfig.ModeWrite),
+            SubmitForm = await source.GetSubmitForm(file),
             Anonymous = anonymousConfigConverter.Convert(configuration)
         };
 
@@ -406,9 +576,9 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
             Permissions = source.Permissions,
             SharedLinkParam = source.SharedLinkParam,
             SharedLinkKey = source.SharedLinkKey,
-            ReferenceData = await source.GetReferenceData(file),
+            ReferenceData = source.GetReferenceData(file),
             Title = source.Title ?? file.Title,
-            Url = await source.GetUrl(file),
+            Url = source.GetUrl(file),
             Options = source.Options,
         };
 

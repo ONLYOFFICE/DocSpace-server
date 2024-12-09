@@ -1663,7 +1663,7 @@ Właśnie utworzyłeś(-łaś) ONLYOFFICE DocSpace – centrum dokumentów, dzi�
 
 Twój bieżący plan cenowy to STARTUP. Jest absolutnie darmowy i obejmuje:
 
-&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 administratorów/użytkowników z większą liczbą uprawnień&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Do 100 pokoi&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB miejsca na dysku&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 administratorów&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Do 100 pokoi&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB miejsca na dysku&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
 *Ciesz się nowym sposobem współpracy nad dokumentami!*
 
@@ -1757,6 +1757,188 @@ $TrulyYours</value>
 $__AuthorName zaprosił Cię do pokoju "$Message":"$ InviteLink" na "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Kup teraz</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Ustaw hasło</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Witaj! Ustaw hasło dla swojego konta ONLYOFFICE DocSpace. Wystarczy kliknąć poniższy przycisk:
+
+$OrangeButton
+
+Link jest ważny przez 7 dni.</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Okres prolongaty dla Twojego konta ONLYOFFICE DocSpace Developer został aktywowany</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Twoja licencja ONLYOFFICE DocSpace Developer wkrótce wygaśnie</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Okres prolongaty dla Twojego konta ONLYOFFICE DocSpace Developer wkrótce wygaśnie</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Twoje konto ONLYOFFICE DocSpace Developer nie jest już dostępne</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Okres prolongaty dla Twojego konta ONLYOFFICE DocSpace Enterprise został aktywowany</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Twoja licencja ONLYOFFICE DocSpace Enterprise wkrótce wygaśnie</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Okres prolongaty dla Twojego konta ONLYOFFICE DocSpace Enterprise wkrótce wygaśnie</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Twoje konto ONLYOFFICE DocSpace Enterprise nie jest już dostępne</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Twoja licencja ONLYOFFICE DocSpace Enterprise wkrótce wygaśnie</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Twoja licencja ONLYOFFICE DocSpace Enterprise wygasa dzisiaj</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Ustaw hasło dla swojego konta ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Twoja licencja ONLYOFFICE DocSpace Developer wygasa dzisiaj.
+
+Aktywowaliśmy dla Ciebie okres prolongaty wynoszący $PaymentDelay dni. W tym czasie dostęp do edycji dokumentów jest ograniczony do 20 jednoczesnych połączeń (wsparcie i aktualizacje nie są już oferowane).
+
+Aby zaktualizować licencję, skontaktuj się bezpośrednio ze swoim osobistym menedżerem ds. sprzedaży lub z nami pod adresem "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+W przypadku pytań dotyczących płatności napisz do nas na adres "${__SalesEmail}":"mailto:${__SalesEmail}". Jeśli napotkasz problemy techniczne, przejdź tutaj "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Twoja licencja ONLYOFFICE DocSpace Developer wygaśnie za 7 dni.
+
+Aby zaktualizować licencję, skontaktuj się bezpośrednio ze swoim osobistym menedżerem ds. sprzedaży lub z nami pod adresem "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+W przypadku pytań dotyczących płatności napisz do nas na adres "${__SalesEmail}":"mailto:${__SalesEmail}". Jeśli napotkasz problemy techniczne, przejdź tutaj "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Okres prolongaty dla Twojej licencji ONLYOFFICE DocSpace Developer wygaśnie za 7 dni. Oznacza to, że Twoje konto DocSpace stanie się niedostępne.
+
+Aby zaktualizować licencję, skontaktuj się bezpośrednio ze swoim osobistym menedżerem ds. sprzedaży lub z nami pod adresem "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+W przypadku pytań dotyczących płatności napisz do nas na adres "${__SalesEmail}":"mailto:${__SalesEmail}". Jeśli napotkasz problemy techniczne, przejdź tutaj "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Okres prolongaty dla Twojej licencji ONLYOFFICE DocSpace Developer wygasa dzisiaj. Oznacza to, że Twoje konto DocSpace stanie się niedostępne.
+
+Aby zaktualizować licencję, skontaktuj się bezpośrednio ze swoim osobistym menedżerem ds. sprzedaży lub z nami pod adresem "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+W przypadku pytań dotyczących płatności napisz do nas na adres "${__SalesEmail}":"mailto:${__SalesEmail}". Jeśli napotkasz problemy techniczne, przejdź tutaj "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Twoja licencja ONLYOFFICE DocSpace Enterprise wygasa dzisiaj.
+
+Aktywowaliśmy dla Ciebie *okres prolongaty wynoszący $PaymentDelay *dni. W tym czasie dostęp do DocSPace jest zapewniony dla 3 *nazwanych użytkowników (wsparcie i aktualizacje nie są już oferowane).
+
+Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ONLYOFFICE DocSpace Enterprise (z 3-letnim wsparciem i aktualizacjami):
+
+$OrangeButton
+
+Zachęcamy również do bezpośredniego kontaktu ze swoim osobistym menedżerem ds. sprzedaży, aby zaktualizować licencję.
+
+W przypadku pytań dotyczących płatności napisz do nas na adres "${__SalesEmail}":"mailto:${__SalesEmail}". Jeśli napotkasz problemy techniczne, przejdź tutaj "${__SupportLink}":"${__SupportLink}".
+
+*Zarejestrowane identyfikatory pierwszych 3 użytkowników, którzy otworzą dowolny plik do edycji. Liczba dokumentów, które można edytować w tym samym czasie, nie jest ograniczona. Inni użytkownicy będą mogli otwierać dokumenty tylko do odczytu.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Twoja licencja ONLYOFFICE DocSpace Enterprise wygaśnie za 7 dni.
+
+Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ONLYOFFICE DocSpace Enterprise (z 3-letnim wsparciem i aktualizacjami).
+
+$OrangeButton
+
+Zachęcamy również do bezpośredniego kontaktu ze swoim osobistym menedżerem ds. sprzedaży, aby zaktualizować licencję
+
+W przypadku pytań dotyczących płatności napisz do nas na adres "${__SalesEmail}":"mailto:${__SalesEmail}". Jeśli napotkasz problemy techniczne, przejdź tutaj "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Okres prolongaty dla Twojej licencji ONLYOFFICE DocSpace Enterprise wygaśnie za 7 dni. Oznacza to, że Twoje konto DocSpace stanie się niedostępne.
+
+Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ONLYOFFICE DocSpace Enterprise (z 3-letnim wsparciem i aktualizacjami):
+
+$OrangeButton
+
+Zachęcamy również do bezpośredniego kontaktu ze swoim osobistym menedżerem ds. sprzedaży, aby zaktualizować licencję
+
+W przypadku pytań dotyczących płatności napisz do nas na adres "${__SalesEmail}":"mailto:${__SalesEmail}". Jeśli napotkasz problemy techniczne, przejdź tutaj "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Okres prolongaty dla Twojej licencji ONLYOFFICE DocSpace Enterprise wygasa dzisiaj. Oznacza to, że Twoje konto DocSpace stanie się niedostępne.
+
+Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ONLYOFFICE DocSpace Enterprise (z 3-letnim wsparciem i aktualizacjami):
+
+$OrangeButton
+
+Zachęcamy również do bezpośredniego kontaktu ze swoim osobistym menedżerem ds. sprzedaży, aby zaktualizować licencję
+
+W przypadku pytań dotyczących płatności napisz do nas na adres "${__SalesEmail}":"mailto:${__SalesEmail}". Jeśli napotkasz problemy techniczne, przejdź tutaj "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Twoja licencja ONLYOFFICE DocSpace Enterprise wygaśnie za 7 dni. Oznacza to, że aktualizacje i wsparcie stanął się niedostępne.*
+
+Aby zaktualizować licencję, skontaktuj się bezpośrednio ze swoim osobistym menedżerem ds. sprzedaży lub z nami pod adresem "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+W przypadku pytań dotyczących płatności napisz do nas na adres "${__SalesEmail}":"mailto:${__SalesEmail}". Jeśli napotkasz problemy techniczne, przejdź tutaj "${__SupportLink}":"${__SupportLink}".
+
+*Możesz korzystać ze wszystkich funkcji dostępnych w chwili zakupu licencji przez nieograniczony czas.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Twoja licencja ONLYOFFICE DocSpace Enterprise wygasa dzisiaj. Oznacza to, że aktualizacje i wsparcie są niedostępne.*
+
+Aby zaktualizować licencję, skontaktuj się bezpośrednio ze swoim osobistym menedżerem ds. sprzedaży lub z nami pod adresem "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+W przypadku pytań dotyczących płatności napisz do nas na adres "${__SalesEmail}":"mailto:${__SalesEmail}". Jeśli napotkasz problemy techniczne, przejdź tutaj "${__SupportLink}":"${__SupportLink}".
+
+*Możesz korzystać ze wszystkich funkcji dostępnych w chwili zakupu licencji przez nieograniczony czas.
 
 $TrulyYours</value>
   </data>

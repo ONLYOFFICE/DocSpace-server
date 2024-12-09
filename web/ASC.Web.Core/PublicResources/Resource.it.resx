@@ -1040,7 +1040,7 @@
     <value>Quote e statistiche di archivio</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} per amministratore/utente esperto e possibilità di aggiungere spazio su richiesta</value>
+    <value>{0} per amministratore e possibilità di aggiungere spazio su richiesta</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Amministratori aggiunti:</value>
@@ -1056,5 +1056,17 @@
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Questa email è allegata all'utente {0} come fornitore di terze parti</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Aggiungi almeno 1 indirizzo IP permesso.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Aggiungi almeno 1 indirizzo IP permesso.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Non-profit</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Il numero di amministratori supera il limite: {0}/{1}.</value>
   </data>
 </root>

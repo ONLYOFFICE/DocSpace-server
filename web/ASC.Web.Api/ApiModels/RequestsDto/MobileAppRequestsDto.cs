@@ -27,10 +27,12 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// Mobile app request parameters
 /// </summary>
 public class MobileAppRequestsDto
 {
-    /// <summary>Mobile app type</summary>
-    /// <type>ASC.Core.Common.Notify.Push.MobileAppType, ASC.Web.Api</type>
+    /// <summary>
+    /// Mobile app type
+    /// </summary>
     public MobileAppType Type { get; set; }
 }

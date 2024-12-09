@@ -401,7 +401,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         var id = Dao.MakeId(Dao.GetId(file));
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -720,6 +720,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.FromResult<EntryProperties<string>>(null);
     }
 
+    public Task<Dictionary<string, EntryProperties<string>>> GetPropertiesAsync(IEnumerable<string> filesIds)
+    {
+        return Task.FromResult<Dictionary<string, EntryProperties<string>>>(null);
+    }
+
     public Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
     {
         return Task.CompletedTask;
@@ -741,9 +746,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
-    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    public Task<int> SetCustomOrder(string fileId, string parentFolderId, int order)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(0);
     }
 
     public Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)

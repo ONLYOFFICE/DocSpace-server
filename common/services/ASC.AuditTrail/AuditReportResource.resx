@@ -861,7 +861,73 @@
   <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
     <value>Users [{0}]. Disabled storage quota for users</value>
   </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Room indexing enabled</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Room indexing disabled</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Life time is set. Value: {0}. Period: {1}. Permanently Delete: {2}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>LifeTime disabled</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Folder: {0}. Index changed from {1} to {2}</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>File: {0}. Index changed from {1} to {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Folder: {0}. Indexes reordered</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Room: {0}. Deny download enabled</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Room: {0}. Deny download disabled</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Room: {0}. Watermark enabled</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Room: {0}. Watermark disabled</value>
+  </data>
   <data name="RoomIndexExportSaved" xml:space="preserve">
     <value>Export of the room index saved to Documents</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Invitation sent again: {0}</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Client created</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Client {0} updated</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Client's {0} secret regenerated</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Client {0} deleted</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Client's {0} activation changed</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Client's {0} visibility changed</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Revoked client {0} access</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Generated authorization code for client {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Generated personal access token for client {0}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
   </data>
 </root>

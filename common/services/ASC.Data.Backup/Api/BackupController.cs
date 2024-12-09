@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Convention;
+
+using Swashbuckle.AspNetCore.Annotations;
+
 namespace ASC.Data.Backup.Controllers;
 
 /// <summary>
@@ -33,6 +37,7 @@ namespace ASC.Data.Backup.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[ControllerName("backup")]
 public class BackupController(
     BackupAjaxHandler backupAjaxHandler,
     TenantManager tenantManager,
@@ -50,9 +55,10 @@ public class BackupController(
     /// Returns the backup schedule of the current portal.
     /// </summary>
     /// <short>Get the backup schedule</short>
-    /// <returns type="ASC.Data.Backup.BackupAjaxHandler.Schedule, ASC.Data.Backup">Backup schedule</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackupschedule</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup schedule", typeof(BackupAjaxHandler.Schedule))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackupschedule")]
     public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule()
     {
@@ -63,10 +69,13 @@ public class BackupController(
     /// Creates the backup schedule of the current portal with the parameters specified in the request.
     /// </summary>
     /// <short>Create the backup schedule</short>
-    /// <param type="ASC.Data.Backup.ApiModels.BackupScheduleDto, ASC.Data.Backup" name="inDto">Backup schedule parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/createbackupschedule</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(400, "BackupStored must be 1 - 30 or backup can not start as dump")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupScheduleAsync(BackupScheduleDto inDto)
     {
@@ -75,14 +84,14 @@ public class BackupController(
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
 
-        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
+        var storageType = inDto.StorageType ?? BackupStorageType.Documents;
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
-        var backupStored = inDto.BackupsStored == null ? 1 : Int32.Parse(inDto.BackupsStored);
+        var backupStored = inDto.BackupsStored ?? 1;
         var cron = new CronParams
         {
-            Period = inDto.CronParams.Period == null ? BackupPeriod.EveryDay : (BackupPeriod)Int32.Parse(inDto.CronParams.Period),
-            Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),
-            Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day)
+            Period = inDto.CronParams.Period ?? BackupPeriod.EveryDay,
+            Hour = inDto.CronParams.Hour,
+            Day = inDto.CronParams.Day ?? 0
         };
         if(backupStored is > 30 or < 1)
         {
@@ -109,9 +118,10 @@ public class BackupController(
     /// Deletes the backup schedule of the current portal.
     /// </summary>
     /// <short>Delete the backup schedule</short>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackupschedule</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule()
     {
@@ -124,10 +134,13 @@ public class BackupController(
     /// Starts the backup of the current portal with the parameters specified in the request.
     /// </summary>
     /// <short>Start the backup</short>
-    /// <param type="ASC.Data.Backup.ApiModels.BackupDto, ASC.Data.Backup" name="inDto">Backup parameters</param>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/startbackup</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
+    [SwaggerResponse(400, "Wrong folder type or backup can`t start as dump")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "The required folder was not found")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
     public async Task<BackupProgress> StartBackupAsync(BackupDto inDto)
@@ -137,7 +150,7 @@ public class BackupController(
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
 
-        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
+        var storageType =  inDto.StorageType ?? BackupStorageType.Documents;
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
         var canParse = false;
@@ -170,7 +183,7 @@ public class BackupController(
         }
         if (storageType is BackupStorageType.ThirdPartyConsumer)
         {
-            storageParams.Add("subdir", "backup");
+            storageParams.TryAdd("subdir", "backup");
         }
         
 
@@ -179,7 +192,7 @@ public class BackupController(
             : default;
         
         var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
              tenantId: tenantId,
@@ -198,9 +211,10 @@ public class BackupController(
     /// Returns the progress of the started backup.
     /// </summary>
     /// <short>Get the backup progress</short>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackupprogress</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
     public async Task<BackupProgress> GetBackupProgressAsync()
@@ -212,10 +226,11 @@ public class BackupController(
     /// Returns the history of the started backup.
     /// </summary>
     /// <short>Get the backup history</short>
-    /// <returns type="ASC.Data.Backup.Contracts.BackupHistoryRecord, ASC.Data.Backup.Core">List of backup history records</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackuphistory</path>
     /// <collection>list</collection>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "List of backup history records", typeof(BackupHistoryRecord))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
     {
@@ -226,14 +241,14 @@ public class BackupController(
     /// Deletes the backup with the ID specified in the request.
     /// </summary>
     /// <short>Delete the backup</short>
-    /// <param type="System.Guid, System" method="url" name="id">Backup ID</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackup/{id:guid}")]
-    public async Task<bool> DeleteBackup(Guid id)
+    public async Task<bool> DeleteBackup([FromRoute] DeleteBackupDto inDto)
     {
-        await backupAjaxHandler.DeleteBackupAsync(id);
+        await backupAjaxHandler.DeleteBackupAsync(inDto.BackupId);
         return true;
     }
 
@@ -241,9 +256,10 @@ public class BackupController(
     /// Deletes the backup history of the current portal.
     /// </summary>
     /// <short>Delete the backup history</short>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackuphistory</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory()
     {
@@ -255,10 +271,13 @@ public class BackupController(
     /// Starts the data restoring process of the current portal with the parameters specified in the request.
     /// </summary>
     /// <short>Start the restoring process</short>
-    /// <param type="ASC.Data.Backup.ApiModels.BackupRestoreDto, ASC.Data.Backup" name="inDto">Restoring parameters</param>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/startrestore</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
+    [SwaggerResponse(400, "Backup can not start as dump")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(404, "The required file or folder was not found")]
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
     {
@@ -270,9 +289,9 @@ public class BackupController(
             ? commonLinkUtility.GetFullAbsolutePath("")
             : default;
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType.ToString());
+        var storageType = inDto.StorageType ?? BackupStorageType.Documents;
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments && storageParams.ContainsKey("filePath"))
         {
             if (int.TryParse(storageParams["filePath"], out var fId))
@@ -284,12 +303,16 @@ public class BackupController(
                 await backupAjaxHandler.CheckAccessToFileAsync(storageParams["filePath"]);
             }
         }
-        
+        if (storageType is BackupStorageType.ThirdPartyConsumer)
+        {
+            storageParams.TryAdd("subdir", "backup");
+        }
+
         await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
                              createBy: CurrentUserId,
                              storageParams: storageParams,
-                             storageType: (BackupStorageType)Int32.Parse(inDto.StorageType.ToString()),
+                             storageType: storageType,
                              notify: inDto.Notify,
                              backupId: inDto.BackupId,
                              serverBaseUri: serverBaseUri
@@ -303,10 +326,10 @@ public class BackupController(
     /// Returns the progress of the started restoring process.
     /// </summary>
     /// <short>Get the restoring progress</short>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getrestoreprogress</path>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [HttpGet("getrestoreprogress")]  //NOTE: this method doesn't check payment!!!
     [AllowAnonymous]
     [AllowNotPayment]
@@ -319,11 +342,11 @@ public class BackupController(
     /// Returns a path to the temporary folder with the stored backup.
     /// </summary>
     /// <short>Get the temporary backup folder</short>
-    /// <returns type="System.Object, System">Path to the temporary folder with the stored backup</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/backuptmp</path>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Backup")]
     [HttpGet("backuptmp")]
+    [SwaggerResponse(200, "Path to the temporary folder with the stored backup")]
     public object GetTempPath()
     {
         return backupAjaxHandler.GetTmpFolder();

@@ -29,11 +29,22 @@ namespace ASC.Data.Backup.Contracts;
 
 public enum BackupStorageType
 {
+    [SwaggerEnum(Description = "Documents")]
     Documents = 0,
+
+    [SwaggerEnum(Description = "Thridparty documents")]
     ThridpartyDocuments = 1,
+
+    [SwaggerEnum(Description = "Custom cloud")]
     CustomCloud = 2,
+
+    [SwaggerEnum(Description = "Local")]
     Local = 3,
+
+    [SwaggerEnum(Description = "Data store")]
     DataStore = 4,
+
+    [SwaggerEnum(Description = "Thirdparty consumer")]
     ThirdPartyConsumer = 5
 }
 
@@ -48,28 +59,31 @@ public class StartBackupRequest
     public bool Dump { get; init; }
 }
 
-/// <summary>
-/// </summary>
 public class BackupHistoryRecord
 {
-    /// <summary>Backup ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// Backup ID
+    /// </summary>
     public Guid Id { get; set; }
 
-    /// <summary>File name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// File name
+    /// </summary>
     public string FileName { get; set; }
 
-    /// <summary>Storage type</summary>
-    /// <type>ASC.Data.Backup.Contracts.BackupStorageType, ASC.Data.Backup.Core</type>
+    /// <summary>
+    /// Storage type
+    /// </summary>
     public BackupStorageType StorageType { get; set; }
 
-    /// <summary>Creation date</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// Creation date
+    /// </summary>
     public DateTime CreatedOn { get; set; }
 
-    /// <summary>Expiration date</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// Expiration date
+    /// </summary>
     public DateTime ExpiresOn { get; set; }
 }
 

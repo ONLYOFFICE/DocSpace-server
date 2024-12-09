@@ -30,15 +30,23 @@ package com.asc.registration.service.ports.output.repository;
 import com.asc.common.core.domain.value.ClientId;
 
 /**
- * ConsentCommandRepository defines the contract for consent-related operations that modify the
- * state of consents. This repository handles revoking consents for clients.
+ * The ConsentCommandRepository interface defines the operations for managing consents by modifying
+ * their state, including revocation of client consents.
  */
 public interface ConsentCommandRepository {
+
   /**
    * Revokes the consent of a specific client for a given principal (user).
    *
-   * @param clientId The unique client ID whose consent is to be revoked.
-   * @param principalId The id of the principal (user) whose consent is to be revoked.
+   * @param clientId the unique identifier of the client whose consent is to be revoked
+   * @param principalId the unique identifier of the principal (user) whose consent is to be revoked
    */
   void revokeConsent(ClientId clientId, String principalId);
+
+  /**
+   * Revokes all consents associated with a specific client.
+   *
+   * @param clientId the unique identifier of the client whose consents are to be revoked
+   */
+  void revokeAllConsents(ClientId clientId);
 }

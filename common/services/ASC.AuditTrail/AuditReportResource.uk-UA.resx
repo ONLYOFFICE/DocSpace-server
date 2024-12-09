@@ -802,4 +802,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Користувачі [{0}]. Форму надіслано: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Експорт індексу кімнати збережено в Документах</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Запрошення надіслані повторно: {0}</value>
+  </data>
 </root>

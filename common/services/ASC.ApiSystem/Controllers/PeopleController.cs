@@ -41,12 +41,18 @@ public class PeopleController(
 {
     #region For TEST api
 
+    /// <summary>
+    /// Test api
+    /// </summary>
+    /// <path>apisystem/people/test</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [SwaggerResponse(200, "People api works")]
     [HttpGet("test")]
     public IActionResult Check()
     {
         return Ok(new
         {
-            value = "Portal api works"
+            value = "People api works"
         });
     }
 
@@ -54,6 +60,12 @@ public class PeopleController(
 
     #region API methods
 
+    /// <summary>
+    /// Find
+    /// </summary>
+    /// <path>apisystem/people/find</path>
+    [Tags("People")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("find")]
     [AllowCrossSiteJson]
     public async Task<IActionResult> FindAsync(FindPeopleModel model)

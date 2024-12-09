@@ -25,7 +25,9 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Polly;
+using Polly.Contrib.WaitAndRetry;
 using Polly.Extensions.Http;
+using Polly.Timeout;
 
 namespace ASC.Files.Core.Helpers;
 
@@ -146,7 +148,7 @@ public static class DocumentService
 
         documentRevisionId = GenerateRevisionId(documentRevisionId);
 
-        documentConverterUrl = FilesLinkUtility.AddQueryString(documentConverterUrl, new Dictionary<string, string>() {
+        documentConverterUrl = FilesLinkUtility.AddQueryString(documentConverterUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, documentRevisionId }
         });
 
@@ -198,9 +200,9 @@ public static class DocumentService
         string dataResponse;
 
         using (var response = await httpClient.SendAsync(request))
-            {
+        {
             dataResponse = await response.Content.ReadAsStringAsync();
-            }
+        }
 
         return GetResponseUri(dataResponse);
     }
@@ -229,7 +231,7 @@ public static class DocumentService
         string signatureSecret,
         IHttpClientFactory clientFactory)
     {
-        documentTrackerUrl = FilesLinkUtility.AddQueryString(documentTrackerUrl, new Dictionary<string, string>() {
+        documentTrackerUrl = FilesLinkUtility.AddQueryString(documentTrackerUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, documentRevisionId }
         });
 
@@ -289,7 +291,7 @@ public static class DocumentService
         {
             using var response = await httpClient.SendAsync(request, cancellationTokenSource.Token);
             dataResponse = await response.Content.ReadAsStringAsync(cancellationTokenSource.Token);
-            }
+        }
         catch (HttpRequestException e) when (e.HttpRequestError == HttpRequestError.NameResolutionError)
         {
             return new CommandResponse
@@ -309,7 +311,7 @@ public static class DocumentService
             return new CommandResponse
             {
                 Error = ErrorTypes.ParseError,
-                ErrorString = ex.Message
+                ErrorString = $"{ex.Message} Content: {dataResponse}"
             };
         }
     }
@@ -342,7 +344,7 @@ public static class DocumentService
        string signatureSecret,
        IHttpClientFactory clientFactory)
     {
-        docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string>() {
+        docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, requestKey }
         });
 
@@ -619,7 +621,8 @@ public static class DocumentService
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
         public required string Url { get; set; }
         public required string Region { get; set; }
-        public WatermarkOnDraw Watermark { get; set; }        public string Token { get; set; }
+        public WatermarkOnDraw Watermark { get; set; }        
+        public string Token { get; set; }
         public PdfData Pdf { get; set; }
 
     }
@@ -635,9 +638,21 @@ public static class DocumentService
 
     public class FileLink
     {
+        /// <summary>
+        /// File type
+        /// </summary>
         [JsonPropertyName("filetype")]
         public string FileType { get; set; }
+
+        /// <summary>
+        /// Token
+        /// </summary>
         public string Token { get; set; }
+
+        /// <summary>
+        /// Url
+        /// </summary>
+        [Url]
         public string Url { get; set; }
     }
 
@@ -735,15 +750,16 @@ public static class DocumentServiceHttpClientExtension
 {
     public static void AddDocumentServiceHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
-        
+        var httpClientTimeout = Convert.ToInt32(configuration["files:docservice:timeout"] ?? "100000");
+        var policyTimeout = httpClientTimeout / 1000;
+        var retryCount = Convert.ToInt32(configuration["files:docservice:try"] ?? "6");
+        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: retryCount);
+
         services.AddHttpClient(nameof(DocumentService))
-            .SetHandlerLifetime(TimeSpan.FromMilliseconds(Convert.ToInt32(configuration["files:docservice:timeout"] ?? "5000")))
-            .AddPolicyHandler((_, _) => 
-                HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .OrResult(response => response.IsSuccessStatusCode
-                    ? false
-                    : throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode))
-                .WaitAndRetryAsync(Convert.ToInt32(configuration["files:docservice:try"] ?? "3"), retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+                .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(policyTimeout))
+                .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
+                                                                .Or<TimeoutRejectedException>()
+                                                                .WaitAndRetryAsync(delay));
     }
 }

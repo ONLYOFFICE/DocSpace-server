@@ -57,10 +57,9 @@ public class ConnectionsController(
     /// <short>
     /// Get active connections
     /// </short>
-    /// <category>Active connections</category>
-    /// <returns type="System.Object, System">Active portal connections</returns>
     /// <path>api/2.0/security/activeconnections</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Security / Active connections")]
+    [SwaggerResponse(200, "Active portal connections", typeof(ActiveConnectionsDto))]
     [HttpGet("")]
     public async Task<ActiveConnectionsDto> GetAllActiveConnections()
     {
@@ -147,10 +146,9 @@ public class ConnectionsController(
     /// <short>
     /// Log out and change password
     /// </short>
-    /// <category>Active connections</category>
-    /// <returns type="System.Object, System">URL to the confirmation message for changing a password</returns>
     /// <path>api/2.0/security/activeconnections/logoutallchangepassword</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Security / Active connections")]
+    [SwaggerResponse(200, "URL to the confirmation message for changing a password", typeof(object))]
     [HttpPut("logoutallchangepassword")]
     public async Task<object> LogOutAllActiveConnectionsChangePassword()
     {
@@ -167,9 +165,9 @@ public class ConnectionsController(
             auditEventDate = auditEventDate.AddTicks(-(auditEventDate.Ticks % TimeSpan.TicksPerSecond));
 
             var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
-            var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
+            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
-            await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
+            messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
 
             return confirmationUrl;
         }
@@ -186,23 +184,22 @@ public class ConnectionsController(
     /// <short>
     /// Log out for the user by ID
     /// </short>
-    /// <category>Active connections</category>
-    /// <param type="System.Guid, System" method="url" name="userId">User ID</param>
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns></returns>
+    [Tags("Security / Active connections")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "Method not available")]
     [HttpPut("logoutall/{userId:guid}")]
-    public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
+    public async Task LogOutAllActiveConnectionsForUserAsync(UserIdRequestDto inDto)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
         if (!await userManager.IsDocSpaceAdminAsync(currentUserId) && 
             !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
-            (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId)))
+            (currentUserId != inDto.Id && await userManager.IsDocSpaceAdminAsync(inDto.Id)))
         {
             throw new SecurityException("Method not available");
         }
 
-        await LogOutAllActiveConnections(userId);
+        await LogOutAllActiveConnections(inDto.Id);
     }
 
     /// <summary>
@@ -211,10 +208,9 @@ public class ConnectionsController(
     /// <short>
     /// Log out from all connections
     /// </short>
-    /// <category>Active connections</category>
-    /// <returns type="System.Object, System">Current user name</returns>
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Security / Active connections")]
+    [SwaggerResponse(200, "Current user name", typeof(object))]
     [HttpPut("logoutallexceptthis")]
     public async Task<object> LogOutAllExceptThisConnection()
     {
@@ -231,7 +227,7 @@ public class ConnectionsController(
                 await quotaSocketManager.LogoutSession(user.Id, loginEvent.Id);
             }
 
-            await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
+            messageService.Send(MessageAction.UserLogoutActiveConnections, userName);
             return userName;
         }
         catch (Exception ex)
@@ -247,20 +243,19 @@ public class ConnectionsController(
     /// <short>
     /// Log out from the connection
     /// </short>
-    /// <category>Active connections</category>
-    /// <param type="System.Int32, System" method="url" name="loginEventId">Login event ID</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Security / Active connections")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(403, "Method not available")]
     [HttpPut("logout/{loginEventId:int}")]
-    public async Task<bool> LogOutActiveConnection(int loginEventId)
+    public async Task<bool> LogOutActiveConnection(LoginEvenrIdRequestDto inDto)
     {
         try
         {
             var currentUserId = securityContext.CurrentAccount.ID;
             var user = await userManager.GetUsersAsync(currentUserId);
 
-            var loginEvent = await dbLoginEventsManager.GetByIdAsync(user.TenantId, loginEventId);
+            var loginEvent = await dbLoginEventsManager.GetByIdAsync(user.TenantId, inDto.Id);
 
             if (loginEvent == null)
             {
@@ -281,7 +276,7 @@ public class ConnectionsController(
                 await quotaSocketManager.LogoutSession(loginEvent.UserId.Value, loginEvent.Id);
             }
 
-            await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
+            messageService.Send(MessageAction.UserLogoutActiveConnection, userName);
             return true;
         }
         catch (Exception ex)
@@ -298,7 +293,7 @@ public class ConnectionsController(
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var auditEventDate = DateTime.UtcNow;
 
-        await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
+        messageService.Send(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
         await cookiesManager.ResetUserCookieAsync(user.Id);
 
         await quotaSocketManager.LogoutSession(user.Id);

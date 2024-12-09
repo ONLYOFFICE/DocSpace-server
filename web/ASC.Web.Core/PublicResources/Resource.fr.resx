@@ -1043,7 +1043,7 @@
     <value>Quotas de stockage et statistiques</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} par administrateur/utilisateur avancé et la possibilité d'augmenter l'espace de stockage sur demande</value>
+    <value>{0} par administrateur et la possibilité d'augmenter l'espace de stockage sur demande</value>
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Utilisateur désactivé</value>
@@ -1062,5 +1062,17 @@
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Échec de la définition du quota par utilisateur. La valeur saisie est supérieure à la capacité totale de stockage de DocSpace.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Ajoutez au moins un domaine de confiance.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Le nombre d'administrateurs dépasse la limite : {0}/{1}.</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Ajoutez au moins une adresse IP autorisée.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Sans but lucratif</value>
   </data>
 </root>

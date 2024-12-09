@@ -165,13 +165,13 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     IHttpClientFactory clientFactory,
     IHttpContextAccessor httpContextAccessor)
 {
-    public async Task<string> GetCallbackUrlAsync<T>(T fileId)
+    public string GetCallbackUrl<T>(T fileId)
     {
         var queryParams = HttpUtility.ParseQueryString(String.Empty);
 
         queryParams[FilesLinkUtility.Action] = "track";
         queryParams[FilesLinkUtility.FileId] = fileId.ToString();
-        queryParams[FilesLinkUtility.AuthKey] = await emailValidationKeyProvider.GetEmailKeyAsync(fileId.ToString());
+        queryParams[FilesLinkUtility.AuthKey] = emailValidationKeyProvider.GetEmailKey(fileId.ToString());
 
         if (httpContextAccessor?.HttpContext != null)
         {
@@ -185,14 +185,14 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         
         var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams}"); 
 
-        callbackUrl = await documentServiceConnector.ReplaceCommunityAddressAsync(callbackUrl);
+        callbackUrl = documentServiceConnector.ReplaceCommunityAddress(callbackUrl);
 
         return callbackUrl;
     }
 
     public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack, string token = null)
     {
-        var callbackUrl = await GetCallbackUrlAsync(fileId);
+        var callbackUrl = GetCallbackUrl(fileId);
 
         if (!string.IsNullOrEmpty(token))
         {
@@ -224,6 +224,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     await socketManager.StopEditAsync(fileId);
                 }
                 var fileDao = daoFactory.GetFileDao<T>();
+                var folderDao = daoFactory.GetFolderDao<T>();
                 var properties = await fileDao.GetProperties(fileId);
                 if(properties?.FormFilling != null)
                 {
@@ -232,7 +233,8 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     {
                         await fileDao.SaveProperties(fileForDeletion.Id, null);
                         await socketManager.DeleteFileAsync(fileForDeletion);
-                        await fileDao.DeleteFileAsync(fileForDeletion.Id);
+                        await folderDao.ChangeTreeFolderSizeAsync(fileForDeletion.ParentId, (-1) * fileForDeletion.ContentLength);
+                        await fileDao.DeleteFileAsync(fileForDeletion.Id, ASC.Core.Configuration.Constants.CoreSystem.ID);
                     }
                     else if(fileData.Status == TrackerStatus.MustSave)
                     {
@@ -292,7 +294,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             try
             {
-                file = await entryManager.TrackEditingAsync(fileId, userId, userId, await tenantManager.GetCurrentTenantIdAsync());
+                file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenantId());
             }
             catch (Exception e)
             {
@@ -315,13 +317,20 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         if (file != null && fileData.Actions != null && fileData.Actions.Any(r => r.Type == 1))
         {
-            if (Guid.TryParse(fileData.Actions.Last().UserId, out var userId))
+            if (Guid.TryParse(fileData.Actions.Last().UserId, out var userId) && userId != ASC.Core.Configuration.Constants.Guest.ID)
             {
-                await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
+                try
+                {
+                    await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
+                }
+                catch
+                { 
+                    // ignored
+                }
             }
 
             var parentFolder = file.IsForm ? await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId) : null;
-            if (parentFolder != null && parentFolder.FolderType == FolderType.FormFillingFolderInProgress)
+            if (parentFolder is { FolderType: FolderType.FormFillingFolderInProgress })
             {
                 var user = await userManager.GetUsersAsync(userId);
                 await filesMessageService.SendAsync(MessageAction.FormOpenedForFilling, file, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), file.Title);
@@ -372,7 +381,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             user = await userManager.GetUsersAsync(userId);
-            var culture = string.IsNullOrEmpty(user.CultureName) ? (await tenantManager.GetCurrentTenantAsync()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
+            var culture = string.IsNullOrEmpty(user.CultureName) ? (tenantManager.GetCurrentTenant()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
         }
@@ -529,7 +538,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             var user = await userManager.GetUsersAsync(userId);
-            var culture = string.IsNullOrEmpty(user.CultureName) ? (await tenantManager.GetCurrentTenantAsync()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
+            var culture = string.IsNullOrEmpty(user.CultureName) ? (tenantManager.GetCurrentTenant()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
 
@@ -544,7 +553,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             }
 
             var message = fileData.MailMerge.Message;
-            Stream attach = null;
+            MemoryStream attach = null;
             var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             switch (fileData.MailMerge.Type)
             {

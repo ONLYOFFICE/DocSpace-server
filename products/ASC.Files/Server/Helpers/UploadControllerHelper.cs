@@ -41,8 +41,7 @@ public class UploadControllerHelper(
     SecurityContext securityContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    FileChecker fileChecker,
-    IDistributedCache distributedCache)
+    FileChecker fileChecker)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -50,8 +49,7 @@ public class UploadControllerHelper(
         fileDtoHelper,
         fileStorageService,
         fileChecker,
-        httpContextAccessor,
-        distributedCache)
+        httpContextAccessor)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
@@ -109,7 +107,7 @@ public class UploadControllerHelper(
             };
         }
 
-        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(await tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
+        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(tenantManager.GetCurrentTenantId(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
 
         var httpClient = httpClientFactory.CreateClient();
 

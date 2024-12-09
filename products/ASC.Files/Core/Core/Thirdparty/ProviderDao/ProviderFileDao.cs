@@ -533,11 +533,11 @@ internal class ProviderFileDao(
         return fileDao.GetThumbnailAsync(file, width, height);
     }
 
-    public async Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    public async Task<int> SetCustomOrder(string fileId, string parentFolderId, int order)
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
-        await fileDao.SetCustomOrder(fileId, parentFolderId, order);
+        return await fileDao.SetCustomOrder(fileId, parentFolderId, order);
     }
 
     public async Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)

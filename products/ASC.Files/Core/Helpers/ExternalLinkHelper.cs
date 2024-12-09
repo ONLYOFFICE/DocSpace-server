@@ -46,6 +46,9 @@ public class ExternalLinkHelper(
             Status = Status.Invalid, 
             Access = FileShare.Restrict
         };
+        
+        var isAuth = securityContext.IsAuthenticated;
+        result.IsAuthenticated = isAuth;
 
         var data = await externalShare.ParseShareKeyAsync(key);
         var securityDao = daoFactory.GetSecurityDao<string>();
@@ -55,8 +58,6 @@ public class ExternalLinkHelper(
         {
             return result;
         }
-        
-        var isAuth = securityContext.IsAuthenticated;
 
         var status = await externalShare.ValidateRecordAsync(record, password, isAuth);
         result.Status = status;
@@ -102,8 +103,9 @@ public class ExternalLinkHelper(
         if (isAuth)
         {
             var userId = securityContext.CurrentAccount.ID;
+            var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(userId);
             
-            if (entry.CreateBy.Equals(userId) || await userManager.IsDocSpaceAdminAsync(userId))
+            if (entry.CreateBy.Equals(userId))
             {
                 result.Shared = true;
             }
@@ -111,13 +113,13 @@ public class ExternalLinkHelper(
             {
                 result.Shared = (entry switch
                 {
-                    FileEntry<int> entryInt => await fileSecurity.CanReadAsync(entryInt) && !entryInt.ShareRecord.IsLink,
-                    FileEntry<string> entryString => await fileSecurity.CanReadAsync(entryString) && !entryString.ShareRecord.IsLink,
+                    FileEntry<int> entryInt => await IsSharedAsync(entryInt, userId, isDocSpaceAdmin),
+                    FileEntry<string> entryString => await IsSharedAsync(entryString, userId, isDocSpaceAdmin),
                     _ => false
                 });
             }
 
-            if (!result.Shared && result.Status == Status.Ok)
+            if (!result.Shared && result.Status == Status.Ok && !isDocSpaceAdmin)
             {
                 result.Shared = entry switch
                 {
@@ -213,5 +215,11 @@ public class ExternalLinkHelper(
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+
+    private async Task<bool> IsSharedAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin)
+    {
+        var record = await fileSecurity.GetCurrentShareAsync(entry, userId, isDocSpaceAdmin);
+        return record != null && record.Share != FileShare.Restrict && !record.IsLink;
     }
 }

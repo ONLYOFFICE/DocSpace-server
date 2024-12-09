@@ -1055,12 +1055,15 @@
     <value>Úložné kvóty a statistiky</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} na správce/oprávněného uživatele a možnost přidat prostor na vyžádání</value>
+    <value>{0} na správce a možnost přidat prostor na vyžádání</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>Nepodařilo se nastavit kvótu na místnost. Zadaná hodnota je větší než celkové úložiště DocSpace.</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Nepodařilo se nastavit kvótu na uživatele. Zadaná hodnota je větší než celkové úložiště DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Počet správců překročil limit: {0}/{1}.</value>
   </data>
 </root>

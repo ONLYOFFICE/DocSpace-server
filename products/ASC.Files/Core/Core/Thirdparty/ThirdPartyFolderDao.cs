@@ -78,7 +78,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             return folder;
         }
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         folder.Shared = await Queries.SharedAsync(filesDbContext, tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
 
@@ -253,7 +253,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
     public async Task DeleteFolderAsync(string folderId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var folder = await dao.GetFolderAsync(folderId);
         var id = dao.MakeId(folder);
 
@@ -315,7 +315,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(folder), newId);
-    }
+        }
 
         return newId;
     }
@@ -455,7 +455,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(thirdFolder), newId);
-    }
+        }
 
         return newId;
     }
@@ -657,9 +657,9 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
-    public Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    public Task<int> SetCustomOrder(string folderId, string parentFolderId, int order)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(0);
     }
 
     public Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
@@ -694,6 +694,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
     {
         throw new NotImplementedException();
     }

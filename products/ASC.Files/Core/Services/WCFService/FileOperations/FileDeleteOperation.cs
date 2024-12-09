@@ -79,7 +79,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     private readonly bool _ignoreException;
     private readonly bool _immediately;
     private readonly bool _isEmptyTrash;
-    private readonly IDictionary<string, StringValues> _headers;
+    private readonly Dictionary<string, StringValues> _headers;
 
     public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
     : base(serviceProvider, fileOperationData)
@@ -363,7 +363,12 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 {
                     try
                     {
-                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner()));
+                        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
+                        var tagDao = daoFactory.GetTagDao<T>();
+                        var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
+                        var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
+
+                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.DeleteFileAsync(file.Id, fromRoomTag == null ? file.GetFileQuotaOwner() : ASC.Core.Configuration.Constants.CoreSystem.ID));
                         
                         var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
                         
@@ -378,7 +383,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             await folderDao.ChangeTreeFolderSizeAsync(_trashId, (-1) * file.ContentLength);
                         }
                         
-                        if (_headers != null)
+                        if (_headers is { Count: > 0 })
                         {
                             if (isNeedSendActions)
                             {

@@ -721,7 +721,7 @@ public class LdapUserImporter(
 
         string email = null;
 
-        if (!string.IsNullOrEmpty(Settings.MailAttribute) && !string.IsNullOrEmpty(ldapLogin.Domain) && login.Contains("@"))
+        if (!string.IsNullOrEmpty(Settings.MailAttribute) && !string.IsNullOrEmpty(ldapLogin.Domain) && login.Contains('@'))
         {
             email = ldapLogin.ToString();
             exps.Add(Expression.Equal(Settings.MailAttribute, email));

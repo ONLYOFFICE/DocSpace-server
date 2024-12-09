@@ -1099,7 +1099,7 @@
     <value>Պահպանման քվոտաներ և վիճակագրություն</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} յուրաքանչյուր ադմինիստրատորի/հզոր օգտատիրոջ համար և տարածք ավելացնելու հնարավորություն, հայտի դեպքում</value>
+    <value>{0} յուրաքանչյուր ադմինիստրատորի համար և տարածք ավելացնելու հնարավորություն, հայտի դեպքում</value>
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Օգտատերն անջատված է</value>
@@ -1121,5 +1121,11 @@
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Չհաջողվեց սահմանել յուրաքանչյուր օգտատիրոջ քվոտան: Մուտքագրված արժեքը մեծ է DocSpace-ի ընդհանուր պահեստից:</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Ավելացրեք առնվազն 1 վստահելի դոմեն:</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Ադմինիստրատորների թիվը գերազանցում է սահմանը՝ {0}/{1}:</value>
   </data>
 </root>

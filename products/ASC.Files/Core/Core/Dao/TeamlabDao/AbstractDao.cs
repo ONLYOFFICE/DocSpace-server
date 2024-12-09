@@ -64,16 +64,16 @@ public class AbstractDao
     }
 
 
-    protected async Task<IQueryable<T>> Query<T>(DbSet<T> set) where T : class, IDbFile
+    protected IQueryable<T> Query<T>(DbSet<T> set) where T : class, IDbFile
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         return set.Where(r => r.TenantId == tenantId);
     }
 
-    protected async Task<IQueryable<DbFile>> GetFileQuery(FilesDbContext filesDbContext, Expression<Func<DbFile, bool>> where)
+    protected IQueryable<DbFile> GetFileQuery(FilesDbContext filesDbContext, Expression<Func<DbFile, bool>> where)
     {
-        return (await Query(filesDbContext.Files))
+        return Query(filesDbContext.Files)
             .Where(where);
     }
     
@@ -221,7 +221,7 @@ public class AbstractDao
 
     internal async Task<int> SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, FileEntryType fileEntryType, int order = 0)
     {            
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var indexing = await filesDbContext.IsIndexingAsync(tenantId, parentFolderId, fileEntryType);
         
         if(!indexing)
@@ -244,7 +244,6 @@ public class AbstractDao
                 if (fileOrder.ParentFolderId == parentFolderId)
                 {
                     var currentOrder = fileOrder.Order;
-
                     if (currentOrder == order)
                     {
                         return currentOrder;
@@ -283,7 +282,7 @@ public class AbstractDao
     internal async Task InitCustomOrder(Dictionary<int, int> fileIds, int parentFolderId, FileEntryType entryType)
     {
         var ids = fileIds.Select(r => r.Key).ToList();
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using (await _distributedLockProvider.TryAcquireFairLockAsync(GetCustomOrderLockKey(tenantId, parentFolderId)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -322,7 +321,7 @@ public class AbstractDao
     
     internal async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId, FileEntryType fileEntryType)
     {        
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var fileOrder = await filesDbContext.GetFileOrderAsync(tenantId, fileId, fileEntryType);
         if (fileOrder != null)
         {

@@ -159,7 +159,7 @@ public abstract class BaseIndexer<T>(Client client,
 
                     if (data is ISearchItemDocument)
                     {
-                        b.Custom("document", ca => ca.Tokenizer(Analyzer.whitespace.ToString()).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
+                        b.Custom("document", ca => ca.Tokenizer(Analyzer.whitespace.ToStringFast()).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
                     }
 
                     return b;
@@ -170,8 +170,8 @@ public abstract class BaseIndexer<T>(Client client,
                     c.Map<T>(m => m.AutoMap())
                     .Settings(r => r.Analysis(a =>
                                     a.Analyzers(analyzers)
-                                    .CharFilters(d => d.HtmlStrip(CharFilter.html.ToString())
-                                    .Mapping(CharFilter.io.ToString(), m => m.Mappings("ё => е", "Ё => Е"))))));
+                                    .CharFilters(d => d.HtmlStrip(CharFilter.html.ToStringFast())
+                                    .Mapping(CharFilter.io.ToStringFast(), m => m.Mappings("ё => е", "Ё => Е"))))));
 
                 _isExist = true;
             }
@@ -390,17 +390,17 @@ public abstract class BaseIndexer<T>(Client client,
     {
         var func = expression.Compile();
         var selector = new Selector<T>(serviceProvider);
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = _tenantManager.GetCurrentTenant();
         var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
 
         return (await client.Instance.SearchAsync(descriptor.GetDescriptor(this, onlyId))).Documents;
     }
 
-    internal async Task<(IReadOnlyCollection<T>, long)> SelectWithTotalAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId)
+    internal (IReadOnlyCollection<T>, long) SelectWithTotal(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId)
     {
         var func = expression.Compile();
         var selector = new Selector<T>(serviceProvider);
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = _tenantManager.GetCurrentTenant();
         var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
         var result = client.Instance.Search(descriptor.GetDescriptor(this, onlyId));
         var total = result.Total;

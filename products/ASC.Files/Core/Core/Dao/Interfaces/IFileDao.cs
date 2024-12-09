@@ -341,12 +341,14 @@ public interface IFileDao<T>
 
     Task<EntryProperties<T>> GetProperties(T fileId);
 
+    Task<Dictionary<T, EntryProperties<T>>> GetPropertiesAsync(IEnumerable<T> filesIds);
+
     Task SaveProperties(T fileId, EntryProperties<T> entryProperties);
 
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
         bool withSubfolders = false, bool excludeSubject = false, T roomId = default);
 
-    Task SetCustomOrder(T fileId, T parentFolderId, int order);
+    Task<int> SetCustomOrder(T fileId, T parentFolderId, int order);
 
     Task InitCustomOrder(Dictionary<T, int> fileIds, T parentFolderId);
 

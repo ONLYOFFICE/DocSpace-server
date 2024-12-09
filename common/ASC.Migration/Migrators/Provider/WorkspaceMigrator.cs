@@ -178,10 +178,7 @@ public class WorkspaceMigrator : Migrator
 
     private void ParseAndUnionStorage(MigrationStorage newStorage, MigrationStorage destinationStorage, string key = "")
     {
-        if (destinationStorage == null)
-        {
-            throw new ArgumentNullException("destinationStorage is null");
-        }
+        ArgumentNullException.ThrowIfNull(destinationStorage);
 
         ParseStorage(newStorage, key);
 
@@ -209,7 +206,7 @@ public class WorkspaceMigrator : Migrator
         destinationStorage.Folders = destinationStorage.Folders.Union(newStorage.Folders).ToList();
     }
 
-    public async Task ParseUsersAsync(bool reportProgress, int count)
+    private async Task ParseUsersAsync(bool reportProgress, int count)
     {
         await using var stream = _dataReader.GetEntry("databases/core/core_user");
         var data = new DataTable();
@@ -237,13 +234,11 @@ public class WorkspaceMigrator : Migrator
                 }
             };
 
-            var drivePath = Directory.Exists(Path.Combine(_dataReader.GetFolder(), "userPhotos")) ?
-            Path.Combine(_dataReader.GetFolder(), "userPhotos") : null;
+            var drivePath = (Directory.Exists(Path.Combine(_dataReader.GetFolder(), "userPhotos")) 
+                                ? Path.Combine(_dataReader.GetFolder(), "userPhotos") 
+                                : null) ?? 
+                            (Directory.GetFiles(_dataReader.GetFolder()).Any(f=> Path.GetFileName(f).StartsWith("userPhotos")) ? _dataReader.GetFolder() : null);
 
-            if(drivePath == null)
-            {
-                drivePath = Directory.GetFiles(_dataReader.GetFolder()).Any(f=> Path.GetFileName(f).StartsWith("userPhotos")) ? _dataReader.GetFolder() : null;
-            }
             if (drivePath == null)
             {
                 u.HasPhoto = false;
@@ -270,15 +265,20 @@ public class WorkspaceMigrator : Migrator
                         u.PathToPhoto = Path.Combine(_dataReader.GetFolder(), $"{key}.{CommonPhotoManager.GetImgFormatName(format)}");
                         u.HasPhoto = true;
 
-                        using var fs = new FileStream(u.PathToPhoto, FileMode.Create);
-                        await fs.WriteAsync(bytes, 0, bytes.Length);
+                        await using var fs = new FileStream(u.PathToPhoto, FileMode.Create);
+                        await fs.WriteAsync(bytes, _cancellationToken);
                     }
                 }
             }
 
             u.Storage = new MigrationStorage { Type = FolderType.USER };
 
-            if (!(await UserManager.GetUserByEmailAsync(u.Info.Email)).Equals(Constants.LostUser))
+            var ascUser = await UserManager.GetUserByEmailAsync(u.Info.Email);
+            if (ascUser.Status == EmployeeStatus.Terminated)
+            {
+                continue;
+            }
+            if (!ascUser.Equals(Constants.LostUser))
             {
                 var user = MigrationInfo.ExistUsers.SingleOrDefault(eu => eu.Value.Info.Email == u.Info.Email);
                 if (user.Value == null)
@@ -307,18 +307,11 @@ public class WorkspaceMigrator : Migrator
         }
     }
 
-    public void ParseStorage(MigrationStorage storage, string createBy = "")
+    private void ParseStorage(MigrationStorage storage, string createBy = "")
     {
         //docker unzip filesfolder_... instend of files/folder... 
-        var folderFiles = _dataReader.GetDirectories("").Select(d => Path.GetFileName(d)).FirstOrDefault(d => d.StartsWith("files"));
-        if (folderFiles.Equals("files"))
-        {
-            folderFiles = "files/folder";
-        }
-        else
-        {
-            folderFiles = folderFiles.Split('_')[0];
-        }
+        var folderFiles = _dataReader.GetDirectories("").Select(Path.GetFileName).FirstOrDefault(d => d.StartsWith("files"));
+        folderFiles = folderFiles.Equals("files") ? "files/folder" : folderFiles.Split('_')[0];
 
         var rootFolders = new List<string>();
         using var streamFolders = _dataReader.GetEntry("databases/files/files_folder");
@@ -431,7 +424,7 @@ public class WorkspaceMigrator : Migrator
             foreach (var entry in folderTree)
             {
                 var id = int.Parse(entry.Key);
-                if (!storage.Folders.Any(f=> f.Id == id))
+                if (storage.Folders.All(f => f.Id != id))
                 {
                     remove.Add(entry.Key);
                 }
@@ -439,7 +432,7 @@ public class WorkspaceMigrator : Migrator
             var removeFolder = new List<MigrationFolder>();
             foreach(var entry in storage.Folders)
             {
-                if(entry.ParentId != 0 && !storage.Folders.Any(f=> f.Id == entry.ParentId))
+                if(entry.ParentId != 0 && storage.Folders.All(f => f.Id != entry.ParentId))
                 {
                     remove.Add(entry.Id.ToString());
                     removeFolder.Add(entry);
@@ -560,7 +553,7 @@ public class WorkspaceMigrator : Migrator
         }
     }
 
-    public void ParseGroup()
+    private void ParseGroup()
     {
         using var streamGroup = _dataReader.GetEntry("databases/core/core_group");
         var dataGroup = new DataTable();

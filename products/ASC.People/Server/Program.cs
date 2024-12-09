@@ -64,7 +64,7 @@ try
     startup.Configure(app, app.Environment);
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
-    await app.RunWithTasksAsync();
+    await app.RunWithTasksAsync(awaitTasks: false);
 }
 catch (Exception ex)
 {

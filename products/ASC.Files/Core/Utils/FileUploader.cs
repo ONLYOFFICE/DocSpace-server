@@ -248,7 +248,7 @@ public class FileUploader(
 
         uploadSession.Expired = uploadSession.Created + ChunkedUploadSessionHolder.SlidingExpiration;
         uploadSession.Location = filesLinkUtility.GetUploadChunkLocationUrl(uploadSession.Id);
-        uploadSession.TenantId = await tenantManager.GetCurrentTenantIdAsync();
+        uploadSession.TenantId = tenantManager.GetCurrentTenantId();
         uploadSession.UserId = authContext.CurrentAccount.ID;
         uploadSession.FolderId = folderId;
         uploadSession.CultureName = CultureInfo.CurrentUICulture.Name;

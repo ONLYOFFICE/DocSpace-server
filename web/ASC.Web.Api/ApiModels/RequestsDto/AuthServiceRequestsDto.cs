@@ -27,31 +27,38 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// Request parameters for authorization service
 /// </summary>
 public class AuthServiceRequestsDto
 {
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Description</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Description
+    /// </summary>
     public string Description { get; set; }
 
-    /// <summary>Instruction</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Instruction
+    /// </summary>
     public string Instruction { get; set; }
 
-    /// <summary>Specifies if the authentication service can be set or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the authentication service can be set or not
+    /// </summary>
     public bool CanSet { get; set; }
 
-    /// <summary>List of authorization keys</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Core.CookiesType.AuthKey}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of authorization keys
+    /// </summary>
     public List<AuthKey> Props { get; set; }
 
     public static async Task<AuthServiceRequestsDto> From(Consumer consumer)

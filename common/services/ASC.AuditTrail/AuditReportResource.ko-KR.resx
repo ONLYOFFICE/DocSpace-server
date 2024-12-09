@@ -861,4 +861,10 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>[{0}] 사용자. 제출된 양식: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>문서에 저장된 룸 인덱스 내보내기</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>초대장이 다시 전송되었습니다: {0}</value>
+  </data>
 </root>
