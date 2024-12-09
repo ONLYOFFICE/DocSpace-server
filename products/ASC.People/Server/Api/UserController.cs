@@ -1341,7 +1341,7 @@ public class UserController(
         {
             await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(id), Constants.Action_EditUser);
             var u = await _userManager.GetUsersAsync(id);
-            if (u.Id == Constants.LostUser.Id || u.IsLDAP())
+            if (u.Id == Constants.LostUser.Id)
             {
                 continue;
             }
