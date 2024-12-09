@@ -225,7 +225,7 @@ public class WhitelabelController(ApiContext apiContext,
 
             var result = new WhiteLabelItemDto
             {
-                Name = logoType.ToString(),
+                Name = logoType.ToStringFast(),
                 Size = TenantWhiteLabelSettings.GetSize(logoType)
             };
 
@@ -304,7 +304,7 @@ public class WhitelabelController(ApiContext apiContext,
         {
             var result = new IsDefaultWhiteLabelLogosDto
             {
-                Name = logoType.ToString(),
+                Name = logoType.ToStringFast(),
                 Default = tenantWhiteLabelSettings.GetIsDefault(logoType)
             };
 

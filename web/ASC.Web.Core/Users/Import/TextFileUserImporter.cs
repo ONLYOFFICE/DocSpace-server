@@ -101,7 +101,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
 
     private string[] GetDataFields(string line)
     {
-        var pattern = string.Format("{0}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))", Separator);
+        var pattern = $"{Separator}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))";
         var result = Regex.Split(line, pattern);
 
         //remove TextDelmiter

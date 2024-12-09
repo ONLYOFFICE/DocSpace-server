@@ -732,10 +732,10 @@ public class TenantWhiteLabelSettingsHelper(
     {
         if (CanBeDark(type))
         {
-            return $"{(dark ? "dark_" : "")}{type.ToString().ToLowerInvariant()}.{fileExt}";
+            return $"{(dark ? "dark_" : "")}{type.ToStringFast().ToLowerInvariant()}.{fileExt}";
         }
 
-        return $"{type.ToString().ToLowerInvariant()}.{fileExt}";
+        return $"{type.ToStringLowerFast()}.{fileExt}";
     }
 
     private static Size GetSize(WhiteLabelLogoType type)
