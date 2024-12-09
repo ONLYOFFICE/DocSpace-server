@@ -193,7 +193,7 @@ public class NotifyEngine(Context context,
         try
         {
             var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
-            var tenant = await tenantManager.GetCurrentTenantAsync(false);
+            var tenant = tenantManager.GetCurrentTenant(false);
             if (tenant == null)
             {
                 await tenantManager.SetCurrentTenantAsync(request._tenantId);
