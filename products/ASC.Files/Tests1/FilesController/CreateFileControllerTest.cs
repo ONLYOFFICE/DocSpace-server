@@ -42,6 +42,14 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
             new object[] { "test.xlsx" },
             new object[] { "test.pdf" },
         };
+    
+    public static IEnumerable<object[]> FolderTypesData =>
+        new List<object[]>
+        {
+            new object[] { FolderType.Archive },
+            new object[] { FolderType.TRASH },
+            new object[] { FolderType.VirtualRooms }
+        };
 
     [Theory]
     [MemberData(nameof(Data))]
@@ -83,26 +91,11 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
     }
     
-    [Fact]
-    public async Task CreateFile_FolderTrash_Owner_ReturnsOk()
+    [Theory]
+    [MemberData(nameof(FolderTypesData))]
+    public async Task CreateFile_SystemFolder_Owner_ReturnsOk(FolderType folderType)
     {
-        var createdFile = await CreateFile("test.docx", FolderType.TRASH, Initializer.Owner);
-
-        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
-    }
-    
-    [Fact]
-    public async Task CreateFile_FolderRooms_Owner_ReturnsOk()
-    {
-        var createdFile = await CreateFile("test.docx", FolderType.VirtualRooms, Initializer.Owner);
-
-        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
-    }
-    
-    [Fact]
-    public async Task CreateFile_FolderArchive_Owner_ReturnsOk()
-    {
-        var createdFile = await CreateFile("test.docx", FolderType.Archive, Initializer.Owner);
+        var createdFile = await CreateFile("test.docx", folderType, Initializer.Owner);
 
         createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
     }
