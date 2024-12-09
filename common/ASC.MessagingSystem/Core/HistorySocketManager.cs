@@ -58,11 +58,6 @@ public class HistorySocketManager(
                 );
         }
     }
-    
-    public void UpdateHistory(int tenantId, IEnumerable<DbFilesAuditReference> auditReference)
-    {
-        UpdateHistoryAsync(tenantId, auditReference).GetAwaiter().GetResult();
-    }
 
     private static string GetRoom(int tenantId, int entryId, int entryType)
     {

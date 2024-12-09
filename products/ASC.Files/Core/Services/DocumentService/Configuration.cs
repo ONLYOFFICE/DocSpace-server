@@ -173,7 +173,7 @@ public class DocumentConfig<T>(
     private string _key = string.Empty;
     private FileReferenceData _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
-    public InfoConfig<T> Info { get; set; } = infoConfig;
+    public InfoConfig<T> Info { get; } = infoConfig;
     public bool IsLinkedForMe { get; set; }
 
     public string Key

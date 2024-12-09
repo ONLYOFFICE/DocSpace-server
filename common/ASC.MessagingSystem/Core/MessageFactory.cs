@@ -27,13 +27,13 @@
 namespace ASC.MessagingSystem.Core;
 
 [Scope]
-public class MessageFactory(AuthContext authContext,
-        TenantManager tenantManager,
-        ILogger<MessageFactory> logger,
-        IHttpContextAccessor httpContextAccessor)
+public class MessageFactory(
+    AuthContext authContext,
+    TenantManager tenantManager,
+    ILogger<MessageFactory> logger,
+    IHttpContextAccessor httpContextAccessor)
 {
-    public EventMessage Create(HttpRequest request, string initiator, DateTime? dateTime, MessageAction action, MessageTarget target,
-        IEnumerable<FilesAuditReference> references = null, params string[] description)
+    public EventMessage Create(HttpRequest request, string initiator, DateTime? dateTime, MessageAction action, MessageTarget target, IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         try
         {
@@ -60,8 +60,7 @@ public class MessageFactory(AuthContext authContext,
         }
     }
 
-    public EventMessage Create(IDictionary<string, StringValues> headers, MessageAction action, MessageTarget target, 
-        IEnumerable<FilesAuditReference> references = null, params string[] description)
+    public EventMessage Create(IDictionary<string, StringValues> headers, MessageAction action, MessageTarget target, IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         try
         {
@@ -96,28 +95,6 @@ public class MessageFactory(AuthContext authContext,
         catch (Exception ex)
         {
             logger.ErrorWhileParseHttpMessage(action, ex);
-
-            return null;
-        }
-    }
-
-    public EventMessage Create(string initiator, MessageAction action, MessageTarget target, params string[] description)
-    {
-        try
-        {
-            return new EventMessage
-            {
-                Initiator = initiator,
-                Date = DateTime.UtcNow,
-                TenantId = tenantManager.GetCurrentTenantId(),
-                Action = action,
-                Description = description,
-                Target = target,
-            };
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorWhileParseInitiatorMessage(action, ex);
 
             return null;
         }

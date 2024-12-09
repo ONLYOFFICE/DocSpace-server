@@ -1096,7 +1096,7 @@ internal class SecurityDao(
         {
             return entry.FileEntryType is FileEntryType.File && 
                    await filesDbContext.IsPureSharedAsync(tenantId, entry.Id.ToString(), FileEntryType.File, subjectTypes);
-}
+        }
 
         if (entry.RootFolderType is not FolderType.VirtualRooms)
         {

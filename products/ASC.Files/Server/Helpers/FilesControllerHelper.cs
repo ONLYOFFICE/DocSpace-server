@@ -41,7 +41,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         FileConverter fileConverter,
         PathProvider pathProvider,
         FileChecker fileChecker,
-        IDistributedCache distributedCache,
         FillingFormResultDtoHelper fillingFormResultDtoHelper)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
@@ -49,8 +48,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             fileDtoHelper,
             fileStorageService,
             fileChecker,
-            httpContextAccessor,
-            distributedCache)
+            httpContextAccessor)
     {
     private readonly ILogger _logger = logger;
 

@@ -90,7 +90,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
             await _persistentConnection.TryConnectAsync();
         }
 
-        using var channel = await _persistentConnection.CreateModelAsync();
+        await using var channel = await _persistentConnection.CreateModelAsync();
 
         await channel.QueueUnbindAsync(queue: _queueName,
             exchange: EXCHANGE_NAME,
@@ -124,7 +124,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
         _logger.TraceCreatingRabbitMQChannel(@event.Id, eventName);
 
-        using var channel = await _persistentConnection.CreateModelAsync();
+        await using var channel = await _persistentConnection.CreateModelAsync();
 
         _logger.TraceDeclaringRabbitMQChannel(@event.Id);
 

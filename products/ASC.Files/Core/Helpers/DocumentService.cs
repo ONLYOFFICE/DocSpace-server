@@ -621,7 +621,8 @@ public static class DocumentService
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
         public required string Url { get; set; }
         public required string Region { get; set; }
-        public WatermarkOnDraw Watermark { get; set; }        public string Token { get; set; }
+        public WatermarkOnDraw Watermark { get; set; }        
+        public string Token { get; set; }
         public PdfData Pdf { get; set; }
 
     }

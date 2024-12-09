@@ -206,7 +206,7 @@ public class WorkspaceMigrator : Migrator
         destinationStorage.Folders = destinationStorage.Folders.Union(newStorage.Folders).ToList();
     }
 
-    public async Task ParseUsersAsync(bool reportProgress, int count)
+    private async Task ParseUsersAsync(bool reportProgress, int count)
     {
         await using var stream = _dataReader.GetEntry("databases/core/core_user");
         var data = new DataTable();
@@ -307,7 +307,7 @@ public class WorkspaceMigrator : Migrator
         }
     }
 
-    public void ParseStorage(MigrationStorage storage, string createBy = "")
+    private void ParseStorage(MigrationStorage storage, string createBy = "")
     {
         //docker unzip filesfolder_... instend of files/folder... 
         var folderFiles = _dataReader.GetDirectories("").Select(Path.GetFileName).FirstOrDefault(d => d.StartsWith("files"));
@@ -553,7 +553,7 @@ public class WorkspaceMigrator : Migrator
         }
     }
 
-    public void ParseGroup()
+    private void ParseGroup()
     {
         using var streamGroup = _dataReader.GetEntry("databases/core/core_group");
         var dataGroup = new DataTable();
