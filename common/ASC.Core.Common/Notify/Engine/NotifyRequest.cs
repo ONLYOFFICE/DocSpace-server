@@ -95,6 +95,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
 
         var newRequest = new NotifyRequest(options, _notifySource, NotifyAction, ObjectID, recipient)
         {
+            _tenantId = _tenantId,
             _senderNames = _senderNames,
             _patterns = _patterns,
             Arguments = [..Arguments],
