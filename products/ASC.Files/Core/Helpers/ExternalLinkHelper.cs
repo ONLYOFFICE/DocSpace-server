@@ -46,6 +46,9 @@ public class ExternalLinkHelper(
             Status = Status.Invalid, 
             Access = FileShare.Restrict
         };
+        
+        var isAuth = securityContext.IsAuthenticated;
+        result.IsAuthenticated = isAuth;
 
         var data = await externalShare.ParseShareKeyAsync(key);
         var securityDao = daoFactory.GetSecurityDao<string>();
@@ -55,8 +58,6 @@ public class ExternalLinkHelper(
         {
             return result;
         }
-        
-        var isAuth = securityContext.IsAuthenticated;
 
         var status = await externalShare.ValidateRecordAsync(record, password, isAuth);
         result.Status = status;

@@ -199,7 +199,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.ShareKey, token);
         }
 
-        return await documentServiceConnector.CommandAsync(CommandMethod.Info, docKeyForTrack, fileId, null);
+        return await documentServiceConnector.CommandAsync(CommandMethod.Info, docKeyForTrack, fileId, callbackUrl);
     }
 
     public async Task<TrackResponse> ProcessDataAsync<T>(T fileId, TrackerData fileData, string fillingSessionId)

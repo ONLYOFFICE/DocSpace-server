@@ -104,7 +104,13 @@ public partial class SettingsController(MessageService messageService,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
             ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager),
-            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !(await tenantManager.GetCurrentTenantQuotaAsync()).Branding
+            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !(await tenantManager.GetCurrentTenantQuotaAsync()).Branding,
+            DeepLink = new DeepLinkDto
+            {
+                AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",
+                Url = configuration["deeplink:url"] ?? "",
+                IosPackageId = configuration["deeplink:iospackageid"] ?? ""
+            }
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
@@ -140,13 +146,6 @@ public partial class SettingsController(MessageService messageService,
                 AppId = configuration["firebase:appId"] ?? "",
                 MeasurementId = configuration["firebase:measurementId"] ?? "",
                 DatabaseURL = configuration["firebase:databaseURL"] ?? ""
-            };
-
-            settings.DeepLink = new DeepLinkDto
-            {
-                AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",
-                Url = configuration["deeplink:url"] ?? "",
-                IosPackageId = configuration["deeplink:iospackageid"] ?? ""
             };
 
             settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);

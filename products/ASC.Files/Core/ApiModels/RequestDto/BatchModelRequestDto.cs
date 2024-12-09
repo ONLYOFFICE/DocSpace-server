@@ -61,7 +61,14 @@ public class DownloadRequestDto : BaseBatchRequestDto
     /// <summary>
     /// List of file IDs which will be converted
     /// </summary>
-    public IEnumerable<ItemKeyValuePair<JsonElement, string>> FileConvertIds { get; set; } = new List<ItemKeyValuePair<JsonElement, string>>();
+    public IEnumerable<DownloadRequestItemDto> FileConvertIds { get; set; } = new List<DownloadRequestItemDto>();
+}
+
+public class DownloadRequestItemDto
+{
+    public JsonElement Key { get; init; }
+    public string Value { get; init; }
+    public string Password { get; init; }
 }
 
 /// <summary>

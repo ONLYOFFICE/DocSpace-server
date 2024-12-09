@@ -1802,6 +1802,25 @@ internal class FileDao(
         return data != null ? EntryProperties<int>.Deserialize(data, logger) : null;
     }
 
+    public async Task<Dictionary<int, EntryProperties<int>>> GetPropertiesAsync(IEnumerable<int> filesIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var properties = await filesDbContext.FilesPropertiesAsync(tenantId, filesIds.Select(f => f.ToString())).ToListAsync();
+        
+        var propertiesMap = new Dictionary<int, EntryProperties<int>>(properties.Count);
+        foreach (var property in properties)
+        {
+            if (int.TryParse(property.EntryId, out var id))
+            {
+                propertiesMap.TryAdd(id, EntryProperties<int>.Deserialize(property.Data, logger));
+            }
+        }
+
+        return propertiesMap;
+    }
+
     public async Task SaveProperties(int fileId, EntryProperties<int> entryProperties)
     {
         string data;

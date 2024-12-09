@@ -206,7 +206,7 @@ public class LicenseReader(
 
     private DateTime Validate(License license)
     {
-        var invalidLicenseType = _licenseType == LicenseType.Enterprise ? license.Customization : !license.Customization;
+        var invalidLicenseType = _licenseType == LicenseType.Enterprise ? license.Developer : !license.Developer;
 
         if (string.IsNullOrEmpty(license.CustomerId)
             || string.IsNullOrEmpty(license.Signature)
