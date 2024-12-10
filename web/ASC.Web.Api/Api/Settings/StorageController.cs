@@ -223,7 +223,7 @@ public class StorageController(ILoggerProvider option,
 
         await encryptionSettingsHelper.SaveAsync(settings);
 
-        await eventBus.PublishAsync(new EncryptionDataStorageRequestedIntegrationEvent
+        await eventBus.PublishAsync(new DataStorageEncryptionIntegrationEvent
         (
               encryptionSettings: new EncryptionSettings
               {
