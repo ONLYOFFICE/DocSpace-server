@@ -286,7 +286,7 @@ public class FileTrackerHelper
                 var docKey = await helper.GetDocKeyAsync(file);
                 using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}") }))
                 {
-                    if (await tracker.StartTrackAsync(fileId.ToString(), docKey, token))
+                    if (await tracker.StartTrackAsync(fileId.ToString(), docKey, token, suppressedErrors: [ErrorTypes.DocumentIdError]))
                     {
                         await SetTrackerAsync(fileId, fileTracker);
                     }

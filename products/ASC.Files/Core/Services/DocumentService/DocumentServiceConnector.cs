@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Amazon.Runtime;
+
 using Microsoft.Net.Http.Headers;
 
 namespace ASC.Web.Files.Services.DocumentService;
@@ -88,7 +90,8 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                                object fileId = null,
                                string callbackUrl = null,
                                string[] users = null,
-                               MetaData meta = null)
+                               MetaData meta = null,
+                               IEnumerable<ErrorTypes> suppressedErrors = null)
     {
         logger.DebugDocServiceCommand(method.ToStringFast(), fileId.ToString(), docKeyForTrack, callbackUrl, users != null ? string.Join(", ", users) : "null", JsonConvert.SerializeObject(meta));
         
@@ -109,8 +112,11 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
             {
                 return true;
             }
-
-            logger.ErrorDocServiceCommandResponse(commandResponse.Error, commandResponse.ErrorString);
+            
+            if (suppressedErrors == null || !suppressedErrors.Contains(commandResponse.Error))
+            { 
+                logger.ErrorDocServiceCommandResponse(commandResponse.Error, commandResponse.ErrorString);
+            }
         }
         catch (Exception e)
         {
