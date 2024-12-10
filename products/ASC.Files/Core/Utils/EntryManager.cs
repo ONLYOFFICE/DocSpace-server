@@ -202,6 +202,58 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
             folder.IsFavorite = true;
         }
     }
+    
+    public async Task SetFormInfoAsync<T>(IEnumerable<File<T>> files)
+    {
+        if (!files.Any())
+        {
+            return;
+}
+
+        var pdfs = new List<File<T>>();
+
+        foreach (var file in files)
+        {
+            var extension = FileUtility.GetFileExtension(file.Title);
+            var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+            if (fileType != FileType.Pdf)
+            {
+                continue;
+            }
+
+            if (!file.ProviderEntry)
+            {
+                pdfs.Add(file);
+            }
+            else
+            {
+                file.FormInfo = FormInfo<T>.Empty;
+            }
+        }
+        
+        if (pdfs.Count == 0)
+        {
+            return;
+        }
+        
+        var linkDao = daoFactory.GetLinkDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        
+        var ids = pdfs.Select(f => f.Id);
+        
+        var linkedIdsMap = await linkDao.GetLinkedIdsAsync(ids);
+        var entryPropertiesMap = await fileDao.GetPropertiesAsync(ids);
+
+        foreach (var pdf in pdfs)
+        {
+            pdf.FormInfo = new FormInfo<T>
+            {
+                LinkedId = linkedIdsMap.GetValueOrDefault(pdf.Id), 
+                Properties = entryPropertiesMap.GetValueOrDefault(pdf.Id)
+            };
+        }
+    }
 }
 
 [Scope]
@@ -316,7 +368,7 @@ public class EntryManager(IDaoFactory daoFactory,
             }
         }
         
-        var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, new string[] {});
+        var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, Array.Empty<string>());
         
         if (parent.FolderType == FolderType.SHARE)
         {
@@ -405,7 +457,6 @@ public class EntryManager(IDaoFactory daoFactory,
             var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId);
             var filesToUpdate = new List<File<T>>();
             
-
             if (room is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
             {
                 orderBy.SortedBy = SortedByType.CustomOrder;
@@ -508,10 +559,12 @@ public class EntryManager(IDaoFactory daoFactory,
             }
 
             var fileStatusTask = entryStatusManager.SetFileStatusAsync(filesToUpdate);
+            var formInfoTask = entryStatusManager.SetFormInfoAsync(filesToUpdate);
+            
             var tagsNewTask = fileMarker.SetTagsNewAsync(parent, entries);
             var originsTask = SetOriginsAsync(parent, entries);
 
-            await Task.WhenAll(fileStatusTask, tagsNewTask, originsTask);
+            await Task.WhenAll(fileStatusTask, tagsNewTask, originsTask, formInfoTask);
 
             total = await allFoldersCountTask + await allFilesCountTask;
 
@@ -627,7 +680,10 @@ public class EntryManager(IDaoFactory daoFactory,
         var t2 = entryStatusManager.SetIsFavoriteFoldersAsync(internalFolders);
         var t3 = entryStatusManager.SetFileStatusAsync(thirdPartyFiles);
         var t4 = entryStatusManager.SetIsFavoriteFoldersAsync(thirdPartyFolders);
-        await Task.WhenAll(t1, t2, t3, t4);
+        var t5 = entryStatusManager.SetFormInfoAsync(internalFiles);
+        var t6 = entryStatusManager.SetFormInfoAsync(thirdPartyFiles);
+
+        await Task.WhenAll(t1, t2, t3, t4, t5, t6);
 
         return (data, total);
 
@@ -1500,7 +1556,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         var resultFolder = await folderDao.GetFolderAsync(origProperties.FormFilling.ResultsFolderId);
                         var resultFile = await fileDao.GetFileAsync(origProperties.FormFilling.ResultsFileID);
 
-                        if (resultFolder == null || resultFolder.FolderType != FolderType.FormFillingFolderDone)
+                        if (resultFolder is not { FolderType: FolderType.FormFillingFolderDone })
                         {
                             logger.LogDebug("Result folder: {Folder} not found.", origProperties.FormFilling.ResultsFolderId);
 
@@ -1523,7 +1579,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         var sourceTitle = Path.GetFileNameWithoutExtension(file.Title);
 
                         var pdfFile = serviceProvider.GetService<File<T>>();
-                        pdfFile.Title = $"{origProperties.FormFilling.ResultFormNumber} - {sourceTitle} ({$"{tenantUtil.DateTimeNow().ToString("dd-MM-yyyy H-mm")}"}){ext}";
+                        pdfFile.Title = $"{origProperties.FormFilling.ResultFormNumber} - {sourceTitle} ({tenantUtil.DateTimeNow():dd-MM-yyyy H-mm}){ext}";
                         pdfFile.ParentId = origProperties.FormFilling.ResultsFolderId;
                         pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
                         pdfFile.Category = (int)FilterType.Pdf;
@@ -2060,6 +2116,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         await InitFormFillingProperties(folder.Id, Path.GetFileNameWithoutExtension(file.Title), file.Id, inProcessFormFolderId, readyFormFolderId, folder.CreateBy, properties, fileDao, folderDao);
     }
+    
     public async Task<(T readyFormFolderId, T inProcessFolderId)> InitSystemFormFillingFolders<T>(T formFillingRoomId, IFolderDao<T> folderDao, Guid createBy)
     {
         var readyFormFolder = serviceProvider.GetService<Folder<T>>();
@@ -2081,6 +2138,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         return (await readyFormFolderTask, await inProcessFolderTask);
     }
+    
     private async Task<T> CreateFormFillingFolder<T>(string sourceTitle, T parentId, FolderType folderType, Guid createBy, IFolderDao<T> folderDao)
     {
         var folder = serviceProvider.GetService<Folder<T>>();
@@ -2091,6 +2149,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         return await folderDao.SaveFolderAsync(folder);
     }
+    
     private async Task<T> CreateCsvResult<T>(T resultsFolderId, Guid createBy, string sourceTitle, IFileDao<T> fileDao)
     {
         using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(""));
@@ -2103,6 +2162,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         return file.Id;
     }
+    
     private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
     {
         var templatesFolderTask = CreateFormFillingFolder(sourceTitle, inProcessFormFolderId, FolderType.FormFillingFolderInProgress, createBy, folderDao);
@@ -2125,8 +2185,9 @@ public class EntryManager(IDaoFactory daoFactory,
         await fileDao.SaveProperties(sourceFileId, properties);
 
         return properties;
-        }
-    private async Task SetOriginsAsync(IFolder parent, IEnumerable<FileEntry> entries)
+    }
+    
+    private async Task SetOriginsAsync<T>(Folder<T> parent, IEnumerable<FileEntry> entries)
     {
         if (parent.FolderType != FolderType.TRASH || !entries.Any())
         {

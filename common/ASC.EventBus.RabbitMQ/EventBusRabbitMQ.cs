@@ -90,7 +90,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
             await _persistentConnection.TryConnectAsync();
         }
 
-        using var channel = await _persistentConnection.CreateModelAsync();
+        await using var channel = await _persistentConnection.CreateModelAsync();
 
         await channel.QueueUnbindAsync(queue: _queueName,
             exchange: EXCHANGE_NAME,
@@ -124,7 +124,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
         _logger.TraceCreatingRabbitMQChannel(@event.Id, eventName);
 
-        using var channel = await _persistentConnection.CreateModelAsync();
+        await using var channel = await _persistentConnection.CreateModelAsync();
 
         _logger.TraceDeclaringRabbitMQChannel(@event.Id);
 
@@ -411,7 +411,10 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
     {
         var eventType = _subsManager.GetEventTypeByName(eventName);
 
-        if (eventType == null) return null;
+        if (eventType == null)
+        {
+            return null;
+        }
 
         var integrationEvent = (IntegrationEvent)_serializer.Deserialize(serializedMessage, eventType);
 
@@ -420,7 +423,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
     private void PreProcessEvent(IntegrationEvent @event)
     {
-        if (_rejectedEvents.Count == 0)
+        if (_rejectedEvents.IsEmpty)
         {
             return;
         }

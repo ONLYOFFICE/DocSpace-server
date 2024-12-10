@@ -341,6 +341,8 @@ public interface IFileDao<T>
 
     Task<EntryProperties<T>> GetProperties(T fileId);
 
+    Task<Dictionary<T, EntryProperties<T>>> GetPropertiesAsync(IEnumerable<T> filesIds);
+
     Task SaveProperties(T fileId, EntryProperties<T> entryProperties);
 
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 

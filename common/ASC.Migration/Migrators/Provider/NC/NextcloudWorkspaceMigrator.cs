@@ -462,7 +462,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                         {
                             Id = entry.FileId,
                             Level = j++,
-                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/',split[0..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
+                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/',split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
                             Title = split.Last()
                         };
                         user.Storage.Folders.Add(folder);
@@ -478,7 +478,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                             Id = entry.FileId,
                             Path = tmpPath,
                             Title = split.Last(),
-                            Folder = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/', split[0..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey)
+                            Folder = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/', split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey)
                         };
                         user.Storage.Files.Add(file);
                         AddShare(user, entry, true);

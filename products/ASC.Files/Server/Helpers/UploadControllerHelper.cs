@@ -41,8 +41,7 @@ public class UploadControllerHelper(
     SecurityContext securityContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    FileChecker fileChecker,
-    IDistributedCache distributedCache)
+    FileChecker fileChecker)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -50,8 +49,7 @@ public class UploadControllerHelper(
         fileDtoHelper,
         fileStorageService,
         fileChecker,
-        httpContextAccessor,
-        distributedCache)
+        httpContextAccessor)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {

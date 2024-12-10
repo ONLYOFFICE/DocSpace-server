@@ -79,7 +79,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     private readonly bool _ignoreException;
     private readonly bool _immediately;
     private readonly bool _isEmptyTrash;
-    private readonly IDictionary<string, StringValues> _headers;
+    private readonly Dictionary<string, StringValues> _headers;
 
     public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
     : base(serviceProvider, fileOperationData)
@@ -383,7 +383,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             await folderDao.ChangeTreeFolderSizeAsync(_trashId, (-1) * file.ContentLength);
                         }
                         
-                        if (_headers != null && _headers.Count > 0)
+                        if (_headers is { Count: > 0 })
                         {
                             if (isNeedSendActions)
                             {

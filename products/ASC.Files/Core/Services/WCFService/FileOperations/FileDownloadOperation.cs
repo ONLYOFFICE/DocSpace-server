@@ -53,7 +53,7 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
     public string BaseUri { get; init; }
 }
 
-public record FilesDownloadOperationItem<T>(T Id, string Ext);
+public record FilesDownloadOperationItem<T>(T Id, string Ext, string Password);
 
 [Transient]
 public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>(serviceProvider)
@@ -215,14 +215,14 @@ public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFi
 
 class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 {
-    private readonly Dictionary<T, string> _files;
+    private readonly Dictionary<T, (string, string)> _files;
     private readonly IDictionary<string, StringValues> _headers;
     private ItemNameValueCollection<T> _entriesPathId;
 
     public FileDownloadOperation(IServiceProvider serviceProvider, FileDownloadOperationData<T> fileDownloadOperationData)
         : base(serviceProvider, fileDownloadOperationData)
     {
-        _files = fileDownloadOperationData.FilesDownload?.ToDictionary(r => r.Id, r => r.Ext) ?? new Dictionary<T, string>();
+        _files = fileDownloadOperationData.FilesDownload?.ToDictionary(r => r.Id, r => (r.Ext, r.Password)) ?? new Dictionary<T, (string, string)>();
         _headers = fileDownloadOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         this[OpType] = (int)FileOperationType.Download;
     }
@@ -258,9 +258,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         foreach (var file in filesForSend)
         {
             var key = file.Id;
-            if (_files.TryGetValue(key, out var value) && !string.IsNullOrEmpty(value))
+            if (_files.TryGetValue(key, out var value) && !string.IsNullOrEmpty(value.Item1))
             {
-                await filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, value);
+                await filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, value.Item1);
             }
             else
             {
@@ -285,16 +285,16 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         var fileExt = FileUtility.GetFileExtension(title);
         var extsConvertible = await fileUtility.GetExtsConvertibleAsync();
-        var convertible = extsConvertible.TryGetValue(fileExt, out var convertibleToExt);
+        var convertible = extsConvertible.TryGetValue(fileExt, out _);
 
         if (convertible && await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
         {
-            _files[file.Id] = FileUtility.WatermarkedDocumentExt;
+            _files[file.Id] = (FileUtility.WatermarkedDocumentExt, _files[file.Id].Item2);
         }
 
-        if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
+        if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt.Item1))
         {
-            title = FileUtility.ReplaceFileExtension(title, convertToExt);
+            title = FileUtility.ReplaceFileExtension(title, convertToExt.Item1);
         }
 
         var entriesPathId = new ItemNameValueCollection<T>();
@@ -396,8 +396,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var fileConverter = scope.ServiceProvider.GetService<FileConverter>();
         var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
 
-        using ICompress compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
+        using var compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
         await compressTo.SetStream(stream);
+        string error = null;
 
         foreach (var path in _entriesPathId.AllKeys)
         {
@@ -419,6 +420,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                 File<T> file = null;
                 var convertToExt = string.Empty;
+                var password = string.Empty;
 
                 if (!Equals(entryId, default(T)))
                 {
@@ -431,8 +433,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                         continue;
                     }
 
-                    if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
+                    if (_files.TryGetValue(file.Id, out var convertData) && !string.IsNullOrEmpty(convertData.Item1))
                     {
+                        (convertToExt, password) = convertData;
                         var sourceFileName = Path.GetFileName(path);
                         var targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
                         newTitle = path.Replace(sourceFileName, targetFileName);
@@ -458,23 +461,29 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     await compressTo.CreateEntry(newTitle, file.ModifiedOn);
                     try
                     {
-                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ?
-                            await fileConverter.ExecAsync(file, convertToExt) :
+                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ? 
+                            await fileConverter.ExecAsync(file, convertToExt, password) : 
                             await fileDao.GetFileStreamAsync(file);
-                        
+
                         var t = Task.Run(async () => await compressTo.PutStream(readStream));
-                            
+
                         while (!t.IsCompleted)
                         {
                             await PublishChanges();
                             await Task.Delay(100);
                         }
-                        
+
                         await compressTo.CloseEntry();
+                    }
+                    catch (Exception ex) when(ex.InnerException is DocumentServiceException { Code: DocumentServiceException.ErrorCode.ConvertPassword })
+                    {
+                        error += $"{entryId}_password:";
+
+                        Logger.ErrorWithException(ex);
                     }
                     catch (Exception ex)
                     {
-                        this[Err] = ex.Message;
+                        error += ex.Message;
 
                         Logger.ErrorWithException(ex);
                     }
@@ -500,6 +509,13 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
             await ProgressStep();
         }
+
+        if (!string.IsNullOrEmpty(error))
+        {
+            this[Err] = error;
+            await PublishChanges();
+        }
+        
     }
     
     internal async Task<string> GetFileAsync(Stream stream, IServiceScope scope)
@@ -529,6 +545,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         File<T> file = null;
         var convertToExt = string.Empty;
+        var password = string.Empty;
 
         if (!Equals(entryId, default(T)))
         {
@@ -541,8 +558,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                 return null;
             }
 
-            if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
+            if (_files.TryGetValue(file.Id, out var convertData) && !string.IsNullOrEmpty(convertData.Item1))
             {
+                (convertToExt, password) = convertData;
                 var sourceFileName = Path.GetFileName(path);
                 var targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
                 newTitle = path.Replace(sourceFileName, targetFileName);
@@ -554,7 +572,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             try
             {
                 await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ?
-                    await fileConverter.ExecAsync(file, convertToExt) :
+                    await fileConverter.ExecAsync(file, convertToExt, password) :
                     await fileDao.GetFileStreamAsync(file);
                 
                 await readStream.CopyToAsync(stream);

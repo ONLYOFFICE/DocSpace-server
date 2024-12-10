@@ -253,7 +253,7 @@ public class FileTrackerHelper
         {
             try
             {
-                if (fileTracker.EditingBy == null || fileTracker.EditingBy.Count == 0)
+                if (fileTracker.EditingBy == null || fileTracker.EditingBy.IsEmpty)
                 {
                     return;
                 }

@@ -115,7 +115,7 @@ public class SsoHandlerService
     {
         try
         {
-            if (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString()) && !_coreBaseSettings.Standalone)
+            if (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToStringFast()) && !_coreBaseSettings.Standalone)
             {
                 throw new SSOException("Single sign-on settings are disabled", MessageKey.SsoSettingsDisabled);
             }

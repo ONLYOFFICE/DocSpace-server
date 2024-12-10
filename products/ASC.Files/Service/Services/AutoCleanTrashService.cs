@@ -40,24 +40,31 @@ public class AutoCleanTrashService(
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        List<TenantUserSettings> activeTenantsUsers;
-
-        await using (var scope = _scopeFactory.CreateAsyncScope())
+        try
         {
-            await using var userDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<UserDbContext>>().CreateDbContextAsync(stoppingToken);
-            activeTenantsUsers = await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(stoppingToken);
-        }
+            List<TenantUserSettings> activeTenantsUsers;
 
-        if (activeTenantsUsers.Count == 0)
+            await using (var scope = _scopeFactory.CreateAsyncScope())
+            {
+                await using var userDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<UserDbContext>>().CreateDbContextAsync(stoppingToken);
+                activeTenantsUsers = await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(stoppingToken);
+            }
+
+            if (activeTenantsUsers.Count == 0)
+            {
+                return;
+            }
+
+            logger.InfoFoundUsers(activeTenantsUsers.Count);
+
+            await Parallel.ForEachAsync(activeTenantsUsers,
+                new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
+                DeleteFilesAndFoldersAsync);
+        }
+        catch (Exception e)
         {
-            return;
+            logger.ErrorWithException(e);
         }
-
-        logger.InfoFoundUsers(activeTenantsUsers.Count);
-
-        await Parallel.ForEachAsync(activeTenantsUsers,
-                                    new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
-                                    DeleteFilesAndFoldersAsync);
     }
 
     private async ValueTask DeleteFilesAndFoldersAsync(TenantUserSettings tenantUser, CancellationToken cancellationToken)

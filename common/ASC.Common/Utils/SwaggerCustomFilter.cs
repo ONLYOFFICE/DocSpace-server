@@ -221,7 +221,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
             if (enumDataString.Count > 0)
             {
-                result.OneOf = new List<OpenApiSchema>()
+                result.OneOf = new List<OpenApiSchema>
                 {
                     new()
                     {

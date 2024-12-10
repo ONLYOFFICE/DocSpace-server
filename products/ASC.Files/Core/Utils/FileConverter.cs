@@ -379,7 +379,7 @@ public class FileConverter(
             {
                 throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
             }
-            }
+        }
 
         var fileUri = pathProvider.GetFileStreamUrl(file);
         var fileExtension = file.ConvertedExtension;

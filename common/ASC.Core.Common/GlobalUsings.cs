@@ -54,7 +54,6 @@ global using Amazon.Runtime;
 global using Amazon.SimpleEmail;
 global using Amazon.SimpleEmail.Model;
 global using ASC.Api.Core.Extensions;
-global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Models;
 global using ASC.Collections;
 global using ASC.Common;

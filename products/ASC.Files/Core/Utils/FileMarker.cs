@@ -105,7 +105,8 @@ public class FileMarker(
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     FileMarkerCache fileMarkerCache,
     IDistributedLockProvider distributedLockProvider,
-    FileMarkerHelper fileMarkerHelper)
+    FileMarkerHelper fileMarkerHelper,
+    EntryStatusManager entryStatusManager)
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
     private const string LockKey = "file_marker";
@@ -655,26 +656,26 @@ public class FileMarker(
         await SendChangeNoticeAsync(updateTags.Concat(toRemove).ToList(), socketManager);
     }
 
-    private async Task UpdateRemoveTags<TFolder>(FileEntry<TFolder> folder, Guid userId, int valueNew, ICollection<Tag> updateTags,  ICollection<Tag> removeTags)
-        {
+    private async Task UpdateRemoveTags<TFolder>(FileEntry<TFolder> folder, Guid userId, int valueNew, List<Tag> updateTags,  List<Tag> removeTags)
+    {
         var tagDao = daoFactory.GetTagDao<TFolder>();
         var newTags = tagDao.GetNewTagsAsync(userId, folder);
-            var parentTag = await newTags.FirstOrDefaultAsync();
+        var parentTag = await newTags.FirstOrDefaultAsync();
 
-            if (parentTag != null)
+        if (parentTag != null)
+        {
+            parentTag.Count -= valueNew;
+
+            if (parentTag.Count > 0)
             {
-                parentTag.Count -= valueNew;
-
-                if (parentTag.Count > 0)
-                {
-                    updateTags.Add(parentTag);
-                }
-                else
-                {
-                    removeTags.Add(parentTag);
-                }
+                updateTags.Add(parentTag);
+            }
+            else
+            {
+                removeTags.Add(parentTag);
             }
         }
+    }
 
     public async Task RemoveMarkAsNewForAllAsync<T>(FileEntry<T> fileEntry)
     {
@@ -972,10 +973,12 @@ public class FileMarker(
         var filesTags = tags.Where(t => t.EntryType == FileEntryType.File).ToDictionary(t => (T)t.EntryId);
         var foldersTags = tags.Where(t => t.EntryType == FileEntryType.Folder).ToDictionary(t => (T)t.EntryId);
 
-        var files = fileDao.GetFilesAsync(filesTags.Keys);
-        var folders = folderDao.GetFoldersAsync(foldersTags.Keys);
+        var files = await fileDao.GetFilesAsync(filesTags.Keys).ToListAsync();
+        var folders = await folderDao.GetFoldersAsync(foldersTags.Keys).ToListAsync();
 
-        await foreach (var file in files)
+        await entryStatusManager.SetFormInfoAsync(files);
+
+        foreach (var file in files)
         {
             if (filesTags.TryGetValue(file.Id, out var tag))
             {
@@ -983,7 +986,7 @@ public class FileMarker(
             }
         }
         
-        await foreach (var folder in folders)
+        foreach (var folder in folders)
         {
             if (foldersTags.TryGetValue(folder.Id, out var tag))
             {

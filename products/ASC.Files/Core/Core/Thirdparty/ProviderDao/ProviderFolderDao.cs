@@ -173,7 +173,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         await foreach (var folder in folders.Where(r => r != null))
         {
             yield return await ResolveParentAsync(folder);
-    }
+        }
     }
 
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
@@ -230,7 +230,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         await foreach (var folder in folderDao.GetParentFoldersAsync(selector.ConvertId(folderId)))
         {
             yield return await ResolveParentAsync(folder);
-    }
+        }
     }
 
     public async Task<string> SaveFolderAsync(Folder<string> folder)
@@ -574,7 +574,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                     .Where(r => r.tag.Type == TagType.Custom)
                     .Any(t => t.EntryId == a.HashId))
                 .Select(r => new { Account = r.a, Hash = r.HashId });
-    }
+        }
         else if (tags != null && tags.Any())
         {
             q1 = q.Join(filesDbContext.ThirdpartyIdMapping, f => f.FolderId, m => m.Id, (account, map) => new { account, map.HashId })
@@ -585,7 +585,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         }
 
         var q2 = q1.Select(r => new RoomProviderQuery
-    {
+        {
             Account = r.Account,
             Shared = filesDbContext.Security.Any(s => s.TenantId == tenantId && s.EntryType == FileEntryType.Folder && s.EntryId == r.Hash
                                                       && s.SubjectType == SubjectType.PrimaryExternalLink)

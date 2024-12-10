@@ -260,7 +260,7 @@ public class BackupWorker(
         return multipartHash + "-" + multipartSplitCount;
     }
 
-    private static async Task<byte[]> GetChunkAsync(Stream sourceStream, long offset, int count)
+    private static async Task<byte[]> GetChunkAsync(FileStream sourceStream, long offset, int count)
     {
         var buffer = new byte[count];
         sourceStream.Position = offset;

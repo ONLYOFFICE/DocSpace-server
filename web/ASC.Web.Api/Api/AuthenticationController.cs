@@ -70,7 +70,6 @@ public class AuthenticationController(
     DbLoginEventsManager dbLoginEventsManager,
     BruteForceLoginManager bruteForceLoginManager,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-    ILogger<AuthenticationController> logger,
     InvitationService invitationService,
     LoginProfileTransport loginProfileTransport,
     IMapper mapper)
@@ -159,8 +158,7 @@ public class AuthenticationController(
                                                                           ? MessageAction.LoginFailViaApiSms
                                                                           : MessageAction.LoginFailViaApiTfa,
                                 MessageTarget.Create(user.Id));
-            logger.ErrorWithException(ex);
-            throw new AuthenticationException("User authentication failed");
+            throw new AuthenticationException("User authentication failed", ex);
         }
         finally
         {
@@ -275,8 +273,7 @@ public class AuthenticationController(
         catch (Exception ex)
         {
             messageService.Send(user.DisplayUserName(false, displayUserSettingsHelper), viaEmail ? MessageAction.LoginFailViaApi : MessageAction.LoginFailViaApiSocialAccount);
-            logger.ErrorWithException(ex);
-            throw new AuthenticationException("User authentication failed");
+            throw new AuthenticationException("User authentication failed", ex);
         }
         finally
         {
@@ -437,7 +434,7 @@ public class AuthenticationController(
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {
-                    user = email.Contains("@")
+                    user = email.Contains('@')
                                    ? await userManager.GetUserByEmailAsync(email)
                                    : await userManager.GetUsersAsync(new Guid(email));
 
@@ -519,8 +516,7 @@ public class AuthenticationController(
         catch (Exception ex)
         {
             messageService.Send(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, action);
-            logger.ErrorWithException(ex);
-            throw new AuthenticationException("User authentication failed");
+            throw new AuthenticationException("User authentication failed", ex);
         }
         wrapper.UserInfo = user;
         return wrapper;

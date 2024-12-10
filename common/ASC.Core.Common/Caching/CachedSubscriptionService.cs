@@ -263,7 +263,7 @@ internal class SubscriptionsStore
     {
         return string.IsNullOrEmpty(recipientId) ?
             _methods.ToList() :
-            _methodsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : new List<SubscriptionMethod>();
+            _methodsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : [];
     }
 
     public void SetSubscriptionMethod(SubscriptionMethod m)

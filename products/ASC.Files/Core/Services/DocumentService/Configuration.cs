@@ -144,7 +144,7 @@ public class Configuration<T>(
     /// <type>System.String, System</type>
     public string Type
     {
-        set => EditorType = (EditorType)Enum.Parse(typeof(EditorType), value, true);
+        set => EditorType = Enum.Parse<EditorType>(value, true);
         get => EditorType.ToString().ToLower();
     }
 
@@ -173,7 +173,7 @@ public class DocumentConfig<T>(
     private string _key = string.Empty;
     private FileReferenceData _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
-    public InfoConfig<T> Info { get; set; } = infoConfig;
+    public InfoConfig<T> Info { get; } = infoConfig;
     public bool IsLinkedForMe { get; set; }
 
     public string Key

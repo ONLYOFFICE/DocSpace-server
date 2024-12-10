@@ -159,7 +159,7 @@ public abstract class BaseIndexer<T>(Client client,
 
                     if (data is ISearchItemDocument)
                     {
-                        b.Custom("document", ca => ca.Tokenizer(Analyzer.whitespace.ToString()).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
+                        b.Custom("document", ca => ca.Tokenizer(Analyzer.whitespace.ToStringFast()).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
                     }
 
                     return b;
@@ -170,8 +170,8 @@ public abstract class BaseIndexer<T>(Client client,
                     c.Map<T>(m => m.AutoMap())
                     .Settings(r => r.Analysis(a =>
                                     a.Analyzers(analyzers)
-                                    .CharFilters(d => d.HtmlStrip(CharFilter.html.ToString())
-                                    .Mapping(CharFilter.io.ToString(), m => m.Mappings("ё => е", "Ё => Е"))))));
+                                    .CharFilters(d => d.HtmlStrip(CharFilter.html.ToStringFast())
+                                    .Mapping(CharFilter.io.ToStringFast(), m => m.Mappings("ё => е", "Ё => Е"))))));
 
                 _isExist = true;
             }

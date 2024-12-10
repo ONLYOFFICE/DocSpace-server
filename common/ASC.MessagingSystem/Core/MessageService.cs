@@ -212,7 +212,7 @@ public class MessageService(
 
     public void Send(MessageInitiator initiator, MessageAction action, params string[] description)
     {
-        SendInitiatorMessage(initiator.ToString(), action, null, null, description);
+        SendInitiatorMessage(initiator.ToStringFast(), action, null, null, description);
     }
 
     #endregion
@@ -221,7 +221,7 @@ public class MessageService(
 
     public void Send(MessageInitiator initiator, MessageAction action, MessageTarget target, IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
-        SendInitiatorMessage(initiator.ToString(), action, target, references, description);
+        SendInitiatorMessage(initiator.ToStringFast(), action, target, references, description);
     }
 
     #endregion

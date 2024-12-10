@@ -80,7 +80,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
     {
         var result = new List<Action<T>>();
 
-        foreach (var val in (CacheNotifyAction[])Enum.GetValues(typeof(CacheNotifyAction)))
+        foreach (var val in Enum.GetValues<CacheNotifyAction>())
         {
             if (!(val == action || Enum.IsDefined(typeof(CacheNotifyAction), (val & action))))
             {

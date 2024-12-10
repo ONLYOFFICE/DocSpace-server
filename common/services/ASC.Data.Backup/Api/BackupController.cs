@@ -91,7 +91,7 @@ public class BackupController(
         {
             Period = inDto.CronParams.Period ?? BackupPeriod.EveryDay,
             Hour = inDto.CronParams.Hour,
-            Day = inDto.CronParams.Day.HasValue ? inDto.CronParams.Day.Value : 0
+            Day = inDto.CronParams.Day ?? 0
         };
         if(backupStored is > 30 or < 1)
         {
@@ -181,9 +181,9 @@ public class BackupController(
                 await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
-        if (storageType is BackupStorageType.ThirdPartyConsumer && !storageParams.ContainsKey("subdir"))
+        if (storageType is BackupStorageType.ThirdPartyConsumer)
         {
-            storageParams.Add("subdir", "backup");
+            storageParams.TryAdd("subdir", "backup");
         }
         
 
@@ -303,9 +303,9 @@ public class BackupController(
                 await backupAjaxHandler.CheckAccessToFileAsync(storageParams["filePath"]);
             }
         }
-        if (storageType is BackupStorageType.ThirdPartyConsumer && !storageParams.ContainsKey("subdir"))
+        if (storageType is BackupStorageType.ThirdPartyConsumer)
         {
-            storageParams.Add("subdir", "backup");
+            storageParams.TryAdd("subdir", "backup");
         }
 
         await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(

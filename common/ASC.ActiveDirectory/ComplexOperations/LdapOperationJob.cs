@@ -138,7 +138,7 @@ public class LdapOperationJob(
                 case LdapOperationType.Save:
                 case LdapOperationType.SaveTest:
 
-                    logger.InfoStartOperation(Enum.GetName(typeof(LdapOperationType), _operationType));
+                    logger.InfoStartOperation(Enum.GetName(_operationType));
 
                     await SetProgress(1, _resource.LdapSettingsStatusCheckingLdapSettings);
 
@@ -180,7 +180,7 @@ public class LdapOperationJob(
                     break;
                 case LdapOperationType.Sync:
                 case LdapOperationType.SyncTest:
-                    logger.InfoStartOperation(Enum.GetName(typeof(LdapOperationType), _operationType));
+                    logger.InfoStartOperation(Enum.GetName(_operationType));
 
                     _novellLdapUserImporter.Init(_ldapSettings, _resource);
                     break;
@@ -570,7 +570,7 @@ public class LdapOperationJob(
 
                             var cleared = false;
 
-                            foreach (var r in Enum.GetValues(typeof(LdapSettings.AccessRight)).Cast<LdapSettings.AccessRight>())
+                            foreach (var r in Enum.GetValues<LdapSettings.AccessRight>())
                             {
                                 var prodId = LdapSettings.AccessRightsGuids[r];
 

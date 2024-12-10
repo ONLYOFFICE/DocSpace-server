@@ -315,7 +315,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(folder), newId);
-    }
+        }
 
         return newId;
     }
@@ -455,7 +455,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(thirdFolder), newId);
-    }
+        }
 
         return newId;
     }

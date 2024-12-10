@@ -109,7 +109,7 @@ public class BaseDbContext(DbContextOptions options) : DbContext(options)
                        select e.Entity;
         foreach (var entity in entities)
         {
-            List<ValidationResult> results =  new();
+            List<ValidationResult> results = [];
             if (!Validator.TryValidateObject(entity, new ValidationContext(entity), results, true))
             {
                 throw new ArgumentException(results.First().ErrorMessage);

@@ -348,7 +348,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     public TenantQuota()
     {
-        _featuresList = new List<string>();
+        _featuresList = [];
 
         _countUserFeature = new CountUserFeature(this) { Order = 1 };
         _countPaidUserFeature = new CountPaidUserFeature(this);
