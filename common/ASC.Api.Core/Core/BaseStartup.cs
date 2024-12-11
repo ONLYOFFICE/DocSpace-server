@@ -51,6 +51,8 @@ public abstract class BaseStartup
 
     protected bool OpenApiEnabled { get; init; }
 
+    protected bool OpenTelemetryEnabled { get; init; }
+
     protected BaseStartup(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -59,6 +61,7 @@ public abstract class BaseStartup
 
         DIHelper = new DIHelper();
         OpenApiEnabled = _configuration.GetValue<bool>("openApi:enable");
+        OpenTelemetryEnabled = _configuration.GetValue<bool>("openTelemetry:enable");
     }
 
     public virtual async Task ConfigureServices(IServiceCollection services)
@@ -410,7 +413,10 @@ public abstract class BaseStartup
             mvcBuilder.AddApiExplorer();
             services.AddOpenApi(_configuration);
         }
-
+        if (OpenTelemetryEnabled)
+        {
+            services.AddOpenTelemetry(_configuration);
+        }
         services.AddScoped<CookieAuthHandler>();
         services.AddScoped<BasicAuthHandler>();
         services.AddScoped<ConfirmAuthHandler>();
