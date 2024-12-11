@@ -26,19 +26,16 @@
 
 using ASC.Files.Core.VirtualRooms;
 
-namespace ASC.Files.Core.RoomTemplates;
+using DocuSign.eSign.Model;
+
+namespace ASC.Files.Core.RoomTemplates.Operations;
 
 [Transient]
-public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : DistributedTaskProgress
+public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) : DistributedTaskProgress
 {
     private Guid _userId;
-    private LogoSettings _logo;
-    private IEnumerable<string> _tags;
-    private IEnumerable<string> _emails;
-    private string _title;
-
-    private int? _roomId;
     private int? _templateId;
+
     private int? _tenantId;
     public int TenantId
     {
@@ -47,16 +44,6 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         {
             _tenantId = value;
             this[nameof(_tenantId)] = value;
-        }
-    }
-
-    public int RoomId
-    {
-        get => _roomId ?? this[nameof(_roomId)];
-        set
-        {
-            _roomId = value;
-            this[nameof(_roomId)] = value;
         }
     }
 
@@ -72,19 +59,11 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
 
     public void Init(int tenantId,
         Guid userId,
-        int roomId,
-        string title,
-        IEnumerable<string> emails,
-        LogoSettings logo,
-        IEnumerable<string> tags)
+        int templateId)
     {
         TenantId = tenantId;
         _userId = userId;
-        RoomId = roomId;
-        _logo = logo;
-        _tags = tags;
-        _emails = emails;
-        _title = title;
+        TemplateId = templateId;
     }
 
     protected override async Task DoJob()
@@ -98,47 +77,35 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
 
         try
         {
+            Percentage = 0;
+            await PublishChanges();
+
             await tenantManager.SetCurrentTenantAsync(TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
 
-            LogoRequest dtoLogo = null;
-            if (_logo != null)
-            {
-                dtoLogo = new LogoRequest
-                {
-                    TmpFile = _logo.TmpFile,
-                    Height = _logo.Height,
-                    Width = _logo.Width,
-                    X = _logo.X,
-                    Y = _logo.Y
-                };
-            }
-
-            TemplateId = (await fileStorageService.CreateRoomTemplateAsync(RoomId, _title, _emails, _tags, dtoLogo)).Id;
+            var roomId = (await fileStorageService.CreateRoomFromTemplateAsync(TemplateId, [])).Id;
 
             var fileDao = daoFactory.GetFileDao<int>();
             var folderDao = daoFactory.GetFolderDao<int>();
-            var files = await fileDao.GetFilesAsync(RoomId).ToListAsync();
-            var folders = await folderDao.GetFoldersAsync(RoomId).Select(r => r.Id).ToListAsync();
+            var files = await fileDao.GetFilesAsync(TemplateId).ToListAsync();
+            var folders = await folderDao.GetFoldersAsync(TemplateId).Select(r => r.Id).ToListAsync();
 
-            foreach(var file in files)
+            foreach (var file in files)
             {
-                await fileDao.CopyFileAsync(file, TemplateId);
+                await fileDao.CopyFileAsync(file, roomId);
             }
 
             foreach (var f in folders)
             {
-                var newFolder = await folderDao.CopyFolderAsync(f, TemplateId, CancellationToken);
+                var newFolder = await folderDao.CopyFolderAsync(f, roomId, CancellationToken);
                 var folderFiles = await fileDao.GetFilesAsync(f).ToListAsync();
                 foreach (var file in folderFiles)
                 {
                     await fileDao.CopyFileAsync(file, newFolder.Id);
                 }
             }
-
-
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Exception = ex;
             IsCompleted = true;

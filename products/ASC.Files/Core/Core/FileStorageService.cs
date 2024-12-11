@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Twilio.TwiML.Voice;
+
 namespace ASC.Web.Files.Services.WCFService;
 
 [Scope]
@@ -525,7 +527,7 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<int>();
         var room = await folderDao.GetFolderAsync(roomId);
 
-        if (!await fileSecurity.CanEditRoomAsync(room))
+        if (!DocSpaceHelper.IsRoom(room.FolderType) || room.RootId != await globalFolderHelper.FolderVirtualRoomsAsync || !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
@@ -563,14 +565,15 @@ public class FileStorageService //: IFileStorageService
     public async Task<Folder<int>> CreateRoomFromTemplateAsync(int templateId, IEnumerable<FileShareParams> share)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        var parentId = await globalFolderHelper.GetFolderVirtualRooms();
+        var parentId = await globalFolderHelper.FolderVirtualRoomsAsync;
         var folderDao = daoFactory.GetFolderDao<int>();
         var template = await folderDao.GetFolderAsync(templateId);
 
-        if (!await fileSecurity.CanReadAsync(template))
+        if (!DocSpaceHelper.IsRoom(template.FolderType) || template.RootId != await globalFolderHelper.FolderRoomTemplatesAsync || !await fileSecurity.CanEditRoomAsync(template))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
+
         var logo = await roomLogoManager.GetLogoAsync(template);
 
         LogoRequest dtoLogo = null;
