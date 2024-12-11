@@ -101,7 +101,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
         return GetAttributes(ldapUser, bindings[0]);
     }
 
-    private void PopulateContacts(ICollection<string> contacts, string type, List<string> values)
+    private static void PopulateContacts(List<string> contacts, string type, List<string> values)
     {
         if (values == null || values.Count == 0)
         {

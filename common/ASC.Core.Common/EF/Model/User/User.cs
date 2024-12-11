@@ -99,7 +99,7 @@ public static class DbUserExtension
                 ActivationStatus = 0,
                 WorkFromDate = new DateTime(2021, 3, 9, 9, 52, 55, 764, DateTimeKind.Utc).AddTicks(9157),
                 LastModified = new DateTime(2021, 3, 9, 9, 52, 55, 765, DateTimeKind.Utc).AddTicks(1420),
-                CreateDate = new DateTime(2022, 7, 8),
+                CreateDate = new DateTime(2022, 7, 8)
             });
 
         return modelBuilder;

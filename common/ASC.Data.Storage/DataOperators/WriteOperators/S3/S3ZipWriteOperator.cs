@@ -39,7 +39,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
     private readonly List<Stream> _streams = new(TasksLimit);
     private readonly TempStream _tempStream;
     private int _chunkNumber = 1;
-    private readonly object _locker = new();
+    private readonly Lock _locker = new();
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }

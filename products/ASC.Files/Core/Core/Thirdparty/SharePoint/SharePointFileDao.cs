@@ -148,7 +148,7 @@ internal class SharePointFileDao(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            files = files.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!extension.IsNullOrEmpty())
@@ -230,7 +230,7 @@ internal class SharePointFileDao(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            files = files.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!extension.IsNullOrEmpty())

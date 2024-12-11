@@ -167,7 +167,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            files = files.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!extension.IsNullOrEmpty())
@@ -250,7 +250,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            files = files.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!extension.IsNullOrEmpty())

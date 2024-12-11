@@ -395,7 +395,7 @@ public class PortalController(
         return Ok(new
         {
             tenant = commonMethods.ToTenantWrapper(tenant),
-            removed = !wizardSettings.Completed,
+            removed = !wizardSettings.Completed
         });
     }
 

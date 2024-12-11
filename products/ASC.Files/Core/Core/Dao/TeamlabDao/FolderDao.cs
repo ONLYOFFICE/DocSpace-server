@@ -911,7 +911,7 @@ internal class FolderDao(
 
     public Task<IDictionary<int, string>> CanMoveOrCopyAsync(IEnumerable<int> folderIds, string to)
         {
-        return Task.FromResult((IDictionary<int, string>)new Dictionary<int, string>());
+        return Task.FromResult<IDictionary<int, string>>(new Dictionary<int, string>());
         }
 
     public async Task<IDictionary<int, string>> CanMoveOrCopyAsync(IEnumerable<int> folderIds, int to)
@@ -1899,12 +1899,6 @@ public class ParentIdTitlePair
 {
     public int ParentId { get; init; }
     public string Title { get; init; }
-}
-
-public class ParentIdFolderTypePair
-{
-    public int ParentId { get; set; }
-    public FolderType FolderType { get; set; }
 }
 
 public class FolderTypeUsedSpacePair

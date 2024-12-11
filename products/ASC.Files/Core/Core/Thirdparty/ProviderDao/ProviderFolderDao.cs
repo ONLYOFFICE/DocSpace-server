@@ -347,7 +347,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, int to)
     {
-        return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
+        return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)

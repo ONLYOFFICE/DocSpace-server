@@ -1271,5 +1271,5 @@ public enum MarkResult
 {
     Marked,
     NotMarked,
-    MarkExists,
+    MarkExists
 }

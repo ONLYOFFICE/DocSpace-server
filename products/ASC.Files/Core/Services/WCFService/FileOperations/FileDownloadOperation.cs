@@ -608,7 +608,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             CancellationToken.ThrowIfCancellationRequested();
 
-            if (200 >= path.Length || 0 >= path.IndexOf('/'))
+            if (200 >= path.Length || path.Contains('/'))
             {
                 continue;
             }

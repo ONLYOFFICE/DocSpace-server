@@ -87,9 +87,7 @@ public class DocumentServiceLicense(ICache cache,
             return false;
         }
 
-        return commandResponse.Server != null &&
-            (commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
-            commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit);
+        return commandResponse.Server is { ResultType: CommandResponse.ServerInfo.ResultTypes.Success or CommandResponse.ServerInfo.ResultTypes.SuccessLimit };
     }
 
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()

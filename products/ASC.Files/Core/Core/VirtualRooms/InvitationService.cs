@@ -222,7 +222,7 @@ public class InvitationService(
             LinkType = result.LinkType, 
             ConfirmType = result.ConfirmType, 
             User = result.User,
-            EmployeeType = employeeType,
+            EmployeeType = employeeType
         };
 
         if (result.LinkType is not InvitationLinkType.CommonToRoom)

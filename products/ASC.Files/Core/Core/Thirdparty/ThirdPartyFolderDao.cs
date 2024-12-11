@@ -112,7 +112,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            rooms = rooms.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            rooms = rooms.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         var filesDbContext = await dbContextFactory.CreateDbContextAsync();
@@ -155,7 +155,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            folders = folders.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            folders = folders.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
@@ -191,7 +191,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            folders = folders.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            folders = folders.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         return folders;
@@ -407,12 +407,12 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)
         {
-        return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
+        return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, int to)
     {
-        return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
+        return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
 
     public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)

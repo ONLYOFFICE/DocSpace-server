@@ -208,7 +208,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
         if (!files.Any())
         {
             return;
-}
+        }
 
         var pdfs = new List<File<T>>();
 

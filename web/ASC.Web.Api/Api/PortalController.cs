@@ -241,7 +241,7 @@ public class PortalController(
             DelayDueDate = source.DelayDueDate,
             LicenseDate = source.LicenseDate,
             CustomerId = source.CustomerId,
-            Quotas = source.Quotas,
+            Quotas = source.Quotas
         };
 
         if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))

@@ -1121,13 +1121,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                    file != null )
                 {
                     var parentFolders = await GetFileParentFolders(file.ParentId);
-                    if (parentFolders != null)
+                    var fileFolder = parentFolders?.LastOrDefault();
+                    if (fileFolder?.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
                     {
-                        var fileFolder = parentFolders.LastOrDefault();
-                        if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
                 
@@ -1250,11 +1247,14 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
 
         var defaultShare =
-            e.RootFolderType == FolderType.VirtualRooms ? DefaultVirtualRoomsShare :
-            e.RootFolderType == FolderType.USER ? DefaultMyShare :
-            e.RootFolderType == FolderType.Privacy ? DefaultPrivacyShare :
-            e.RootFolderType == FolderType.Archive ? DefaultArchiveShare :
-            DefaultCommonShare;
+            e.RootFolderType switch
+            {
+                FolderType.VirtualRooms => DefaultVirtualRoomsShare,
+                FolderType.USER => DefaultMyShare,
+                FolderType.Privacy => DefaultPrivacyShare,
+                FolderType.Archive => DefaultArchiveShare,
+                _ => DefaultCommonShare
+            };
 
         e.ShareRecord = ace;
         e.Access = ace?.Share ?? defaultShare;

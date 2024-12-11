@@ -178,15 +178,12 @@ public class FolderContentDtoHelper(
 
         async Task<FileEntryDto> GetFileDto(FileEntry fileEntry, string entriesOrder = null, IFolder contextFolder = null)
         {
-            switch (fileEntry)
+            return fileEntry switch
             {
-                case File<int> fol1:
-                    return await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder);
-                case File<string> fol2:
-                    return await fileWrapperHelper.GetAsync(fol2, entriesOrder, expiration, contextFolder);
-            }
-
-            return null;
+                File<int> fol1 => await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder),
+                File<string> fol2 => await fileWrapperHelper.GetAsync(fol2, entriesOrder, expiration, contextFolder),
+                _ => null
+            };
         }
 
         async IAsyncEnumerable<FileEntryDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null)

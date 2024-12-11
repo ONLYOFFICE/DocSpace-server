@@ -98,11 +98,12 @@ public class ExportToCSV(
 
             dataTable.Columns.Add(new DataColumn(entity.Key));
 
-            var formattedValue = (entity.Type == null)
-                ? entity.Value
-                : (entity.Type == "dateTime"
-                    ? $"=\"{entity.Value}\""
-                    : entity.Value);
+            var formattedValue = entity.Type switch
+            {
+                null => entity.Value,
+                "dateTime" => $"=\"{entity.Value}\"",
+                _ => entity.Value
+            };
 
             values.Add(formattedValue);
         }

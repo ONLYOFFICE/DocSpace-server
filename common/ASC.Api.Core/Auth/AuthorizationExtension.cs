@@ -39,7 +39,7 @@ public static class AuthorizationExtension
         { "GET api/[0-9].[0-9]/people/@self", "accounts.self:read" },
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people/@self", "account.self:write" },
         { "GET api/[0-9].[0-9]/people", "accounts:read" },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", "accounts:write" },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", "accounts:write" }
     };
 
     private static readonly string[] _allScopes =

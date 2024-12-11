@@ -352,7 +352,7 @@ internal abstract class ThirdPartyProviderDao
             return rooms;
         }
 
-        return rooms.Where(x => x.Title.IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1);
+        return rooms.Where(x => x.Title.Contains(text, StringComparison.OrdinalIgnoreCase));
     }
 
     internal static string GetProviderType(ProviderFilter providerFilter)
