@@ -63,17 +63,7 @@ public class RoomTemplatesController(IEventBus eventBus,
         return await Status();
     }
 
-    [HttpPost("room")]
-    public async Task<FileOperationDto> CreateRoomAsync(CreateRoomFromTempateDto dto)
-    {
-        await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
-        {
-            TemplateId = dto.TemplateId
-        });
-        return null;
-    }
-
-    [HttpGet("templatestatus")]
+    [HttpGet("createstatus")]
     public async Task<RoomTemplateStatusDto> Status()
     {
         try

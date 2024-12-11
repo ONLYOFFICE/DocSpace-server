@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.RoomTemplates.Events;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -42,7 +44,10 @@ public class VirtualRoomsInternalController(
     ApiContext apiContext,
     FilesMessageService filesMessageService,
     SettingsManager settingsManager,
-    ApiDateTimeHelper apiDateTimeHelper)
+    ApiDateTimeHelper apiDateTimeHelper,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    IEventBus eventBus)
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -78,6 +83,16 @@ public class VirtualRoomsInternalController(
         var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, inDto.Tags, inDto.Logo);
 
         return await _folderDtoHelper.GetAsync(room);
+    }
+
+    [HttpPost("fromTemplate")]
+    public async Task<FileOperationDto> CreateRoomAsync(CreateRoomFromTempateDto dto)
+    {
+        await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
+        {
+            TemplateId = dto.TemplateId
+        });
+        return null;
     }
 }
 
@@ -648,11 +663,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpGet("rooms")]
     public async Task<FolderContentDto<int>> GetRoomsFolderAsync(RoomContentRequestDto inDto)
     {
-        var parentId = inDto.SearchArea != SearchArea.Archive 
-            ? await globalFolderHelper.GetFolderVirtualRooms()
-            : await globalFolderHelper.GetFolderArchive();
-
-        var p = inDto.SearchArea switch
+        var parentId = inDto.SearchArea switch
         {
             SearchArea.Archive => await globalFolderHelper.GetFolderArchive(),
             SearchArea.Template => await globalFolderHelper.FolderRoomTemplatesAsync,

@@ -143,6 +143,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
             }
 
             Percentage = 100;
+            IsCompleted = true;
         }
         catch (Exception ex)
         {
