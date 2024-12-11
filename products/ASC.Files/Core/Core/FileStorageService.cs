@@ -518,6 +518,100 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
+    public async Task<Folder<int>> CreateRoomTemplateAsync(int roomId, string title, IEnumerable<string> emails, IEnumerable<string> tags, LogoRequest logo)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var parentId = await globalFolderHelper.FolderRoomTemplatesAsync;
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId);
+
+        if (!await fileSecurity.CanEditRoomAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
+
+        WatermarkRequestDto watermarkRequestDto = null;
+        if (room.SettingsWatermark != null)
+        {
+            watermarkRequestDto = new WatermarkRequestDto
+            {
+                Text = room.SettingsWatermark.Text,
+                Additions = room.SettingsWatermark.Additions,
+                Rotate = room.SettingsWatermark.Rotate,
+                ImageUrl = room.SettingsWatermark.ImageUrl,
+                ImageScale = room.SettingsWatermark.ImageScale,
+                ImageHeight = room.SettingsWatermark.ImageHeight,
+                ImageWidth = room.SettingsWatermark.ImageWidth
+            };
+        }
+
+        IEnumerable<FileShareParams> share = null;
+        if (emails != null)
+        {
+            share = emails.Select(e => new FileShareParams() { Email = e, Access = FileShare.RoomManager });
+        }
+        return await CreateRoomAsync(async () =>
+        {
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
+            {
+                await countRoomChecker.CheckAppend();
+                return await InternalCreateFolderAsync(parentId, title, room.FolderType, room.SettingsPrivate, room.SettingsIndexing, room.SettingsQuota, room.SettingsLifetime, room.SettingsDenyDownload, watermarkRequestDto, room.SettingsColor, room.SettingsCover, tags, logo);
+            }
+        }, room.SettingsPrivate, share);
+    }
+
+    public async Task<Folder<int>> CreateRoomFromTemplateAsync(int templateId, IEnumerable<FileShareParams> share)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var parentId = await globalFolderHelper.GetFolderVirtualRooms();
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var template = await folderDao.GetFolderAsync(templateId);
+
+        if (!await fileSecurity.CanReadAsync(template))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
+        var logo = await roomLogoManager.GetLogoAsync(template);
+
+        LogoRequest dtoLogo = null;
+        if (logo != null)
+        {
+            dtoLogo = new LogoRequest
+            {
+                TmpFile = logo.Medium
+            };
+        }
+
+        WatermarkRequestDto watermarkRequestDto = null;
+        if (template.SettingsWatermark != null)
+        {
+            watermarkRequestDto = new WatermarkRequestDto
+            {
+                Text = template.SettingsWatermark.Text,
+                Additions = template.SettingsWatermark.Additions,
+                Rotate = template.SettingsWatermark.Rotate,
+                ImageUrl = template.SettingsWatermark.ImageUrl,
+                ImageScale = template.SettingsWatermark.ImageScale,
+                ImageHeight = template.SettingsWatermark.ImageHeight,
+                ImageWidth = template.SettingsWatermark.ImageWidth
+            };
+        }
+
+        if (template.Tags == null)
+        {
+            template.Tags = new List<Tag>();
+        }
+
+        return await CreateRoomAsync(async () =>
+        {
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
+            {
+                await countRoomChecker.CheckAppend();
+                return await InternalCreateFolderAsync(parentId, template.Title, template.FolderType, template.SettingsPrivate, template.SettingsIndexing, template.SettingsQuota, template.SettingsLifetime, template.SettingsDenyDownload, watermarkRequestDto, template.SettingsColor, template.SettingsCover, template.Tags.Select(t => t.Name));
+            }
+        }, template.SettingsPrivate, share);
+    }
+
     private async Task<Folder<T>> CreateRoomAsync<T>(Func<Task<Folder<T>>> folderFactory, bool privacy, IEnumerable<FileShareParams> shares)
     {
         ArgumentNullException.ThrowIfNull(folderFactory);

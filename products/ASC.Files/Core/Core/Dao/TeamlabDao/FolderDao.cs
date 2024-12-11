@@ -67,6 +67,7 @@ internal class FolderDao(
     private const string Trash = "trash";
     private const string Projects = "projects";
     private const string VirtualRooms = "virtualrooms";
+    private const string RoomTemplates = "roomtemplates";
     private const string Archive = "archive";
 
     public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
@@ -1296,6 +1297,10 @@ internal class FolderDao(
                         folder.FolderType = FolderType.VirtualRooms;
                         folder.Title = VirtualRooms;
                         break;
+                    case RoomTemplates:
+                        folder.FolderType = FolderType.RoomTemplates;
+                        folder.Title = RoomTemplates;
+                        break;
                     case Archive:
                         folder.FolderType = FolderType.Archive;
                         folder.Title = Archive;
@@ -1409,6 +1414,10 @@ internal class FolderDao(
                     folder.FolderType = FolderType.VirtualRooms;
                     folder.Title = VirtualRooms;
                     break;
+                case RoomTemplates:
+                    folder.FolderType = FolderType.RoomTemplates;
+                    folder.Title = RoomTemplates;
+                    break;
                 case Archive:
                     folder.FolderType = FolderType.Archive;
                     folder.Title = Archive;
@@ -1500,6 +1509,11 @@ internal class FolderDao(
     public async Task<int> GetFolderIDVirtualRooms(bool createIfNotExists)
     {
         return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, VirtualRooms, null, createIfNotExists);
+    }
+
+    public async Task<int> GetFolderIDRoomTemplatesAsync(bool createIfNotExists)
+    {
+        return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, RoomTemplates, null, createIfNotExists);
     }
 
     public async Task<int> GetFolderIDArchive(bool createIfNotExists)

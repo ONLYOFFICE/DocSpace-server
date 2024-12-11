@@ -588,6 +588,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult<string>(null);
     }
 
+    public Task<string> GetFolderIDRoomTemplatesAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
     public Task<string> GetFolderIDArchive(bool createIfNotExists)
     {
         return Task.FromResult<string>(null);

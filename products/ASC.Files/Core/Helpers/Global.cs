@@ -406,6 +406,25 @@ public class GlobalFolder(
         return result;
     }
 
+    public async ValueTask<int> GetFolderRoomTemplatesAsync(IDaoFactory daoFactory, bool createIfNotExist = true)
+    {
+        var key = $"roomTemplates/{tenantManager.GetCurrentTenantId()}";
+
+        if (DocSpaceFolderCache.TryGetValue(key, out var result))
+        {
+            return result;
+        }
+
+        result = await daoFactory.GetFolderDao<int>().GetFolderIDRoomTemplatesAsync(createIfNotExist);
+
+        if (result != default)
+        {
+            DocSpaceFolderCache[key] = result;
+        }
+
+        return result;
+    }
+
     public async ValueTask<int> GetFolderArchiveAsync(IDaoFactory daoFactory)
     {
         var key = $"archive/{tenantManager.GetCurrentTenantId()}";
@@ -800,6 +819,7 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     public ValueTask<int> FolderFavoritesAsync => globalFolder.GetFolderFavoritesAsync(daoFactory);
     public ValueTask<int> FolderTemplatesAsync => globalFolder.GetFolderTemplatesAsync(daoFactory);
     public ValueTask<int> FolderVirtualRoomsAsync => globalFolder.GetFolderVirtualRoomsAsync(daoFactory);
+    public ValueTask<int> FolderRoomTemplatesAsync => globalFolder.GetFolderRoomTemplatesAsync(daoFactory);
     public ValueTask<int> FolderArchiveAsync => globalFolder.GetFolderArchiveAsync(daoFactory);
 
     public async Task<T> GetFolderMyAsync<T>()

@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.RoomTemplates;
 using ASC.Files.Service.IntegrationEvents.EventHandling;
 
 using NLog;
@@ -79,6 +80,8 @@ try
     await eventBus.SubscribeAsync<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>();
     await eventBus.SubscribeAsync<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>();
     await eventBus.SubscribeAsync<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
     
     sp.GetRequiredService<FileTrackerHelper>().Subscribe();
 

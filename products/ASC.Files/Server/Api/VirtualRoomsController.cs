@@ -652,6 +652,13 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             ? await globalFolderHelper.GetFolderVirtualRooms()
             : await globalFolderHelper.GetFolderArchive();
 
+        var p = inDto.SearchArea switch
+        {
+            SearchArea.Archive => await globalFolderHelper.GetFolderArchive(),
+            SearchArea.Template => await globalFolderHelper.FolderRoomTemplatesAsync,
+            _ => await globalFolderHelper.GetFolderVirtualRooms()
+        };
+
         var filter = RoomTypeExtensions.MapToFilterType(inDto.Type);
 
         var tagNames = !string.IsNullOrEmpty(inDto.Tags) 
