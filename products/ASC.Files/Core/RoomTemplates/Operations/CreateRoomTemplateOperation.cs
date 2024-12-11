@@ -27,7 +27,7 @@
 using ASC.Files.Core.RoomTemplates.Events;
 using ASC.Files.Core.VirtualRooms;
 
-namespace ASC.Files.Core.RoomTemplates;
+namespace ASC.Files.Core.RoomTemplates.Operations;
 
 [Transient]
 public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : DistributedTaskProgress
@@ -122,7 +122,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
             var files = await fileDao.GetFilesAsync(RoomId).ToListAsync();
             var folders = await folderDao.GetFoldersAsync(RoomId).Select(r => r.Id).ToListAsync();
 
-            foreach(var file in files)
+            foreach (var file in files)
             {
                 await fileDao.CopyFileAsync(file, TemplateId);
             }
@@ -139,7 +139,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
 
 
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Exception = ex;
             IsCompleted = true;
