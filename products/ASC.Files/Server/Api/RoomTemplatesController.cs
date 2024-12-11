@@ -63,7 +63,7 @@ public class RoomTemplatesController(IEventBus eventBus,
         return await Status();
     }
 
-    [HttpGet("createstatus")]
+    [HttpGet("status")]
     public async Task<RoomTemplateStatusDto> Status()
     {
         try
