@@ -41,6 +41,8 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
     private int? _roomId;
     private int? _templateId;
     private int? _tenantId;
+    private int _totalCount;
+    private int _count;
     public int TenantId
     {
         get => _tenantId ?? this[nameof(_tenantId)];
@@ -96,6 +98,8 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         var fileStorageService = serviceProvider.GetService<FileStorageService>();
         var dbFactory = serviceProvider.GetService<IDbContextFactory<FilesDbContext>>();
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
 
         try
         {
@@ -117,30 +121,33 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
 
             TemplateId = (await fileStorageService.CreateRoomTemplateAsync(RoomId, _title, _emails, _tags, dtoLogo)).Id;
 
-            var fileDao = daoFactory.GetFileDao<int>();
-            var folderDao = daoFactory.GetFolderDao<int>();
-            var files = await fileDao.GetFilesAsync(RoomId).ToListAsync();
-            var folders = await folderDao.GetFoldersAsync(RoomId).Select(r => r.Id).ToListAsync();
-
-            foreach (var file in files)
+            _totalCount = await fileDao.GetFilesCountAsync(RoomId, FilterType.None, false, Guid.Empty, string.Empty, null, false, true);
+            var files = fileDao.GetFilesAsync(RoomId);
+            var folders = folderDao.GetFoldersAsync(RoomId).Select(r => r.Id);
+            
+            await foreach (var file in files)
             {
                 await fileDao.CopyFileAsync(file, TemplateId);
+                _count++;
+                await PublishAsync();
             }
 
-            foreach (var f in folders)
+            await foreach (var f in folders)
             {
                 var newFolder = await folderDao.CopyFolderAsync(f, TemplateId, CancellationToken);
-                var folderFiles = await fileDao.GetFilesAsync(f).ToListAsync();
-                foreach (var file in folderFiles)
+                var folderFiles = fileDao.GetFilesAsync(f);
+                await foreach (var file in folderFiles)
                 {
                     await fileDao.CopyFileAsync(file, newFolder.Id);
+                    await PublishAsync();
                 }
             }
 
-
+            Percentage = 100;
         }
         catch (Exception ex)
         {
+            await folderDao.DeleteFolderAsync(TemplateId);
             Exception = ex;
             IsCompleted = true;
         }
@@ -148,5 +155,11 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         {
             await PublishChanges();
         }
+    }
+
+    private async Task PublishAsync()
+    {
+        Percentage = _count * 0.9 / _totalCount;
+        await PublishChanges();
     }
 }

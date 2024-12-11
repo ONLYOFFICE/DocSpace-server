@@ -1,5 +1,4 @@
-﻿
-namespace ASC.Files.Core.RoomTemplates;
+﻿namespace ASC.Files.Core.RoomTemplates.Events;
 
 [Scope]
 public class RoomTemplatesIntegrationEventHandler(RoomTemplatesWorker worker)
