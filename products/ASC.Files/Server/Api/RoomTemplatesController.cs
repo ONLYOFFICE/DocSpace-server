@@ -57,6 +57,7 @@ public class RoomTemplatesController(IEventBus eventBus,
             RoomId = dto.RoomId,
             Title = dto.Title,
             Logo = logo,
+            Emails = dto.Share,
             Tags = dto.Tags
         });
         return await Status();

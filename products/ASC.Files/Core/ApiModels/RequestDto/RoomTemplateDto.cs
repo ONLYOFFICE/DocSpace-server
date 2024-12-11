@@ -30,6 +30,6 @@ public class RoomTemplateDto
     public int RoomId { get; set; }
     public string Title { get; set; }
     public LogoRequest Logo { get; set; }
-    public IEnumerable<FileShareParams> Share { get; set; }
+    public IEnumerable<string> Share { get; set; }
     public IEnumerable<string> Tags { get; set; }
 }
