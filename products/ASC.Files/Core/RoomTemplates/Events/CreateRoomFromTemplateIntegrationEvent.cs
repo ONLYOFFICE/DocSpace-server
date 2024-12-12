@@ -32,6 +32,15 @@ public record CreateRoomFromTemplateIntegrationEvent : IntegrationEvent
     [ProtoMember(6)]
     public int TemplateId { get; set; }
 
+    [ProtoMember(7)]
+    public string Title { get; set; }
+
+    [ProtoMember(8)]
+    public LogoSettings Logo { get; set; }
+
+    [ProtoMember(9)]
+    public IEnumerable<string> Tags { get; set; }
+
     public CreateRoomFromTemplateIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
     }

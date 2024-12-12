@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.RoomTemplates;
 using ASC.Files.Core.RoomTemplates.Events;
 
 namespace ASC.Files.Api;
@@ -47,7 +48,8 @@ public class VirtualRoomsInternalController(
     ApiDateTimeHelper apiDateTimeHelper,
     AuthContext authContext,
     TenantManager tenantManager,
-    IEventBus eventBus)
+    IEventBus eventBus,
+    RoomTemplatesWorker roomTemplatesWorker)
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -86,12 +88,52 @@ public class VirtualRoomsInternalController(
     }
 
     [HttpPost("fromTemplate")]
-    public async Task<FileOperationDto> CreateRoomAsync(CreateRoomFromTempateDto dto)
+    public async Task<RoomFromTemplateStatusDto> CreateRoomAsync(CreateRoomFromTempateDto dto)
     {
+        LogoSettings logo = null;
+        if (dto.Logo != null)
+        {
+            logo = new LogoSettings
+            {
+                Height = dto.Logo.Height,
+                Width = dto.Logo.Width,
+                TmpFile = dto.Logo.TmpFile,
+                X = dto.Logo.X,
+                Y = dto.Logo.Y
+            };
+        }
         await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
-            TemplateId = dto.TemplateId
+            TemplateId = dto.TemplateId,
+            Logo = logo,
+            Title = dto.Title,
+            Tags = dto.Tags
         });
+        return await Status();
+    }
+
+    [HttpGet("fromTemplate/status")]
+    public async Task<RoomFromTemplateStatusDto> Status()
+    {
+        try
+        {
+            var status = await roomTemplatesWorker.GetStatusRoomCreatingAsync(tenantManager.GetCurrentTenantId());
+            if (status != null)
+            {
+                var result = new RoomFromTemplateStatusDto
+                {
+                    Progress = status.Percentage,
+                    Error = status.Exception != null ? status.Exception.Message : "",
+                    IsCompleted = status.IsCompleted,
+                    RoomId = status.RoomId
+                };
+                return result;
+            }
+        }
+        catch
+        {
+
+        }
         return null;
     }
 }

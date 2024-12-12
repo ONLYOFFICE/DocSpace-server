@@ -69,7 +69,7 @@ public class RoomTemplatesWorker(
         }
     }
 
-    public async Task StartCreateRoomAsync(int tenantId, Guid userId, int templateId)
+    public async Task StartCreateRoomAsync(int tenantId, Guid userId, int templateId, string title, LogoSettings logo, IEnumerable<string> tags)
     {
         try
         {
@@ -86,7 +86,7 @@ public class RoomTemplatesWorker(
             {
                 item = serviceProvider.GetService<CreateRoomFromTemplateOperation>();
 
-                item.Init(tenantId, userId, templateId);
+                item.Init(tenantId, userId, templateId, title, logo, tags);
 
                 await _queue.EnqueueTask(item);
             }

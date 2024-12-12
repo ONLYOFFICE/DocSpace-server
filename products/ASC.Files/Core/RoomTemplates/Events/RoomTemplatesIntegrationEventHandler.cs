@@ -12,6 +12,6 @@ public class RoomTemplatesIntegrationEventHandler(RoomTemplatesWorker worker)
 
     public async Task Handle(CreateRoomFromTemplateIntegrationEvent @event)
     {
-        await worker.StartCreateRoomAsync(@event.TenantId, @event.CreateBy, @event.TemplateId);
+        await worker.StartCreateRoomAsync(@event.TenantId, @event.CreateBy, @event.TemplateId, @event.Title, @event.Logo, @event.Tags);
     }
 }

@@ -25,10 +25,20 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
-public class RoomTemplateStatusDto
+
+public class BaseRoomTemplateStatusDto
 {
     public double Progress { get; set; }
     public string Error { get; set; }
-    public int TemplateId { get; set; }
     public bool IsCompleted { get; set; }
+}
+
+public class RoomTemplateStatusDto : BaseRoomTemplateStatusDto
+{
+    public int TemplateId { get; set; }
+}
+
+public class RoomFromTemplateStatusDto : BaseRoomTemplateStatusDto
+{
+    public int RoomId { get; set; }
 }

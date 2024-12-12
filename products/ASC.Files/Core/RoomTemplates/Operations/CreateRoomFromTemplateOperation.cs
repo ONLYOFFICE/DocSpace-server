@@ -24,12 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.RoomTemplates.Events;
+
 namespace ASC.Files.Core.RoomTemplates.Operations;
 
 [Transient]
 public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) : DistributedTaskProgress
 {
     private Guid _userId;
+    private string _title;
+    private LogoSettings _logo;
+    private IEnumerable<string> _tags;
     private int? _templateId;
 
     private int? _tenantId;
@@ -55,11 +60,17 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
 
     public void Init(int tenantId,
         Guid userId,
-        int templateId)
+        int templateId,
+        string title,
+        LogoSettings logo,
+        IEnumerable<string> tags)
     {
         TenantId = tenantId;
         _userId = userId;
         TemplateId = templateId;
+        _title = title;
+        _logo = logo;
+        _tags = tags;
     }
 
     protected override async Task DoJob()
@@ -79,7 +90,20 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
             await tenantManager.SetCurrentTenantAsync(TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
 
-            var roomId = (await fileStorageService.CreateRoomFromTemplateAsync(TemplateId, [])).Id;
+            LogoRequest dtoLogo = null;
+            if (_logo != null)
+            {
+                dtoLogo = new LogoRequest
+                {
+                    TmpFile = _logo.TmpFile,
+                    Height = _logo.Height,
+                    Width = _logo.Width,
+                    X = _logo.X,
+                    Y = _logo.Y
+                };
+            }
+
+            var roomId = (await fileStorageService.CreateRoomFromTemplateAsync(TemplateId, _title, _tags, dtoLogo)).Id;
 
             var fileDao = daoFactory.GetFileDao<int>();
             var folderDao = daoFactory.GetFolderDao<int>();
@@ -100,11 +124,14 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
                     await fileDao.CopyFileAsync(file, newFolder.Id);
                 }
             }
+
+            Percentage = 100;
         }
         catch (Exception ex)
         {
             Exception = ex;
             IsCompleted = true;
+            Percentage = 100;
         }
         finally
         {
