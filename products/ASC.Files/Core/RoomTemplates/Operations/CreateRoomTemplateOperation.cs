@@ -37,7 +37,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
     private IEnumerable<string> _emails;
     private string _title;
 
-    private int? _roomId;
+    private int _roomId;
     private int? _templateId;
     private int? _tenantId;
     private int _totalCount;
@@ -49,16 +49,6 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         {
             _tenantId = value;
             this[nameof(_tenantId)] = value;
-        }
-    }
-
-    public int RoomId
-    {
-        get => _roomId ?? this[nameof(_roomId)];
-        set
-        {
-            _roomId = value;
-            this[nameof(_roomId)] = value;
         }
     }
 
@@ -82,7 +72,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
     {
         TenantId = tenantId;
         _userId = userId;
-        RoomId = roomId;
+        _roomId = roomId;
         _logo = logo;
         _tags = tags;
         _emails = emails;
@@ -118,11 +108,11 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
                 };
             }
 
-            TemplateId = (await fileStorageService.CreateRoomTemplateAsync(RoomId, _title, _emails, _tags, dtoLogo)).Id;
+            TemplateId = (await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, _emails, _tags, dtoLogo)).Id;
 
-            _totalCount = await fileDao.GetFilesCountAsync(RoomId, FilterType.None, false, Guid.Empty, string.Empty, null, false, true);
-            var files = fileDao.GetFilesAsync(RoomId);
-            var folders = folderDao.GetFoldersAsync(RoomId).Select(r => r.Id);
+            _totalCount = await fileDao.GetFilesCountAsync(_roomId, FilterType.None, false, Guid.Empty, string.Empty, null, false, true);
+            var files = fileDao.GetFilesAsync(_roomId);
+            var folders = folderDao.GetFoldersAsync(_roomId).Select(r => r.Id);
             
             await foreach (var file in files)
             {

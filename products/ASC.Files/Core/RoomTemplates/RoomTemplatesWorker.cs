@@ -104,8 +104,8 @@ public class RoomTemplatesWorker(
         return (await _queue.GetAllTasks<CreateRoomTemplateOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
     }
 
-    public async Task<CreateRoomTemplateOperation> GetStatusRoomCreatingAsync(int tenantId)
+    public async Task<CreateRoomFromTemplateOperation> GetStatusRoomCreatingAsync(int tenantId)
     {
-        return (await _queue.GetAllTasks<CreateRoomTemplateOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
+        return (await _queue.GetAllTasks<CreateRoomFromTemplateOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
     }
 }
