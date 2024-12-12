@@ -910,9 +910,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
-            if (folder.FolderType == FolderType.Recent && isGuest)
+            if (folder.FolderType == FolderType.Recent)
             {
-                return false;
+                if (isGuest)
+                {
+                    return false;
+                }
+
+                return action == FilesSecurityActions.Read;
             }
 
             if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && 
