@@ -213,12 +213,22 @@ public class TariffService(
 
                     await UpdateCacheAsync(tariff.Id);
                 }
+                catch (BillingNotFoundException)
+                {
+                    if (tariff.Id != 0 && tariff.State == TariffState.Paid)
+                    {
+                        tariff.DueDate = DateTime.Today.AddDays(-1);
+
+                        if (await SaveBillingInfoAsync(tenantId, tariff))
+                        {
+                            tariff = await CalculateTariffAsync(tenantId, tariff);
+                            await UpdateCacheAsync(tariff.Id);
+                        }
+                    }
+                }
                 catch (Exception error)
                 {
-                    if (error is not BillingNotFoundException)
-                    {
-                        LogError(error, tenantId.ToString());
-                    }
+                    LogError(error, tenantId.ToString());
                 }
 
                 if (tariff.Id == 0)
