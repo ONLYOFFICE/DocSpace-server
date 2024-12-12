@@ -45,9 +45,12 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         CoreSettings coreSettings,
         IServiceProvider serviceProvider,
         AuditEventsRepository auditEventsRepository,
+        IDistributedCache distributedCache,
         IEventBus eventBus)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
+
+    private const string CacheKey = "notification_date_for_unused_portals";
 
     public async ValueTask SendSaasLettersAsync(string senderName, DateTime scheduleDate)
     {
@@ -61,6 +64,19 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         }
 
         var nowDate = scheduleDate.Date;
+        var startDateToNotifyUnusedPortals = nowDate;
+
+        var cacheValue = await distributedCache.GetStringAsync(CacheKey);
+        if (string.IsNullOrEmpty(cacheValue))
+        {
+            await distributedCache.SetStringAsync(CacheKey, JsonSerializer.Serialize(startDateToNotifyUnusedPortals));
+        }
+        else
+        {
+            startDateToNotifyUnusedPortals = JsonSerializer.Deserialize<DateTime>(cacheValue);
+        }
+
+        var startDateToRemoveUnusedPortals = startDateToNotifyUnusedPortals.AddDays(7);
 
         foreach (var tenant in activeTenants)
         {
@@ -78,9 +94,6 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
                 var delayDueDate = tariff.DelayDueDate.Date;
-
-                var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
-                var lastAuditEventDate = lastAuditEvent != null ? lastAuditEvent.Date.Date : tenant.CreationDateTime.Date;
 
                 INotifyAction action = null;
                 var paymentMessage = true;
@@ -119,7 +132,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 {
                     #region After registration letters
 
-                    #region 1 days after registration to admins SAAS TRIAL
+                    #region 1 days after registration to admins SAAS Free
 
                     if (createdDate.AddDays(1) == nowDate)
                     {
@@ -136,7 +149,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #endregion
 
-                    #region 4 days after registration to admins SAAS TRIAL
+                    #region 4 days after registration to admins SAAS Free
 
                     if (createdDate.AddDays(4) == nowDate)
                     {
@@ -160,7 +173,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #endregion
 
-                    #region 7 days after registration to admins and users SAAS TRIAL
+                    #region 7 days after registration to admins and users SAAS Free
 
                     else if (createdDate.AddDays(7) == nowDate)
                     {
@@ -183,7 +196,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #endregion
 
-                    #region 10 days after registration to admins SAAS TRIAL
+                    #region 10 days after registration to admins SAAS Free
 
                     else if (createdDate.AddDays(10) == nowDate)
                     {
@@ -217,7 +230,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #endregion
 
-                    #region 14 days after registration to admins and users SAAS TRIAL
+                    #region 14 days after registration to admins and users SAAS Free
 
                     else if (createdDate.AddDays(14) == nowDate)
                     {
@@ -240,36 +253,46 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #endregion
 
-                    #region 6 months after SAAS TRIAL expired or has no activity for 6 months
+                    #region 6 months whithout activity to owner SAAS Free
 
-                    else if ((dueDateIsNotMax && dueDate.AddMonths(6) == nowDate) || (lastAuditEventDate.AddMonths(6) == nowDate))
+                    else
                     {
-                        action = Actions.SaasAdminTrialWarningAfterHalfYearV1;
-                        toowner = true;
+                        var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
+                        var lastAuditEventDate = lastAuditEvent != null ? lastAuditEvent.Date.Date : tenant.CreationDateTime.Date;
 
-                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
-
-                        var owner = await userManager.GetUsersAsync(tenant.OwnerId);
-                        orangeButtonUrl = setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#" +
-                                  HttpUtility.UrlEncode(Convert.ToBase64String(
-                                      Encoding.UTF8.GetBytes("{\"firstname\":\"" + owner.FirstName +
-                                                                         "\",\"lastname\":\"" + owner.LastName +
-                                                                         "\",\"alias\":\"" + tenant.Alias +
-                                                                         "\",\"email\":\"" + owner.Email + "\"}")));
-
-                        topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
-
-                        trulyYoursAsTebleRow = true;
-                    }
-                    else if ((dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate) || (lastAuditEventDate.AddMonths(6).AddDays(7) <= nowDate))
-                    {
-                        await tenantManager.RemoveTenantAsync(tenant.Id, true);
-
-                        if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+                        if (lastAuditEventDate.AddMonths(6) <= nowDate)
                         {
-                            await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
+                            if (nowDate >= startDateToNotifyUnusedPortals && nowDate.Day == tenant.CreationDateTime.Day)
+                            {
+                                action = Actions.SaasAdminTrialWarningAfterHalfYearV1;
+                                toowner = true;
+
+                                orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
+
+                                var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+                                orangeButtonUrl = setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#" +
+                                            HttpUtility.UrlEncode(Convert.ToBase64String(
+                                                Encoding.UTF8.GetBytes("{\"firstname\":\"" + owner.FirstName +
+                                                                                    "\",\"lastname\":\"" + owner.LastName +
+                                                                                    "\",\"alias\":\"" + tenant.Alias +
+                                                                                    "\",\"email\":\"" + owner.Email + "\"}")));
+
+                                topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
+
+                                trulyYoursAsTebleRow = true;
+                            }
+
+                            if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
+                            {
+                                await tenantManager.RemoveTenantAsync(tenant.Id, true);
+
+                                if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+                                {
+                                    await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
+                                }
+                                await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                            }
                         }
-                        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
 
                     #endregion
