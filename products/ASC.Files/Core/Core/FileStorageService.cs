@@ -3912,7 +3912,12 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
-        
+
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+        {
+            throw new ItemNotFoundException();
+        }
+
         if (!await fileSecurity.CanEditAsync(room))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
@@ -4243,6 +4248,11 @@ public class FileStorageService //: IFileStorageService
         if (!await fileSecurity.CanEditRoomAsync(room))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+        {
+            throw new ItemNotFoundException();
         }
 
         Dictionary<Guid, UserRelation> userRelations = null;

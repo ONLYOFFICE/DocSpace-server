@@ -45,7 +45,8 @@ public class RoomLogoManager(
     SetupInfo setupInfo,
     FileSizeComment fileSizeComment,
     CommonLinkUtility commonLinkUtility, 
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    GlobalFolderHelper globalFolderHelper)
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
@@ -352,8 +353,12 @@ public class RoomLogoManager(
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
-        
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        {
+            throw new ItemNotFoundException();
+        }
+
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
             throw new ItemNotFoundException();
         }

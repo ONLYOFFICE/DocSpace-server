@@ -145,6 +145,11 @@ public class FileSharingAceHelper(
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
 
+                if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync && w.Access != FileShare.RoomManager)
+                {
+                    throw new ItemNotFoundException();
+                }
+
                 if (w.FileShareOptions != null)
                 {
                     if (w.SubjectType == SubjectType.PrimaryExternalLink)

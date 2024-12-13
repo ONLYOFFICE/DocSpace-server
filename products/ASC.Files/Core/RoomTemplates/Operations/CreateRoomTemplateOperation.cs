@@ -117,7 +117,6 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
             await foreach (var file in files)
             {
                 await fileDao.CopyFileAsync(file, TemplateId);
-                _count++;
                 await PublishAsync();
             }
 
@@ -149,6 +148,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
 
     private async Task PublishAsync()
     {
+        _count++;
         Percentage = _count * 0.9 / _totalCount;
         await PublishChanges();
     }

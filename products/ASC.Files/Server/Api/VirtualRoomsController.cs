@@ -331,6 +331,12 @@ public abstract class VirtualRoomsController<T>(
     [HttpPut("{id}/archive")]
     public async Task<FileOperationDto> ArchiveRoomAsync(ArchiveRoomRequestDto<T> inDto)
     {
+        var room = await _fileStorageService.GetFolderAsync(inDto.Id);
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+        {
+            throw new ItemNotFoundException();
+        }
+
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
         var movableRoom = JsonSerializer.SerializeToElement(inDto.Id);
         
@@ -349,9 +355,15 @@ public abstract class VirtualRoomsController<T>(
     [HttpPut("{id}/unarchive")]
     public async Task<FileOperationDto> UnarchiveRoomAsync(ArchiveRoomRequestDto<T> inDto)
     {
+        var room = await _fileStorageService.GetFolderAsync(inDto.Id);
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+        {
+            throw new ItemNotFoundException();
+        }
+
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync);
         var movableRoom = JsonSerializer.SerializeToElement(inDto.Id);
-        
+
         await fileOperationsManager.PublishMoveOrCopyAsync([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter);
         return await fileOperationDtoHelper.GetAsync((await fileOperationsManager.GetOperationResults()).FirstOrDefault());
     }
@@ -858,6 +870,11 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     public async Task<DocumentBuilderTaskDto> StartRoomIndexExportAsync(RoomIdRequestDto<int> inDto)
     {
         var room = await fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
+
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+        {
+            throw new ItemNotFoundException();
+        }
 
         var fileSecurity = serviceProvider.GetService<FileSecurity>();
 
