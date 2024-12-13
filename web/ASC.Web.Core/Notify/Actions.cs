@@ -112,6 +112,7 @@ public static class Actions
     public static readonly INotifyAction EnterpriseAdminUserDocsTipsV1 = new NotifyAction("enterprise_admin_user_docs_tips_v1");
 
     public static readonly INotifyAction SaasAdminTrialWarningAfterHalfYearV1 = new NotifyAction("saas_admin_trial_warning_after_half_year_v1");
+    public static readonly INotifyAction SaasAdminStartupWarningAfterHalfYearV1 = new NotifyAction("saas_admin_startup_warning_after_half_year_v1");
 
     public static readonly INotifyAction PortalDeleteSuccessV1 = new NotifyAction("portal_delete_success_v1");
 

@@ -264,7 +264,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         {
                             if (nowDate >= startDateToNotifyUnusedPortals && nowDate.Day == tenant.CreationDateTime.Day)
                             {
-                                action = Actions.SaasAdminTrialWarningAfterHalfYearV1;
+                                action = Actions.SaasAdminStartupWarningAfterHalfYearV1;
                                 toowner = true;
 
                                 orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
