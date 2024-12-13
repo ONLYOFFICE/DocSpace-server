@@ -267,7 +267,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -435,7 +435,7 @@ internal class FileDao(
         }
         else
         {
-            user = await _userManager.GetUsersAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy);
+            user = await _userManager.GetUsersAsync(file.Id == 0 ? _authContext.CurrentAccount.ID : file.CreateBy);
             quotaLockKey = $"user_{user.Id}";
         }
 
@@ -495,7 +495,7 @@ internal class FileDao(
                     {
                         await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
-                        if (file.Id == default)
+                        if (file.Id == 0)
                         {
                                 file.Id = await filesDbContext.FileMaxIdAsync() + 1;
                             file.Version = 1;
@@ -510,7 +510,7 @@ internal class FileDao(
                         file.ModifiedBy = _authContext.CurrentAccount.ID;
                         file.ModifiedOn = _tenantUtil.DateTimeNow();
                             
-                        if (file.CreateBy == default)
+                        if (file.CreateBy == Guid.Empty)
                         {
                             file.CreateBy = _authContext.CurrentAccount.ID;
                         }
@@ -708,7 +708,7 @@ internal class FileDao(
     }
 
     public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = default)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -725,7 +725,7 @@ internal class FileDao(
     {
         ArgumentNullException.ThrowIfNull(file);
 
-        if (file.Id == default)
+        if (file.Id == 0)
         {
             throw new ArgumentException("No file id or folder id toFolderId determine provider");
         }
@@ -756,7 +756,7 @@ internal class FileDao(
 
                 file.ModifiedBy = _authContext.CurrentAccount.ID;
                 file.ModifiedOn = _tenantUtil.DateTimeNow();
-                if (file.CreateBy == default)
+                if (file.CreateBy == Guid.Empty)
                 {
                     file.CreateBy = _authContext.CurrentAccount.ID;
                 }
@@ -830,7 +830,7 @@ internal class FileDao(
     private async ValueTask DeleteVersionAsync(File<int> file)
     {
         if (file == null
-            || file.Id == default
+            || file.Id == 0
             || file.Version <= 1)
         {
             return;
@@ -883,7 +883,7 @@ internal class FileDao(
 
     private async ValueTask DeleteFileAsync(int fileId, bool deleteFolder, Guid ownerId)
     {
-        if (fileId == default)
+        if (fileId == 0)
         {
             return;
         }
@@ -965,9 +965,9 @@ internal class FileDao(
 
     public async Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks = false)
     {
-        if (fileId == default)
+        if (fileId == 0)
         {
-            return default;
+            return 0;
         }
 
         var tagDao = daoFactory.GetTagDao<int>();
@@ -1419,7 +1419,7 @@ internal class FileDao(
 
     private async Task<File<int>> GetFileForCommitAsync(ChunkedUploadSession<int> uploadSession)
     {
-        if (uploadSession.File.Id != default)
+        if (uploadSession.File.Id != 0)
         {
             var file = await GetFileAsync(uploadSession.File.Id);
             if (!uploadSession.KeepVersion)
@@ -2212,7 +2212,7 @@ internal class FileDao(
                 break;
         }
 
-        if (roomId != default)
+        if (roomId != 0)
         {
             q = q.Join(filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (l, t) => new
             {

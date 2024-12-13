@@ -1393,14 +1393,14 @@ public class UserController(
     {
         var user = await GetUserInfoAsync(inDto.UserId);
 
-        if (_userManager.IsSystemUser(user.Id) || !Equals(user.Id, securityContext.CurrentAccount.ID))
+        if (_userManager.IsSystemUser(user.Id) || !user.Id.Equals(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
         await _userManager.ChangeUserCulture(user, inDto.UpdateMember.CultureName);
-            messageService.Send(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
         
         return await employeeFullDtoHelper.GetFullAsync(user);
     }

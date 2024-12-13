@@ -742,7 +742,7 @@ public class S3Storage(TempStream tempStream,
                 InputStream = buffered,
                 Headers =
                     {
-                        CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds),
+                        CacheControl = $"public, maxage={(int)TimeSpan.FromDays(5).TotalSeconds}",
                         ExpiresUtc = DateTime.UtcNow.Add(TimeSpan.FromDays(5)),
                         ContentDisposition = "attachment"
                     }

@@ -189,7 +189,7 @@ public class BackupController(
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
-            : default;
+            : null;
         
         var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -287,7 +287,7 @@ public class BackupController(
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
-            : default;
+            : null;
         
         var tenantId = tenantManager.GetCurrentTenantId();
 

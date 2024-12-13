@@ -190,7 +190,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -741,7 +741,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = default)
+        bool excludeSubject = false, string roomId = null)
     {
         throw new NotImplementedException();
     }
@@ -765,7 +765,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     public Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
-        return default;
+        return null;
     }
 
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
@@ -776,7 +776,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         {
             return long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred) 
                 ? Task.FromResult(transferred) 
-                : default;
+                : null;
         }
         
         var nativeSession = uploadSession.GetItemOrDefault<ThirdPartyUploadSessionBase>(UploadSessionKey);

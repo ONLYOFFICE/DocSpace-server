@@ -58,7 +58,7 @@ public class InvitationService(
         return link;
     }
     
-    public async Task<Validation> ConfirmAsync(string key, string email, EmployeeType employeeType, string roomId = null, Guid? userId = default)
+    public async Task<Validation> ConfirmAsync(string key, string email, EmployeeType employeeType, string roomId = null, Guid? userId = null)
     {
         if (!await iPSecurity.VerifyAsync())
         {
@@ -195,7 +195,7 @@ public class InvitationService(
         return validation;
     }
 
-    public async Task<InvitationLinkData> GetLinkDataAsync(string key, string email, ConfirmType? confirmType, EmployeeType employeeType = EmployeeType.All, Guid? userId = default)
+    public async Task<InvitationLinkData> GetLinkDataAsync(string key, string email, ConfirmType? confirmType, EmployeeType employeeType = EmployeeType.All, Guid? userId = null)
     {
         if (confirmType is ConfirmType.EmpInvite)
         {

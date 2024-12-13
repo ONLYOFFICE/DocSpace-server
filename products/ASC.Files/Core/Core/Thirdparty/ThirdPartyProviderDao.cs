@@ -214,13 +214,13 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = default)
+        bool excludeSubject = false, string roomId = null)
     {
         throw new NotImplementedException();
     }
     
     public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, 
-        string roomId = default)
+        string roomId = null)
     {
         throw new NotImplementedException();
     }
@@ -234,7 +234,7 @@ internal abstract class ThirdPartyProviderDao
     public Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
-        return default;
+        return null;
     }
 
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,

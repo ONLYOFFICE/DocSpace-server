@@ -509,7 +509,7 @@ public abstract class BaseIndexer<T>(Client client,
             }
             else
             {
-                if (newValue == default(T))
+                if (newValue == null)
                 {
                     source.Append($"ctx._source.remove('{sourceExprText[1..]}');");
                 }

@@ -113,7 +113,7 @@ public partial class SettingsController(MessageService messageService,
             }
         };
 
-        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
+        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
         {
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
         }

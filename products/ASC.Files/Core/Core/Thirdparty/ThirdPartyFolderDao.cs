@@ -28,7 +28,6 @@ using DriveFile = Google.Apis.Drive.v3.Data.File;
 
 namespace ASC.Files.Core.Core.Thirdparty;
 
-/// <inheritdoc />
 [Scope(GenericArguments = [typeof(BoxFile), typeof(BoxFolder), typeof(BoxItem)])]
 [Scope(GenericArguments = [typeof(FileMetadata), typeof(FolderMetadata), typeof(Metadata)])]
 [Scope(GenericArguments = [typeof(DriveFile), typeof(DriveFile), typeof(DriveFile)])]
@@ -137,7 +136,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         if (dao.CheckInvalidFilter(filterType))
         {
@@ -647,7 +646,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
     
-    public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, string roomId = default)
+    public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, string roomId = null)
     {
         throw new NotImplementedException();
     }
