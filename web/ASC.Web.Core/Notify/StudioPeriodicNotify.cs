@@ -255,7 +255,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #region 6 months whithout activity to owner SAAS Free
 
-                    else
+                    else if (nowDate.Day == tenant.CreationDateTime.Day || nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
                     {
                         var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
                         var lastAuditEventDate = lastAuditEvent != null ? lastAuditEvent.Date.Date : tenant.CreationDateTime.Date;
