@@ -149,6 +149,7 @@ public partial class SettingsController(MessageService messageService,
             };
 
             settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
+            settings.FeedbackAndSupportLink = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
             settings.ApiDocsLink = configuration["web:api-docs"];
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
