@@ -45,6 +45,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         CoreSettings coreSettings,
         IServiceProvider serviceProvider,
         AuditEventsRepository auditEventsRepository,
+        LoginEventsRepository loginEventsRepository,
         IDistributedCache distributedCache,
         IEventBus eventBus)
 {
@@ -260,7 +261,10 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
                         var lastAuditEventDate = lastAuditEvent != null ? lastAuditEvent.Date.Date : tenant.CreationDateTime.Date;
 
-                        if (lastAuditEventDate.AddYears(1) <= nowDate)
+                        var lastLoginEvent = await loginEventsRepository.GetLastSuccessEventAsync(tenant.Id);
+                        var lastLoginEventDate = lastLoginEvent != null ? lastLoginEvent.Date.Date : tenant.CreationDateTime.Date;
+
+                        if ((lastAuditEventDate > lastLoginEventDate ? lastAuditEventDate : lastLoginEventDate).AddYears(1) <= nowDate)
                         {
                             if (nowDate >= startDateToNotifyUnusedPortals && nowDate.Day == tenant.CreationDateTime.Day)
                             {
