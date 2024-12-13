@@ -570,9 +570,9 @@ $activity.Key
   </pattern>
 
   <!-- saas admin startup warning after half year v1 for DocSpace -->
-  <pattern id="saas_admin_startup_warning_after_half_year_v1">
-    <subject resource="|subject_saas_admin_startup_warning_after_half_year_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_startup_warning_after_half_year_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  <pattern id="saas_admin_startup_warning_after_year_v1">
+    <subject resource="|subject_saas_admin_startup_warning_after_year_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_startup_warning_after_year_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- saas admin trial modules v1 for DocSpace -->

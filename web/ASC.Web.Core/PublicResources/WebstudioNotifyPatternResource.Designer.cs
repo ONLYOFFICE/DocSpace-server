@@ -1724,9 +1724,9 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; l [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_startup_warning_after_half_year_v1 {
+        public static string pattern_saas_admin_startup_warning_after_year_v1 {
             get {
-                return ResourceManager.GetString("pattern_saas_admin_startup_warning_after_half_year_v1", resourceCulture);
+                return ResourceManager.GetString("pattern_saas_admin_startup_warning_after_year_v1", resourceCulture);
             }
         }
         
@@ -2818,9 +2818,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace will be deleted.
         /// </summary>
-        public static string subject_saas_admin_startup_warning_after_half_year_v1 {
+        public static string subject_saas_admin_startup_warning_after_year_v1 {
             get {
-                return ResourceManager.GetString("subject_saas_admin_startup_warning_after_half_year_v1", resourceCulture);
+                return ResourceManager.GetString("subject_saas_admin_startup_warning_after_year_v1", resourceCulture);
             }
         }
         

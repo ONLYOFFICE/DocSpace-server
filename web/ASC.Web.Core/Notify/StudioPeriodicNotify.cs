@@ -253,18 +253,18 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #endregion
 
-                    #region 6 months whithout activity to owner SAAS Free
+                    #region 1 year whithout activity to owner SAAS Free
 
                     else if (nowDate.Day == tenant.CreationDateTime.Day || nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
                     {
                         var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
                         var lastAuditEventDate = lastAuditEvent != null ? lastAuditEvent.Date.Date : tenant.CreationDateTime.Date;
 
-                        if (lastAuditEventDate.AddMonths(6) <= nowDate)
+                        if (lastAuditEventDate.AddYears(1) <= nowDate)
                         {
                             if (nowDate >= startDateToNotifyUnusedPortals && nowDate.Day == tenant.CreationDateTime.Day)
                             {
-                                action = Actions.SaasAdminStartupWarningAfterHalfYearV1;
+                                action = Actions.SaasAdminStartupWarningAfterYearV1;
                                 toowner = true;
 
                                 orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
