@@ -45,7 +45,7 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
                 RoomDataLifetimePeriod.Day => expiration.AddDays(-Value.Value),
                 RoomDataLifetimePeriod.Month => expiration.AddMonths(-Value.Value),
                 RoomDataLifetimePeriod.Year => expiration.AddYears(-Value.Value),
-                _ => throw new Exception("Unknown lifetime period"),
+                _ => throw new Exception("Unknown lifetime period")
             };
         }
         else

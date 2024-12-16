@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-
 using ValidationResult = System.ComponentModel.DataAnnotations.ValidationResult;
 
 namespace ASC.Core.Common.EF;
@@ -106,12 +104,11 @@ public class BaseDbContext(DbContextOptions options) : DbContext(options)
     private void ValidateEntries()
     {
         var entities = from e in ChangeTracker.Entries()
-                       where e.State == EntityState.Added
-                           || e.State == EntityState.Modified
+                       where e.State is EntityState.Added or EntityState.Modified
                        select e.Entity;
         foreach (var entity in entities)
         {
-            List<ValidationResult> results =  new();
+            List<ValidationResult> results = [];
             if (!Validator.TryValidateObject(entity, new ValidationContext(entity), results, true))
             {
                 throw new ArgumentException(results.First().ErrorMessage);

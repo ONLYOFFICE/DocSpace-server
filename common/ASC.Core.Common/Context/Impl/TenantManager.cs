@@ -177,7 +177,7 @@ public class TenantManager(
 
             if (tenant == null)
             {
-                var origin = context.Request.Headers[HeaderNames.Origin].FirstOrDefault();
+                string origin = context.Request.Headers.Origin;
 
                 if (!string.IsNullOrEmpty(origin))
                 {
@@ -246,7 +246,7 @@ public class TenantManager(
 
             if (tenant == null)
             {
-                var origin = context.Request.Headers[HeaderNames.Origin].FirstOrDefault();
+                string origin = context.Request.Headers.Origin;
 
                 if (!string.IsNullOrEmpty(origin))
                 {

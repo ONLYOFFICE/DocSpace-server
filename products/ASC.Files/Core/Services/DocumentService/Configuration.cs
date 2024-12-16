@@ -144,7 +144,7 @@ public class Configuration<T>(
     /// <type>System.String, System</type>
     public string Type
     {
-        set => EditorType = (EditorType)Enum.Parse(typeof(EditorType), value, true);
+        set => EditorType = Enum.Parse<EditorType>(value, true);
         get => EditorType.ToString().ToLower();
     }
 
@@ -173,7 +173,7 @@ public class DocumentConfig<T>(
     private string _key = string.Empty;
     private FileReferenceData _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
-    public InfoConfig<T> Info { get; set; } = infoConfig;
+    public InfoConfig<T> Info { get; } = infoConfig;
     public bool IsLinkedForMe { get; set; }
 
     public string Key
@@ -894,7 +894,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// Embed url
     /// </summary>
-    public string EmbedUrl => ShareLinkParam != null && ShareLinkParam.IndexOf(FilesLinkUtility.ShareKey) != -1 ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null;
+    public string EmbedUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null;
 
     /// <summary>
     /// Save url
@@ -909,7 +909,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// Share url
     /// </summary>
-    public string ShareUrl => ShareLinkParam != null && ShareLinkParam.IndexOf(FilesLinkUtility.ShareKey) != -1 ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null;
+    public string ShareUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null;
 
     /// <summary>
     /// Toolbar docked

@@ -376,6 +376,10 @@ public class ValidationInfo
     /// <summary>Link ID</summary>
     /// <type>System.Guid, System</type>
     public Guid LinkId { get; set; }
+    
+    /// <summary>Specifies whether the user is authenticated or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsAuthenticated { get; set; }
 }
 
 public record DownloadSession

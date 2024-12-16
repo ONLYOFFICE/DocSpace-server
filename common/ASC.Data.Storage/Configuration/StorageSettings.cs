@@ -29,7 +29,7 @@ namespace ASC.Data.Storage.Configuration;
 [Singleton]
 public class BaseStorageSettingsListener(IServiceProvider serviceProvider, ICacheNotify<ConsumerCacheItem> cacheNotify)
 {
-    private readonly object _locker = new();
+    private readonly Lock _locker = new();
     private volatile bool _subscribed;
 
     public void Subscribe()

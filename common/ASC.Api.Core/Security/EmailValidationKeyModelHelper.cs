@@ -26,8 +26,6 @@
 
 using System.Net.Mail;
 
-using static ASC.Security.Cryptography.EmailValidationKeyProvider;
-
 using SecurityContext = ASC.Core.SecurityContext;
 using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult;
 
@@ -52,7 +50,7 @@ public class EmailValidationKeyModelHelper(
     {
         var request = QueryHelpers.ParseQuery(httpContextAccessor.HttpContext.Request.Headers["confirm"]);
 
-        var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : null;
+        var type = request.TryGetValue("type", out var value) ? (string)value : null;
 
         ConfirmType? cType = null;
         if (ConfirmTypeExtensions.TryParse(type, out var confirmType))

@@ -79,10 +79,10 @@ internal class LinkDao<T>(
 
         var fromDb = await filesDbContext.SourceIdAsync(tenantId, mappedLinkedId, _authContext.CurrentAccount.ID);
 
-        if (Equals(fromDb, default))
+        if (Equals(fromDb, null))
         {
             return default;
-    }
+        }
 
         return (T)Convert.ChangeType(fromDb, typeof(T));
     }
@@ -98,12 +98,28 @@ internal class LinkDao<T>(
 
         var fromDb = await filesDbContext.LinkedIdAsync(tenantId, mappedSourceId, _authContext.CurrentAccount.ID);
 
-        if (Equals(fromDb, default))
+        if (Equals(fromDb, null))
         {
             return default;
-    }
+        }
 
         return (T)Convert.ChangeType(fromDb, typeof(T));
+    }
+
+    public async Task<Dictionary<T, T>> GetLinkedIdsAsync(IEnumerable<T> sourceIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var mapping = daoFactory.GetMapping<T>();
+
+        var mappedIds = await sourceIds.ToAsyncEnumerable().SelectAwait(async x => await mapping.MappingIdAsync(x)).ToListAsync();
+        var source = mappedIds.Select(x => x.ToString());
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        
+        return await filesDbContext.FilesLinksAsync(tenantId, source, _authContext.CurrentAccount.ID)
+            .ToDictionaryAsync(
+                x => (T)Convert.ChangeType(x.SourceId, typeof(T)), 
+                x => (T)Convert.ChangeType(x.LinkedId, typeof(T)));
     }
 
     public async Task DeleteLinkAsync(T sourceId)

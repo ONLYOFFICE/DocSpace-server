@@ -97,6 +97,11 @@ internal abstract class ThirdPartyProviderDao
     {
         return Task.FromResult<EntryProperties<string>>(null);
     }
+    
+    public Task<Dictionary<string, EntryProperties<string>>> GetPropertiesAsync(IEnumerable<string> filesIds)
+    {
+        return Task.FromResult<Dictionary<string, EntryProperties<string>>>(null);
+    }
 
     public Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
     {
@@ -209,27 +214,27 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = default)
+        bool excludeSubject = false, string roomId = null)
     {
         throw new NotImplementedException();
     }
     
     public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, 
-        string roomId = default)
+        string roomId = null)
     {
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
 
-    public Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
-        return default;
+        return null;
     }
 
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
@@ -347,7 +352,7 @@ internal abstract class ThirdPartyProviderDao
             return rooms;
         }
 
-        return rooms.Where(x => x.Title.IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1);
+        return rooms.Where(x => x.Title.Contains(text, StringComparison.OrdinalIgnoreCase));
     }
 
     internal static string GetProviderType(ProviderFilter providerFilter)

@@ -6,7 +6,6 @@
     <OutputType>Library</OutputType>
     <NoWarn>NU1701</NoWarn>
     <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>12</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Grpc" Version="2.46.6">

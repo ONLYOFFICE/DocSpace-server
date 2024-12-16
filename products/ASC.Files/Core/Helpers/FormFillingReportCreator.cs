@@ -77,7 +77,7 @@ public class FormFillingReportCreator(
             {
                 Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture),
                 Value = resultFormNumber
-            },
+            }
         };
 
         var formLink = new FormsItemData

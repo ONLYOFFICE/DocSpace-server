@@ -685,7 +685,7 @@ public class FileSharing(
         var folderDao = daoFactory.GetFolderDao<T>();
         var folders = await folderDao.GetFoldersAsync(folderIds).ToListAsync();
 
-        var entries = files.Concat(folders.Cast<FileEntry<T>>());
+        var entries = files.Concat(folders.Select(FileEntry<T> (r) => r));
 
         foreach (var entry in entries)
         {
@@ -800,14 +800,13 @@ public class FileSharing(
         await foreach (var member in securityDao.GetGroupMembersWithSecurityAsync(entry, groupId, text, offset, count))
         {
             var isOwner = entry.CreateBy == member.UserId;
-            var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(member.UserId);
             
             yield return new GroupMemberSecurity
             {
                 User = await userManager.GetUsersAsync(member.UserId),
                 GroupShare = member.GroupShare,
-                UserShare = isOwner || isDocSpaceAdmin ? FileShare.RoomManager : member.UserShare,
-                CanEditAccess = canEditAccess && !isOwner && userId != member.UserId && !isDocSpaceAdmin,
+                UserShare = isOwner ? FileShare.RoomManager : member.UserShare,
+                CanEditAccess = canEditAccess && !isOwner && userId != member.UserId,
                 Owner = isOwner
             };
         }

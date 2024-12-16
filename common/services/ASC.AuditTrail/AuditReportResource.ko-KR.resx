@@ -867,4 +867,67 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>초대장이 다시 전송되었습니다: {0}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>클라이언트의 {0} 활성화가 변경되었습니다</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>클라이언트의 {0} 가시성이 변경되었습니다</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>클라이언트가 생성되었습니다</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>{0} 클라이언트가 삭제되었습니다</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>파일: {0}. 인덱스가 변경되었습니다: {1} &gt; {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>폴더: {0}. 인덱스가 변경되었습니다: {1} &gt; {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>폴더: {0}. 인덱스가 재정렬되었습니다</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>{0} 클라이언트에 대한 인증 코드가 생성되었습니다</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>{0} 클라이언트에 대한 개인 액세스 토큰이 생성되었습니다</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>클라이언트의 {0} 시크릿이 재생성되었습니다</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>{0} 클라이언트 액세스가 취소되었습니다</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>룸: {0}. 다운로드 거부가 비활성화되었습니다</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>룸: {0}. 다운로드 거부가 활성화되었습니다</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>룸 인덱싱이 비활성화되었습니다</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>룸 인덱싱이 활성화되었습니다</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>수명이 비활성화되었습니다</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>수명이 설정되었습니다. 값: {0}. 기간: {1}. 영구 삭제: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>룸: {0}. 워터마크가 비활성화되었습니다</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>룸: {0}. 워터마크가 활성화되었습니다</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>{0} 클라이언트가 업데이트되었습니다</value>
+  </data>
 </root>

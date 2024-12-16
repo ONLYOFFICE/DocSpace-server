@@ -31,6 +31,7 @@ public interface ILinkDao<T>
     Task AddLinkAsync(T sourceId, T linkedId);
     Task<T> GetSourceAsync(T linkedId);
     Task<T> GetLinkedAsync(T sourceId);
+    Task<Dictionary<T, T>> GetLinkedIdsAsync(IEnumerable<T> sourceIds);
     Task DeleteLinkAsync(T sourceId);
     Task DeleteAllLinkAsync(T sourceId);
 }

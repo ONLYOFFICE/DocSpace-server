@@ -929,7 +929,7 @@ internal abstract class SecurityBaseDao<T>(
     {
         var result = mapper.Map<SecurityTreeRecord, FileShareRecord<T>>(r);
 
-        if (r.FolderId != default)
+        if (r.FolderId != 0)
         {
             result.EntryId = (T)Convert.ChangeType(r.FolderId, typeof(T));
         }
@@ -1096,7 +1096,7 @@ internal class SecurityDao(
         {
             return entry.FileEntryType is FileEntryType.File && 
                    await filesDbContext.IsPureSharedAsync(tenantId, entry.Id.ToString(), FileEntryType.File, subjectTypes);
-}
+        }
 
         if (entry.RootFolderType is not FolderType.VirtualRooms)
         {
@@ -1171,7 +1171,7 @@ internal class ThirdPartySecurityDao(
         return Task.FromResult(entry.RootFolderType is FolderType.VirtualRooms);
     }
 
-    private async ValueTask GetFoldersForShareAsync(string folderId, ICollection<FileEntry<string>> folders)
+    private async ValueTask GetFoldersForShareAsync(string folderId, List<FileEntry<string>> folders)
     {
         var selector = selectorFactory.GetSelector(folderId);
         var folderDao = selector.GetFolderDao(folderId);

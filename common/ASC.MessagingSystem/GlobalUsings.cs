@@ -33,7 +33,6 @@ global using ASC.Common.Log;
 global using ASC.Common.Threading;
 global using ASC.Core;
 global using ASC.Core.Billing;
-global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Messaging;
 global using ASC.Core.Notify.Socket;

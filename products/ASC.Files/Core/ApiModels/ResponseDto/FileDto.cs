@@ -229,11 +229,22 @@ public class FileDtoHelper(
 
         if (fileType == FileType.Pdf)
         {
-            var linkDao = daoFactory.GetLinkDao<T>();
             var folderDao = daoFactory.GetCacheFolderDao<T>();
 
-            var linkedIdTask = linkDao.GetLinkedAsync(file.Id);
-            var propertiesTask = fileDao.GetProperties(file.Id);
+            Task<T> linkedIdTask;
+            Task<EntryProperties<T>> propertiesTask;
+            
+            if (file.FormInfo != null)
+            {
+                linkedIdTask = Task.FromResult(file.FormInfo.LinkedId);
+                propertiesTask = Task.FromResult(file.FormInfo.Properties);
+            }
+            else
+            {
+                linkedIdTask = daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
+                propertiesTask = fileDao.GetProperties(file.Id);
+            }
+            
             var currentFolderTask = folderDao.GetFolderAsync(file.ParentId);
             await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
 

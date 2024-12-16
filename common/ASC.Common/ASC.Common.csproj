@@ -12,9 +12,8 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <WarningsAsErrors></WarningsAsErrors>
     <NoWarn>$(NoWarn);NU1605</NoWarn>
-	  <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>enable</ImplicitUsings>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <LangVersion>12</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -36,7 +35,7 @@
     <PackageReference Include="Confluent.Kafka" Version="2.6.1" />
     <PackageReference Include="DistributedLock.Redis" Version="1.0.3" />
     <PackageReference Include="DistributedLock.ZooKeeper" Version="1.0.0" />
-    <PackageReference Include="JWT" Version="10.1.1" />
+    <PackageReference Include="JWT" Version="11.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />

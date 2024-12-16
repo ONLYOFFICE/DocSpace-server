@@ -3,8 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
 	<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-	  <ImplicitUsings>enable</ImplicitUsings>
-	  <LangVersion>12</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

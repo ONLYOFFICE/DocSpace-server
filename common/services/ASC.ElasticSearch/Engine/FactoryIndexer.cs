@@ -686,7 +686,7 @@ public class FactoryIndexer
         state = new State
         {
             Indexing = _factoryIndexerHelper.Indexing,
-            LastIndexed = _factoryIndexerHelper.LastIndexed != DateTime.MinValue ? _factoryIndexerHelper.LastIndexed : default(DateTime?)
+            LastIndexed = _factoryIndexerHelper.LastIndexed != DateTime.MinValue ? _factoryIndexerHelper.LastIndexed : null
         };
 
         if (state.LastIndexed.HasValue)

@@ -148,7 +148,7 @@ public static class DocumentService
 
         documentRevisionId = GenerateRevisionId(documentRevisionId);
 
-        documentConverterUrl = FilesLinkUtility.AddQueryString(documentConverterUrl, new Dictionary<string, string>() {
+        documentConverterUrl = FilesLinkUtility.AddQueryString(documentConverterUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, documentRevisionId }
         });
 
@@ -200,9 +200,9 @@ public static class DocumentService
         string dataResponse;
 
         using (var response = await httpClient.SendAsync(request))
-            {
+        {
             dataResponse = await response.Content.ReadAsStringAsync();
-            }
+        }
 
         return GetResponseUri(dataResponse);
     }
@@ -231,7 +231,7 @@ public static class DocumentService
         string signatureSecret,
         IHttpClientFactory clientFactory)
     {
-        documentTrackerUrl = FilesLinkUtility.AddQueryString(documentTrackerUrl, new Dictionary<string, string>() {
+        documentTrackerUrl = FilesLinkUtility.AddQueryString(documentTrackerUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, documentRevisionId }
         });
 
@@ -291,7 +291,7 @@ public static class DocumentService
         {
             using var response = await httpClient.SendAsync(request, cancellationTokenSource.Token);
             dataResponse = await response.Content.ReadAsStringAsync(cancellationTokenSource.Token);
-            }
+        }
         catch (HttpRequestException e) when (e.HttpRequestError == HttpRequestError.NameResolutionError)
         {
             return new CommandResponse
@@ -344,7 +344,7 @@ public static class DocumentService
        string signatureSecret,
        IHttpClientFactory clientFactory)
     {
-        docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string>() {
+        docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, requestKey }
         });
 
@@ -621,7 +621,8 @@ public static class DocumentService
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
         public required string Url { get; set; }
         public required string Region { get; set; }
-        public WatermarkOnDraw Watermark { get; set; }        public string Token { get; set; }
+        public WatermarkOnDraw Watermark { get; set; }        
+        public string Token { get; set; }
         public PdfData Pdf { get; set; }
 
     }

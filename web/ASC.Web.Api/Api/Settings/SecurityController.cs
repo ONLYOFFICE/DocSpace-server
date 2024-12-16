@@ -327,7 +327,7 @@ public class SecurityController(
     public async Task<object> IsProductAdministratorAsync(UserProductIdsRequestDto inDto)
     {
         var result = await webItemSecurity.IsProductAdministratorAsync(inDto.ProductId, inDto.UserId);
-        return new { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = result };
+        return new { inDto.ProductId, inDto.UserId, Administrator = result };
     }
 
     /// <summary>

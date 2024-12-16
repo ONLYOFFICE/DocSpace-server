@@ -122,7 +122,7 @@ public class TfaappController(
         var result = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
 
         var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
-        var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : "";
+        var type = request.TryGetValue("type", out var value) ? (string)value : "";
         cookiesManager.ClearCookies(CookiesType.ConfirmKey, $"_{type}");
 
         return result;
