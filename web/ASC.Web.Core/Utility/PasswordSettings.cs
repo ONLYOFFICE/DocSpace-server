@@ -192,7 +192,7 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
         var text = new StringBuilder();
 
         text.Append($"{Resource.ErrorPasswordMessage} ");
-        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettingsManager.MaxLength);
+        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, MaxLength);
         text.Append($", {Resource.ErrorPasswordOnlyLatinLetters}");
         text.Append($", {Resource.ErrorPasswordNoSpaces}");
 

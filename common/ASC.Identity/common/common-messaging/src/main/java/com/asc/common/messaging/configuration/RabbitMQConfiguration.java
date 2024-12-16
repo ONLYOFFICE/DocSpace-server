@@ -115,6 +115,7 @@ public class RabbitMQConfiguration {
                   .withArgument("x-max-length-bytes", value.getMaxBytes())
                   .withArgument("x-message-ttl", value.getMessageTTL())
                   .withArgument("x-overflow", "reject-publish")
+                  .withArgument("x-single-active-consumer", value.isSingleActiveConsumer())
                   .build();
           var binding = BindingBuilder.bind(queue).to(exchange).with(value.getRouting()).noargs();
 

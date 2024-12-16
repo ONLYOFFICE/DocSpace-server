@@ -28,7 +28,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ASC.Core.Common.Migrations;
 
-public partial class TestMigration : Migration
+public partial class TestMigration : Microsoft.EntityFrameworkCore.Migrations.Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
     {

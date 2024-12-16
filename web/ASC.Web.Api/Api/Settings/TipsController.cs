@@ -59,7 +59,7 @@ public class TipsController(ILoggerProvider option,
         {
             try
             {
-                var tenant = await tenantManager.GetCurrentTenantAsync();
+                var tenant = tenantManager.GetCurrentTenant();
                 var request = new HttpRequestMessage
                 {
                     RequestUri = new Uri($"{setupInfo.TipsAddress}/tips/deletereaded")

@@ -29,7 +29,7 @@ using NLog;
 var options = new WebApplicationOptions
 {
     Args = args,
-    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : default
+    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : null
 };
 
 var builder = WebApplication.CreateBuilder(options);
@@ -72,7 +72,7 @@ try
     await eventBus.SubscribeAsync<NotifySendMessageRequestedIntegrationEvent, NotifySendMessageRequestedIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
-    await app.RunWithTasksAsync();
+    await app.RunWithTasksAsync(awaitTasks: false);
 }
 catch (Exception ex)
 {

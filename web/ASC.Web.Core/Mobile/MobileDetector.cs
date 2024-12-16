@@ -54,7 +54,7 @@ public class MobileDetector
     public bool IsRequestMatchesMobile()
     {
         bool? result = false;
-        var ua = _httpContextAccessor.HttpContext.Request.Headers["User-Agent"].ToString();
+        var ua = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString();
         var regex = _uaMobileRegex;
         if (!string.IsNullOrEmpty(ua) && regex != null)
         {

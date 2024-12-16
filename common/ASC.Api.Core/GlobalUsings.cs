@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Linq.Expressions;
@@ -44,6 +45,7 @@ global using System.Threading.Channels;
 global using System.Threading.RateLimiting;
 global using System.Web;
 global using Apache.NMS;
+
 global using ASC.Api.Core;
 global using ASC.Api.Core.Auth;
 global using ASC.Api.Core.Convention;

@@ -43,10 +43,8 @@ public class FilesChunkedUploadSessionHolder : CommonChunkedUploadSessionHolder
         {
             return ((await InternalUploadChunkAsync<int>(uploadSession, stream, length)).ToString(), null);
         }
-        else
-        {
-            return (await InternalUploadChunkAsync<string>(uploadSession, stream, length), null);
-        }
+
+        return (await InternalUploadChunkAsync<string>(uploadSession, stream, length), null);
     }
 
     private async Task<T> InternalUploadChunkAsync<T>(CommonChunkedUploadSession uploadSession, Stream stream, long length)

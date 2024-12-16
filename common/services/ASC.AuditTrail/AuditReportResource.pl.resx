@@ -802,4 +802,73 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Użytkownicy [{0}]. Przesłany formularz: {1}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Zmieniono aktywację klienta {0}</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Zmieniono widoczność klienta {0}</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Utworzono klienta</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Usunięto klienta {0}</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Plik: {0}. Indeks został zmieniony z {1} na {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Katalog: {0}. Indeks został zmieniony z {1} na {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Katalog: {0}. Indeksy zostały uporządkowane</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Wygenerowano kod autoryzacji dla klienta {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Wygenerowano osobisty token dostępu dla klienta {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Wygenerowano ponownie sekret klienta {0}</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Cofnięto dostęp klienta {0}</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Pokój: {0}. Odmowa pobierania jest wyłączona</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Pokój: {0}. Odmowa pobierania jest włączona</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indeksowanie pokoju jest wyłączone</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indeksowanie pokoju jest włączone</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Okres ważności jest wyłączony</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Okres ważności jest włączony. Wartość: {0}. Okres: {1}. Usuń trwale: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Pokój: {0}. Znak wodny jest wyłączony</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Pokój: {0}. Znak wodny włączony</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Zaktualizowano klienta {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Eksport indeksu pokoju zapisanego w Dokumentach</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Ponownie wysłane zaproszenie: {0}</value>
+  </data>
 </root>

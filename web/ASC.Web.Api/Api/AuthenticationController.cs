@@ -36,7 +36,6 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
-[AllowAnonymous]
 [WebhookDisable]
 [ControllerName("authentication")]
 public class AuthenticationController(
@@ -70,7 +69,6 @@ public class AuthenticationController(
     DbLoginEventsManager dbLoginEventsManager,
     BruteForceLoginManager bruteForceLoginManager,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-    ILogger<AuthenticationController> logger,
     InvitationService invitationService,
     LoginProfileTransport loginProfileTransport,
     IMapper mapper)
@@ -84,7 +82,7 @@ public class AuthenticationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
     [SwaggerResponse(200, "Boolean value: true if the current user is authenticated", typeof(bool))]
-    [AllowNotPayment]
+    [AllowNotPayment, AllowAnonymous]
     [HttpGet]
     public bool GetIsAuthentificated()
     {
@@ -105,11 +103,11 @@ public class AuthenticationController(
     [SwaggerResponse(401, "User authentication failed")]
     [SwaggerResponse(403, "Auth code is not available")]
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
-    [AllowNotPayment]
+    [AllowNotPayment, AllowAnonymous]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
     {
-        var tenant = (await tenantManager.GetCurrentTenantAsync()).Id;
+        var tenant = (tenantManager.GetCurrentTenant()).Id;
         var user = (await GetUserAsync(inDto)).UserInfo;
         var sms = false;
 
@@ -124,7 +122,7 @@ public class AuthenticationController(
             {
                 if (await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true))
                 {
-                    await messageService.SendAsync(MessageAction.UserConnectedTfaApp, MessageTarget.Create(user.Id));
+                    messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(user.Id));
                 }
             }
             else
@@ -155,12 +153,11 @@ public class AuthenticationController(
         }
         catch (Exception ex)
         {
-            await messageService.SendAsync(user.DisplayUserName(false, displayUserSettingsHelper), sms
+            messageService.Send(user.DisplayUserName(false, displayUserSettingsHelper), sms
                                                                           ? MessageAction.LoginFailViaApiSms
                                                                           : MessageAction.LoginFailViaApiTfa,
                                 MessageTarget.Create(user.Id));
-            logger.ErrorWithException(ex);
-            throw new AuthenticationException("User authentication failed");
+            throw new AuthenticationException("User authentication failed", ex);
         }
         finally
         {
@@ -182,7 +179,7 @@ public class AuthenticationController(
     [SwaggerResponse(401, "User authentication failed")]
     [SwaggerResponse(404, "The user could not be found")]
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
-    [AllowNotPayment]
+    [AllowNotPayment, AllowAnonymous]
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
     {
@@ -208,7 +205,7 @@ public class AuthenticationController(
                 return new AuthenticationTokenDto
                 {
                     Sms = true,
-                    ConfirmUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneActivation)
+                    ConfirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PhoneActivation)
                 };
             }
 
@@ -219,7 +216,7 @@ public class AuthenticationController(
                 Sms = true,
                 PhoneNoise = SmsSender.BuildPhoneNoise(user.MobilePhone),
                 Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval)),
-                ConfirmUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneAuth)
+                ConfirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PhoneAuth)
             };
         }
 
@@ -227,7 +224,7 @@ public class AuthenticationController(
         {
             if (!await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
             {
-                var (urlActivation, keyActivation) = await commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaActivation);
+                var (urlActivation, keyActivation) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaActivation);
                 await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");
                 return new AuthenticationTokenDto
                 {
@@ -237,7 +234,7 @@ public class AuthenticationController(
                 };
             }
 
-            var (urlAuth, keyAuth) = await commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaAuth);
+            var (urlAuth, keyAuth) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaAuth);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyAuth, true, $"_{ConfirmType.TfaAuth}");
             return new AuthenticationTokenDto
             {
@@ -254,7 +251,7 @@ public class AuthenticationController(
             if (!string.IsNullOrEmpty(inDto.Culture))
             {
                 await userManager.ChangeUserCulture(user, inDto.Culture);
-                await messageService.SendAsync(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+                messageService.Send(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
             }
 
             var outDto = new AuthenticationTokenDto
@@ -264,7 +261,7 @@ public class AuthenticationController(
 
             if (!session)
             {
-                var tenant = await tenantManager.GetCurrentTenantIdAsync();
+                var tenant = tenantManager.GetCurrentTenantId();
                 var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
 
                 outDto.Expires = new ApiDateTime(tenantManager, timeZoneConverter, expires);
@@ -274,9 +271,8 @@ public class AuthenticationController(
         }
         catch (Exception ex)
         {
-            await messageService.SendAsync(user.DisplayUserName(false, displayUserSettingsHelper), viaEmail ? MessageAction.LoginFailViaApi : MessageAction.LoginFailViaApiSocialAccount);
-            logger.ErrorWithException(ex);
-            throw new AuthenticationException("User authentication failed");
+            messageService.Send(user.DisplayUserName(false, displayUserSettingsHelper), viaEmail ? MessageAction.LoginFailViaApi : MessageAction.LoginFailViaApiSocialAccount);
+            throw new AuthenticationException("User authentication failed", ex);
         }
         finally
         {
@@ -294,19 +290,19 @@ public class AuthenticationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
     [SwaggerResponse(200, "Ok", typeof(object))]
-    [AllowNotPayment]
+    [AllowNotPayment, AllowAnonymous]
     [HttpPost("logout")]
     public async Task<object> LogoutAsync()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await dbLoginEventsManager.LogOutEventAsync(tenantId, loginEventId);
         await quotaSocketManager.LogoutSession(securityContext.CurrentAccount.ID, loginEventId);
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var loginName = user.DisplayUserName(false, displayUserSettingsHelper);
-        await messageService.SendAsync(loginName, MessageAction.Logout);
+        messageService.Send(loginName, MessageAction.Logout);
 
         cookiesManager.ClearCookies(CookiesType.AuthKey);
         cookiesManager.ClearCookies(CookiesType.SocketIO);
@@ -343,7 +339,7 @@ public class AuthenticationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
     [SwaggerResponse(200, "Validation result: Ok, Invalid, or Expired", typeof(ConfirmDto))]
-    [AllowNotPayment, AllowSuspended]
+    [AllowNotPayment, AllowSuspended, AllowAnonymous]
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
     {
@@ -380,7 +376,7 @@ public class AuthenticationController(
         await apiContext.AuthByClaimAsync();
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         inDto.MobilePhone = await smsManager.SaveMobilePhoneAsync(user, inDto.MobilePhone);
-        await messageService.SendAsync(MessageAction.UserUpdatedMobileNumber, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), inDto.MobilePhone);
+        messageService.Send(MessageAction.UserUpdatedMobileNumber, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), inDto.MobilePhone);
 
         return new AuthenticationTokenDto
         {
@@ -402,7 +398,7 @@ public class AuthenticationController(
     [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
     [SwaggerResponse(400, "userName, password or passworHash is empty")]
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
-    [AllowNotPayment]
+    [AllowNotPayment, AllowAnonymous]
     [HttpPost("sendsms")]
     public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)
     {
@@ -416,7 +412,7 @@ public class AuthenticationController(
             Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
         };
     }
-
+    
     private async Task<UserInfoWrapper> GetUserAsync(AuthRequestsDto inDto)
     {
         var wrapper = new UserInfoWrapper
@@ -435,9 +431,9 @@ public class AuthenticationController(
                     
                 var checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
 
-                if (checkKeyResult == Security.Cryptography.EmailValidationKeyProvider.ValidationResult.Ok)
+                if (checkKeyResult == ValidationResult.Ok)
                 {
-                    user = email.Contains("@")
+                    user = email.Contains('@')
                                    ? await userManager.GetUserByEmailAsync(email)
                                    : await userManager.GetUsersAsync(new Guid(email));
 
@@ -484,14 +480,14 @@ public class AuthenticationController(
 
                 if(user == null || Equals(user, Constants.LostUser))
                 {
-                    user = await userManager.GetUsersByPasswordHashAsync(await tenantManager.GetCurrentTenantIdAsync(), inDto.UserName, inDto.PasswordHash);
+                    user = await userManager.GetUsersByPasswordHashAsync(tenantManager.GetCurrentTenantId(), inDto.UserName, inDto.PasswordHash);
                 }
 
                 user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, user);
             }
             else
             {
-                if (!(coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync())).Oauth))
+                if (!(coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId())).Oauth))
                 {
                     throw new Exception(Resource.ErrorNotAllowedOption);
                 }
@@ -508,24 +504,23 @@ public class AuthenticationController(
         }
         catch (BruteForceCredentialException)
         {
-            await messageService.SendAsync(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailBruteForce);
+            messageService.Send(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailBruteForce);
             throw new BruteForceCredentialException(Resource.ErrorTooManyLoginAttempts);
         }
         catch (RecaptchaException)
         {
-            await messageService.SendAsync(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailRecaptcha);
+            messageService.Send(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailRecaptcha);
             throw new RecaptchaException(Resource.RecaptchaInvalid);
         }
         catch (Exception ex)
         {
-            await messageService.SendAsync(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, action);
-            logger.ErrorWithException(ex);
-            throw new AuthenticationException("User authentication failed");
+            messageService.Send(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, action);
+            throw new AuthenticationException("User authentication failed", ex);
         }
         wrapper.UserInfo = user;
         return wrapper;
     }
-
+    
     private async Task<UserInfo> GetUserByThirdParty(LoginProfile loginProfile)
     {
         try
@@ -588,8 +583,8 @@ public class AuthenticationController(
             throw;
         }
     }
-
-        private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
+    
+    private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
     {
         if (string.IsNullOrEmpty(loginProfile.EMail))
         {
@@ -616,7 +611,7 @@ public class AuthenticationController(
 
         return userInfo;
     }
-
+    
     private UserInfo ProfileToUserInfo(LoginProfile loginProfile)
     {
         if (string.IsNullOrEmpty(loginProfile.EMail))
@@ -649,6 +644,7 @@ public class AuthenticationController(
 
         return userInfo;
     }
+    
     private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)
     {
         var userId = Guid.Empty;

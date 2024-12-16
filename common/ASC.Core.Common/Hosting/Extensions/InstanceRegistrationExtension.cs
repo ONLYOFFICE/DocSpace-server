@@ -49,7 +49,7 @@ public static class InstanceRegistrationExtension
 
             entity.Property(e => e.WorkerTypeName)
                   .HasColumnName("worker_type_name")
-                  .HasColumnType("varchar(255)")
+                  .HasColumnType("varchar")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci")
                   .IsRequired();
@@ -61,7 +61,7 @@ public static class InstanceRegistrationExtension
 
             entity.Property(e => e.InstanceRegistrationId)
                   .HasColumnName("instance_registration_id")
-                  .HasColumnType("varchar(255)")
+                  .HasColumnType("varchar")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci")
                   .IsRequired();
@@ -86,7 +86,7 @@ public static class InstanceRegistrationExtension
 
             entity.Property(e => e.WorkerTypeName)
                   .HasColumnName("worker_type_name")
-                  .HasColumnType("varchar(255)")
+                  .HasColumnType("varchar")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci")
                   .IsRequired();
@@ -98,7 +98,7 @@ public static class InstanceRegistrationExtension
 
             entity.Property(e => e.InstanceRegistrationId)
                   .HasColumnName("instance_registration_id")
-                  .HasColumnType("varchar(255)")
+                  .HasColumnType("varchar")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci")
                   .IsRequired();

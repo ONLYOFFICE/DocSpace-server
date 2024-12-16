@@ -144,7 +144,7 @@ public class Configuration<T>(
     /// <type>System.String, System</type>
     public string Type
     {
-        set => EditorType = (EditorType)Enum.Parse(typeof(EditorType), value, true);
+        set => EditorType = Enum.Parse<EditorType>(value, true);
         get => EditorType.ToString().ToLower();
     }
 
@@ -173,7 +173,7 @@ public class DocumentConfig<T>(
     private string _key = string.Empty;
     private FileReferenceData _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
-    public InfoConfig<T> Info { get; set; } = infoConfig;
+    public InfoConfig<T> Info { get; } = infoConfig;
     public bool IsLinkedForMe { get; set; }
 
     public string Key
@@ -187,23 +187,23 @@ public class DocumentConfig<T>(
 	public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
-    public async Task<FileReferenceData> GetReferenceData(File<T> file)
+    public FileReferenceData GetReferenceData(File<T> file)
     {
         return _referenceData ??= new FileReferenceData
         {
             FileKey = file.Id.ToString(), 
-            InstanceId = (await tenantManager.GetCurrentTenantIdAsync()).ToString()
+            InstanceId = (tenantManager.GetCurrentTenantId()).ToString()
         };
     }
 
     public string Title { get; set; }
 
-    public async Task SetUrl(string val)
+    public void SetUrl(string val)
     {
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(val);
+        _fileUri = documentServiceConnector.ReplaceCommunityAddress(val);
     }
     
-    public async Task<string> GetUrl(File<T> file)
+    public string GetUrl(File<T> file)
     {
         if (!string.IsNullOrEmpty(_fileUri))
         {
@@ -211,7 +211,7 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, last));
+        _fileUri = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file, last));
 
         return _fileUri;
     }
@@ -278,7 +278,7 @@ public class EditorConfiguration<T>(
             return null;
         }
 
-        var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(file.Id.ToString());
+        var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(file.Id.ToString());
 
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
         {
@@ -579,6 +579,7 @@ public class Options
 
         _ = stringBuilder.Append(WatermarkOnDraw.Width.ToString(CultureInfo.InvariantCulture));
         _ = stringBuilder.Append(WatermarkOnDraw.Height.ToString(CultureInfo.InvariantCulture));
+        _ = stringBuilder.Append(string.Join(',',WatermarkOnDraw.Margins));
         _ = stringBuilder.Append(WatermarkOnDraw.Fill);
         _ = stringBuilder.Append(WatermarkOnDraw.Rotate);
         _ = stringBuilder.Append(WatermarkOnDraw.Transparent.ToString(CultureInfo.InvariantCulture));
@@ -615,13 +616,16 @@ public class WatermarkOnDraw(double widthInPixels, double heightInPixels, string
     /// Defines the watermark width measured in millimeters.
     /// </summary>
     [JsonPropertyName("width")]
-    public double Width { get; init; } = widthInPixels == 0 ? 200 : widthInPixels / DotsPerMm;
+    public double Width { get; init; } = widthInPixels == 0 ? 100 : widthInPixels / DotsPerMm;
 
     /// <summary>
     /// Defines the watermark height measured in millimeters.
     /// </summary>
     [JsonPropertyName("height")]
-    public double Height { get; init; } = heightInPixels == 0 ? 240 : heightInPixels / DotsPerMm;
+    public double Height { get; init; } = heightInPixels == 0 ? 100 : heightInPixels / DotsPerMm;
+
+    [JsonPropertyName("margins")]
+    public int[] Margins { get; init; } = [0, 0, 0, 0];
 
     [JsonPropertyName("fill")]
     public string Fill { get; init; } = fill;
@@ -657,7 +661,7 @@ public class Run
 
     public Run(string text, bool usedInHash = true)
     {
-        FontSize = "42";
+        FontSize = "26";
         Fill = [124, 124, 124];
         Text = text;
 
@@ -874,12 +878,11 @@ public class CustomizationConfig<T>(
         return modeWrite ? null : "markup";
     }
 
-    public async Task<bool> GetSubmitForm(File<T> file, bool modeWrite)
+    public async Task<bool> GetSubmitForm(File<T> file)
     {
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-
-        return properties is { FormFilling.CollectFillForm: true } && file.RootFolderType != FolderType.Archive;
+        return file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormsAsync(file) && properties is { FormFilling.CollectFillForm: true };
     }
 
     private FileSharing FileSharing { get; } = fileSharing;
@@ -891,7 +894,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// Embed url
     /// </summary>
-    public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam);
+    public string EmbedUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null;
 
     /// <summary>
     /// Save url
@@ -906,7 +909,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// Share url
     /// </summary>
-    public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam);
+    public string ShareUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null;
 
     /// <summary>
     /// Toolbar docked

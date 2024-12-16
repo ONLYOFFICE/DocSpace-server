@@ -111,7 +111,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
   @Pattern(
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
-  @LogoSize
+  @LogoSize(maxBytes = 1048576, maxLength = 2000000)
   private String logo;
 
   /** Indicates whether PKCE is allowed for the client. */

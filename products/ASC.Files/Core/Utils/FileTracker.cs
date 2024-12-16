@@ -44,6 +44,13 @@ public class FileTrackerHelper
     {
         _cacheNotify = cacheNotify;
         _cache = cache;
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+        _callbackAction = EvictionCallback();
+    }
+
+    public void Subscribe()
+    {
         _cacheNotify.Subscribe(a =>
         {
             try
@@ -68,9 +75,7 @@ public class FileTrackerHelper
             }
         }, CacheNotifyAction.Remove);
         
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-        _callbackAction = EvictionCallback();
+        _logger.Debug("FileTracker subscribed");
     }
 
     public async Task<bool> ProlongEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, string baseUri, bool editingAlone = false, string token = null)
@@ -86,7 +91,7 @@ public class FileTrackerHelper
             }
             else
             {
-                tracker.EditingBy.Add(tabId,
+                tracker.EditingBy.TryAdd(tabId,
                     new TrackInfo
                 {
                     UserId = userId,
@@ -115,7 +120,7 @@ public class FileTrackerHelper
         {
             if (tabId != Guid.Empty)
             {
-                tracker.EditingBy.Remove(tabId);
+                tracker.EditingBy.TryRemove(tabId, out _);
                 await SetTrackerAsync(fileId, tracker);
 
                 return;
@@ -127,7 +132,7 @@ public class FileTrackerHelper
 
                 foreach (var editTab in listForRemove)
                 {
-                    tracker.EditingBy.Remove(editTab.Key);
+                    tracker.EditingBy.TryRemove(editTab.Key, out _);
                 }
 
                 await SetTrackerAsync(fileId, tracker);
@@ -150,10 +155,10 @@ public class FileTrackerHelper
 
             foreach (var editTab in listForRemove)
             {
-                tracker.EditingBy.Remove(editTab.Key);
+                tracker.EditingBy.TryRemove(editTab.Key, out _);
             }
 
-            if (tracker.EditingBy.Count == 0)
+            if (tracker.EditingBy.IsEmpty)
             {
                 await RemoveTrackerAsync(fileId);
 
@@ -214,7 +219,6 @@ public class FileTrackerHelper
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default) && tracker != null)
         {
-            _cache.Insert(GetCacheKey(fileId), tracker with { }, _cacheTimeout, _callbackAction);
             await _cacheNotify.PublishAsync(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = tracker }, CacheNotifyAction.Insert);
         }
     }
@@ -249,7 +253,7 @@ public class FileTrackerHelper
         {
             try
             {
-                if (fileTracker.EditingBy == null || fileTracker.EditingBy.Count == 0)
+                if (fileTracker.EditingBy == null || fileTracker.EditingBy.IsEmpty)
                 {
                     return;
                 }
@@ -319,27 +323,22 @@ public record FileTrackerNotify
 public record FileTracker
 {
     [ProtoMember(1)]
-    public Dictionary<Guid, TrackInfo> EditingBy { get; set; }
+    public ConcurrentDictionary<Guid, TrackInfo> EditingBy { get; set; }
 
     public FileTracker() { }
     
     internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, int tenantId, string baseUri, string token = null)
     {
-        EditingBy = new Dictionary<Guid, TrackInfo>
-        { 
-            {
-                tabId,
-                new TrackInfo
-                {
-                    UserId = userId,
-                    NewScheme = newScheme,
-                    EditingAlone = editingAlone,
-                    TenantId = tenantId,
-                    BaseUri = baseUri,
-                    Token = token
-                }
-            } 
-        };
+        EditingBy = new ConcurrentDictionary<Guid, TrackInfo>();
+        EditingBy.TryAdd(tabId, new TrackInfo 
+        {
+            UserId = userId,
+            NewScheme = newScheme,
+            EditingAlone = editingAlone,
+            TenantId = tenantId,
+            BaseUri = baseUri,
+            Token = token
+        });
     }
 
     [ProtoContract]

@@ -76,7 +76,7 @@ public class IPSecurity(
     
     public async Task<bool> VerifyAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         if (!IpSecurityEnabled)
         {

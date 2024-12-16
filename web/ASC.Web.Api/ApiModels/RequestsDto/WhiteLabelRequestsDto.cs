@@ -40,7 +40,7 @@ public class WhiteLabelRequestsDto
     /// <summary>
     /// Tenant IDs with their logos (light or dark)
     /// </summary>
-    public IDictionary<string, LogoRequestsDto> Logo { get; set; }
+    public IEnumerable<ItemKeyValuePair<string, LogoRequestsDto>> Logo { get; set; }
 }
 
 public class LogoRequestsDto

@@ -68,7 +68,7 @@ public class WebhookPublisher(
 
         await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(
             securityContext.CurrentAccount.ID,
-            (await tenantManager.GetCurrentTenantAsync()).Id)
+            (tenantManager.GetCurrentTenant()).Id)
         {
             WebhookId = webhook.Id
         });

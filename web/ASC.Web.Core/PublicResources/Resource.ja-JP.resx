@@ -1063,4 +1063,10 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>ユーザーごとの容量制限の設定に失敗しました。入力された値はDocSpaceストレージの合計容量を超えています。</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>少なくとも1つの信頼済みドメインを追加してください。</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>管理者の数が制限を超えています：{0}/{1}。</value>
+  </data>
 </root>

@@ -31,6 +31,7 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
     public bool DeletePermanently { get; set; }
     public RoomDataLifetimePeriod Period { get; set; }
     public int? Value { get; set; }
+    public DateTime? StartDate { get; set; }
     public bool? Enabled { get; set; }
 
     public DateTime GetExpirationUtc()
@@ -44,7 +45,7 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
                 RoomDataLifetimePeriod.Day => expiration.AddDays(-Value.Value),
                 RoomDataLifetimePeriod.Month => expiration.AddMonths(-Value.Value),
                 RoomDataLifetimePeriod.Year => expiration.AddYears(-Value.Value),
-                _ => throw new Exception("Unknown lifetime period"),
+                _ => throw new Exception("Unknown lifetime period")
             };
         }
         else

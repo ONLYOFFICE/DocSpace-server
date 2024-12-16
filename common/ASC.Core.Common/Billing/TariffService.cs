@@ -625,7 +625,7 @@ public class TariffService(
                     CreateOn = DateTime.UtcNow
                 };
 
-                if (efTariff.Id == default)
+                if (efTariff.Id == 0)
                 {
                     efTariff.Id = (-tenant);
                     tariffInfo.Id = efTariff.Id;
@@ -734,7 +734,7 @@ public class TariffService(
                             fromDate = DateTime.UtcNow.Date;
                         }
 
-                        tariff.DueDate = trialPeriod != default ? fromDate.Date.AddDays(trialPeriod) : DateTime.MaxValue;
+                        tariff.DueDate = trialPeriod != 0 ? fromDate.Date.AddDays(trialPeriod) : DateTime.MaxValue;
                     }
                     else
                     {
@@ -836,17 +836,17 @@ public class TariffService(
         var maxTotalSize = updatedQuota.MaxTotalSize;
         var maxTotalSizeFeatureName = updatedQuota.GetFeature<MaxTotalSizeFeature>().Name;
 
-        _ = quotaSocketManager.ChangeQuotaFeatureValue(maxTotalSizeFeatureName, maxTotalSize);
+        _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(maxTotalSizeFeatureName, maxTotalSize);
 
         var maxPaidUsers = updatedQuota.CountRoomAdmin;
         var maxPaidUsersFeatureName = updatedQuota.GetFeature<CountPaidUserFeature>().Name;
 
-        _ = quotaSocketManager.ChangeQuotaFeatureValue(maxPaidUsersFeatureName, maxPaidUsers);
+        _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(maxPaidUsersFeatureName, maxPaidUsers);
 
         var maxRoomCount = updatedQuota.CountRoom == int.MaxValue ? -1 : updatedQuota.CountRoom;
         var maxRoomCountFeatureName = updatedQuota.GetFeature<CountRoomFeature>().Name;
 
-        _ = quotaSocketManager.ChangeQuotaFeatureValue(maxRoomCountFeatureName, maxRoomCount);
+        _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(maxRoomCountFeatureName, maxRoomCount);
 
         if (currenTariff != null)
         {
@@ -857,7 +857,7 @@ public class TariffService(
             {
                 var freeFeatureName = updatedQuota.GetFeature<FreeFeature>().Name;
 
-                _ = quotaSocketManager.ChangeQuotaFeatureValue(freeFeatureName, free);
+                _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(freeFeatureName, free);
             }
         }
     }

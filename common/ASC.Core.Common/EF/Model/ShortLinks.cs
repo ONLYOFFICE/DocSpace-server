@@ -29,6 +29,7 @@ public class ShortLink
 {
     public ulong Id { get; set; }
     public int TenantId { get; set; }
+    [MaxLength(15)]
     public string Short { get; set; }
     public string Link { get; set; }
 
@@ -69,7 +70,7 @@ public static class ShortLinksExtension
 
             entity.Property(e => e.Short)
                 .HasColumnName("short")
-                .HasColumnType("char(15)")
+                .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
                 .IsRequired(false);
@@ -110,7 +111,7 @@ public static class ShortLinksExtension
 
             entity.Property(e => e.Short)
                 .HasColumnName("short")
-                .HasColumnType("char(15)")
+                .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
                 .IsRequired(false);

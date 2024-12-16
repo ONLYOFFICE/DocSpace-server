@@ -296,7 +296,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
     private static void PreProcessEvent(IntegrationEvent @event)
     {
-        if (_rejectedEvents.Count == 0)
+        if (_rejectedEvents.IsEmpty)
         {
             return;
         }

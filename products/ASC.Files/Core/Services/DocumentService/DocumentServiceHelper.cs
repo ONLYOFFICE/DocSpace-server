@@ -177,7 +177,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var locatedInPrivateRoom = false;
         Options options = null;
-        if (file.RootFolderType == FolderType.VirtualRooms || file.RootFolderType == FolderType.Archive)
+        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
@@ -370,13 +370,13 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             runs.Add(new Run(watermarkSettings.Text));
             runs.Add(new Run(Environment.NewLine, false));
         }
-        if (runs.Any())
+        if (runs.Count != 0)
         {
             runs.Remove(runs.Last());
         }
         paragrahs.Add(new Paragraph(runs));
 
-        var options = new Options()
+        var options = new Options
         {
             WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth * watermarkSettings.ImageScale / 100, watermarkSettings.ImageHeight * watermarkSettings.ImageScale / 100 , watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
         };

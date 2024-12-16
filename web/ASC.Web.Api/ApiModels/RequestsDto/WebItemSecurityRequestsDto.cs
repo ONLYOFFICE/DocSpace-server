@@ -55,5 +55,5 @@ public class WebItemsSecurityRequestsDto
     /// <summary>
     /// Products with security information
     /// </summary>
-    public IDictionary<string, bool> Items { get; set; }
+    public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }
 }

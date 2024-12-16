@@ -74,7 +74,7 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
                 {
                     var dn = capability.FirstOrDefault(dc =>
                         !string.IsNullOrEmpty(dc) &&
-                        dc.IndexOf("dc=", StringComparison.InvariantCultureIgnoreCase) != -1);
+                        dc.Contains("dc=", StringComparison.InvariantCultureIgnoreCase));
 
                     var domain = LdapUtils.DistinguishedNameToDomain(dn);
 
@@ -88,7 +88,7 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
                 {
                     var dn = capability1.FirstOrDefault(dc =>
                         !string.IsNullOrEmpty(dc) &&
-                        dc.IndexOf("dc=", StringComparison.InvariantCultureIgnoreCase) != -1);
+                        dc.Contains("dc=", StringComparison.InvariantCultureIgnoreCase));
 
                     var domain = LdapUtils.DistinguishedNameToDomain(dn);
 
@@ -102,7 +102,7 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
                 {
                     var dn = dnList.FirstOrDefault(dc =>
                         !string.IsNullOrEmpty(dc) &&
-                        dc.IndexOf("dc=", StringComparison.InvariantCultureIgnoreCase) != -1);
+                        dc.Contains("dc=", StringComparison.InvariantCultureIgnoreCase));
 
                     var domain = LdapUtils.DistinguishedNameToDomain(dn);
 
@@ -180,14 +180,14 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
 
         try
         {
-            if (!string.IsNullOrEmpty(Settings.UserFilter) && !Settings.UserFilter.StartsWith("(") &&
-                !Settings.UserFilter.EndsWith(")"))
+            if (!string.IsNullOrEmpty(Settings.UserFilter) && !Settings.UserFilter.StartsWith('(') &&
+                !Settings.UserFilter.EndsWith(')'))
             {
                 Settings.UserFilter = string.Format("({0})", Settings.UserFilter);
             }
 
-            if (!string.IsNullOrEmpty(filter) && !filter.StartsWith("(") &&
-                !filter.EndsWith(")"))
+            if (!string.IsNullOrEmpty(filter) && !filter.StartsWith('(') &&
+                !filter.EndsWith(')'))
             {
                 filter = string.Format("({0})", Settings.UserFilter);
             }
@@ -250,8 +250,8 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
 
         try
         {
-            if (!string.IsNullOrEmpty(Settings.GroupFilter) && !Settings.GroupFilter.StartsWith("(") &&
-                !Settings.GroupFilter.EndsWith(")"))
+            if (!string.IsNullOrEmpty(Settings.GroupFilter) && !Settings.GroupFilter.StartsWith('(') &&
+                !Settings.GroupFilter.EndsWith(')'))
             {
                 Settings.GroupFilter = string.Format("({0})", Settings.GroupFilter);
             }

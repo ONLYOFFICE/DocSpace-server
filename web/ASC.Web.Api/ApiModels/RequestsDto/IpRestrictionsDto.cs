@@ -40,10 +40,13 @@ public class IpRestrictionsBaseRequestsDto
 /// <summary>
 /// New IP restriction settings
 /// </summary>
-public class IpRestrictionsRequestsDto
+public class IpRestrictionsDto
 {
-    /// <summary>
-    /// Enables IP restrictions or not
-    /// </summary>
-    public bool Enable { get; set; }
+    /// <summary>List of IP addresses</summary>
+    /// <type>System.Collections.Generic.IEnumerable{ASC.IPSecurity.IpRestrictionBase}, System.Collections.Generic</type>
+    public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
+
+    /// <summary>Enables IP restrictions or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? Enable { get; set; }
 }

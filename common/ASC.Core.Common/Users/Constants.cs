@@ -51,31 +51,31 @@ public sealed class Constants(IConfiguration configuration)
     public static readonly GroupInfo GroupEveryone = new(SysGroupCategoryId)
     {
         ID = AuthConstants.Everyone.ID,
-        Name = AuthConstants.Everyone.Name,
+        Name = AuthConstants.Everyone.Name
     };
 
     public static readonly GroupInfo GroupGuest = new(SysGroupCategoryId)
     {
         ID = AuthConstants.Guest.ID,
-        Name = AuthConstants.Guest.Name,
+        Name = AuthConstants.Guest.Name
     };
 
     public static readonly GroupInfo GroupRoomAdmin = new(SysGroupCategoryId)
     {
         ID = AuthConstants.RoomAdmin.ID,
-        Name = AuthConstants.RoomAdmin.Name,
+        Name = AuthConstants.RoomAdmin.Name
     };
 
     public static readonly GroupInfo GroupAdmin = new(SysGroupCategoryId)
     {
         ID = AuthConstants.DocSpaceAdmin.ID,
-        Name = AuthConstants.DocSpaceAdmin.Name,
+        Name = AuthConstants.DocSpaceAdmin.Name
     };
 
     public static readonly GroupInfo GroupUser = new(SysGroupCategoryId)
     {
         ID = AuthConstants.User.ID, 
-        Name = AuthConstants.User.Name,
+        Name = AuthConstants.User.Name
     };
 
     public static readonly GroupInfo[] SystemGroups =

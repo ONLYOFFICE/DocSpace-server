@@ -1063,4 +1063,16 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Αποτυχία ορισμού ποσόστωσης ανά χρήστη. Η εισαχθείσα τιμή είναι μεγαλύτερη από τον συνολικό αποθηκευτικό χώρο του DocSpace.</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Προσθέστε τουλάχιστον 1 αξιόπιστο τομέα.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Ο αριθμός των διαχειριστών υπερβαίνει το όριο: {0}/{1}.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Μη κερδοσκοπικό</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Προσθέστε τουλάχιστον 1 επιτρεπόμενη διεύθυνση IP.</value>
+  </data>
 </root>

@@ -70,14 +70,14 @@ public class FormFillingReportCreator(
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        var tenantCulture = (await tenantManager.GetCurrentTenantAsync()).GetCulture();
+        var tenantCulture = (tenantManager.GetCurrentTenant()).GetCulture();
         var formNumber = new List<FormsItemData>
         {
             new()
             {
                 Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture),
                 Value = resultFormNumber
-            },
+            }
         };
 
         var formLink = new FormsItemData

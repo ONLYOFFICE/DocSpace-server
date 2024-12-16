@@ -40,8 +40,11 @@ internal static partial class RegisterInstanceWorkerServiceLogger
     [LoggerMessage(LogLevel.Information, "UnRegister Instance {instanceName} running at: {time}.")]
     public static partial void InformationUnRegister(this ILogger logger, string instanceName, DateTimeOffset time);
 
-    [LoggerMessage(LogLevel.Error, "Unable to UnRegister Instance {instanceName} running at: {time}.")]
-    public static partial void ErrorUnableToUnRegister(this ILogger logger, string instanceName, DateTimeOffset time);
+    [LoggerMessage(LogLevel.Warning, "Unable to UnRegister Instance {instanceName} running at: {time}.")]
+    public static partial void WarningUnableToUnRegister(this ILogger logger, string instanceName, DateTimeOffset time, Exception ex);
+
+    [LoggerMessage(LogLevel.Warning, "Unable to Register Instance {instanceName} running at: {time}.")]
+    public static partial void WarningUnableToRegister(this ILogger logger, string instanceName, DateTimeOffset time, Exception ex);
 
     [LoggerMessage(LogLevel.Error, "Critical error forced worker to shutdown")]
     public static partial void CriticalError(this ILogger logger, Exception exception);

@@ -34,6 +34,4 @@ public class WebDavEntry
     public DateTime CreationDate { get; set; }
     public DateTime LastModifiedDate { get; set; }
     public bool IsCollection { get; set; }
-    
-    public WebDavEntry() { }
 }

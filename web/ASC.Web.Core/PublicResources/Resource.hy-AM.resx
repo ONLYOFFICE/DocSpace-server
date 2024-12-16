@@ -1122,4 +1122,16 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Չհաջողվեց սահմանել յուրաքանչյուր օգտատիրոջ քվոտան: Մուտքագրված արժեքը մեծ է DocSpace-ի ընդհանուր պահեստից:</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Ավելացրեք առնվազն 1 վստահելի դոմեն:</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Ադմինիստրատորների թիվը գերազանցում է սահմանը՝ {0}/{1}:</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Ավելացրեք առնվազն 1 թույլատրված IP հասցե:</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Ոչ կոմերցիոն</value>
+  </data>
 </root>
