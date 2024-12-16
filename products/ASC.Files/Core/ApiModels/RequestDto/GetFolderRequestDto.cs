@@ -87,6 +87,13 @@ public class GetFolderRequestDto<T>
     /// </summary>
     [FromQuery(Name = "searchArea")]
     public SearchArea SearchArea { get; set; }
+
+
+    [FromQuery(Name = "formsItemKey")]
+    public string FormsItemKey { get; set; }
+    
+    [FromQuery(Name = "formsItemType")]
+    public string FormsItemType{ get; set; }
 }
 
 /// <summary>

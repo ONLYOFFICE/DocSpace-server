@@ -118,12 +118,13 @@ public interface IFileDao<T>
     /// <param name="withShared"></param>
     /// <param name="containingMyFiles"></param>
     /// <param name="parentType"></param>
+    /// <param name="formsItemDto"></param>
     /// <returns>list of files</returns>
     /// <remarks>
     ///    Return only the latest versions of files of a folder
     /// </remarks>
     IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT);
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null);
 
     /// <summary>
     /// Get stream of file
@@ -346,7 +347,8 @@ public interface IFileDao<T>
     Task SaveProperties(T fileId, EntryProperties<T> entryProperties);
 
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
-        bool withSubfolders = false, bool excludeSubject = false, T roomId = default);
+        bool withSubfolders = false, bool excludeSubject = false, T roomId = default,
+        FormsItemDto formsItemDto = null);
 
     Task<int> SetCustomOrder(T fileId, T parentFolderId, int order);
 

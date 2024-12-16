@@ -97,7 +97,7 @@ internal abstract class ThirdPartyProviderDao
     {
         return Task.FromResult<EntryProperties<string>>(null);
     }
-    
+
     public Task<Dictionary<string, EntryProperties<string>>> GetPropertiesAsync(IEnumerable<string> filesIds)
     {
         return Task.FromResult<Dictionary<string, EntryProperties<string>>>(null);
@@ -214,7 +214,7 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = null)
+        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null)
     {
         throw new NotImplementedException();
     }

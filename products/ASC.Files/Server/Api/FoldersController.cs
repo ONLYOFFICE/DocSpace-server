@@ -37,8 +37,10 @@ public class FoldersControllerInternal(
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
-    HistoryApiHelper historyApiHelper)
-    : FoldersController<int>(breadCrumbsManager,
+    HistoryApiHelper historyApiHelper,
+    FormFillingReportCreator formFillingReportCreator)
+    : FoldersController<int>(
+        breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
         fileOperationsManager,
@@ -64,6 +66,13 @@ public class FoldersControllerInternal(
     public IAsyncEnumerable<HistoryDto> GetHistoryAsync(HistoryFolderRequestDto inDto)
     {
         return historyApiHelper.GetFolderHistoryAsync(inDto.FolderId, inDto.FromDate, inDto.ToDate);
+    }
+    
+    [AllowAnonymous]
+    [HttpGet("{folderId:int}/formfilter")]
+    public async Task<IEnumerable<FormsItemDto>> GetFolderAsync(int folderId)
+    {
+        return (await formFillingReportCreator.GetFormsFields(folderId)).Select(r => new FormsItemDto(r.Key, r.Type));
     }
 }
 
@@ -162,8 +171,13 @@ public abstract class FoldersController<T>(
     {
 
         var split = inDto.Extension == null ? [] : inDto.Extension.Split(",");
-        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.FilterType, inDto.RoomId, inDto.SearchInContent, inDto.Withsubfolders, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, split);
-
+        FormsItemDto formsItemDto = null;
+        if (!string.IsNullOrEmpty(inDto.FormsItemKey) || !string.IsNullOrEmpty(inDto.FormsItemType))
+        {
+            formsItemDto = new FormsItemDto(inDto.FormsItemKey, inDto.FormsItemType);
+        }
+        
+        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.FilterType, inDto.RoomId, inDto.SearchInContent, inDto.Withsubfolders, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, split, formsItemDto);
         return folder.NotFoundIfNull();
     }
 
@@ -273,7 +287,7 @@ public abstract class FoldersController<T>(
 
         return await fileStorageService.GetFilesUsedSpace();
     }
-
+    
     /// <summary>
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
