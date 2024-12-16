@@ -34,14 +34,13 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
 {
     private readonly HttpClient _filesClient = filesFactory.HttpClient;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
-    public static IEnumerable<object[]> Data =>
-        new List<object[]>
-        {
-            new object[] { "test.docx" },
-            new object[] { "test.pptx" },
-            new object[] { "test.xlsx" },
-            new object[] { "test.pdf" },
-        };
+    public static TheoryData<string> Data =>
+    [
+        "test.docx",
+        "test.pptx",
+        "test.xlsx",
+        "test.pdf"
+    ];
     
     public static IEnumerable<object[]> FolderTypesData =>
         new List<object[]>

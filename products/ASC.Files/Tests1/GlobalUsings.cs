@@ -29,6 +29,8 @@ global using ASCPeople::ASC.People.ApiModels.RequestDto;
 global using ASCWebApi::ASC.Web.Api.ApiModel.RequestsDto;
 global using ASCWebApi::ASC.Web.Api.ApiModel.ResponseDto;
 
+global using DotNet.Testcontainers.Containers;
+
 global using FluentAssertions;
 
 global using Microsoft.AspNetCore.Hosting;
@@ -45,6 +47,9 @@ global using Respawn;
 global using Respawn.Graph;
 
 global using Testcontainers.MySql;
+global using Testcontainers.RabbitMq;
+global using Testcontainers.Redis;
+
 global using Xunit;
 
 global using FilesProgram = ASCFiles::Program;

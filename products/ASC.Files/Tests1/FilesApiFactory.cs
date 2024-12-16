@@ -31,23 +31,33 @@ namespace ASC.Files.Tests1;
 public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetime
 {
     private readonly MySqlContainer _mySqlContainer = new MySqlBuilder()
-        .WithImage("mysql:8.0")
+        .WithImage("mysql:8.4.3")
         .Build();
     
-    private DbConnection _dbconnection = default!;
-    private Respawner _respawner = default!;
+    private readonly RedisContainer _redisContainer = new RedisBuilder()
+        .WithImage("redis:7.0")
+        .Build();
+    
+    private readonly RabbitMqContainer _rabbitMqContainer = new RabbitMqBuilder()
+        .WithImage("rabbitmq:3.13")
+        .Build();
+    
+    private DbConnection _dbconnection = null!;
+    private Respawner _respawner = null!;
     readonly List<string> _tablesToBackup = ["files_folder", "core_user", "core_usersecurity" ];
     readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
     
-    public string ConnectionString => _mySqlContainer.GetConnectionString(); 
-    public HttpClient HttpClient { get; private set;} = default!;
+    public string MySqlConnectionString => _mySqlContainer.GetConnectionString(); 
+    public string RedisConnectionString => _redisContainer.GetConnectionString(); 
+    public string RabbitMqConnectionString => _rabbitMqContainer.GetConnectionString(); 
+    public HttpClient HttpClient { get; private set;} = null!;
     public JsonSerializerOptions JsonRequestSerializerOptions { get; } = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
     
     protected override IHost CreateHost(IHostBuilder builder)
     {             
         builder.ConfigureHostConfiguration(configBuilder =>
         {
-            configBuilder.AddInMemoryCollection(Initializer.GetSettings(ConnectionString)); 
+            configBuilder.AddInMemoryCollection(Initializer.GetSettings(MySqlConnectionString, RedisConnectionString, RabbitMqConnectionString)); 
         });
         
         return base.CreateHost(builder);
@@ -75,7 +85,8 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
 
     public async Task InitializeAsync()
     {
-        await _mySqlContainer.StartAsync();
+        await StartAllContainersAsync(_mySqlContainer, _redisContainer, _rabbitMqContainer);
+        
         _dbconnection = new MySqlConnection(_mySqlContainer.GetConnectionString());
 
         HttpClient = CreateClient();
@@ -113,8 +124,15 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         await _mySqlContainer.ExecScriptAsync(backupScript.ToString());
     }
 
-    private string MakeCopyTableName(string tableName)
+    private static string MakeCopyTableName(string tableName)
     {
         return $"{tableName}_copy";
+    }
+    
+    private static async Task StartAllContainersAsync(params DockerContainer[] containers)
+    {
+        var tasks = containers.Select(r => r.StartAsync()).ToArray();
+
+        await Task.WhenAll(tasks);
     }
 }

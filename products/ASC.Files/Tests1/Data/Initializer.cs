@@ -54,11 +54,24 @@ public static class Initializer
         .RuleFor(x => x.Email, f => f.Person.Email)
         .RuleFor(x => x.Password, f => f.Internet.Password(8, 10));
     
-    public static List<KeyValuePair<string, string?>> GetSettings(string connectionString)
+    public static List<KeyValuePair<string, string?>> GetSettings(string dbConnectionString, string redisConnectionString, string rabbitMqConnectionString)
     {
+        var redisSplitted = redisConnectionString.Split(':');
+        var redisHost = redisSplitted[0];
+        var redisPort = redisSplitted[1];
+
+        var rabbitMqSettings = new Uri(rabbitMqConnectionString);
+        var rabbitMqUserInfo = rabbitMqSettings.UserInfo.Split(':');
+        
         var result = new List<KeyValuePair<string, string?>>(_settings)
         {
-            new("ConnectionStrings:default:connectionString", connectionString)
+            new("ConnectionStrings:default:connectionString", dbConnectionString),
+            new("Redis:Hosts:0:Host", redisHost),
+            new("Redis:Hosts:0:Port", redisPort),
+            new("RabbitMQ:Hostname", rabbitMqSettings.Host),
+            new("RabbitMQ:Port", rabbitMqSettings.Port.ToString()),
+            new("RabbitMQ:UserName", rabbitMqUserInfo[0]),
+            new("RabbitMQ:Password", rabbitMqUserInfo[1])
         };
         
         return result;
@@ -70,26 +83,34 @@ public static class Initializer
         
         if (!_initialized)
         {
-            _apiClient = apiFactory.WithWebHostBuilder(builder =>
+            var apiClientStartTask = Task.Run(() =>
             {
-                foreach (var setting in GetSettings(filesFactory.ConnectionString))
+                _apiClient = apiFactory.WithWebHostBuilder(builder =>
                 {
-                    builder.UseSetting(setting.Key, setting.Value);
-                }
-            }).CreateClient();
+                    foreach (var setting in GetSettings(filesFactory.MySqlConnectionString, filesFactory.RedisConnectionString, filesFactory.RabbitMqConnectionString))
+                    {
+                        builder.UseSetting(setting.Key, setting.Value);
+                    }
+                }).CreateClient();
 
-            _apiClient.BaseAddress = new Uri(_apiClient.BaseAddress, "api/2.0/");
+                _apiClient.BaseAddress = new Uri(_apiClient.BaseAddress, "api/2.0/");
+            });
+
+            var peopleClientStartTask = Task.Run(() =>
+            {
+                _peopleClient = peopleFactory.WithWebHostBuilder(builder =>
+                {
+                    foreach (var setting in GetSettings(filesFactory.MySqlConnectionString, filesFactory.RedisConnectionString, filesFactory.RabbitMqConnectionString))
+                    {
+                        builder.UseSetting(setting.Key, setting.Value);
+                    }
+                }).CreateClient();
+
+                _peopleClient.BaseAddress = new Uri(_peopleClient.BaseAddress, "api/2.0/");
+            });
             
-            _peopleClient = peopleFactory.WithWebHostBuilder(builder =>
-            {
-                foreach (var setting in GetSettings(filesFactory.ConnectionString))
-                {
-                    builder.UseSetting(setting.Key, setting.Value);
-                }
-            }).CreateClient();
-
-            _peopleClient.BaseAddress = new Uri(_peopleClient.BaseAddress, "api/2.0/");
-
+            await Task.WhenAll(apiClientStartTask, peopleClientStartTask);
+            
             var response = await _apiClient.GetAsync("settings");
             var settings = await HttpClientHelper.ReadFromJson<SettingsDto>(response);
             
