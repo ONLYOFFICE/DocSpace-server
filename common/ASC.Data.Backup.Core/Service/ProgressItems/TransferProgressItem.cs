@@ -84,7 +84,7 @@ public class TransferProgressItem : BaseBackupProgressItem
 
             await _notifyHelper.SendAboutTransferStartAsync(tenant, TargetRegion, Notify);
             transferProgressItem.Init(TenantId, TargetRegion, Limit, TempFolder);
-            transferProgressItem.ProgressChanged = async (args) =>
+            transferProgressItem.ProgressChanged = async args =>
             {
                 Percentage = args.Progress;
                 await PublishChanges();

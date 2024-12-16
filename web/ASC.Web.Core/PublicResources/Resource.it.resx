@@ -806,7 +806,7 @@
     <value>Il numero di amministratori non deve superare {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Numero di amministratori/utenti esperti</value>
+    <value>Numero di amministratori</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Backup e ripristino automatici</value>
@@ -1040,10 +1040,10 @@
     <value>Quote e statistiche di archivio</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} per amministratore/utente esperto e possibilità di aggiungere spazio su richiesta</value>
+    <value>{0} per amministratore e possibilità di aggiungere spazio su richiesta</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Amministratori/utenti esperti aggiunti:</value>
+    <value>Amministratori aggiunti:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Il limite degli inviti è stato superato</value>
@@ -1056,5 +1056,23 @@
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Questa email è allegata all'utente {0} come fornitore di terze parti</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Aggiungi almeno 1 indirizzo IP permesso.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Aggiungi almeno 1 indirizzo IP permesso.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Non-profit</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Il numero di amministratori supera il limite: {0}/{1}.</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Impossibile impostare la quota per stanza. Il valore inserito è superiore allo spazio di archiviazione totale di DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Impossibile impostare la quota per utente. Il valore inserito è superiore allo spazio di archiviazione totale di DocSpace.</value>
   </data>
 </root>

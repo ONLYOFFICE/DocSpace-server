@@ -33,6 +33,11 @@ function customizeWorksheet() {
     oWorksheet.SetColumnWidth(4, 23);
     oWorksheet.SetColumnWidth(5, 23);
     oWorksheet.SetColumnWidth(6, 23);
+
+    oWorksheet.GetRange("B1:D1").Merge(true);
+    oWorksheet.GetRange("B2:D2").Merge(true);
+    oWorksheet.GetRange("B3:D3").Merge(true);
+    oWorksheet.GetRange("B4:D4").Merge(true);
 }
 
 function prepareInfo() {
@@ -41,21 +46,21 @@ function prepareInfo() {
             height: 15.5,
             dataArray: [
                 { "value": inputData.resources.company, "bold": true },
-                { "value": inputData.info.company, "fontColor": defaultFontColorGray }
+                { "value": inputData.info.company, "fontColor": defaultFontColorGray, "format": "@" }
             ]
         },
         {
             height: 15.5,
             dataArray: [
                 { "value": inputData.resources.room, "bold": true },
-                { "value": inputData.info.room, "fontColor": defaultFontColorGray }
+                { "value": inputData.info.room, "fontColor": defaultFontColorGray, "format": "@" }
             ]
         },
         {
             height: 15.5,
             dataArray: [
                 { "value": inputData.resources.exportAuthor, "bold": true },
-                { "value": inputData.info.exportAuthor, "fontColor": defaultFontColorGray }
+                { "value": inputData.info.exportAuthor, "fontColor": defaultFontColorGray, "format": "@" }
             ]
         },
         {
@@ -96,25 +101,40 @@ function prepareData(startColIndex, startRowIndex) {
         }
     ];
 
-    for (var i = 0; i < inputData.data.length; i++) {
-        var item = inputData.data[i];
+    var sortedData = inputData.data.sort(function(a, b) {
+        var i, diff;
+        var segmentsA = (a.index ?? "").split('.');
+        var segmentsB = (b.index ?? "").split('.');
+        var l = Math.min(segmentsA.length, segmentsB.length);
+
+        for (i = 0; i < l; i++) {
+            diff = parseInt(segmentsA[i]) - parseInt(segmentsB[i]);
+            if (diff) {
+                return diff;
+            }
+        }
+        return segmentsA.length - segmentsB.length;
+    });
+
+    for (var i = 0; i < sortedData.length; i++) {
+        var item = sortedData[i];
         var indexBgColor = i > 0 ? defaultBgColorGray : null;
         var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
         dataTable.push({
             height: 19.5,
             dataArray: [
-                { "value": item.index, "fontSize": (defaultFontSize + 1), "bgColor": indexBgColor, valign: "center", "borderColor": defaultBorderColorWhite },
-                { "value": item.name, "url": item.url, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
+                { "value": item.index, "fontSize": (defaultFontSize + 1), "bgColor": indexBgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": "@" },
+                { "value": item.name, "url": item.url, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": "@" },
                 { "value": item.type, "bold": !item.type.startsWith('.'), "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": item.size, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.numberFormat },
-                { "value": item.author, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
+                { "value": item.author, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": "@" },
                 { "value": item.created, "fontColor": defaultFontColorGray, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.dateFormat },
                 { "value": item.modified, "fontColor": defaultFontColorGray, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.dateFormat }
             ]
         });
     }
 
-    var sizeSum = "=SUM(" + toColumnName(currentColIndex + 3) + (currentRowIndex + 1) + ":" + toColumnName(currentColIndex + 3) + (currentRowIndex + inputData.data.length) + ")";
+    var sizeSum = "=SUM(" + toColumnName(currentColIndex + 3) + (currentRowIndex + 1) + ":" + toColumnName(currentColIndex + 3) + (currentRowIndex + sortedData.length) + ")";
 
     dataTable.push({ height: 19.5, dataArray: [] });
 
@@ -141,6 +161,10 @@ function writeCell(position, data) {
 
     var sRange = oWorksheet.GetRange(position);
 
+    if (data.format) {
+        sRange.SetNumberFormat(data.format);
+    }
+
     if (data.url) {
         oWorksheet.SetHyperlink(position, data.url, "", data.value);
     } else {
@@ -154,10 +178,6 @@ function writeCell(position, data) {
     sRange.SetBold(data.bold || false);
     sRange.SetAlignHorizontal(data.halign || "left");
     sRange.SetAlignVertical(data.valign || "bottom");
-
-    if (data.format) {
-        sRange.SetNumberFormat(data.format);
-    }
 
     if (data.bgColor) {
         sRange.SetFillColor(data.bgColor);

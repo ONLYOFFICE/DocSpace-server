@@ -28,5 +28,8 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class CspRequestsDto
 {
+    /// <summary>
+    /// Domains
+    /// </summary>
     public IEnumerable<string> Domains { get; set; }
 }

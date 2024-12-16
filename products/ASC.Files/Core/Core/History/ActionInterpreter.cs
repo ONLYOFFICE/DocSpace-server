@@ -32,34 +32,32 @@ public abstract class ActionInterpreter
     {
         { MessageAction.FileMovedWithOverwriting, MessageAction.FileMoved },
         { MessageAction.FileCopiedWithOverwriting, MessageAction.FileCopied },
-        { MessageAction.FileMovedToTrash, MessageAction.FileDeleted },
         { MessageAction.FolderMovedWithOverwriting, MessageAction.FolderMoved },
         { MessageAction.FolderCopiedWithOverwriting, MessageAction.FolderCopied },
-        { MessageAction.FolderMovedToTrash, MessageAction.FolderDeleted },
         { MessageAction.FileRestoreVersion, MessageAction.UserFileUpdated },
         { MessageAction.FileUploadedWithOverwriting, MessageAction.UserFileUpdated }
     }.ToFrozenDictionary();
     
-    public async ValueTask<HistoryEntry> InterpretAsync(DbAuditEvent @event, IServiceProvider serviceProvider)
+    public async ValueTask<HistoryEntry> InterpretAsync(DbAuditEvent @event, FileEntry<int> entry, IServiceProvider serviceProvider)
     {
         var messageAction = @event.Action.HasValue ? (MessageAction)@event.Action.Value : MessageAction.None;
         var processedAction = _aliases.GetValueOrDefault(messageAction, messageAction);
         var key = processedAction != MessageAction.None ? processedAction.ToStringFast() : null;
         
         var description = JsonSerializer.Deserialize<List<string>>(@event.DescriptionRaw);
-        var data = await GetDataAsync(serviceProvider, @event.Target, description);
+        var data = await GetDataAsync(serviceProvider, @event.Target, description, entry);
         
         var initiatorId = @event.UserId ?? ASC.Core.Configuration.Constants.Guest.ID;
         string initiatorName = null;
 
-        if (!string.IsNullOrEmpty(data?.InitiatorName))
+        if (!string.IsNullOrEmpty(data?.InitiatorName) && initiatorId == ASC.Core.Configuration.Constants.Guest.ID)
         {
-            initiatorName = initiatorId == ASC.Core.Configuration.Constants.Guest.ID && data.InitiatorName != AuditReportResource.GuestAccount 
+            initiatorName = data.InitiatorName != AuditReportResource.GuestAccount 
                 ? $"{data.InitiatorName} ({FilesCommonResource.ExternalUser})" 
                 : data.InitiatorName;
         }
         
-        var entry = new HistoryEntry
+        var historyEntry = new HistoryEntry
         {
             Action = new HistoryAction(processedAction, key),
             InitiatorId = initiatorId,
@@ -68,7 +66,7 @@ public abstract class ActionInterpreter
             Data = data
         };
 
-        return entry;
+        return historyEntry;
     }
     
     protected static EventDescription<int> GetAdditionalDescription(List<string> description)
@@ -76,7 +74,7 @@ public abstract class ActionInterpreter
         return JsonSerializer.Deserialize<EventDescription<int>>(description.Last());
     }
 
-    protected abstract ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description);
+    protected abstract ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry);
 }
 
 public record EntryData : HistoryData
@@ -158,25 +156,4 @@ public record EntryOperationData : HistoryData
     {
         return FromFolderId.HasValue ? HashCode.Combine(ToFolderId, FromFolderId) : ToFolderId.GetHashCode();
     }
-}
-
-public record UserFileUpdateData : EntryData
-{
-    public string UserName { get; }
-
-    public UserFileUpdateData(string id,
-        string title,
-        int? parentId = null,
-        string parentTitle = null,
-        int? parentType = null,
-        string userName = null) : base(id,
-        title,
-        parentId,
-        parentTitle,
-        parentType)
-    {
-        UserName = userName;
-    }
-    
-    public override string InitiatorName => UserName;
 }

@@ -28,8 +28,23 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class EncryptionSettingsRequestsDto
 {
+    /// <summary>
+    /// Password
+    /// </summary>
     public string Password { get; set; }
+
+    /// <summary>
+    /// Status
+    /// </summary>
     public EncryprtionStatus Status { get; set; }
+
+    /// <summary>
+    /// Notify users
+    /// </summary>
     public bool NotifyUsers { get; set; }
+
+    /// <summary>
+    /// Server root path
+    /// </summary>
     public string ServerRootPath { get; set; }
 }

@@ -45,7 +45,7 @@ public class RegionHelper(TenantManager tenantManager,
         
         if (currentRegion == null)
         {
-                var tenant = await tenantManager.GetCurrentTenantAsync(false);
+                var tenant = tenantManager.GetCurrentTenant(false);
             if (tenant != null)
             {
                     var owner = await userManager.GetUsersAsync(tenant.OwnerId);

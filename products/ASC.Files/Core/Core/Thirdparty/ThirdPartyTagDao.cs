@@ -55,17 +55,18 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(
     {
         var mapping = daoFactory.GetMapping<string>();
         var folderId = daoSelector.ConvertId(parentFolder.Id);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix).ToListAsync();
+        var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix)
+            .ToDictionaryAsync(x => x.HashId, x => x.Id);
 
         if (entryIds.Count == 0)
         {
             yield break;
         }
 
-        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, tenantId, entryIds, subject).ToListAsync();
+        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, tenantId, entryIds.Keys, subject).ToListAsync();
 
         var tags = new List<Tag>();
 
@@ -76,13 +77,14 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(
                 Name = r.Tag.Name,
                 Type = r.Tag.Type,
                 Owner = r.Tag.Owner,
-                EntryId = await mapping.MappingIdAsync(r.TagLink.EntryId),
+                EntryId = entryIds.TryGetValue(r.TagLink.EntryId, out var entryId) 
+                    ? entryId 
+                    : await mapping.MappingIdAsync(r.TagLink.EntryId),
                 EntryType = r.TagLink.EntryType,
                 Count = r.TagLink.Count,
                 Id = r.Tag.Id
             });
         }
-
 
         if (deepSearch)
         {
@@ -92,9 +94,11 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(
             }
             yield break;
         }
+        
+        var children = (await dao.GetChildrenAsync(folderId)).Select(dao.MakeId);
 
         var folderFileIds = new[] { parentFolder.Id }
-            .Concat(await dao.GetChildrenAsync(folderId));
+            .Concat(children);
 
         foreach (var e in tags.Where(tag => folderFileIds.Contains(tag.EntryId.ToString())))
         {
@@ -108,14 +112,25 @@ sealed file class TagLinkTagPair
     public DbFilesTag Tag { get; set; }
     public DbFilesTagLink TagLink { get; set; }
 }
+
+sealed file class IdMap
+{
+    public string HashId { get; set; }
+    public string Id { get; set; }
+}
+
 static file class Queries
 {
-    public static readonly Func<FilesDbContext, string, IAsyncEnumerable<string>> HashIdsAsync =
+    public static readonly Func<FilesDbContext, string, IAsyncEnumerable<IdMap>> HashIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, string idStart) =>
                 ctx.ThirdpartyIdMapping
                     .Where(r => r.Id.StartsWith(idStart))
-                    .Select(r => r.HashId));
+                    .Select(r => new IdMap
+                    {
+                        HashId = r.HashId,
+                        Id = r.Id
+                    }));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<string>, Guid, IAsyncEnumerable<TagLinkTagPair>>
         TagLinkTagPairAsync =

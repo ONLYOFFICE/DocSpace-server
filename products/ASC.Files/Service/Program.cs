@@ -31,7 +31,7 @@ using NLog;
 var options = new WebApplicationOptions
 {
     Args = args,
-    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : default
+    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : null
 };
 
 var builder = WebApplication.CreateBuilder(options);
@@ -67,7 +67,9 @@ try
 
     startup.Configure(app);
 
-    var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
+    var sp = ((IApplicationBuilder)app).ApplicationServices;
+
+    var eventBus = sp.GetRequiredService<IEventBus>();
 
     await eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent, ThumbnailRequestedIntegrationEventHandler>();
     await eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent, RoomIndexExportIntegrationEventHandler>();
@@ -77,6 +79,8 @@ try
     await eventBus.SubscribeAsync<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>();
     await eventBus.SubscribeAsync<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>();
     await eventBus.SubscribeAsync<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>();
+    
+    sp.GetRequiredService<FileTrackerHelper>().Subscribe();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

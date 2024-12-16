@@ -27,9 +27,9 @@
 namespace ASC.Files.Core.Log;
 internal static partial class FileSharingLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetSharedInfo")]
+    [LoggerMessage(LogLevel.Error, "GetSharedInfo")]
     public static partial void ErrorGetSharedInfo(this ILogger<FileSharing> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "User {userId} can't get shared info for {fileEntryType} {entryId}")]
+    [LoggerMessage(LogLevel.Error, "User {userId} can't get shared info for {fileEntryType} {entryId}")]
     public static partial void ErrorUserCanTGetSharedInfo(this ILogger<FileSharing> logger, Guid userId, FileEntryType fileEntryType, string entryId);
 }

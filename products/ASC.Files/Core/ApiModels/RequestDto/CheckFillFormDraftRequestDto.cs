@@ -27,22 +27,46 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Parameters for checking a form draft
 /// </summary>
-public class CheckFillFormDraftRequestDto
+public class CheckFillFormDraft
 {
-    /// <summary>File version</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// File version
+    /// </summary>
     public int Version { get; set; }
-    
-    /// <summary>Action with a form</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// Action with a form
+    /// </summary>
     public string Action { get; set; }
 
-    /// <summary>Specifies whether to request a form for viewing or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to request a form for viewing or not
+    /// </summary>
     public bool RequestView => (Action ?? "").Equals("view", StringComparison.InvariantCultureIgnoreCase);
 
-    /// <summary>Specifies whether to request an embedded form or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to request an embedded form or not
+    /// </summary>
     public bool RequestEmbedded => (Action ?? "").Equals("embedded", StringComparison.InvariantCultureIgnoreCase);
+}
+
+
+/// <summary>
+/// Request parameters for checking a form draft
+/// </summary>
+public class CheckFillFormDraftRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromBody]
+    public CheckFillFormDraft File {  get; set; }
 }

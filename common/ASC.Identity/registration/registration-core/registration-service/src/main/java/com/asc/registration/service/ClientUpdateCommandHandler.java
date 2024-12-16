@@ -43,6 +43,7 @@ import com.asc.registration.core.domain.value.ClientRedirectInfo;
 import com.asc.registration.service.mapper.ClientDataMapper;
 import com.asc.registration.service.ports.output.repository.ClientCommandRepository;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
+import com.asc.registration.service.ports.output.repository.ConsentCommandRepository;
 import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import java.util.UUID;
@@ -65,6 +66,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class ClientUpdateCommandHandler {
+  private final ConsentCommandRepository consentCommandRepository;
   private final ClientCommandRepository clientCommandRepository;
   private final ClientDataMapper clientDataMapper;
   private final ClientDomainService clientDomainService;
@@ -240,6 +242,7 @@ public class ClientUpdateCommandHandler {
     log.info("Changing client activation to disabled");
     var event = clientDomainService.disableClient(audit, client);
     clientCommandRepository.updateClient(client);
+    consentCommandRepository.revokeAllConsents(client.getId());
     messagePublisher.publish(event);
   }
 
@@ -357,11 +360,10 @@ public class ClientUpdateCommandHandler {
   public void deleteClient(Audit audit, DeleteTenantClientCommand command) {
     log.info("Trying to remove client");
 
+    var clientId = new ClientId(UUID.fromString(command.getClientId()));
     var client =
         clientQueryRepository
-            .findByClientIdAndTenantId(
-                new ClientId(UUID.fromString(command.getClientId())),
-                new TenantId(command.getTenantId()))
+            .findByClientIdAndTenantId(clientId, new TenantId(command.getTenantId()))
             .orElseThrow(
                 () ->
                     new ClientNotFoundException(
@@ -372,6 +374,7 @@ public class ClientUpdateCommandHandler {
     var event = clientDomainService.invalidateClient(audit, client);
     messagePublisher.publish(event);
     clientCommandRepository.updateClient(client);
+    consentCommandRepository.revokeAllConsents(clientId);
   }
 
   /**

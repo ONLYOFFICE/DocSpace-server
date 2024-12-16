@@ -27,6 +27,6 @@
 namespace ASC.Data.Reassigns.Log;
 internal static partial class ReassignProgressItemLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "RemoveProgressItem")]
+    [LoggerMessage(LogLevel.Error, "RemoveProgressItem")]
     public static partial void ErrorRemoveProgressItem(this ILogger logger, Exception exception);
 }

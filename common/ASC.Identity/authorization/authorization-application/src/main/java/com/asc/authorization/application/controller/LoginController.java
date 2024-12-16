@@ -43,6 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class LoginController {
   private static final String CLIENT_ID = "client_id";
+  private final HttpUtils httpUtils;
 
   /**
    * Handles login requests and redirects to the login page with appropriate query parameters.
@@ -61,7 +62,7 @@ public class LoginController {
           "redirect:%s",
           UriComponentsBuilder.fromUriString(
                   String.format(
-                      "%s://%s", request.getScheme(), HttpUtils.getFirstRequestIP(request)))
+                      "%s://%s", request.getScheme(), httpUtils.getFirstRequestIP(request)))
               .path("login")
               .queryParam("client_id", clientId)
               .queryParam("type", "oauth2")

@@ -26,12 +26,24 @@
 
 namespace ASC.ApiSystem.Models;
 
+/// <summary>
+/// Request parameters
+/// </summary>
 public class CoreSettingsModel
 {
+    /// <summary>
+    /// Tenant
+    /// </summary>
     public int Tenant { get; set; } = -1;
 
+    /// <summary>
+    /// Key
+    /// </summary>
     [StringLength(255)]
     public string Key { get; set; }
 
+    /// <summary>
+    /// Value
+    /// </summary>
     public string Value { get; set; }
 }

@@ -544,4 +544,22 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Broj formulara</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Menadžer sobe</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Kreator sadržaja</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Spoljni korisnik</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Menadžer sobe</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Kreator sadržaja</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Otvori fajl</value>
+  </data>
 </root>

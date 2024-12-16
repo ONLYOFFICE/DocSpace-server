@@ -116,7 +116,7 @@ public class UserManager(
         return await users.ToArrayAsync();
     }
 
-    public async Task<UserInfo> GetUsersAsync(Guid id)
+    public async Task<UserInfo> GetUsersAsync(Guid id, bool returnLostUserIfRemoved = true)
     {
         if (IsSystemUser(id))
         {
@@ -125,7 +125,12 @@ public class UserManager(
 
         var u = await userService.GetUserAsync(Tenant.Id, id);
 
-        return u is { Removed: false } ? u : Constants.LostUser;
+        if (returnLostUserIfRemoved)
+        {
+            return u is { Removed: false } ? u : Constants.LostUser;
+        }
+
+        return u ?? Constants.LostUser;
     }
     
     public async Task<UserInfo> GetUserAsync(Guid id, Expression<Func<User, UserInfo>> exp)
@@ -178,7 +183,7 @@ public class UserManager(
 
     public async Task<UserInfo> GetUserByUserNameAsync(string username)
     {
-        var u = await userService.GetUserByUserName(await tenantManager.GetCurrentTenantIdAsync(), username);
+        var u = await userService.GetUserByUserName(tenantManager.GetCurrentTenantId(), username);
 
         return u ?? Constants.LostUser;
     }
@@ -320,7 +325,7 @@ public class UserManager(
             await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(u.Id), Constants.Action_EditUser);
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (u.Status == EmployeeStatus.Terminated && u.Id == tenant.OwnerId)
         {
             throw new InvalidOperationException("Can not disable tenant owner.");
@@ -373,7 +378,7 @@ public class UserManager(
             throw new TenantQuotaException("Maximum number of users exceeded");
         }
 
-        var oldUserData = await userService.GetUserByUserName(await tenantManager.GetCurrentTenantIdAsync(), u.UserName);
+        var oldUserData = await userService.GetUserByUserName(tenantManager.GetCurrentTenantId(), u.UserName);
 
         if (oldUserData != null && !Equals(oldUserData, Constants.LostUser))
         {
@@ -397,7 +402,7 @@ public class UserManager(
                 await countPaidUserChecker.CheckAppend();
             }
 
-            var newUser = await userService.SaveUserAsync(await tenantManager.GetCurrentTenantIdAsync(), u);
+            var newUser = await userService.SaveUserAsync(tenantManager.GetCurrentTenantId(), u);
             if (syncCardDav)
             {
                 await SyncCardDavAsync(u, oldUserData, newUser);
@@ -421,7 +426,7 @@ public class UserManager(
 
     private async Task SyncCardDavAsync(UserInfo u, UserInfo oldUserData, UserInfo newUser)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var myUri = (httpContextAccessor?.HttpContext != null) ? httpContextAccessor.HttpContext.Request.GetDisplayUrl() :
                     (cache.Get<string>("REWRITE_URL" + tenant.Id) != null) ?
                     new Uri(cache.Get<string>("REWRITE_URL" + tenant.Id)).ToString() : tenant.GetTenantDomain(coreSettings);
@@ -467,7 +472,7 @@ public class UserManager(
                     var cardDavUser = new CardDavItem(u.Id, u.FirstName, u.LastName, u.UserName, u.BirthDate, u.Sex, u.Title, u.Email, u.ContactsList, u.MobilePhone);
                     try
                     {
-                        await cardDavAddressBook.UpdateItemForAllAddBooks(allUserEmails, myUri, cardDavUser, await tenantManager.GetCurrentTenantIdAsync(), oldUserData != null && oldUserData.Email != newUser.Email ? oldUserData.Email : null);
+                        await cardDavAddressBook.UpdateItemForAllAddBooks(allUserEmails, myUri, cardDavUser, tenantManager.GetCurrentTenantId(), oldUserData != null && oldUserData.Email != newUser.Email ? oldUserData.Email : null);
                     }
                     catch (Exception ex)
                     {
@@ -484,7 +489,7 @@ public class UserManager(
 
     public async Task<IEnumerable<string>> GetDavUserEmailsAsync()
     {
-        return await userService.GetDavUserEmailsAsync(await tenantManager.GetCurrentTenantIdAsync());
+        return await userService.GetDavUserEmailsAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task DeleteUserAsync(Guid id)
@@ -502,7 +507,7 @@ public class UserManager(
 
         var delUser = await GetUsersAsync(id);
         await userService.RemoveUserAsync(Tenant.Id, id);
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         try
         {
@@ -663,7 +668,7 @@ public class UserManager(
         var user = await GetUsersAsync(userId);
         var isPaidUserBefore = await IsPaidUserAsync(user);
 
-        await permissionContext.DemandPermissionsAsync(new UserGroupObject(new UserAccount(user, await tenantManager.GetCurrentTenantIdAsync(), userFormatter), groupId),
+        await permissionContext.DemandPermissionsAsync(new UserGroupObject(new UserAccount(user, tenantManager.GetCurrentTenantId(), userFormatter), groupId),
             Constants.Action_EditGroups);
 
         await userService.SaveUserGroupRefAsync(Tenant.Id, new UserGroupRef(userId, groupId, UserGroupRefType.Contains));
@@ -672,7 +677,7 @@ public class UserManager(
 
         if (groupId == Constants.GroupGuest.ID)
         {
-            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var tenant = tenantManager.GetCurrentTenant();
             var myUri = (httpContextAccessor?.HttpContext != null) ? httpContextAccessor.HttpContext.Request.GetDisplayUrl() :
                        (cache.Get<string>("REWRITE_URL" + tenant.Id) != null) ?
                        new Uri(cache.Get<string>("REWRITE_URL" + tenant.Id)).ToString() : tenant.GetTenantDomain(coreSettings);
@@ -709,7 +714,7 @@ public class UserManager(
 
         var isPaidUserBefore = await IsPaidUserAsync(user);
 
-        await permissionContext.DemandPermissionsAsync(new UserGroupObject(new UserAccount(user, await tenantManager.GetCurrentTenantIdAsync(), userFormatter), groupId),
+        await permissionContext.DemandPermissionsAsync(new UserGroupObject(new UserAccount(user, tenantManager.GetCurrentTenantId(), userFormatter), groupId),
             Constants.Action_EditGroups);
 
         await userService.RemoveUserGroupRefAsync(Tenant.Id, userId, groupId, UserGroupRefType.Contains);

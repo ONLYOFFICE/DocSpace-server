@@ -27,33 +27,41 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
+/// Webhook request parameters
 /// </summary>
 public class WebhooksConfigRequestsDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Name
+    /// </summary>
     [StringLength(50)]
+    [Required]
     public string Name { get; set; }
 
-    /// <summary>URI</summary>
-    /// <type>System.String, System</type>
-    [Url]
+    /// <summary>
+    /// URI
+    /// </summary>
+    [Required]
     public string Uri { get; set; }
 
-    /// <summary>Secret key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Secret key
+    /// </summary>
     [StringLength(50)]
     public string SecretKey { get; set; }
 
-    /// <summary>Enabled or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Enabled or not
+    /// </summary>
     public bool? Enabled { get; set; }
 
-    /// <summary>SSL</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// SSL
+    /// </summary>
     public bool? SSL { get; set;}
 }

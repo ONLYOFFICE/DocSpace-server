@@ -26,34 +26,43 @@
 
 namespace ASC.Core.Common.EF;
 
-/// <summary>
-/// </summary>
 public class FireBaseUser : BaseEntity
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+/// <summary>
+    /// ID
+/// </summary>
     public int Id { get; set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// User ID
+    /// </summary>
     public Guid UserId { get; set; }
 
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Tenant ID
+    /// </summary>
     public int TenantId { get; set; }
 
-    /// <summary>Firebase device token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Firebase device token
+    /// </summary>
+    [MaxLength(255)]
     public string FirebaseDeviceToken { get; set; }
 
-    /// <summary>Application</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Application
+    /// </summary>
+    [MaxLength(20)]
     public string Application { get; set; }
 
-    /// <summary>Specifies if the user is subscribed to the push notifications or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if the user is subscribed to the push notifications or not
+    /// </summary>
     public bool? IsSubscribed { get; set; }
 
+    /// <summary>
+    /// Tenant
+    /// </summary>
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()
@@ -99,13 +108,13 @@ public static class FireBaseUserExtension
 
             entity.Property(e => e.FirebaseDeviceToken)
                 .HasColumnName("firebase_device_token")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Application)
                 .HasColumnName("application")
-                .HasColumnType("varchar(20)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -133,12 +142,10 @@ public static class FireBaseUserExtension
                 .HasMaxLength(36);
 
             entity.Property(e => e.FirebaseDeviceToken)
-                .HasColumnName("firebase_device_token")
-                .HasMaxLength(255);
+                .HasColumnName("firebase_device_token");
 
             entity.Property(e => e.Application)
-                .HasColumnName("application")
-                .HasMaxLength(20);
+                .HasColumnName("application");
         });
     }
 

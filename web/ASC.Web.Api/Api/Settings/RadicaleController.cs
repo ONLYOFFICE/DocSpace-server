@@ -48,11 +48,10 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <short>
     /// Get a link to the CardDav address book
     /// </short>
-    /// <category>CardDav address book</category>
-    /// <returns type="ASC.Common.Radicale.DavResponse, ASC.Common.Radicale">CardDav response</returns>
     /// <path>api/2.0/settings/carddavurl</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / CardDav address book")]
+    [SwaggerResponse(200, "CardDav response", typeof(DavResponse))]
     [HttpGet("carddavurl")]
     public async Task<DavResponse> GetCardDavUrl()
     {
@@ -90,7 +89,7 @@ public class RadicaleController(RadicaleClient radicaleClient,
             {
                 try
                 {
-                    await dbRadicale.SaveCardDavUserAsync(await tenantManager.GetCurrentTenantIdAsync(), currUser.Id);
+                    await dbRadicale.SaveCardDavUserAsync(tenantManager.GetCurrentTenantId(), currUser.Id);
                 }
                 catch (Exception ex)
                 {
@@ -120,11 +119,10 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <short>
     /// Delete a CardDav address book
     /// </short>
-    /// <category>CardDav address book</category>
-    /// <returns type="ASC.Common.Radicale.DavResponse, ASC.Common.Radicale">CardDav response</returns>
     /// <path>api/2.0/settings/deletebook</path>
-    /// <httpMethod>DELETE</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / CardDav address book")]
+    [SwaggerResponse(200, "CardDav response", typeof(DavResponse))]
     [HttpDelete("deletebook")]
     public async Task<DavResponse> DeleteCardDavAddressBook()
     {
@@ -133,7 +131,7 @@ public class RadicaleController(RadicaleClient radicaleClient,
         var authorization = await cardDavAddressbook.GetSystemAuthorizationAsync();
         var myUri = HttpContext.Request.Url();
         var requestUrlBook = cardDavAddressbook.GetRadicaleUrl(myUri.ToString(), currentUserEmail, true, true);
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
         var davRequest = new DavRequest
         {
             Url = requestUrlBook,

@@ -27,6 +27,6 @@
 namespace ASC.ActiveDirectory.Log;
 internal static partial class LdapChangeCollectionLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetPropChange({propName})")]
+    [LoggerMessage(LogLevel.Error, "GetPropChange({propName})")]
     public static partial void ErrorCanNotGetSidProperty(this ILogger logger, string propName, Exception exception);
 }

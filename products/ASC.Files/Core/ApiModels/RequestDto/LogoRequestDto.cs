@@ -27,26 +27,50 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Logo request parameters
 /// </summary>
-public class LogoRequestDto
+public class LogoRequest
 {
-    /// <summary>The path to the temporary image file</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The path to the temporary image file
+    /// </summary>
     public string TmpFile { get; set; }
 
-    /// <summary>The X coordinate of the rectangle starting point</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The X coordinate of the rectangle starting point
+    /// </summary>
     public int X { get; set; }
 
-    /// <summary>The Y coordinate of the rectangle starting point</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The Y coordinate of the rectangle starting point
+    /// </summary>
     public int Y { get; set; }
 
-    /// <summary>The rectangle width</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The rectangle width
+    /// </summary>
     public int Width { get; set; }
 
-    /// <summary>The rectangle height</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The rectangle height
+    /// </summary>
     public int Height { get; set; }
+}
+
+/// <summary>
+/// Logo request parameters
+/// </summary>
+public class LogoRequest<T>
+{
+    /// <summary>
+    /// Room Id
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// Logo
+    /// </summary>
+    [FromBody]
+    public LogoRequest Logo { get; set; }
 }

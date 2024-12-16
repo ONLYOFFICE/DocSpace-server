@@ -26,12 +26,35 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public class GroupMemberSecurityDto
+public class GroupMemberSecurityRequestDto
 {
+    /// <summary>
+    /// User
+    /// </summary>
     public EmployeeFullDto User { get; init; }
+
+    /// <summary>
+    /// Group access
+    /// </summary>
     public FileShare GroupAccess { get; init; }
+
+    /// <summary>
+    /// User access
+    /// </summary>
     public FileShare? UserAccess { get; init; }
+
+    /// <summary>
+    /// Overridden
+    /// </summary>
     public bool Overridden { get; init; }
+
+    /// <summary>
+    /// Can edit access
+    /// </summary>
     public bool CanEditAccess { get; init; }
+
+    /// <summary>
+    /// Owner
+    /// </summary>
     public bool Owner { get; init; }
 }

@@ -28,10 +28,29 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public record HistoryDto
 {
+    /// <summary>
+    /// Action
+    /// </summary>
     public HistoryAction Action { get; init; }
+
+    /// <summary>
+    /// Initiator
+    /// </summary>
     public EmployeeDto Initiator { get; init; }
+
+    /// <summary>
+    /// Date
+    /// </summary>
     public ApiDateTime Date { get; init; }
+
+    /// <summary>
+    /// Data
+    /// </summary>
     public HistoryData Data { get; init; }
+
+    /// <summary>
+    /// Related
+    /// </summary>
     public List<HistoryDto> Related { get; set; }
 }
 
@@ -65,23 +84,37 @@ public class HistoryDtoHelper(EmployeeFullDtoHelper employeeFullDtoHelper, UserM
 }
 
 [Scope]
-public class HistoryApiHelper(HistoryService historyService, HistoryDtoHelper historyDtoHelper, ApiContext apiContext, IDaoFactory daoFactory, FileSecurity fileSecurity)
+public class HistoryApiHelper(
+    HistoryService historyService,
+    HistoryDtoHelper historyDtoHelper,
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    TenantUtil tenantUtil)
 {
-    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId)
+    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate)
     {
-        return GetEntryHistoryAsync(fileId, FileEntryType.File);
+        return GetEntryHistoryAsync(fileId, FileEntryType.File, fromDate, toDate);
     }
 
-    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(int folderId)
+    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(int folderId, ApiDateTime fromDate, ApiDateTime toDate)
     {
-        return GetEntryHistoryAsync(folderId, FileEntryType.Folder);
+        return GetEntryHistoryAsync(folderId, FileEntryType.Folder, fromDate, toDate);
     }
     
-    private async IAsyncEnumerable<HistoryDto> GetEntryHistoryAsync(int entryId, FileEntryType entryType)
+    private async IAsyncEnumerable<HistoryDto> GetEntryHistoryAsync(int entryId, FileEntryType entryType, ApiDateTime fromDate, ApiDateTime toDate)
     {
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         
+        var fromDateUtc = fromDate != null 
+            ? tenantUtil.DateTimeToUtc(fromDate) 
+            : (DateTime?)null;
+        
+        var toDateUtc = toDate != null 
+            ? tenantUtil.DateTimeToUtc(toDate) 
+            : (DateTime?)null;
+
         var filterFolderIds = new List<int>();
         var filterFileIds = new List<int>();
         var needFiltering = false;
@@ -97,16 +130,14 @@ public class HistoryApiHelper(HistoryService historyService, HistoryDtoHelper hi
         {
             throw new ItemNotFoundException(entryType == FileEntryType.File
                 ? FilesCommonResource.ErrorMessage_FileNotFound
-                : FilesCommonResource.ErrorMessage_FolderNotFound
-                );
+                : FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (!await fileSecurity.CanReadAsync(entry))
         {
             throw new SecurityException(entryType == FileEntryType.File
                 ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile
-                : FilesCommonResource.ErrorMessage_SecurityException_ReadFolder
-                );
+                : FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
         if (entryType == FileEntryType.Folder &&
@@ -118,13 +149,13 @@ public class HistoryApiHelper(HistoryService historyService, HistoryDtoHelper hi
             var fileDao = daoFactory.GetFileDao<int>();
 
             var f = entry as Folder<int>;
-            filterFolderIds = await folderDao.GetFoldersAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, true, false, 0, -1, default, true, f.FolderType).Select(r => r.Id).ToListAsync();
-            filterFileIds = await fileDao.GetFilesAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, null, false, true, false, 0, -1, default, false, true, f.FolderType).Select(r => r.Id).ToListAsync();
+            filterFolderIds = await folderDao.GetFoldersAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, true, false, 0, -1, 0, true, f.FolderType).Select(r => r.Id).ToListAsync();
+            filterFileIds = await fileDao.GetFilesAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, null, false, true, false, 0, -1, 0, false, true, f.FolderType).Select(r => r.Id).ToListAsync();
         }
 
-        var totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType, needFiltering, filterFolderIds, filterFileIds);
+        var totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType, needFiltering, filterFolderIds, filterFileIds, fromDateUtc, toDateUtc);
 
-        var histories = historyService.GetHistoryAsync(entryId, entryType, offset, count, needFiltering, filterFolderIds, filterFileIds)
+        var histories = historyService.GetHistoryAsync(entry, offset, count, needFiltering, filterFolderIds, filterFileIds, fromDateUtc, toDateUtc)
             .GroupByAwait(x => ValueTask.FromResult(x.GetGroupId()),
                 async (_, group) =>
                 {

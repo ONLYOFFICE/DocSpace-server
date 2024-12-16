@@ -27,14 +27,36 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Parameters for saving file as pdf
+/// </summary>
+public class SaveAsPdf<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// File title
+    /// </summary>
+    public string Title { get; set; }
+}
+
+
+/// <summary>
+/// Request parameters for saving file as pdf
 /// </summary>
 public class SaveAsPdfRequestDto<T>
 {
-    /// <summary>Folder ID</summary>
-    /// <type>System.Int32, System</type>
-    public T FolderId { get; set; }
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
 
-    /// <summary>File title</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
+    /// <summary>
+    /// Parameters for saving file as pdf
+    /// </summary>
+    [FromBody]
+    public SaveAsPdf<T> File { get; set; }
 }

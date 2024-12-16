@@ -67,6 +67,7 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
   private static final String ASC_AUTH_COOKIE = "asc_auth_key";
 
   private final AscApiClient apiClient;
+  private final HttpUtils httpUtils;
 
   /**
    * Converts the provided HttpServletRequest into an Authentication object.
@@ -106,13 +107,13 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
           }
         });
 
-    var address = HttpUtils.getRequestHostAddress(request).orElse(null);
+    var address = httpUtils.getRequestHostAddress(request).orElse(null);
     if (address == null) {
       log.error("Invalid request address");
       throwError(OAuth2ErrorCodes.INVALID_REQUEST, OAuth2ParameterNames.RESOURCE);
     }
 
-    var hostAddress = HttpUtils.getRequestDomain(request).orElse(null);
+    var hostAddress = httpUtils.getRequestDomain(request).orElse(null);
     if (hostAddress == null) {
       log.error("Invalid request domain");
       throwError(OAuth2ErrorCodes.INVALID_REQUEST, OAuth2ParameterNames.RESOURCE);

@@ -157,7 +157,7 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
     {
         if (!int.TryParse(configuration["web:password:min"], out var defaultMinLength))
         {
-            defaultMinLength = 0;
+            defaultMinLength = 8;
         }
 
         return length >= defaultMinLength && length <= MaxLength;
@@ -192,7 +192,7 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
         var text = new StringBuilder();
 
         text.Append($"{Resource.ErrorPasswordMessage} ");
-        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettingsManager.MaxLength);
+        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, MaxLength);
         text.Append($", {Resource.ErrorPasswordOnlyLatinLetters}");
         text.Append($", {Resource.ErrorPasswordNoSpaces}");
 

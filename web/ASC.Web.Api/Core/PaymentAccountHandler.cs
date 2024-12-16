@@ -39,7 +39,7 @@ public class PaymentAccountHandler
         SecurityContext securityContext,
         TenantManager tenantManager)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await userManager.GetUserByEmailAsync(payerId);
 

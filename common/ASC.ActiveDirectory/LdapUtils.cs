@@ -79,7 +79,7 @@ public static class LdapUtils
             return false;
         }
 
-        var alterEmail = ldapUser.UserName.Contains("@")
+        var alterEmail = ldapUser.UserName.Contains('@')
             ? ldapUser.UserName
             : string.Format("{0}@{1}", ldapUser.UserName, ldapDomain);
 
@@ -102,7 +102,7 @@ public static class LdapUtils
                 return email;
             }
 
-            var dotIndex = login.Domain.LastIndexOf(".", StringComparison.Ordinal);
+            var dotIndex = login.Domain.LastIndexOf('.');
 
             var accessableEmail = dotIndex > -1 ? string.Format("{0}@{1}", login.Username, login.Domain.Remove(dotIndex)) : email;
 
@@ -185,7 +185,7 @@ public static class LdapUtils
             userInfo.Title,
             userInfo.Location,
             userInfo.GetContactsString(),
-            Enum.GetName(typeof(EmployeeStatus), userInfo.Status));
+            Enum.GetName(userInfo.Status));
     }
 
     public static string UnescapeLdapString(string ldapString)

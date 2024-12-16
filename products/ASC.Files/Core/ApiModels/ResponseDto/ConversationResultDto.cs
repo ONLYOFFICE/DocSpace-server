@@ -34,44 +34,38 @@ public class ConversationResultDto
     /// <summary>
     /// Operation ID
     /// </summary>
-    /// <type>System.String, System</type>
     public string Id { get; set; }
 
     /// <summary>
     /// Operation type
     /// </summary>
-    /// <type>ASC.Web.Files.Services.WCFService.FileOperations.FileOperationType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Example = "Move")]
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; set; }
 
     /// <summary>
     /// Operation progress
     /// </summary>
-    /// <type>System.Int32, System</type>
     public int Progress { get; set; }
 
     /// <summary>
     /// Source file
     /// </summary>
-    /// <type>System.String, System</type>
     public string Source { get; set; }
 
     /// <summary>
     /// Resulting file
     /// </summary>
-    /// <type>System.Object, System</type>
     [JsonPropertyName("result")]
     public object File { get; set; }
 
     /// <summary>
     /// Error
     /// </summary>
-    /// <type>System.String, System</type>
     public string Error { get; set; }
 
     /// <summary>
     /// Specifies if the operation is processed or not
     /// </summary>
-    /// <type>System.String, System</type>
     public string Processed { get; set; }
 }

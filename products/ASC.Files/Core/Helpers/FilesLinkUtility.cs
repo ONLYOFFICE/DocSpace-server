@@ -480,7 +480,7 @@ public class FilesLinkUtility
             return FilesBaseAbsolutePath + $"share/preview/{id}";
         }
         
-        return FilesBaseAbsolutePath + $"#preview/{id}";
+        return FilesBaseAbsolutePath + $"media/view/{id}";
     }
 
     public static string AddQueryString(string uri, Dictionary<string, string> queryString)
@@ -494,9 +494,8 @@ public class FilesLinkUtility
             anchorText = uriToBeAppended.Substring(anchorIndex);
             uriToBeAppended = uriToBeAppended.Substring(0, anchorIndex);
         }
-
-        var queryIndex = uriToBeAppended.IndexOf('?');
-        var hasQuery = queryIndex != -1;
+        
+        var hasQuery =  uriToBeAppended.Contains('?');
 
         var sb = new StringBuilder();
         sb.Append(uriToBeAppended);

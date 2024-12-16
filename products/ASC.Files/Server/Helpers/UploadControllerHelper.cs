@@ -41,8 +41,7 @@ public class UploadControllerHelper(
     SecurityContext securityContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    FileChecker fileChecker,
-    IDistributedCache distributedCache)
+    FileChecker fileChecker)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -50,14 +49,13 @@ public class UploadControllerHelper(
         fileDtoHelper,
         fileStorageService,
         fileChecker,
-        httpContextAccessor,
-        distributedCache)
+        httpContextAccessor)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
-        return await CreateUploadSessionAsync(file, false, default, true);
+        return await CreateUploadSessionAsync(file, false, null, true);
     }
 
     public async Task<List<string>> CheckUploadAsync<T>(T folderId, IEnumerable<string> filesTitle)
@@ -109,7 +107,7 @@ public class UploadControllerHelper(
             };
         }
 
-        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(await tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
+        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(tenantManager.GetCurrentTenantId(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
 
         var httpClient = httpClientFactory.CreateClient();
 

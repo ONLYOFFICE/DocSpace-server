@@ -69,7 +69,7 @@ internal abstract class BaseTagDao<T>(
             }
         }
         
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
@@ -99,7 +99,7 @@ internal abstract class BaseTagDao<T>(
         var mapping = daoFactory.GetMapping<T>();
         var mappedId = await mapping.MappingIdAsync(entryId);
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = filesDbContext.GetTagsByEntryTypeAsync(tenantId, tagType, entryType, mappedId, owner, name);
         var fromDb = await q.ToListAsync();
@@ -112,7 +112,7 @@ internal abstract class BaseTagDao<T>(
 
     public async IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, TagType tagType)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var fromDb = await filesDbContext.TagsByOwnerAsync(tenantId, tagType, owner).ToListAsync();
         
@@ -127,7 +127,7 @@ internal abstract class BaseTagDao<T>(
     public async IAsyncEnumerable<TagInfo> GetTagsInfoAsync(string searchText, TagType tagType, bool byName, int from = 0, int count = 0)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = (await Query(filesDbContext.Tag)).Where(r => r.Type == tagType);
+        var q = (Query(filesDbContext.Tag)).Where(r => r.Type == tagType);
 
         if (byName)
         {
@@ -154,7 +154,7 @@ internal abstract class BaseTagDao<T>(
 
     public async IAsyncEnumerable<TagInfo> GetTagsInfoAsync(IEnumerable<string> names, TagType type)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = filesDbContext.TagsInfoAsync(tenantId, names, type);
 
@@ -166,7 +166,7 @@ internal abstract class BaseTagDao<T>(
 
     public async Task<TagInfo> SaveTagInfoAsync(TagInfo tagInfo)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tagDb = mapper.Map<TagInfo, DbFilesTag>(tagInfo);
         tagDb.TenantId = tenantId;
@@ -193,7 +193,7 @@ internal abstract class BaseTagDao<T>(
             return result;
         }
         
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
@@ -274,7 +274,7 @@ internal abstract class BaseTagDao<T>(
             return result;
         }
         
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         
         await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
         {
@@ -360,7 +360,7 @@ internal abstract class BaseTagDao<T>(
             return;
         }
         
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
@@ -393,7 +393,7 @@ internal abstract class BaseTagDao<T>(
             return;
         }
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         
         await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
@@ -424,7 +424,7 @@ internal abstract class BaseTagDao<T>(
             return;
         }
         
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
         {
@@ -441,7 +441,7 @@ internal abstract class BaseTagDao<T>(
             return;
         }
         
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var mappedId = (await MappingIdAsync(filesDbContext, tenantId, tag.EntryId)).ToString();
         var tagId = tag.Id;
@@ -459,7 +459,7 @@ internal abstract class BaseTagDao<T>(
             return;
         }
         
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         
         await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
         {
@@ -479,7 +479,7 @@ internal abstract class BaseTagDao<T>(
 
     public async Task RemoveTagsAsync(FileEntry<T> entry, IEnumerable<int> tagsIds)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var entryId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -499,7 +499,7 @@ internal abstract class BaseTagDao<T>(
             return;
         }
         
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
@@ -523,7 +523,7 @@ internal abstract class BaseTagDao<T>(
 
     public async Task<int> RemoveTagLinksAsync(T entryId, FileEntryType entryType, TagType tagType)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entryId);
 
@@ -538,7 +538,7 @@ internal abstract class BaseTagDao<T>(
             return;
         }
         
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var id = await filesDbContext.FirstTagIdAsync(tenantId, tag.Owner, tag.Name, tag.Type);
@@ -578,7 +578,7 @@ internal abstract class BaseTagDao<T>(
 
         if (entryIds.Count > 0)
         {
-            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+            var tenantId = _tenantManager.GetCurrentTenantId();
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var fromDb = await filesDbContext.TagLinkDataAsync(tenantId, entryIds, entryTypes, subject).ToListAsync();
             
@@ -710,7 +710,7 @@ internal class TagDao(
 
     private async IAsyncEnumerable<Tag> InternalGetNewTagsAsync(Guid subject, Folder<int> parentFolder, bool deepSearch)
     {            
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var tempTags = AsyncEnumerable.Empty<TagLinkData>();
         var monitorFolderIds = new List<object> { parentFolder.Id };
         

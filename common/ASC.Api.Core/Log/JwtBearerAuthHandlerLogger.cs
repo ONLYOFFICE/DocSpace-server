@@ -27,12 +27,12 @@
 namespace ASC.Api.Core.Log;
 internal static partial class JwtBearerAuthHandlerLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "Token Validation Exception: ")]
+    [LoggerMessage(LogLevel.Information, "Token Validation Exception: ")]
     public static partial void InformationTokenValidationException(this ILogger<JwtBearerAuthHandler> logger, Exception ex);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Disable token validation. Setting core:oidc:disableValidateToken is true")]
+    [LoggerMessage(LogLevel.Warning, "Disable token validation. Setting core:oidc:disableValidateToken is true")]
     public static partial void WarningDisableTokenValidation(this ILogger<JwtBearerAuthHandler> logger);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "ValidateToken: Token: {token}, authority/issuer: {issuer}, audience: {audience}")]
+    [LoggerMessage(LogLevel.Trace, "ValidateToken: Token: {token}, authority/issuer: {issuer}, audience: {audience}")]
     public static partial void TraceValidateTokenInfo(this ILogger<JwtBearerAuthHandler> logger, string token, string issuer, string audience);
 }

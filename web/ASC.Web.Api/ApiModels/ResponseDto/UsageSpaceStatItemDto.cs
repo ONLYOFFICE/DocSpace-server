@@ -26,39 +26,61 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class UsageSpaceStatItemDto
 {
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Name
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Item name")]
     public string Name { get; set; }
 
-    /// <summary>Icon</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Icon
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Item icon path")]
     public string Icon { get; set; }
 
-    /// <summary>Specifies if the module space is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the module space is disabled or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool Disabled { get; set; }
 
-    /// <summary>Size</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Size
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "0 Byte")]
     public string Size { get; set; }
 
-    /// <summary>URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// URL
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Item url")]
     public string Url { get; set; }
+}
 
-    public static UsageSpaceStatItemDto GetSample()
-    {
-        return new UsageSpaceStatItemDto
-        {
-            Name = "Item name",
-            Icon = "Item icon path",
-            Disabled = false,
-            Size = "0 Byte",
-            Url = "Item url"
-        };
-    }
+public class ChartPointDto
+{
+    /// <summary>
+    /// Display date
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "6/1/2024")]
+    public string DisplayDate { get; set; }
+
+    /// <summary>
+    /// Date
+    /// </summary>
+    public DateTime Date { get; init; }
+
+    /// <summary>
+    /// Hosts
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
+    public int Hosts { get; set; }
+
+    /// <summary>
+    /// Hits
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
+    public int Hits { get; set; }
 }

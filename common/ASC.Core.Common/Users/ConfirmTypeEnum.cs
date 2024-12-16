@@ -33,26 +33,61 @@ namespace ASC.Web.Studio.Utility;
 //  portal-continue - confirm portal continuation  - Tenant.SetStatus(TenantStatus.Active)
 //  portal-remove - confirm portal deletation - Tenant.SetStatus(TenantStatus.RemovePending)
 //  DnsChange - change Portal Address and/or Custom domain name
-[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter<ConfirmType>))]
+[JsonConverter(typeof(JsonStringEnumConverter<ConfirmType>))]
 [EnumExtensions]
 public enum ConfirmType
 {
+    [SwaggerEnum("Emp invite")]
     EmpInvite,
+
+    [SwaggerEnum("Link invite")]
     LinkInvite,
+
+    [SwaggerEnum("Portal suspend")]
     PortalSuspend,
+
+    [SwaggerEnum("Portal continue")]
     PortalContinue,
+
+    [SwaggerEnum("Portal remove")]
     PortalRemove,
+
+    [SwaggerEnum("Dns change")]
     DnsChange,
+
+    [SwaggerEnum("Portal owner change")]
     PortalOwnerChange,
+
+    [SwaggerEnum("Activation")]
     Activation,
+
+    [SwaggerEnum("Email change")]
     EmailChange,
+
+    [SwaggerEnum("Email activation")]
     EmailActivation,
+
+    [SwaggerEnum("Password change")]
     PasswordChange,
+
+    [SwaggerEnum("Profile remove")]
     ProfileRemove,
+
+    [SwaggerEnum("Phone activation")]
     PhoneActivation,
+
+    [SwaggerEnum("Phone auth")]
     PhoneAuth,
+
+    [SwaggerEnum("Auth")]
     Auth,
+
+    [SwaggerEnum("Tfa activation")]
     TfaActivation,
+
+    [SwaggerEnum("Tfa auth")]
     TfaAuth,
+
+    [SwaggerEnum("Wizard")]
     Wizard
 }

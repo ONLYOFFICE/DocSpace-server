@@ -27,10 +27,30 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for setting a group manager
+/// </summary>
+public class SetManagerRequest
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    public Guid UserId { get; set; }
+}
+
+/// <summary>
+/// Request parameters for setting a group manager
 /// </summary>
 public class SetManagerRequestDto
 {
-    /// <summary>User ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid UserId { get; set; }
+    /// <summary>
+    /// Group ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public Guid Id { get; set; }
+
+    /// <summary>
+    /// Set manager
+    /// </summary>
+    [FromBody]
+    public SetManagerRequest SetManager { get; set; }
 }

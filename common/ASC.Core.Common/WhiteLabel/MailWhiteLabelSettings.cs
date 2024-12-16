@@ -27,6 +27,7 @@
 namespace ASC.Web.Core.WhiteLabel;
 
 /// <summary>
+/// Mail white label settings
 /// </summary>
 public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 {

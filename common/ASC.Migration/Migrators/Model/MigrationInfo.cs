@@ -56,7 +56,7 @@ public class MigrationInfo
             FailedUsers = FailedUsers,
             Errors = Errors,
             Groups = Groups.Select(g => g.Value.ToApiInfo()).ToList(),
-            Operation = Operation.ToString().ToLower(),
+            Operation = Operation.ToStringLowerFast(),
             Files = Files
         };
     }

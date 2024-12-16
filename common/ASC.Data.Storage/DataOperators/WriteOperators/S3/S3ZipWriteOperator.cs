@@ -39,7 +39,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
     private readonly List<Stream> _streams = new(TasksLimit);
     private readonly TempStream _tempStream;
     private int _chunkNumber = 1;
-    private readonly object _locker = new();
+    private readonly Lock _locker = new();
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
@@ -93,11 +93,11 @@ public class S3ZipWriteOperator : IDataWriteOperator
         {
             var entry = TarEntry.CreateTarEntry(tarKey);
             entry.Size = buffered.Length;
-            await _tarOutputStream.PutNextEntryAsync(entry, default);
+            await _tarOutputStream.PutNextEntryAsync(entry, CancellationToken.None);
             buffered.Position = 0;
             await buffered.CopyToAsync(_tarOutputStream);
             await _tarOutputStream.FlushAsync();
-            await _tarOutputStream.CloseEntryAsync(default).ContinueWith(async _ => await action());
+            await _tarOutputStream.CloseEntryAsync(CancellationToken.None).ContinueWith(async _ => await action());
         }
         finally
         {

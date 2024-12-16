@@ -848,7 +848,7 @@
     <value>Количество администраторов не должно превышать {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Количество администраторов/опытных пользователей</value>
+    <value>Количество администраторов</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Автоматическое резервное копирование и восстановление данных</value>
@@ -890,7 +890,7 @@
     <value>Количество пользователей в комнате не должно превышать {0}</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Добавлено администраторов/опытных пользователей:</value>
+    <value>Добавлено администраторов:</value>
   </data>
   <data name="ConsumersappleIdClientId" xml:space="preserve">
     <value>ID клиента приложения</value>
@@ -1040,7 +1040,7 @@
     <value>Превышена квота пространства на пользователя</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} на администратора / опытного пользователя и возможность добавлять пространство по запросу</value>
+    <value>{0} на администратора и возможность добавлять пространство по запросу</value>
   </data>
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Квота хранилища и статистика</value>
@@ -1062,5 +1062,17 @@
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Не удалось установить квоту на пользователя. Введенное значение превышает объем хранилища DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Количество администраторов превышает лимит: {0}/{1}.</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Добавьте хотя бы 1 разрешенный IP-адрес.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Добавьте хотя бы 1 доверенный домен.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Некоммерческий</value>
   </data>
 </root>

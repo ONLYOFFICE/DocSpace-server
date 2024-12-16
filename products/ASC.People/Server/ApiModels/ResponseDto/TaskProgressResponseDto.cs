@@ -28,10 +28,29 @@ namespace ASC.People.ApiModels.ResponseDto;
 
 public class TaskProgressResponseDto
 {
+    /// <summary>
+    /// ID
+    /// </summary>
     public string Id { get; set; }
+
+    /// <summary>
+    /// Error
+    /// </summary>
     public string Error { get; set; }
+
+    /// <summary>
+    /// Percentage
+    /// </summary>
     public int Percentage { get; set; }
+
+    /// <summary>
+    /// IsCompleted
+    /// </summary>
     public bool IsCompleted { get; set; }
+
+    /// <summary>
+    /// Status
+    /// </summary>
     public DistributedTaskStatus Status { get; set; }
 
     public static TaskProgressResponseDto Get(DistributedTaskProgress progressItem)

@@ -69,6 +69,7 @@ public class AscPersonalAccessTokenAuthenticationProvider implements Authenticat
   @Value("${spring.application.name}")
   private String serviceName;
 
+  private final HttpUtils httpUtils;
   private final AuditMessagePublisher auditMessagePublisher;
   private final OAuth2AuthorizationService authorizationService;
   private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
@@ -140,19 +141,20 @@ public class AscPersonalAccessTokenAuthenticationProvider implements Authenticat
       auditMessagePublisher.publish(
           AuditMessage.builder()
               .ip(
-                  HttpUtils.getRequestClientAddress(request)
-                      .map(HttpUtils::extractHostFromUrl)
+                  httpUtils
+                      .getRequestClientAddress(request)
+                      .map(httpUtils::extractHostFromUrl)
                       .orElseGet(
-                          () -> HttpUtils.extractHostFromUrl(HttpUtils.getFirstRequestIP(request))))
+                          () -> httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request))))
               .initiator(serviceName)
               .target(registeredClient.getClientId())
-              .browser(HttpUtils.getClientBrowser(request))
-              .platform(HttpUtils.getClientOS(request))
+              .browser(httpUtils.getClientBrowser(request))
+              .platform(httpUtils.getClientOS(request))
               .tenantId(patAuthentication.getTenantId())
               .userId(patAuthentication.getUserId())
               .userEmail(patAuthentication.getUserEmail())
               .userName(patAuthentication.getUserName())
-              .page(HttpUtils.getFullURL(request))
+              .page(httpUtils.getFullURL(request))
               .action(AuditCode.GENERATE_PERSONAL_ACCESS_TOKEN.getCode())
               .build());
 
