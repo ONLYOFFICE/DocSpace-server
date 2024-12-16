@@ -28,7 +28,12 @@ namespace ASC.Files.Core.Core;
 
 public enum StorageFilter
 {
+    [SwaggerEnum("None")]
     None = 0,
+
+    [SwaggerEnum("Internal")]
     Internal = 1,
+
+    [SwaggerEnum("ThirdParty")]
     ThirdParty = 2
 }

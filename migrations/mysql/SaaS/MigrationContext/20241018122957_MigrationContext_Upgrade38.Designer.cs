@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20241009092523_MigrationContext_Upgrade35")]
-    partial class MigrationContext_Upgrade35
+    [Migration("20241018122957_MigrationContext_Upgrade38")]
+    partial class MigrationContext_Upgrade38
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -602,14 +602,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -1,
                             Subject = "abef62db-11a8-4673-9d32-ef1d8af19dc0",
-                            Action = "3e74aff2-7c0c-4089-b209-6495b8643471",
-                            Object = "",
-                            AceType = 0
-                        },
-                        new
-                        {
-                            TenantId = -1,
-                            Subject = "88f11e7c-7407-4bea-b4cb-070010cdbb6b",
                             Action = "3e74aff2-7c0c-4089-b209-6495b8643471",
                             Object = "",
                             AceType = 0
@@ -1215,30 +1207,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.ToTable("tenants_tariffrow", (string)null);
                 });
 
-            modelBuilder.Entity("ASC.Core.Common.EF.DbUserRelation", b =>
-                {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant");
-
-                    b.Property<string>("SourceUserId")
-                        .HasColumnType("varchar(36)")
-                        .HasColumnName("source_user_id")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<string>("TargetUserId")
-                        .HasColumnType("varchar(36)")
-                        .HasColumnName("target_user_id")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.HasKey("TenantId", "SourceUserId", "TargetUserId")
-                        .HasName("PRIMARY");
-
-                    b.ToTable("core_user_relations", (string)null);
-                });
-
             modelBuilder.Entity("ASC.Core.Common.EF.FireBaseUser", b =>
                 {
                     b.Property<int>("Id")
@@ -1549,12 +1517,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<bool>("Spam")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("spam")
-                        .HasDefaultValueSql("'1'");
-
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -1623,7 +1585,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Web Office",
                             OwnerId = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
-                            Spam = false,
                             Status = 0,
                             TrustedDomainsEnabled = 0,
                             Version = 0
@@ -1638,7 +1599,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Web Office",
                             OwnerId = "00000000-0000-0000-0000-000000000000",
-                            Spam = false,
                             Status = 1,
                             TrustedDomainsEnabled = 0,
                             Version = 0
@@ -5126,6 +5086,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<bool?>("Spam")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("spam");
+
                     b.Property<string>("SsoNameId")
                         .HasColumnType("varchar(512)")
                         .HasColumnName("sso_name_id")
@@ -6790,12 +6754,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("tinytext")
                         .HasColumnName("terms_url");
 
-                    b.Property<int>("Version")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("version")
-                        .HasDefaultValueSql("0");
-
                     b.Property<string>("WebsiteUrl")
                         .HasColumnType("tinytext")
                         .HasColumnName("website_url");
@@ -7272,17 +7230,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.DbTariffRow", b =>
-                {
-                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("ASC.Core.Common.EF.DbUserRelation", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()

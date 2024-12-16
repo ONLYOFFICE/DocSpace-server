@@ -24,27 +24,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.Files.Core.ApiModels;
 
 /// <summary>
 /// </summary>
 public class RoomDataLifetimeDto : IMapFrom<RoomDataLifetime>
 {
-    /// <summary>Specifies action</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies action
+    /// </summary>
     public bool DeletePermanently { get; set; }
 
-    /// <summary>Specifies time period type</summary>
-    /// <type>ASC.Files.Core.VirtualRooms.RoomDataLifetimePeriod, ASC.Files.Core</type>
+    /// <summary>
+    /// Specifies time period type
+    /// </summary>
+    [EnumDataType(typeof(RoomDataLifetimePeriod))]
     public RoomDataLifetimePeriod Period { get; set; }
 
-    /// <summary>Specifies time period value</summary>
-    /// <type>System.Int32, System</type>
-    [Range(1, 9999)]
+    /// <summary>
+    /// Specifies time period value
+    /// </summary>
+    [Range(1, 999)]
     public int? Value { get; set; }
     
+    /// <summary>
+    /// Enabled
+    /// </summary>
     public bool? Enabled { get; set; }
 }
-

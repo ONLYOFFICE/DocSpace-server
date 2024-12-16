@@ -35,7 +35,7 @@ public class CustomTagsService(
     UserManager userManager,
     FileSecurityCommon fileSecurityCommon)
 {
-    public async Task<string> CreateTagAsync(string name)
+    public async Task<TagInfo> CreateTagAsync(string name)
     {
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
@@ -49,7 +49,7 @@ public class CustomTagsService(
 
         if (existedTag != null)
         {
-            return existedTag.Name;
+            return existedTag;
         }
 
         var tagInfo = new TagInfo
@@ -61,9 +61,9 @@ public class CustomTagsService(
 
         var savedTag = await tagDao.SaveTagInfoAsync(tagInfo);
 
-        await filesMessageService.SendAsync(MessageAction.TagCreated, savedTag.Name);
+        filesMessageService.Send(MessageAction.TagCreated, savedTag.Name);
 
-        return savedTag.Name;
+        return savedTag;
     }
 
     public async Task DeleteTagsAsync<T>(IEnumerable<string> names)
@@ -80,12 +80,12 @@ public class CustomTagsService(
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsInfo = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+        var tagsInfo = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
         var tags = tagsInfo.Select(tagInfo => new Tag { EntryId = tagInfo.EntryId, Id = tagInfo.Id, Owner = tagInfo.Owner, Type = tagInfo.Type, Name = tagInfo.Name, EntryType = tagInfo.EntryType});
 
         await tagDao.RemoveTagsAsync(tags);
 
-        await filesMessageService.SendAsync(MessageAction.TagsDeleted, string.Join(',', tags.Select(t => t.Name).ToArray()));
+        filesMessageService.Send(MessageAction.TagsDeleted, string.Join(',', tags.Select(t => t.Name).ToArray()));
     }
 
     public async Task<Folder<T>> AddRoomTagsAsync<T>(T folderId, IEnumerable<string> names)
@@ -104,7 +104,7 @@ public class CustomTagsService(
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+        var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
 
         if (tagsInfos.Count == 0)
         {
@@ -136,7 +136,7 @@ public class CustomTagsService(
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+        var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
 
         await tagDao.RemoveTagsAsync(folder, tagsInfos.Select(t => t.Id).ToList());
 

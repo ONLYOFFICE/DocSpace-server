@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.ComponentModel.DataAnnotations;
 global using System.Configuration;
 global using System.Data;
 global using System.Data.Common;
@@ -33,12 +34,11 @@ global using System.Reflection;
 global using System.Security.Cryptography;
 global using System.ServiceModel;
 global using System.Text;
-
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Xml;
 global using System.Xml.Linq;
-
+global using ASC.Api.Core.Extensions;
 global using ASC.Api.Utils;
 global using ASC.Common;
 global using ASC.Common.Caching;
@@ -49,7 +49,6 @@ global using ASC.Common.Utils;
 global using ASC.Core;
 global using ASC.Core.Billing;
 global using ASC.Core.ChunkedUploader;
-global using ASC.Files.Core.Resources;
 global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
@@ -71,11 +70,12 @@ global using ASC.Data.Backup.Tasks.Modules;
 global using ASC.Data.Backup.Utils;
 global using ASC.Data.Storage;
 global using ASC.Data.Storage.Configuration;
+global using ASC.Data.Storage.DataOperators;
 global using ASC.Data.Storage.DiscStorage;
 global using ASC.Data.Storage.S3;
-global using ASC.Data.Storage.DataOperators;
 global using ASC.EventBus.Events;
 global using ASC.Files.Core;
+global using ASC.Files.Core.Resources;
 global using ASC.MessagingSystem.Core;
 global using ASC.Notify.Cron;
 global using ASC.Notify.Model;
@@ -88,16 +88,11 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
-
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
-
 global using MySql.Data.MySqlClient;
-
-global using Newtonsoft.Json;
-
 global using ProtoBuf;

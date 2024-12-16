@@ -29,7 +29,15 @@ using Status = ASC.Files.Core.Security.Status;
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
-public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext securityContext, IDaoFactory daoFactory, UserManager userManager, FileSecurity fileSecurity)
+public class ExternalLinkHelper(
+    ExternalShare externalShare,
+    SecurityContext securityContext,
+    IDaoFactory daoFactory,
+    UserManager userManager,
+    FileSecurity fileSecurity,
+    FileMarker fileMarker,
+    SocketManager socketManager,
+    GlobalFolderHelper globalFolderHelper)
 {
     public async Task<ValidationInfo> ValidateAsync(string key, string password = null, string fileId = null)
     {
@@ -38,6 +46,9 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
             Status = Status.Invalid, 
             Access = FileShare.Restrict
         };
+        
+        var isAuth = securityContext.IsAuthenticated;
+        result.IsAuthenticated = isAuth;
 
         var data = await externalShare.ParseShareKeyAsync(key);
         var securityDao = daoFactory.GetSecurityDao<string>();
@@ -48,7 +59,7 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
             return result;
         }
 
-        var status = await externalShare.ValidateRecordAsync(record, password, securityContext.IsAuthenticated);
+        var status = await externalShare.ValidateRecordAsync(record, password, isAuth);
         result.Status = status;
 
         if (status != Status.Ok && status != Status.RequiredPassword)
@@ -89,11 +100,12 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
         result.TenantId = record.TenantId;
         result.LinkId = data.Id;
 
-        if (securityContext.IsAuthenticated)
+        if (isAuth)
         {
             var userId = securityContext.CurrentAccount.ID;
+            var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(userId);
             
-            if (entry.CreateBy.Equals(userId) || await userManager.IsDocSpaceAdminAsync(userId))
+            if (entry.CreateBy.Equals(userId))
             {
                 result.Shared = true;
             }
@@ -101,14 +113,37 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
             {
                 result.Shared = (entry switch
                 {
-                    FileEntry<int> entryInt => await fileSecurity.CanReadAsync(entryInt) && !entryInt.ShareRecord.IsLink,
-                    FileEntry<string> entryString => await fileSecurity.CanReadAsync(entryString) && !entryString.ShareRecord.IsLink,
+                    FileEntry<int> entryInt => await IsSharedAsync(entryInt, userId, isDocSpaceAdmin),
+                    FileEntry<string> entryString => await IsSharedAsync(entryString, userId, isDocSpaceAdmin),
                     _ => false
                 });
             }
+
+            if (!result.Shared && result.Status == Status.Ok && !isDocSpaceAdmin)
+            {
+                result.Shared = entry switch
+                {
+                    Folder<int> folderInt => await MarkAsync(folderInt, data.Id, userId),
+                    Folder<string> folderString => await MarkAsync(folderString, data.Id, userId),
+                    _ => false
+                };
+            }
+
+            if (!string.IsNullOrEmpty(password) && entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                switch (entry)
+                {
+                    case Folder<int> folderInt: 
+                        await socketManager.UpdateFolderAsync(folderInt, [userId]);
+                        break;
+                    case Folder<string> folderString:
+                        await socketManager.UpdateFolderAsync(folderString, [userId]);
+                        break;
+                }
+            }
         }
 
-        if (securityContext.IsAuthenticated || !string.IsNullOrEmpty(externalShare.GetAnonymousSessionKey()))
+        if (isAuth || !string.IsNullOrEmpty(externalShare.GetAnonymousSessionKey()))
         {
             return result;
         }
@@ -155,12 +190,36 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
         }
         var (currentRoomId, _) = await daoFactory.GetFolderDao<T>().GetParentRoomInfoFromFileEntryAsync(file);
         
-        if (Equals(currentRoomId, default) || !string.Equals(currentRoomId.ToString(), rootId))
+        if (Equals(currentRoomId, null) || !string.Equals(currentRoomId.ToString(), rootId))
         {
             return;
         }
         
         info.EntityId = file.Id.ToString();
         info.EntryTitle = file.Title;
+    }
+
+    private async Task<bool> MarkAsync<T>(Folder<T> room, Guid linkId, Guid userId)
+    {
+        var result = await fileMarker.MarkAsRecentByLink(room, linkId);
+        switch (result)
+        {
+            case MarkResult.NotMarked:
+                return false;
+            case MarkResult.MarkExists:
+                return true;
+            case MarkResult.Marked:
+                room.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
+                await socketManager.CreateFolderAsync(room, [userId]);
+                return true;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private async Task<bool> IsSharedAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin)
+    {
+        var record = await fileSecurity.GetCurrentShareAsync(entry, userId, isDocSpaceAdmin);
+        return record != null && record.Share != FileShare.Restrict && !record.IsLink;
     }
 }

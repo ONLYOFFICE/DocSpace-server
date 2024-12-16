@@ -30,38 +30,125 @@ namespace ASC.Core.Common.EF.Model;
 
 public class DbTenant : IMapFrom<Tenant>
 {
+    /// <summary>
+    /// Id
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// Name
+    /// </summary>
+    [MaxLength(255)]
     public string Name { get; set; }
+
+    /// <summary>
+    /// Alias
+    /// </summary>
+    [MaxLength(100)]
     public string Alias { get; set; }
+
+    /// <summary>
+    /// Mapped domain
+    /// </summary>
+    [MaxLength(100)]
     public string MappedDomain { get; set; }
+
+    /// <summary>
+    /// Version
+    /// </summary>
     public int Version { get; set; }
+
+    /// <summary>
+    /// Version_changed
+    /// </summary>
     public DateTime? Version_Changed { get; set; }
+
+    /// <summary>
+    /// Version changed
+    /// </summary>
     public DateTime VersionChanged
     {
         get => Version_Changed ?? DateTime.MinValue;
         set => Version_Changed = value;
     }
+
+    /// <summary>
+    /// Language
+    /// </summary>
+    [MaxLength(10)]
     public string Language { get; set; }
+
+    /// <summary>
+    /// Time zone
+    /// </summary>
+    [MaxLength(50)]
     public string TimeZone { get; set; }
+
+    /// <summary>
+    /// Trusted domains raw
+    /// </summary>
+    [MaxLength(1024)]
     public string TrustedDomainsRaw { get; set; }
+
+    /// <summary>
+    /// Trusted domains enabled
+    /// </summary>
     public TenantTrustedDomainsType TrustedDomainsEnabled { get; set; }
+
+    /// <summary>
+    /// Status
+    /// </summary>
     public TenantStatus Status { get; set; }
+
+    /// <summary>
+    /// Status changed
+    /// </summary>
     public DateTime? StatusChanged { get; set; }
     //hack for DateTime?
 
+    /// <summary>
+    /// Status changed hack
+    /// </summary>
     public DateTime StatusChangedHack
     {
         get => StatusChanged ?? DateTime.MinValue;
         set { StatusChanged = value; }
     }
+
+    /// <summary>
+    /// Creation date time
+    /// </summary>
     public DateTime CreationDateTime { get; set; }
+
+    /// <summary>
+    /// Owner id
+    /// </summary>
     public Guid? OwnerId { get; set; }
+
+    /// <summary>
+    /// Payment id
+    /// </summary>
+    [MaxLength(38)]
     public string PaymentId { get; set; }
+
+    /// <summary>
+    /// Industry
+    /// </summary>
     public TenantIndustry Industry { get; set; }
+
+    /// <summary>
+    /// Last modified
+    /// </summary>
     public DateTime LastModified { get; set; }
-    public bool Spam { get; set; }
+
+    /// <summary>
+    /// Calls
+    /// </summary>
     public bool Calls { get; set; }
 
+    /// <summary>
+    /// Partner
+    /// </summary>
     public DbTenantPartner Partner { get; set; }
 
     public void Mapping(Profile profile)
@@ -150,7 +237,7 @@ public static class DbTenantExtension
             entity.Property(e => e.Alias)
                 .IsRequired()
                 .HasColumnName("alias")
-                .HasColumnType("varchar(100)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -171,7 +258,7 @@ public static class DbTenantExtension
             entity.Property(e => e.Language)
                 .IsRequired()
                 .HasColumnName("language")
-                .HasColumnType("char(10)")
+                .HasColumnType("char")
                 .HasDefaultValueSql("'en-US'")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
@@ -182,14 +269,14 @@ public static class DbTenantExtension
 
             entity.Property(e => e.MappedDomain)
                 .HasColumnName("mappeddomain")
-                .HasColumnType("varchar(100)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -202,14 +289,9 @@ public static class DbTenantExtension
 
             entity.Property(e => e.PaymentId)
                 .HasColumnName("payment_id")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-
-            entity.Property(e => e.Spam)
-                .HasColumnName("spam")
-                .HasDefaultValueSql("'1'")
-                .HasColumnType("tinyint(1)");
 
             entity.Property(e => e.Status)
                 .HasColumnName("status")
@@ -222,19 +304,19 @@ public static class DbTenantExtension
 
             entity.Property(e => e.TimeZone)
                 .HasColumnName("timezone")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TrustedDomainsRaw)
                 .HasColumnName("trusteddomains")
-                .HasColumnType("varchar(1024)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TrustedDomainsEnabled)
                 .HasColumnName("trusteddomainsenabled")
-                .HasDefaultValueSql("'1'");
+                .HasDefaultValueSql("'0'");
 
             entity.Property(e => e.Version)
                 .HasColumnName("version")
@@ -272,8 +354,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.Alias)
                 .IsRequired()
-                .HasColumnName("alias")
-                .HasMaxLength(100);
+                .HasColumnName("alias");
 
             entity.Property(e => e.Calls)
                 .HasColumnName("calls")
@@ -286,7 +367,6 @@ public static class DbTenantExtension
             entity.Property(e => e.Language)
                 .IsRequired()
                 .HasColumnName("language")
-                .HasMaxLength(10)
                 .IsFixedLength()
                 .HasDefaultValueSql("'en-US'");
 
@@ -296,13 +376,11 @@ public static class DbTenantExtension
 
             entity.Property(e => e.MappedDomain)
                 .HasColumnName("mappeddomain")
-                .HasMaxLength(100)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Name)
                 .IsRequired()
-                .HasColumnName("name")
-                .HasMaxLength(255);
+                .HasColumnName("name");
 
             entity.Property(e => e.OwnerId)
                 .HasColumnName("owner_id")
@@ -311,12 +389,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.PaymentId)
                 .HasColumnName("payment_id")
-                .HasMaxLength(38)
                 .HasDefaultValueSql("NULL");
-
-            entity.Property(e => e.Spam)
-                .HasColumnName("spam")
-                .HasDefaultValueSql("true");
 
             entity.Property(e => e.Status).HasColumnName("status");
 
@@ -324,17 +397,15 @@ public static class DbTenantExtension
 
             entity.Property(e => e.TimeZone)
                 .HasColumnName("timezone")
-                .HasMaxLength(50)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.TrustedDomainsRaw)
                 .HasColumnName("trusteddomains")
-                .HasMaxLength(1024)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.TrustedDomainsEnabled)
                 .HasColumnName("trusteddomainsenabled")
-                .HasDefaultValueSql("1");
+                .HasDefaultValueSql("0");
 
             entity.Property(e => e.Version)
                 .HasColumnName("version")

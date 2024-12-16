@@ -28,8 +28,11 @@ namespace ASC.Core.Common.EF.Model;
 
 public class AccountLinks : BaseEntity
 {
+    [MaxLength(200)]
     public string Id { get; set; }
+    [MaxLength(200)]
     public string UId { get; set; }
+    [MaxLength(60)]
     public string Provider { get; set; }
     public string Profile { get; set; }
     public DateTime Linked { get; set; }
@@ -66,13 +69,13 @@ public static class AccountLinksExtension
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .HasColumnType("varchar(200)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.UId)
                 .HasColumnName("uid")
-                .HasColumnType("varchar(200)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -89,7 +92,7 @@ public static class AccountLinksExtension
 
             entity.Property(e => e.Provider)
                 .HasColumnName("provider")
-                .HasColumnType("char(60)")
+                .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });
@@ -107,12 +110,10 @@ public static class AccountLinksExtension
                 .HasDatabaseName("uid");
 
             entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasMaxLength(200);
+                .HasColumnName("id");
 
             entity.Property(e => e.UId)
-                .HasColumnName("uid")
-                .HasMaxLength(200);
+                .HasColumnName("uid");
 
             entity.Property(e => e.Linked).HasColumnName("linked");
 
@@ -122,7 +123,6 @@ public static class AccountLinksExtension
 
             entity.Property(e => e.Provider)
                 .HasColumnName("provider")
-                .HasMaxLength(60)
                 .IsFixedLength()
                 .HasDefaultValueSql("NULL");
         });

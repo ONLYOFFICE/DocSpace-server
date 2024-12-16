@@ -80,9 +80,9 @@ public class SmsKeyStorage
         }
     }
 
-    private async Task<string> BuildCacheKeyAsync(string phone)
+    private string BuildCacheKey(string phone)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
+        var tenant = _tenantManager.GetCurrentTenant(false);
         var tenantCache = tenant?.Id ?? Tenant.DefaultTenant;
         return "smskey" + phone + tenantCache;
     }
@@ -94,7 +94,7 @@ public class SmsKeyStorage
         try
         {
             await _semaphore.WaitAsync();
-            var cacheKey = await BuildCacheKeyAsync(phone);
+            var cacheKey = BuildCacheKey(phone);
             var phoneKeys = _keyCache.Get<Dictionary<string, DateTime>>(cacheKey) ?? new Dictionary<string, DateTime>();
             if (phoneKeys.Count > _attemptCount)
             {
@@ -123,7 +123,7 @@ public class SmsKeyStorage
         try
         {
             await _semaphore.WaitAsync();
-            var cacheKey = await BuildCacheKeyAsync(phone);
+            var cacheKey = BuildCacheKey(phone);
             var phoneKeys = _keyCache.Get<Dictionary<string, DateTime>>(cacheKey);
             return phoneKeys != null;
         }
@@ -141,7 +141,7 @@ public class SmsKeyStorage
             return Result.Empty;
         }
 
-        var cacheCheck = await BuildCacheKeyAsync("check" + phone);
+        var cacheCheck = BuildCacheKey("check" + phone);
         int.TryParse(_checkCache.Get<string>(cacheCheck), out var counter);
         if (++counter > _attemptCount)
         {
@@ -153,7 +153,7 @@ public class SmsKeyStorage
         try 
         {
             await _semaphore.WaitAsync();
-            var cacheKey = await BuildCacheKeyAsync(phone);
+            var cacheKey = BuildCacheKey(phone);
             var phoneKeys = _keyCache.Get<Dictionary<string, DateTime>>(cacheKey);
             if (phoneKeys == null)
             {

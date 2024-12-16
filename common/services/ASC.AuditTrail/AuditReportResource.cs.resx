@@ -802,4 +802,73 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Uživatelé [{0}]. Formulář odeslán: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Export indexu místnosti uloženého do Dokumentů</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Opětovné odeslání pozvánek: {0}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Aktivace klienta {0} změněna</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Viditelnost klienta {0} se změnila</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Klient vytvořen</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Klient {0} smazán</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Soubor: {0}. Index změněn z {1} na {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Složka: {0}. Index změněn z {1} na {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Složka: {0}. Změněno pořadí indexů</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Vygenerován autorizační kód pro klienta {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Vygenerován osobní přístupový token pro klienta {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Regenerace klientova tajemství {0}</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Zrušení přístupu klienta {0}</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Místnost: {0}. Odmítnutí stahování vypnuto</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Místnost: {0}. Odmítnutí stahování zapnuto</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indexování místnosti vypnuto</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indexování místnosti zapnuto</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Funkce LifeTime vypnuta</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Funkce LifeTime nastavena. Hodnota: {0}. Období: {1}. Trvale odstranit: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Místnost: {0}. Vodoznak vypnut</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Místnost: {0}. Vodoznak zapnut</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Klient {0} aktualizován</value>
+  </data>
 </root>

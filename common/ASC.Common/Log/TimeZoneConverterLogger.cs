@@ -27,21 +27,21 @@
 namespace ASC.Common.Log;
 internal static partial class TimeZoneConverterLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "TimeZone {timeZoneId} not found")]
+    [LoggerMessage(LogLevel.Information, "TimeZone {timeZoneId} not found")]
     public static partial void InformationTimeZoneNotFound(this ILogger<TimeZoneConverter> logger, string timeZoneId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "OlsonTimeZone {olsonTimeZoneId} not found")]
+    [LoggerMessage(LogLevel.Error, "OlsonTimeZone {olsonTimeZoneId} not found")]
     public static partial void ErrorOlsonTimeZoneNotFound(this ILogger<TimeZoneConverter> logger, string olsonTimeZoneId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "WindowsTimeZone {windowsTimeZoneId} not found")]
+    [LoggerMessage(LogLevel.Error, "WindowsTimeZone {windowsTimeZoneId} not found")]
     public static partial void ErrorWindowsTimeZoneNotFound(this ILogger<TimeZoneConverter> logger, string windowsTimeZoneId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetTimeZone")]
+    [LoggerMessage(LogLevel.Error, "GetTimeZone")]
     public static partial void ErrorGetTimeZone(this ILogger<TimeZoneConverter> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "InitMapZones")]
+    [LoggerMessage(LogLevel.Error, "InitMapZones")]
     public static partial void ErrorInitMapZones(this ILogger<TimeZoneConverter> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "InitTranslations")]
+    [LoggerMessage(LogLevel.Error, "InitTranslations")]
     public static partial void ErrorInitTranslations(this ILogger<TimeZoneConverter> logger, Exception exception);
 }

@@ -26,23 +26,44 @@
 
 namespace ASC.Files.Core.Security;
 
-/// <summary>
-/// </summary>
 [EnumExtensions]
 [JsonConverter(typeof(FileShareConverter))]
 public enum FileShare
 {
+    [SwaggerEnum(Description = "None")]
     None,
+
+    [SwaggerEnum(Description = "Read and write")]
     ReadWrite,
+
+    [SwaggerEnum(Description = "Read")]
     Read,
+
+    [SwaggerEnum(Description = "Restrict")]
     Restrict,
+
+    [SwaggerEnum(Description = "Varies")]
     Varies,
+
+    [SwaggerEnum(Description = "Review")]
     Review,
+
+    [SwaggerEnum(Description = "Comment")]
     Comment,
+
+    [SwaggerEnum(Description = "Fill forms")]
     FillForms,
+
+    [SwaggerEnum(Description = "Custom filter")]
     CustomFilter,
+
+    [SwaggerEnum(Description = "Room manager")]
     RoomManager,
+
+    [SwaggerEnum(Description = "Editing")]
     Editing,
+
+    [SwaggerEnum(Description = "Content creator")]
     ContentCreator
 }
 
@@ -75,23 +96,21 @@ public static partial class FileShareExtensions
     {
         var prefix = useRoomFormat && fileShare != FileShare.ReadWrite ? "RoleEnum_" : "AceStatusEnum_";
 
-        switch (fileShare)
+        return fileShare switch
         {
-            case FileShare.Read:
-            case FileShare.ReadWrite:
-            case FileShare.CustomFilter:
-            case FileShare.Review:
-            case FileShare.FillForms:
-            case FileShare.Comment:
-            case FileShare.Restrict:
-            case FileShare.RoomManager:
-            case FileShare.Editing:
-            case FileShare.ContentCreator:
-            case FileShare.Varies:
-            case FileShare.None:
-                return FilesCommonResource.ResourceManager.GetString(prefix + fileShare.ToStringFast(), cultureInfo);
-            default:
-                return string.Empty;
-        }
+            FileShare.Read or 
+            FileShare.ReadWrite or 
+            FileShare.CustomFilter or 
+            FileShare.Review or 
+            FileShare.FillForms or 
+            FileShare.Comment or 
+            FileShare.Restrict or 
+            FileShare.RoomManager or 
+            FileShare.Editing or 
+            FileShare.ContentCreator or 
+            FileShare.Varies or 
+            FileShare.None => FilesCommonResource.ResourceManager.GetString(prefix + fileShare.ToStringFast(), cultureInfo),
+            _ => string.Empty
+        };
     }
 }

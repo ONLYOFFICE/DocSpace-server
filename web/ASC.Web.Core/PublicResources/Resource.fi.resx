@@ -296,7 +296,7 @@
     <value>Ylläpitäjien määrä ei saisi ylittää {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Järjestelmänvalvojien/tehokäyttäjien määrä</value>
+    <value>Järjestelmänvalvojien määrä</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automaattinen varmuuskopiointi &amp; palautus</value>
@@ -1037,7 +1037,7 @@
     <value>Käyttäjätilakiintiö ylitetty</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Pääkäyttäjät/Tehokäyttäjät lisätty:</value>
+    <value>Pääkäyttäjät lisätty:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Kutsujen raja on ylitetty</value>
@@ -1055,6 +1055,24 @@
     <value>Varastokiintiöt &amp; tilastot</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} per järjestelmänvalvoja/tehokäyttäjä ja mahdollisuus lisätä tilaa pyynnöstä</value>
+    <value>{0} per järjestelmänvalvoja ja mahdollisuus lisätä tilaa pyynnöstä</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Huonekohtaisen kiintiön asettaminen epäonnistui. Syötetty arvo on suurempi kuin koko DocSpacen muisti.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Käyttäjäkohtaisen kiintiön asettaminen epäonnistui. Syötetty arvo on suurempi kuin koko DocSpacen muisti.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Lisää ainakin yksi luotettu domain.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Pääkäyttäjien määrä ylittää rajan: {0}/{1}.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Voittoa tavoittelematon</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Lisää ainakin 1 sallittu IP-osoite.</value>
   </data>
 </root>

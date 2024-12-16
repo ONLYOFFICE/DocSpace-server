@@ -437,7 +437,7 @@
     <value>Броят администратори не трябва да надвишава {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Брой администратори/опитни потребители</value>
+    <value>Брой администратори</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Автоматичен бекъп и възстановяване</value>
@@ -1037,7 +1037,7 @@
     <value>Квотата за потребителс пространство е надвишена</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Добавени са Администратори/Опитни потребители:</value>
+    <value>Добавени са Администратори:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Лимитът за покани е надвишен</value>
@@ -1055,6 +1055,18 @@
     <value>Квоти и статистики за съхранение</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} за администратор/опитен потребител и възможност за добавяне на място по заявка</value>
+    <value>{0} за администратор и възможност за добавяне на място по заявка</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Неуспешно задаване на квота за стая. Въведената стойност е по-голяма от общото хранилище на DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Неуспешно задаване на квота за потребител. Въведената стойност е по-голяма от общото хранилище на DocSpace.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Добавете поне 1 доверен домейн.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Броят на администраторите надвишава ограничението: {0}/{1}.</value>
   </data>
 </root>

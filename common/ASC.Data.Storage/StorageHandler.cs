@@ -35,13 +35,13 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 {
     public async Task InvokeAsync(HttpContext context, TenantManager tenantManager, AuthContext authContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider, UserManager userManager)
     {
-        var storage = await storageFactory.GetStorageAsync((await tenantManager.GetCurrentTenantAsync()).Id, module);
+        var storage = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), module);
         var path = CrossPlatform.PathCombine(storagePath, GetRouteValue("pathInfo", context).Replace('/', Path.DirectorySeparatorChar));
-        var header = context.Request.Query[Constants.QueryHeader].FirstOrDefault() ?? "";
-        var auth = context.Request.Query[Constants.QueryAuth].FirstOrDefault() ?? "";
+        string header = context.Request.Query[Constants.QueryHeader];
+        string auth = context.Request.Query[Constants.QueryAuth];
         var storageExpire = storage.GetExpire(domain);
 
-        if (checkAuth && !authContext.IsAuthenticated && !await SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
+        if (checkAuth && !authContext.IsAuthenticated && !SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
             || module == "backup" && (!authContext.IsAuthenticated || !(await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
@@ -56,7 +56,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
                 expire = storageExpire.TotalMinutes.ToString(CultureInfo.InvariantCulture);
             }
 
-            var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(path + "." + header + "." + expire, auth, TimeSpan.FromMinutes(Convert.ToDouble(expire)));
+            var validateResult = emailValidationKeyProvider.ValidateEmailKey(path + "." + header + "." + expire, auth, TimeSpan.FromMinutes(Convert.ToDouble(expire)));
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
@@ -145,14 +145,14 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
         if (encoding != null)
         {
-            context.Response.Headers["Content-Encoding"] = encoding;
+            context.Response.Headers.ContentEncoding = encoding;
         }
 
 
         long offset = 0;
         var length = ProcessRangeHeader(context, fileSize, ref offset);
 
-        context.Response.Headers["Connection"] = "Keep-Alive";
+        context.Response.Headers.Connection = "Keep-Alive";
         context.Response.Headers["Content-Length"] = length.ToString(CultureInfo.InvariantCulture);
 
         await using (var stream = await storage.GetReadStreamAsync(domain, path, offset))
@@ -171,14 +171,14 @@ public class StorageHandler(string storagePath, string module, string domain, bo
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        if (context.Request.Headers["Range"] == StringValues.Empty)
+        if (context.Request.Headers.Range == StringValues.Empty)
         {
             return fullLength;
         }
 
         long endOffset = -1;
 
-        var range = context.Request.Headers["Range"][0].Split('=', '-');
+        var range = context.Request.Headers.Range[0].Split('=', '-');
         offset = Convert.ToInt64(range[1]);
         if (range.Length > 2 && !string.IsNullOrEmpty(range[2]))
         {
@@ -200,8 +200,8 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         {
             context.Response.StatusCode = (int)HttpStatusCode.PartialContent;
         }
-        context.Response.Headers["Accept-Ranges"] = "bytes";
-        context.Response.Headers["Content-Range"] = string.Format(" bytes {0}-{1}/{2}", offset, endOffset, fullLength);
+        context.Response.Headers.AcceptRanges = "bytes";
+        context.Response.Headers.ContentRange = $" bytes {offset}-{endOffset}/{fullLength}";
 
         return length;
     }

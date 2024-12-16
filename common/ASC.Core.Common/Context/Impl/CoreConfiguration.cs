@@ -180,7 +180,7 @@ public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantMa
     public async Task<SmtpSettings> GetDefaultSmtpSettingsAsync()
     {
         var isDefaultSettings = false;
-        var tenant = await tenantManager.GetCurrentTenantAsync(false);
+        var tenant = tenantManager.GetCurrentTenant(false);
 
         if (tenant != null)
         {
@@ -209,7 +209,7 @@ public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantMa
 
     public async Task SetSmtpSettingsAsync(SmtpSettings value)
     {
-        await SaveSettingAsync("SmtpSettings", value?.Serialize(), await tenantManager.GetCurrentTenantIdAsync());
+        await SaveSettingAsync("SmtpSettings", value?.Serialize(), tenantManager.GetCurrentTenantId());
     }
 
     #region Methods Get/Save Setting
@@ -245,7 +245,7 @@ public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantMa
 
     public async Task<T> GetSectionAsync<T>(string sectionName) where T : class
     {
-        return await GetSectionAsync<T>(await tenantManager.GetCurrentTenantIdAsync(), sectionName);
+        return await GetSectionAsync<T>(tenantManager.GetCurrentTenantId(), sectionName);
     }
 
     public async Task<T> GetSectionAsync<T>(int tenantId, string sectionName) where T : class
@@ -256,12 +256,12 @@ public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantMa
             serializedSection = await GetSettingAsync(sectionName);
         }
 
-        return serializedSection != null ? JsonConvert.DeserializeObject<T>(serializedSection) : null;
+        return serializedSection != null ? JsonSerializer.Deserialize<T>(serializedSection) : null;
     }
 
     public async Task SaveSectionAsync<T>(string sectionName, T section) where T : class
     {
-        await SaveSectionAsync(await tenantManager.GetCurrentTenantIdAsync(), sectionName, section);
+        await SaveSectionAsync(tenantManager.GetCurrentTenantId(), sectionName, section);
     }
 
     public async Task SaveSectionAsync<T>(T section) where T : class
@@ -276,7 +276,7 @@ public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantMa
 
     public async Task SaveSectionAsync<T>(int tenantId, string sectionName, T section) where T : class
     {
-        var serializedSection = section != null ? JsonConvert.SerializeObject(section) : null;
+        var serializedSection = section != null ? JsonSerializer.Serialize(section) : null;
         await SaveSettingAsync(sectionName, serializedSection, tenantId);
     }
 

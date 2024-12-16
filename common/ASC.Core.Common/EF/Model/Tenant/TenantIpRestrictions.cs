@@ -30,6 +30,7 @@ public class TenantIpRestrictions
 {
     public int Id { get; set; }
     public int TenantId { get; set; }
+    [MaxLength(50)]
     public string Ip { get; set; }
     public bool ForAdmin { get; set; }
 
@@ -64,7 +65,7 @@ public static class TenantIpRestrictionsExtension
             entity.Property(e => e.Ip)
                 .IsRequired()
                 .HasColumnName("ip")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -90,8 +91,7 @@ public static class TenantIpRestrictionsExtension
 
             entity.Property(e => e.Ip)
                 .IsRequired()
-                .HasColumnName("ip")
-                .HasMaxLength(50);
+                .HasColumnName("ip");
 
             entity.Property(e => e.ForAdmin)
                 .IsRequired()

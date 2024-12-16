@@ -139,7 +139,7 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
 
         try
         {
-            (var r, total) = await _indexer.SelectWithTotalAsync(expression, true);
+            (var r, total) = _indexer.SelectWithTotal(expression, true);
             result = r.Select(entry => entry.Id).ToList();
         }
         catch (Exception e)
@@ -318,7 +318,7 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
 
         try
         {
-            var tenant = await tenantManager.GetCurrentTenantIdAsync();
+            var tenant = tenantManager.GetCurrentTenantId();
             _indexer.Update(data, expression, tenant, immediately, fields);
         }
         catch (Exception e)
@@ -337,7 +337,7 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
 
         try
         {
-            var tenant = await tenantManager.GetCurrentTenantIdAsync();
+            var tenant = tenantManager.GetCurrentTenantId();
             _indexer.Update(data, expression, tenant, action, fields, immediately);
         }
         catch (Exception e)
@@ -402,7 +402,7 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
             return false;
         }
 
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
 
         return await QueueAsync(() => _indexer.Delete(expression, tenant, immediately));
     }
@@ -686,7 +686,7 @@ public class FactoryIndexer
         state = new State
         {
             Indexing = _factoryIndexerHelper.Indexing,
-            LastIndexed = _factoryIndexerHelper.LastIndexed != DateTime.MinValue ? _factoryIndexerHelper.LastIndexed : default(DateTime?)
+            LastIndexed = _factoryIndexerHelper.LastIndexed != DateTime.MinValue ? _factoryIndexerHelper.LastIndexed : null
         };
 
         if (state.LastIndexed.HasValue)

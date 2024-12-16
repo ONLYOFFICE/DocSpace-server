@@ -26,7 +26,13 @@
 
 namespace ASC.ApiSystem.Models;
 
+/// <summary>
+/// Request parameters for people
+/// </summary>
 public class FindPeopleModel
 {
+    /// <summary>
+    /// User ids
+    /// </summary>
     public IEnumerable<Guid> UserIds { get; set; }
 }

@@ -390,15 +390,24 @@ static file class FolderQueries
                                     where f.TenantId == r.TenantId
                                     select f
                                 ).FirstOrDefault(),
-                            Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom || r.FolderType == FolderType.FillingFormsRoom) && 
-                                     ctx.Security.Any(s => 
-                                         s.TenantId == tenantId && 
-                                         s.EntryId == r.Id.ToString() && 
-                                         s.EntryType == FileEntryType.Folder && 
-                                         s.SubjectType == SubjectType.PrimaryExternalLink),
-                            Settings = (from f in ctx.RoomSettings 
-                                where f.TenantId == r.TenantId && f.RoomId == r.Id 
-                                select f).FirstOrDefault(),
+                            Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom || r.FolderType == FolderType.FillingFormsRoom) 
+                                ? ctx.Security.Any(s => 
+                                    s.TenantId == r.TenantId && 
+                                    s.EntryId == r.Id.ToString() && 
+                                    s.EntryType == FileEntryType.Folder && 
+                                    s.SubjectType == SubjectType.PrimaryExternalLink)
+                                : r.FolderType == FolderType.DEFAULT && ctx.Security.Any(x => 
+                                    x.TenantId == r.TenantId && 
+                                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) && 
+                                    x.EntryType == FileEntryType.Folder && 
+                                    x.EntryId == ctx.Tree
+                                        .Where(t => t.FolderId == r.ParentId)
+                                        .OrderByDescending(t => t.Level)
+                                        .Select(t => t.ParentId)
+                                        .Skip(1)
+                                        .FirstOrDefault()
+                                        .ToString()),
+                            Settings = ctx.RoomSettings.Where(x => x.TenantId == r.TenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
                             Order = (
                                 from f in ctx.FileOrder
                                 where (
@@ -411,7 +420,7 @@ static file class FolderQueries
                                         ).Skip(1).FirstOrDefault()
                                     select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
                                 select f.Order
-                            ).FirstOrDefault(),
+                            ).FirstOrDefault()
                         }
                     ).SingleOrDefault());
 
@@ -473,9 +482,7 @@ static file class FolderQueries
                                     select rs.Indexing).FirstOrDefault() && f.EntryId == r.folder.Id && f.TenantId == r.folder.TenantId && f.EntryType == FileEntryType.Folder
                                 select f.Order
                             ).FirstOrDefault(),
-                            Settings = (from f in ctx.RoomSettings 
-                                where f.TenantId == r.folder.TenantId && f.RoomId == r.folder.Id 
-                                select f).FirstOrDefault()
+                            Settings = ctx.RoomSettings.Where(x => x.TenantId == r.folder.TenantId && x.RoomId == r.folder.Id).Distinct().FirstOrDefault()
                         }
                     ));
 
@@ -912,10 +919,7 @@ static file class FolderQueries
                     .Select(r => new DbFolderQuery
                     {
                         Folder = r.Folders,
-                        Settings = (from f in ctx.RoomSettings
-                                where f.TenantId == r.Folders.TenantId && f.RoomId == r.Folders.Id
-                                select f)
-                            .FirstOrDefault()
+                        Settings = ctx.RoomSettings.Where(x => x.TenantId == r.Folders.TenantId && x.RoomId == r.Folders.Id).Distinct().FirstOrDefault()
                     })
                     .Skip(1)
                     .FirstOrDefault());

@@ -29,14 +29,31 @@ namespace ASC.Files.Core;
 [Flags]
 public enum FileStatus
 {
+    [SwaggerEnum(Description = "None")]
     None = 0x0,
+
+    [SwaggerEnum(Description = "Is editing")]
     IsEditing = 0x1,
+
+    [SwaggerEnum(Description = "Is new")]
     IsNew = 0x2,
+
+    [SwaggerEnum(Description = "Is converting")]
     IsConverting = 0x4,
+
+    [SwaggerEnum(Description = "Is original")]
     IsOriginal = 0x8,
+
+    [SwaggerEnum(Description = "Is editing alone")]
     IsEditingAlone = 0x10,
+
+    [SwaggerEnum(Description = "Is favorite")]
     IsFavorite = 0x20,
+
+    [SwaggerEnum(Description = "Is template")]
     IsTemplate = 0x40,
+
+    [SwaggerEnum(Description = "Is fill form draft")]
     IsFillFormDraft = 0x80
 }
 
@@ -97,14 +114,7 @@ public class File<T> : FileEntry<T>
                 case FileType.Video:
                     return FilterType.MediaOnly;
                 case FileType.Pdf:
-                    if (this.IsForm)
-                    {
-                        return FilterType.PdfForm;
-                    }
-                    else
-                    {
-                        return FilterType.Pdf;
-                    }
+                    return this.IsForm ? FilterType.PdfForm : FilterType.Pdf;
                    
             }
 
@@ -219,4 +229,12 @@ public class File<T> : FileEntry<T>
     }
     
     public DateTime? LastOpened { get; set; }
+    public FormInfo<T> FormInfo { get; set; }
+}
+
+public record FormInfo<T>
+{
+    public T LinkedId { get; init; }
+    public EntryProperties<T> Properties { get; init; }
+    public static  FormInfo<T> Empty => new();
 }

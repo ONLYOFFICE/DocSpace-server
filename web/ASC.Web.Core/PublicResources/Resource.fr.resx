@@ -848,7 +848,7 @@
     <value>Le nombre d'administrateurs ne peut pas dépasser {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Nombre d'administrateurs/utilisateurs avancés</value>
+    <value>Nombre d'administrateurs</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Sauvegarde automatique &amp; récupération</value>
@@ -890,7 +890,7 @@
     <value>Le nombre d'utilisateurs dans la salle ne peut pas dépasser {0}</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administrateurs/utilisateurs avancés ajoutés :</value>
+    <value>Administrateurs ajoutés :</value>
   </data>
   <data name="ConsumersAppleId" xml:space="preserve">
     <value>Apple ID</value>
@@ -1043,7 +1043,7 @@
     <value>Quotas de stockage et statistiques</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} par administrateur/utilisateur avancé et la possibilité d'augmenter l'espace de stockage sur demande</value>
+    <value>{0} par administrateur et la possibilité d'augmenter l'espace de stockage sur demande</value>
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Utilisateur désactivé</value>
@@ -1056,5 +1056,23 @@
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Cet email est attaché à l'utilisateur {0} en tant que fournisseur tiers</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Échec de la définition du quota par salle. La valeur saisie est supérieure à la capacité totale de stockage de DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Échec de la définition du quota par utilisateur. La valeur saisie est supérieure à la capacité totale de stockage de DocSpace.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Ajoutez au moins un domaine de confiance.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Le nombre d'administrateurs dépasse la limite : {0}/{1}.</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Ajoutez au moins une adresse IP autorisée.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Sans but lucratif</value>
   </data>
 </root>

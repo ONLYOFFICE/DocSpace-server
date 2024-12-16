@@ -36,6 +36,8 @@ public class FileShareRecord<T>
     public Guid Owner { get; set; }
     public FileShare Share { get; set; }
     public FileShareOptions Options { get; set; }
+    public T ParentId { get; set; }
+    
     public int Level { get; set; }
     public bool IsLink => SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink;
 

@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.Hosting;
 
-public class InstanceRegistrationContext(DbContextOptions<InstanceRegistrationContext> options) : DbContext(options)
+public class InstanceRegistrationContext(DbContextOptions<InstanceRegistrationContext> options) : BaseDbContext(options)
 {
     public DbSet<InstanceRegistration> InstanceRegistrations { get; set; }
 

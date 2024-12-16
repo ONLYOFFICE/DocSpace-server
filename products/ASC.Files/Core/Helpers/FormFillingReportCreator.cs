@@ -93,15 +93,14 @@ public class FormFillingReportCreator(
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        
-        var tenantCulture = (await tenantManager.GetCurrentTenantAsync()).GetCulture();
+        var tenantCulture = (tenantManager.GetCurrentTenant()).GetCulture();
         var formNumber = new List<FormsItemData>
         {
             new()
             {
                 Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture),
                 Value = resultFormNumber.ToString()
-            },
+            }
         };
         List<FormsItemData> formInfo = 
         [
@@ -117,7 +116,7 @@ public class FormFillingReportCreator(
         result.FormsData = result.FormsData.Concat(formInfo).ToList();
 
         var now = DateTime.UtcNow;
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         if (formsDataFile.Id is int id &&  formsDataFile.ParentId is int parentId)
         {

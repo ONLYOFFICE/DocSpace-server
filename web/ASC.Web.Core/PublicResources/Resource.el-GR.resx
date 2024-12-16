@@ -218,7 +218,7 @@
     <value>Ο αριθμός των διαχειριστών πρέπει να είναι ίσος ή μικρότερος από {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Ο αριθμός των διαχειριστών/χρηστών ισχύο</value>
+    <value>Ο αριθμός των διαχειριστών</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Αυτόματη δημιουργία αντιγράφων ασφαλείας και ανάκτηση</value>
@@ -1046,7 +1046,7 @@
     <value>Η εντολή αλλαγής κωδικού πρόσβασης έχει αποσταλεί στη διεύθυνση email {0}.</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Οι Διαχειριστές/Εξουσιοδοτημένοι χρήστες προστέθηκαν:</value>
+    <value>Οι Διαχειριστές προστέθηκαν:</value>
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Αυτό το email επισυνάπτεται στον χρήστη {0} ως πάροχος τρίτου μέρους</value>
@@ -1055,6 +1055,24 @@
     <value>Ποσοστώσεις αποθήκευσης και στατιστικά στοιχεία</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} ανά διαχειριστή/ενεργό χρήστη και δυνατότητα προσθήκης χώρου κατόπιν αιτήματος</value>
+    <value>{0} ανά διαχειριστή και δυνατότητα προσθήκης χώρου κατόπιν αιτήματος</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Αποτυχία ορισμού ποσόστωσης ανά δωμάτιο. Η εισαχθείσα τιμή είναι μεγαλύτερη από το συνολικό χώρο αποθήκευσης του DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Αποτυχία ορισμού ποσόστωσης ανά χρήστη. Η εισαχθείσα τιμή είναι μεγαλύτερη από τον συνολικό αποθηκευτικό χώρο του DocSpace.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Προσθέστε τουλάχιστον 1 αξιόπιστο τομέα.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Ο αριθμός των διαχειριστών υπερβαίνει το όριο: {0}/{1}.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Μη κερδοσκοπικό</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Προσθέστε τουλάχιστον 1 επιτρεπόμενη διεύθυνση IP.</value>
   </data>
 </root>

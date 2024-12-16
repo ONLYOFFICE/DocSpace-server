@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 namespace ASC.Data.Backup.Services;
 
 [Scope]
@@ -135,7 +137,7 @@ public class BackupService(
 
             request.FilePathOrId = backupRecord.StoragePath;
             request.StorageType = backupRecord.StorageType;
-            request.StorageParams = JsonConvert.DeserializeObject<Dictionary<string, string>>(backupRecord.StorageParams);
+            request.StorageParams = JsonSerializer.Deserialize<Dictionary<string, string>>(backupRecord.StorageParams);
         }
 
         var progress = await backupWorker.StartRestoreAsync(request);
@@ -175,7 +177,7 @@ public class BackupService(
                 BackupsStored = request.NumberOfBackupsStored,
                 StorageType = request.StorageType,
                 StorageBasePath = request.StorageBasePath,
-                StorageParams = JsonConvert.SerializeObject(request.StorageParams),
+                StorageParams = JsonSerializer.Serialize(request.StorageParams),
                 Dump = request.Dump
             });
     }
@@ -197,7 +199,7 @@ public class BackupService(
                 NumberOfBackupsStored = schedule.BackupsStored,
                 Cron = schedule.Cron,
                 LastBackupTime = schedule.LastBackupTime,
-                StorageParams = JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.StorageParams),
+                StorageParams = JsonSerializer.Deserialize<Dictionary<string, string>>(schedule.StorageParams),
                 Dump = schedule.Dump
             };
 

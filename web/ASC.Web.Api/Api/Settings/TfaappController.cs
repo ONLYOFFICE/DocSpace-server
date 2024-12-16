@@ -56,11 +56,10 @@ public class TfaappController(
     /// Returns the current two-factor authentication settings.
     /// </summary>
     /// <short>Get the TFA settings</short>
-    /// <category>TFA settings</category>
-    /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.TfaSettingsDto, ASC.Web.Api">TFA settings</returns>
     ///<path>api/2.0/settings/tfaapp</path>
-    ///<httpMethod>GET</httpMethod>
     ///<collection>list</collection>
+    [Tags("Settings / TFA settings")]
+    [SwaggerResponse(200, "TFA settings", typeof(TfaSettingsDto))]
     [HttpGet("tfaapp")]
     public async Task<IEnumerable<TfaSettingsDto>> GetTfaSettingsAsync()
     {
@@ -108,11 +107,9 @@ public class TfaappController(
     /// Validates the two-factor authentication code specified in the request.
     /// </summary>
     /// <short>Validate the TFA code</short>
-    /// <category>TFA settings</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.TfaValidateRequestsDto, ASC.Web.Api" name="inDto">TFA validation request parameters</param>
-    /// <returns type="System.Boolean, System">True if the code is valid</returns>
     ///<path>api/2.0/settings/tfaapp/validate</path>
-    ///<httpMethod>POST</httpMethod>
+    [Tags("Settings / TFA settings")]
+    [SwaggerResponse(200, "True if the code is valid", typeof(bool))]
     [HttpPost("tfaapp/validate")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth,Everyone")]
@@ -125,7 +122,7 @@ public class TfaappController(
         var result = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
 
         var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
-        var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : "";
+        var type = request.TryGetValue("type", out var value) ? (string)value : "";
         cookiesManager.ClearCookies(CookiesType.ConfirmKey, $"_{type}");
 
         return result;
@@ -135,10 +132,9 @@ public class TfaappController(
     /// Returns the confirmation email URL for authorization via SMS or TFA application.
     /// </summary>
     /// <short>Get confirmation email</short>
-    /// <category>TFA settings</category>
-    /// <returns type="System.Object, System">Confirmation email URL</returns>
     ///<path>api/2.0/settings/tfaapp/confirm</path>
-    ///<httpMethod>GET</httpMethod>
+    [Tags("Settings / TFA settings")]
+    [SwaggerResponse(200, "Confirmation email URL", typeof(object))]
     [HttpGet("tfaapp/confirm")]
     public async Task<object> TfaConfirmUrlAsync()
     {
@@ -151,7 +147,7 @@ public class TfaappController(
                                 ? ConfirmType.PhoneActivation
                                 : ConfirmType.PhoneAuth;
 
-            return await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, confirmType);
+            return commonLinkUtility.GetConfirmationEmailUrl(user.Email, confirmType);
         }
 
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
@@ -160,7 +156,7 @@ public class TfaappController(
                 ? ConfirmType.TfaAuth
                 : ConfirmType.TfaActivation;
 
-            var (url, key) = await commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, confirmType);
+            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, confirmType);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{confirmType}");
             return url;
         }
@@ -172,11 +168,10 @@ public class TfaappController(
     /// Updates the two-factor authentication settings with the parameters specified in the request.
     /// </summary>
     /// <short>Update the TFA settings</short>
-    /// <category>TFA settings</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.TfaRequestsDto, ASC.Web.Api" name="inDto">TFA settings request parameters</param>
-    /// <returns type="System.Boolean, System">True if the operation is successful</returns>
     ///<path>api/2.0/settings/tfaapp</path>
-    ///<httpMethod>PUT</httpMethod>
+    [Tags("Settings / TFA settings")]
+    [SwaggerResponse(200, "True if the operation is successful", typeof(bool))]
+    [SwaggerResponse(405, "SMS settings are not available/TFA application settings are not available")]
     [HttpPut("tfaapp")]
     public async Task<bool> TfaSettingsAsync(TfaRequestsDto inDto)
     {
@@ -188,7 +183,7 @@ public class TfaappController(
 
         switch (inDto.Type)
         {
-            case "sms":
+            case TfaRequestsDtoType.Sms:
                 if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync())
                 {
                     throw new Exception(Resource.SmsNotAvailable);
@@ -214,7 +209,7 @@ public class TfaappController(
 
                 break;
 
-            case "app":
+            case TfaRequestsDtoType.App:
                 if (!tfaAppAuthSettingsHelper.IsVisibleSettings)
                 {
                     throw new Exception(Resource.TfaAppNotAvailable);
@@ -257,7 +252,7 @@ public class TfaappController(
             await cookiesManager.ResetTenantCookieAsync();
         }
 
-        await messageService.SendAsync(action);
+        messageService.Send(action);
         return result;
 
         void SetSettingsProperty<T>(TfaSettingsBase<T> settings) where T : class, ISettings<T>
@@ -273,11 +268,9 @@ public class TfaappController(
     /// Returns the confirmation email URL for updating TFA settings.
     /// </summary>
     /// <short>Get confirmation email for updating TFA settings</short>
-    /// <category>TFA settings</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.TfaRequestsDto, ASC.Web.Api" name="inDto">TFA settings request parameters</param>
-    /// <returns type="System.Object, System">Confirmation email URL</returns>
     /// <path>api/2.0/settings/tfaappwithlink</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / TFA settings")]
+    [SwaggerResponse(200, "Confirmation email URL", typeof(object))]
     [HttpPut("tfaappwithlink")]
     public async Task<object> TfaSettingsLink(TfaRequestsDto inDto)
     {
@@ -293,10 +286,10 @@ public class TfaappController(
     /// Generates the setup TFA code for the current user.
     /// </summary>
     /// <short>Generate setup code</short>
-    /// <category>TFA settings</category>
-    /// <returns type="Google.Authenticator.SetupCode, Google.Authenticator">Setup code</returns>
     /// <path>api/2.0/settings/tfaapp/setup</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / TFA settings")]
+    [SwaggerResponse(200, "Setup code", typeof(SetupCode))]
+    [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaapp/setup")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation")]
     public async Task<SetupCode> TfaAppGenerateSetupCodeAsync()
@@ -323,11 +316,11 @@ public class TfaappController(
     /// Returns the two-factor authentication application codes.
     /// </summary>
     /// <short>Get the TFA codes</short>
-    /// <category>TFA settings</category>
-    /// <returns type="System.Object, System">List of TFA application codes</returns>
     /// <path>api/2.0/settings/tfaappcodes</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / TFA settings")]
+    [SwaggerResponse(200, "List of TFA application codes", typeof(object))]
+    [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaappcodes")]
     public async Task<IEnumerable<object>> TfaAppGetCodesAsync()
     {
@@ -352,11 +345,11 @@ public class TfaappController(
     /// Requests the new backup codes for the two-factor authentication application.
     /// </summary>
     /// <short>Update the TFA codes</short>
-    /// <category>TFA settings</category>
-    /// <returns type="System.Object, System">New backup codes</returns>
     /// <path>api/2.0/settings/tfaappnewcodes</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / TFA settings")]
+    [SwaggerResponse(200, "New backup codes", typeof(object))]
+    [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewcodes")]
     public async Task<IEnumerable<object>> TfaAppRequestNewCodesAsync()
     {
@@ -373,7 +366,7 @@ public class TfaappController(
         }
 
         var codes = (await tfaManager.GenerateBackupCodesAsync()).Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
-        await messageService.SendAsync(MessageAction.UserConnectedTfaApp, MessageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, displayUserSettingsHelper));
         return codes;
     }
 
@@ -381,11 +374,11 @@ public class TfaappController(
     /// Unlinks the current two-factor authentication application from the user account specified in the request.
     /// </summary>
     /// <short>Unlink the TFA application</short>
-    /// <category>TFA settings</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.TfaRequestsDto, ASC.Web.Api" name="inDto">TFA settings request parameters</param>
-    /// <returns type="System.Object, System">Login URL</returns>
     /// <path>api/2.0/settings/tfaappnewapp</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / TFA settings")]
+    [SwaggerResponse(200, "Login URL", typeof(object))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewapp")]
     public async Task<object> TfaAppNewAppAsync(TfaRequestsDto inDto)
     {
@@ -399,7 +392,7 @@ public class TfaappController(
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (!isMe && tenant.OwnerId != authContext.CurrentAccount.ID)
         {
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
@@ -416,12 +409,12 @@ public class TfaappController(
         }
 
         await TfaAppUserSettings.DisableForUserAsync(settingsManager, user.Id);
-        await messageService.SendAsync(MessageAction.UserDisconnectedTfaApp, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserDisconnectedTfaApp, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)
         {
-            var (url, key) = await commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaActivation);
+            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaActivation);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{ConfirmType.TfaActivation}");
             return url;
         }

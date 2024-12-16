@@ -39,7 +39,7 @@ public class LogoHandler
         SettingsManager settingsManager,
         TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper)
     {
-        var logoTypeStr = context.Request.Query["logotype"].FirstOrDefault();
+        string logoTypeStr = context.Request.Query["logotype"];
         if (!Enum.TryParse(logoTypeStr, out WhiteLabelLogoType logoType))
         {
             throw new ArgumentException("logotype");
@@ -57,7 +57,7 @@ public class LogoHandler
             throw new ArgumentException("dark");
         }
 
-        var culture = context.Request.Query["culture"].FirstOrDefault();
+        string culture = context.Request.Query["culture"];
 
         string path;
 

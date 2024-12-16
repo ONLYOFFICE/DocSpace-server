@@ -717,7 +717,7 @@ public class S3Storage(TempStream tempStream,
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
         var obj = tmp
-            .Where(x => x.Key.EndsWith("/"))
+            .Where(x => x.Key.EndsWith('/'))
             .Select(x => x.Key[(MakePath(domain, path) + "/").Length..]);
         foreach (var e in obj)
         {
@@ -742,7 +742,7 @@ public class S3Storage(TempStream tempStream,
                 InputStream = buffered,
                 Headers =
                     {
-                        CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds),
+                        CacheControl = $"public, maxage={(int)TimeSpan.FromDays(5).TotalSeconds}",
                         ExpiresUtc = DateTime.UtcNow.Add(TimeSpan.FromDays(5)),
                         ContentDisposition = "attachment"
                     }
@@ -897,7 +897,7 @@ public class S3Storage(TempStream tempStream,
     public override async IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
-        var obj = tmp.Where(x=> !x.Key.EndsWith("/"))
+        var obj = tmp.Where(x=> !x.Key.EndsWith('/'))
             .Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x.Key)))
             .Select(x => x.Key[(MakePath(domain, path) + "/").Length..].TrimStart('/'));
 
@@ -953,7 +953,7 @@ public class S3Storage(TempStream tempStream,
     }
     public override async Task DeleteDirectoryAsync(string domain, string path, Guid ownerId)
     {
-        await DeleteFilesAsync(domain, path, "*", true);
+        await DeleteFilesAsync(domain, path, "*", true, ownerId);
     }
 
     public override async Task<long> GetFileSizeAsync(string domain, string path)

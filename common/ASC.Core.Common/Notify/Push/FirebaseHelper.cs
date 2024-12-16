@@ -43,7 +43,7 @@ public class FirebaseHelper(AuthContext authContext,
         {
             try
             {
-                var credentials = JsonConvert.SerializeObject(new FirebaseApiKey(configuration)).Replace("\\\\", "\\");
+                var credentials = JsonSerializer.Serialize(new FirebaseApiKey(configuration)).Replace("\\\\", "\\");
                 FirebaseApp.Create(new AppOptions
                 {
                     Credential = GoogleCredential.FromJson(credentials)
@@ -91,7 +91,7 @@ public class FirebaseHelper(AuthContext authContext,
     public async Task<FireBaseUser> RegisterUserDeviceAsync(string fbDeviceToken, bool isSubscribed, string application)
     {
         var userId = authContext.CurrentAccount.ID;
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         return await firebaseDao.RegisterUserDeviceAsync(userId, tenantId, fbDeviceToken, isSubscribed, application);
     }
@@ -99,7 +99,7 @@ public class FirebaseHelper(AuthContext authContext,
     public async Task<FireBaseUser> UpdateUserAsync(string fbDeviceToken, bool isSubscribed, string application)
     {
         var userId = authContext.CurrentAccount.ID;
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         return await firebaseDao.UpdateUserAsync(userId, tenantId, fbDeviceToken, isSubscribed, application);
     }

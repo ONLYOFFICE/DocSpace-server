@@ -485,4 +485,22 @@
   <data name="FormNumber" xml:space="preserve">
     <value>Номер формы</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Внешний пользователь</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Создатель контента</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Менеджер комнат</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Создатель контента</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Менеджер комнат</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Открыть файл</value>
+  </data>
 </root>

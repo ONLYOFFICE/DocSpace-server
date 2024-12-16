@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Newtonsoft.Json;
+
 namespace ASC.Data.Backup.Tasks;
 
 [Scope]
@@ -235,7 +237,6 @@ public class BackupPortalTask(
                     creates.Append(createScheme
                         .Select(r => Convert.ToString(r[1]).Replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS "))
                         .FirstOrDefault());
-                    creates.Append(';');
                 }
                 else
                 {
@@ -244,8 +245,9 @@ public class BackupPortalTask(
                     creates.Append(createScheme
                         .Select(r => Convert.ToString(r[1]))
                         .FirstOrDefault());
-                    creates.Append(';');
                 }
+
+                creates.Append(';');
 
                 var path = CrossPlatform.PathCombine(dir, t);
                 await using (var stream = File.OpenWrite(path))

@@ -131,9 +131,9 @@ public partial class FilesDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, TagType.Custom])]
-    public Task<int> DeleteTagLinksByTypeAsync(int tenantId, string fileId, TagType type)
+    public Task<int> DeleteTagLinksByTypeAsync(int tenantId, string entryId, FileEntryType entryType, TagType type)
     {
-        return FileQueries.DeleteTagLinksByTypeAsync(this, tenantId, fileId, type);
+        return FileQueries.DeleteTagLinksByTypeAsync(this, tenantId, entryId, entryType, type);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
@@ -271,6 +271,12 @@ public partial class FilesDbContext
     public Task<string> DataAsync(int tenantId, string entryId)
     {
         return FileQueries.DataAsync(this, tenantId, entryId);
+    }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public IAsyncEnumerable<DbFilesProperties> FilesPropertiesAsync(int tenantId, IEnumerable<string> filesIds)
+    {
+        return FileQueries.FilesPropertiesAsync(this, tenantId, filesIds);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
@@ -449,7 +455,6 @@ static file class FileQueries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => fileIds.Contains(r.Id) && r.CurrentVersion)
-
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -462,7 +467,20 @@ static file class FileQueries
                                       ).FirstOrDefault()
                                 where f.TenantId == r.TenantId
                                 select f
-                            ).FirstOrDefault()
+                            ).FirstOrDefault(),
+                        Order = (
+                            from f in ctx.FileOrder
+                            where (
+                                from rs in ctx.RoomSettings 
+                                where rs.TenantId == f.TenantId && rs.RoomId ==
+                                    (from t in ctx.Tree
+                                        where t.FolderId == r.ParentId
+                                        orderby t.Level descending
+                                        select t.ParentId
+                                    ).Skip(1).FirstOrDefault()
+                                select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                            select f.Order
+                        ).FirstOrDefault()
                     }));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> FileIdsAsync =
@@ -552,17 +570,16 @@ static file class FileQueries
                     .Where(r => r.EntryId == fileId && r.EntryType == FileEntryType.File)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, string, TagType, Task<int>> DeleteTagLinksByTypeAsync =
+    public static readonly Func<FilesDbContext, int, string, FileEntryType, TagType, Task<int>> DeleteTagLinksByTypeAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string fileId, TagType type) =>
+            (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, TagType type) =>
                 ctx.Tag
                     .Where(t => t.TenantId == tenantId)
                     .Where(t => t.Type == type)
                     .Join(ctx.TagLink, t => t.Id, l => l.TagId, (t, l) => l)
-                    .Where(l => l.EntryId == fileId)
-                    .Where(l => l.EntryType == FileEntryType.File)
+                    .Where(l => l.EntryId == entryId)
+                    .Where(l => l.EntryType == entryType)
                     .ExecuteDelete());
-                
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFile>> DbFilesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -819,6 +836,13 @@ static file class FileQueries
                     .Where(r => r.EntryId == entryId)
                     .Select(r => r.Data)
                     .FirstOrDefault());
+    
+    public static readonly Func<FilesDbContext, int, IEnumerable<string>, IAsyncEnumerable<DbFilesProperties>> FilesPropertiesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<string> filesIds) =>
+                ctx.FilesProperties
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => filesIds.Contains(r.EntryId)));
 
     public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteFilesPropertiesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

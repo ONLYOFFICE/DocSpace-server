@@ -35,7 +35,11 @@ public static class UserExtensions
             return false;
         }
 
-        return tenant != null && tenant.OwnerId.Equals(ui.Id);
+        return IsOwner(ui.Id, tenant);
+    }
+    public static bool IsOwner(this Guid ui, Tenant tenant)
+    {
+        return tenant != null && tenant.OwnerId.Equals(ui);
     }
 
     public static bool IsMe(this UserInfo ui, AuthContext authContext)
@@ -167,17 +171,16 @@ public static class UserExtensions
             {
                 case _extMobPhone:
                     newContacts.Add(_mobPhone);
-                    newContacts.Add(value);
                     break;
                 case _extMail:
                     newContacts.Add(_mail);
-                    newContacts.Add(value);
                     break;
                 default:
                     newContacts.Add(type);
-                    newContacts.Add(value);
                     break;
             }
+
+            newContacts.Add(value);
         }
 
         ui.ContactsList = newContacts;

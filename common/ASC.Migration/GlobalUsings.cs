@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.ComponentModel.DataAnnotations;
 global using System.Data;
 global using System.IO.Compression;
 global using System.Text.Json;
@@ -61,16 +62,12 @@ global using ASC.Web.Core.Users;
 global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Utils;
-
 global using DotNetOpenAuth.Messaging;
-
 global using HtmlAgilityPack;
-
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
+global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
-global using Microsoft.Extensions.Caching.Distributed;
-
 global using ProtoBuf;

@@ -125,7 +125,11 @@ public class Startup
         services.RegisterQuotaFeature();
 
         services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
-
+        
+        if (_configuration.GetValue<bool>("openApi:enable"))
+        {
+            services.AddOpenApi(_configuration);
+        }
         if (!_hostEnvironment.IsDevelopment())
         {
             services.AddStartupTask<WarmupServicesStartupTask>()
@@ -159,8 +163,14 @@ public class Startup
             app.UseCors(CustomCorsPolicyName);
         }
 
+        if (_configuration.GetValue<bool>("openApi:enable"))
+        {
+            app.UseOpenApi();
+        }
         app.UseSynchronizationContextMiddleware();
 
+        app.UseTenantMiddleware();
+        
         app.UseAuthentication();
 
         app.UseAuthorization();

@@ -24,52 +24,59 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.Web.Core.WhiteLabel;
 
 /// <summary>
+/// Company white label settings
 /// </summary>
 public class CompanyWhiteLabelSettingsWrapper
 {
-    /// <summary>Company white label settings</summary>
-    /// <type>ASC.Web.Core.WhiteLabel.CompanyWhiteLabelSettings, ASC.Web.Core</type>
+    /// <summary>
+    /// Company white label settings
+    /// </summary>
     public CompanyWhiteLabelSettings Settings { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 {
-    /// <summary>Core settings</summary>
-    /// <type>ASC.Core.CoreSettings, ASC.Core.Common</type>
     public CoreSettings CoreSettings;
 
-    /// <summary>Company name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Company name
+    /// </summary>
+    [StringLength(255)]
     public string CompanyName { get; set; }
 
-    /// <summary>Site</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Site
+    /// </summary>
     [Url]
+    [StringLength(255)]
     public string Site { get; set; }
 
-    /// <summary>Email address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Email address
+    /// </summary>
     [EmailAddress]
+    [StringLength(255)]
     public string Email { get; set; }
 
-    /// <summary>Address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Address
+    /// </summary>
+    [StringLength(255)]
     public string Address { get; set; }
 
-    /// <summary>Phone</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Phone
+    /// </summary>
     [Phone]
+    [StringLength(255)]
     public string Phone { get; set; }
 
-    /// <summary>Specifies if a company is a licensor or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if a company is a licensor or not
+    /// </summary>
     [JsonPropertyName("IsLicensor")]
     public bool IsLicensor { get; set; }
 
@@ -96,7 +103,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
     {
         var settings = CoreSettings.GetSetting("CompanyWhiteLabelSettings");
 
-        var result = string.IsNullOrEmpty(settings) ? new CompanyWhiteLabelSettings(CoreSettings) : JsonConvert.DeserializeObject<CompanyWhiteLabelSettings>(settings);
+        var result = string.IsNullOrEmpty(settings) ? new CompanyWhiteLabelSettings(CoreSettings) : JsonSerializer.Deserialize<CompanyWhiteLabelSettings>(settings);
 
         result.CoreSettings = CoreSettings;
 

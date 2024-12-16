@@ -27,9 +27,9 @@
 namespace ASC.Webhooks.Service.Log;
 internal static partial class WebhookSenderLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Procedure: Finish.")]
+    [LoggerMessage(LogLevel.Debug, "Procedure: Finish.")]
     public static partial void DebugProcedureFinish(this ILogger<WorkerService> logger);
 
-    [LoggerMessage(Level = LogLevel.Error)]
+    [LoggerMessage(LogLevel.Error)]
     public static partial void ErrorSSLVerification(this ILogger logger, Exception exception);
 }

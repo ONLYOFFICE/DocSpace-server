@@ -440,7 +440,7 @@
     <value>DocSpace ադմինիստրատոր</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
-    <value>Խմբագրիչ</value>
+    <value>Խմբագիր</value>
   </data>
   <data name="RoleEnum_FillForms" xml:space="preserve">
     <value>Ձևի լցոնիչ</value>
@@ -543,5 +543,23 @@
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Ձևի համարը</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Արտաքին օգտատեր</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Բովանդակության ստեղծող</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Սենյակի մենեջեր</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Սենյակի մենեջեր</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Բովանդակության ստեղծող</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Բացել ֆայլը</value>
   </data>
 </root>

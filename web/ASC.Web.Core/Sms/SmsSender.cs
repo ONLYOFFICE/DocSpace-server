@@ -44,7 +44,7 @@ public class SmsSender(IConfiguration configuration,
 
         if ("log".Equals(configuration["core:notify:postman"], StringComparison.InvariantCultureIgnoreCase))
         {
-            var tenant = await tenantManager.GetCurrentTenantAsync(false);
+            var tenant = tenantManager.GetCurrentTenant(false);
             var tenantId = tenant?.Id ?? Tenant.DefaultTenant;
 
             logger.InformationSendSmsToPhoneNumber(tenantId, number, message);

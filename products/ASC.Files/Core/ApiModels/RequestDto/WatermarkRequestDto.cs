@@ -23,39 +23,70 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for adding watermarks
+/// </summary>
 public class WatermarkRequestDto
 {
-    /// <summary>Specifies whether watermarks are on or off</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether watermarks are on or off
+    /// </summary>
     public bool? Enabled { get; set; }
 
-    /// <summary>Specifies whether to display: username, user email, user ip-adress, current date and room name </summary>
-    /// <type>WatermarkAdditions</type>
+    /// <summary>
+    /// Specifies whether to display: username, user email, user ip-adress, current date and room name 
+    /// </summary>
     public WatermarkAdditions Additions { get; set; }
 
-    /// <summary>Watermark Text</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Watermark Text
+    /// </summary>
+    [StringLength(255)]
     public string Text { get; set; }
 
-    /// <summary>Watermark text and image rotate</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Watermark text and image rotate
+    /// </summary>
     public int Rotate { get; set; }
 
-    /// <summary>Watermark image scale</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Watermark image scale
+    /// </summary>
     public int ImageScale { get; set; }
 
-    /// <summary>The path to the temporary image file</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The path to the temporary image file
+    /// </summary>
     public string ImageUrl { get; set; }
 
-    /// <summary>Watermark image height</summary>
-    /// <type>System.Double, System</type>
+    /// <summary>
+    /// Watermark image height
+    /// </summary>
     public double ImageHeight { get; set; }
 
-    /// <summary>Watermark image width</summary>
-    /// <type>System.Double, System</type>
+    /// <summary>
+    /// Watermark image width
+    /// </summary>
     public double ImageWidth { get; set; }
+}
+
+/// <summary>
+/// Request parameters for adding watermarks
+/// </summary>
+public class WatermarkRequestDto<T>
+{
+    /// <summary>
+    /// Room ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// Watermark settings
+    /// </summary>
+    [FromBody]
+    public WatermarkRequestDto Watermark { get; set; }
 }

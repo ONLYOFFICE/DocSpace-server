@@ -29,33 +29,33 @@ using ASC.Core.Common.Notify.Engine;
 namespace ASC.Core.Common.Log;
 public static partial class NotifyEngineLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "NotifySchedulerService is starting.")]
+    [LoggerMessage(LogLevel.Debug, "NotifySchedulerService is starting.")]
     public static partial void DebugNotifySchedulerServiceStarting(this ILogger<NotifyEngine> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "NotifySchedulerService background task is stopping.")]
+    [LoggerMessage(LogLevel.Debug, "NotifySchedulerService background task is stopping.")]
     public static partial void DebugNotifySchedulerServiceStopping(this ILogger<NotifyEngine> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "NotifySchedulerService background task with instance id {instanceId} is't active.")]
+    [LoggerMessage(LogLevel.Debug, "NotifySchedulerService background task with instance id {instanceId} is't active.")]
     public static partial void DebugNotifySchedulerServiceIsNotActive(this ILogger<NotifyEngine> logger, string instanceId);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "error styling message")]
+    [LoggerMessage(LogLevel.Warning, "error styling message")]
     public static partial void WarningErrorStyling(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "InvokeSendMethod")]
+    [LoggerMessage(LogLevel.Error, "InvokeSendMethod")]
     public static partial void ErrorInvokeSendMethod(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "NotifyScheduler")]
+    [LoggerMessage(LogLevel.Error, "NotifyScheduler")]
     public static partial void ErrorNotifyScheduler(this ILogger<NotifySenderService> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "SendNotify")]
+    [LoggerMessage(LogLevel.Error, "SendNotify")]
     public static partial void ErrorSendNotify(this ILogger<NotifySenderService> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "NotifySender")]
+    [LoggerMessage(LogLevel.Error, "NotifySender")]
     public static partial void ErrorNotifySender(this ILogger<NotifySenderService> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Prepare {action} {recipient}")]
+    [LoggerMessage(LogLevel.Error, "Prepare {action} {recipient}")]
     public static partial void ErrorPrepare(this ILogger logger, Exception exception, INotifyAction action, IRecipient recipient);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "UpdateScheduleDate")]
+    [LoggerMessage(LogLevel.Error, "UpdateScheduleDate")]
     public static partial void ErrorUpdateScheduleDate(this ILogger logger, Exception exception);
 }

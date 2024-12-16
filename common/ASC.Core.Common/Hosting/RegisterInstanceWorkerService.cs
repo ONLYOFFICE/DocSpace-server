@@ -30,7 +30,6 @@ namespace ASC.Core.Common.Hosting;
 public class RegisterInstanceWorkerService<T>(
     ILogger<RegisterInstanceWorkerService<T>> logger,
     IServiceProvider serviceProvider,
-    IHostApplicationLifetime applicationLifetime,
     IOptions<InstanceWorkerOptions<T>> optionsSettings)
     : BackgroundService where T : IHostedService
 {
@@ -44,26 +43,25 @@ public class RegisterInstanceWorkerService<T>(
 
             return;
         }
-        
+
         await using var scope = serviceProvider.CreateAsyncScope();
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
+
             try
             {
-                var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
-
                 await registerInstanceService.Register();
 
                 logger.TraceWorkingRunnging(DateTimeOffset.Now);
-
-                await Task.Delay(TimeSpan.FromSeconds(_settings.IntervalCheckRegisterInstanceInSeconds), stoppingToken);
             }
             catch (Exception ex)
             {
-                logger.CriticalError(ex);
-                applicationLifetime.StopApplication();
+                logger.WarningUnableToRegister(_settings.InstanceId, DateTimeOffset.Now, ex);
             }
+
+            await Task.Delay(TimeSpan.FromSeconds(_settings.IntervalCheckRegisterInstanceInSeconds), stoppingToken);
         }
     }
     public override async Task StopAsync(CancellationToken cancellationToken)
@@ -80,9 +78,9 @@ public class RegisterInstanceWorkerService<T>(
 
                 logger.InformationUnRegister(_settings.InstanceId, DateTimeOffset.Now);
             }
-            catch
+            catch (Exception ex)
             {
-                logger.ErrorUnableToUnRegister(_settings.InstanceId, DateTimeOffset.Now);
+                logger.WarningUnableToUnRegister(_settings.InstanceId, DateTimeOffset.Now, ex);
             }
         }
 

@@ -485,4 +485,22 @@
   <data name="FormNumber" xml:space="preserve">
     <value>表单编号</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>外部用户</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>内容创作者</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>房间管理员</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>内容创作者</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>房间管理员</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>打开文件</value>
+  </data>
 </root>

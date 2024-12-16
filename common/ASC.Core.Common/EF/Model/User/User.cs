@@ -29,31 +29,45 @@ namespace ASC.Core.Common.EF;
 public class User : BaseEntity, IMapFrom<UserInfo>
 {
     public int TenantId { get; set; }
+    [MaxLength(255)]
     public string UserName { get; set; }
+    [MaxLength(64)]
     public string FirstName { get; set; }
+    [MaxLength(64)]
     public string LastName { get; set; }
     public Guid Id { get; set; }
     public bool? Sex { get; set; }
     public DateTime? BirthDate { get; set; }
     public EmployeeStatus Status { get; set; }
     public EmployeeActivationStatus ActivationStatus { get; set; }
+    [MaxLength(255)]
     public string Email { get; set; }
     public DateTime? WorkFromDate { get; set; }
     public DateTime? TerminatedDate { get; set; }
+    [MaxLength(64)]
     public string Title { get; set; }
+    [MaxLength(20)]
     public string CultureName { get; set; }
+    [MaxLength(1024)]
     public string Contacts { get; set; }
+    [MaxLength(255)]
     public string MobilePhone { get; set; }
     public MobilePhoneActivationStatus MobilePhoneActivation { get; set; }
+    [MaxLength(255)]
     public string Location { get; set; }
+    [MaxLength(512)]
     public string Notes { get; set; }
+    [MaxLength(512)]
     public string Sid { get; set; }
+    [MaxLength(512)]
     public string SsoNameId { get; set; }
+    [MaxLength(512)]
     public string SsoSessionId { get; set; }
     public bool Removed { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime LastModified { get; set; }
     public Guid? CreatedBy { get; set; }
+    public bool? Spam { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -85,7 +99,7 @@ public static class DbUserExtension
                 ActivationStatus = 0,
                 WorkFromDate = new DateTime(2021, 3, 9, 9, 52, 55, 764, DateTimeKind.Utc).AddTicks(9157),
                 LastModified = new DateTime(2021, 3, 9, 9, 52, 55, 765, DateTimeKind.Utc).AddTicks(1420),
-                CreateDate = new DateTime(2022, 7, 8),
+                CreateDate = new DateTime(2022, 7, 8)
             });
 
         return modelBuilder;
@@ -135,7 +149,7 @@ public static class DbUserExtension
 
             entity.Property(e => e.Contacts)
                 .HasColumnName("contacts")
-                .HasColumnType("varchar(1024)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -145,21 +159,21 @@ public static class DbUserExtension
 
             entity.Property(e => e.CultureName)
                 .HasColumnName("culture")
-                .HasColumnType("varchar(20)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
 
             entity.Property(e => e.Email)
                 .HasColumnName("email")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.FirstName)
                 .IsRequired()
                 .HasColumnName("firstname")
-                .HasColumnType("varchar(64)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -170,25 +184,25 @@ public static class DbUserExtension
             entity.Property(e => e.LastName)
                 .IsRequired()
                 .HasColumnName("lastname")
-                .HasColumnType("varchar(64)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Location)
                 .HasColumnName("location")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Notes)
                 .HasColumnName("notes")
-                .HasColumnType("varchar(512)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.MobilePhone)
                 .HasColumnName("phone")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -207,19 +221,19 @@ public static class DbUserExtension
 
             entity.Property(e => e.Sid)
                 .HasColumnName("sid")
-                .HasColumnType("varchar(512)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.SsoNameId)
                 .HasColumnName("sso_name_id")
-                .HasColumnType("varchar(512)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.SsoSessionId)
                 .HasColumnName("sso_session_id")
-                .HasColumnType("varchar(512)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -242,7 +256,7 @@ public static class DbUserExtension
             entity.Property(e => e.UserName)
                 .IsRequired()
                 .HasColumnName("username")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -255,6 +269,10 @@ public static class DbUserExtension
                 .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+
+            entity.Property(e => e.Spam)
+                .HasColumnName("spam")
+                .HasColumnType("tinyint(1)");
         });
     }
 
@@ -273,7 +291,7 @@ public static class DbUserExtension
 
             entity.HasIndex(e => new { e.UserName, e.TenantId })
                 .HasDatabaseName("username");
-            
+
             entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.FirstName })
                 .HasDatabaseName("tenant_activation_status_firstname");
 
@@ -293,7 +311,6 @@ public static class DbUserExtension
 
             entity.Property(e => e.Contacts)
                 .HasColumnName("contacts")
-                .HasMaxLength(1024)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.CreateDate)
@@ -302,39 +319,33 @@ public static class DbUserExtension
 
             entity.Property(e => e.CultureName)
                 .HasColumnName("culture")
-                .HasMaxLength(20)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Email)
                 .HasColumnName("email")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.FirstName)
                 .IsRequired()
-                .HasColumnName("firstname")
-                .HasMaxLength(64);
+                .HasColumnName("firstname");
 
-            entity.Property(e => e.LastModified).HasColumnName("last_modified");
+            entity.Property(e => e.LastModified)
+                .HasColumnName("last_modified");
 
             entity.Property(e => e.LastName)
                 .IsRequired()
-                .HasColumnName("lastname")
-                .HasMaxLength(64);
+                .HasColumnName("lastname");
 
             entity.Property(e => e.Location)
                 .HasColumnName("location")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Notes)
                 .HasColumnName("notes")
-                .HasMaxLength(512)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.MobilePhone)
                 .HasColumnName("phone")
-                .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.MobilePhoneActivation).HasColumnName("phone_activation");
@@ -345,17 +356,14 @@ public static class DbUserExtension
 
             entity.Property(e => e.Sid)
                 .HasColumnName("sid")
-                .HasMaxLength(512)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.SsoNameId)
                 .HasColumnName("sso_name_id")
-                .HasMaxLength(512)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.SsoSessionId)
                 .HasColumnName("sso_session_id")
-                .HasMaxLength(512)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Status)
@@ -368,19 +376,19 @@ public static class DbUserExtension
 
             entity.Property(e => e.Title)
                 .HasColumnName("title")
-                .HasMaxLength(64)
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.UserName)
                 .IsRequired()
-                .HasColumnName("username")
-                .HasMaxLength(255);
+                .HasColumnName("username");
 
             entity.Property(e => e.WorkFromDate).HasColumnName("workfromdate");
 
             entity.Property(e => e.CreatedBy)
                 .HasColumnName("created_by")
                 .HasMaxLength(36);
+
+            entity.Property(e => e.Spam).HasColumnName("spam");
         });
     }
 }

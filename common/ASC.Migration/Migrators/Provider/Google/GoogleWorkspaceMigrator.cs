@@ -62,7 +62,7 @@ public class GoogleWorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -148,18 +148,26 @@ public class GoogleWorkspaceMigrator : Migrator
                     {
                         MigrationInfo.WithoutEmailUsers.Add(key, user);
                     }
-                    else if (await UserManager.GetUserByEmailAsync(user.Info.Email) != ASC.Core.Users.Constants.LostUser)
-                    {
-                        if (!MigrationInfo.ExistUsers.TryAdd(user.Info.Email, user))
-                        {
-                            MergeStorages(MigrationInfo.ExistUsers[user.Info.Email], user);
-                        }
-                    }
                     else
                     {
-                        if (!MigrationInfo.Users.TryAdd(user.Info.Email, user))
+                        var ascUser = await UserManager.GetUserByEmailAsync(user.Info.Email);
+                        if (ascUser.Status == EmployeeStatus.Terminated)
                         {
-                            MergeStorages(MigrationInfo.Users[user.Info.Email], user);
+                            continue;
+                        }
+                        if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
+                        {
+                            if (!MigrationInfo.ExistUsers.TryAdd(user.Info.Email, user))
+                            {
+                                MergeStorages(MigrationInfo.ExistUsers[user.Info.Email], user);
+                            }
+                        }
+                        else
+                        {
+                            if (!MigrationInfo.Users.TryAdd(user.Info.Email, user))
+                            {
+                                MergeStorages(MigrationInfo.Users[user.Info.Email], user);
+                            }
                         }
                     }
                 }
@@ -376,7 +384,7 @@ public class GoogleWorkspaceMigrator : Migrator
                 Title = f,
                 Level = j++
             };
-            var key = string.Join(',', split[0..(j - 1)]);
+            var key = string.Join(',', split[..(j - 1)]);
             foldersdictionary.TryAdd(key, folder);
         }
     }
@@ -424,7 +432,7 @@ public class GoogleWorkspaceMigrator : Migrator
         if (commentsVersionMatch.Success)
         {
             var baseName = entry.Substring(0, entry.Length - commentsVersionMatch.Groups[0].Value.Length);
-            baseName = baseName.Insert(baseName.LastIndexOf("."), commentsVersionMatch.Groups[1].Value);
+            baseName = baseName.Insert(baseName.LastIndexOf('.'), commentsVersionMatch.Groups[1].Value);
 
             if (entries.Contains(baseName))
             {
@@ -444,7 +452,7 @@ public class GoogleWorkspaceMigrator : Migrator
         if (infoVersionMatch.Success)
         {
             var baseName = entry.Substring(0, entry.Length - infoVersionMatch.Groups[0].Length);
-            baseName = baseName.Insert(baseName.LastIndexOf("."), infoVersionMatch.Groups[1].Value);
+            baseName = baseName.Insert(baseName.LastIndexOf('.'), infoVersionMatch.Groups[1].Value);
 
             if (entries.Contains(baseName))
             {

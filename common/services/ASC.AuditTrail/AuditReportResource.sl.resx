@@ -802,4 +802,73 @@
   <data name="FormOpenedForFilling" xml:space="preserve">
     <value>Datoteka odprta za izpolnjevanje: {0}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Izvoz indeksa sobe shranjen v Dokumentih</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Ponovno poslana vabila: {0}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Aktivacija odjemalca {0} je spremenjena</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Vidnost odjemalca {0} je spremenjena</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Odjemalec ustvarjen</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Odjemalec {0} izbrisan</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Datoteka: {0}. Indeks spremenjen z {1} na {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Mapa: {0}. Indeks spremenjen z {1} na {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Mapa: {0}. Indeksi preurejeni</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Ustvarjena avtorizacijska koda za odjemalca {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Ustvarjen žeton osebnega dostopa za odjemalca {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Skrivnost odjemalca {0} ponovno ustvarjena</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Preklican dostop odjemalca {0}</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Soba: {0}. Zavrnitev prenosa onemogočena</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Soba: {0}. Zavrnitev prenosa omogočena</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indeksiranje sobe onemogočeno</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indeksiranje sobe omogočeno</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Življenjska doba onemogočena</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Življenjska doba je določena. Vrednost: {0}. Obdobje: {1}. Trajno izbriši: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Soba: {0}. Vodni žig onemogočen</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Soba: {0}. Vodni žig omogočen</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Odjemalec {0} posodobljen</value>
+  </data>
 </root>

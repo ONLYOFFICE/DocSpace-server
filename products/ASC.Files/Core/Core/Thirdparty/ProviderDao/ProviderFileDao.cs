@@ -152,7 +152,7 @@ internal class ProviderFileDao(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null)
     {
         var selector = _selectorFactory.GetSelector(parentId);
 
@@ -533,11 +533,11 @@ internal class ProviderFileDao(
         return fileDao.GetThumbnailAsync(file, width, height);
     }
 
-    public async Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    public async Task<int> SetCustomOrder(string fileId, string parentFolderId, int order)
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
-        await fileDao.SetCustomOrder(fileId, parentFolderId, order);
+        return await fileDao.SetCustomOrder(fileId, parentFolderId, order);
     }
 
     public async Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)

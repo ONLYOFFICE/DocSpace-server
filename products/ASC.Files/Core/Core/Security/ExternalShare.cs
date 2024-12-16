@@ -376,6 +376,10 @@ public class ValidationInfo
     /// <summary>Link ID</summary>
     /// <type>System.Guid, System</type>
     public Guid LinkId { get; set; }
+    
+    /// <summary>Specifies whether the user is authenticated or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsAuthenticated { get; set; }
 }
 
 public record DownloadSession
@@ -411,11 +415,22 @@ public class ExternalSessionSnapshot
 
 public enum Status
 {
+    [SwaggerEnum(Description = "Ok")]
     Ok,
+
+    [SwaggerEnum(Description = "Invalid")]
     Invalid,
+
+    [SwaggerEnum(Description = "Expired")]
     Expired,
+
+    [SwaggerEnum(Description = "Required password")]
     RequiredPassword,
+
+    [SwaggerEnum(Description = "Invalid password")]
     InvalidPassword,
+
+    [SwaggerEnum(Description = "External access denied")]
     ExternalAccessDenied
 }
 

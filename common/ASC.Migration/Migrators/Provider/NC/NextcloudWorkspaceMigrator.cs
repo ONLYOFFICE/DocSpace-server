@@ -55,7 +55,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -184,13 +184,21 @@ public class NextcloudWorkspaceMigrator : Migrator
                         {
                             MigrationInfo.WithoutEmailUsers.Add(user.Key, user.Value);
                         }
-                        else if (!(await UserManager.GetUserByEmailAsync(user.Value.Info.Email)).Equals(ASC.Core.Users.Constants.LostUser))
-                        {
-                            MigrationInfo.ExistUsers.Add(user.Key, user.Value);
-                        }
                         else
                         {
-                            MigrationInfo.Users.Add(user.Key, user.Value);
+                            var ascUser = await UserManager.GetUserByEmailAsync(user.Value.Info.Email);
+                            if (ascUser.Status == EmployeeStatus.Terminated)
+                            {
+                                continue;
+                            }
+                            if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
+                            {
+                                MigrationInfo.ExistUsers.Add(user.Key, user.Value);
+                            }
+                            else
+                            {
+                                MigrationInfo.Users.Add(user.Key, user.Value);
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -454,7 +462,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                         {
                             Id = entry.FileId,
                             Level = j++,
-                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/',split[0..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
+                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/',split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
                             Title = split.Last()
                         };
                         user.Storage.Folders.Add(folder);
@@ -470,7 +478,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                             Id = entry.FileId,
                             Path = tmpPath,
                             Title = split.Last(),
-                            Folder = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/', split[0..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey)
+                            Folder = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/', split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey)
                         };
                         user.Storage.Files.Add(file);
                         AddShare(user, entry, true);

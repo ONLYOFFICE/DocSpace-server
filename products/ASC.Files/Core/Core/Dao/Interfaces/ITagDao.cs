@@ -29,7 +29,7 @@ namespace ASC.Files.Core;
 public interface ITagDao<T>
 {
     IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries);
-    IAsyncEnumerable<Tag> GetTagsAsync(T entryId, FileEntryType entryType, TagType? tagType, Guid? owner = null);
+    IAsyncEnumerable<Tag> GetTagsAsync(T entryId, FileEntryType entryType, TagType? tagType, Guid? owner = null, string name = null);
     IAsyncEnumerable<Tag> GetTagsAsync(TagType tagType, IEnumerable<FileEntry<T>> fileEntries);
     IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, TagType tagType);
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<T> parentFolder, bool deepSearch);
@@ -38,7 +38,7 @@ public interface ITagDao<T>
     Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tag, Guid createdBy = default);
     Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag);
     IAsyncEnumerable<TagInfo> GetTagsInfoAsync(string searchText, TagType tagType, bool byName, int from = 0, int count = 0);
-    IAsyncEnumerable<TagInfo> GetTagsInfoAsync(IEnumerable<string> names);
+    IAsyncEnumerable<TagInfo> GetTagsInfoAsync(IEnumerable<string> names, TagType type);
     Task<TagInfo> SaveTagInfoAsync(TagInfo tagInfo);
     Task UpdateNewTags(IEnumerable<Tag> tag, Guid createdBy = default);
     Task UpdateNewTags(Tag tag);

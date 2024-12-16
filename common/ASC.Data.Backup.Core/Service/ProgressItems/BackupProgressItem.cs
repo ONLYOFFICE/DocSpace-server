@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 namespace ASC.Data.Backup.Services;
 
 [Transient]
@@ -51,7 +53,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         TenantId = schedule.TenantId;
         _storageType = schedule.StorageType;
         _storageBasePath = schedule.StorageBasePath;
-        _storageParams = JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.StorageParams);
+        _storageParams = JsonSerializer.Deserialize<Dictionary<string, string>>(schedule.StorageParams);
         _isScheduled = isScheduled;
         _tempFolder = tempFolder;
         _limit = limit;
@@ -102,7 +104,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
 
             backupPortalTask.Init(TenantId, tempFile, _limit, writer, _dump);
 
-            backupPortalTask.ProgressChanged = async (args) =>
+            backupPortalTask.ProgressChanged = async args =>
             {
                 Percentage = 0.9 * args.Progress;
                 await PublishChanges();
@@ -135,7 +137,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
                     StoragePath = storagePath,
                     CreatedOn = DateTime.UtcNow,
                     ExpiresOn = _storageType == BackupStorageType.DataStore ? DateTime.UtcNow.AddDays(1) : DateTime.MinValue,
-                    StorageParams = JsonConvert.SerializeObject(_storageParams),
+                    StorageParams = JsonSerializer.Serialize(_storageParams),
                     Hash = hash,
                     Removed = false
                 });

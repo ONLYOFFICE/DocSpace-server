@@ -802,4 +802,73 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Χρήστες [{0}]. Φόρμα που υποβλήθηκε: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Εξαγωγή του ευρετηρίου δωματίων που έχει αποθηκευτεί στα Έγγραφα</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Οι προσκλήσεις στάλθηκαν ξανά: {0}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Η ενεργοποίηση {0} του πελάτη άλλαξε</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Η ορατότητα {0} του πελάτη άλλαξε</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Ο πελάτης δημιουργήθηκε</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Ο πελάτης {0} διαγράφηκε</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Αρχείο: {0}. Ο δείκτης άλλαξε από {1} σε {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Φάκελος: {0}. Ο δείκτης άλλαξε από {1} σε {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Φάκελος: {0}. Έγινε αναδιάταξη ευρετηρίων</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Δημιουργήθηκε κωδικός εξουσιοδότησης για τον πελάτη {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Δημιουργήθηκε προσωπικό διακριτικό πρόσβασης για τον πελάτη {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Αναδημιουργήθηκε το μυστικό {0} του πελάτη</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Ανακλήθηκε η πρόσβαση {0} του πελάτη</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Δωμάτιο: {0}. Απενεργοποιήθηκε η άρνηση λήψης</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Δωμάτιο: {0}. Ενεργοποιήθηκε η άρνηση λήψης</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Η ευρετηρίαση δωματίου απενεργοποιήθηκε</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Η ευρετηρίαση δωματίου ενεργοποιήθηκε</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Ο χρόνος ζωής απενεργοποιήθηκε</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Ο χρόνος ζωής έχει οριστεί. Αξία: {0}. Περίοδος: {1}. Μόνιμη διαγραφή: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Δωμάτιο: {0}. Το υδατογράφημα απενεργοποιήθηκε</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Δωμάτιο: {0}. Το υδατογράφημα ενεργοποιήθηκε</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Ο πελάτης {0} ενημερώθηκε</value>
+  </data>
 </root>

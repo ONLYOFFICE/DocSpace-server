@@ -30,7 +30,7 @@ namespace ASC.Web.Api.Controllers;
 /// Portal information access.
 ///</summary>
 ///<name>portal</name>
-///<visible>false</visible>
+[ApiExplorerSettings(IgnoreApi = true)]
 [Scope]
 [DefaultRoute("payment")]
 [ApiController]
@@ -45,7 +45,8 @@ public class PaymentController(UserManager userManager,
         IMemoryCache memoryCache,
         IHttpContextAccessor httpContextAccessor,
         MessageService messageService,
-        StudioNotifyService studioNotifyService)
+        StudioNotifyService studioNotifyService,
+        PermissionContext permissionContext)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -57,15 +58,13 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get the payment page URL
     /// </short>
-    /// <category>Payment</category>
-    /// <param type="ASC.Web.Api.Models.PaymentUrlRequestsDto, ASC.Web.Api" name="inDto">Payment URL request parameters</param>
-    /// <returns type="System.Uri, System">The URL to the payment page</returns>
     /// <path>api/2.0/portal/payment/url</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
             !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
@@ -92,15 +91,13 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Update the payment quantity
     /// </short>
-    /// <category>Payment</category>
-    /// <param type="ASC.Web.Api.Models.PaymentUrlRequestsDto, ASC.Web.Api" name="inDto">Payment URL request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/portal/payment/update</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("update")]
-    public async Task<bool> PaymentUpdateAsync(PaymentUrlRequestsDto inDto)
+    public async Task<bool> PaymentUpdateAsync(QuantityRequestDto inDto)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
@@ -119,20 +116,18 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get the payment account
     /// </short>
-    /// <category>Payment</category>
-    /// <param type="System.String, System" name="backUrl">Back URL</param>
-    /// <returns type="System.Object, System">The URL to the payment account</returns>
     /// <path>api/2.0/portal/payment/account</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The URL to the payment account", typeof(object))]
     [HttpGet("account")]
-    public async Task<object> GetPaymentAccountAsync(string backUrl)
+    public async Task<object> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
             return null;
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
@@ -143,7 +138,7 @@ public class PaymentController(UserManager userManager,
         }
 
         var result = "payment.ashx";
-        return !string.IsNullOrEmpty(backUrl) ? $"{result}?backUrl={backUrl}" : result;
+        return !string.IsNullOrEmpty(inDto.BackUrl) ? $"{result}?backUrl={inDto.BackUrl}" : result;
     }
 
     /// <summary>
@@ -152,10 +147,9 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get prices
     /// </short>
-    /// <category>Payment</category>
-    /// <returns type="System.Object, System">List of available portal prices</returns>
     /// <path>api/2.0/portal/payment/prices</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "List of available portal prices", typeof(object))]
     [HttpGet("prices")]
     public async Task<object> GetPricesAsync()
     {
@@ -172,11 +166,10 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get currencies
     /// </short>
-    /// <category>Payment</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CurrenciesDto, ASC.Web.Api">List of available portal currencies</returns>
     /// <path>api/2.0/portal/payment/currencies</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "List of available portal currencies", typeof(CurrenciesDto))]
     [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetCurrenciesAsync()
     {
@@ -197,14 +190,21 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get quotas
     /// </short>
-    /// <category>Quota</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api">List of available portal quotas</returns>
     /// <path>api/2.0/portal/payment/quotas</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "List of available portal quotas", typeof(QuotaDto))]
     [HttpGet("quotas")]
     public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var currentQuota = await tariffHelper.GetCurrentQuotaAsync(false, false);
+        if (currentQuota.NonProfit)
+        {
+            return [currentQuota];
+        }
+
         return await tariffHelper.GetQuotasAsync().ToListAsync();
     }
 
@@ -214,19 +214,19 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get quota payment information
     /// </short>
-    /// <category>Payment</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api">Payment information about the current portal quota</returns>
     /// <path>api/2.0/portal/payment/quota</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("quota")]
-    public async Task<QuotaDto> GetQuotaAsync(bool refresh)
+    public async Task<QuotaDto> GetQuotaAsync(PaymentInformationRequestDto inDto)
     {
         if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
         
-        return await tariffHelper.GetCurrentQuotaAsync(refresh);
+        return await tariffHelper.GetCurrentQuotaAsync(inDto.Refresh);
     }
 
     /// <summary>
@@ -235,11 +235,11 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Send a payment request
     /// </short>
-    /// <category>Payment</category>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.SalesRequestsDto, ASC.Web.Api" name="inDto">Portal payment request parameters</param>
-    /// <returns></returns>
     /// <path>api/2.0/portal/payment/request</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(400, "Incorrect email or message text is empty")]
+    [SwaggerResponse(429, "Request limit is exceeded")]
     [HttpPost("request")]
     public async Task SendSalesRequestAsync(SalesRequestsDto inDto)
     {
@@ -256,7 +256,7 @@ public class PaymentController(UserManager userManager,
         CheckCache("salesrequest");
 
         await studioNotifyService.SendMsgToSalesAsync(inDto.Email, inDto.UserName, inDto.Message);
-        await messageService.SendAsync(MessageAction.ContactSalesMailSent);
+        messageService.Send(MessageAction.ContactSalesMailSent);
     }
 
     private void CheckCache(string baseKey)

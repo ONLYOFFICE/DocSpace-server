@@ -40,6 +40,12 @@ public class TariffController(CommonMethods commonMethods,
 
     #region For TEST api
 
+    /// <summary>
+    /// Test Api
+    /// </summary>
+    /// <path>apisystem/tariff/test</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [SwaggerResponse(200, "Tariff api works")]
     [HttpGet("test")]
     public IActionResult Check()
     {
@@ -53,6 +59,12 @@ public class TariffController(CommonMethods commonMethods,
 
     #region API methods
 
+    /// <summary>
+    /// Sets tariff
+    /// </summary>
+    /// <path>apisystem/tariff/set</path>
+    [Tags("Tariff")]
+    [SwaggerResponse(200, "Tariff", typeof(IActionResult))]
     [HttpPut("set")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
@@ -90,17 +102,17 @@ public class TariffController(CommonMethods commonMethods,
             Name = "api"
         };
 
-        if (model.ActiveUsers != default)
+        if (model.ActiveUsers != 0)
         {
             quota.CountRoomAdmin = model.ActiveUsers;
         }
 
-        if (model.MaxTotalSize != default)
+        if (model.MaxTotalSize != 0)
         {
             quota.MaxTotalSize = model.MaxTotalSize;
         }
 
-        if (model.MaxFileSize != default)
+        if (model.MaxFileSize != 0)
         {
             quota.MaxFileSize = model.MaxFileSize;
         }
@@ -118,6 +130,12 @@ public class TariffController(CommonMethods commonMethods,
         return await GetTariffAsync(tenant);
     }
 
+    /// <summary>
+    /// Gets tariff
+    /// </summary>
+    /// <path>apisystem/tariff/get</path>
+    [Tags("Tariff")]
+    [SwaggerResponse(200, "Tariff", typeof(IActionResult))]
     [HttpGet("get")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
@@ -149,6 +167,12 @@ public class TariffController(CommonMethods commonMethods,
         return await GetTariffAsync(tenant);
     }
 
+    /// <summary>
+    /// Gets all tariffs
+    /// </summary>
+    /// <path>apisystem/tariff/all</path>
+    [Tags("Tariff")]
+    [SwaggerResponse(200, "Tariff", typeof(IActionResult))]
     [HttpGet("all")]
     [AllowCrossSiteJson]
     public async Task<IActionResult> GetTariffsAsync()

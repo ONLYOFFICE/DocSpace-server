@@ -150,7 +150,7 @@ public class NotifyClient(WorkContext notifyContext,
             else
             {
                 userCulture = string.IsNullOrEmpty(u.CultureName)
-                    ? (await tenantManager.GetCurrentTenantAsync()).GetCulture()
+                    ? (tenantManager.GetCurrentTenant()).GetCulture()
                     : CultureInfo.GetCultureInfo(u.CultureName);
             }
             
@@ -255,7 +255,7 @@ public class NotifyClient(WorkContext notifyContext,
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         var user = await userManager.GetUsersAsync(filledForm.CreateBy);
 

@@ -26,172 +26,194 @@
 
 namespace ASC.Web.Api.Models;
 
-/// <summary>
-/// </summary>
 public class EmployeeFullDto : EmployeeDto
 {
-    /// <summary>First name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// First name
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Mike")]
     public string FirstName { get; set; }
 
-    /// <summary>Last name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Last name
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Zanyatski")]
     public string LastName { get; set; }
 
-    /// <summary>Username</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Username
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Mike.Zanyatski")]
     public string UserName { get; set; }
 
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Email
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "my@gmail.com")]
+    [EmailAddress]
     public string Email { get; set; }
 
-    /// <summary>List of contacts</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.Contact}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of contacts
+    /// </summary>
     public List<Contact> Contacts { get; set; }
 
-    /// <summary>Birthday</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    /// <summary>
+    /// Birthday
+    /// </summary>
     public ApiDateTime Birthday { get; set; }
 
-    /// <summary>Sex (male or female)</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Sex
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "male")]
     public string Sex { get; set; }
 
-    /// <summary>Employee status</summary>
-    /// <type>ASC.Core.Users.EmployeeStatus, ASC.Core.Common</type>
+    /// <summary>
+    /// Employee status
+    /// </summary>
     public EmployeeStatus Status { get; set; }
 
-    /// <summary>Employee activation status</summary>
-    /// <type>ASC.Core.Users.EmployeeActivationStatus, ASC.Core.Common</type>
+    /// <summary>
+    /// Employee activation status
+    /// </summary>
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
-    /// <summary>The date when the user account was terminated</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    /// <summary>
+    /// The date when the user account was terminated
+    /// </summary>
     public ApiDateTime Terminated { get; set; }
 
-    /// <summary>Department</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Department
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Marketing")]
     public string Department { get; set; }
 
-    /// <summary>Registration date</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    /// <summary>
+    /// Registration date
+    /// </summary>
     public ApiDateTime WorkFrom { get; set; }
 
-    /// <summary>List of groups</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.GroupSummaryDto}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of groups
+    /// </summary>
     public List<GroupSummaryDto> Groups { get; set; }
 
-    /// <summary>Location</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Location
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Palo Alto")]
     public string Location { get; set; }
 
-    /// <summary>Notes</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Notes
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Notes to worker")]
     public string Notes { get; set; }
 
-    /// <summary>Specifies if the user is an administrator or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user is an administrator or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool IsAdmin { get; set; }
 
-    /// <summary>Specifies if the user is a room administrator or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user is a room administrator or not
+    /// </summary>
     public bool IsRoomAdmin { get; set; }
 
-    /// <summary>Specifies if the LDAP settings are enabled for the user or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the LDAP settings are enabled for the user or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool IsLDAP { get; set; }
 
-    /// <summary>List of administrator modules</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of administrator modules
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "[\"projects\", \"crm\"]")]
     public List<string> ListAdminModules { get; set; }
 
-    /// <summary>Specifies if the user is a portal owner or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user is a portal owner or not
+    /// </summary>
     public bool IsOwner { get; set; }
 
-    /// <summary>Specifies if the user is a portal visitor or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user is a portal visitor or not
+    /// </summary>
     public bool IsVisitor { get; set; }
 
-    /// <summary>Specifies if the user is a portal collaborator or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user is a portal collaborator or not
+    /// </summary>
     public bool IsCollaborator { get; set; }
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Language
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "en-EN")]
     public string CultureName { get; set; }
 
-    /// <summary>Mobile phone number</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Mobile phone number
+    /// </summary>
     public string MobilePhone { get; set; }
 
-    /// <summary>Mobile phone activation status</summary>
-    /// <type>ASC.Core.Users.MobilePhoneActivationStatus, ASC.Core.Common</type>
+    /// <summary>
+    /// Mobile phone activation status
+    /// </summary>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
-    /// <summary>Specifies if the SSO settings are enabled for the user or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the SSO settings are enabled for the user or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool IsSSO { get; set; }
 
-    /// <summary>Theme</summary>
-    /// <type>System.Nullable{ASC.Web.Core.Users.DarkThemeSettingsType}, System</type>
+    /// <summary>
+    /// Theme
+    /// </summary>
     public DarkThemeSettingsType? Theme { get; set; }
 
-    /// <summary>Quota limit</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// Quota limit
+    /// </summary>
     public long? QuotaLimit { get; set; }
 
-    /// <summary>Portal used space</summary>
-    /// <type>System.Double, System</type>
+    /// <summary>
+    /// Portal used space
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 12345)]
     public double? UsedSpace { get; set; }
+
+    /// <summary>
+    /// Shared
+    /// </summary>
     public bool? Shared { get; set; }
 
-    /// <summary>Specifies if the user has a custom quota or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user has a custom quota or not
+    /// </summary>
     public bool? IsCustomQuota { get; set; }
 
-    /// <summary>Current login event ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Current login event ID
+    /// </summary>
     public int? LoginEventId { get; set; }
-    
+
+    /// <summary>
+    /// Created by
+    /// </summary>
     public EmployeeDto CreatedBy { get; set; }
+
+    /// <summary>
+    /// Registration date
+    /// </summary>
     public ApiDateTime RegistrationDate { get; set; }
 
-    public static new EmployeeFullDto GetSample()
-    {
-        return new EmployeeFullDto
-        {
-            Avatar = "url to big avatar",
-            AvatarSmall = "url to small avatar",
-            AvatarMax = "url to max avatar",
-            AvatarOriginal = "url to original avatar",
-            Contacts = [Contact.GetSample()],
-            Email = "my@gmail.com",
-            FirstName = "Mike",
-            Id = Guid.Empty,
-            IsAdmin = false,
-            ListAdminModules = ["projects", "crm"],
-            UserName = "Mike.Zanyatski",
-            LastName = "Zanyatski",
-            Title = "Manager",
-            Groups = [GroupSummaryDto.GetSample()],
-            AvatarMedium = "url to medium avatar",
-            Birthday = ApiDateTime.GetSample(),
-            Department = "Marketing",
-            Location = "Palo Alto",
-            Notes = "Notes to worker",
-            Sex = "male",
-            Status = EmployeeStatus.Active,
-            WorkFrom = ApiDateTime.GetSample(),
-            Terminated = ApiDateTime.GetSample(),
-            CultureName = "en-EN",
-            IsLDAP = false,
-            IsSSO = false
-        };
-    }
 }
-
 [Scope]
 public class EmployeeFullDtoHelper(
         ApiContext httpContext,
@@ -282,7 +304,7 @@ public class EmployeeFullDtoHelper(
     public async Task<EmployeeFullDto> GetFullAsync(UserInfo userInfo, bool? shared = null)
     {
         var currentType = await _userManager.GetUserTypeAsync(userInfo.Id);
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         var result = new EmployeeFullDto
         {

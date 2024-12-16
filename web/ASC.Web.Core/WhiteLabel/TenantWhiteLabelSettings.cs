@@ -383,7 +383,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     private async Task SetLogoAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, string logoFileExt, byte[] data, bool dark, IDataStore storage = null)
     {
-        var store = storage ?? await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), ModuleName);
+        var store = storage ?? await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), ModuleName);
 
         #region delete from storage if already exists
 
@@ -577,7 +577,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     #region Get logo path
 
-    public async Task<string> GetAbsoluteLogoPathAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark = false, string culture = default)
+    public async Task<string> GetAbsoluteLogoPathAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark = false, string culture = null)
     {
         if (tenantWhiteLabelSettings.GetIsDefault(type))
         {
@@ -587,9 +587,9 @@ public class TenantWhiteLabelSettingsHelper(
         return await GetAbsoluteStorageLogoPath(tenantWhiteLabelSettings, type, dark, culture);
     }
 
-    private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark, string culture = default)
+    private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark, string culture = null)
     {
-        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), ModuleName);
+        var store = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), ModuleName);
         var fileName = BuildLogoFileName(type, tenantWhiteLabelSettings.GetExt(type, dark), dark);
 
         if (await store.IsFileAsync(fileName))
@@ -599,7 +599,7 @@ public class TenantWhiteLabelSettingsHelper(
         return await GetAbsoluteDefaultLogoPathAsync(type, dark, culture);
     }
 
-    public async Task<string> GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType type, bool dark, string culture = default)
+    public async Task<string> GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType type, bool dark, string culture = null)
     {
         var partnerLogoPath = await GetPartnerStorageLogoPathAsync(type, dark);
         if (!string.IsNullOrEmpty(partnerLogoPath))
@@ -668,7 +668,7 @@ public class TenantWhiteLabelSettingsHelper(
 
         if (string.IsNullOrEmpty(culture))
         {
-            culture = (await tenantManager.GetCurrentTenantAsync()).Language;
+            culture = (tenantManager.GetCurrentTenant()).Language;
         }
 
         return customCultures.Contains(culture, StringComparer.InvariantCultureIgnoreCase) ? $"{culture.ToLower()}/" : string.Empty;
@@ -693,7 +693,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     private async Task<Stream> GetStorageLogoData(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark)
     {
-        var storage = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), ModuleName);
+        var storage = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), ModuleName);
 
         if (storage == null)
         {
@@ -732,10 +732,10 @@ public class TenantWhiteLabelSettingsHelper(
     {
         if (CanBeDark(type))
         {
-            return $"{(dark ? "dark_" : "")}{type.ToString().ToLowerInvariant()}.{fileExt}";
+            return $"{(dark ? "dark_" : "")}{type.ToStringFast().ToLowerInvariant()}.{fileExt}";
         }
 
-        return $"{type.ToString().ToLowerInvariant()}.{fileExt}";
+        return $"{type.ToStringLowerFast()}.{fileExt}";
     }
 
     private static Size GetSize(WhiteLabelLogoType type)
