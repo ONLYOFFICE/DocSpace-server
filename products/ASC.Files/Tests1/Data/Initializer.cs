@@ -26,11 +26,8 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using Bogus;
-using Bogus.DataSets;
 
 namespace ASC.Files.Tests1.Data;
-
 
 public static class Initializer
 {
@@ -54,25 +51,34 @@ public static class Initializer
         .RuleFor(x => x.Email, f => f.Person.Email)
         .RuleFor(x => x.Password, f => f.Internet.Password(8, 10));
     
-    public static List<KeyValuePair<string, string?>> GetSettings(string dbConnectionString, string redisConnectionString, string rabbitMqConnectionString)
+    public static List<KeyValuePair<string, string?>> GetSettings(string dbConnectionString, string redisConnectionString, string rabbitMqConnectionString, string openSearchConnectionString)
     {
-        var redisSplitted = redisConnectionString.Split(':');
-        var redisHost = redisSplitted[0];
-        var redisPort = redisSplitted[1];
-
-        var rabbitMqSettings = new Uri(rabbitMqConnectionString);
-        var rabbitMqUserInfo = rabbitMqSettings.UserInfo.Split(':');
-        
         var result = new List<KeyValuePair<string, string?>>(_settings)
         {
             new("ConnectionStrings:default:connectionString", dbConnectionString),
-            new("Redis:Hosts:0:Host", redisHost),
-            new("Redis:Hosts:0:Port", redisPort),
-            new("RabbitMQ:Hostname", rabbitMqSettings.Host),
-            new("RabbitMQ:Port", rabbitMqSettings.Port.ToString()),
-            new("RabbitMQ:UserName", rabbitMqUserInfo[0]),
-            new("RabbitMQ:Password", rabbitMqUserInfo[1])
         };
+        
+        var redisSplit = redisConnectionString.Split(':');
+        var redisHost = redisSplit[0];
+        var redisPort = redisSplit[1];
+        
+        result.Add(new KeyValuePair<string, string?>("Redis:Hosts:0:Host", redisHost));
+        result.Add(new KeyValuePair<string, string?>("Redis:Hosts:0:Port", redisPort));
+        
+        var rabbitMqSettings = new Uri(rabbitMqConnectionString);
+        var rabbitMqUserInfo = rabbitMqSettings.UserInfo.Split(':');
+        result.Add(new KeyValuePair<string, string?>("RabbitMQ:Hostname", rabbitMqSettings.Host));
+        result.Add(new KeyValuePair<string, string?>("RabbitMQ:Port", rabbitMqSettings.Port.ToString()));
+        result.Add(new KeyValuePair<string, string?>("RabbitMQ:UserName", rabbitMqUserInfo[0]));
+        result.Add(new KeyValuePair<string, string?>("RabbitMQ:Password", rabbitMqUserInfo[1]));
+        
+        var openSearchSplit = openSearchConnectionString.Split(':');
+        var openSearchHost = openSearchSplit[0];
+        var openSearchPort = openSearchSplit[1];
+        
+        result.Add(new KeyValuePair<string, string?>("elastic:Scheme", "http"));
+        result.Add(new KeyValuePair<string, string?>("elastic:Host", openSearchHost));
+        result.Add(new KeyValuePair<string, string?>("elastic:Port", openSearchPort));
         
         return result;
     }
@@ -85,27 +91,13 @@ public static class Initializer
         {
             var apiClientStartTask = Task.Run(() =>
             {
-                _apiClient = apiFactory.WithWebHostBuilder(builder =>
-                {
-                    foreach (var setting in GetSettings(filesFactory.MySqlConnectionString, filesFactory.RedisConnectionString, filesFactory.RabbitMqConnectionString))
-                    {
-                        builder.UseSetting(setting.Key, setting.Value);
-                    }
-                }).CreateClient();
-
+                _apiClient = apiFactory.WithWebHostBuilder(Build).CreateClient();
                 _apiClient.BaseAddress = new Uri(_apiClient.BaseAddress, "api/2.0/");
             });
 
             var peopleClientStartTask = Task.Run(() =>
             {
-                _peopleClient = peopleFactory.WithWebHostBuilder(builder =>
-                {
-                    foreach (var setting in GetSettings(filesFactory.MySqlConnectionString, filesFactory.RedisConnectionString, filesFactory.RabbitMqConnectionString))
-                    {
-                        builder.UseSetting(setting.Key, setting.Value);
-                    }
-                }).CreateClient();
-
+                _peopleClient = peopleFactory.WithWebHostBuilder(Build).CreateClient();
                 _peopleClient.BaseAddress = new Uri(_peopleClient.BaseAddress, "api/2.0/");
             });
             
@@ -136,6 +128,15 @@ public static class Initializer
         }
 
         _initialized = true;
+        return;
+
+        void Build(IWebHostBuilder builder)
+        {
+            foreach (var setting in GetSettings(filesFactory.MySqlConnectionString, filesFactory.RedisConnectionString, filesFactory.RabbitMqConnectionString, filesFactory.OpenSearchConnectionString))
+            {
+                builder.UseSetting(setting.Key, setting.Value);
+            }
+        }
     }
     
     internal static async Task<User> InviteContact(FilesApiFactory filesFactory, EmployeeType employeeType)
@@ -198,7 +199,7 @@ public static class Initializer
         }
     }
     
-    private static string Password(
+    internal static string Password(
         this Internet internet,
         int minLength,
         int maxLength,

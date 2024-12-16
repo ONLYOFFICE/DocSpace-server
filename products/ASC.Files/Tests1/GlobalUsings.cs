@@ -29,6 +29,9 @@ global using ASCPeople::ASC.People.ApiModels.RequestDto;
 global using ASCWebApi::ASC.Web.Api.ApiModel.RequestsDto;
 global using ASCWebApi::ASC.Web.Api.ApiModel.ResponseDto;
 
+global using Bogus;
+global using Bogus.DataSets;
+
 global using DotNet.Testcontainers.Containers;
 
 global using FluentAssertions;
