@@ -178,7 +178,8 @@ public class FileStorageService //: IFileStorageService
         SubjectFilter subjectFilter = SubjectFilter.Owner,
         ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
         QuotaFilter quotaFilter = QuotaFilter.All,
-        StorageFilter storageFilter = StorageFilter.None)
+        StorageFilter storageFilter = StorageFilter.None,
+        FormsItemDto formsItemDto = null)
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
 
@@ -287,7 +288,8 @@ public class FileStorageService //: IFileStorageService
                 subjectFilter,
                 applyFilterOption,
                 quotaFilter,
-                storageFilter);
+                storageFilter,
+                formsItemDto);
         }
         catch (Exception e)
         {

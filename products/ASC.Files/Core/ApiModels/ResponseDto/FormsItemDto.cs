@@ -24,13 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModels.RequestsDto;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public class InvitationLinkRequestDto
-{
-    /// <summary>
-    /// Employee type (All, RoomAdmin, Guest, DocSpaceAdmin, User)
-    /// </summary>
-    [FromRoute(Name = "employeeType")]
-    public EmployeeType EmployeeType { get; set; }
-}
+public record FormsItemDto(string Key, string Type);
