@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class InvitationLinkRequestDto
 {
     /// <summary>
-    /// Employee type (All, RoomAdmin, User, DocSpaceAdmin)
+    /// Employee type (All, RoomAdmin, Guest, DocSpaceAdmin, User)
     /// </summary>
     [FromRoute(Name = "employeeType")]
     public EmployeeType EmployeeType { get; set; }
