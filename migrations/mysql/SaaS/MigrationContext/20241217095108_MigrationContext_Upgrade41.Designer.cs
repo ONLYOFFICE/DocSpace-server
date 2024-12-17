@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20241213162637_MigrationContext_Upgrade41")]
+    [Migration("20241217095108_MigrationContext_Upgrade41")]
     partial class MigrationContext_Upgrade41
     {
         /// <inheritdoc />
@@ -1570,7 +1570,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("trusteddomainsenabled")
-                        .HasDefaultValueSql("'0'");
+                        .HasDefaultValueSql("'1'");
 
                     b.Property<string>("TrustedDomainsRaw")
                         .HasColumnType("varchar(1024)")
@@ -5880,7 +5880,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Options")
-                        .HasColumnType("text")
+                        .HasColumnType("json")
                         .HasColumnName("options")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
