@@ -365,7 +365,7 @@ public class GlobalFolder(
     {
         if (await webItemManager[WebItemManager.ProjectsProductID].IsDisabledAsync(webItemSecurity, authContext))
         {
-            return default;
+            return 0;
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -398,7 +398,7 @@ public class GlobalFolder(
 
         result = await daoFactory.GetFolderDao<int>().GetFolderIDVirtualRooms(createIfNotExist);
 
-        if (result != default)
+        if (result != 0)
         {
             DocSpaceFolderCache[key] = result;
         }
@@ -426,12 +426,12 @@ public class GlobalFolder(
     {
         if (!authContext.IsAuthenticated)
         {
-            return default;
+            return 0;
         }
 
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
-            return default;
+            return 0;
         }
 
         var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{authContext.CurrentAccount.ID}";
@@ -474,7 +474,7 @@ public class GlobalFolder(
     {
         if (await IsOutsiderAsync)
         {
-            return default;
+            return 0;
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -482,7 +482,7 @@ public class GlobalFolder(
         {
             sharedFolderId = await daoFactory.GetFolderDao<int>().GetFolderIDShareAsync(true);
 
-            if (!sharedFolderId.Equals(default))
+            if (!sharedFolderId.Equals(0))
             {
                 ShareFolderCache[tenant.Id] = sharedFolderId;
             }

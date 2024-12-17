@@ -74,7 +74,7 @@ public abstract class BaseIndexer<T>(Client client,
     private bool _isExist;
     private readonly ILogger _logger = logger;
     protected readonly TenantManager _tenantManager = tenantManager;
-    private static readonly object _locker = new();
+    private static readonly Lock _locker = new();
 
     public async IAsyncEnumerable<List<T>> IndexAllAsync(
         Func<DateTime, (int, int, int)> getCount,
@@ -509,7 +509,7 @@ public abstract class BaseIndexer<T>(Client client,
             }
             else
             {
-                if (newValue == default(T))
+                if (newValue == null)
                 {
                     source.Append($"ctx._source.remove('{sourceExprText[1..]}');");
                 }

@@ -685,7 +685,7 @@ public class FileSharing(
         var folderDao = daoFactory.GetFolderDao<T>();
         var folders = await folderDao.GetFoldersAsync(folderIds).ToListAsync();
 
-        var entries = files.Concat(folders.Cast<FileEntry<T>>());
+        var entries = files.Concat(folders.Select(FileEntry<T> (r) => r));
 
         foreach (var entry in entries)
         {

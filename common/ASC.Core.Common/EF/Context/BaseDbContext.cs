@@ -104,8 +104,7 @@ public class BaseDbContext(DbContextOptions options) : DbContext(options)
     private void ValidateEntries()
     {
         var entities = from e in ChangeTracker.Entries()
-                       where e.State == EntityState.Added
-                           || e.State == EntityState.Modified
+                       where e.State is EntityState.Added or EntityState.Modified
                        select e.Entity;
         foreach (var entity in entities)
         {

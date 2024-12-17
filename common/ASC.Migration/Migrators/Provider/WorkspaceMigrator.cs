@@ -54,7 +54,7 @@ public class WorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "Workspace" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;

@@ -90,7 +90,7 @@ public class SubscriptionServiceCache
 
     public static string GetKey(int tenant, string sourceId, string actionId)
     {
-        return string.Format("sub/{0}/{1}/{2}", tenant, sourceId, actionId);
+        return $"sub/{tenant}/{sourceId}/{actionId}";
     }
 }
 

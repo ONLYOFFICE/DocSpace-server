@@ -77,7 +77,7 @@ public abstract class FileOperation : DistributedTaskProgress
         this[Progress] = progress < 100 ? progress : 100;
     }
 
-    protected abstract Task DoJob(IServiceScope serviceScope);
+    protected abstract Task DoJob(AsyncServiceScope serviceScope);
 }
 
 public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvider) : FileOperation(serviceProvider)
@@ -187,7 +187,7 @@ public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvi
         await PublishChanges();
     }
 
-    protected override Task DoJob(IServiceScope serviceScope)
+    protected override Task DoJob(AsyncServiceScope serviceScope)
     {
         throw new NotImplementedException();
     }

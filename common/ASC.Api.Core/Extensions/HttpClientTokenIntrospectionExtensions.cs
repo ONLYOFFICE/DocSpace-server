@@ -62,7 +62,7 @@ public class TokenIntrospectionRequest
     /// <value>
     /// The token.
     /// </value>
-    public string Token { get; set; } = default!;
+    public string Token { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the endpoint address

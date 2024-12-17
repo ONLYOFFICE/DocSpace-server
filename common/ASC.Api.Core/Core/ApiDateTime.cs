@@ -109,7 +109,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
                 return new ApiDateTime(dateTime, tzOffset);
             }
 
-            if (!data.EndsWith("Z", true, CultureInfo.InvariantCulture))
+            if (!data.EndsWith('Z'))
             {
                 tz ??= GetTimeZoneInfo(tenantManager, timeZoneConverter);
 

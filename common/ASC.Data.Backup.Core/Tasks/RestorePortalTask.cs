@@ -388,7 +388,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         Logger.DebugEndDeleteStorage();
     }
 
-    private IEnumerable<BackupFileInfo> GetFilesToProcess(IDataReadOperator dataReader)
+    private static List<BackupFileInfo> GetFilesToProcess(IDataReadOperator dataReader)
     {
         using var stream = dataReader.GetEntry(KeyHelper.GetStorageRestoreInfoZipKey());
         if (stream == null)

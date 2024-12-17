@@ -27,14 +27,13 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
+namespace ASC.Api.Core.Extensions;
+
 public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
 {
     public void Apply(OpenApiDocument document, DocumentFilterContext context)
     {
-        if (document.Paths.ContainsKey(routeToHide))
-        {
-            document.Paths.Remove(routeToHide);
-        }
+        document.Paths.Remove(routeToHide);
     }
 }
 

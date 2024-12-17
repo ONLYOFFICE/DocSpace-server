@@ -102,17 +102,17 @@ public class TariffController(CommonMethods commonMethods,
             Name = "api"
         };
 
-        if (model.ActiveUsers != default)
+        if (model.ActiveUsers != 0)
         {
             quota.CountRoomAdmin = model.ActiveUsers;
         }
 
-        if (model.MaxTotalSize != default)
+        if (model.MaxTotalSize != 0)
         {
             quota.MaxTotalSize = model.MaxTotalSize;
         }
 
-        if (model.MaxFileSize != default)
+        if (model.MaxFileSize != 0)
         {
             quota.MaxFileSize = model.MaxFileSize;
         }

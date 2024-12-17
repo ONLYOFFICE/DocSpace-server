@@ -41,7 +41,7 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
         var corsResult = new CorsResult
         {
             IsPreflightRequest = isPreflightRequest,
-            IsOriginAllowed = await IsOriginAllowed(policy, origin),
+            IsOriginAllowed = await IsOriginAllowed(policy, origin)
         };
 
         if (isPreflightRequest)

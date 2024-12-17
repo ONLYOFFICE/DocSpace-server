@@ -113,7 +113,7 @@ public partial class SettingsController(MessageService messageService,
             }
         };
 
-        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
+        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
         {
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
         }
@@ -149,6 +149,7 @@ public partial class SettingsController(MessageService messageService,
             };
 
             settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
+            settings.FeedbackAndSupportLink = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
             settings.ApiDocsLink = configuration["web:api-docs"];
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))

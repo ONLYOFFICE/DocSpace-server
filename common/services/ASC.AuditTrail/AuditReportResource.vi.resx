@@ -808,4 +808,67 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Đã gửi lại lời mời: {0}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Kích hoạt máy khách {0} đã thay đổi</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Khả năng hiển thị máy khách {0} đã thay đổi</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Khách đã được tạo</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Khách {0} đã bị xóa</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Tập tin: {0}. Chỉ mục đã thay đổi từ {1} thành {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Thư mục: {0}. Chỉ mục đã thay đổi từ {1} thành {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Thư mục: {0}. Đã sắp xếp lại các chỉ mục</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Đã tạo mã ủy quyền cho máy khách {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Mã token truy cập cá nhân đã được tạo cho máy khách {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Đã tạo lại bí mật của máy khách {0}</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Đã thu hồi quyền truy cập máy khách {0}</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Phòng: {0}. Đã tắt từ chối tải xuống</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Phòng: {0}. Đã bật từ chối tải xuống</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Đã tắt lập chỉ mục phòng</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Đã bật lập chỉ mục phòng</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Đã tắt Thời gian tồn tại</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Đã thiết lập thời gian tồn tại. Giá trị: {0}. Khoảng thời gian: {1}. Xóa Vĩnh viễn: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Phòng: {0}. Đã tắt Watermark</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Phòng: {0}. Đã bật Watermark</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Đã cập nhật máy khách {0}</value>
+  </data>
 </root>

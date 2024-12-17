@@ -1069,4 +1069,10 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Кількість адміністраторів перевищує обмеження: {0}/{1}.</value>
   </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Некомерційний</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Додайте мінімум 1 дозволену IP-адресу.</value>
+  </data>
 </root>

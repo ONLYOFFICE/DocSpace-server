@@ -72,17 +72,16 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
 
     [Ignore]
     public string IndexName => Tables.File;
-
     public Document Document { get; set; }
 
     public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings)
     {
         if (searchSettings.CanSearchByContentAsync(GetType()).Result)
         {
-            return a => new[] { Title, Comment, Changes, Document.Attachment.Content };
+            return a => new object[] { Title, Comment, Changes, Document.Attachment.Content };
         }
 
-        return a => new[] { Title, Comment, Changes };
+        return a => new object[] { Title, Comment, Changes };
     }
 
     public override object[] GetKeys()

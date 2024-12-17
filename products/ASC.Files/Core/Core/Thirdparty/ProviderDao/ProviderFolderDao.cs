@@ -177,7 +177,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     }
 
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         var selector = _selectorFactory.GetSelector(parentId);
         var folderDao = selector.GetFolderDao(parentId);
@@ -347,7 +347,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, int to)
     {
-        return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
+        return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)

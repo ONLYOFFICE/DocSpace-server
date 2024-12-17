@@ -257,9 +257,6 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             var timeSpan = TimeSpan.Zero.ToString();
             result.Example = new OpenApiString(timeSpan);
         }
-        else
-        {
-        }
 
         return result;
     }
@@ -312,14 +309,13 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 {
                     return new OpenApiString(faker.Random.Int(1, 10000).ToString());
                 }
-                else if(propertyInfo.PropertyType == typeof(int))
+
+                if(propertyInfo.PropertyType == typeof(int))
                 {
                     return new OpenApiInteger(faker.Random.Int(1, 10000));
                 }
-                else
-                {
-                    return new OpenApiString(Guid.NewGuid().ToString());
-                }
+
+                return new OpenApiString(Guid.NewGuid().ToString());
             default:
                 return null;
         }

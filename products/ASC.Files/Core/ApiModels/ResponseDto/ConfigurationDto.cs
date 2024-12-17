@@ -579,7 +579,7 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
             ReferenceData = source.GetReferenceData(file),
             Title = source.Title ?? file.Title,
             Url = source.GetUrl(file),
-            Options = source.Options,
+            Options = source.Options
         };
 
         return result;

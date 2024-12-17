@@ -62,7 +62,7 @@ public class GoogleWorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -155,7 +155,7 @@ public class GoogleWorkspaceMigrator : Migrator
                         {
                             continue;
                         }
-                        if (ascUser != ASC.Core.Users.Constants.LostUser)
+                        if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
                         {
                             if (!MigrationInfo.ExistUsers.TryAdd(user.Info.Email, user))
                             {

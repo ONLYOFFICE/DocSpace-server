@@ -91,7 +91,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         this[OpType] = (int)FileOperationType.Delete;
     }
 
-    protected override async Task DoJob(IServiceScope serviceScope)
+    protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
         var filesMessageService = serviceScope.ServiceProvider.GetService<FilesMessageService>();

@@ -581,8 +581,8 @@ public class FileMarker(
         var parentFolders = await folderDao.GetParentFoldersAsync(folderId).Reverse().ToListAsync();
 
         var rootFolder = parentFolders.LastOrDefault();
-        int rootFolderId = default;
-        int cacheFolderId = default;
+        var rootFolderId = 0;
+        var cacheFolderId = 0;
         if (rootFolder != null)
         {
             switch (rootFolder.RootFolderType)
@@ -626,7 +626,7 @@ public class FileMarker(
 
         var updateTags = new List<Tag>();
 
-        if (!rootFolderId.Equals(default))
+        if (!rootFolderId.Equals(0))
         {
             var internalRootFolder = await internalFolderDao.GetFolderAsync(rootFolderId);
             await UpdateRemoveTags(internalRootFolder, userId, valueNew, updateTags, removeTags);
@@ -1171,7 +1171,7 @@ public class FileMarker(
                 return MarkResult.NotMarked;
             }
 
-            if (await globalFolder.GetFolderMyAsync(daoFactory) == default)
+            if (await globalFolder.GetFolderMyAsync(daoFactory) == 0)
             {
                 return MarkResult.NotMarked;
             }
@@ -1228,7 +1228,7 @@ public class FileMarker(
 
     private async Task RemoveFromCacheAsync<T>(T folderId, Guid userId)
     {
-        if (Equals(folderId, default))
+        if (Equals(folderId, null))
         {
             return;
         }
@@ -1271,5 +1271,5 @@ public enum MarkResult
 {
     Marked,
     NotMarked,
-    MarkExists,
+    MarkExists
 }
