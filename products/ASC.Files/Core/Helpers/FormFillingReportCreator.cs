@@ -44,12 +44,12 @@ public class FormFillingReportCreator(
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task UpdateFormFillingReport<T>(T resultsFileId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile)
+    public async Task UpdateFormFillingReport<T>(T resultsFileId, T originalFormId, T roomId, int resultFormNumber,string formsDataUrl, File<T> formsDataFile)
     {
         if (formsDataUrl != null)
         {
             var fileDao = daoFactory.GetFileDao<T>();
-            var submitFormsData = await GetSubmitFormsData(formsDataFile, resultFormNumber, formsDataUrl);
+            var submitFormsData = await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
 
             if (resultsFileId != null)
             {
@@ -80,8 +80,27 @@ public class FormFillingReportCreator(
 
         return [];
     }
-    
-    private async Task<SubmitFormsData> GetSubmitFormsData<T>(File<T> formsDataFile, int resultFormNumber, string url)
+
+    public async Task<IEnumerable<FormsItemData>> getFormFillingResults(int roomId, int originalFormId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var folder = await folderDao.GetFolderAsync(originalFormId);
+        if (folder?.FolderType != FolderType.FillingFormsRoom)
+        {
+            return [];
+        }
+
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId));
+
+        if (success)
+        {
+            return result.SelectMany(r => r.FormsData);
+        }
+
+        return [];
+    }
+
+    private async Task<SubmitFormsData> GetSubmitFormsData<T>(File<T> formsDataFile, T originalFormId, T roomId, int resultFormNumber, string url)
     {
         var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
         var request = new HttpRequestMessage
@@ -125,6 +144,8 @@ public class FormFillingReportCreator(
                 Id = id,
                 TenantId = tenantId,
                 ParentId = parentId,
+                OriginalFormId = Convert.ToInt32(originalFormId),
+                RoomId = Convert.ToInt32(roomId),
                 CreateOn = now,
                 FormsData = fromData.FormsData
             };

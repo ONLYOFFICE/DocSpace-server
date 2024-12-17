@@ -1640,7 +1640,7 @@ public class EntryManager(IDaoFactory daoFactory,
                             await fileMarker.MarkAsNewAsync(result, users.Where(x => x != userId).ToList());
                             await socketManager.CreateFileAsync(result, users);
                             
-                            await formFillingReportCreator.UpdateFormFillingReport(origProperties.FormFilling.ResultsFileID, resProp.FormFilling.ResultFormNumber, formsDataUrl, result);
+                            await formFillingReportCreator.UpdateFormFillingReport(origProperties.FormFilling.ResultsFileID, origProperties.FormFilling.OriginalFormId, origProperties.FormFilling.RoomId, resProp.FormFilling.ResultFormNumber, formsDataUrl, result);
 
                             if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                             {
