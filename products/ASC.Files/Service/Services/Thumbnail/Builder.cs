@@ -59,9 +59,17 @@ public class Builder<T>(ThumbnailSettings settings,
     {
         try
         {
-            await tenantManager.SetCurrentTenantAsync(fileData.TenantId);
+            var tenant = await tenantManager.GetTenantAsync(fileData.TenantId);
+
+            if (tenant.Status != TenantStatus.Active)
+            {
+                return;
+            }
+
+            tenantManager.SetCurrentTenant(tenant);
+
             await securityContext.AuthenticateMeWithoutCookieAsync(fileData.CreatedBy);
-            
+
             _dataStore = await storageFactory.GetStorageAsync(fileData.TenantId, FileConstant.StorageModule, (IQuotaController)null);
 
             var fileDao = daoFactory.GetFileDao<T>();

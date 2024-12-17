@@ -91,11 +91,19 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
         CustomSynchronizationContext.CreateContext();
         using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
+            var tenant = await _tenantManager.GetTenantAsync(@event.TenantId);
+
+            if (tenant.Status != TenantStatus.Active)
+            {
+                return;
+            }
+
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
             var freezingThumbnails = await GetFreezingThumbnailsAsync();
 
-            await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            _tenantManager.SetCurrentTenant(tenant);
+
             var tariff = await _tariffService.GetTariffAsync(@event.TenantId);
 
             var data = @event.FileIds.Select(fileId => new FileData<int>(@event.TenantId, @event.CreateBy, Convert.ToInt32(fileId), @event.BaseUrl, tariff.State))
@@ -120,6 +128,9 @@ static file class Queries
         EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 ctx.Files
-                    .Where(r => r.CurrentVersion && r.ThumbnailStatus == Thumbnail.Creating &&
-                                EF.Functions.DateDiffMinute(r.ModifiedOn, DateTime.UtcNow) > 5));
+                    .Join(ctx.Tenants, f => f.TenantId, t => t.Id, (file, tenant) => new { file, tenant })
+                    .Where(r => r.tenant.Status == TenantStatus.Active)
+                    .Where(r => r.file.CurrentVersion && r.file.ThumbnailStatus == Thumbnail.Creating &&
+                                EF.Functions.DateDiffMinute(r.file.ModifiedOn, DateTime.UtcNow) > 5)
+                    .Select(r => r.file));
 }
