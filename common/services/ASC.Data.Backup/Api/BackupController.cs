@@ -60,9 +60,9 @@ public class BackupController(
     [SwaggerResponse(200, "Backup schedule", typeof(BackupAjaxHandler.Schedule))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackupschedule")]
-    public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule()
+    public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule(ScheduleDto dto)
     {
-        return await backupAjaxHandler.GetScheduleAsync();
+        return await backupAjaxHandler.GetScheduleAsync(dto.Dump);
     }
 
     /// <summary>

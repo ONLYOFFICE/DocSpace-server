@@ -211,11 +211,11 @@ public class BackupAjaxHandler(
         await backupService.CreateScheduleAsync(scheduleRequest);
     }
 
-    public async Task<Schedule> GetScheduleAsync()
+    public async Task<Schedule> GetScheduleAsync(bool? dump)
     {
         await DemandPermissionsBackupAsync();
 
-        var response = await backupService.GetScheduleAsync(GetCurrentTenantIdAsync());
+        var response = await backupService.GetScheduleAsync(GetCurrentTenantIdAsync(), dump);
         if (response == null)
         {
             return null;

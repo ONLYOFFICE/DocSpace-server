@@ -187,9 +187,9 @@ public class BackupService(
         await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
 
-    public async Task<ScheduleResponse> GetScheduleAsync(int tenantId)
+    public async Task<ScheduleResponse> GetScheduleAsync(int tenantId, bool? dump)
     {
-        var schedule = await backupRepository.GetBackupScheduleAsync(tenantId);
+        var schedule = await backupRepository.GetBackupScheduleAsync(tenantId, dump);
         if (schedule != null)
         {
             var tmp = new ScheduleResponse

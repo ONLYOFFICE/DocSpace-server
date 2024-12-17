@@ -55,7 +55,7 @@ internal sealed class BackupCleanerService(
                 return;
             }
 
-            var schedule = await backupRepository.GetBackupScheduleAsync(scheduledBackups.Key);
+            var schedule = await backupRepository.GetBackupScheduleAsync(scheduledBackups.Key, null);
 
             if (schedule != null)
             {

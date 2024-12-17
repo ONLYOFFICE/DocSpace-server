@@ -487,7 +487,7 @@ public class StorageController(ILoggerProvider option,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var schedule = await backupAjaxHandler.GetScheduleAsync();
+        var schedule = await backupAjaxHandler.GetScheduleAsync(null);
         var current = new StorageSettings();
 
         if (schedule is { StorageType: BackupStorageType.ThirdPartyConsumer })

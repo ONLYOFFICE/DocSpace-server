@@ -116,10 +116,17 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
         return await Queries.BackupSchedulesAsync(backupContext).ToListAsync();
     }
 
-    public async Task<BackupSchedule> GetBackupScheduleAsync(int tenantId)
+    public async Task<BackupSchedule> GetBackupScheduleAsync(int tenantId, bool? dump)
     {
         await using var backupContext = await dbContextFactory.CreateDbContextAsync();
-        return await Queries.BackupScheduleAsync(backupContext, tenantId);
+        if (dump.HasValue)
+        {
+            return await Queries.BackupScheduleWithDumpAsync(backupContext, tenantId, dump.Value);
+        }
+        else
+        {
+            return await Queries.BackupScheduleAsync(backupContext, tenantId);
+        }
     }
 }
 
@@ -180,10 +187,15 @@ static file class Queries
                     .Where(q => q.tenant.Status == TenantStatus.Active)
                     .Select(q => q.schedule));
 
+    public static readonly Func<BackupsContext, int, bool, Task<BackupSchedule>> BackupScheduleWithDumpAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (BackupsContext ctx, int tenantId, bool dump) =>
+                ctx.Schedules
+                    .SingleOrDefault(s => s.TenantId == tenantId && s.Dump == dump));
+
     public static readonly Func<BackupsContext, int, Task<BackupSchedule>> BackupScheduleAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx, int tenantId) =>
                 ctx.Schedules
-                    
                     .SingleOrDefault(s => s.TenantId == tenantId));
 }
