@@ -236,4 +236,12 @@ public class File<T> : FileEntry<T>
     }
     
     public DateTime? LastOpened { get; set; }
+    public FormInfo<T> FormInfo { get; set; }
+}
+
+public record FormInfo<T>
+{
+    public T LinkedId { get; init; }
+    public EntryProperties<T> Properties { get; init; }
+    public static  FormInfo<T> Empty => new();
 }

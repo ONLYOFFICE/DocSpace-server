@@ -27,26 +27,28 @@
 namespace ASC.Files.Service.Services;
 
 [Singleton]
-public class DeleteExpiredService(
+public class RefreshLicenseService(
         IServiceScopeFactory scopeFactory,
-        ILogger<DeleteExpiredService> logger,
-        GlobalStore globalStore,
+        ILogger<RefreshLicenseService> logger,
+        LicenseReader licenseReader,
+        DocumentServiceLicense documentServiceLicense,
         IConfiguration configuration)
-    : ActivePassiveBackgroundService<DeleteExpiredService>(logger, scopeFactory)
+    : ActivePassiveBackgroundService<RefreshLicenseService>(logger, scopeFactory)
 {
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["files:deleteExpired"] ?? "1", CultureInfo.InvariantCulture);
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["files:refreshLicense:period"] ?? "1", CultureInfo.InvariantCulture);
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         try
         {
-            var dataStore = await globalStore.GetStoreAsync(false);
-
-            await dataStore.DeleteExpiredAsync(FileConstant.StorageDomainTmp, CommonChunkedUploadSessionHolder.StoragePath, CommonChunkedUploadSessionHolder.SlidingExpiration);
+            if (!string.IsNullOrEmpty(licenseReader.LicensePath))
+            {
+                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
+            }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            logger.ErrorWithException(e);
+            logger.ErrorWithException(ex);
         }
     }
 }

@@ -903,4 +903,31 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Soba: {0}. Vodeni žig omogućen</value>
   </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Aktivacija {0} klijenta je promenjena</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Promenjena {0} vidljivost klijenta</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Klijent je kreiran</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Klijent {0} izbrisan</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Generisani autorizacioni kod za klijenta {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Generisani lični pristupni token za klijenta {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Klijentova {0} tajna regenerisana</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Oduzet klijentu {0} pristup</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Klijent {0} ažuriran</value>
+  </data>
 </root>

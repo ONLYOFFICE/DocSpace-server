@@ -1722,7 +1722,7 @@ internal class FileDao(
         return await storage.GetReadStreamAsync(string.Empty, path, 0);
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -1768,7 +1768,7 @@ internal class FileDao(
         }
     }
 
-    public async Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public async Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -1781,7 +1781,7 @@ internal class FileDao(
         var q = await GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
         
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
-
+        
         return await q.CountAsync();
     }
 
@@ -1803,6 +1803,25 @@ internal class FileDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var data = await filesDbContext.DataAsync(tenantId, fileId.ToString());
         return data != null ? EntryProperties<int>.Deserialize(data, logger) : null;
+    }
+
+    public async Task<Dictionary<int, EntryProperties<int>>> GetPropertiesAsync(IEnumerable<int> filesIds)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var properties = await filesDbContext.FilesPropertiesAsync(tenantId, filesIds.Select(f => f.ToString())).ToListAsync();
+        
+        var propertiesMap = new Dictionary<int, EntryProperties<int>>(properties.Count);
+        foreach (var property in properties)
+        {
+            if (int.TryParse(property.EntryId, out var id))
+            {
+                propertiesMap.TryAdd(id, EntryProperties<int>.Deserialize(property.Data, logger));
+            }
+        }
+
+        return propertiesMap;
     }
 
     public async Task SaveProperties(int fileId, EntryProperties<int> entryProperties)
@@ -2309,47 +2328,41 @@ internal class FileDao(
         return q;
     }
     
-    private async Task<IQueryable<FileByTagQuery>> GetFilesByTagQuery(Guid? tagOwner, TagType tagType, FilesDbContext filesDbContext)
+    private async Task<IQueryable<FileByTagQuery>> GetFilesByTagQuery(Guid tagOwner, TagType tagType, FilesDbContext filesDbContext)
     {
         IQueryable<FileByTagQuery> query;
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         
-        var initQuery = filesDbContext.Files
-            .Where(x => x.TenantId == tenantId && x.CurrentVersion)
+        var initQuery = filesDbContext.Tag
+            .Where(x => x.TenantId == tenantId && x.Owner == tagOwner && x.Type == tagType)
             .Join(filesDbContext.TagLink,
-                f => new
+                t => new
                 {
-                    tenantId, 
-                    entryId = f.Id.ToString(), 
-                    entryType = FileEntryType.File
-                }, 
+                    t.TenantId,
+                    TagId = t.Id 
+                },
                 l => new
                 {
-                    tenantId = l.TenantId, 
-                    entryId = l.EntryId, 
-                    entryType = l.EntryType
+                    l.TenantId,
+                    l.TagId
                 },
-                (f, l) => new { f, l })
-            .Join(filesDbContext.Tag, 
-                x => x.l.TagId, 
-                t => t.Id,
-                (x, t) => new { x.f, x.l, t })
-            .Where(x => x.t.Type == tagType);
-        
-        if (tagOwner.HasValue)
-        {
-            initQuery = initQuery.Where(x => x.t.Owner == tagOwner.Value);
-        }
+                (t, l) => new { t, l })
+            .Where(x => x.l.EntryType == FileEntryType.File)
+            .Join(filesDbContext.Files,
+                x => Convert.ToInt32(x.l.EntryId),
+                f => f.Id,
+                (x, f) => new { f, x.l, x.t })
+            .Where(x => x.f.CurrentVersion);
 
         if (tagType == TagType.RecentByLink)
         {
             query = initQuery.Join(filesDbContext.Security, 
-                    x => new
+                    x => new 
                     {
                         tenantId,
-                        entryId = x.f.Id.ToString(),
-                        entryType = FileEntryType.File, 
+                        entryId = x.l.EntryId,
+                        entryType = x.l.EntryType,
                         subject = x.t.Name
                     },
                     s => new

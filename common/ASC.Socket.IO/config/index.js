@@ -57,7 +57,7 @@ function getAndSaveAppsettings(){
     if(redis != null)
     {
         redis.connect_timeout = redis.ConnectTimeout;
-        redis.db = redis.Database;
+        redis.database = redis.Database;
         redis.username = redis.User;
         redis.password = redis.Password;
         redis.socket = {

@@ -430,33 +430,37 @@ public class FileOperationsManager(
         {
             if (item.Id.ValueKind == JsonValueKind.Number)
             {
-                resultInt.Add(new FilesDownloadOperationItem<int>(item.Id.GetInt32(), item.Ext));
+                resultInt.Add(new FilesDownloadOperationItem<int>(item.Id.GetInt32(), item.Ext, item.Password));
             }
             else if (item.Id.ValueKind == JsonValueKind.String)
             {
                 var val = item.Id.GetString();
                 if (int.TryParse(val, out var i))
                 {
-                    resultInt.Add(new FilesDownloadOperationItem<int>(i, item.Ext));
+                    resultInt.Add(new FilesDownloadOperationItem<int>(i, item.Ext, item.Password));
                 }
                 else
                 {
-                    resultString.Add(new FilesDownloadOperationItem<string>(val, item.Ext));
+                    resultString.Add(new FilesDownloadOperationItem<string>(val, item.Ext, item.Password));
                 }
             }
             else if (item.Id.ValueKind == JsonValueKind.Object)
             {
                 var key = item.Id.GetProperty("key");
-
                 var val = item.Id.GetProperty("value").GetString();
+                var password = "";
+                if (item.Id.TryGetProperty("password", out var p))
+                {
+                    password = p.GetString();
+                };
 
                 if (key.ValueKind == JsonValueKind.Number)
                 {
-                    resultInt.Add(new FilesDownloadOperationItem<int>(key.GetInt32(), val));
+                    resultInt.Add(new FilesDownloadOperationItem<int>(key.GetInt32(), val, password));
                 }
                 else
                 {
-                    resultString.Add(new FilesDownloadOperationItem<string>(key.GetString(), val));
+                    resultString.Add(new FilesDownloadOperationItem<string>(key.GetString(), val, password));
                 }
             }
         }
