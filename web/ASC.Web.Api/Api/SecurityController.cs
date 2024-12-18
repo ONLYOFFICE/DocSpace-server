@@ -117,7 +117,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         inDto.Action = inDto.Action == 0 ? MessageAction.None : inDto.Action;
 
-        if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString()))
+        if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
             return await GetLastLoginEventsAsync();
         }
@@ -149,7 +149,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         inDto.Action = inDto.Action == 0 ? MessageAction.None : inDto.Action;
 
-        if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString()))
+        if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
             return await GetLastAuditEventsAsync();
         }
@@ -201,17 +201,17 @@ public class SecurityController(PermissionContext permissionContext,
             .Where(r => !inDto.ProductType.HasValue || r.Product == inDto.ProductType.Value)
             .Select(r => new
             {
-                ProductType = r.Product.ToString(),
+                ProductType = r.Product.ToStringFast(),
                 Modules = r.Mappers
                 .Where(m => !inDto.ModuleType.HasValue || m.Module == inDto.ModuleType.Value)
                 .Select(x => new
                 {
-                    ModuleType = x.Module.ToString(),
+                    ModuleType = x.Module.ToStringFast(),
                     Actions = x.Actions.Select(a => new
                     {
                         MessageAction = a.Key.ToString(),
-                        ActionType = a.Value.ActionType.ToString(),
-                        Entity = a.Value.EntryType1.ToString()
+                        ActionType = a.Value.ActionType.ToStringFast(),
+                        Entity = a.Value.EntryType1.ToStringFast()
                     })
                 })
             });
@@ -406,7 +406,7 @@ public class SecurityController(PermissionContext permissionContext,
     private async Task DemandAuditPermissionAsync()
     {
         if (!coreBaseSettings.Standalone
-            && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString())
+            && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Audit");
@@ -416,7 +416,7 @@ public class SecurityController(PermissionContext permissionContext,
     private void DemandBaseAuditPermission()
     {
         if (!coreBaseSettings.Standalone
-            && !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString()))
+            && !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Audit");
         }

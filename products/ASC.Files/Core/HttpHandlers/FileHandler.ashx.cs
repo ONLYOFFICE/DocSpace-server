@@ -293,7 +293,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             //TODO
             //context.Response.Headers.Charset = "utf-8";
 
-            var range = (context.Request.Headers["Range"].FirstOrDefault() ?? "").Split('=', '-');
+            var range = (context.Request.Headers.Range.FirstOrDefault() ?? "").Split('=', '-');
             var isNeedSendAction = range.Length < 2 || Convert.ToInt64(range[1]) == 0;
 
             if (isNeedSendAction)
@@ -315,7 +315,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 }
             }
 
-            if (string.Equals(context.Request.Headers["If-None-Match"], GetEtag(file)))
+            if (string.Equals(context.Request.Headers.IfNoneMatch, GetEtag(file)))
             {
                 //Its cached. Reply 304
                 context.Response.StatusCode = (int)HttpStatusCode.NotModified;
@@ -497,7 +497,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     {
         ArgumentNullException.ThrowIfNull(context);
         
-        var rangeHeader = context.Request.Headers["Range"].FirstOrDefault();
+        var rangeHeader = context.Request.Headers.Range.FirstOrDefault();
         if (rangeHeader == null)
         {
             return fullLength;

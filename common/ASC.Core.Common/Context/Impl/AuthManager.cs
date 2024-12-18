@@ -54,7 +54,7 @@ public class AuthManager(IUserService service, UserManager userManager, UserForm
         return !Users.Constants.LostUser.Equals(u) && u.Status == EmployeeStatus.Active ? ToAccount(tenantId, u) : Constants.Guest;
     }
 
-    private IUserAccount ToAccount(int tenantId, UserInfo u)
+    private UserAccount ToAccount(int tenantId, UserInfo u)
     {
         return new UserAccount(u, tenantId, userFormatter);
     }

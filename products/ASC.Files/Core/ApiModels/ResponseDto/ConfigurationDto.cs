@@ -395,7 +395,7 @@ public class ConfigurationConverter<T>(
             ErrorMessage = source.Error
         };
         
-        result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string>() {
+        result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, result.Document?.Key }
         });
 
@@ -579,7 +579,7 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
             ReferenceData = source.GetReferenceData(file),
             Title = source.Title ?? file.Title,
             Url = source.GetUrl(file),
-            Options = source.Options,
+            Options = source.Options
         };
 
         return result;

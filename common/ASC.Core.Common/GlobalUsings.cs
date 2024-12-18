@@ -54,7 +54,6 @@ global using Amazon.Runtime;
 global using Amazon.SimpleEmail;
 global using Amazon.SimpleEmail.Model;
 global using ASC.Api.Core.Extensions;
-global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Models;
 global using ASC.Collections;
 global using ASC.Common;
@@ -159,7 +158,7 @@ global using Telegram.Bot;
 global using Textile;
 global using Textile.Blocks;
 global using Textile.States;
-global using static ASC.Security.Cryptography.EmailValidationKeyProvider;
+
 global using AppOptions = FirebaseAdmin.AppOptions;
 global using FirebaseAdminMessaging = FirebaseAdmin.Messaging;
 global using FirebaseApp = FirebaseAdmin.FirebaseApp;

@@ -178,7 +178,8 @@ public class FileStorageService //: IFileStorageService
         SubjectFilter subjectFilter = SubjectFilter.Owner,
         ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
         QuotaFilter quotaFilter = QuotaFilter.All,
-        StorageFilter storageFilter = StorageFilter.None)
+        StorageFilter storageFilter = StorageFilter.None,
+        FormsItemDto formsItemDto = null)
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
 
@@ -287,7 +288,8 @@ public class FileStorageService //: IFileStorageService
                 subjectFilter,
                 applyFilterOption,
                 quotaFilter,
-                storageFilter);
+                storageFilter,
+                formsItemDto);
         }
         catch (Exception e)
         {
@@ -348,26 +350,26 @@ public class FileStorageService //: IFileStorageService
             Entries = entries.ToList(),
             FolderPathParts =
             [
-                ..breadCrumbs.Select(f =>
-            {
-                if (f.FileEntryType == FileEntryType.Folder)
+                ..breadCrumbs.Select(object (f) =>
                 {
-                    if (f is Folder<string> f1)
+                    if (f.FileEntryType == FileEntryType.Folder)
                     {
-                            return (object)new { f1.Id, f1.Title, RoomType = DocSpaceHelper.MapToRoomType(f1.FolderType) };
-                    }
-
-                    if (f is Folder<int> f2)
-                    {
-                            var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
-                                ? FilesUCResource.MyFiles
-                                : f2.Title;
+                        switch (f)
+                        {
+                            case Folder<string> f1:
+                                return new { f1.Id, f1.Title, RoomType = DocSpaceHelper.MapToRoomType(f1.FolderType) };
+                            case Folder<int> f2:
+                                {
+                                    var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
+                                        ? FilesUCResource.MyFiles
+                                        : f2.Title;
                             
-                            return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType) };
+                                    return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType) };
+                                }
+                        }
                     }
-                }
 
-                return 0;
+                    return 0;
                 })
             ],
             FolderInfo = parent,
@@ -706,6 +708,8 @@ public class FileStorageService //: IFileStorageService
                     var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
 
                     await tagDao.SaveTagsAsync(tags);
+                    
+                    await filesMessageService.SendAsync(MessageAction.AddedRoomTags, folder, folder.Title, string.Join(',', tags.Select(x => x.Name)));
                 }
             }
 
@@ -920,12 +924,7 @@ public class FileStorageService //: IFileStorageService
                         folder, folder.Title);
                 }
                 
-                if (colorChanged)
-                {
-                    await filesMessageService.SendAsync(MessageAction.RoomColorChanged, folder, folder.Title);
-                }
-
-                if (coverChanged)
+                if ((colorChanged || coverChanged) && !folder.SettingsHasLogo)
                 {
                     await filesMessageService.SendAsync(MessageAction.RoomCoverChanged, folder, folder.Title);
                 }
@@ -1001,11 +1000,22 @@ public class FileStorageService //: IFileStorageService
                     var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
 
                     await tagDao.SaveTagsAsync(tags);
+                    
+                    var addedTags = tags.Select(t => t.Name).Except(currentTags.Select(t => t.Name)).ToList();
+                    if (addedTags.Count > 0)
+                    {
+                        await filesMessageService.SendAsync(MessageAction.AddedRoomTags, folder, folder.Title, string.Join(',', addedTags));
+                    }
                 }
             }
             
             var toDelete = currentTags.Where(r => tagsInfos.All(b => b.Name != r.Name)).ToList();
             await tagDao.RemoveTagsAsync(folder, toDelete.Select(t => t.Id).ToList());
+
+            if (toDelete.Count > 0)
+            {
+                await filesMessageService.SendAsync(MessageAction.DeletedRoomTags, folder, folder.Title, string.Join(',', toDelete.Select(t => t.Name)));
+            }
         }
 
         var newTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder);
@@ -1648,8 +1658,14 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
+        
+        var history = await fileDao.GetFileHistoryAsync(fileId).ToListAsync();
+        
+        var t1 = entryStatusManager.SetFileStatusAsync(history);
+        var t2 = entryStatusManager.SetFormInfoAsync(history);
+        await Task.WhenAll(t1, t2);
 
-        await foreach (var r in fileDao.GetFileHistoryAsync(fileId))
+        foreach (var r in history)
         {
             await entryStatusManager.SetFileStatusAsync(r);
             yield return r;

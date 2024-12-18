@@ -42,7 +42,7 @@ public class Login(
         {
             if (!string.IsNullOrEmpty(_params.Get("mode")))
             {
-                return (LoginMode)Enum.Parse(typeof(LoginMode), _params.Get("mode"), true);
+                return Enum.Parse<LoginMode>(_params.Get("mode"), true);
             }
 
             return LoginMode.Popup;

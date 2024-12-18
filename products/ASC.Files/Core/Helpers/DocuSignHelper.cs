@@ -150,7 +150,7 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
 
         logger.DebugDocuSingUserInfo(userInfoString);
 
-        var userInfo = (DocuSignUserInfo)JsonConvert.DeserializeObject(userInfoString, typeof(DocuSignUserInfo));
+        var userInfo = JsonConvert.DeserializeObject<DocuSignUserInfo>(userInfoString);
 
         if (userInfo.Accounts == null || userInfo.Accounts.Count == 0)
         {

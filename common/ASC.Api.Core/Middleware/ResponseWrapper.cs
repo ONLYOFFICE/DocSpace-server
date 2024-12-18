@@ -41,6 +41,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
         }
 
         var withStackTrace = true;
+        var criticalException = true;
 
         switch (exception)
         {
@@ -64,6 +65,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             case AuthenticationException:
                 status = HttpStatusCode.Unauthorized;
                 withStackTrace = false;
+                criticalException = false;
                 break;
             case InvalidOperationException:
                 status = HttpStatusCode.Forbidden;
@@ -82,7 +84,14 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 break;
         }
 
-        logger.CriticalError(context.Request.Method, context.Request.Path.Value, exception);
+        if (criticalException)
+        {
+            logger.CriticalError(context.Request.Method, context.Request.Path.Value, exception);
+        }
+        else
+        {
+            logger.InformationError(context.Request.Method, context.Request.Path.Value, exception.Message, exception.InnerException?.Message);
+        }
 
         var result = new ErrorApiResponse(status, exception, message, withStackTrace);
 

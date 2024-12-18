@@ -55,10 +55,11 @@ public class ExportToCSV(
         }
     }
 
-    public async Task UpdateCsvReport<T>(File<T> file, DataTable dataTable)
+    public async Task UpdateCsvReport<T>(File<T> file, IEnumerable<FormsItemData> list)
     {
         try
-        {
+        {                
+            var dataTable = CreateDataTable(list);
             var fileDao = daoFactory.GetFileDao<T>();
 
             await using var source = await fileDao.GetFileStreamAsync(file);
@@ -82,7 +83,7 @@ public class ExportToCSV(
         }
     }
 
-    public DataTable CreateDataTable(IEnumerable<FormsItemData> list)
+    private DataTable CreateDataTable(IEnumerable<FormsItemData> list)
     {
         var dataTable = new DataTable();
         dataTable.TableName = typeof(FormsItemData).FullName;
@@ -98,11 +99,12 @@ public class ExportToCSV(
 
             dataTable.Columns.Add(new DataColumn(entity.Key));
 
-            var formattedValue = (entity.Type == null)
-                ? entity.Value
-                : (entity.Type == "dateTime"
-                    ? $"=\"{entity.Value}\""
-                    : entity.Value);
+            var formattedValue = entity.Type switch
+            {
+                null => entity.Value,
+                "dateTime" => $"=\"{entity.Value}\"",
+                _ => entity.Value
+            };
 
             values.Add(formattedValue);
         }

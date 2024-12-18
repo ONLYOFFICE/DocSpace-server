@@ -81,7 +81,7 @@ public class TransferPortalTask(DbFactory dbFactory,
             var backupTask = serviceProvider.GetService<BackupPortalTask>();
             backupTask.Init(TenantId, backupFilePath, Limit, DataOperatorFactory.GetDefaultWriteOperator(tempStream, backupFilePath), false);
             backupTask.ProcessStorage = false;
-            backupTask.ProgressChanged = (args) => SetCurrentStepProgress(args.Progress);
+            backupTask.ProgressChanged = args => SetCurrentStepProgress(args.Progress);
             foreach (var moduleName in _ignoredModules)
             {
                 backupTask.IgnoreModule(moduleName);
@@ -92,7 +92,7 @@ public class TransferPortalTask(DbFactory dbFactory,
             var restoreTask = serviceProvider.GetService<RestorePortalTask>();
             restoreTask.Init(ToRegion, backupFilePath, columnMapper: columnMapper);
             restoreTask.ProcessStorage = false;
-            restoreTask.ProgressChanged = (args) => SetCurrentStepProgress(args.Progress);
+            restoreTask.ProgressChanged = args => SetCurrentStepProgress(args.Progress);
             foreach (var moduleName in _ignoredModules)
             {
                 restoreTask.IgnoreModule(moduleName);

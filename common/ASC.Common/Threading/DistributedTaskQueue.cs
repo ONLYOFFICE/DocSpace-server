@@ -33,7 +33,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
     ILogger<DistributedTaskQueue> logger)
 {
     public const string QUEUE_DEFAULT_PREFIX = "asc_distributed_task_queue_";
-    public static readonly int INSTANCE_ID = Process.GetCurrentProcess().Id;
+    public static readonly int INSTANCE_ID = Environment.ProcessId;
 
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancelations = new();
     private bool _subscribed;

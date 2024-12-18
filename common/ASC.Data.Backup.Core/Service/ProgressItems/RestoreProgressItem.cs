@@ -134,7 +134,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             columnMapper.Commit();
 
             restoreTask.Init(_region, tempFile, TenantId, columnMapper, _upgradesPath);
-            restoreTask.ProgressChanged = async (args) =>
+            restoreTask.ProgressChanged = async args =>
             {
                 Percentage = Percentage = 10d + 0.65 * args.Progress;
                 await PublishChanges();
@@ -171,7 +171,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 await _tenantManager.RestoreTenantAsync(tenant.Id, restoredTenant);
                 TenantId = restoredTenant.Id;
 
-                await _tariffService.GetTariffAsync(tenant.Id, true);
+                await _tariffService.GetTariffAsync(tenant.Id);
                 await _tenantManager.GetCurrentTenantQuotaAsync(true);
                 await _notifyHelper.SendAboutRestoreCompletedAsync(restoredTenant, Notify);
             }

@@ -57,7 +57,7 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
 
     public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings)
     {
-        return a => new[] { Title };
+        return a => new object[] { Title };
     }
 }
 

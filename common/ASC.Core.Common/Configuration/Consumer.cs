@@ -313,7 +313,7 @@ public class DataStoreConsumer : Consumer, ICloneable
         return base.GetSettingsKey(Name + name);
     }
 
-    private async Task InitAsync(IReadOnlyDictionary<string, string> additional)
+    private async Task InitAsync(Dictionary<string, string> additional)
     {
         if (additional == null || !additional.TryGetValue(HandlerTypeKey, out var handler))
         {

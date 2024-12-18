@@ -205,7 +205,7 @@ public class Builder<T>(ThumbnailSettings settings,
         {
             try
             {
-                (resultPercent, thumbnailUrl) = await GetThumbnailUrl(file, global.DocThumbnailExtension.ToString(), thumbnailWidth, thumbnailHeight);
+                (resultPercent, thumbnailUrl) = await GetThumbnailUrl(file, global.DocThumbnailExtension.ToStringFast(), thumbnailWidth, thumbnailHeight);
 
                 if (resultPercent == 100)
                 {
