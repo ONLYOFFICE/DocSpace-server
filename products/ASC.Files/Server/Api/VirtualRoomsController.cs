@@ -388,6 +388,14 @@ public abstract class VirtualRoomsController<T>(
             return result;
         }
 
+        var room = await fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
+
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync 
+            && inDto.RoomInvitation.Invitations.Any(i=> i.Access != FileShare.None || i.Access != FileShare.RoomManager))
+        {
+            throw new ItemNotFoundException();
+        }
+
         var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.RoomInvitation.Invitations);
 
         var aceCollection = new AceCollection<T>
@@ -720,7 +728,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var parentId = inDto.SearchArea switch
         {
             SearchArea.Archive => await globalFolderHelper.GetFolderArchive(),
-            SearchArea.Template => await globalFolderHelper.FolderRoomTemplatesAsync,
+            SearchArea.Templates => await globalFolderHelper.FolderRoomTemplatesAsync,
             _ => await globalFolderHelper.GetFolderVirtualRooms()
         };
 
