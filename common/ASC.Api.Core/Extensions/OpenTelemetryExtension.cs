@@ -30,144 +30,48 @@ using OpenTelemetry.Resources;
 using InfluxDB.Client;
 using InfluxDB.Client.Writes;
 using InfluxDB.Client.Api.Domain;
+using System.Reflection.PortableExecutable;
 
 namespace ASC.Api.Core.Extensions;
 public static class OpenTelemetryExtension
 {
+    public class OpenTelemetrySettings
+    {
+        public string ServiceName { get; set; }
+
+        public InfluxDBSettings InfluxDB { get; set; }
+    }
+
+    public class InfluxDBSettings
+    {
+        public string Endpoint { get; set; }
+        public string Token { get; set; }
+        public string Org { get; set; }
+        public string Bucket { get; set; }
+    }
+
     public static IServiceCollection AddOpenTelemetry(this IServiceCollection services, IConfiguration configuration)
     {
-        var telemetryConfig = configuration.GetSection("openTelemetry");
-        var serviceName = telemetryConfig.GetValue<string>("serviceName");
-        var influxConfig = telemetryConfig.GetSection("influxdb");
-        var influxEndpoint = influxConfig.GetValue<string>("endpoint");
-        var influxToken = influxConfig.GetValue<string>("token");
-        var influxOrg = influxConfig.GetValue<string>("org");
-        var influxBucket = influxConfig.GetValue<string>("bucket");
-        var influxClient = new InfluxDBClient(influxEndpoint, influxToken);
+        var telemetrySettings = configuration.GetSection("openTelemetry").Get<OpenTelemetrySettings>();
+        var influxClient = new InfluxDBClient(telemetrySettings.InfluxDB.Endpoint, telemetrySettings.InfluxDB.Token);
 
         services.AddOpenTelemetry()
-            .ConfigureResource(resource => resource.AddService(serviceName)) 
+            .ConfigureResource(resource => resource.AddService(telemetrySettings.ServiceName))
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation();
                 metrics.AddHttpClientInstrumentation();
-
-                metrics.AddMeter("CustomMetrics");
-                metrics.AddInstrumentation(serviceProvider =>
+                metrics.AddRuntimeInstrumentation();
+                metrics.AddProcessInstrumentation();
+                metrics.AddInfluxDBMetricsExporter(options =>
                 {
-                    var logger = serviceProvider.GetRequiredService<ILogger<MetricCollector>>();
-
-                    return new MetricCollector(() =>
-                    {
-                        var cpuUsage = GetCpuUsage();
-                        var ramAvailable = GetMemoryUsage();
-
-                        logger.LogInformation($"CPU Usage: {cpuUsage}%, Available ram: {ramAvailable}GB");
-                        WriteToInfluxDB(influxClient, influxOrg, influxBucket, serviceName, cpuUsage, ramAvailable);
-                    });
+                    options.Endpoint = new Uri(telemetrySettings.InfluxDB.Endpoint);
+                    options.Token = telemetrySettings.InfluxDB.Token;
+                    options.Bucket = telemetrySettings.InfluxDB.Bucket;
+                    options.Org = telemetrySettings.InfluxDB.Org;
                 });
             });
 
         return services;
-    }
-    private static void WriteToInfluxDB(InfluxDBClient influxClient, string org, string bucket, string serviceName, double cpuUsage, double memoryUsage)
-    {
-        using (var writeApi = influxClient.GetWriteApi())
-        {
-            var cpuPoint = PointData.Measurement("cpu_usage")
-                .Tag("service", serviceName)
-                .Field("usage", cpuUsage)
-                .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
-
-            var memoryPoint = PointData.Measurement("ram_available")
-                .Tag("service", serviceName)
-                .Field("available", memoryUsage)
-                .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
-
-            writeApi.WritePoint(cpuPoint, bucket, org);
-            writeApi.WritePoint(memoryPoint, bucket, org);
-        }
-    }
-    public static double GetCpuUsage()
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-            cpuCounter.NextValue();
-            Thread.Sleep(500);
-            return (int)cpuCounter.NextValue();
-        }
-        else if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
-        {
-            var cpuInfo = System.IO.File.ReadAllLines("/proc/stat").FirstOrDefault(line => line.StartsWith("cpu ")) ?? throw new InvalidOperationException("Unable to read CPU stats from /proc/stat.");
-            var cpuData = cpuInfo.Split(' ', StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(double.Parse).ToArray();
-
-            var totalTime = cpuData.Sum();
-            var idleTime = cpuData[3];
-
-            Thread.Sleep(500);
-            var cpuInfo2 = System.IO.File.ReadAllLines("/proc/stat").First(line => line.StartsWith("cpu "));
-            var cpuData2 = cpuInfo2.Split(' ', StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(double.Parse).ToArray();
-
-            var totalTime2 = cpuData2.Sum();
-            var idleTime2 = cpuData2[3];
-            var totalDiff = totalTime2 - totalTime;
-            var idleDiff = idleTime2 - idleTime;
-            var cpuUsage = (1.0 - (idleDiff / totalDiff)) * 100.0;
-
-            return (int)cpuUsage;
-        }
-        else
-        {
-            throw new PlatformNotSupportedException("Platform not supported for CPU usage retrieval.");
-        }
-    }
-
-    public static double GetMemoryUsage()
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            var ramCounter = new PerformanceCounter("Memory", "Available MBytes", true);
-            var availableMemory = ramCounter.NextValue();
-
-            return Math.Round(availableMemory / 1024, 2);
-        }
-        else if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
-        {
-            var memInfo = System.IO.File.ReadAllLines("/proc/meminfo");
-            var memAvailableLine = memInfo.FirstOrDefault(line => line.StartsWith("MemAvailable:"));
-
-            if (memAvailableLine != null)
-            {
-                var availableMemoryKB = double.Parse(memAvailableLine.Split(':')[1].Trim().Split(' ')[0]);
-
-                return Math.Round(availableMemoryKB / (1024.0 * 1024.0), 2);
-            }
-            else
-            {
-                throw new InvalidOperationException("Unable to read memory information from /proc/meminfo.");
-            }
-        }
-        else
-        {
-            throw new PlatformNotSupportedException("Platform not supported for memory usage retrieval.");
-        }
-    }
-}
-
-public class MetricCollector : IDisposable
-{
-    private readonly System.Action _collectMetricsAction;
-    private readonly Timer _timer;
-
-    public MetricCollector(System.Action collectMetricsAction, TimeSpan interval = default)
-    {
-        _collectMetricsAction = collectMetricsAction ?? throw new ArgumentNullException(nameof(collectMetricsAction));
-        _timer = new Timer(_ => _collectMetricsAction(), null, TimeSpan.Zero, interval == default ? TimeSpan.FromSeconds(10) : interval);
-    }
-
-    public void Dispose()
-    {
-        _timer?.Dispose();
     }
 }
