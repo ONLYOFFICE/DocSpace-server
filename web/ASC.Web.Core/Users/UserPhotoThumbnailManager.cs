@@ -24,16 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Drawing;
+
 namespace ASC.Web.Core.Users;
 
 public static class UserPhotoThumbnailManager
 {
-    public static async Task<List<ThumbnailItem>> SaveThumbnails(UserPhotoManager userPhotoManager, SettingsManager settingsManager, int x, int y, int width, int height, Guid userId)
+    public static async Task<List<ThumbnailItem>> SaveThumbnails(UserPhotoManager userPhotoManager, SettingsManager settingsManager, int x, int y, uint width, uint height, Guid userId)
     {
         return await SaveThumbnails(userPhotoManager, settingsManager, new UserPhotoThumbnailSettings(x, y, width, height), userId);
     }
 
-    public static async Task<List<ThumbnailItem>> SaveThumbnails(UserPhotoManager userPhotoManager, SettingsManager settingsManager, Point point, Size size, Guid userId)
+    public static async Task<List<ThumbnailItem>> SaveThumbnails(UserPhotoManager userPhotoManager, SettingsManager settingsManager, Point point, IMagickGeometry size, Guid userId)
     {
         return await SaveThumbnails(userPhotoManager, settingsManager, new UserPhotoThumbnailSettings(point, size), userId);
     }
@@ -53,9 +55,9 @@ public static class UserPhotoThumbnailManager
             return null;
         }
 
-        if (thumbnailSettings.Size.IsEmpty)
+        if (thumbnailSettings.Size.Width == 0 && thumbnailSettings.Size.Height == 0)
         {
-            thumbnailSettings.Size = new Size(img.Width, img.Height);
+            thumbnailSettings.Size = new MagickGeometry(img.Width, img.Height);
         }
 
         foreach (var thumbnail in await thumbnailsData.ThumbnailList())
@@ -72,33 +74,30 @@ public static class UserPhotoThumbnailManager
         return await thumbnailsData.ThumbnailList();
     }
 
-    public static Image GetImage(Image mainImg, Size size, UserPhotoThumbnailSettings thumbnailSettings)
+    public static IMagickImage GetImage(MagickImage mainImg, IMagickGeometry size, UserPhotoThumbnailSettings thumbnailSettings)
     {
         var x = thumbnailSettings.Point.X > 0 ? thumbnailSettings.Point.X : 0;
         var y = thumbnailSettings.Point.Y > 0 ? thumbnailSettings.Point.Y : 0;
         var width = x + thumbnailSettings.Size.Width >= mainImg.Width ? mainImg.Width - x : thumbnailSettings.Size.Width ;
         var height = y + thumbnailSettings.Size.Height >= mainImg.Height ? mainImg.Height - y : thumbnailSettings.Size.Height;
-
-        var rect = new Rectangle(x,
-                                 y,
-                                 width,
-                                 height);
-
-        var result = mainImg.Clone(img => img.BackgroundColor(Color.White).Crop(rect).Resize(new ResizeOptions
+        
+        var result = mainImg.CloneAndMutate(a =>
         {
-            Size = size
-        }));
+            a.Colorize(MagickColors.White, new Percentage());
+            a.Crop(new MagickGeometry(x, y, (uint)width, (uint)height));
+            a.Resize(size.Width, size.Height);
+        });
 
         return result;
     }
 
     public static void CheckImgFormat(byte[] data)
     {
-        IImageFormat imgFormat;
+        MagickFormat imgFormat;
         try
         {
-            using var img = Image.Load(data);
-            imgFormat = img.Metadata.DecodedImageFormat;
+            using var img = new MagickImage(data);
+            imgFormat = img.Format;
         }
         catch (OutOfMemoryException)
         {
@@ -109,13 +108,13 @@ public static class UserPhotoThumbnailManager
             throw new UnknownImageFormatException(error);
         }
 
-        if (imgFormat.Name != "PNG" && imgFormat.Name != "JPEG")
+        if (imgFormat != MagickFormat.Png && imgFormat != MagickFormat.Jpeg)
         {
             throw new UnknownImageFormatException();
         }
     }
 
-    public static byte[] TryParseImage(byte[] data, long maxFileSize, Size maxsize)
+    public static async Task<byte[]> TryParseImage(byte[] data, long maxFileSize, IMagickGeometry maxsize)
     {
         if (data is not { Length: > 0 })
         {
@@ -131,13 +130,13 @@ public static class UserPhotoThumbnailManager
 
         try
         {
-            using var img = Image.Load(data);
+            using var img = new MagickImage(data);
             var width = img.Width;
             var height = img.Height;
             var maxWidth = maxsize.Width;
             var maxHeight = maxsize.Height;
 
-            if ((maxHeight != -1 && img.Height > maxHeight) || (maxWidth != -1 && img.Width > maxWidth))
+            if (img.Height > maxHeight || img.Width > maxWidth)
             {
                 #region calulate height and width
 
@@ -146,38 +145,35 @@ public static class UserPhotoThumbnailManager
 
                     if (width > height)
                     {
-                        height = (int)(height * (double)maxWidth / width + 0.5);
+                        height = (uint)(height * (double)maxWidth / width + 0.5);
                         width = maxWidth;
                     }
                     else
                     {
-                        width = (int)(width * (double)maxHeight / height + 0.5);
+                        width = (uint)(width * (double)maxHeight / height + 0.5);
                         height = maxHeight;
                     }
                 }
 
                 if (width > maxWidth && height <= maxHeight)
                 {
-                    height = (int)(height * (double)maxWidth / width + 0.5);
+                    height = (uint)(height * (double)maxWidth / width + 0.5);
                     width = maxWidth;
                 }
 
                 if (width <= maxWidth && height > maxHeight)
                 {
-                    width = (int)(width * (double)maxHeight / height + 0.5);
+                    width = (uint)(width * (double)maxHeight / height + 0.5);
                     height = maxHeight;
                 }
 
                 var tmpW = width;
                 var tmpH = height;
                 #endregion
-                using var destRound = img.Clone(x => x.Resize(new ResizeOptions
-                {
-                    Size = new Size(tmpW, tmpH),
-                    Mode = ResizeMode.Stretch
-                }));
+                
+                using var destRound = img.CloneAndMutate(x=> x.Resize(tmpW, tmpH));
 
-                data = CommonPhotoManager.SaveToBytes(destRound);
+                data = await CommonPhotoManager.SaveToBytes(destRound);
             }
             return data;
         }
@@ -194,14 +190,14 @@ public static class UserPhotoThumbnailManager
 
 public class ThumbnailItem
 {
-    public Size Size { get; init; }
+    public IMagickGeometry Size { get; init; }
     public string ImgUrl { get; set; }
-    public Image Image { get; set; }
+    public IMagickImage Image { get; set; }
 }
 
 public class ThumbnailsData(Guid userId, UserPhotoManager userPhotoManager)
 {
-    public async Task<(Image, IImageFormat)> MainImgBitmapAsync()
+    public async Task<(MagickImage, MagickFormat)> MainImgBitmapAsync()
     {
         var (img, imageFormat) = await userPhotoManager.GetPhotoImageAsync(userId);
         return (img, imageFormat);

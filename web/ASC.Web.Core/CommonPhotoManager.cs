@@ -24,24 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Drawing;
+
+using ImageMagick.Drawing;
+
 namespace ASC.Web.Core;
 
 public static class CommonPhotoManager
 {
-
-    public static Image DoThumbnail(Image image, Size size, bool crop, bool transparent, bool rectangle)
+    public static MagickImage DoThumbnail(MagickImage image, IMagickGeometry size)
     {
         var width = size.Width;
         var height = size.Height;
         var realWidth = image.Width;
         var realHeight = image.Height;
-
-        Image thumbnail;
+        
+        MagickImage thumbnail;
 
         var maxSide = realWidth > realHeight ? realWidth : realHeight;
         var minSide = realWidth < realHeight ? realWidth : realHeight;
 
-        var alignWidth = crop ? (minSide == realWidth) : (maxSide == realWidth);
+        var alignWidth = minSide == realWidth;
 
         var scaleFactor = alignWidth ? (realWidth / (1.0 * width)) : (realHeight / (1.0 * height));
 
@@ -50,56 +53,32 @@ public static class CommonPhotoManager
             scaleFactor = 1;
         }
 
-        var finalWidth = (int)(realWidth / scaleFactor);
-        var finalHeigth = (int)(realHeight / scaleFactor);
-
-
-        if (rectangle)
-        {
-            thumbnail = new Image<Rgba32>(width, height);
-            var locationY = (int)((height / 2.0) - (finalHeigth / 2.0));
-            var locationX = (int)((width / 2.0) - (finalWidth / 2.0));
-
-            if (!transparent)
-            {
-                thumbnail.Mutate(x => x.BackgroundColor(Color.White));
-            }
-            var point = new Point(locationX, locationY);
-            image.Mutate(y => y.Resize(finalWidth, finalHeigth));
-            thumbnail.Mutate(x => x.DrawImage(image, point, 1));
-        }
-        else
-        {
-            thumbnail = new Image<Rgba32>(finalWidth, finalHeigth);
-
-            if (!transparent)
-            {
-                thumbnail.Mutate(x => x.BackgroundColor(Color.White));
-            }
-            image.Mutate(y => y.Resize(finalWidth, finalHeigth));
-            thumbnail.Mutate(x => x.DrawImage(image, 1));
-        }
+        var finalWidth = (uint)(realWidth / scaleFactor);
+        var finalHeigth = (uint)(realHeight / scaleFactor);
+        
+        thumbnail = new MagickImage(MagickColors.None, width, height);
+        var locationY = (int)((height / 2.0) - (finalHeigth / 2.0));
+        var locationX = (int)((width / 2.0) - (finalWidth / 2.0));
+        
+        var point = new Point(locationX, locationY);
+        image.Resize(finalWidth, finalHeigth);
+        
+        new Drawables()
+            .Draw(image)
+            .Draw(thumbnail);
 
         return thumbnail;
     }
 
-    public static byte[] SaveToBytes(Image img)
+    public static async Task<byte[]> SaveToBytes(IMagickImage img, MagickFormat imageFormat =  MagickFormat.Png)
     {
         using var memoryStream = new MemoryStream();
-        img.Save(memoryStream, PngFormat.Instance);
+        await img.WriteAsync(memoryStream, imageFormat);
         return memoryStream.ToArray();
     }
 
-    public static byte[] SaveToBytes(Image img, IImageFormat imageFormat)
+    public static string GetImgFormatName(MagickFormat format)
     {
-        using var memoryStream = new MemoryStream();
-        img.Save(memoryStream, imageFormat);
-        var data = memoryStream.ToArray();
-        return data;
-    }
-
-    public static string GetImgFormatName(IImageFormat format)
-    {
-        return format.Name.ToLower();
+        return format.ToString().ToLower();
     }
 }

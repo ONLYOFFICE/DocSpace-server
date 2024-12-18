@@ -27,6 +27,8 @@
 using ASC.Data.Storage;
 using ASC.Data.Storage.DiscStorage;
 
+using ImageMagick;
+
 using FileShare = System.IO.FileShare;
 
 namespace ASC.Files.Service.Services.Thumbnail;
@@ -193,12 +195,10 @@ public class Builder<T>(ThumbnailSettings settings,
         var thumbnailHeight = maxSize.Height;
         var thumbnailWidth = maxSize.Width;
         
-        if (maxSize.ResizeMode == ResizeMode.Manual)
+
+        if (maxSize.Width > maxSize.Height) // change thumbnail orientation
         {
-            if (maxSize.Width > maxSize.Height) // change thumbnail orientation
-            {
-                (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
-            }
+            (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
         }
 
         do
@@ -259,11 +259,11 @@ public class Builder<T>(ThumbnailSettings settings,
         using var response = await httpClient.SendAsync(request);
         await using (var stream = await response.Content.ReadAsStreamAsync())
         {
-            using (var sourceImg = await Image.LoadAsync(stream))
+            using (var sourceImg = new MagickImage(stream))
             {
                 foreach (var w in settings.Sizes)
                 {
-                    await CropAsync(sourceImg, fileDao, file, w.Width, w.Height, w.ResizeMode, AnchorPositionMode.Top);
+                    await CropAsync(sourceImg, fileDao, file, w.Width, w.Height);
                 }
             }
         }
@@ -271,7 +271,7 @@ public class Builder<T>(ThumbnailSettings settings,
         _logger.DebugMakeThumbnail4(file.Id.ToString());
     }
 
-    private async Task<(int, string)> GetThumbnailUrl(File<T> file, string toExtension, int width, int height)
+    private async Task<(int, string)> GetThumbnailUrl(File<T> file, string toExtension, uint width, uint height)
     {
         var fileUri = pathProvider.GetFileStreamUrl(file);
         fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
@@ -282,15 +282,15 @@ public class Builder<T>(ThumbnailSettings settings,
         {
             Aspect = 1,
             First = true,
-            Height = height,
-            Width = width
+            Height = (int)height,
+            Width = (int)width
         };
         var spreadsheetLayout = new SpreadsheetLayout
         {
             IgnorePrintArea = true,
             //Orientation = "landscape", // "297mm" x "210mm"
-            FitToHeight = height,
-            FitToWidth = width,
+            FitToHeight = (int)height,
+            FitToWidth = (int)width,
             Headings = false,
             GridLines = false,
             Margins = new SpreadsheetLayout.LayoutMargins
@@ -361,20 +361,20 @@ public class Builder<T>(ThumbnailSettings settings,
 
     private async Task CropAsync(IFileDao<T> fileDao, File<T> file, Stream stream)
     {
-        using var sourceImg = await Image.LoadAsync(stream);
+        using var sourceImg = new MagickImage(stream);
 
         if (_dataStore is DiscDataStore)
         {
             foreach (var w in settings.Sizes)
             {
-                await CropAsync(sourceImg, fileDao, file, w.Width, w.Height, w.ResizeMode);
+                await CropAsync(sourceImg, fileDao, file, w.Width, w.Height);
             }
         }
         else
         {
             await Parallel.ForEachAsync(settings.Sizes, new ParallelOptions { MaxDegreeOfParallelism = 3 }, async (w, _) =>
             {
-                await CropAsync(sourceImg, fileDao, file, w.Width, w.Height, w.ResizeMode);
+                await CropAsync(sourceImg, fileDao, file, w.Width, w.Height);
             });
         }
 
@@ -382,74 +382,60 @@ public class Builder<T>(ThumbnailSettings settings,
     }
 
     private async ValueTask CropAsync(
-        Image sourceImg,
+        MagickImage sourceImg,
         IFileDao<T> fileDao,
         File<T> file,
-        int width,
-        int height,
-        ResizeMode resizeMode,
-        AnchorPositionMode anchorPositionMode = AnchorPositionMode.Center)
+        uint width,
+        uint height)
     {
-        using var targetImg = GetImageThumbnail(sourceImg, width, height, resizeMode, anchorPositionMode);
+        var targetImg = GetImageThumbnail(sourceImg, width, height);
         await using var targetStream = tempStream.Create();
 
         switch (global.ThumbnailExtension)
         {
             case ThumbnailExtension.bmp:
-                await targetImg.SaveAsBmpAsync(targetStream);
+                await targetImg.WriteAsync(targetStream, MagickFormat.Bmp);
                 break;
             case ThumbnailExtension.gif:
-                await targetImg.SaveAsGifAsync(targetStream);
+                await targetImg.WriteAsync(targetStream, MagickFormat.Gif);
                 break;
             case ThumbnailExtension.jpg:
-                await targetImg.SaveAsJpegAsync(targetStream);
+                await targetImg.WriteAsync(targetStream, MagickFormat.Jpg);
                 break;
             case ThumbnailExtension.png:
-                await targetImg.SaveAsPngAsync(targetStream);
+                await targetImg.WriteAsync(targetStream, MagickFormat.Png);
                 break;
             case ThumbnailExtension.pbm:
-                await targetImg.SaveAsPbmAsync(targetStream);
+                await targetImg.WriteAsync(targetStream, MagickFormat.Pbm);
                 break;
             case ThumbnailExtension.tiff:
-                await targetImg.SaveAsTiffAsync(targetStream);
+                await targetImg.WriteAsync(targetStream, MagickFormat.Tiff);
                 break;
             case ThumbnailExtension.tga:
-                await targetImg.SaveAsTgaAsync(targetStream);
+                await targetImg.WriteAsync(targetStream, MagickFormat.Tga);
                 break;
             case ThumbnailExtension.webp:
-                await targetImg.SaveAsWebpAsync(targetStream);
+                await targetImg.WriteAsync(targetStream, MagickFormat.WebP);
                 break;
         }
 
         await _dataStore.SaveAsync(fileDao.GetUniqThumbnailPath(file, width, height), targetStream);
     }
 
-    private Image GetImageThumbnail(Image sourceBitmap, int thumbnailWidth, int thumbnailHeight, ResizeMode resizeMode, AnchorPositionMode anchorPositionMode)
+    private IMagickImage GetImageThumbnail(MagickImage sourceBitmap, uint thumbnailWidth, uint thumbnailHeight)
     {
-        if (resizeMode == ResizeMode.Manual)
+        if (sourceBitmap.BoundingBox != null && 
+            (sourceBitmap.BoundingBox.Width > sourceBitmap.BoundingBox.Height && thumbnailWidth < thumbnailHeight ||
+            sourceBitmap.BoundingBox.Width < sourceBitmap.BoundingBox.Height && thumbnailWidth > thumbnailHeight))
         {
-            resizeMode = ResizeMode.Max;
-
-            if (sourceBitmap.Bounds.Width > sourceBitmap.Bounds.Height && thumbnailWidth < thumbnailHeight ||
-                sourceBitmap.Bounds.Width < sourceBitmap.Bounds.Height && thumbnailWidth > thumbnailHeight)
-            {
-                (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
-            }
+            (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
         }
 
-        var response = sourceBitmap.Clone(x =>
-        {
-            x.Resize(new ResizeOptions
-            {
-                Size = new Size(thumbnailWidth, thumbnailHeight),
-                Mode = resizeMode,
-                Position = anchorPositionMode,
-                Sampler = KnownResamplers.Lanczos8
-            });
-        });
 
-        response.Mutate(i => i.AutoOrient());
+        sourceBitmap.Thumbnail(thumbnailWidth, thumbnailHeight);
 
-        return response;
+        sourceBitmap.AutoOrient();
+
+        return sourceBitmap;
     }
 }

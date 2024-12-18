@@ -29,7 +29,7 @@ namespace ASC.Web.Core.WhiteLabel;
 public class TenantInfoSettings : ISettings<TenantInfoSettings>
 {
     [JsonPropertyName("LogoSize")]
-    public Size CompanyLogoSize { get; internal set; }
+    public IMagickGeometry CompanyLogoSize { get; internal set; }
 
     [JsonPropertyName("LogoFileName")]
     public string CompanyLogoFileName { get; set; }
@@ -83,7 +83,7 @@ public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
         catch
         {
         }
-        tenantInfoSettings.CompanyLogoSize = default;
+        tenantInfoSettings.CompanyLogoSize = null;
 
         await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
     }
@@ -103,9 +103,9 @@ public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
             }
         }
         using (var memory = new MemoryStream(data))
-        using (var image = await Image.LoadAsync(memory))
+        using (var image = new MagickImage(memory))
         {
-            tenantInfoSettings.CompanyLogoSize = image.Size;
+            tenantInfoSettings.CompanyLogoSize = new MagickGeometry(image.Width, image.Height);
 
             memory.Seek(0, SeekOrigin.Begin);
             await store.SaveAsync(companyLogoFileName, memory);

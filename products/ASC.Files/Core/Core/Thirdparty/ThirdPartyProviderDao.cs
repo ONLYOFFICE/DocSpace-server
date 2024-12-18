@@ -72,7 +72,7 @@ internal abstract class ThirdPartyProviderDao
         return Task.FromResult(false);
     }
 
-    public string GetUniqThumbnailPath(File<string> file, int width, int height)
+    public string GetUniqThumbnailPath(File<string> file, uint width, uint height)
     {
         //Do nothing
         return null;
@@ -83,12 +83,12 @@ internal abstract class ThirdPartyProviderDao
         return Task.CompletedTask;
     }
 
-    public virtual Task<Stream> GetThumbnailAsync(File<string> file, int width, int height)
+    public virtual Task<Stream> GetThumbnailAsync(File<string> file, uint width, uint height)
     {
         return GetThumbnailAsync(file.Id, width, height);
     }
 
-    public virtual Task<Stream> GetThumbnailAsync(string file, int width, int height)
+    public virtual Task<Stream> GetThumbnailAsync(string file, uint width, uint height)
     {
         return Task.FromResult<Stream>(null);
     }

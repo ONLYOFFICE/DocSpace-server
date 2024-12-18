@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Drawing;
+
 namespace ASC.Web.Core.Users;
 
 [Transient]
@@ -34,7 +36,7 @@ public sealed class ResizeWorkerItem : DistributedTask
 
     }
 
-    public ResizeWorkerItem(int tenantId, Guid userId, byte[] data, long maxFileSize, Size size, IDataStore dataStore, UserPhotoThumbnailSettings settings)
+    public ResizeWorkerItem(int tenantId, Guid userId, byte[] data, long maxFileSize, IMagickGeometry size, IDataStore dataStore, UserPhotoThumbnailSettings settings)
     {
         TenantId = tenantId;
         UserId = userId;
@@ -45,7 +47,7 @@ public sealed class ResizeWorkerItem : DistributedTask
         Settings = settings;
     }
 
-    public Size Size { get; }
+    public IMagickGeometry Size { get; }
 
     public IDataStore DataStore { get; }
 
@@ -149,7 +151,7 @@ public class UserPhotoManagerCache
         }
     }
 
-    public async Task AddToCache(Guid userID, Size size, string fileName, int tenantId)
+    public async Task AddToCache(Guid userID, IMagickGeometry size, string fileName, int tenantId)
     {
         if (_cacheNotify != null)
         {
@@ -157,7 +159,7 @@ public class UserPhotoManagerCache
         }
     }
 
-    public string SearchInCache(Guid userId, Size size)
+    public string SearchInCache(Guid userId, IMagickGeometry size)
     {
         if (!_photoFiles.TryGetValue(userId, out var val))
         {
@@ -231,9 +233,9 @@ public class UserPhotoManager(UserManager userManager,
     }
 
 
-    public async Task<string> GetSizedPhotoUrl(Guid userId, int width, int height)
+    public async Task<string> GetSizedPhotoUrl(Guid userId, uint width, uint height)
     {
-        return await GetSizedPhotoAbsoluteWebPath(userId, new Size(width, height));
+        return await GetSizedPhotoAbsoluteWebPath(userId, new MagickGeometry(width, height));
     }
 
 
@@ -267,17 +269,17 @@ public class UserPhotoManager(UserManager userManager,
         return _defaultRetinaPhotoURL ??= GetDefaultPhotoAbsoluteWebPath(RetinaFotoSize);
     }
 
-    public static Size OriginalFotoSize { get; } = new(1280, 1280);
+    public static IMagickGeometry OriginalFotoSize { get; } = new MagickGeometry(1280, 1280);
 
-    public static Size RetinaFotoSize { get; } = new(360, 360);
+    public static IMagickGeometry RetinaFotoSize { get; } = new MagickGeometry(360, 360);
 
-    public static Size MaxFotoSize { get; } = new(200, 200);
+    public static IMagickGeometry MaxFotoSize { get; } = new MagickGeometry(200, 200);
 
-    public static Size BigFotoSize { get; } = new(82, 82);
+    public static IMagickGeometry BigFotoSize { get; } = new MagickGeometry(82, 82);
 
-    public static Size MediumFotoSize { get; } = new(48, 48);
+    public static IMagickGeometry MediumFotoSize { get; } = new MagickGeometry(48, 48);
 
-    public static Size SmallFotoSize { get; } = new(32, 32);
+    public static IMagickGeometry SmallFotoSize { get; } = new MagickGeometry(32, 32);
 
     private static readonly string _defaultRetinaAvatar = "default_user_photo_size_360-360.png";
     private static readonly string _defaultAvatar = "default_user_photo_size_200-200.png";
@@ -296,7 +298,7 @@ public class UserPhotoManager(UserManager userManager,
 
     public async Task<string> GetPhotoAbsoluteWebPath(Guid userID)
     {
-        var path = await SearchInCache(userID, Size.Empty);
+        var path = await SearchInCache(userID, SizeExtend.Empty());
         if (!string.IsNullOrEmpty(path))
         {
             return path;
@@ -314,10 +316,10 @@ public class UserPhotoManager(UserManager userManager,
             }
             else
             {
-                (photoUrl, fileName) = await SaveOrUpdatePhotoAsync(userID, data, -1, new Size(-1, -1), false);
+                (photoUrl, fileName) = await SaveOrUpdatePhotoAsync(userID, data, -1, null, false);
             }
 
-            await userPhotoManagerCache.AddToCache(userID, Size.Empty, fileName, (tenantManager.GetCurrentTenant()).Id);
+            await userPhotoManagerCache.AddToCache(userID, SizeExtend.Empty(), fileName, (tenantManager.GetCurrentTenant()).Id);
 
             return photoUrl;
         }
@@ -327,12 +329,12 @@ public class UserPhotoManager(UserManager userManager,
         return GetDefaultPhotoAbsoluteWebPath();
     }
 
-    internal async Task<Size> GetPhotoSize(Guid userID)
+    internal async Task<IMagickGeometry> GetPhotoSize(Guid userID)
     {
         var virtualPath = await GetPhotoAbsoluteWebPath(userID);
         if (virtualPath == null)
         {
-            return Size.Empty;
+            return SizeExtend.Empty();
         }
 
         try
@@ -340,15 +342,15 @@ public class UserPhotoManager(UserManager userManager,
             var sizePart = virtualPath[virtualPath.LastIndexOf('_')..];
             sizePart = sizePart.Trim('_');
             sizePart = sizePart.Remove(sizePart.LastIndexOf('.'));
-            return new Size(int.Parse(sizePart.Split('-')[0]), int.Parse(sizePart.Split('-')[1]));
+            return new MagickGeometry(uint.Parse(sizePart.Split('-')[0]), uint.Parse(sizePart.Split('-')[1]));
         }
         catch
         {
-            return Size.Empty;
+            return SizeExtend.Empty();
         }
     }
 
-    private async Task<string> GetSizedPhotoAbsoluteWebPath(Guid userID, Size size)
+    private async Task<string> GetSizedPhotoAbsoluteWebPath(Guid userID, IMagickGeometry size)
     {
         var res = await SearchInCache(userID, size);
         if (!string.IsNullOrEmpty(res))
@@ -378,7 +380,7 @@ public class UserPhotoManager(UserManager userManager,
         return GetDefaultPhotoAbsoluteWebPath(size);
     }
 
-    private string GetDefaultPhotoAbsoluteWebPath(Size size)
+    private string GetDefaultPhotoAbsoluteWebPath(IMagickGeometry size)
     {
         return (size) switch
         {
@@ -394,7 +396,7 @@ public class UserPhotoManager(UserManager userManager,
     private static readonly SemaphoreSlim _semaphore = new(1);
 
 
-    private async Task<string> SearchInCache(Guid userId, Size size)
+    private async Task<string> SearchInCache(Guid userId, IMagickGeometry size)
     {
         if (!userPhotoManagerCache.IsCacheLoadedForTenant((tenantManager.GetCurrentTenant()).Id))
         {
@@ -437,11 +439,11 @@ public class UserPhotoManager(UserManager userManager,
                         if (match.Success && match.Groups["user"].Success)
                         {
                             var parsedUserId = new Guid(match.Groups["user"].Value);
-                            var size = Size.Empty;
+                            var size = SizeExtend.Empty();
                             if (match.Groups["width"].Success && match.Groups["height"].Success)
                             {
                                 //Parse size
-                                size = new Size(int.Parse(match.Groups["width"].Value), int.Parse(match.Groups["height"].Value));
+                                size = new MagickGeometry(uint.Parse(match.Groups["width"].Value), uint.Parse(match.Groups["height"].Value));
                             }
                             await userPhotoManagerCache.AddToCache(parsedUserId, size, fileName,tenantId);
                         }
@@ -500,16 +502,16 @@ public class UserPhotoManager(UserManager userManager,
 
     public async Task SyncPhotoAsync(Guid userID, byte[] data)
     {
-        data = TryParseImage(data, -1, OriginalFotoSize, out _, out var width, out var height);
+        (data, _, var width, var height) = await TryParseImage(data, -1, OriginalFotoSize);
         await userManager.SaveUserPhotoAsync(userID, data);
         await SetUserPhotoThumbnailSettingsAsync(userID, width, height);
         //   _userPhotoManagerCache.ClearCache(userID, _tenantManager.GetCurrentTenant().Id);
     }
 
 
-    private async Task<(string, string)> SaveOrUpdatePhotoAsync(Guid userID, byte[] data, long maxFileSize, Size size, bool saveInCoreContext)
+    private async Task<(string, string)> SaveOrUpdatePhotoAsync(Guid userID, byte[] data, long maxFileSize, IMagickGeometry size, bool saveInCoreContext)
     {
-        data = TryParseImage(data, maxFileSize, size, out var imgFormat, out var width, out var height);
+        (data, var imgFormat, var width, var height) = await TryParseImage(data, maxFileSize, size);
 
         var widening = CommonPhotoManager.GetImgFormatName(imgFormat);
         var fileName = $"{userID}_orig_{width}-{height}.{widening}";
@@ -540,12 +542,12 @@ public class UserPhotoManager(UserManager userManager,
             await Task.WhenAll(t1, t2, t3, t4, t5);
         }
         
-        await userPhotoManagerCache.AddToCache(userID, Size.Empty, fileName, tenantManager.GetCurrentTenantId());
+        await userPhotoManagerCache.AddToCache(userID, SizeExtend.Empty(), fileName, tenantManager.GetCurrentTenantId());
         
         return (photoUrl, fileName);
     }
 
-    private async Task SetUserPhotoThumbnailSettingsAsync(Guid userId, int width, int height)
+    private async Task SetUserPhotoThumbnailSettingsAsync(Guid userId, uint width, uint height)
     {
         var max = Math.Max(Math.Max(width, height), SmallFotoSize.Width);
         var min = Math.Max(Math.Min(width, height), SmallFotoSize.Width);
@@ -553,13 +555,13 @@ public class UserPhotoManager(UserManager userManager,
         var pos = (max - min) / 2;
 
         var settings = new UserPhotoThumbnailSettings(
-            width >= height ? new Point(pos, 0) : new Point(0, pos),
-            new Size(min, min));
+            width >= height ? new Point((int)pos, 0) : new Point(0, (int)pos),
+            new MagickGeometry(min, min));
 
         await settingsManager.SaveAsync(settings, userId);
     }
 
-    private byte[] TryParseImage(byte[] data, long maxFileSize, Size maxsize, out IImageFormat imgFormat, out int width, out int height)
+    private async Task<(byte[], MagickFormat, uint, uint)> TryParseImage(byte[] data, long maxFileSize, IMagickGeometry maxsize)
     {
         if (data is not { Length: > 0 })
         {
@@ -575,57 +577,59 @@ public class UserPhotoManager(UserManager userManager,
 
         try
         {
-            using var img = Image.Load(data);
+            using var img = new MagickImage(data);
 
-            imgFormat = img.Metadata.DecodedImageFormat;
-            width = img.Width;
-            height = img.Height;
-            var maxWidth = maxsize.Width;
-            var maxHeight = maxsize.Height;
-
-            if ((maxHeight != -1 && img.Height > maxHeight) || (maxWidth != -1 && img.Width > maxWidth))
+            var imgFormat = img.Format;
+            var width = img.Width;
+            var height = img.Height;
+            if (maxsize != null)
             {
-                #region calulate height and width
+                var maxWidth = maxsize.Width;
+                var maxHeight = maxsize.Height;
 
-                if (width > maxWidth && height > maxHeight)
+                if (img.Height > maxHeight || img.Width > maxWidth)
                 {
+                    #region calulate height and width
 
-                    if (width > height)
+                    if (width > maxWidth && height > maxHeight)
                     {
-                        height = (int)(height * (double)maxWidth / width + 0.5);
+
+                        if (width > height)
+                        {
+                            height = (uint)(height * (double)maxWidth / width + 0.5);
+                            width = maxWidth;
+                        }
+                        else
+                        {
+                            width = (uint)(width * (double)maxHeight / height + 0.5);
+                            height = maxHeight;
+                        }
+                    }
+
+                    if (width > maxWidth && height <= maxHeight)
+                    {
+                        height = (uint)(height * (double)maxWidth / width + 0.5);
                         width = maxWidth;
                     }
-                    else
+
+                    if (width <= maxWidth && height > maxHeight)
                     {
-                        width = (int)(width * (double)maxHeight / height + 0.5);
+                        width = (uint)(width * (double)maxHeight / height + 0.5);
                         height = maxHeight;
                     }
+
+                    var tmpW = width;
+                    var tmpH = height;
+
+                    #endregion
+
+                    using var destRound = img.CloneAndMutate(x => x.Resize(tmpW, tmpH));
+
+                    data = await CommonPhotoManager.SaveToBytes(destRound);
                 }
-
-                if (width > maxWidth && height <= maxHeight)
-                {
-                    height = (int)(height * (double)maxWidth / width + 0.5);
-                    width = maxWidth;
-                }
-
-                if (width <= maxWidth && height > maxHeight)
-                {
-                    width = (int)(width * (double)maxHeight / height + 0.5);
-                    height = maxHeight;
-                }
-
-                var tmpW = width;
-                var tmpH = height;
-                #endregion
-                using var destRound = img.Clone(x => x.Resize(new ResizeOptions
-                {
-                    Size = new Size(tmpW, tmpH),
-                    Mode = ResizeMode.Stretch
-                }));
-
-                data = CommonPhotoManager.SaveToBytes(destRound);
             }
-            return data;
+
+            return (data, imgFormat, width, height);
         }
         catch (OutOfMemoryException)
         {
@@ -637,12 +641,12 @@ public class UserPhotoManager(UserManager userManager,
         }
     }
 
-    private async Task SizePhoto(Guid userID, byte[] data, long maxFileSize, Size size)
+    private async Task SizePhoto(Guid userID, byte[] data, long maxFileSize, IMagickGeometry size)
     {
         await SizePhoto(userID, data, maxFileSize, size, false);
     }
 
-    private async Task<string> SizePhoto(Guid userID, byte[] data, long maxFileSize, Size size, bool now)
+    private async Task<string> SizePhoto(Guid userID, byte[] data, long maxFileSize, IMagickGeometry size, bool now)
     {
         if (data is not { Length: > 0 })
         {
@@ -682,19 +686,19 @@ public class UserPhotoManager(UserManager userManager,
 
             var data = item.Data;
             using var stream = new MemoryStream(data);
-            using var img = await Image.LoadAsync(stream);
-            var imgFormat = img.Metadata.DecodedImageFormat;
+            using var img = new MagickImage(stream);
+            var imgFormat = img.Format;
 
-            if (item.Size != img.Size)
+            if (item.Size.CompareTo(new MagickGeometry(img.Width, img.Height)) != 0)
             {
                 using var img2 = item.Settings.IsDefault ?
-                    CommonPhotoManager.DoThumbnail(img, item.Size, true, true, true) :
+                    CommonPhotoManager.DoThumbnail(img, item.Size) :
                     UserPhotoThumbnailManager.GetImage(img, item.Size, item.Settings);
-                data = CommonPhotoManager.SaveToBytes(img2);
+                data = await CommonPhotoManager.SaveToBytes(img2);
             }
             else
             {
-                data = CommonPhotoManager.SaveToBytes(img);
+                data = await CommonPhotoManager.SaveToBytes(img);
             }
 
             var widening = CommonPhotoManager.GetImgFormatName(imgFormat);
@@ -711,9 +715,9 @@ public class UserPhotoManager(UserManager userManager,
         }
     }
 
-    public async Task<string> SaveTempPhoto(byte[] data, long maxFileSize, int maxWidth, int maxHeight)
+    public async Task<string> SaveTempPhoto(byte[] data, long maxFileSize, uint maxWidth, uint maxHeight)
     {
-        data = TryParseImage(data, maxFileSize, new Size(maxWidth, maxHeight), out var imgFormat, out _, out _);
+        (data, var imgFormat, _, _) = await TryParseImage(data, maxFileSize, new MagickGeometry(maxWidth, maxHeight));
 
         var fileName = Guid.NewGuid() + "." + CommonPhotoManager.GetImgFormatName(imgFormat);
 
@@ -768,34 +772,34 @@ public class UserPhotoManager(UserManager userManager,
     }
 
 
-    public async Task<(Image, IImageFormat)> GetPhotoImageAsync(Guid userID)
+    public async Task<(MagickImage, MagickFormat)> GetPhotoImageAsync(Guid userID)
     {
         try
         {
             var data = await userManager.GetUserPhotoAsync(userID);
             if (data != null)
             {
-                var img = Image.Load(data);
+                var img = new MagickImage(data);
 
-                var format = img.Metadata.DecodedImageFormat;
+                var format = img.Format;
 
                 return (img, format);
             }
         }
         catch { }
-        return (null, null);
+        return (null, default);
     }
 
-    public async Task<string> SaveThumbnail(Guid userID, Image img, IImageFormat format)
+    public async Task<string> SaveThumbnail(Guid userID, IMagickImage img, MagickFormat format)
     {
         var moduleID = Guid.Empty;
         var widening = CommonPhotoManager.GetImgFormatName(format);
-        var size = img.Size;
+        var size = new MagickGeometry(img.Width, img.Height);
         var fileName = string.Format("{0}{1}_size_{2}-{3}.{4}", moduleID == Guid.Empty ? "" : moduleID.ToString(), userID, img.Width, img.Height, widening);
 
         var store = await GetDataStoreAsync();
         string photoUrl;
-        using (var s = new MemoryStream(CommonPhotoManager.SaveToBytes(img)))
+        using (var s = new MemoryStream(await CommonPhotoManager.SaveToBytes(img)))
         {
             img.Dispose();
             photoUrl = (await store.SaveAsync(fileName, s)).ToString();
@@ -805,7 +809,7 @@ public class UserPhotoManager(UserManager userManager,
         return photoUrl;
     }
 
-    public async Task<byte[]> GetUserPhotoData(Guid userId, Size size)
+    public async Task<byte[]> GetUserPhotoData(Guid userId, IMagickGeometry size)
     {
         try
         {
@@ -847,7 +851,7 @@ public class UserPhotoManager(UserManager userManager,
         return _dataStore ??= await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), "userPhotos");
     }
 
-    public static CacheSize ToCache(Size size)
+    public static CacheSize ToCache(IMagickGeometry size)
     {
         return size switch
         {
@@ -978,8 +982,11 @@ public class ImageSizeLimitException() : Exception("image size is too large");
 
 public static class SizeExtend
 {
-    public static void Deconstruct(this Size size, out int w, out int h)
+    public static void Deconstruct(this IMagickGeometry size, out uint w, out uint h)
     {
         (w, h) = (size.Width, size.Height);
     }
+
+    public static IMagickGeometry Empty() => new MagickGeometry(0, 0);
+
 }
