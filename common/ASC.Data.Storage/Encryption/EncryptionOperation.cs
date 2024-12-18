@@ -292,11 +292,11 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                     {
                         if (_isEncryption)
                         {
-                           await notifyHelper.SendStorageEncryptionSuccess(tenant.Id);
+                           await notifyHelper.SendStorageEncryptionSuccessAsync(tenant.Id);
                         }
                         else
                         {
-                           await notifyHelper.SendStorageDecryptionSuccess(tenant.Id);
+                           await notifyHelper.SendStorageDecryptionSuccessAsync(tenant.Id);
                         }
                         log.DebugTenantSendStorageEncryptionSuccess(tenant.Alias);
                     }
@@ -305,11 +305,11 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                 {
                     if (_isEncryption)
                     {
-                        await notifyHelper.SendStorageEncryptionError(tenant.Id);
+                        await notifyHelper.SendStorageEncryptionErrorAsync(tenant.Id);
                     }
                     else
                     {
-                        await notifyHelper.SendStorageDecryptionError(tenant.Id);
+                        await notifyHelper.SendStorageDecryptionErrorAsync(tenant.Id);
                     }
 
                     log.DebugTenantSendStorageEncryptionError(tenant.Alias);
