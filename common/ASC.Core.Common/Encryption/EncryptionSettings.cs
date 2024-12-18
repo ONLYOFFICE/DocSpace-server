@@ -62,7 +62,7 @@ public class EncryptionSettings
 }
 
 [Scope]
-public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCacheNotify ascCacheNotify, InstanceCrypto instanceCrypto)
+public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, InstanceCrypto instanceCrypto)
 {
     private const string Key = "EncryptionSettings";
 
@@ -70,7 +70,6 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCa
     {
         var settings = await SerializeAsync(encryptionSettings);
         await coreConfiguration.SaveSettingAsync(Key, settings);
-        await ascCacheNotify.ClearCacheAsync();
     }
 
     public async Task<EncryptionSettings> LoadAsync()
