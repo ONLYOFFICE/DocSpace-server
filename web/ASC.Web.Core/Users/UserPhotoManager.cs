@@ -231,44 +231,7 @@ public class UserPhotoManager(UserManager userManager,
     {
         return await GetSizedPhotoAbsoluteWebPath(userID, SmallFotoSize);
     }
-
-
-    public async Task<string> GetSizedPhotoUrl(Guid userId, uint width, uint height)
-    {
-        return await GetSizedPhotoAbsoluteWebPath(userId, new MagickGeometry(width, height));
-    }
-
-
-    private string _defaultSmallPhotoURL;
-    public string GetDefaultSmallPhotoURL()
-    {
-        return _defaultSmallPhotoURL ??= GetDefaultPhotoAbsoluteWebPath(SmallFotoSize);
-    }
-
-    private string _defaultMediumPhotoURL;
-    public string GetDefaultMediumPhotoURL()
-    {
-        return _defaultMediumPhotoURL ??= GetDefaultPhotoAbsoluteWebPath(MediumFotoSize);
-    }
-
-    private string _defaultBigPhotoURL;
-    public string GetDefaultBigPhotoURL()
-    {
-        return _defaultBigPhotoURL ??= GetDefaultPhotoAbsoluteWebPath(BigFotoSize);
-    }
-
-    private string _defaultMaxPhotoURL;
-    public string GetDefaultMaxPhotoURL()
-    {
-        return _defaultMaxPhotoURL ??= GetDefaultPhotoAbsoluteWebPath(MaxFotoSize);
-    }
-
-    private string _defaultRetinaPhotoURL;
-    public string GetDefaultRetinaPhotoURL()
-    {
-        return _defaultRetinaPhotoURL ??= GetDefaultPhotoAbsoluteWebPath(RetinaFotoSize);
-    }
-
+    
     public static IMagickGeometry OriginalFotoSize { get; } = new MagickGeometry(1280, 1280);
 
     public static IMagickGeometry RetinaFotoSize { get; } = new MagickGeometry(360, 360);
@@ -327,27 +290,6 @@ public class UserPhotoManager(UserManager userManager,
         {
         }
         return GetDefaultPhotoAbsoluteWebPath();
-    }
-
-    internal async Task<IMagickGeometry> GetPhotoSize(Guid userID)
-    {
-        var virtualPath = await GetPhotoAbsoluteWebPath(userID);
-        if (virtualPath == null)
-        {
-            return SizeExtend.Empty();
-        }
-
-        try
-        {
-            var sizePart = virtualPath[virtualPath.LastIndexOf('_')..];
-            sizePart = sizePart.Trim('_');
-            sizePart = sizePart.Remove(sizePart.LastIndexOf('.'));
-            return new MagickGeometry(uint.Parse(sizePart.Split('-')[0]), uint.Parse(sizePart.Split('-')[1]));
-        }
-        catch
-        {
-            return SizeExtend.Empty();
-        }
     }
 
     private async Task<string> GetSizedPhotoAbsoluteWebPath(Guid userID, IMagickGeometry size)

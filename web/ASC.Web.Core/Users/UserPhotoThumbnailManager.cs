@@ -24,24 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Drawing;
-
 namespace ASC.Web.Core.Users;
 
 public static class UserPhotoThumbnailManager
 {
-    public static async Task<List<ThumbnailItem>> SaveThumbnails(UserPhotoManager userPhotoManager, SettingsManager settingsManager, int x, int y, uint width, uint height, Guid userId)
+    public static async Task SaveThumbnails(UserPhotoManager userPhotoManager, SettingsManager settingsManager, int x, int y, uint width, uint height, Guid userId)
     {
-        return await SaveThumbnails(userPhotoManager, settingsManager, new UserPhotoThumbnailSettings(x, y, width, height), userId);
-    }
-
-    public static async Task<List<ThumbnailItem>> SaveThumbnails(UserPhotoManager userPhotoManager, SettingsManager settingsManager, Point point, IMagickGeometry size, Guid userId)
-    {
-        return await SaveThumbnails(userPhotoManager, settingsManager, new UserPhotoThumbnailSettings(point, size), userId);
-    }
-
-    public static async Task<List<ThumbnailItem>> SaveThumbnails(UserPhotoManager userPhotoManager, SettingsManager settingsManager, UserPhotoThumbnailSettings thumbnailSettings, Guid userId)
-    {
+        var thumbnailSettings = new UserPhotoThumbnailSettings(x, y, width, height);
         var thumbnailsData = new ThumbnailsData(userId, userPhotoManager);
 
         var resultBitmaps = new List<ThumbnailItem>();
@@ -52,7 +41,7 @@ public static class UserPhotoThumbnailManager
 
         if (img == null)
         {
-            return null;
+            return;
         }
 
         if (thumbnailSettings.Size.Width == 0 && thumbnailSettings.Size.Height == 0)
@@ -70,8 +59,6 @@ public static class UserPhotoThumbnailManager
         await thumbnailsData.SaveAsync(resultBitmaps);
 
         await settingsManager.SaveAsync(thumbnailSettings, userId);
-
-        return await thumbnailsData.ThumbnailList();
     }
 
     public static IMagickImage GetImage(MagickImage mainImg, IMagickGeometry size, UserPhotoThumbnailSettings thumbnailSettings)
