@@ -136,11 +136,10 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
         catch (Exception ex)
         {
             Exception = ex;
-            IsCompleted = true;
-            Percentage = 100;
         }
         finally
         {
+            IsCompleted = true;
             await PublishChanges();
         }
     }
