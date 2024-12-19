@@ -29,7 +29,7 @@ namespace ASC.Web.Core.WhiteLabel;
 public class TenantInfoSettings : ISettings<TenantInfoSettings>
 {
     [JsonPropertyName("LogoSize")]
-    public IMagickGeometry CompanyLogoSize { get; internal set; }
+    public Size CompanyLogoSize { get; internal set; }
 
     [JsonPropertyName("LogoFileName")]
     public string CompanyLogoFileName { get; set; }
@@ -51,6 +51,23 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
         get { return new Guid("{5116B892-CCDD-4406-98CD-4F18297C0C0A}"); }
     }
 }
+
+public class Size
+{
+    public uint Height { get; set; }
+    public uint Width { get; set; }
+
+    public static implicit operator Size(MagickGeometry cache)
+    {
+        return new Size
+        {
+            Height = cache.Height, 
+            Width = cache.Width
+        };
+    }
+}
+
+public record Point(int X, int Y);
 
 [Scope]
 public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,

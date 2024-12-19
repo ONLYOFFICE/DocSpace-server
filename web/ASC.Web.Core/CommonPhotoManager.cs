@@ -38,8 +38,6 @@ public static class CommonPhotoManager
         var height = size.Height;
         var realWidth = image.Width;
         var realHeight = image.Height;
-        
-        MagickImage thumbnail;
 
         var maxSide = realWidth > realHeight ? realWidth : realHeight;
         var minSide = realWidth < realHeight ? realWidth : realHeight;
@@ -54,14 +52,11 @@ public static class CommonPhotoManager
         }
 
         var finalWidth = (uint)(realWidth / scaleFactor);
-        var finalHeigth = (uint)(realHeight / scaleFactor);
+        var finalHeight = (uint)(realHeight / scaleFactor);
         
-        thumbnail = new MagickImage(MagickColors.None, width, height);
-        var locationY = (int)((height / 2.0) - (finalHeigth / 2.0));
-        var locationX = (int)((width / 2.0) - (finalWidth / 2.0));
+        var thumbnail = new MagickImage(MagickColors.None, width, height);
         
-        var point = new Point(locationX, locationY);
-        image.Resize(finalWidth, finalHeigth);
+        image.Resize(finalWidth, finalHeight);
         
         new Drawables()
             .Draw(image)

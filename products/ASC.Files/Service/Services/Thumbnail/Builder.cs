@@ -430,10 +430,8 @@ public class Builder<T>(ThumbnailSettings settings,
         {
             (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
         }
-
-
-        sourceBitmap.Thumbnail(thumbnailWidth, thumbnailHeight);
-
+        
+        sourceBitmap.Resize(thumbnailWidth, thumbnailHeight);
         sourceBitmap.AutoOrient();
 
         return sourceBitmap;

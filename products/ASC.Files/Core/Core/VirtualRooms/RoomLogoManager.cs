@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Drawing;
 using System.Reflection;
 
 using ImageMagick;
@@ -450,7 +449,7 @@ public class RoomLogoManager(
         }
     }
 
-    private async Task SaveWithProcessAsync(IDataStore store, string id, byte[] imageData, long maxFileSize, Point position, IMagickGeometry cropSize)
+    private async Task SaveWithProcessAsync(IDataStore store, string id, byte[] imageData, long maxFileSize, Point position, MagickGeometry cropSize)
     {
         imageData = await UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
         

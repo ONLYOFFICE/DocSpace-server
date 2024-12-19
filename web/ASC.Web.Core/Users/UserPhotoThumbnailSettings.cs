@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Drawing;
+using Size = ASC.Web.Core.WhiteLabel.Size;
 
 namespace ASC.Web.Core.Users;
 
@@ -40,7 +40,7 @@ public class UserPhotoThumbnailSettings : ISettings<UserPhotoThumbnailSettings>
 
     }
 
-    public UserPhotoThumbnailSettings(Point point, IMagickGeometry size)
+    public UserPhotoThumbnailSettings(Point point, MagickGeometry size)
     {
         Point = point;
         Size = size;
@@ -54,7 +54,7 @@ public class UserPhotoThumbnailSettings : ISettings<UserPhotoThumbnailSettings>
 
     public Point Point { get; init; }
 
-    public IMagickGeometry Size { get; set; }
+    public Size Size { get; set; }
 
     public bool IsDefault { get; private set; }
 

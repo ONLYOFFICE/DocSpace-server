@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Drawing;
-
 namespace ASC.Web.Core.Users;
 
 [Transient]
@@ -565,7 +563,8 @@ public class UserPhotoManager(UserManager userManager,
 
                     #endregion
 
-                    using var destRound = img.CloneAndMutate(x => x.Resize(tmpW, tmpH));
+                    var g = new MagickGeometry(width, height) { FillArea = true };
+                    using var destRound = img.CloneAndMutate(x => x.Resize(g));
 
                     data = await CommonPhotoManager.SaveToBytes(destRound);
                 }
