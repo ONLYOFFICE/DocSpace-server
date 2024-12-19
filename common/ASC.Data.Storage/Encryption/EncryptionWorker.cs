@@ -32,7 +32,7 @@ public class EncryptionWorker(
     IServiceProvider serviceProvider,
     IDistributedLockProvider distributedLockProvider)
 {
-    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "encryption";
 
     public async Task StartAsync(EncryptionSettings encryptionSettings, string serverRootPath)
@@ -69,8 +69,13 @@ public class EncryptionWorker(
 
     public async Task<double?> GetEncryptionProgress()
     {
-        var progress = (await _queue.GetAllTasks<EncryptionOperation>()).FirstOrDefault();
+        var item = (await _queue.GetAllTasks<EncryptionOperation>()).FirstOrDefault();
 
-        return progress?.Percentage;
+        if (item is { IsCompleted: true })
+        {
+            await _queue.DequeueTask(item.Id);
+        }
+
+        return item?.Percentage;
     }
 }
