@@ -59,8 +59,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         _modules = storageFactoryConfig.GetModuleList(exceptDisabledMigration: true);
         _useProgressFile = Convert.ToBoolean(configuration["storage:encryption:progressfile"] ?? "true");
 
-        Percentage = 10;
-        await PublishChanges();
+        StepCount = (_tenants.Count() * _modules.Count()) + 4; // number of calls to the StepDone method
 
         try
         {
@@ -76,8 +75,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                 return;
             }
 
-            Percentage = 30;
-            await PublishChanges();
+            await StepDone();
 
             foreach (var tenant in _tenants)
             {
@@ -94,8 +92,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                 });
             }
 
-            Percentage = 70;
-            await PublishChanges();
+            await StepDone();
 
             if (!_hasErrors)
             {
@@ -103,12 +100,10 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                 await SaveNewSettingsAsync(encryptionSettingsHelper, log);
             }
 
-            Percentage = 90;
-            await PublishChanges();
+            await StepDone();
             await ActivateTenantsAsync(tenantManager, log, notifyHelper);
 
             Percentage = 100;
-
             IsCompleted = true;
             await PublishChanges();
         }
@@ -140,7 +135,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
 
         await StepDone();
 
-        log.DebugPercentage(Percentage);
+        log.DebugPercentage(tenant.Alias, module, Percentage);
     }
 
     private async ValueTask<List<string>> ReadProgressAsync(DiscDataStore store)
