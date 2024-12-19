@@ -32,7 +32,11 @@ public class FormFillingReportCreator(
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
     TenantUtil tenantUtil,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    FactoryIndexerForm factoryIndexerForm,
+    CommonLinkUtility commonLinkUtility,
+    FilesLinkUtility filesLinkUtility,
+    FileUtility fileUtility)
 {
 
     private static readonly JsonSerializerOptions _options = new() {
@@ -40,27 +44,46 @@ public class FormFillingReportCreator(
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task UpdateFormFillingReport<T>(T resultsFileId, int resultFormNumber, string formsDataUrl, string resultUrl)
+    public async Task UpdateFormFillingReport<T>(T resultsFileId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile)
     {
-
         if (formsDataUrl != null)
         {
             var fileDao = daoFactory.GetFileDao<T>();
-            var submitFormsData = await GetSubmitFormsData(resultFormNumber, formsDataUrl, resultUrl);
+            var submitFormsData = await GetSubmitFormsData(formsDataFile, resultFormNumber, formsDataUrl);
 
             if (resultsFileId != null)
             {
                 var resultsFile = await fileDao.GetFileAsync(resultsFileId);
-
-                var updateDt = exportToCSV.CreateDataTable(submitFormsData.FormsData);
-                await exportToCSV.UpdateCsvReport(resultsFile, updateDt);
-
+                
+                await exportToCSV.UpdateCsvReport(resultsFile, submitFormsData.FormsData);
             }
         }
     }
 
-    private async Task<SubmitFormsData> GetSubmitFormsData(int resultFormNumber, string url, string resultUrl)
+    public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
     {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var folder = await folderDao.GetFolderAsync(folderId);
+        if (folder?.FolderType != FolderType.FormFillingFolderDone)
+        {
+            return [];
+        }
+        
+        var fileDao = daoFactory.GetFileDao<int>();
+        var file = await fileDao.GetFilesAsync([folderId], FilterType.Pdf, false, Guid.Empty, null, null, false).FirstOrDefaultAsync();
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.Id, file.Id));
+
+        if (success)
+        {
+            return result.SelectMany(r => r.FormsData);
+        }
+
+        return [];
+    }
+    
+    private async Task<SubmitFormsData> GetSubmitFormsData<T>(File<T> formsDataFile, int resultFormNumber, string url)
+    {
+        var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(url),
@@ -76,25 +99,38 @@ public class FormFillingReportCreator(
             new()
             {
                 Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture),
-                Value = resultFormNumber
+                Value = resultFormNumber.ToString()
             }
         };
-
-        var formLink = new FormsItemData
+        List<FormsItemData> formInfo = 
+        [
+                new() { Key = FilesCommonResource.ResourceManager.GetString("Date", tenantCulture), Value = $"=\"{tenantUtil.DateTimeNow().ToString("G", tenantCulture)}\"" },
+                new() { Key = FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture), Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture)}\")" }
+        ];
+        
+        var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+        var result = new SubmitFormsData
         {
-            Key = FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture),
-            Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture)}\")"
+            FormsData =  formNumber.Concat(fromData.FormsData).ToList()
         };
-        var date = new FormsItemData
-        {
-            Key = FilesCommonResource.ResourceManager.GetString("Date", tenantCulture),
-            Value = $"=\"{tenantUtil.DateTimeNow().ToString("G", tenantCulture)}\""
-        };
-        var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+        result.FormsData = result.FormsData.Concat(formInfo).ToList();
 
-        result.FormsData = formNumber.Concat(result.FormsData);
-        result.FormsData = result.FormsData.Append(date);
-        result.FormsData = result.FormsData.Append(formLink);
+        var now = DateTime.UtcNow;
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        if (formsDataFile.Id is int id &&  formsDataFile.ParentId is int parentId)
+        {
+            var searchItems = new DbFormsItemDataSearch
+            {
+                Id = id,
+                TenantId = tenantId,
+                ParentId = parentId,
+                CreateOn = now,
+                FormsData = fromData.FormsData
+            };
+
+            await factoryIndexerForm.IndexAsync(searchItems);
+        }
 
         return result;
     }

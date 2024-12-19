@@ -24,13 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModels.RequestsDto;
+namespace ASC.Common.Log;
 
-public class InvitationLinkRequestDto
+internal static partial class RedisCacheNotifyLogger
 {
-    /// <summary>
-    /// Employee type (All, RoomAdmin, Guest, DocSpaceAdmin, User)
-    /// </summary>
-    [FromRoute(Name = "employeeType")]
-    public EmployeeType EmployeeType { get; set; }
+    [LoggerMessage(LogLevel.Error, "RedisCacheNotify Publish")]
+    public static partial void ErrorRedisCacheNotifyPublish(this ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "RedisCacheNotify Subscribe")]
+    public static partial void ErrorRedisCacheNotifySubscribe(this ILogger logger, Exception exception);
 }

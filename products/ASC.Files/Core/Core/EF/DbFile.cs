@@ -72,7 +72,6 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
 
     [Ignore]
     public string IndexName => Tables.File;
-
     public Document Document { get; set; }
 
     public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings)
