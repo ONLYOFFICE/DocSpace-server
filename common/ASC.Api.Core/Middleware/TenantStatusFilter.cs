@@ -30,7 +30,7 @@ namespace ASC.Api.Core.Middleware;
 public class TenantStatusFilter(ILogger<TenantStatusFilter> logger, TenantManager tenantManager)
     : IAsyncResourceFilter
 {
-    private readonly string[] _passthroughtRequestEndings = ["preparation-portal", "getrestoreprogress", "settings", "settings.json", "colortheme", "colortheme.json", "logos", "logos.json", "build", "build.json", "@self", "@self.json"
+    private readonly string[] _passthroughtRequestEndings = ["preparation-portal", "getrestoreprogress", "settings", "settings.json", "colortheme", "colortheme.json", "logos", "logos.json", "build", "build.json", "@self", "@self.json", "encryption/progress"
     ]; //TODO add or update when "preparation-portal" will be done
 
 
@@ -59,7 +59,7 @@ public class TenantStatusFilter(ILogger<TenantStatusFilter> logger, TenantManage
             return;
         }
 
-        if (tenant.Status is TenantStatus.Transfering or TenantStatus.Restoring)
+        if (tenant.Status is TenantStatus.Transfering or TenantStatus.Restoring or TenantStatus.Encryption)
         {
             if (_passthroughtRequestEndings.Any(path => context.HttpContext.Request.Path.ToString().EndsWith(path, StringComparison.InvariantCultureIgnoreCase)))
             {
