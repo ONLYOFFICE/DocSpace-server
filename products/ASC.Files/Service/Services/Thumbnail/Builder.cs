@@ -35,14 +35,15 @@ namespace ASC.Files.Service.Services.Thumbnail;
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class Builder<T>(ThumbnailSettings settings,
+public class Builder<T>(
+    ThumbnailSettings settings,
     TenantManager tenantManager,
     IDaoFactory daoFactory,
     DocumentServiceConnector documentServiceConnector,
     DocumentServiceHelper documentServiceHelper,
     Global global,
     PathProvider pathProvider,
-    ILoggerProvider log,
+    ILogger<Builder<T>> logger,
     IHttpClientFactory clientFactory,
     FFmpegService fFmpegService,
     TempPath tempPath,
@@ -51,11 +52,7 @@ public class Builder<T>(ThumbnailSettings settings,
     StorageFactory storageFactory,
     SecurityContext securityContext)
 {
-    private readonly ILogger _logger = log.CreateLogger("ASC.Files.ThumbnailBuilder");
     private IDataStore _dataStore;
-
-    private readonly List<string> _imageFormatsCanBeCrop =
-        [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tga", ".webp"];
 
     internal async Task BuildThumbnail(FileData<T> fileData)
     {
@@ -69,7 +66,7 @@ public class Builder<T>(ThumbnailSettings settings,
             var fileDao = daoFactory.GetFileDao<T>();
             if (fileDao == null)
             {
-                _logger.ErrorBuildThumbnailFileDaoIsNull(fileData.TenantId);
+                logger.ErrorBuildThumbnailFileDaoIsNull(fileData.TenantId);
 
                 return;
             }
@@ -78,7 +75,7 @@ public class Builder<T>(ThumbnailSettings settings,
         }
         catch (Exception exception)
         {
-            _logger.ErrorBuildThumbnailsTenantId(fileData.TenantId, exception);
+            logger.ErrorBuildThumbnailsTenantId(fileData.TenantId, exception);
         }
     }
 
@@ -92,14 +89,14 @@ public class Builder<T>(ThumbnailSettings settings,
 
             if (file == null)
             {
-                _logger.ErrorGenerateThumbnailFileNotFound(fileData.FileId.ToString());
+                logger.ErrorGenerateThumbnailFileNotFound(fileData.FileId.ToString());
 
                 return;
             }
 
             if (file.ThumbnailStatus != ASC.Files.Core.Thumbnail.Waiting)
             {
-                _logger.InformationGenerateThumbnail(fileData.FileId.ToString());
+                logger.InformationGenerateThumbnail(fileData.FileId.ToString());
 
                 return;
             }
@@ -138,7 +135,7 @@ public class Builder<T>(ThumbnailSettings settings,
         }
         catch (Exception exception)
         {
-            _logger.ErrorGenerateThumbnail(fileData.FileId.ToString(), exception);
+            logger.ErrorGenerateThumbnail(fileData.FileId.ToString(), exception);
             if (file != null)
             {
                 file.ThumbnailStatus = ASC.Files.Core.Thumbnail.Error;
@@ -185,7 +182,7 @@ public class Builder<T>(ThumbnailSettings settings,
 
     private async Task MakeThumbnailFromDocs(IFileDao<T> fileDao, File<T> file)
     {            
-        _logger.DebugMakeThumbnail1(file.Id.ToString());
+        logger.DebugMakeThumbnail1(file.Id.ToString());
 
         string thumbnailUrl = null;
         var resultPercent = 0;
@@ -229,12 +226,12 @@ public class Builder<T>(ThumbnailSettings settings,
                     }
                     else
                     {
-                        _logger.WarningMakeThumbnail(file.Id.ToString(), thumbnailUrl, resultPercent, attempt, exception);
+                        logger.WarningMakeThumbnail(file.Id.ToString(), thumbnailUrl, resultPercent, attempt, exception);
                     }
                 }
                 else
                 {
-                    _logger.WarningMakeThumbnail(file.Id.ToString(), thumbnailUrl, resultPercent, attempt, exception);
+                    logger.WarningMakeThumbnail(file.Id.ToString(), thumbnailUrl, resultPercent, attempt, exception);
                 }
             }
 
@@ -243,14 +240,14 @@ public class Builder<T>(ThumbnailSettings settings,
                 throw new Exception($"MakeThumbnail: FileId: {file.Id}, ThumbnailUrl: {thumbnailUrl}, ResultPercent: {resultPercent}. Attempts limit exceeded.");
             }
 
-            _logger.DebugMakeThumbnailAfter(file.Id.ToString(), settings.AttemptWaitInterval, attempt);
+            logger.DebugMakeThumbnailAfter(file.Id.ToString(), settings.AttemptWaitInterval, attempt);
             attempt++;
 
             await Task.Delay(settings.AttemptWaitInterval);
         }
         while (string.IsNullOrEmpty(thumbnailUrl));
         
-        _logger.DebugMakeThumbnail3(file.Id.ToString(), thumbnailUrl);
+        logger.DebugMakeThumbnail3(file.Id.ToString(), thumbnailUrl);
 
         using var request = new HttpRequestMessage();
         request.RequestUri = new Uri(thumbnailUrl);
@@ -268,7 +265,7 @@ public class Builder<T>(ThumbnailSettings settings,
             }
         }
 
-        _logger.DebugMakeThumbnail4(file.Id.ToString());
+        logger.DebugMakeThumbnail4(file.Id.ToString());
     }
 
     private async Task<(int, string)> GetThumbnailUrl(File<T> file, string toExtension, uint width, uint height)
@@ -339,7 +336,7 @@ public class Builder<T>(ThumbnailSettings settings,
 
     private bool IsImage(string extension)
     {
-        return _imageFormatsCanBeCrop.Contains(extension);
+        return global.ImageThumbnailExtension.Contains(extension);
     }
 
     private bool IsVideo(string extension)
@@ -349,14 +346,14 @@ public class Builder<T>(ThumbnailSettings settings,
 
     private async Task MakeThumbnailFromImage(IFileDao<T> fileDao, File<T> file)
     {
-        _logger.DebugCropImage(file.Id.ToString());
+        logger.DebugCropImage(file.Id.ToString());
 
         await using (var stream = await fileDao.GetFileStreamAsync(file))
         {
             await CropAsync(fileDao, file, stream);
         }
 
-        _logger.DebugCropImageSuccessfullySaved(file.Id.ToString());
+        logger.DebugCropImageSuccessfullySaved(file.Id.ToString());
     }
 
     private async Task CropAsync(IFileDao<T> fileDao, File<T> file, Stream stream)
