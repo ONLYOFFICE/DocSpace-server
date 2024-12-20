@@ -123,7 +123,7 @@ public class SocketManager(
 
     public async Task BackupProgressAsync(double percentage)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await MakeRequest("backup-progress", new { tenantId, percentage });
     }
 
