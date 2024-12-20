@@ -77,7 +77,7 @@ public class OAuth20Token
     /// <summary>
     /// Origin json
     /// </summary>
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     public string OriginJson { get; set; }
 
     /// <summary>
@@ -87,7 +87,7 @@ public class OAuth20Token
     {
         get
         {
-            if (!ExpiresIn.Equals(default))
+            if (!ExpiresIn.Equals(0))
             {
                 return DateTime.UtcNow > Timestamp + TimeSpan.FromSeconds(ExpiresIn);
             }

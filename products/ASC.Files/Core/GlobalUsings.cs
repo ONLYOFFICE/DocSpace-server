@@ -49,7 +49,7 @@ global using System.Text.RegularExpressions;
 global using System.Text.Unicode;
 global using System.Web;
 global using System.Xml;
-global using ASC.Api.Collections;
+
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Model;

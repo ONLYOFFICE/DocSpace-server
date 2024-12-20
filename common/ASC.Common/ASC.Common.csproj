@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProductVersion>9.0.30729</ProductVersion>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <AssemblyTitle>ASC.Common</AssemblyTitle>
@@ -12,9 +12,8 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <WarningsAsErrors></WarningsAsErrors>
     <NoWarn>$(NoWarn);NU1605</NoWarn>
-	  <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>enable</ImplicitUsings>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <LangVersion>12</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -33,17 +32,17 @@
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="AWS.Logger.NLog" Version="3.3.4" />
     <PackageReference Include="Bogus" Version="35.6.1" />
-    <PackageReference Include="Confluent.Kafka" Version="2.5.3" />
+    <PackageReference Include="Confluent.Kafka" Version="2.6.1" />
     <PackageReference Include="DistributedLock.Redis" Version="1.0.3" />
     <PackageReference Include="DistributedLock.ZooKeeper" Version="1.0.0" />
-    <PackageReference Include="JWT" Version="10.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="8.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.10" />
+    <PackageReference Include="JWT" Version="11.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.0" />
     <PackageReference Include="EtaEmre.NetEscapades.EnumGenerators" Version="1.0.0-beta07" />
 <!-- <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.9.4">
       <PrivateAssets>all</PrivateAssets>
@@ -56,13 +55,13 @@
     <PackageReference Include="NLog" Version="5.3.4" />
     <PackageReference Include="NLog.Targets.Syslog" Version="7.0.0" />
     <PackageReference Include="NVelocity" Version="1.2.0" />
-    <PackageReference Include="Polly" Version="8.4.2" />
-    <PackageReference Include="protobuf-net" Version="3.2.30" />
+    <PackageReference Include="Polly" Version="8.5.0" />
+    <PackageReference Include="protobuf-net" Version="3.2.45" />
     <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="10.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.9.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.7.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.2.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ASC.EventBus\ASC.EventBus.csproj" />

@@ -71,7 +71,7 @@ public class FileSharingAceHelper(
 
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
         var room = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
-        var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString()) : null;
+        var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString(), false) : null;
         var entryType = entry.FileEntryType;
         var recipients = new Dictionary<Guid, FileShare>();
         var usersWithoutRight = new List<Guid>();
@@ -290,7 +290,7 @@ public class FileSharingAceHelper(
 
             if (emailInvite)
             {
-                var link = await invitationService.GetInvitationLinkAsync(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
+                var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
                 await studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink, culture, true);
@@ -685,7 +685,7 @@ public class FileSharing(
         var folderDao = daoFactory.GetFolderDao<T>();
         var folders = await folderDao.GetFoldersAsync(folderIds).ToListAsync();
 
-        var entries = files.Concat(folders.Cast<FileEntry<T>>());
+        var entries = files.Concat(folders.Select(FileEntry<T> (r) => r));
 
         foreach (var entry in entries)
         {
@@ -800,14 +800,13 @@ public class FileSharing(
         await foreach (var member in securityDao.GetGroupMembersWithSecurityAsync(entry, groupId, text, offset, count))
         {
             var isOwner = entry.CreateBy == member.UserId;
-            var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(member.UserId);
             
             yield return new GroupMemberSecurity
             {
                 User = await userManager.GetUsersAsync(member.UserId),
                 GroupShare = member.GroupShare,
-                UserShare = isOwner || isDocSpaceAdmin ? FileShare.RoomManager : member.UserShare,
-                CanEditAccess = canEditAccess && !isOwner && userId != member.UserId && !isDocSpaceAdmin,
+                UserShare = isOwner ? FileShare.RoomManager : member.UserShare,
+                CanEditAccess = canEditAccess && !isOwner && userId != member.UserId,
                 Owner = isOwner
             };
         }

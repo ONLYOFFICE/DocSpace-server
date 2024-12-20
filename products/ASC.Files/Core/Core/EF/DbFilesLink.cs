@@ -29,7 +29,9 @@ namespace ASC.Files.Core.EF;
 public class DbFilesLink : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    [MaxLength(32)]
     public string SourceId { get; set; }
+    [MaxLength(32)]
     public string LinkedId { get; set; }
     public Guid LinkedFor { get; set; }
 
@@ -70,13 +72,13 @@ public static class DbFilesLinkExtension
 
             entity.Property(e => e.SourceId)
                 .HasColumnName("source_id")
-                .HasColumnType("varchar(32)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.LinkedId)
                 .HasColumnName("linked_id")
-                .HasColumnType("varchar(32)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -103,12 +105,10 @@ public static class DbFilesLinkExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.LinkedId)
-                .HasColumnName("linked_id")
-                .HasMaxLength(32);
+                .HasColumnName("linked_id");
 
             entity.Property(e => e.SourceId)
-                .HasColumnName("source_id")
-                .HasMaxLength(32);
+                .HasColumnName("source_id");
 
             entity.Property(e => e.LinkedFor)
                 .HasColumnName("linked_for")

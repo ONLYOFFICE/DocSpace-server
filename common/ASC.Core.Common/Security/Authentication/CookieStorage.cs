@@ -153,7 +153,7 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
         var data = string.Empty;
         try
         {
-            if (_httpContext is { Request: not null, Connection.RemoteIpAddress: not null })
+            if (_httpContext is { Connection.RemoteIpAddress: not null })
             {
                 data = _httpContext.Connection.RemoteIpAddress.ToString();
             }

@@ -317,7 +317,7 @@ public class UserPhotoManager(UserManager userManager,
                 (photoUrl, fileName) = await SaveOrUpdatePhotoAsync(userID, data, -1, new Size(-1, -1), false);
             }
 
-            await userPhotoManagerCache.AddToCache(userID, Size.Empty, fileName, (await tenantManager.GetCurrentTenantAsync()).Id);
+            await userPhotoManagerCache.AddToCache(userID, Size.Empty, fileName, (tenantManager.GetCurrentTenant()).Id);
 
             return photoUrl;
         }
@@ -365,7 +365,7 @@ public class UserPhotoManager(UserManager userManager,
                 //empty photo. cache default
                 var photoUrl = GetDefaultPhotoAbsoluteWebPath(size);
 
-                await userPhotoManagerCache.AddToCache(userID, size, "default", (await tenantManager.GetCurrentTenantAsync()).Id);
+                await userPhotoManagerCache.AddToCache(userID, size, "default", (tenantManager.GetCurrentTenant()).Id);
 
                 return photoUrl;
             }
@@ -396,7 +396,7 @@ public class UserPhotoManager(UserManager userManager,
 
     private async Task<string> SearchInCache(Guid userId, Size size)
     {
-        if (!userPhotoManagerCache.IsCacheLoadedForTenant((await tenantManager.GetCurrentTenantAsync()).Id))
+        if (!userPhotoManagerCache.IsCacheLoadedForTenant((tenantManager.GetCurrentTenant()).Id))
         {
             await LoadDiskCache();
         }
@@ -422,7 +422,7 @@ public class UserPhotoManager(UserManager userManager,
     private async Task LoadDiskCache()
     {
         await _semaphore.WaitAsync();
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         if (!userPhotoManagerCache.IsCacheLoadedForTenant(tenantId))
         {
             try
@@ -495,7 +495,7 @@ public class UserPhotoManager(UserManager userManager,
         }
 
         await userManager.SaveUserPhotoAsync(idUser, null);
-        await userPhotoManagerCache.ClearCacheAsync(idUser, await tenantManager.GetCurrentTenantIdAsync());
+        await userPhotoManagerCache.ClearCacheAsync(idUser, tenantManager.GetCurrentTenantId());
     }
 
     public async Task SyncPhotoAsync(Guid userID, byte[] data)
@@ -540,7 +540,7 @@ public class UserPhotoManager(UserManager userManager,
             await Task.WhenAll(t1, t2, t3, t4, t5);
         }
         
-        await userPhotoManagerCache.AddToCache(userID, Size.Empty, fileName, await tenantManager.GetCurrentTenantIdAsync());
+        await userPhotoManagerCache.AddToCache(userID, Size.Empty, fileName, tenantManager.GetCurrentTenantId());
         
         return (photoUrl, fileName);
     }
@@ -654,7 +654,7 @@ public class UserPhotoManager(UserManager userManager,
             throw new ImageWeightLimitException();
         }
 
-        var resizeTask = new ResizeWorkerItem(await tenantManager.GetCurrentTenantIdAsync(), userID, data, maxFileSize, size, await GetDataStoreAsync(), await settingsManager.LoadAsync<UserPhotoThumbnailSettings>(userID));
+        var resizeTask = new ResizeWorkerItem(tenantManager.GetCurrentTenantId(), userID, data, maxFileSize, size, await GetDataStoreAsync(), await settingsManager.LoadAsync<UserPhotoThumbnailSettings>(userID));
         var key = $"{userID}{size}";
         resizeTask["key"] = key;
 
@@ -801,7 +801,7 @@ public class UserPhotoManager(UserManager userManager,
             photoUrl = (await store.SaveAsync(fileName, s)).ToString();
         }
 
-        await userPhotoManagerCache.AddToCache(userID, size, fileName, (await tenantManager.GetCurrentTenantAsync()).Id);
+        await userPhotoManagerCache.AddToCache(userID, size, fileName, (tenantManager.GetCurrentTenant()).Id);
         return photoUrl;
     }
 
@@ -844,7 +844,7 @@ public class UserPhotoManager(UserManager userManager,
     private IDataStore _dataStore;
     private async ValueTask<IDataStore> GetDataStoreAsync()
     {
-        return _dataStore ??= await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "userPhotos");
+        return _dataStore ??= await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), "userPhotos");
     }
 
     public static CacheSize ToCache(Size size)

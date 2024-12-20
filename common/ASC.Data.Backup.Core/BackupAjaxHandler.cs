@@ -61,7 +61,7 @@ public class BackupAjaxHandler(
 
         var backupRequest = new StartBackupRequest
         {
-            TenantId = await GetCurrentTenantIdAsync(),
+            TenantId = GetCurrentTenantIdAsync(),
             UserId = authContext.CurrentAccount.ID,
             StorageType = storageType,
             StorageParams = storageParams,
@@ -85,7 +85,7 @@ public class BackupAjaxHandler(
                 break;
         }
 
-        await messageService.SendAsync(MessageAction.StartBackupSetting);
+        messageService.Send(MessageAction.StartBackupSetting);
 
         return await backupService.StartBackupAsync(backupRequest, enqueueTask, taskId);
     }
@@ -94,7 +94,7 @@ public class BackupAjaxHandler(
     {
         await DemandPermissionsBackupAsync();
 
-        return await backupService.GetBackupProgress(await GetCurrentTenantIdAsync());
+        return await backupService.GetBackupProgress(GetCurrentTenantIdAsync());
     }
     
     public async Task StopBackupAsync()
@@ -122,14 +122,14 @@ public class BackupAjaxHandler(
     {
         await DemandPermissionsBackupAsync();
 
-        await backupService.DeleteAllBackupsAsync(await GetCurrentTenantIdAsync());
+        await backupService.DeleteAllBackupsAsync(GetCurrentTenantIdAsync());
     }
 
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
     {
         await DemandPermissionsBackupAsync();
 
-        return await backupService.GetBackupHistoryAsync(await GetCurrentTenantIdAsync());
+        return await backupService.GetBackupHistoryAsync(GetCurrentTenantIdAsync());
     }
 
     public async Task CheckAccessToFileAsync<T>(T fileId)
@@ -191,7 +191,7 @@ public class BackupAjaxHandler(
 
         var scheduleRequest = new CreateScheduleRequest
         {
-            TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+            TenantId = tenantManager.GetCurrentTenantId(),
             Cron = cronParams.ToString(),
             NumberOfBackupsStored = backupsStored,
             StorageType = storageType,
@@ -222,7 +222,7 @@ public class BackupAjaxHandler(
     {
         await DemandPermissionsBackupAsync();
 
-        var response = await backupService.GetScheduleAsync(await GetCurrentTenantIdAsync());
+        var response = await backupService.GetScheduleAsync(GetCurrentTenantIdAsync());
         if (response == null)
         {
             return null;
@@ -262,7 +262,7 @@ public class BackupAjaxHandler(
 
             var scheduleRequest = new CreateScheduleRequest
             {
-                TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+                TenantId = tenantManager.GetCurrentTenantId(),
                 Cron = schedule.CronParams.ToString(),
                 NumberOfBackupsStored = schedule.BackupsStored ?? 0,
                 StorageType = schedule.StorageType,
@@ -285,7 +285,7 @@ public class BackupAjaxHandler(
     {
         await DemandPermissionsBackupAsync();
 
-        await backupService.DeleteScheduleAsync(await GetCurrentTenantIdAsync());
+        await backupService.DeleteScheduleAsync(GetCurrentTenantIdAsync());
     }
 
     private async Task DemandPermissionsBackupAsync()
@@ -305,7 +305,7 @@ public class BackupAjaxHandler(
     public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify, string serverBaseUri)
     {
         await DemandPermissionsRestoreAsync();
-        var tenantId = await GetCurrentTenantIdAsync();
+        var tenantId = GetCurrentTenantIdAsync();
         var restoreRequest = new StartRestoreRequest
         {
             TenantId = tenantId,
@@ -336,7 +336,7 @@ public class BackupAjaxHandler(
 
     public async Task<BackupProgress> GetRestoreProgressAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         return await backupService.GetRestoreProgress(tenant.Id);
     }
@@ -345,7 +345,7 @@ public class BackupAjaxHandler(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var quota = await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync());
+        var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
         if (!SetupInfo.IsVisibleSettings("Restore") || (!coreBaseSettings.Standalone && !quota.AutoBackupRestore))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Restore");
@@ -361,7 +361,7 @@ public class BackupAjaxHandler(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!SetupInfo.IsVisibleSettings("AutoBackup") || !(await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync())).AutoBackupRestore)
+        if (!SetupInfo.IsVisibleSettings("AutoBackup") || !(await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId())).AutoBackupRestore)
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "AutoBackup");
         }
@@ -375,11 +375,11 @@ public class BackupAjaxHandler(
     {
         await DemandPermissionsTransferAsync();
 
-        await messageService.SendAsync(MessageAction.StartTransferSetting);
+        messageService.Send(MessageAction.StartTransferSetting);
         await backupService.StartTransferAsync(
             new StartTransferRequest
             {
-                TenantId = await GetCurrentTenantIdAsync(),
+                TenantId = GetCurrentTenantIdAsync(),
                 TargetRegion = targetRegion,
                 NotifyUsers = notifyUsers
             });
@@ -388,7 +388,7 @@ public class BackupAjaxHandler(
 
     public async Task<BackupProgress> GetTransferProgressAsync()
     {
-        return await backupService.GetTransferProgress(await GetCurrentTenantIdAsync());
+        return await backupService.GetTransferProgress(GetCurrentTenantIdAsync());
     }
 
     private async Task DemandPermissionsTransferAsync()
@@ -397,7 +397,7 @@ public class BackupAjaxHandler(
 
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.Migration))
-        || !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync())
+        || !currentUser.IsOwner(tenantManager.GetCurrentTenant())
         || !SetupInfo.IsSecretEmail(currentUser.Email) && !(await tenantManager.GetCurrentTenantQuotaAsync()).AutoBackupRestore)
         {
             throw new InvalidOperationException(Resource.ErrorNotAllowedOption);
@@ -416,14 +416,14 @@ public class BackupAjaxHandler(
         new CronExpression(cronParams.ToString());
     }
 
-    private async Task<int> GetCurrentTenantIdAsync()
+    private int GetCurrentTenantIdAsync()
     {
-        return await tenantManager.GetCurrentTenantIdAsync();
+        return tenantManager.GetCurrentTenantId();
     }
 
     public async Task<string> GetTmpFilePathAsync(int tenantId)
     {
-        var discStore = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), BackupTempModule, (IQuotaController)null) as DiscDataStore;
+        var discStore = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), BackupTempModule, (IQuotaController)null) as DiscDataStore;
         var folder = discStore.GetPhysicalPath("", "");
 
         if (!Directory.Exists(folder))

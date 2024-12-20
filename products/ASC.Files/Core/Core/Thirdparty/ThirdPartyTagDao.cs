@@ -55,7 +55,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(
     {
         var mapping = daoFactory.GetMapping<string>();
         var folderId = daoSelector.ConvertId(parentFolder.Id);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix)

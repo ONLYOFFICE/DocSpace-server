@@ -114,14 +114,7 @@ public class File<T> : FileEntry<T>
                 case FileType.Video:
                     return FilterType.MediaOnly;
                 case FileType.Pdf:
-                    if (this.IsForm)
-                    {
-                        return FilterType.PdfForm;
-                    }
-                    else
-                    {
-                        return FilterType.Pdf;
-                    }
+                    return this.IsForm ? FilterType.PdfForm : FilterType.Pdf;
                    
             }
 
@@ -236,4 +229,12 @@ public class File<T> : FileEntry<T>
     }
     
     public DateTime? LastOpened { get; set; }
+    public FormInfo<T> FormInfo { get; set; }
+}
+
+public record FormInfo<T>
+{
+    public T LinkedId { get; init; }
+    public EntryProperties<T> Properties { get; init; }
+    public static  FormInfo<T> Empty => new();
 }

@@ -287,7 +287,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
             if (cacheDays > 0)
             {
-                customHeaders.Add("Cache-Control", string.Format("public, maxage={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds));
+                customHeaders.Add("Cache-Control", $"public, maxage={(int)TimeSpan.FromDays(cacheDays).TotalSeconds}");
                 customHeaders.Add("Expires", DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString());
             }
 
@@ -732,7 +732,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
             }
         }
 
-        return string.Format("{0}_{1}", chunkNumber, filePath);
+        return $"{chunkNumber}_{filePath}";
     }
 
     public override Task AbortChunkedUploadAsync(string domain, string path, string filePath)

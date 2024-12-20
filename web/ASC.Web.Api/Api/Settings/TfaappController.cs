@@ -122,7 +122,7 @@ public class TfaappController(
         var result = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
 
         var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
-        var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : "";
+        var type = request.TryGetValue("type", out var value) ? (string)value : "";
         cookiesManager.ClearCookies(CookiesType.ConfirmKey, $"_{type}");
 
         return result;
@@ -147,7 +147,7 @@ public class TfaappController(
                                 ? ConfirmType.PhoneActivation
                                 : ConfirmType.PhoneAuth;
 
-            return await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, confirmType);
+            return commonLinkUtility.GetConfirmationEmailUrl(user.Email, confirmType);
         }
 
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
@@ -156,7 +156,7 @@ public class TfaappController(
                 ? ConfirmType.TfaAuth
                 : ConfirmType.TfaActivation;
 
-            var (url, key) = await commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, confirmType);
+            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, confirmType);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{confirmType}");
             return url;
         }
@@ -252,7 +252,7 @@ public class TfaappController(
             await cookiesManager.ResetTenantCookieAsync();
         }
 
-        await messageService.SendAsync(action);
+        messageService.Send(action);
         return result;
 
         void SetSettingsProperty<T>(TfaSettingsBase<T> settings) where T : class, ISettings<T>
@@ -366,7 +366,7 @@ public class TfaappController(
         }
 
         var codes = (await tfaManager.GenerateBackupCodesAsync()).Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
-        await messageService.SendAsync(MessageAction.UserConnectedTfaApp, MessageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, displayUserSettingsHelper));
         return codes;
     }
 
@@ -392,7 +392,7 @@ public class TfaappController(
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (!isMe && tenant.OwnerId != authContext.CurrentAccount.ID)
         {
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
@@ -409,12 +409,12 @@ public class TfaappController(
         }
 
         await TfaAppUserSettings.DisableForUserAsync(settingsManager, user.Id);
-        await messageService.SendAsync(MessageAction.UserDisconnectedTfaApp, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserDisconnectedTfaApp, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)
         {
-            var (url, key) = await commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaActivation);
+            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaActivation);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{ConfirmType.TfaActivation}");
             return url;
         }

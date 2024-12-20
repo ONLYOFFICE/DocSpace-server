@@ -154,7 +154,7 @@ public class PeopleNamesItem
 [Scope]
 public class CustomNamingPeople(SettingsManager settingsManager)
 {
-    private static readonly object _locked = new();
+    private static readonly Lock _locked = new();
     private static bool _loaded;
 
     private static readonly List<PeopleNamesItem> _items = [];

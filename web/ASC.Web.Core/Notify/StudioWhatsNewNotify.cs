@@ -115,7 +115,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
             var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
             _log.InformationStartSendWhatsNewIn(tenant.GetTenantDomain(coreSettings), tenantId);
-            foreach (var user in await userManager.GetUsersAsync())
+            foreach (var user in await userManager.GetUsersAsync(EmployeeStatus.Active))
             {
                 _log.Debug($"SendMsgWhatsNew start checking subscription: {user.Email}");//temp
 

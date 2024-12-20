@@ -132,7 +132,7 @@ public class CustomNavigationController(MessageService messageService,
 
         await settingsManager.SaveAsync(settings);
 
-        await messageService.SendAsync(MessageAction.CustomNavigationSettingsUpdated);
+        messageService.Send(MessageAction.CustomNavigationSettingsUpdated);
 
         return inDto;
     }
@@ -163,6 +163,6 @@ public class CustomNavigationController(MessageService messageService,
         settings.Items.Remove(target);
         await settingsManager.SaveAsync(settings);
 
-        await messageService.SendAsync(MessageAction.CustomNavigationSettingsUpdated);
+        messageService.Send(MessageAction.CustomNavigationSettingsUpdated);
     }
 }

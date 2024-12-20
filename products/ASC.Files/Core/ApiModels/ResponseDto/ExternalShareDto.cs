@@ -63,4 +63,7 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// Link ID
     /// </summary>
     public Guid LinkId { get; set; }
+    
+    /// <summary>Specifies whether the user is authenticated or not</summary>
+    public bool IsAuthenticated { get; set; }
 }
