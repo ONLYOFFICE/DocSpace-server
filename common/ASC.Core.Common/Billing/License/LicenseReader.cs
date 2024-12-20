@@ -122,6 +122,7 @@ public class LicenseReader(
                 if (temp)
                 {
                     await SaveLicenseAsync(licenseStream, LicensePath);
+                    await Task.Delay(100);
                 }
 
                 if (!await validateFunc())
