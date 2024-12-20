@@ -473,20 +473,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpPut("order")]
     public async Task SetOrder(OrdersRequestDto<T> inDto)
     {
-        foreach (var item in inDto.Items)
-        {
-            switch (item.EntryType)
-            {
-                case FileEntryType.Folder:
-                    await fileStorageService.SetFolderOrder(item.EntryId, item.Order);
-                    break;
-                case FileEntryType.File:
-                    await fileStorageService.SetFileOrder(item.EntryId, item.Order);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+        await fileStorageService.SetOrderAsync(inDto.Items);
     }
 
     /// <summary>

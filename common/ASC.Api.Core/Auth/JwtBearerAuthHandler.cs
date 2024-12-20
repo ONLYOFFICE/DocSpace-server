@@ -36,38 +36,23 @@ using SecurityContext = ASC.Core.SecurityContext;
 namespace ASC.Api.Core.Auth;
 
 [Scope]
-public class JwtBearerAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public class JwtBearerAuthHandler(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder,
+    SecurityContext securityContext,
+    IHttpContextAccessor httpContextAccessor,
+    BaseCommonLinkUtility baseCommonLinkUtility,
+    IConfiguration configuration,
+    IHttpClientFactory httpClientFactory)
+    : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
-    private readonly SecurityContext _securityContext;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IConfiguration _configuration;
-    private readonly BaseCommonLinkUtility _linkUtility;
-    private readonly ILogger<JwtBearerAuthHandler> _logger;
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    public JwtBearerAuthHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        SecurityContext securityContext,
-        IHttpContextAccessor httpContextAccessor,
-        BaseCommonLinkUtility baseCommonLinkUtility,
-        IConfiguration configuration,
-        IHttpClientFactory httpClientFactory)
-        : base(options, logger, encoder)
-    {
-        _securityContext = securityContext;
-        _httpContextAccessor = httpContextAccessor;
-        _configuration = configuration;
-        _linkUtility = baseCommonLinkUtility;
-        _logger = logger.CreateLogger<JwtBearerAuthHandler>();
-        _httpClientFactory = httpClientFactory;
-    }
+    private readonly ILogger<JwtBearerAuthHandler> _logger = logger.CreateLogger<JwtBearerAuthHandler>();
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var serverRootPath = _linkUtility.ServerRootPath;
-        var authority = _configuration["core:oidc:authority"];
+        var serverRootPath = baseCommonLinkUtility.ServerRootPath;
+        var authority = configuration["core:oidc:authority"];
 
         if (string.IsNullOrEmpty(authority))
         {
@@ -79,11 +64,10 @@ public class JwtBearerAuthHandler : AuthenticationHandler<AuthenticationSchemeOp
             authority = $"{serverRootPath}{authority}";
         }
 
-        var audience = serverRootPath;
         var httpDocumentRetriever = new HttpDocumentRetriever();
 
-        var showPIIEnable = bool.TryParse(_configuration["core:oidc:showPII"], out var showPII) && showPII;
-        var requireHttpsEnable = bool.TryParse(_configuration["core:oidc:requireHttps"], out var requireHttps) && requireHttps;
+        var showPIIEnable = bool.TryParse(configuration["core:oidc:showPII"], out var showPII) && showPII;
+        var requireHttpsEnable = bool.TryParse(configuration["core:oidc:requireHttps"], out var requireHttps) && requireHttps;
 
         IdentityModelEventSource.ShowPII = showPIIEnable;
         httpDocumentRetriever.RequireHttps = requireHttpsEnable;
@@ -92,7 +76,7 @@ public class JwtBearerAuthHandler : AuthenticationHandler<AuthenticationSchemeOp
                                                                                         new OpenIdConnectConfigurationRetriever(),
                                                                                         httpDocumentRetriever);
 
-        var accessToken = _httpContextAccessor?.HttpContext?.Request.Headers["Authorization"].ToString();
+        var accessToken = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString();
 
         if (string.IsNullOrEmpty(accessToken))
         {
@@ -101,18 +85,18 @@ public class JwtBearerAuthHandler : AuthenticationHandler<AuthenticationSchemeOp
 
         accessToken = accessToken.Trim();
 
-        if (0 <= accessToken.IndexOf("Bearer", 0))
+        if (0 <= accessToken.IndexOf("Bearer", 0, StringComparison.Ordinal))
         {
             accessToken = accessToken["Bearer ".Length..];
         }
 
         JwtSecurityToken validatedToken;
 
-        var validationTokenEnable = !(bool.TryParse(_configuration["core:oidc:disableValidateToken"], out var disableValidateToken) && disableValidateToken);
+        var validationTokenEnable = !(bool.TryParse(configuration["core:oidc:disableValidateToken"], out var disableValidateToken) && disableValidateToken);
 
         if (validationTokenEnable)
         {
-            validatedToken = await ValidateToken(accessToken, authority, audience, configurationManager);
+            validatedToken = await ValidateToken(accessToken, authority, serverRootPath, configurationManager);
         }
         else
         {
@@ -135,7 +119,7 @@ public class JwtBearerAuthHandler : AuthenticationHandler<AuthenticationSchemeOp
 
         try
         {
-            await _securityContext.AuthenticateMeWithoutCookieAsync(userId, validatedToken.Claims.ToList());
+            await securityContext.AuthenticateMeWithoutCookieAsync(userId, validatedToken.Claims.ToList());
         }
         catch (Exception ex)
         {
@@ -176,7 +160,7 @@ public class JwtBearerAuthHandler : AuthenticationHandler<AuthenticationSchemeOp
             ValidIssuer = issuer,
             ValidAlgorithms = [SecurityAlgorithms.EcdsaSha256, SecurityAlgorithms.RsaSha256],
 
-            ClockSkew = TimeSpan.FromMinutes(2),
+            ClockSkew = TimeSpan.FromMinutes(2)
         };
 
         try
@@ -184,7 +168,7 @@ public class JwtBearerAuthHandler : AuthenticationHandler<AuthenticationSchemeOp
             _ = new JwtSecurityTokenHandler()
                                  .ValidateToken(token, validationParameters, out var rawValidatedToken);
 
-            var httpClient = _httpClientFactory.CreateClient();
+            var httpClient = httpClientFactory.CreateClient();
 
             var response = await httpClient.IntrospectTokenAsync(new TokenIntrospectionRequest
             {

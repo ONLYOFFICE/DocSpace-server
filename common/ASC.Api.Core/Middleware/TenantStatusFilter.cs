@@ -36,7 +36,7 @@ public class TenantStatusFilter(ILogger<TenantStatusFilter> logger, TenantManage
 
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync(false);
+        var tenant = tenantManager.GetCurrentTenant(false);
         if (tenant == null)
         {
             context.Result = new StatusCodeResult((int)HttpStatusCode.NotFound);

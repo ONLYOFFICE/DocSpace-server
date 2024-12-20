@@ -841,4 +841,34 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Raum: {0}. Wasserzeichen aktiviert</value>
   </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Einladung erneut verschickt: {0}</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Aktivierung des Clients {0} geändert</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Sichtbarkeit des Clients {0} geändert</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Client erstellt</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Client {0} gelöscht</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Autorisierungscode für Client {0} generiert</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Persönlicher Zugriffstoken für Client {0} generiert</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Geheimnis des Clients {0} neu generiert</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Zugriff für Client {0} widerrufen</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Client {0} aktualisiert</value>
+  </data>
 </root>

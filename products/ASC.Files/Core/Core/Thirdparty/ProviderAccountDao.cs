@@ -86,7 +86,7 @@ internal class ProviderAccountDao(
 
     public virtual async IAsyncEnumerable<IProviderInfo> GetProvidersInfoAsync(Guid userId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var thirdPartyAccounts = filesDbContext.ThirdPartyAccountsAsync(tenantId, userId);
 
@@ -98,7 +98,7 @@ internal class ProviderAccountDao(
 
     private async IAsyncEnumerable<IProviderInfo> GetProvidersInfoInternalAsync(int linkId = -1, FolderType folderType = FolderType.DEFAULT, string searchText = null)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var thirdPartyAccounts = filesDbContext.ThirdPartyAccountsByFilterAsync(tenantId, linkId, folderType, authContext.CurrentAccount.ID, GetSearchText(searchText));
         await foreach (var t in thirdPartyAccounts)
@@ -112,7 +112,7 @@ internal class ProviderAccountDao(
         ProviderTypes prKey;
         try
         {
-            prKey = (ProviderTypes)Enum.Parse(typeof(ProviderTypes), providerKey, true);
+            prKey = Enum.Parse<ProviderTypes>(providerKey, true);
             switch (prKey)
             {
                 case ProviderTypes.NextCloud:
@@ -134,7 +134,7 @@ internal class ProviderAccountDao(
             throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, providerKey));
         }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var now = tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow());
 
         var dbFilesThirdPartyAccount = new DbFilesThirdpartyAccount
@@ -167,7 +167,7 @@ internal class ProviderAccountDao(
     
     public async Task<IProviderInfo> UpdateRoomProviderInfoAsync(ProviderData data)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var forUpdate = await filesDbContext.ThirdPartyAccountAsync(tenantId, data.Id);
 
@@ -243,7 +243,7 @@ internal class ProviderAccountDao(
 
     public virtual async Task<int> UpdateProviderInfoAsync(int linkId, AuthData authData)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var login = authData.Login ?? "";
         var password = await EncryptPasswordAsync(authData.Password);
@@ -252,12 +252,12 @@ internal class ProviderAccountDao(
 
         var forUpdateCount = await filesDbContext.UpdateThirdPartyAccountsAsync(tenantId, linkId, login, password, token, url);
 
-        return forUpdateCount == 1 ? linkId : default;
+        return forUpdateCount == 1 ? linkId : 0;
     }
 
     public virtual async Task<int> UpdateProviderInfoAsync(int linkId, string customerTitle, AuthData newAuthData, FolderType folderType, Guid? userId = null)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var authData = new AuthData();
@@ -340,12 +340,12 @@ internal class ProviderAccountDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        return toUpdateCount == 1 ? linkId : default;
+        return toUpdateCount == 1 ? linkId : 0;
     }
 
     public virtual async Task<int> UpdateBackupProviderInfoAsync(string providerKey, string customerTitle, AuthData newAuthData)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         DbFilesThirdpartyAccount thirdParty;
@@ -412,7 +412,7 @@ internal class ProviderAccountDao(
 
     public virtual async Task RemoveProviderInfoAsync(int linkId)
     {       
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>

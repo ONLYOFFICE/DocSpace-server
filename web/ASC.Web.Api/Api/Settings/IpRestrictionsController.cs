@@ -49,7 +49,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     public async Task<IEnumerable<IPRestriction>> GetIpRestrictionsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         return await iPRestrictionsService.GetAsync(tenant.Id);
     }
 
@@ -88,7 +88,7 @@ public class IpRestrictionsController(ApiContext apiContext,
             throw new ArgumentException(nameof(inDto.IpRestrictions));
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var ips = await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
 
         var settings = new IPRestrictionsSettings { Enable = enable };
@@ -147,7 +147,7 @@ public class IpRestrictionsController(ApiContext apiContext,
             throw new ArgumentException(nameof(inDto.IpRestrictions));
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var ips = await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
 
         var settings = new IPRestrictionsSettings { Enable = enable };

@@ -44,7 +44,7 @@ public class IntegrationEventLogEntry
         TransactionId = transactionId.ToString();
     }
     public Guid EventId { get; private set; }
-
+    [MaxLength(255)]
     public string EventTypeName { get; private set; }
 
     [NotMapped]

@@ -52,21 +52,3 @@ public class RoomDataLifetimeDto : IMapFrom<RoomDataLifetime>
     /// </summary>
     public bool? Enabled { get; set; }
 }
-
-/// <summary>
-/// Request parameters for room data lifetime
-/// </summary>
-public class RoomDataLifetimeDto<T>
-{
-    /// <summary>
-    /// Room ID
-    /// </summary>
-    [FromRoute(Name = "id")]
-    public T Id { get; set; }
-
-    /// <summary>
-    /// Room data lifetime
-    /// </summary>
-    [FromBody]
-    public RoomDataLifetimeDto RoomDataLifetime { get; set; }
-}

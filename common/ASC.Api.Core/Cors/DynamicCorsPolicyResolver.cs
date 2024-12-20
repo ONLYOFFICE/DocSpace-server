@@ -71,9 +71,9 @@ public class DynamicCorsPolicyResolver(
 
     private async Task<IEnumerable<string>> GetOriginsFromOAuth2App()
     {        
-        var accessToken = _context.Request.Headers["Authorization"].ToString();
+        var accessToken = _context.Request.Headers.Authorization.ToString();
 
-        if (accessToken == null || accessToken.IndexOf("Bearer", 0) == -1)
+        if (string.IsNullOrEmpty(accessToken) || accessToken.IndexOf("Bearer", 0, StringComparison.Ordinal) == -1)
         {
             return new List<string>();
         }
@@ -93,7 +93,7 @@ public class DynamicCorsPolicyResolver(
         var claimIdClaim = token.Claims.Single(c => string.Equals(c.Type, "cid", StringComparison.OrdinalIgnoreCase));
         var clientId = Guid.Parse(claimIdClaim.Value);
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var cookieValue = await cookieStorage.EncryptCookieAsync(tenantId, userId, 0);
         var cookieName = cookiesManager.GetAscCookiesName();
 

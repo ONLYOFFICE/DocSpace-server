@@ -51,14 +51,14 @@ public class InvitationService(
         return commonLinkUtility.GetConfirmationUrl(key, ConfirmType.LinkInvite, createdBy);
     }
 
-    public async Task<string> GetInvitationLinkAsync(string email, FileShare share, Guid createdBy, string roomId, string culture = null)
+    public string GetInvitationLink(string email, FileShare share, Guid createdBy, string roomId, string culture = null)
     {
         var type = FileSecurity.GetTypeByShare(share);
-        var link = await commonLinkUtility.GetInvitationLinkAsync(email, type, createdBy, culture) + $"&roomId={roomId}";
+        var link = commonLinkUtility.GetInvitationLink(email, type, createdBy, culture) + $"&roomId={roomId}";
         return link;
     }
     
-    public async Task<Validation> ConfirmAsync(string key, string email, EmployeeType employeeType, string roomId = null, Guid? userId = default)
+    public async Task<Validation> ConfirmAsync(string key, string email, EmployeeType employeeType, string roomId = null, Guid? userId = null)
     {
         if (!await iPSecurity.VerifyAsync())
         {
@@ -103,7 +103,7 @@ public class InvitationService(
                         return true;
                     }
                     
-                    var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+                    var tenantId = tenantManager.GetCurrentTenantId();
                     await using var context = await dbContextFactory.CreateDbContextAsync();
 
                     var query = context.AuditEvents.Where(x => x.TenantId == tenantId && x.Action == (int)MessageAction.RoomRemoveUser);
@@ -195,7 +195,7 @@ public class InvitationService(
         return validation;
     }
 
-    public async Task<InvitationLinkData> GetLinkDataAsync(string key, string email, ConfirmType? confirmType, EmployeeType employeeType = EmployeeType.All, Guid? userId = default)
+    public async Task<InvitationLinkData> GetLinkDataAsync(string key, string email, ConfirmType? confirmType, EmployeeType employeeType = EmployeeType.All, Guid? userId = null)
     {
         if (confirmType is ConfirmType.EmpInvite)
         {
@@ -222,7 +222,7 @@ public class InvitationService(
             LinkType = result.LinkType, 
             ConfirmType = result.ConfirmType, 
             User = result.User,
-            EmployeeType = employeeType,
+            EmployeeType = employeeType
         };
 
         if (result.LinkType is not InvitationLinkType.CommonToRoom)
@@ -259,7 +259,7 @@ public class InvitationService(
         }
 
         var success = int.TryParse(data.RoomId, out var id);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
         {

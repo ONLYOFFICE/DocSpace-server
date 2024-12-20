@@ -27,13 +27,8 @@
 namespace ASC.Api.Core.Extensions;
 
 [AttributeUsage(AttributeTargets.All)]
-public class SwaggerEnumAttribute : Attribute
+public class SwaggerEnumAttribute(string description = null) : Attribute
 {
-    public SwaggerEnumAttribute(string description = null)
-    {
-        Ignore = false;
-        Description = description;
-    }
-    public bool Ignore {  get; set; }
-    public string Description { get; set; }
+    public bool Ignore { get; set; }
+    public string Description { get; set; } = description;
 }

@@ -1069,4 +1069,10 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Administratorların sayı limiti keçir: {0}/{1}.</value>
   </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Ən azı 1 icazə verilən IP ünvanı əlavə edin.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Qeyri-kommersiya</value>
+  </data>
 </root>

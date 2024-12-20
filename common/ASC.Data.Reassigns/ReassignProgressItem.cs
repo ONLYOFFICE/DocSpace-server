@@ -169,11 +169,11 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
 
         if (_httpHeaders != null)
         {
-            await messageService.SendHeadersMessageAsync(MessageAction.UserDataReassigns, MessageTarget.Create(FromUser), _httpHeaders, [fromUserName, toUserName]);
+            messageService.SendHeadersMessage(MessageAction.UserDataReassigns, MessageTarget.Create(FromUser), _httpHeaders, [fromUserName, toUserName]);
         }
         else
         {
-            await messageService.SendAsync(MessageAction.UserDataReassigns, MessageTarget.Create(FromUser), fromUserName, toUserName);
+            messageService.Send(MessageAction.UserDataReassigns, MessageTarget.Create(FromUser), fromUserName, toUserName);
         }
     }
 
@@ -195,11 +195,11 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
 
         if (_httpHeaders != null)
         {
-            await messageService.SendHeadersMessageAsync(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
+            messageService.SendHeadersMessage(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
         }
         else
         {
-            await messageService.SendAsync(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
+            messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
         }
     }
 }

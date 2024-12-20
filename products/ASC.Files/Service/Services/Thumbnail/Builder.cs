@@ -205,7 +205,7 @@ public class Builder<T>(ThumbnailSettings settings,
         {
             try
             {
-                (resultPercent, thumbnailUrl) = await GetThumbnailUrl(file, global.DocThumbnailExtension.ToString(), thumbnailWidth, thumbnailHeight);
+                (resultPercent, thumbnailUrl) = await GetThumbnailUrl(file, global.DocThumbnailExtension.ToStringFast(), thumbnailWidth, thumbnailHeight);
 
                 if (resultPercent == 100)
                 {
@@ -273,8 +273,8 @@ public class Builder<T>(ThumbnailSettings settings,
 
     private async Task<(int, string)> GetThumbnailUrl(File<T> file, string toExtension, int width, int height)
     {
-        var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
-        fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
+        var fileUri = pathProvider.GetFileStreamUrl(file);
+        fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
 
         var fileExtension = file.ConvertedExtension;
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
@@ -437,7 +437,7 @@ public class Builder<T>(ThumbnailSettings settings,
             }
         }
 
-        return sourceBitmap.Clone(x =>
+        var response = sourceBitmap.Clone(x =>
         {
             x.Resize(new ResizeOptions
             {
@@ -447,5 +447,9 @@ public class Builder<T>(ThumbnailSettings settings,
                 Sampler = KnownResamplers.Lanczos8
             });
         });
+
+        response.Mutate(i => i.AutoOrient());
+
+        return response;
     }
 }
