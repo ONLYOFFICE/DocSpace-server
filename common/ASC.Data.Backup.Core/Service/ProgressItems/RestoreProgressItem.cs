@@ -139,13 +139,13 @@ public class RestoreProgressItem : BaseBackupProgressItem
             restoreTask.ProgressChanged = async args =>
             {
                 Percentage = Percentage = 10d + 0.65 * args.Progress;
-                await _socketManager.RestoreProgressAsync(socketTenant, Percentage);
+                await _socketManager.RestoreProgressAsync(socketTenant, (int)Percentage);
                 await PublishChanges();
             };
             await restoreTask.RunJob(); 
             NewTenantId = columnMapper.GetTenantMapping();
 
-            await _socketManager.RestoreProgressAsync(socketTenant, Percentage);
+            await _socketManager.RestoreProgressAsync(socketTenant, (int)Percentage);
             await PublishChanges();
 
             if (restoreTask.Dump)
@@ -183,7 +183,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             Percentage = 75;
 
-            await _socketManager.RestoreProgressAsync(socketTenant, Percentage);
+            await _socketManager.RestoreProgressAsync(socketTenant, (int)Percentage);
             await PublishChanges();
 
             File.Delete(tempFile);

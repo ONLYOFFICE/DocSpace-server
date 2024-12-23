@@ -108,7 +108,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
             backupPortalTask.ProgressChanged = async args =>
             {
                 Percentage = 0.9 * args.Progress;
-                await socketManager.BackupProgressAsync(Percentage);
+                await socketManager.BackupProgressAsync((int)Percentage);
                 await PublishChanges();
             };
 

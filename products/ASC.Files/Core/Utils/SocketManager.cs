@@ -121,13 +121,13 @@ public class SocketManager(
         await MakeRequest("mark-as-new-folder", result);
     }
 
-    public async Task BackupProgressAsync(double percentage)
+    public async Task BackupProgressAsync(int percentage)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await MakeRequest("backup-progress", new { tenantId, percentage });
     }
 
-    public async Task RestoreProgressAsync(int tenantId, double percentage)
+    public async Task RestoreProgressAsync(int tenantId, int percentage)
     {
         await MakeRequest("restore-progress", new { tenantId, percentage });
     }
