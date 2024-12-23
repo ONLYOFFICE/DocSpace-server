@@ -40,7 +40,7 @@ public class LoginEventsRepository(TenantManager tenantManager,
         int startIndex = 0,
         int limit = 0)
     {
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
         await using var messagesContext = await dbContextFactory.CreateDbContextAsync();
 
         var query =
@@ -99,5 +99,31 @@ public class LoginEventsRepository(TenantManager tenantManager,
             await geolocationHelper.AddGeolocationAsync(e);
         }
         return events;
+    }
+
+    public async Task<DbLoginEvent> GetLastSuccessEventAsync(int tenantId)
+    {
+        await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
+
+        var successLoginEvents = new List<int>() {
+            (int)MessageAction.LoginSuccess,
+            (int)MessageAction.LoginSuccessViaSocialAccount,
+            (int)MessageAction.LoginSuccessViaSms,
+            (int)MessageAction.LoginSuccessViaApi,
+            (int)MessageAction.LoginSuccessViaSocialApp,
+            (int)MessageAction.LoginSuccessViaApiSms,
+            (int)MessageAction.LoginSuccessViaSSO,
+            (int)MessageAction.LoginSuccessViaApiSocialAccount,
+            (int)MessageAction.LoginSuccesViaTfaApp,
+            (int)MessageAction.LoginSuccessViaApiTfa,
+
+            (int)MessageAction.Logout,
+        };
+
+        return await auditTrailContext.LoginEvents
+            .Where(r => r.TenantId == tenantId)
+            .Where(r => successLoginEvents.Contains(r.Action ?? 0))
+            .OrderByDescending(r => r.Id)
+            .FirstOrDefaultAsync();
     }
 }

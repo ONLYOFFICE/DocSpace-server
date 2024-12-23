@@ -41,7 +41,7 @@ public class WorkContext(IConfiguration configuration,
     TelegramSender notifyTelegramSender,
     PushSender notifyPushSender)
 {
-    private static readonly object _syncRoot = new();
+    private static readonly Lock _syncRoot = new();
     private bool _notifyStarted;
     private static bool? _isMono;
 
@@ -151,8 +151,9 @@ public class NotifyTransferRequest(TenantManager tenantManager) : INotifyEngineA
         }
     }
 
-    public async Task BeforeTransferRequestAsync(NotifyRequest request)
+    public Task BeforeTransferRequestAsync(NotifyRequest request)
     {
-        request.Properties.Add("Tenant", await tenantManager.GetCurrentTenantAsync(false));
+        request.Properties.Add("Tenant", tenantManager.GetCurrentTenant(false));
+        return Task.CompletedTask;
     }
 }

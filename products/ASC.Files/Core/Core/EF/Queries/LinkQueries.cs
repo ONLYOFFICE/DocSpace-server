@@ -40,6 +40,11 @@ public partial class FilesDbContext
         return LinkQueries.LinkedIdAsync(this, tenantId, sourceId, id);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    public IAsyncEnumerable<DbFilesLink> FilesLinksAsync(int tenantId, IEnumerable<string> sourceIds, Guid id)
+    {
+        return LinkQueries.FilesLinksAsync(this, tenantId, sourceIds, id);
+    }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
     public Task<DbFilesLink> FileLinkAsync(int tenantId, string sourceId, Guid id)
@@ -72,6 +77,14 @@ static file class LinkQueries
                     .Select(r => r.LinkedId)
                     .OrderByDescending(r => r)
                     .LastOrDefault());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Guid, IAsyncEnumerable<DbFilesLink>> FilesLinksAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<string> sourceIds, Guid id) =>
+                ctx.FilesLink
+                    .Where(r => r.TenantId == tenantId && sourceIds.Contains(r.SourceId) && r.LinkedFor == id)
+                    .GroupBy(r => r.SourceId)
+                    .Select(g => g.OrderByDescending(r => r.LinkedId).LastOrDefault()));
 
     public static readonly Func<FilesDbContext, int, string, Guid, Task<DbFilesLink>> FileLinkAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

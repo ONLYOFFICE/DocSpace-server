@@ -1131,4 +1131,7 @@
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Non-profit</value>
   </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Add at least 1 allowed IP address.</value>
+  </data>
 </root>

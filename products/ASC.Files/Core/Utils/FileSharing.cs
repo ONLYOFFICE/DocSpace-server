@@ -45,15 +45,17 @@ public class FileSharingAceHelper(
     IUrlShortener urlShortener,
     IDistributedLockProvider distributedLockProvider,
     SocketManager socketManager,
-    FilesLinkUtility filesLinkUtility,
-    IDaoFactory daoFactory)
+    IDaoFactory daoFactory,
+    ExternalShare externalShare,
+    SettingsManager settingsManager,
+    PasswordSettingsManager passwordSettingsManager)
 {
     private const int MaxInvitationLinks = 1;
     private const int MaxAdditionalExternalLinks = 5;
     private const int MaxPrimaryExternalLinks = 1;
 
-    public async Task<AceProcessingResult<T>> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message,
-        AceAdvancedSettingsWrapper advancedSettings, string culture = null, bool socket = true, bool beforeOwnerChange = false)
+    public async Task<AceProcessingResult<T>> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, string culture = null, 
+        bool socket = true, bool beforeOwnerChange = false)
     {
         if (entry == null)
         {
@@ -68,9 +70,8 @@ public class FileSharingAceHelper(
         }
 
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
-        var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
         var room = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
-        var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString()) : null;
+        var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString(), false) : null;
         var entryType = entry.FileEntryType;
         var recipients = new Dictionary<Guid, FileShare>();
         var usersWithoutRight = new List<Guid>();
@@ -86,8 +87,8 @@ public class FileSharingAceHelper(
             }
 
             var emailInvite = !string.IsNullOrEmpty(w.Email);
-            var currentUser = await userManager.GetUsersAsync(w.Id);
-            if (currentUser.Status == EmployeeStatus.Terminated && w.Access != FileShare.None)
+            var currentUser = await userManager.GetUsersAsync(w.Id, false);
+            if ((currentUser.Status == EmployeeStatus.Terminated || currentUser.Removed) && w.Access != FileShare.None)
             {
                 continue;
             }
@@ -134,11 +135,6 @@ public class FileSharingAceHelper(
                     w.FileShareOptions.Password = null;
                     w.FileShareOptions.DenyDownload = false;
                 }
-
-                if (eventType == EventType.Create && w.FileShareOptions.ExpirationDate == DateTime.MinValue)
-                {
-                    w.FileShareOptions.ExpirationDate = DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime);
-                }
             }
 
             if (room != null)
@@ -159,6 +155,17 @@ public class FileSharingAceHelper(
                     if (w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
                     {
                         w.FileShareOptions.Internal = false;
+                    }
+                    
+                    if (!string.IsNullOrEmpty(w.FileShareOptions.Password))
+                    {
+                        if (eventType != EventType.Remove)
+                        {
+                            var settings = await settingsManager.LoadAsync<PasswordSettings>();
+                            passwordSettingsManager.CheckPassword(w.FileShareOptions.Password, settings);
+                        }
+            
+                        w.FileShareOptions.Password = await externalShare.CreatePasswordKeyAsync(w.FileShareOptions.Password);
                     }
                 }
             }
@@ -283,7 +290,7 @@ public class FileSharingAceHelper(
 
             if (emailInvite)
             {
-                var link = await invitationService.GetInvitationLinkAsync(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
+                var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
                 await studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink, culture, true);
@@ -356,13 +363,6 @@ public class FileSharingAceHelper(
 
         if (recipients.Count > 0)
         {
-            if (entryType == FileEntryType.File
-                || ((Folder<T>)entry).FoldersCount + ((Folder<T>)entry).FilesCount > 0
-                || entry.ProviderEntry)
-            {
-                await fileMarker.MarkAsNewAsync(entry, recipients.Keys.ToList());
-            }
-
             if (entry.RootFolderType is FolderType.USER or FolderType.Privacy
                 && notify)
             {
@@ -685,7 +685,7 @@ public class FileSharing(
         var folderDao = daoFactory.GetFolderDao<T>();
         var folders = await folderDao.GetFoldersAsync(folderIds).ToListAsync();
 
-        var entries = files.Concat(folders.Cast<FileEntry<T>>());
+        var entries = files.Concat(folders.Select(FileEntry<T> (r) => r));
 
         foreach (var entry in entries)
         {
@@ -800,14 +800,13 @@ public class FileSharing(
         await foreach (var member in securityDao.GetGroupMembersWithSecurityAsync(entry, groupId, text, offset, count))
         {
             var isOwner = entry.CreateBy == member.UserId;
-            var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(member.UserId);
             
             yield return new GroupMemberSecurity
             {
                 User = await userManager.GetUsersAsync(member.UserId),
                 GroupShare = member.GroupShare,
-                UserShare = isOwner || isDocSpaceAdmin ? FileShare.RoomManager : member.UserShare,
-                CanEditAccess = canEditAccess && !isOwner && userId != member.UserId && !isDocSpaceAdmin,
+                UserShare = isOwner ? FileShare.RoomManager : member.UserShare,
+                CanEditAccess = canEditAccess && !isOwner && userId != member.UserId,
                 Owner = isOwner
             };
         }

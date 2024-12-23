@@ -27,21 +27,13 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-public class HideRouteDocumentFilter : IDocumentFilter
+namespace ASC.Api.Core.Extensions;
+
+public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
 {
-    private readonly string _routeToHide;
-
-    public HideRouteDocumentFilter(string RouteToHide)
-    {
-        _routeToHide = RouteToHide;
-    }
-
     public void Apply(OpenApiDocument document, DocumentFilterContext context)
     {
-        if (document.Paths.ContainsKey(_routeToHide))
-        {
-            document.Paths.Remove(_routeToHide);
-        }
+        document.Paths.Remove(routeToHide);
     }
 }
 
@@ -62,7 +54,7 @@ public class LowercaseDocumentFilter : IDocumentFilter
 
 public class TagDescriptionsDocumentFilter : IDocumentFilter
 {
-    private readonly Dictionary<string, string> _tagDescriptions = new Dictionary<string, string>
+    private readonly Dictionary<string, string> _tagDescriptions = new()
     {
         { "People", "Operations for working with people" },
         { "Portal", "Operations for working with portal" },

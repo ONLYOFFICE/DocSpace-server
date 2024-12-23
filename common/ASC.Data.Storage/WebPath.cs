@@ -60,7 +60,7 @@ public class WebPathSettings
 
     public string GetPath(HttpContext httpContext, ILoggerProvider options, string relativePath)
     {
-        if (!string.IsNullOrEmpty(relativePath) && relativePath.IndexOf('~') == 0)
+        if (!string.IsNullOrEmpty(relativePath) && relativePath.StartsWith('~'))
         {
             throw new ArgumentException($"bad path format {relativePath} remove '~'", nameof(relativePath));
         }
@@ -87,7 +87,7 @@ public class WebPathSettings
                 appender = _appenders.First();
             }
 
-            if (appender.Append.IndexOf('~') == 0)
+            if (appender.Append.StartsWith('~'))
             {
                 var query = string.Empty;
                 //Rel path
@@ -137,7 +137,7 @@ public class WebPath(
 {
     public async Task<string> GetPathAsync(string relativePath)
     {
-        if (!string.IsNullOrEmpty(relativePath) && relativePath.IndexOf('~') == 0)
+        if (!string.IsNullOrEmpty(relativePath) && relativePath.StartsWith('~'))
         {
             throw new ArgumentException($"bad path format {relativePath} remove '~'", nameof(relativePath));
         }

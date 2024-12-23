@@ -93,7 +93,7 @@ internal class FileConverterService<T>(
                 {
                     var user = await userManager.GetUsersAsync(converter.Account);
 
-                    var culture = string.IsNullOrEmpty(user.CultureName) ? (await tenantManager.GetCurrentTenantAsync()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
+                    var culture = string.IsNullOrEmpty(user.CultureName) ? (tenantManager.GetCurrentTenant()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
 
                     CultureInfo.CurrentCulture = culture;
                     CultureInfo.CurrentUICulture = culture;
@@ -104,11 +104,11 @@ internal class FileConverterService<T>(
                         throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
                     }
 
-                    fileUri = await pathProvider.GetFileStreamUrlAsync(file);
+                    fileUri = pathProvider.GetFileStreamUrl(file);
 
                     var toExtension = fileUtility.GetInternalConvertExtension(file.Title);
                     
-                    if (!string.IsNullOrEmpty(outputType) && await fileConverter.EnableConvertAsync(file, outputType))
+                    if (!string.IsNullOrEmpty(outputType) && await fileConverter.EnableConvertAsync(file, outputType, false))
                     {
                         toExtension = outputType;
                     }
@@ -116,7 +116,7 @@ internal class FileConverterService<T>(
                     var fileExtension = file.ConvertedExtension;
                     var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 
-                    fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
+                    fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
                     (operationResultProgress, convertedFileUrl, convertedFileType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, null, true, false);
                 }
                 catch (Exception exception)

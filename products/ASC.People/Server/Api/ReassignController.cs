@@ -49,7 +49,7 @@ public class ReassignController(
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var progressItem = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         return TaskProgressResponseDto.Get(progressItem);
@@ -81,7 +81,7 @@ public class ReassignController(
         }
 
         var fromUser = await userManager.GetUsersAsync(inDto.FromUserId);
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         if (userManager.IsSystemUser(fromUser.Id) || 
             fromUser.IsOwner(tenant) || 
@@ -110,7 +110,7 @@ public class ReassignController(
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var progressItem = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         if (progressItem != null)

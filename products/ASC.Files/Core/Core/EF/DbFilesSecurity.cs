@@ -29,6 +29,7 @@ namespace ASC.Files.Core.EF;
 public class DbFilesSecurity : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    [MaxLength(50)]
     public string EntryId { get; set; }
     public FileEntryType EntryType { get; set; }
     public SubjectType SubjectType { get; set; }
@@ -36,7 +37,7 @@ public class DbFilesSecurity : BaseEntity, IDbFile
     public Guid Owner { get; set; }
     public FileShare Share { get; set; }
     public DateTime TimeStamp { get; set; }
-    public string Options { get; set; }
+    public FileShareOptions Options { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -79,7 +80,7 @@ public static class DbFilesSecurityExtension
 
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -108,7 +109,7 @@ public static class DbFilesSecurityExtension
 
             entity.Property(e => e.Options)
                 .HasColumnName("options")
-                .HasColumnType("text")
+                .HasColumnType("json")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });
@@ -131,8 +132,7 @@ public static class DbFilesSecurityExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id")
-                .HasMaxLength(50);
+                .HasColumnName("entry_id");
 
             entity.Property(e => e.EntryType).HasColumnName("entry_type");
 

@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class CustomDbContext(DbContextOptions<CustomDbContext> options) : DbContext(options)
+public class CustomDbContext(DbContextOptions<CustomDbContext> options) : BaseDbContext(options)
 {
     public DbSet<MobileAppInstall> MobileAppInstall { get; set; }
     public DbSet<DbIPLookup> DbIPLookup { get; set; }

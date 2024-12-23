@@ -148,7 +148,7 @@ public class FilesSettingsHelper(
         var setting = await settingsManager.LoadAsync<FilesSettings>();
         setting.EnableThirdpartySetting = value;
         await settingsManager.SaveAsync(setting);
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsThirdPartySettingsUpdated);
+        messageService.SendHeadersMessage(MessageAction.DocumentsThirdPartySettingsUpdated);
     }
 
     public async Task<bool> GetExternalShare()
@@ -190,7 +190,7 @@ public class FilesSettingsHelper(
             await SetExternalShareSocialMedia(false);
         }
 
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsExternalShareSettingsUpdated);
+        messageService.SendHeadersMessage(MessageAction.DocumentsExternalShareSettingsUpdated);
 
         return await GetExternalShare();
     }
@@ -204,7 +204,7 @@ public class FilesSettingsHelper(
 
         await SetExternalShareSocialMedia(await GetExternalShare() && enable);
 
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsExternalShareSettingsUpdated);
+        messageService.SendHeadersMessage(MessageAction.DocumentsExternalShareSettingsUpdated);
 
         return await GetExternalShareSocialMedia();
     }
@@ -217,7 +217,7 @@ public class FilesSettingsHelper(
         setting.StoreOriginalFilesSetting = value;
         await SaveForCurrentUser(setting);
         
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsUploadingFormatsSettingsUpdated);
+        messageService.SendHeadersMessage(MessageAction.DocumentsUploadingFormatsSettingsUpdated);
     }
 
     public async Task<bool> GetKeepNewFileName() => (await LoadForCurrentUser()).KeepNewFileName;
@@ -229,7 +229,7 @@ public class FilesSettingsHelper(
         {
             current.KeepNewFileName = value;
             await SaveForCurrentUser(current);
-            await messageService.SendHeadersMessageAsync(MessageAction.DocumentsKeepNewFileNameSettingsUpdated);
+            messageService.SendHeadersMessage(MessageAction.DocumentsKeepNewFileNameSettingsUpdated);
         }
 
         return current.KeepNewFileName;
@@ -244,7 +244,7 @@ public class FilesSettingsHelper(
         {
             current.DisplayFileExtension = value;
             await SaveForCurrentUser(current);
-            await messageService.SendHeadersMessageAsync(MessageAction.DocumentsDisplayFileExtensionUpdated);
+            messageService.SendHeadersMessage(MessageAction.DocumentsDisplayFileExtensionUpdated);
         }
 
         return current.DisplayFileExtension;
@@ -328,7 +328,7 @@ public class FilesSettingsHelper(
         //var setting = await LoadForCurrentUser();
         //setting.ForcesaveSetting = value;
         //await SaveForCurrentUser(setting);
-        //await messageService.SendHeadersMessageAsync(MessageAction.DocumentsForcesave);
+        //messageService.SendHeadersMessageAsync(MessageAction.DocumentsForcesave);
     }
 
     public bool GetStoreForcesave() => false;
@@ -342,7 +342,7 @@ public class FilesSettingsHelper(
         //var setting = _settingsManager.Load<FilesSettings>();
         //setting.StoreForcesaveSetting = value;
         //_settingsManager.Save(setting);
-        //await messageService.SendHeadersMessageAsync(MessageAction.DocumentsStoreForcesave);
+        //messageService.SendHeadersMessageAsync(MessageAction.DocumentsStoreForcesave);
     }
 
     public async Task<bool> GetRecentSection() => !(await LoadForCurrentUser()).HideRecentSetting;

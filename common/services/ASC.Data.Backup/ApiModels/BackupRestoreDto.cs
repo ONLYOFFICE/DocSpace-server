@@ -39,12 +39,13 @@ public class BackupRestoreDto
     /// <summary>
     /// Storage type
     /// </summary>
-    public int? StorageType { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
     /// Storage parameters
     /// </summary>
-    public IDictionary<object, object> StorageParams { get; set; }
+    public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
     /// Notifies users about portal restoring process or not

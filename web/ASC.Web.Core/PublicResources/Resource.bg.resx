@@ -1063,4 +1063,10 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Неуспешно задаване на квота за потребител. Въведената стойност е по-голяма от общото хранилище на DocSpace.</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Добавете поне 1 доверен домейн.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Броят на администраторите надвишава ограничението: {0}/{1}.</value>
+  </data>
 </root>

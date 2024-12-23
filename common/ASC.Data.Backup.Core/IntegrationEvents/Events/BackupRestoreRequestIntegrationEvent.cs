@@ -40,7 +40,7 @@ public record BackupRestoreRequestIntegrationEvent : IntegrationEvent
                                   Dictionary<string, string> storageParams,
                                   bool notify,
                                   string backupId,
-                                  string serverBaseUri = default
+                                  string serverBaseUri = null
                                   ) : base(createBy, tenantId)
     {
         StorageType = storageType;

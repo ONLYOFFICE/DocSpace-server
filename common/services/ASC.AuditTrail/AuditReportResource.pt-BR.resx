@@ -802,4 +802,73 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Usuários [{0}]. Formulário enviado: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Exportação do índice da sala salvo em Documentos</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Convite enviados novamente: {0}</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Ativação do cliente {0} alterada</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Visibilidade do cliente {0} alterada</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Cliente criado</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Cliente {0} excluído</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Arquivo: {0}. Índice alterado de {1} para {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Pasta: {0}. Índice alterado de {1} para {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Pasta: {0}. Índices reordenados</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Código de autorização gerado para o cliente {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Token de acesso pessoal gerado para o cliente {0}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Segredo do cliente {0} regenerado</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Acesso do cliente {0} revogado</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Sala: {0}. Negar download desabilitado</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Sala: {0}. Negar download habilitado</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indexação de sala desabilitada</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indexação de sala habilitada</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>LifeTime desabilitado</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>O tempo de vida é definido. Valor: {0}. Período: {1}. Excluir permanentemente: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Sala: {0}. Marca d'água desabilitada</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Sala: {0}. Marca d'água habilitada</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Cliente {0} atualizado</value>
+  </data>
 </root>

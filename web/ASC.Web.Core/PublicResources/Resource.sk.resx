@@ -1063,4 +1063,16 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Nepodarilo sa nastaviť kvótu pre používateľa. Zadaná hodnota je väčšia ako celkové úložisko DocSpace.</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Pridajte aspoň 1 dôveryhodnú doménu.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Počet administrátorov prekročil limit: {0}/{1}.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Nezisková</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Pridajte aspoň 1 povolenú IP adresu.</value>
+  </data>
 </root>

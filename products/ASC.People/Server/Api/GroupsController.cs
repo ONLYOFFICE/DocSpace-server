@@ -33,7 +33,7 @@ namespace ASC.People.Api;
 [Scope]
 [DefaultRoute]
 [ApiController]
-[ControllerName("groups")]
+[ControllerName("group")]
 public class GroupController(
     GroupSummaryDtoHelper groupSummaryDtoHelper,
     UserManager userManager,
@@ -156,7 +156,7 @@ public class GroupController(
             }
         }
 
-        await messageService.SendAsync(MessageAction.GroupCreated, MessageTarget.Create(group.ID), group.Name);
+        messageService.Send(MessageAction.GroupCreated, MessageTarget.Create(group.ID), group.Name);
 
         return await groupFullDtoHelper.Get(group, true);
     }
@@ -199,7 +199,7 @@ public class GroupController(
             }
         }
 
-        await messageService.SendAsync(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
+        messageService.Send(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
 
         return await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
     }
@@ -224,7 +224,7 @@ public class GroupController(
         await userManager.DeleteGroupAsync(inDto.Id);
         await fileSecurity.RemoveSubjectAsync(inDto.Id, false);
 
-        await messageService.SendAsync(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
+        messageService.Send(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
 
         return NoContent();
     }

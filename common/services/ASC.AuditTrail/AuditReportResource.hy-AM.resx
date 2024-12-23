@@ -403,7 +403,7 @@
     <value>Չհաջողվեց մուտք գործել API-ի միջոցով</value>
   </data>
   <data name="LoginFailViaApiSms" xml:space="preserve">
-    <value>Չհաջողվեց մուտք գործել API-ի միջոցով &amp;amp; SMS կոդ</value>
+    <value>Չհաջողվեց մուտք գործել API-ի միջոցով &amp; SMS կոդ</value>
   </data>
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
     <value>Մուտք գործել API-ի միջոցով &amp; Սոցիալական մեդիան ձախողվեց</value>
@@ -860,5 +860,74 @@
   </data>
   <data name="FormSubmit" xml:space="preserve">
     <value>Օգտատերեր [{0}]: Ներկայացված ձևը՝ {1}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Հաճախորդի {0} ակտիվացումը փոխվել է</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Հաճախորդի {0} տեսանելիությունը փոխվել է</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Հաճախորդը ստեղծվել է</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Հաճախորդը {0} ջնջվել է</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Ֆայլ՝ {0}: Ցուցանիշը փոխվել է {1}-ից մինչև {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Թղթապանակ՝ {0}: Ցուցանիշը փոխվել է {1}-ից մինչև {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Թղթապանակ՝ {0}: Ցուցանիշները վերադասավորվել են</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Հաճախորդի համար ստեղծվել է թույլտվության կոդը {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Հաճախորդի համար ստեղծվել է անձնական մուտքի նշան {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Հաճախորդի {0} գաղտնին վերականգնվել է</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Հաճախորդի {0} մուտքը չեղարկվել է</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Սենյակ՝ {0}: Ներբեռնման արգելումը անջատված է</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Սենյակ՝ {0}: Ներբեռնման արգելումը միացված է</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Սենյակների ինդեքսավորումը անջատված է</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Սենյակի ինդեքսի արտահանումը պահված է Փաստաթղթերում</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Սենյակների ինդեքսավորումը միացված է</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Մշտականը անջատված է</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Մշտական լիցենզիայի ժամանակը սահմանված է: Արժեք՝ {0}: Ժամանակահատվածը՝ {1}: Ընդմիշտ ջնջել՝ {2}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Կրկին ուղարկված հրավեր՝ {0}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Սենյակ՝ {0}: Ջրանշանն անջատված է</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Սենյակ՝ {0}: Ջրանշանը միացված է</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Հաճախորդը {0} թարմացվել է</value>
   </data>
 </root>

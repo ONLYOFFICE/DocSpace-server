@@ -72,7 +72,6 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             {
                 schema.Example = GetExample(swaggerSchemaCustomAttribute.Example);
             }
-            return;
         }
         else
         {
@@ -81,7 +80,6 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             {
                 schema.Example = example;
             }
-            return;
         }
     }
 
@@ -173,9 +171,13 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 result.Example = array;
             }
 
-            if(arraySchema.OneOf != null)
+            if(arraySchema.OneOf.Count != 0)
             {
                 result.Items = new OpenApiSchema { AnyOf = arraySchema.OneOf };
+            }
+            else if(checkType == typeof(object))
+            {
+                result.Items = new OpenApiSchema { Type = "object" };
             }
 
         }
@@ -219,7 +221,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
             if (enumDataString.Count > 0)
             {
-                result.OneOf = new List<OpenApiSchema>()
+                result.OneOf = new List<OpenApiSchema>
                 {
                     new()
                     {
@@ -255,13 +257,9 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             var timeSpan = TimeSpan.Zero.ToString();
             result.Example = new OpenApiString(timeSpan);
         }
-        else
-        {
-        }
 
         return result;
     }
-    
     private IOpenApiAny GetExample(object exampleValue)
     {
         return exampleValue switch
@@ -311,14 +309,13 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 {
                     return new OpenApiString(faker.Random.Int(1, 10000).ToString());
                 }
-                else if(propertyInfo.PropertyType == typeof(int))
+
+                if(propertyInfo.PropertyType == typeof(int))
                 {
                     return new OpenApiInteger(faker.Random.Int(1, 10000));
                 }
-                else
-                {
-                    return new OpenApiString(Guid.NewGuid().ToString());
-                }
+
+                return new OpenApiString(Guid.NewGuid().ToString());
             default:
                 return null;
         }

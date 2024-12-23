@@ -35,6 +35,7 @@ public class EmailMemberRequestDto
     /// Email
     /// </summary>
     [EmailAddress]
+    [StringLength(255)]
     public string Email { get; set; }
 }
 
@@ -210,7 +211,7 @@ public enum SexEnum
     Female = 0,
 
     [SwaggerEnum("Male")]
-    Male = 1,
+    Male = 1
 }
 
 /// <summary>
@@ -265,6 +266,7 @@ public class GetMemberByEmailRequestDto
     /// </summary>
     [FromQuery(Name = "email")]
     [EmailAddress]
+    [StringLength(255)]
     public string Email { get; set; }
 }
 

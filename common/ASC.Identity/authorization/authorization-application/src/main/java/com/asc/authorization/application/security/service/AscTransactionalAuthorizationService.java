@@ -23,8 +23,10 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -35,6 +37,7 @@ public class AscTransactionalAuthorizationService {
   private static final String CLIENT_STATE_COOKIE = "client_state";
 
   private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+  private final PlatformTransactionManager transactionManager;
 
   private final AuthorizationMapper authorizationMapper;
   private final EncryptionService encryptionService;
@@ -49,10 +52,6 @@ public class AscTransactionalAuthorizationService {
    * @param authorization the authorization to save
    * @throws AuthorizationPersistenceException if an error occurs during saving
    */
-  @Transactional(
-      isolation = Isolation.SERIALIZABLE,
-      timeout = 3,
-      rollbackFor = {Exception.class})
   public void save(OAuth2Authorization authorization) {
     try {
       MDC.put("id", authorization.getId());
@@ -62,31 +61,44 @@ public class AscTransactionalAuthorizationService {
       var tenant = getTenantFromRequest();
       var atokenFuture = encryptTokenAsync(authorization.getToken(OAuth2AccessToken.class));
       var rtokenFuture = encryptTokenAsync(authorization.getToken(OAuth2RefreshToken.class));
+      var atoken = atokenFuture.get(2, TimeUnit.SECONDS);
+      var rtoken = rtokenFuture.get(2, TimeUnit.SECONDS);
 
-      var existingAuthorizationOpt =
-          jpaAuthorizationRepository
-              .findByRegisteredClientIdAndPrincipalIdAndAuthorizationGrantType(
-                  authorization.getRegisteredClientId(),
-                  authorization.getPrincipalName(),
-                  authorization.getAuthorizationGrantType().getValue());
+      var template = new TransactionTemplate(transactionManager);
+      template.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
+      template.setTimeout(2);
+      template.execute(
+          status -> {
+            try {
+              var existingAuthorizationOpt =
+                  jpaAuthorizationRepository
+                      .findByRegisteredClientIdAndPrincipalIdAndAuthorizationGrantType(
+                          authorization.getRegisteredClientId(),
+                          authorization.getPrincipalName(),
+                          authorization.getAuthorizationGrantType().getValue());
 
-      var mappedAuthorization = authorizationMapper.toEntity(authorization);
-      var entity =
-          authorizationMapper.merge(
-              existingAuthorizationOpt.orElseGet(() -> mappedAuthorization),
-              authorizationMapper.toEntity(authorization));
+              var mappedAuthorization = authorizationMapper.toEntity(authorization);
+              var entity =
+                  authorizationMapper.merge(
+                      existingAuthorizationOpt.orElseGet(() -> mappedAuthorization),
+                      authorizationMapper.toEntity(authorization));
 
-      entity.setAccessTokenHash(hashingService.hash(entity.getAccessTokenValue()));
-      entity.setRefreshTokenHash(hashingService.hash(entity.getRefreshTokenValue()));
+              entity.setAccessTokenHash(hashingService.hash(entity.getAccessTokenValue()));
+              entity.setRefreshTokenHash(hashingService.hash(entity.getRefreshTokenValue()));
 
-      if (tenant != null && tenant.getTenantId() > 0) entity.setTenantId(tenant.getTenantId());
+              if (tenant != null && tenant.getTenantId() > 0)
+                entity.setTenantId(tenant.getTenantId());
+              entity.setAccessTokenValue(atoken);
+              entity.setRefreshTokenValue(rtoken);
 
-      entity.setAccessTokenValue(atokenFuture.get(2, TimeUnit.SECONDS));
-      entity.setRefreshTokenValue(rtokenFuture.get(2, TimeUnit.SECONDS));
-
-      jpaAuthorizationRepository.save(entity);
-
-      log.info("Authorization saved successfully");
+              jpaAuthorizationRepository.save(entity);
+              log.info("Authorization saved successfully");
+              return null;
+            } catch (Exception ex) {
+              status.setRollbackOnly();
+              throw ex;
+            }
+          });
     } catch (Exception e) {
       log.error("Could not save authorization");
       throw new AuthorizationPersistenceException(e);

@@ -395,7 +395,7 @@ public class ConfigurationConverter<T>(
             ErrorMessage = source.Error
         };
         
-        result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string>() {
+        result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, result.Document?.Key }
         });
 
@@ -476,7 +476,7 @@ public class CustomizationConfigConverter<T>(
             Logo = await configConverter.Convert(configuration),
             MentionShare = await source.GetMentionShare(file),
             ReviewDisplay = source.GetReviewDisplay(configuration.EditorConfig.ModeWrite),
-            SubmitForm = await source.GetSubmitForm(file, configuration.EditorConfig.ModeWrite),
+            SubmitForm = await source.GetSubmitForm(file),
             Anonymous = anonymousConfigConverter.Convert(configuration)
         };
 
@@ -576,10 +576,10 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
             Permissions = source.Permissions,
             SharedLinkParam = source.SharedLinkParam,
             SharedLinkKey = source.SharedLinkKey,
-            ReferenceData = await source.GetReferenceData(file),
+            ReferenceData = source.GetReferenceData(file),
             Title = source.Title ?? file.Title,
-            Url = await source.GetUrl(file),
-            Options = source.Options,
+            Url = source.GetUrl(file),
+            Options = source.Options
         };
 
         return result;

@@ -183,7 +183,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _trialFeature.Value = value;
     }
 
-    private readonly TenantQuotaFeatureFlag _freeFeature;
+    private readonly FreeFeature _freeFeature;
 
     /// <summary>
     /// Specifies if the tenant quota is free or not
@@ -348,7 +348,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     public TenantQuota()
     {
-        _featuresList = new List<string>();
+        _featuresList = [];
 
         _countUserFeature = new CountUserFeature(this) { Order = 1 };
         _countPaidUserFeature = new CountPaidUserFeature(this);

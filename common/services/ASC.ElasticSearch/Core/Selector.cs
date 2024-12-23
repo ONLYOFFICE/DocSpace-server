@@ -118,7 +118,7 @@ public class Selector<T>(IServiceProvider serviceProvider)
         {
             _queryContainer &= Wrap(selector, (a, w) => w.MatchPhrase(r => r.Field(a).Query(value.TrimQuotes())));
         }
-        else if (value.HasOtherLetter() || IsExactly(value))
+        else if (IsExactly(value))
         {
             _queryContainer &= Wrap(selector, (a, w) => w.Match(r => r.Field(a).Query(value.TrimQuotes())));
         }
@@ -168,7 +168,15 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
         return this;
     }
-
+    
+    public Selector<T> Nested(Expression<Func<T, object>> fieldSelector, Func<QueryContainerDescriptor<T>, QueryContainer> selector)
+    {
+        var path = IsNested(fieldSelector);
+        _queryContainer &= _queryContainerDescriptor.Nested(a => a.Query(selector).Path(char.ToLower(path[0]) + path[1..]));
+        
+        return this;
+    }
+    
     public Selector<T> Sort(Expression<Func<T, object>> selector, bool asc)
     {
         _sortContainerDescriptor = _sortContainerDescriptor.Field(selector, asc ? SortOrder.Ascending : SortOrder.Descending);
@@ -306,7 +314,7 @@ public class Selector<T>(IServiceProvider serviceProvider)
         {
             _queryContainer = _queryContainer && MultiPhrase(props, value.TrimQuotes());
         }
-        else if (value.HasOtherLetter() || IsExactly(value))
+        else if (IsExactly(value))
         {
             _queryContainer = _queryContainer && MultiMatch(props, value.TrimQuotes());
         }
@@ -367,6 +375,11 @@ public class Selector<T>(IServiceProvider serviceProvider)
             return null;
         }
 
+        if (lambdaExpression.Body is MemberExpression memberExpression && memberExpression.Member.GetCustomAttributes(false).OfType<NestedAttribute>().Any())
+        {
+            return memberExpression.Member.Name;
+        }
+        
         if (lambdaExpression.Body is MethodCallExpression { Arguments.Count: > 1 } methodCallExpression)
         {
             return methodCallExpression.Arguments[0] is not MemberExpression pathMember
@@ -431,12 +444,6 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
 internal static class StringExtension
 {
-    public static bool HasOtherLetter(this string value)
-    {      
-        var specialChar = @"-=+;/\|№&#^<>()[]{}$%";
-        return specialChar.Any(value.Contains);
-    }
-
     public static string WrapAsterisk(this string value)
     {
         var result = value;

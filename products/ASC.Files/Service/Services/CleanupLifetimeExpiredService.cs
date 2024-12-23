@@ -36,43 +36,52 @@ internal class CleanupLifetimeExpiredService(
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
+    private TimeSpan DelayInterval { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:cleanupLifetimeExpired:delay") ?? "6:0:0");
+
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:cleanupLifetimeExpired:period") ?? "0:5:0");
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        if (stoppingToken.IsCancellationRequested)
+        try
         {
-            return;
-        }
-
-        List<LifetimeEnabledRoom> lifetimeEnabledRooms;
-
-        await using (var scope = _scopeFactory.CreateAsyncScope())
-        {
-            await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<FilesDbContext>>().CreateDbContextAsync(stoppingToken);
-
-            lifetimeEnabledRooms = await GetLifetimeEnabledRoomsAsync(dbContext);
-
-            if (lifetimeEnabledRooms.Count == 0)
+            if (stoppingToken.IsCancellationRequested)
             {
                 return;
             }
 
-            foreach (var room in lifetimeEnabledRooms)
+            List<LifetimeEnabledRoom> lifetimeEnabledRooms;
+
+            await using (var scope = _scopeFactory.CreateAsyncScope())
             {
-                var lifetime = mapper.Map<DbRoomDataLifetime, RoomDataLifetime>(room.Lifetime);
+                await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<FilesDbContext>>().CreateDbContextAsync(stoppingToken);
 
-                var expiration = lifetime.GetExpirationUtc();
+                lifetimeEnabledRooms = await GetLifetimeEnabledRoomsAsync(dbContext);
 
-                room.ExipiredFiles = await GetExpiredFilesAsync(dbContext, room.TenantId, room.RoomId, expiration);
+                if (lifetimeEnabledRooms.Count == 0)
+                {
+                    return;
+                }
 
-                logger.InfoCleanupLifetimeExpiredFound(room.TenantId, room.RoomId, room.ExipiredFiles.Count);
+                foreach (var room in lifetimeEnabledRooms)
+                {
+                    var lifetime = mapper.Map<DbRoomDataLifetime, RoomDataLifetime>(room.Lifetime);
+
+                    var expiration = lifetime.GetExpirationUtc();
+
+                    room.ExipiredFiles = await GetExpiredFilesAsync(dbContext, room.TenantId, room.RoomId, expiration);
+
+                    logger.InfoCleanupLifetimeExpiredFound(room.TenantId, room.RoomId, room.ExipiredFiles.Count);
+                }
             }
-        }
 
-        await Parallel.ForEachAsync(lifetimeEnabledRooms.Where(x => x.ExipiredFiles.Count > 0),
-                                    new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
-                                    DeleteExpiredFiles);
+            await Parallel.ForEachAsync(lifetimeEnabledRooms.Where(x => x.ExipiredFiles.Count > 0),
+                new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
+                DeleteExpiredFiles);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
     }
 
     private async ValueTask DeleteExpiredFiles(LifetimeEnabledRoom data, CancellationToken cancellationToken)
@@ -128,7 +137,11 @@ internal class CleanupLifetimeExpiredService(
 
     private async Task<List<LifetimeEnabledRoom>> GetLifetimeEnabledRoomsAsync(FilesDbContext dbContext)
     {
-        return await Queries.LifetimeEnabledRoomsAsync(dbContext).ToListAsync();
+        var delayedStartDate = DateTime.UtcNow.Subtract(DelayInterval);
+
+        return await Queries.LifetimeEnabledRoomsAsync(dbContext)
+            .Where(x => x.Lifetime.StartDate == null || x.Lifetime.StartDate < delayedStartDate)
+            .ToListAsync();
     }
 
     private async Task<List<int>> GetExpiredFilesAsync(FilesDbContext dbContext, int tenantId, int roomId, DateTime expiration)
@@ -161,7 +174,7 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, int roomId, DateTime expiration) =>
                 ctx.Tree
                     .Join(ctx.Files, a => a.FolderId, b => b.ParentId, (tree, file) => new { tree, file })
-                    .Where(x => x.tree.ParentId == roomId && x.file.TenantId == tenantId && x.file.ModifiedOn < expiration)
+                    .Where(x => x.tree.ParentId == roomId && x.file.TenantId == tenantId && x.file.Version == 1 && x.file.ModifiedOn < expiration)
                     .Select(r => r.file.Id));
 }
 

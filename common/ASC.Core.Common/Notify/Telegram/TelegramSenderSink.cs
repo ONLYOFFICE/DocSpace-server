@@ -40,7 +40,7 @@ class TelegramSenderSink(INotifySender sender) : Sink
         {
             const SendResult result = SendResult.OK;
 
-            var m = await serviceScope.ServiceProvider.GetRequiredService<TelegramSenderSinkMessageCreator>().CreateNotifyMessageAsync(message, _senderName);
+            var m = await serviceScope.ServiceProvider.GetRequiredService<TelegramSenderSinkMessageCreator>().CreateNotifyMessage(message, _senderName);
             await _sender.SendAsync(m);
 
             return new SendResponse(message, _senderName, result);
@@ -55,7 +55,7 @@ class TelegramSenderSink(INotifySender sender) : Sink
 [Scope]
 public class TelegramSenderSinkMessageCreator(TenantManager tenantManager) : SinkMessageCreator
 {
-    public override async Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName)
+    public override Task<NotifyMessage> CreateNotifyMessage(INoticeMessage message, string senderName)
     {
         var m = new NotifyMessage
         {
@@ -67,9 +67,9 @@ public class TelegramSenderSinkMessageCreator(TenantManager tenantManager) : Sin
             CreationDate = DateTime.UtcNow
         };
 
-        var tenant = await tenantManager.GetCurrentTenantAsync(false);
+        var tenant = tenantManager.GetCurrentTenant(false);
         m.TenantId = tenant?.Id ?? Tenant.DefaultTenant;
 
-        return m;
+        return Task.FromResult(m);
     }
 }

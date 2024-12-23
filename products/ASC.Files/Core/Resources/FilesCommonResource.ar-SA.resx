@@ -559,4 +559,7 @@
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>مدير الغرفة</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>افتح الملف</value>
+  </data>
 </root>

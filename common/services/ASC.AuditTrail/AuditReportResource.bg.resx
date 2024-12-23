@@ -802,4 +802,73 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Потребители [{0}]. Формулярът е изпратен: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Експортиране индекса на стаята, запазен в Документи</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Повторно изпратени покани: {0}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Активирането на {0} на клиента е променено</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Видимостта на {0} на клиента е променена</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Клиентът е създаден</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Клиент {0} е изтрит</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Файл: {0}. Индексът е променен от {1} на {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Папка: {0}. Индексът е променен от {1} на {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Папка: {0}. Индексите са пренаредени</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Генериран е код за оторизация за клиент {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Генериран е личен токен за достъп за клиент {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Тайната на клиент {0} е регенерирана</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Отменен е достъп до клиент {0}</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Стая: {0}. Отказът за изтегляне е деактивиран</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Стая: {0}. Отказът за изтегляне е активиран</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Индексирането на стаята е деактивирано</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Индексирането на стаята е активирано</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>LifeTime е деактивиран</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Времето на живот е зададени. Стойност: {0}. Период: {1}. Окончателно изтриване: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Стая: {0}. Водният знак е деактивиран</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Стая: {0}. Водният знак е активиран</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Клиент {0} е актуализиран</value>
+  </data>
 </root>

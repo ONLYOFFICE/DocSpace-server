@@ -39,5 +39,5 @@ public class StorageRequestsDto
     /// <summary>
     /// Storage properties
     /// </summary>
-    public IDictionary<string, string> Props { get; set; }
+    public IEnumerable<ItemKeyValuePair<string, string>> Props { get; set; }
 }

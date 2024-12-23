@@ -169,6 +169,8 @@ public class Startup
         }
         app.UseSynchronizationContextMiddleware();
 
+        app.UseTenantMiddleware();
+        
         app.UseAuthentication();
 
         app.UseAuthorization();

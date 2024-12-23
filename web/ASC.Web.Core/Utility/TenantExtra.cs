@@ -74,7 +74,7 @@ public class TenantExtra(
 
     public async Task<Tariff> GetCurrentTariffAsync(bool withRequestToPaymentSystem = true, bool refresh = false)
     {
-        return await tariffService.GetTariffAsync(await tenantManager.GetCurrentTenantIdAsync(), withRequestToPaymentSystem, refresh);
+        return await tariffService.GetTariffAsync(tenantManager.GetCurrentTenantId(), withRequestToPaymentSystem, refresh);
     }
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()

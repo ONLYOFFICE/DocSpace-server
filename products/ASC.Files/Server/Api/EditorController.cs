@@ -42,8 +42,9 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
         IDaoFactory daoFactory,
-        SecurityContext securityContext)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext);
+        SecurityContext securityContext,
+        FileSecurity fileSecurity)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -58,8 +59,9 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
         IDaoFactory daoFactory,
-        SecurityContext securityContext)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext);
+        SecurityContext securityContext,
+        FileSecurity fileSecurity)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -73,7 +75,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<T> configurationConverter,
         IDaoFactory daoFactory,
-        SecurityContext securityContext)
+        SecurityContext securityContext,
+        FileSecurity fileSecurity)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
@@ -102,6 +105,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File key for Document Service", typeof(object))]
     [SwaggerResponse(403, "You don't have enough permission to view the file")]
+    [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
     public async Task<object> StartEditAsync(StartEditRequestDto<T> inDto)
     {
@@ -130,6 +134,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File changes", typeof(KeyValuePair<bool, string>))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [AllowAnonymous]
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(TrackEditFileRequestDto<T> inDto)
     {
@@ -155,7 +160,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
         bool canEdit;
         bool canFill;
-        var disableEmbeddedConfig = false;
         var canStartFilling = true;
         var isSubmitOnly = false;
 
@@ -206,7 +210,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     }
                     else
                     {
-                        if (file.RootFolderType == FolderType.Archive)
+                        if (!await fileSecurity.CanFillFormsAsync(rootFolder))
                         {
                             canEdit = false;
                             canFill = false;
@@ -247,7 +251,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
-                    disableEmbeddedConfig = true;
                     break;
 
                 default:
@@ -281,16 +284,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
         var result = await configurationConverter.Convert(configuration, file);
 
-        if (disableEmbeddedConfig)
-        {
-            result.EditorConfig.Embedded = null;
-        }
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
         {
             var linkId = await externalShare.GetLinkIdAsync();
 
-            if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
+            if (linkId != Guid.Empty && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
             {
                 await entryManager.MarkFileAsRecentByLink(file, linkId);
             }
@@ -300,7 +299,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
         
-        if (fileType == FileType.Pdf && file.IsForm && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+        if (fileType == FileType.Pdf && file.IsForm && result.Document.Permissions.Copy && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
             result.StartFilling = canStartFilling;
         }
@@ -441,7 +440,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         {
             await documentServiceConnector.CheckDocServiceUrlAsync();
 
-            await messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
+            messageService.Send(MessageAction.DocumentServiceLocationSetting);
 
             var settings = await cspSettingsHelper.LoadAsync();
 
