@@ -37,7 +37,7 @@ internal class MappedPath
         tenant = tenant.Trim('/');
 
         ppath = _pathUtils.ResolvePhysicalPath(ppath, storageConfig);
-        PhysicalPath = ppath.IndexOf('{') == -1 && appendTenant ? CrossPlatform.PathCombine(ppath, tenant) : string.Format(ppath, tenant);
+        PhysicalPath = !ppath.Contains('{') && appendTenant ? CrossPlatform.PathCombine(ppath, tenant) : string.Format(ppath, tenant);
     }
 
     private MappedPath(PathUtils pathUtils)

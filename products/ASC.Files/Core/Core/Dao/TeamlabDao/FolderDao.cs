@@ -145,7 +145,7 @@ internal class FolderDao(
     }
     public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId)
     {
-        return GetFoldersAsync(parentId, default, FilterType.None, false, default, string.Empty);
+        return GetFoldersAsync(parentId, null, FilterType.None, false, Guid.Empty, string.Empty);
     }
 
     public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(
@@ -236,7 +236,7 @@ internal class FolderDao(
     }
 
     public async Task<int> GetFoldersCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = default)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -245,7 +245,7 @@ internal class FolderDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        if (filterType == FilterType.None && subjectId == default && string.IsNullOrEmpty(searchText) && !withSubfolders && !excludeSubject && roomId == default)
+        if (filterType == FilterType.None && subjectId == Guid.Empty && string.IsNullOrEmpty(searchText) && !withSubfolders && !excludeSubject && roomId == 0)
         {
             return await filesDbContext.Tree.CountAsync(r => r.ParentId == parentId && r.Level == 1);
         }
@@ -256,7 +256,7 @@ internal class FolderDao(
     }
 
     public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
-        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         if (CheckInvalidFilter(filterType) || count == 0)
         {
@@ -458,7 +458,7 @@ internal class FolderDao(
         {
             folder.CreateOn = _tenantUtil.DateTimeNow();
         }
-        if (folder.CreateBy == default)
+        if (folder.CreateBy == Guid.Empty)
         {
             folder.CreateBy = _authContext.CurrentAccount.ID;
         }
@@ -466,7 +466,7 @@ internal class FolderDao(
         var isNew = false;
 
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var toUpdate = folder.Id != default ? await filesDbContext.FolderForUpdateAsync(tenantId, folder.Id) : null;
+        var toUpdate = folder.Id != 0 ? await filesDbContext.FolderForUpdateAsync(tenantId, folder.Id) : null;
 
         if (toUpdate != null)
         {
@@ -628,7 +628,7 @@ internal class FolderDao(
 
     public async Task DeleteFolderAsync(int folderId)
     {
-        if (folderId == default)
+        if (folderId == 0)
         {
             throw new ArgumentNullException(nameof(folderId));
         }
@@ -912,7 +912,7 @@ internal class FolderDao(
 
     public Task<IDictionary<int, string>> CanMoveOrCopyAsync(IEnumerable<int> folderIds, string to)
         {
-        return Task.FromResult((IDictionary<int, string>)new Dictionary<int, string>());
+        return Task.FromResult<IDictionary<int, string>>(new Dictionary<int, string>());
         }
 
     public async Task<IDictionary<int, string>> CanMoveOrCopyAsync(IEnumerable<int> folderIds, int to)
@@ -1864,7 +1864,7 @@ internal class FolderDao(
             }
         }
 
-        if (roomId != default)
+        if (roomId != 0)
         {
             q = q.Join(filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (l, t) => new
             {
@@ -1913,12 +1913,6 @@ public class ParentIdTitlePair
 {
     public int ParentId { get; init; }
     public string Title { get; init; }
-}
-
-public class ParentIdFolderTypePair
-{
-    public int ParentId { get; set; }
-    public FolderType FolderType { get; set; }
 }
 
 public class FolderTypeUsedSpacePair

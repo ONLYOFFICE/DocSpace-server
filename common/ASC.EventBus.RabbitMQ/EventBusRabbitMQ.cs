@@ -287,7 +287,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
                 Guid.TryParse(eventArgs.BasicProperties.MessageId, out var messageId);
 
-                if (_rejectedEvents.ContainsKey(messageId) || messageId == default)
+                if (_rejectedEvents.ContainsKey(messageId) || messageId == Guid.Empty)
                 {
                     _rejectedEvents.TryRemove(messageId, out _);
 

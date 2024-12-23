@@ -36,11 +36,11 @@ public class QuotaSocketManager(
     : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
-
-    public async Task ChangeQuotaUsedValueAsync(string featureId, object value)
+    
+    public async Task ChangeQuotaUsedValueAsync<T>(string featureId, T value)
     {
         var room = GetQuotaRoom();
-
+        
         await MakeRequest("change-quota-used-value", new { room, featureId, value });
     }
 
@@ -51,7 +51,7 @@ public class QuotaSocketManager(
         await MakeRequest("change-user-quota-used-value", new { room, customQuotaFeature, enableQuota, usedSpace, quotaLimit, userIds });
     }
 
-    public async Task ChangeQuotaFeatureValue(string featureId, object value)
+    public async Task ChangeQuotaFeatureValueAsync<T>(string featureId, T value)
     {
         var room = GetQuotaRoom();
 

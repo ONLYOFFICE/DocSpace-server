@@ -88,11 +88,11 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         {
             var entry = TarEntry.CreateTarEntry(tarKey);
             entry.Size = buffered.Length;
-            await _tarOutputStream.PutNextEntryAsync(entry, default);
+            await _tarOutputStream.PutNextEntryAsync(entry, CancellationToken.None);
             buffered.Position = 0;
             await buffered.CopyToAsync(_tarOutputStream);
             await _tarOutputStream.FlushAsync();
-            await _tarOutputStream.CloseEntryAsync(default).ContinueWith(async _ => await action());
+            await _tarOutputStream.CloseEntryAsync(CancellationToken.None).ContinueWith(async _ => await action());
         }
         finally
         {

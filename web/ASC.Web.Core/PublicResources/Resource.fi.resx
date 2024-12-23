@@ -1069,4 +1069,10 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Pääkäyttäjien määrä ylittää rajan: {0}/{1}.</value>
   </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Voittoa tavoittelematon</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Lisää ainakin 1 sallittu IP-osoite.</value>
+  </data>
 </root>

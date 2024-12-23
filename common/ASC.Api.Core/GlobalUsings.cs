@@ -45,7 +45,6 @@ global using System.Threading.Channels;
 global using System.Threading.RateLimiting;
 global using System.Web;
 global using Apache.NMS;
-global using Apache.NMS;
 
 global using ASC.Api.Core;
 global using ASC.Api.Core.Auth;

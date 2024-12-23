@@ -79,7 +79,7 @@ internal class LinkDao<T>(
 
         var fromDb = await filesDbContext.SourceIdAsync(tenantId, mappedLinkedId, _authContext.CurrentAccount.ID);
 
-        if (Equals(fromDb, default))
+        if (Equals(fromDb, null))
         {
             return default;
         }
@@ -98,7 +98,7 @@ internal class LinkDao<T>(
 
         var fromDb = await filesDbContext.LinkedIdAsync(tenantId, mappedSourceId, _authContext.CurrentAccount.ID);
 
-        if (Equals(fromDb, default))
+        if (Equals(fromDb, null))
         {
             return default;
         }

@@ -577,7 +577,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     #region Get logo path
 
-    public async Task<string> GetAbsoluteLogoPathAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark = false, string culture = default)
+    public async Task<string> GetAbsoluteLogoPathAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark = false, string culture = null)
     {
         if (tenantWhiteLabelSettings.GetIsDefault(type))
         {
@@ -587,7 +587,7 @@ public class TenantWhiteLabelSettingsHelper(
         return await GetAbsoluteStorageLogoPath(tenantWhiteLabelSettings, type, dark, culture);
     }
 
-    private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark, string culture = default)
+    private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark, string culture = null)
     {
         var store = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), ModuleName);
         var fileName = BuildLogoFileName(type, tenantWhiteLabelSettings.GetExt(type, dark), dark);
@@ -599,7 +599,7 @@ public class TenantWhiteLabelSettingsHelper(
         return await GetAbsoluteDefaultLogoPathAsync(type, dark, culture);
     }
 
-    public async Task<string> GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType type, bool dark, string culture = default)
+    public async Task<string> GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType type, bool dark, string culture = null)
     {
         var partnerLogoPath = await GetPartnerStorageLogoPathAsync(type, dark);
         if (!string.IsNullOrEmpty(partnerLogoPath))

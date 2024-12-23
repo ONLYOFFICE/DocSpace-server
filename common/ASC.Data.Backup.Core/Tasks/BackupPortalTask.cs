@@ -614,7 +614,7 @@ public class BackupPortalTask(
             var path = file.GetZipKey();
             if (dump) 
             {
-                path = Path.Combine("\\storage", path);
+                path = Path.Combine("storage", path);
             }
             await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
 

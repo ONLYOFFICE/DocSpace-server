@@ -123,7 +123,7 @@ public class MigrationOperation(
             }
 
             var folder = await cache.GetStringAsync($"migration folder - {TenantId}");
-            await migrator.InitAsync(folder, CancellationToken, onlyParse ? OperationType.Parse : OperationType.Migration);
+            await migrator.InitAsync(folder, onlyParse ? OperationType.Parse : OperationType.Migration, CancellationToken);
 
             await migrator.ParseAsync(onlyParse);
             if (!onlyParse)

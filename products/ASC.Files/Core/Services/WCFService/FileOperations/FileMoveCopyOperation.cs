@@ -125,7 +125,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         this[OpType] = (int)(_copy ? FileOperationType.Copy : FileOperationType.Move);
     }
 
-    protected override async Task DoJob(IServiceScope serviceScope)
+    protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
         if (_daoFolderId != 0)
         {
@@ -138,7 +138,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
     }
 
-    private async Task DoAsync<TTo>(IServiceScope scope, TTo tto)
+    private async Task DoAsync<TTo>(AsyncServiceScope scope, TTo tto)
     {
         var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
@@ -299,7 +299,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
     }
 
-    private async Task<List<File<TTo>>> GetFilesAsync<TTo>(IServiceScope scope, Folder<TTo> folder)
+    private async Task<List<File<TTo>>> GetFilesAsync<TTo>(AsyncServiceScope scope, Folder<TTo> folder)
     {
         var fileDao = scope.ServiceProvider.GetService<IFileDao<TTo>>();
 
@@ -308,7 +308,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         return files;
     }
 
-    private async Task<List<Folder<TTo>>> MoveOrCopyFoldersAsync<TTo>(IServiceScope scope, List<T> folderIds, Folder<TTo> toFolder, bool copy, List<Folder<TTo>> toFolderParents, bool checkPermissions = true)
+    private async Task<List<Folder<TTo>>> MoveOrCopyFoldersAsync<TTo>(AsyncServiceScope scope, List<T> folderIds, Folder<TTo> toFolder, bool copy, List<Folder<TTo>> toFolderParents, bool checkPermissions = true)
     {
         var needToMark = new List<Folder<TTo>>();
 
@@ -821,7 +821,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         return needToMark;
     }
 
-    private async Task<List<FileEntry<TTo>>> MoveOrCopyFilesAsync<TTo>(IServiceScope scope, List<T> fileIds, Folder<TTo> toFolder, bool copy, List<Folder<TTo>> toParentFolders, bool checkPermissions = true)
+    private async Task<List<FileEntry<TTo>>> MoveOrCopyFilesAsync<TTo>(AsyncServiceScope scope, List<T> fileIds, Folder<TTo> toFolder, bool copy, List<Folder<TTo>> toParentFolders, bool checkPermissions = true)
     {
         var needToMark = new List<FileEntry<TTo>>();
 
@@ -1174,7 +1174,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         return needToMark;
     }
 
-    private async Task<(bool isError, string message)> WithErrorAsync(IServiceScope scope, IEnumerable<File<T>> files, bool checkPermissions = true)
+    private async Task<(bool isError, string message)> WithErrorAsync(AsyncServiceScope scope, IEnumerable<File<T>> files, bool checkPermissions = true)
     {
         var lockerManager = scope.ServiceProvider.GetService<LockerManager>();
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();

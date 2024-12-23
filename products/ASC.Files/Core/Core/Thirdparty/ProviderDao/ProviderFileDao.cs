@@ -152,12 +152,12 @@ internal class ProviderFileDao(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null)
     {
         var selector = _selectorFactory.GetSelector(parentId);
 
         var fileDao = selector.GetFileDao(parentId);
-        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), orderBy, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders, excludeSubject);
+        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), orderBy, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders, excludeSubject, formsItemDto: formsItemDto);
         var result = await files.Where(r => r != null).ToListAsync();
 
         foreach (var r in result)

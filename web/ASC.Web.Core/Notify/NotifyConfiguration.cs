@@ -32,7 +32,7 @@ namespace ASC.Web.Studio.Core.Notify;
 public class NotifyConfiguration(NotifyEngine notifyEngine, WorkContext workContext)
 {
     private static bool _configured;
-    private static readonly object _locker = new();
+    private static readonly Lock _locker = new();
     private static readonly Regex _urlReplacer = new(@"(<a [^>]*href=(('(?<url>[^>']*)')|(""(?<url>[^>""]*)""))[^>]*>)|(<img [^>]*src=(('(?<url>(?![data:|cid:])[^>']*)')|(""(?<url>(?![data:|cid:])[^>""]*)""))[^/>]*/?>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex _textileLinkReplacer = new(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
 

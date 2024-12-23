@@ -27,10 +27,8 @@
 namespace ASC.Core.Notify.Senders;
 
 [Singleton]
-public class JabberSender(IServiceProvider serviceProvider, ILogger<JabberSender> logger)
-    : INotifySender
+public class JabberSender(IServiceProvider serviceProvider, ILogger<JabberSender> logger) : INotifySender
 {
-    private readonly ILogger _logger = logger;
 
     public void Init(IDictionary<string, string> properties) { }
 
@@ -50,7 +48,7 @@ public class JabberSender(IServiceProvider serviceProvider, ILogger<JabberSender
         }
         catch (Exception e)
         {
-            _logger.ErrorUnexpected(e);
+            logger.ErrorUnexpected(e);
         }
 
         return Task.FromResult(NoticeSendResult.OK);

@@ -395,7 +395,7 @@ public class PortalController(
         return Ok(new
         {
             tenant = commonMethods.ToTenantWrapper(tenant),
-            removed = !wizardSettings.Completed,
+            removed = !wizardSettings.Completed
         });
     }
 
@@ -589,14 +589,12 @@ public class PortalController(
                         message = "Too much attempts already"
                     });
                 }
-                else
-                {
-                    var error = await GetRecaptchaError(model, clientIP, sw);
 
-                    if (error != null)
-                    {
-                        return StatusCode(StatusCodes.Status401Unauthorized, error);
-                    }
+                var error = await GetRecaptchaError(model, clientIP, sw);
+
+                if (error != null)
+                {
+                    return StatusCode(StatusCodes.Status401Unauthorized, error);
                 }
             }
 

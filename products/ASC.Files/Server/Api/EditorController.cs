@@ -289,7 +289,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         {
             var linkId = await externalShare.GetLinkIdAsync();
 
-            if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
+            if (linkId != Guid.Empty && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
             {
                 await entryManager.MarkFileAsRecentByLink(file, linkId);
             }

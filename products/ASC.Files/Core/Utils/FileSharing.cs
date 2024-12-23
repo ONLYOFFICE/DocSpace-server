@@ -71,7 +71,7 @@ public class FileSharingAceHelper(
 
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
         var room = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
-        var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString()) : null;
+        var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString(), false) : null;
         var entryType = entry.FileEntryType;
         var recipients = new Dictionary<Guid, FileShare>();
         var usersWithoutRight = new List<Guid>();
@@ -690,7 +690,7 @@ public class FileSharing(
         var folderDao = daoFactory.GetFolderDao<T>();
         var folders = await folderDao.GetFoldersAsync(folderIds).ToListAsync();
 
-        var entries = files.Concat(folders.Cast<FileEntry<T>>());
+        var entries = files.Concat(folders.Select(FileEntry<T> (r) => r));
 
         foreach (var entry in entries)
         {

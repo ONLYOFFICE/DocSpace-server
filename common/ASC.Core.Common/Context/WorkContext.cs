@@ -41,7 +41,7 @@ public class WorkContext(IConfiguration configuration,
     TelegramSender notifyTelegramSender,
     PushSender notifyPushSender)
 {
-    private static readonly object _syncRoot = new();
+    private static readonly Lock _syncRoot = new();
     private bool _notifyStarted;
     private static bool? _isMono;
 
