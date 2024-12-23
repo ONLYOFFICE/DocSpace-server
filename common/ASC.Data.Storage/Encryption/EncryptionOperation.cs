@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Tenant = ASC.Core.Tenants.Tenant;
+using SocketManager = ASC.Core.Common.Quota.QuotaSocketManager;
 
 namespace ASC.Data.Storage.Encryption;
 
@@ -49,9 +50,27 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         _serverRootPath = serverRootPath;
     }
 
+    private async Task PublishProgressAsync(SocketManager socketManager, bool complete = false)
+    {
+        if (complete)
+        {
+            Percentage = 100;
+            IsCompleted = true;
+
+            await PublishChanges();
+        }
+        else
+        {
+             await StepDone();
+        }
+
+        await socketManager.EncryptionProgressAsync((int)Percentage, Exception?.Message);
+    }
+
     protected override async Task DoJob()
     {
         await using var scope = serviceScopeFactory.CreateAsyncScope();
+        var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var scopeClass = scope.ServiceProvider.GetService<EncryptionOperationScope>();
         var (log, storageFactoryConfig, storageFactory, tenantManager, coreBaseSettings, notifyHelper, encryptionSettingsHelper,   configuration) = scopeClass;
         notifyHelper.Init(_serverRootPath);
@@ -75,7 +94,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                 return;
             }
 
-            await StepDone();
+            await PublishProgressAsync(socketManager);
 
             foreach (var tenant in _tenants)
             {
@@ -88,11 +107,11 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
 
                 await Parallel.ForEachAsync(dictionary, async (elem, _) =>
                 {
-                    await EncryptStoreAsync(tenant, elem.Key, elem.Value, storageFactoryConfig, log);
+                    await EncryptStoreAsync(tenant, elem.Key, elem.Value, storageFactoryConfig, socketManager, log);
                 });
             }
 
-            await StepDone();
+            await PublishProgressAsync(socketManager);
 
             if (!_hasErrors)
             {
@@ -100,23 +119,21 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                 await SaveNewSettingsAsync(encryptionSettingsHelper, log);
             }
 
-            await StepDone();
+            await PublishProgressAsync(socketManager);
             await ActivateTenantsAsync(tenantManager, log, notifyHelper);
-
-            Percentage = 100;
-            IsCompleted = true;
-            await PublishChanges();
         }
         catch (Exception e)
         {
             Exception = e;
             log.ErrorEncryptionOperation(e);
-            IsCompleted = true;
-            await PublishChanges();
+        }
+        finally
+        {
+            await PublishProgressAsync(socketManager, true);
         }
     }
 
-    private async Task EncryptStoreAsync(Tenant tenant, string module, DiscDataStore store, StorageFactoryConfig storageFactoryConfig, ILogger log)
+    private async Task EncryptStoreAsync(Tenant tenant, string module, DiscDataStore store, StorageFactoryConfig storageFactoryConfig, SocketManager socketManager, ILogger log)
     {
         var domains = storageFactoryConfig.GetDomainList(module).ToList();
 
@@ -133,7 +150,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
             EncryptFiles(store, domain, files, logParent, log);
         }
 
-        await StepDone();
+        await PublishProgressAsync(socketManager);
 
         log.DebugPercentage(tenant.Alias, module, Percentage);
     }

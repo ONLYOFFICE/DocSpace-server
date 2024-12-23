@@ -343,6 +343,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
+  function encryptionProgress({ room, percentage, error } = {}) {
+    logger.info(`${room} progress ${percentage}, error ${error}`);
+    filesIO.to(room).emit("s:encryption-progress", { percentage, error });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -360,6 +365,7 @@ module.exports = (io) => {
     markAsNewFolders,
     changeInvitationLimitValue,
     updateHistory,
-    logoutSession
+    logoutSession,
+    encryptionProgress
   };
 };
