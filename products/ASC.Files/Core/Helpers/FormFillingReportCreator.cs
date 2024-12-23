@@ -29,6 +29,7 @@ namespace ASC.Files.Core.Helpers;
 [Scope]
 public class FormFillingReportCreator(
     ExportToCSV exportToCSV,
+    ExportToXLSX exportToXLSX,
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
     TenantUtil tenantUtil,
@@ -44,20 +45,10 @@ public class FormFillingReportCreator(
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task UpdateFormFillingReport<T>(T resultsFileId, T originalFormId, T roomId, int resultFormNumber,string formsDataUrl, File<T> formsDataFile)
+    public async Task UpdateFormFillingReport<T>(int originalFormId, int roomId, int resultFormNumber,string formsDataUrl, File<T> formsDataFile)
     {
-        if (formsDataUrl != null)
-        {
-            var fileDao = daoFactory.GetFileDao<T>();
-            var submitFormsData = await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
-
-            if (resultsFileId != null)
-            {
-                var resultsFile = await fileDao.GetFileAsync(resultsFileId);
-                
-                await exportToCSV.UpdateCsvReport(resultsFile, submitFormsData.FormsData);
-            }
-        }
+        _ = await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
+        await exportToXLSX.UpdateXlsxReport(roomId, originalFormId);
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
@@ -81,26 +72,26 @@ public class FormFillingReportCreator(
         return [];
     }
 
-    public async Task<IEnumerable<FormsItemData>> getFormFillingResults(int roomId, int originalFormId)
+    public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
-        var folder = await folderDao.GetFolderAsync(originalFormId);
+        var folder = await folderDao.GetFolderAsync(roomId);
         if (folder?.FolderType != FolderType.FillingFormsRoom)
         {
             return [];
         }
-
+        factoryIndexerForm.Refresh();
         var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId));
 
         if (success)
         {
-            return result.SelectMany(r => r.FormsData);
+            return result;
         }
 
         return [];
     }
 
-    private async Task<SubmitFormsData> GetSubmitFormsData<T>(File<T> formsDataFile, T originalFormId, T roomId, int resultFormNumber, string url)
+    private async Task<SubmitFormsData> GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int roomId, int resultFormNumber, string url)
     {
         var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
         var request = new HttpRequestMessage
@@ -144,13 +135,13 @@ public class FormFillingReportCreator(
                 Id = id,
                 TenantId = tenantId,
                 ParentId = parentId,
-                OriginalFormId = Convert.ToInt32(originalFormId),
-                RoomId = Convert.ToInt32(roomId),
+                OriginalFormId = originalFormId,
+                RoomId = roomId,
                 CreateOn = now,
                 FormsData = fromData.FormsData
             };
 
-            await factoryIndexerForm.IndexAsync(searchItems);
+            _ = factoryIndexerForm.IndexAsync(searchItems);
         }
 
         return result;
