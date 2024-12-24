@@ -194,7 +194,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         catch (Exception error)
         {
             _logger.ErrorRestoreProgressItem(error);
-            Exception = error; 
+            Exception = new Exception(BackupResource.RestoreException, error);
             IsCompleted = true;
 
             if (tenant != null)
