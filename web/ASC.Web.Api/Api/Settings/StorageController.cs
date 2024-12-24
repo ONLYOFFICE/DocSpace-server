@@ -483,11 +483,11 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(StorageDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("storage/backup")]
-    public async Task<List<StorageDto>> GetAllBackupStorages()
+    public async Task<List<StorageDto>> GetAllBackupStorages(AllBackupStoragesDto dto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var schedule = await backupAjaxHandler.GetScheduleAsync(null);
+        var schedule = await backupAjaxHandler.GetScheduleAsync(dto.Dump);
         var current = new StorageSettings();
 
         if (schedule is { StorageType: BackupStorageType.ThirdPartyConsumer })
