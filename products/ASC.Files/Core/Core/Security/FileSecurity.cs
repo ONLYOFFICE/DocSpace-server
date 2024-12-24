@@ -1571,13 +1571,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                         break;
                     default:
-                        if (e.Access == FileShare.RoomManager ||
-                            (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
-                        {
-                            return true;
-                        }
-
-                        break;
+                        return true;
                 }
 
                 break;
