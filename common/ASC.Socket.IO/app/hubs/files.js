@@ -64,6 +64,14 @@ module.exports = (io) => {
       return;
     }
 
+    const isAdmin = () => {
+      return socket.handshake.session?.user?.isAdmin;
+    }
+
+    const isOwner = () => {
+      return socket.handshake.session?.user?.isOwner;
+    }
+
     const userId = () => {
       return socket.handshake.session?.user?.id;
     }
@@ -144,11 +152,22 @@ module.exports = (io) => {
     function subscribe(roomParts) {
       if (!roomParts) return;
 
-      if (Array.isArray(roomParts)) {
+      if (Array.isArray(roomParts)) 
+      {
+        if(!isAdmin() && !isOwner())
+        {
+          roomParts = roomParts.filter(rp=> rp != "backup");
+        }
         const rooms = roomParts.map((p) => getRoom(p));
         logger.info(`client ${socket.id} join rooms [${rooms.join(",")}]`);
         socket.join(rooms);
-      } else {
+      } 
+      else 
+      {
+        if(roomParts == "backup" && !isAdmin() && !isOwner())
+        {
+            return;
+        }
         const room = getRoom(roomParts);
         logger.info(`client ${socket.id} join room ${room}`);
         socket.join(room);
@@ -158,7 +177,8 @@ module.exports = (io) => {
     function unsubscribe(roomParts) {
       if (!roomParts) return;
 
-      if (Array.isArray(roomParts)) {
+      if (Array.isArray(roomParts))
+      {
         const rooms = roomParts.map((p) => getRoom(p));
         logger.info(`client ${socket.id} leave rooms [${rooms.join(",")}]`);
         socket.leave(rooms);
