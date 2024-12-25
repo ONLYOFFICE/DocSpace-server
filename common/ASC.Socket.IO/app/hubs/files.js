@@ -351,6 +351,14 @@ module.exports = (io) => {
     filesIO.to(`${tenantId}-restore`).emit("s:restore-progress", percentage);
   }
 
+  function endBackup({ tenantId, result } = {}) {
+    filesIO.to(`${tenantId}-backup`).emit("s:end-backup", result);
+  }
+
+  function endRestore({ tenantId, result } = {}) {
+    filesIO.to(`${tenantId}-restore`).emit("s:end-restore", result);
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -370,6 +378,8 @@ module.exports = (io) => {
     updateHistory,
     logoutSession,
     backupProgress,
-    restoreProgress
+    restoreProgress,
+    endBackup,
+    endRestore
   };
 };

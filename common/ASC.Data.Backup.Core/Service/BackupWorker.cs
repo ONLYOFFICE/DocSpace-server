@@ -274,22 +274,7 @@ public class BackupWorker(
         {
             return null;
         }
-        var progress = new BackupProgress
-        {
-            IsCompleted = progressItem.IsCompleted,
-            Progress = (int)progressItem.Percentage,
-            Error = progressItem.Exception != null ? progressItem.Exception.Message : "",
-            TenantId = progressItem.TenantId,
-            BackupProgressEnum = progressItem.BackupProgressItemType.Convert(),
-            TaskId = progressItem.Id
-        };
-
-        if (progressItem.BackupProgressItemType is BackupProgressItemType.Backup or BackupProgressItemType.Transfer && progressItem.Link != null)
-        {
-            progress.Link = progressItem.Link;
-        }
-
-        return progress;
+        return progressItem.ToBackupProgress();
     }
 
     public async Task<bool> IsInstanceTooBusy()

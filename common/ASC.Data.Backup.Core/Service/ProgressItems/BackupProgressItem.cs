@@ -167,7 +167,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         {
             try
             {
-                await socketManager.BackupProgressAsync(100);
+                await socketManager.EndBackupAsync(ToBackupProgress());
                 await PublishChanges();
             }
             catch (Exception error)

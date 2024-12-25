@@ -207,7 +207,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         {
             try
             {
-                await _socketManager.RestoreProgressAsync(socketTenant, 100);
+                await _socketManager.EndRestoreAsync(socketTenant, ToBackupProgress());
                 await PublishChanges();
             }
             catch (Exception error)

@@ -122,5 +122,15 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/end-backup", (req, res) => {
+    files.endBackup(req.body);
+    res.end();
+  });
+
+  router.post("/end-restore", (req, res) => {
+    files.endResotore(req.body);
+    res.end();
+  });
+
   return router;
 };
