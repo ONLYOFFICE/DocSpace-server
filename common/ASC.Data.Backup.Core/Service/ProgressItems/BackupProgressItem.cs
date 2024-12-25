@@ -160,7 +160,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         catch (Exception error)
         {
             logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
-            Exception = error;
+            Exception = new Exception(BackupResource.BackupException, error);
             IsCompleted = true;
         }
         finally
