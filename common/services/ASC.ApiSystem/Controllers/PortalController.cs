@@ -494,7 +494,7 @@ public class PortalController(
     /// <summary>
     /// Gets a list of portals
     /// </summary>
-    /// <path>apisystem/portal</path>
+    /// <path>apisystem/portal/get</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpGet("get")]
