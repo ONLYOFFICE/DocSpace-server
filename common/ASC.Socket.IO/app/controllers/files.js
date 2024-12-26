@@ -128,7 +128,7 @@ module.exports = (files) => {
   });
 
   router.post("/end-restore", (req, res) => {
-    files.endResotore(req.body);
+    files.endRestore(req.body);
     res.end();
   });
 
