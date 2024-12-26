@@ -9,6 +9,10 @@ var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
 
 var inputData = ${inputData};
 
+inputData.data = [
+    ${items}
+];
+
 var oWorksheet = Api.GetActiveSheet();
 
 var currentRowIndex = 1;

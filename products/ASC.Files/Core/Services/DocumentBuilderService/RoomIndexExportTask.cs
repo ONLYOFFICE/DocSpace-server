@@ -30,32 +30,25 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : DocumentBuilderTask<int, RoomIndexExportTaskData>(serviceProvider)
 {
     private const string ScriptName = "RoomIndexExport.docbuilder";
-    
+
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
-        var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
-        var tempFileName = DocumentBuilderScriptHelper.GetTempFileName();
-        
-        var (data, outputFileName) = await GetRoomIndexExportData(serviceProvider, _userId, _data.RoomId);
-        
-        script = script
-            .Replace("${tempFileName}", tempFileName)
-            .Replace("${inputData}", JsonConvert.SerializeObject(data));
-        
-        return new DocumentBuilderInputData(script, tempFileName, outputFileName);
+        var (scriptFilePath, tempFileName, outputFileName) = await GetRoomIndexExportData(serviceProvider, _userId, _data.RoomId);
+
+        return new DocumentBuilderInputData(null, scriptFilePath, tempFileName, outputFileName);
     }
 
-    protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, string fileName)
+    protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)
     {
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
         var socketManager = serviceProvider.GetService<SocketManager>();
-        
+
         var file = serviceProvider.GetService<File<int>>();
-        
+
         file.ParentId = await daoFactory.GetFolderDao<int>().GetFolderIDUserAsync(false, _userId);
-        file.Title = fileName;
-        
+        file.Title = inputData.OutputFileName;
+
         using var request = new HttpRequestMessage();
         request.RequestUri = fileUri;
 
@@ -69,33 +62,36 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
         file = await fileDao.SaveFileAsync(file, stream);
         await socketManager.CreateFileAsync(file);
-        
+
         var filesMessageService = serviceProvider.GetService<FilesMessageService>();
-        
+
         var headers = _data.Headers != null 
             ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)) 
             : [];
-        
+
         var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(_data.RoomId);
-        
+
         await filesMessageService.SendAsync(MessageAction.RoomIndexExportSaved, room, headers: headers);
+
+        if (System.IO.File.Exists(inputData.ScriptFilePath))
+        {
+            System.IO.File.Delete(inputData.ScriptFilePath);
+        }
 
         return file;
     }
 
-    private static async Task<(object data, string outputFileName)> GetRoomIndexExportData<T>(IServiceProvider serviceProvider, Guid userId, T roomId)
+    private static async Task<(string scriptFilePath, string tempFileName, string outputFileName)> GetRoomIndexExportData<T>(IServiceProvider serviceProvider, Guid userId, T roomId)
     {
         var userManager = serviceProvider.GetService<UserManager>();
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var settingsManager = serviceProvider.GetService<SettingsManager>();
         var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
-        var pathProvider = serviceProvider.GetService<PathProvider>();
-        var filesLinkUtility = serviceProvider.GetService<FilesLinkUtility>();
-        var fileUtility = serviceProvider.GetService<FileUtility>();
         var tenantWhiteLabelSettingsHelper = serviceProvider.GetService<TenantWhiteLabelSettingsHelper>();
         var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
         var tenantUtil = serviceProvider.GetService<TenantUtil>();
         var documentServiceConnector = serviceProvider.GetService<DocumentServiceConnector>();
+        var tempPath = serviceProvider.GetService<TempPath>();
 
         var user = await userManager.GetUsersAsync(userId);
 
@@ -104,16 +100,6 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         CultureInfo.CurrentUICulture = usertCulture;
 
         var room = await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
-
-        var outputFileName = $"{room.Title}_{FilesCommonResource.RoomIndex_Index.ToLowerInvariant()}.xlsx";
-
-        //TODO: think about loop by N
-        var (entries, _) = await serviceProvider.GetService<EntryManager>()
-            .GetEntriesAsync(room, room, 0, -1, null, false, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
-
-        var typedEntries = entries.OfType<FileEntry<T>>().ToList();
-
-        var foldersIndex = await GetFoldersIndex(roomId, typedEntries, serviceProvider);
 
         var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
 
@@ -124,40 +110,6 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         var logoPath = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.LightSmall);
 
         logoPath = documentServiceConnector.ReplaceCommunityAddress(logoPath);
-
-        var items = new List<object>
-        {
-            new
-            {
-                index = (string)null,
-                name = room.Title,
-                url = commonLinkUtility.GetFullAbsolutePath(pathProvider.GetRoomsUrl(room.Id.ToString(), false)),
-                type = FilesCommonResource.RoomIndex_Room,
-                size = (string)null,
-                author = room.CreateByString,
-                created = room.CreateOnString,
-                modified = room.CreateOnString
-            }
-        };
-
-        foreach (var entry in typedEntries)
-        {
-            var isFolder = entry.FileEntryType == FileEntryType.Folder;
-            var index = isFolder ? foldersIndex[entry.Id].Order : string.Join(".", foldersIndex[entry.ParentId].Order, entry.Order);
-            var url = isFolder ? pathProvider.GetRoomsUrl(entry.Id.ToString(), false) : filesLinkUtility.GetFileWebPreviewUrl(fileUtility, entry.Title, entry.Id);
-
-            items.Add(new
-            {
-                index = index.TrimStart('.'),
-                name = entry.Title,
-                url = commonLinkUtility.GetFullAbsolutePath(url),
-                type = isFolder ? FilesCommonResource.RoomIndex_Folder : Path.GetExtension(entry.Title),
-                size = isFolder ? null : Math.Round(((File<T>)entry).ContentLength / 1024d / 1024d, 3).ToString(CultureInfo.InvariantCulture),
-                author = entry.CreateByString,
-                created = entry.CreateOnString,
-                modified = entry.ModifiedOnString
-            });
-        }
 
         var data = new
         {
@@ -195,15 +147,106 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
                 room = room.Title,
                 exportAuthor = user.DisplayUserName(false, displayUserSettingsHelper),
                 dateGenerated = tenantUtil.DateTimeNow().ConvertNumerals("g")
-            },
-
-            data = items
+            }
         };
 
-        return (data, outputFileName);
+        var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
+
+        var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
+        var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
+        var outputFileName = $"{room.Title}_{FilesCommonResource.RoomIndex_Index.ToLowerInvariant()}.xlsx";
+
+        script = script
+            .Replace("${tempFileName}", tempFileName)
+            .Replace("${inputData}", JsonConvert.SerializeObject(data));
+
+        var scriptParts = script.Split("${items}");
+
+        await using (var writer = new StreamWriter(scriptFilePath))
+        {
+            await writer.WriteAsync(scriptParts[0]);
+
+            await WriteItemsToScript(serviceProvider, room, writer);
+
+            await writer.WriteAsync(scriptParts[1]);
+        }
+
+        return (scriptFilePath, tempFileName, outputFileName);
     }
-    
-    private static async Task<Dictionary<T, FolderIndex>> GetFoldersIndex<T>(T roomId, IEnumerable<FileEntry<T>> entries, IServiceProvider serviceProvider)
+
+    private static async Task WriteItemsToScript<T>(IServiceProvider serviceProvider, Folder<T> room, StreamWriter writer)
+    {
+        var entryManager = serviceProvider.GetService<EntryManager>();
+        var pathProvider = serviceProvider.GetService<PathProvider>();
+        var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
+        var filesLinkUtility = serviceProvider.GetService<FilesLinkUtility>();
+        var fileUtility = serviceProvider.GetService<FileUtility>();
+        var breadCrumbsManager = serviceProvider.GetService<BreadCrumbsManager>();
+
+        var from = 0;
+        var count = 1000;
+        var separator = "";
+
+        var items = new List<object>
+        {
+            new
+            {
+                index = (string)null,
+                name = room.Title,
+                url = commonLinkUtility.GetFullAbsolutePath(pathProvider.GetRoomsUrl(room.Id.ToString(), false)),
+                type = FilesCommonResource.RoomIndex_Room,
+                size = (string)null,
+                author = room.CreateByString,
+                created = room.CreateOnString,
+                modified = room.CreateOnString
+            }
+        };
+
+        while (true)
+        {
+            var (entries, _) = await entryManager.GetEntriesAsync(room, room, from, count, null, false, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
+            var typedEntries = entries.OfType<FileEntry<T>>().ToList();
+            var foldersIndex = await GetFoldersIndex(room.Id, typedEntries, breadCrumbsManager);
+
+            foreach (var entry in typedEntries)
+            {
+                var isFolder = entry.FileEntryType == FileEntryType.Folder;
+                var index = isFolder ? foldersIndex[entry.Id].Order : string.Join(".", foldersIndex[entry.ParentId].Order, entry.Order);
+                var url = isFolder ? pathProvider.GetRoomsUrl(entry.Id.ToString(), false) : filesLinkUtility.GetFileWebPreviewUrl(fileUtility, entry.Title, entry.Id);
+
+                items.Add(new
+                {
+                    index = index.TrimStart('.'),
+                    name = entry.Title,
+                    url = commonLinkUtility.GetFullAbsolutePath(url),
+                    type = isFolder ? FilesCommonResource.RoomIndex_Folder : Path.GetExtension(entry.Title),
+                    size = isFolder ? null : Math.Round(((File<T>)entry).ContentLength / 1024d / 1024d, 3).ToString(CultureInfo.InvariantCulture),
+                    author = entry.CreateByString,
+                    created = entry.CreateOnString,
+                    modified = entry.ModifiedOnString
+                });
+            }
+
+            var jsonArray = JsonConvert.SerializeObject(items);
+
+            var text = separator + jsonArray.TrimStart('[').TrimEnd(']');
+
+            await writer.WriteAsync(text);
+
+            if (typedEntries.Count < count)
+            {
+                break;
+            }
+            else
+            {
+                from += count;
+                separator = ",";
+                items = [];
+            }
+        }
+    }
+
+    private static async Task<Dictionary<T, FolderIndex>> GetFoldersIndex<T>(T roomId, IEnumerable<FileEntry<T>> entries, BreadCrumbsManager breadCrumbsManager)
     {
         var result = new Dictionary<T, FolderIndex> { { roomId, new FolderIndex(0, string.Empty) } };
 
@@ -215,7 +258,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
             }
             else
             {
-                var order = await serviceProvider.GetService<BreadCrumbsManager>().GetBreadCrumbsOrderAsync(entry.ParentId);
+                var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(entry.ParentId);
                 result[entry.ParentId] = new FolderIndex(1, order);
             }
 
@@ -227,7 +270,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
         return result;
     }
-    
+
     private record FolderIndex(int ChildFoldersCount, string Order);
 }
 
