@@ -43,7 +43,7 @@ public class BackupSchedule : BaseEntity
 
     public override object[] GetKeys()
     {
-        return [TenantId, Dump];
+        return [TenantId];
     }
 }
 
@@ -64,7 +64,7 @@ public static class BackupScheduleExtension
     {
         modelBuilder.Entity<BackupSchedule>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.Dump })
+            entity.HasKey(e => new { e.TenantId })
                 .HasName("PRIMARY");
 
             entity.ToTable("backup_schedule")
@@ -113,14 +113,20 @@ public static class BackupScheduleExtension
 
             entity.Property(e => e.Dump)
                 .HasColumnName("dump")
-                .HasColumnType("tinyint(1)");
+                .HasColumnType("tinyint(1)")
+                .HasDefaultValueSql("'0'");
+
+            entity.HasOne(e => e.Tenant)
+                   .WithOne()
+                   .HasForeignKey<BackupSchedule>(b => b.TenantId)
+                   .OnDelete(DeleteBehavior.Cascade);
         });
     }
     public static void PgSqlAddBackupSchedule(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<BackupSchedule>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.Dump })
+            entity.HasKey(e => new { e.TenantId })
                 .HasName("PRIMARY");
 
             entity.ToTable("backup_schedule");
@@ -166,7 +172,13 @@ public static class BackupScheduleExtension
 
             entity.Property(e => e.Dump)
                 .HasColumnName("dump")
-                .HasColumnType("tinyint(1)");
+                .HasColumnType("tinyint(1)")
+                .HasDefaultValueSql("'0'");
+
+            entity.HasOne(e => e.Tenant)
+                   .WithOne()
+                   .HasForeignKey<BackupSchedule>(b => b.TenantId)
+                   .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
