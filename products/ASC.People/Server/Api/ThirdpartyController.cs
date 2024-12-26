@@ -67,7 +67,7 @@ public class ThirdpartyController(
     public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(AuthProvidersRequestDto inDto)
     {
         var infos = new List<AccountInfoDto>();
-        IEnumerable<LoginProfile> linkedAccounts = new List<LoginProfile>();
+        var linkedAccounts = new List<LoginProfile>();
 
         if (authContext.IsAuthenticated)
         {

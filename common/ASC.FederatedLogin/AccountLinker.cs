@@ -79,7 +79,7 @@ public class AccountLinker(
         return (await GetLinkedProfilesAsync(objects)).Where(o => o.Value.Provider.Equals(provider)).ToDictionary(k => k.Key, v => v.Value);
     }
 
-    public async Task<IEnumerable<LoginProfile>> GetLinkedProfilesAsync(string obj)
+    public async Task<List<LoginProfile>> GetLinkedProfilesAsync(string obj)
     {
         return await accountLinkerStorage.GetFromCacheAsync(obj, GetLinkedProfilesFromDBAsync);
     }
