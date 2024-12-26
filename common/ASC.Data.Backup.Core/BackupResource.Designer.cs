@@ -70,6 +70,15 @@ namespace ASC.Data.Backup.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The backup file is invalid. .
+        /// </summary>
+        internal static string BackupInvalid {
+            get {
+                return ResourceManager.GetString("BackupInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The backup file is invalid. Please use the file created in the same portal..
         /// </summary>
         internal static string BackupNotFound {

@@ -120,6 +120,9 @@
   <data name="BackupException" xml:space="preserve">
     <value>Something went wrong while creating the backup. Please try creating it again or contact support.</value>
   </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>The backup file is invalid. </value>
+  </data>
   <data name="BackupNotFound" xml:space="preserve">
     <value>The backup file is invalid. Please use the file created in the same portal.</value>
   </data>

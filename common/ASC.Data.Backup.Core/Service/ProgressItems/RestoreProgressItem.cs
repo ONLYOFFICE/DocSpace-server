@@ -191,10 +191,22 @@ public class RestoreProgressItem : BaseBackupProgressItem
             Percentage = 100;
             IsCompleted = true;
         }
+        catch (DbBackupException error)
+        {
+            _logger.ErrorRestoreProgressItem(error);
+            Exception = new DbBackupException(BackupResource.BackupInvalid, error);
+            IsCompleted = true;
+
+            if (tenant != null)
+            {
+                tenant.SetStatus(TenantStatus.Active);
+                await _tenantManager.SaveTenantAsync(tenant);
+            }
+        }
         catch (Exception error)
         {
             _logger.ErrorRestoreProgressItem(error);
-            Exception = new Exception(BackupResource.RestoreException, error);
+            Exception = error;
             IsCompleted = true;
 
             if (tenant != null)
