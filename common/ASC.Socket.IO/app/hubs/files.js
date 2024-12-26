@@ -372,11 +372,11 @@ module.exports = (io) => {
   }
 
   function endBackup({ tenantId, result } = {}) {
-    filesIO.to(`${tenantId}-backup`).emit("s:end-backup", result);
+    filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", result);
   }
 
   function endRestore({ tenantId, result } = {}) {
-    filesIO.to(`${tenantId}-restore`).emit("s:end-restore", result);
+    filesIO.to(`${tenantId}-restore`).emit("s:restore-progress", result);
   }
 
   return {
