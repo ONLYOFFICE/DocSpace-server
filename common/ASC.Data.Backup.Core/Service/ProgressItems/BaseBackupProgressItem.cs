@@ -74,9 +74,9 @@ public abstract class BaseBackupProgressItem(IServiceScopeFactory serviceScopeFa
     {
         get
         {
-            return _backupProgressItemEnum ?? (BackupProgressItemType)this[nameof(_backupProgressItemEnum)];
+            return _backupProgressItemEnum ?? BackupProgressItemType.Backup;
         }
-        protected init
+        protected set
         {
             _backupProgressItemEnum = value;
 
@@ -89,7 +89,6 @@ public abstract class BaseBackupProgressItem(IServiceScopeFactory serviceScopeFa
         this[nameof(_tenantId)] = 0;
         this[nameof(_newTenantId)] = 0;
         this[nameof(_link)] = "";
-        this[nameof(_backupProgressItemEnum)] = 0;
     }
 
     public BackupProgress ToBackupProgress()

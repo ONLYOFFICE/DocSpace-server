@@ -49,6 +49,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
     public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit)
     {
         Init();
+        BackupProgressItemType = BackupProgressItemType.Backup;
         _userId = Guid.Empty;
         TenantId = schedule.TenantId;
         _storageType = schedule.StorageType;
@@ -63,6 +64,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
     public void Init(StartBackupRequest request, bool isScheduled, string tempFolder, int limit)
     {
         Init();
+        BackupProgressItemType = BackupProgressItemType.Backup;
         _userId = request.UserId;
         TenantId = request.TenantId;
         _storageType = request.StorageType;

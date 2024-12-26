@@ -58,8 +58,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
         _cache = cache;
         _notifyHelper = notifyHelper;
         _coreBaseSettings = coreBaseSettings;
-
-        BackupProgressItemType = BackupProgressItemType.Restore;
     }
 
     public BackupStorageType StorageType { get; set; }
@@ -71,6 +69,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
     public void Init(StartRestoreRequest request, string tempFolder, string upgradesPath, string region = "current")
     {
         Init();
+        BackupProgressItemType = BackupProgressItemType.Restore;
         TenantId = request.TenantId;
         NewTenantId = request.TenantId;
         Notify = request.NotifyAfterCompletion;
