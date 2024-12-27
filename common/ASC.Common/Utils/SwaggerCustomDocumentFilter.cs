@@ -44,7 +44,17 @@ public class LowercaseDocumentFilter : IDocumentFilter
         var paths = new OpenApiPaths();
         foreach (var (key, value) in swaggerDoc.Paths)
         {
-            var lowerCaseKey = key.ToLowerInvariant();
+            var segments = key.Split('/');
+
+            for (var i = 0; i < segments.Length; i++)
+            {
+                if (!segments[i].StartsWith("{") && !segments[i].EndsWith("}"))
+                {
+                    segments[i] = segments[i].ToLowerInvariant();
+                }
+            }
+
+            var lowerCaseKey = string.Join("/", segments);
             paths.Add(lowerCaseKey, value);
         }
 
