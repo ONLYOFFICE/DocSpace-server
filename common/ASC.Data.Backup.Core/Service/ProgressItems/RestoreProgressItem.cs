@@ -96,6 +96,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             _backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
             _backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
             _socketManager = scope.ServiceProvider.GetService<SocketManager>();
+            await _socketManager.RestoreProgressAsync(socketTenant, 0);
 
             tenant = await _tenantManager.GetTenantAsync(TenantId);
             _tenantManager.SetCurrentTenant(tenant);
