@@ -87,6 +87,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         var backupPortalTask = scope.ServiceProvider.GetService<BackupPortalTask>();
         var tempStream = scope.ServiceProvider.GetService<TempStream>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        await tenantManager.SetCurrentTenantAsync(TenantId);
         await socketManager.BackupProgressAsync(0);
 
         var dateTime = coreBaseSettings.Standalone ? DateTime.Now : DateTime.UtcNow;
