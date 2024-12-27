@@ -114,7 +114,18 @@ module.exports = (io) => {
       logger.info(`refresh folder ${folderId} in room ${room}`);
       socket.to(room).emit("refresh-folder", folderId);
     });
-    
+
+    socket.on("restore-backup", () => {
+      const room = getRoom("restore");
+      const sess = socket.handshake.session;
+      const tenant = sess?.portal?.tenantId || "unknown";
+      const user = sess?.user?.id || "unknown";
+      const sessId = sess?.id;
+
+      logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
+      socket.to(room).emit("restore-backup");
+    });
+
     function changeSubscription(roomParts, individual, changeFunc) {
       if (!roomParts) return;
 
