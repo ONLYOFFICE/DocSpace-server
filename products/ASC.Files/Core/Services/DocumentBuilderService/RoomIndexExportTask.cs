@@ -185,7 +185,9 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
         var from = 0;
         var count = 1000;
-        var separator = "";
+        var separator = string.Empty;
+        var filterType = FilterType.FoldersOnly;
+        var foldersIndex = new Dictionary<T, FolderIndex> { { room.Id, new FolderIndex(0, string.Empty) } };
 
         var items = new List<object>
         {
@@ -204,9 +206,29 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
         while (true)
         {
-            var (entries, _) = await entryManager.GetEntriesAsync(room, room, from, count, null, false, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
+            var (entries, _) = await entryManager.GetEntriesAsync(room, room, from, count, [filterType], false, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
             var typedEntries = entries.OfType<FileEntry<T>>().ToList();
-            var foldersIndex = await GetFoldersIndex(room.Id, typedEntries, breadCrumbsManager);
+
+            if (filterType == FilterType.FoldersOnly)
+            {
+                foreach (var entry in typedEntries)
+                {
+                    if (foldersIndex.TryGetValue(entry.ParentId, out var value))
+                    {
+                        foldersIndex[entry.ParentId] = value with { ChildFoldersCount = value.ChildFoldersCount + 1 };
+                    }
+                    else
+                    {
+                        var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(entry.ParentId);
+                        foldersIndex[entry.ParentId] = new FolderIndex(1, order);
+                    }
+
+                    if (!foldersIndex.ContainsKey(entry.Id))
+                    {
+                        foldersIndex.Add(entry.Id, new FolderIndex(0, string.Join(".", foldersIndex[entry.ParentId].Order, entry.Order)));
+                    }
+                }
+            }
 
             foreach (var entry in typedEntries)
             {
@@ -233,42 +255,30 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
             await writer.WriteAsync(text);
 
+            if (string.IsNullOrEmpty(separator))
+            {
+                separator = ",";
+            }
+
             if (typedEntries.Count < count)
             {
-                break;
+                if (filterType == FilterType.FoldersOnly)
+                {
+                    filterType = FilterType.FilesOnly;
+                    from = 0;
+                    items = [];
+                }
+                else
+                {
+                    break;
+                }
             }
             else
             {
                 from += count;
-                separator = ",";
                 items = [];
             }
         }
-    }
-
-    private static async Task<Dictionary<T, FolderIndex>> GetFoldersIndex<T>(T roomId, IEnumerable<FileEntry<T>> entries, BreadCrumbsManager breadCrumbsManager)
-    {
-        var result = new Dictionary<T, FolderIndex> { { roomId, new FolderIndex(0, string.Empty) } };
-
-        foreach (var entry in entries.Where(x => x.FileEntryType == FileEntryType.Folder))
-        {
-            if (result.TryGetValue(entry.ParentId, out var value))
-            {
-                result[entry.ParentId] = value with { ChildFoldersCount = value.ChildFoldersCount + 1 };
-            }
-            else
-            {
-                var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(entry.ParentId);
-                result[entry.ParentId] = new FolderIndex(1, order);
-            }
-
-            if (!result.ContainsKey(entry.Id))
-            {
-                result.Add(entry.Id, new FolderIndex(0, string.Join(".", result[entry.ParentId].Order, entry.Order)));
-            }
-        }
-
-        return result;
     }
 
     private record FolderIndex(int ChildFoldersCount, string Order);
