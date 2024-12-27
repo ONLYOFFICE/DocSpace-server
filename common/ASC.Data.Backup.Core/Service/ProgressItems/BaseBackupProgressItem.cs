@@ -74,12 +74,11 @@ public abstract class BaseBackupProgressItem(IServiceScopeFactory serviceScopeFa
     {
         get
         {
-            return _backupProgressItemEnum ?? BackupProgressItemType.Backup;
+            return _backupProgressItemEnum ?? (BackupProgressItemType)this[nameof(_backupProgressItemEnum)];
         }
         protected set
         {
             _backupProgressItemEnum = value;
-
             this[nameof(_backupProgressItemEnum)] = (int)value;
         }
     }
