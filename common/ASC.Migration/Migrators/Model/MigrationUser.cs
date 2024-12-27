@@ -34,7 +34,7 @@ public class MigrationUser(DisplayUserSettingsHelper displayUserSettingsHelper)
     public bool HasPhoto { get; set; }
     public string PathToPhoto { get; set; }
 
-    public virtual MigratingApiUser ToApiInfo(string key)
+    public MigratingApiUser ToApiInfo(string key)
     {
         return new MigratingApiUser
         {
