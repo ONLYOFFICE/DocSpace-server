@@ -573,7 +573,7 @@ public class WorkspaceMigrator : Migrator
             }
             var group = new MigrationGroup
             {
-                Info = new()
+                Info = new GroupInfo
                 {
                     Name = row["name"].ToString()
                 },

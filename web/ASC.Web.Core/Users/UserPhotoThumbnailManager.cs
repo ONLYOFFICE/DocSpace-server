@@ -202,15 +202,15 @@ public class ThumbnailsData(Guid userId, UserPhotoManager userPhotoManager)
     {
         return
         [
-            new() { Size = UserPhotoManager.RetinaFotoSize, ImgUrl = await userPhotoManager.GetRetinaPhotoURL(userId) },
+            new ThumbnailItem { Size = UserPhotoManager.RetinaFotoSize, ImgUrl = await userPhotoManager.GetRetinaPhotoURL(userId) },
 
-            new() { Size = UserPhotoManager.MaxFotoSize, ImgUrl = await userPhotoManager.GetMaxPhotoURL(userId) },
+            new ThumbnailItem { Size = UserPhotoManager.MaxFotoSize, ImgUrl = await userPhotoManager.GetMaxPhotoURL(userId) },
 
-            new() { Size = UserPhotoManager.BigFotoSize, ImgUrl = await userPhotoManager.GetBigPhotoURL(userId) },
+            new ThumbnailItem { Size = UserPhotoManager.BigFotoSize, ImgUrl = await userPhotoManager.GetBigPhotoURL(userId) },
 
-            new() { Size = UserPhotoManager.MediumFotoSize, ImgUrl = await userPhotoManager.GetMediumPhotoURL(userId) },
+            new ThumbnailItem { Size = UserPhotoManager.MediumFotoSize, ImgUrl = await userPhotoManager.GetMediumPhotoURL(userId) },
 
-            new() { Size = UserPhotoManager.SmallFotoSize, ImgUrl = await userPhotoManager.GetSmallPhotoURL(userId) }
+            new ThumbnailItem { Size = UserPhotoManager.SmallFotoSize, ImgUrl = await userPhotoManager.GetSmallPhotoURL(userId) }
         ];
     }
 
