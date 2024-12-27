@@ -184,13 +184,18 @@ public class BackupAjaxHandler(
 
         var scheduleRequest = new CreateScheduleRequest
         {
-            TenantId = tenantManager.GetCurrentTenantId(),
+            TenantId =  dump ? -1 : tenantManager.GetCurrentTenantId(),
             Cron = cronParams.ToString(),
             NumberOfBackupsStored = backupsStored,
             StorageType = storageType,
             StorageParams = storageParams,
             Dump = dump
         };
+
+        if (dump)
+        {
+            scheduleRequest.StorageParams.Add("tenantId", tenantManager.GetCurrentTenantId().ToString());
+        }
 
         switch (storageType)
         {
@@ -214,8 +219,15 @@ public class BackupAjaxHandler(
     public async Task<Schedule> GetScheduleAsync(bool? dump)
     {
         await DemandPermissionsBackupAsync();
-
-        var response = await backupService.GetScheduleAsync(GetCurrentTenantIdAsync(), dump);
+        ScheduleResponse response = null;
+        if (dump.HasValue && dump.Value) 
+        {
+            response = await backupService.GetScheduleAsync(-1, dump);
+        }
+        else
+        {
+            response = await backupService.GetScheduleAsync(GetCurrentTenantIdAsync(), dump);
+        }
         if (response == null)
         {
             return null;

@@ -82,14 +82,15 @@ public sealed class BackupSchedulerService(
                         await backupRepository.SaveBackupScheduleAsync(schedule);
 
                         logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
-
+                        var param = JsonSerializer.Deserialize<Dictionary<string, string>>(schedule.StorageParams);
                         await _eventBus.PublishAsync(new BackupRequestIntegrationEvent(
-                                                 tenantId: schedule.TenantId,
+                                                 tenantId: schedule.Dump ? int.Parse(param["tenantId"]) : schedule.TenantId,
                                                  storageBasePath: schedule.StorageBasePath,
-                                                 storageParams: JsonSerializer.Deserialize<Dictionary<string, string>>(schedule.StorageParams),
+                                                 storageParams: param,
                                                  storageType: schedule.StorageType,
                                                  createBy: Constants.CoreSystem.ID,
                                                  isScheduled: true,
+                                                 dump: schedule.Dump,
                                                  backupsStored: schedule.BackupsStored
                                           ));
                     }
