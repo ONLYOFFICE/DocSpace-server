@@ -41,6 +41,7 @@ public class FormFillingReportCreator(
 {
 
     private static readonly JsonSerializerOptions _options = new() {
+        Converters = { new BoolToStringConverter() },
         AllowTrailingCommas = true,
         PropertyNameCaseInsensitive = true
     };
@@ -119,6 +120,8 @@ public class FormFillingReportCreator(
         ];
         
         var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+        fromData.FormsData = fromData.FormsData.Where(f => f.Type != "picture").ToList();
+
         var result = new SubmitFormsData
         {
             FormsData =  formNumber.Concat(fromData.FormsData).ToList()
@@ -128,7 +131,7 @@ public class FormFillingReportCreator(
         var now = DateTime.UtcNow;
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        if (formsDataFile.Id is int id &&  formsDataFile.ParentId is int parentId)
+        if (formsDataFile.Id is int id && formsDataFile.ParentId is int parentId)
         {
             var searchItems = new DbFormsItemDataSearch
             {
@@ -145,6 +148,25 @@ public class FormFillingReportCreator(
         }
 
         return result;
+    }
+
+    public class BoolToStringConverter : System.Text.Json.Serialization.JsonConverter<string>
+    {
+        public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return reader.TokenType switch
+            {
+                JsonTokenType.True => "true",
+                JsonTokenType.False => "false",
+                JsonTokenType.String => reader.GetString(),
+                _ => throw new System.Text.Json.JsonException("Unexpected token type")
+            };
+        }
+
+        public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value);
+        }
     }
 
 }

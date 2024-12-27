@@ -91,8 +91,12 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
         var userManager = serviceProvider.GetService<UserManager>();
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var settingsManager = serviceProvider.GetService<SettingsManager>();
+        var tenantManager = serviceProvider.GetService<TenantManager>();
         var formFillingReportCreator = serviceProvider.GetService<FormFillingReportCreator>();
-        
+        var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
+        var filesLinkUtility = serviceProvider.GetService<FilesLinkUtility>();
+        var fileUtility = serviceProvider.GetService<FileUtility>();
+
         var user = await userManager.GetUsersAsync(userId);
         var fileDao = daoFactory.GetFileDao<int>();
 
@@ -101,6 +105,7 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
         CultureInfo.CurrentUICulture = usertCulture;
 
         var formFillingResults = await formFillingReportCreator.GetFormFillingResults(roomId, originalFormId);
+        var tenantCulture = tenantManager.GetCurrentTenant().GetCulture();
 
         var keys = new List<string>();
         var values = new List<List<object>>();
@@ -117,6 +122,9 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
                     }
                     keys.Add(field.Key);
                 }
+                keys.Add(FilesCommonResource.ResourceManager.GetString("Date", tenantCulture));
+                keys.Add(FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture));
+
                 foreach (var formFillingRes in formFillingResults)
                 {
                     var t = new List<object>();
@@ -128,10 +136,25 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
                         }
                         t.Add(new
                         {
-                            field.Type,
-                            field.Value
+                            format = field.Type == "dateTime" ? $"{tenantCulture.DateTimeFormat.ShortDatePattern}" : "@",
+                            value = field.Value,
+                            url = ""
                         });
                     }
+                    t.Add(new
+                    {
+                        format = $"{tenantCulture.DateTimeFormat.LongTimePattern}",
+                        value = formFillingRes.CreateOn.ToString("G", tenantCulture),
+                        url = ""
+                    });
+                    var formsDataFile = await fileDao.GetFileAsync(formFillingRes.Id);
+                    var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
+                    t.Add(new
+                    {
+                        format = "@",
+                        value = FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture),
+                        url = resultUrl
+                    });
                     values.Add(t);
                 }
             }

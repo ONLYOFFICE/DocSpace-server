@@ -24,6 +24,9 @@ function toColumnName(num) {
 
 function customizeWorksheet() {
     oWorksheet.SetName(inputData.resources.sheetName);
+
+    oWorksheet.SetColumnWidth(inputData.data.keys.length - 1, 20);
+    oWorksheet.SetColumnWidth(inputData.data.keys.length - 2, 20);
 }
 
 function prepareData(startColIndex, startRowIndex) {
@@ -35,7 +38,7 @@ function prepareData(startColIndex, startRowIndex) {
 
     var kA = [];
     for (var i = 0; i < inputData.data.keys.length; i++){
-        kA.push({ "value": inputData.data.keys[i], "bold": true, "fontColor": colors.mainFontColor, "bgColor": colors.mainBgColor, valign: "center", "borderColor": defaultBorderColorWhite });
+        kA.push({ "value": inputData.data.keys[i], "bold": true, "fontColor": defaultFontColorBlack, "bgColor": defaultBgColorGray, valign: "center", "borderColor": defaultBorderColorWhite });
     }
     var dataTable = [
         {
@@ -47,7 +50,7 @@ function prepareData(startColIndex, startRowIndex) {
     for (var i = 0; i < inputData.data.values.length; i++){
         var rowValues = []
         for (var j = 0; j < inputData.data.values[i].length; j++){
-            rowValues.push({ "value": inputData.data.values[i][j].Value, "fontSize": (defaultFontSize + 1), "bgColor": defaultBgColorGray, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.data.values[i][j].Type == "dateTime" ? inputData.resources.dateFormat : "@" });
+            rowValues.push({ "value": inputData.data.values[i][j].value, "url": inputData.data.values[i][j].url, "fontSize": (defaultFontSize + 1), valign: "center", "format": inputData.data.values[i][j].format });
         }
         dataTable.push({ height: 19.5, dataArray: rowValues });
     }
@@ -84,12 +87,6 @@ function writeCell(position, data) {
         sRange.SetFillColor(data.bgColor);
     }
 
-    if (data.borderColor) {
-        sRange.SetBorders("Bottom", "Medium", data.borderColor);
-        sRange.SetBorders("Top", "Medium", data.borderColor);
-        sRange.SetBorders("Left", "Medium", data.borderColor);
-        sRange.SetBorders("Right", "Medium", data.borderColor);
-    }
 }
 
 function writeTable(table) {
