@@ -40,7 +40,7 @@ public class AuditReportUploader(GlobalFolderHelper globalFolderHelper,
             var file = await fileUploader.ExecAsync(await globalFolderHelper.FolderMyAsync, reportName, stream.Length, stream, true);
             var fileUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id));
 
-            fileUrl += string.Format("&options={{\"codePage\":{0}}}", Encoding.UTF8.CodePage);
+            fileUrl += $"&options={{\"codePage\":{Encoding.UTF8.CodePage}}}";
 
             return fileUrl;
         }
