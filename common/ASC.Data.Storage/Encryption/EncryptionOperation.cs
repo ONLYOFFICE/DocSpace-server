@@ -145,9 +145,9 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         {
             var logParent = $"Tenant: {tenant.Alias}, Module: {module}, Domain: {domain}";
 
-            var files = await GetFilesAsync(domains, progress, store, domain);
+            var files = GetFilesAsync(domains, progress, store, domain);
 
-            EncryptFiles(store, domain, files, logParent, log);
+            await EncryptFilesAsync(store, domain, files, logParent, log);
         }
 
         await PublishProgressAsync(socketManager);
@@ -183,9 +183,9 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         return encryptedFiles;
     }
 
-    private static async Task<IEnumerable<string>> GetFilesAsync(IEnumerable<string> domains, List<string> progress, DiscDataStore targetStore, string targetDomain)
+    private static IAsyncEnumerable<string> GetFilesAsync(IEnumerable<string> domains, List<string> progress, DiscDataStore targetStore, string targetDomain)
     {
-        IEnumerable<string> files = await targetStore.ListFilesRelativeAsync(targetDomain, "\\", "*.*", true).ToListAsync();
+        var files = targetStore.ListFilesRelativeAsync(targetDomain, "\\", "*.*", true);
 
         if (progress.Count > 0)
         {
@@ -209,9 +209,9 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         return files;
     }
 
-    private void EncryptFiles(DiscDataStore store, string domain, IEnumerable<string> files, string logParent, ILogger log)
+    private async Task EncryptFilesAsync(DiscDataStore store, string domain, IAsyncEnumerable<string> files, string logParent, ILogger log)
     {
-        foreach (var file in files)
+        await foreach (var file in files)
         {
             var logItem = $"{logParent}, File: {file}";
 
@@ -221,11 +221,11 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
             {
                 if (_isEncryption)
                 {
-                    store.Encrypt(domain, file);
+                    await store.EncryptAsync(domain, file);
                 }
                 else
                 {
-                    store.Decrypt(domain, file);
+                    await store.DecryptAsync(domain, file);
                 }
 
                 WriteProgress(store, file, _useProgressFile);

@@ -123,11 +123,11 @@ public class Metadata(IConfiguration configuration)
     }
 
 
-    public bool TryReadFromStream(Stream stream, byte cryptVersion)
+    public async Task<bool> TryReadFromStreamAsync(Stream stream, byte cryptVersion)
     {
         try
         {
-            var readed = stream.Read(Prefix, 0, prefixLength);
+            var readed = await stream.ReadAsync(Prefix.AsMemory(0, prefixLength));
             if (readed < prefixLength)
             {
                 return false;
@@ -138,7 +138,7 @@ public class Metadata(IConfiguration configuration)
                 return false;
             }
 
-            readed = stream.Read(Version, 0, versionLength);
+            readed = await stream.ReadAsync(Version.AsMemory(0, versionLength));
             if (readed < versionLength)
             {
                 return false;
@@ -149,7 +149,7 @@ public class Metadata(IConfiguration configuration)
                 return false;
             }
 
-            readed = stream.Read(Size, 0, sizeLength);
+            readed = await stream.ReadAsync(Size.AsMemory(0, sizeLength));
             if (readed < sizeLength)
             {
                 return false;
@@ -160,19 +160,19 @@ public class Metadata(IConfiguration configuration)
                 return false;
             }
 
-            readed = stream.Read(Salt, 0, saltLength);
+            readed = await stream.ReadAsync(Salt.AsMemory(0, saltLength));
             if (readed < saltLength)
             {
                 return false;
             }
 
-            readed = stream.Read(HmacHash, 0, hmacHashLength);
+            readed = await stream.ReadAsync(HmacHash.AsMemory(0, hmacHashLength));
             if (readed < hmacHashLength)
             {
                 return false;
             }
 
-            readed = stream.Read(IV, 0, ivLength);
+            readed = await stream.ReadAsync(IV.AsMemory(0, ivLength));
             return readed >= ivLength;
         }
         catch (Exception)
@@ -181,16 +181,16 @@ public class Metadata(IConfiguration configuration)
         }
     }
 
-    public void WriteToStream(Stream stream)
+    public async Task WriteToStreamAsync(Stream stream)
     {
         stream.Seek(0, SeekOrigin.Begin);
 
-        stream.Write(Prefix, 0, prefixLength);
-        stream.Write(Version, 0, versionLength);
-        stream.Write(Size, 0, sizeLength);
-        stream.Write(Salt, 0, saltLength);
-        stream.Write(HmacHash, 0, hmacHashLength);
-        stream.Write(IV, 0, ivLength);
+        await stream.WriteAsync(Prefix.AsMemory(0, prefixLength));
+        await stream.WriteAsync(Version.AsMemory(0, versionLength));
+        await stream.WriteAsync(Size.AsMemory(0, sizeLength));
+        await stream.WriteAsync(Salt.AsMemory(0, saltLength));
+        await stream.WriteAsync(HmacHash.AsMemory(0, hmacHashLength));
+        await stream.WriteAsync(IV.AsMemory(0, ivLength));
     }
 
     public SymmetricAlgorithm GetCryptographyAlgorithm()
@@ -205,13 +205,13 @@ public class Metadata(IConfiguration configuration)
         return aes;
     }
 
-    public void ComputeAndWriteHmacHash(Stream stream)
+    public async Task ComputeAndWriteHmacHashAsync(Stream stream)
     {
         HmacHash = ComputeHmacHash(stream);
 
         stream.Seek(metadataLength - ivLength - hmacHashLength, SeekOrigin.Begin); // Move position to hmac
 
-        stream.Write(HmacHash, 0, hmacHashLength); // Replace empty hmac with computed
+        await stream.WriteAsync(HmacHash.AsMemory(0, hmacHashLength)); // Replace empty hmac with computed
     }
 
     public void ComputeAndValidateHmacHash(Stream stream)
