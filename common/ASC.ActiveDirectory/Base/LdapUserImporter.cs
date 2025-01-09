@@ -220,7 +220,7 @@ public class LdapUserImporter(
 
     const string GROUP_MEMBERSHIP = "groupMembership";
 
-    private IEnumerable<LdapObject> GetLdapUserGroups(LdapObject ldapUser)
+    private List<LdapObject> GetLdapUserGroups(LdapObject ldapUser)
     {
         var ldapUserGroups = new List<LdapObject>();
         try

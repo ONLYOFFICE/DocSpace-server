@@ -73,7 +73,7 @@ public abstract class Migrator(
 
     public Func<double, string, Task> OnProgressUpdateAsync { get; set; }
 
-    public abstract Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation);
+    public abstract Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken);
     public abstract Task<MigrationApiInfo> ParseAsync(bool reportProgress = true);
 
     protected async Task ReportProgressAsync(double value, string status)

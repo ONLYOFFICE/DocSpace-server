@@ -64,7 +64,6 @@ public class JwtBearerAuthHandler(
             authority = $"{serverRootPath}{authority}";
         }
 
-        var audience = serverRootPath;
         var httpDocumentRetriever = new HttpDocumentRetriever();
 
         var showPIIEnable = bool.TryParse(configuration["core:oidc:showPII"], out var showPII) && showPII;
@@ -77,7 +76,7 @@ public class JwtBearerAuthHandler(
                                                                                         new OpenIdConnectConfigurationRetriever(),
                                                                                         httpDocumentRetriever);
 
-        var accessToken = httpContextAccessor?.HttpContext?.Request.Headers["Authorization"].ToString();
+        var accessToken = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString();
 
         if (string.IsNullOrEmpty(accessToken))
         {
@@ -86,7 +85,7 @@ public class JwtBearerAuthHandler(
 
         accessToken = accessToken.Trim();
 
-        if (0 <= accessToken.IndexOf("Bearer", 0))
+        if (0 <= accessToken.IndexOf("Bearer", 0, StringComparison.Ordinal))
         {
             accessToken = accessToken["Bearer ".Length..];
         }
@@ -97,7 +96,7 @@ public class JwtBearerAuthHandler(
 
         if (validationTokenEnable)
         {
-            validatedToken = await ValidateToken(accessToken, authority, audience, configurationManager);
+            validatedToken = await ValidateToken(accessToken, authority, serverRootPath, configurationManager);
         }
         else
         {
@@ -161,7 +160,7 @@ public class JwtBearerAuthHandler(
             ValidIssuer = issuer,
             ValidAlgorithms = [SecurityAlgorithms.EcdsaSha256, SecurityAlgorithms.RsaSha256],
 
-            ClockSkew = TimeSpan.FromMinutes(2),
+            ClockSkew = TimeSpan.FromMinutes(2)
         };
 
         try

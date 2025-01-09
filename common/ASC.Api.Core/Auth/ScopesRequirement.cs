@@ -25,12 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Api.Core.Auth;
-public class ScopesRequirement : IAuthorizationRequirement
+public class ScopesRequirement(string scopes) : IAuthorizationRequirement
 {
-    public string Scopes { get; }
-
-    public ScopesRequirement(string scopes)
-    {
-        Scopes = scopes ?? throw new ArgumentNullException(nameof(scopes));
-    }
+    public string Scopes { get; } = scopes ?? throw new ArgumentNullException(nameof(scopes));
 }

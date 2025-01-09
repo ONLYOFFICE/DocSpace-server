@@ -54,7 +54,7 @@ public class WorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "Workspace" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -577,7 +577,7 @@ public class WorkspaceMigrator : Migrator
             }
             var group = new MigrationGroup
             {
-                Info = new()
+                Info = new GroupInfo
                 {
                     Name = row["name"].ToString()
                 },

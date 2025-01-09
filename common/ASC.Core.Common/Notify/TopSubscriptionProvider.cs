@@ -26,9 +26,7 @@
 
 namespace ASC.Notify.Model;
 
-public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
-        ISubscriptionProvider directSubscriptionProvider)
-    : ISubscriptionProvider
+public class TopSubscriptionProvider(IRecipientProvider recipientProvider, ISubscriptionProvider directSubscriptionProvider) : ISubscriptionProvider
 {
     private readonly string[] _defaultSenderMethods = [];
     private readonly ISubscriptionProvider _subscriptionProvider = directSubscriptionProvider ?? throw new ArgumentNullException(nameof(directSubscriptionProvider));
@@ -42,7 +40,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
     }
 
 
-    public virtual async Task<string[]> GetSubscriptionMethodAsync(INotifyAction action, IRecipient recipient)
+    public async Task<string[]> GetSubscriptionMethodAsync(INotifyAction action, IRecipient recipient)
     {
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
@@ -64,7 +62,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         return senders is { Length: > 0 } ? senders : _defaultSenderMethods;
     }
 
-    public virtual async Task<IRecipient[]> GetRecipientsAsync(INotifyAction action, string objectID)
+    public async Task<IRecipient[]> GetRecipientsAsync(INotifyAction action, string objectID)
     {
         ArgumentNullException.ThrowIfNull(action);
 
@@ -75,7 +73,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         return recipents.ToArray();
     }
 
-    public virtual async Task<bool> IsUnsubscribeAsync(IDirectRecipient recipient, INotifyAction action, string objectID)
+    public async Task<bool> IsUnsubscribeAsync(IDirectRecipient recipient, INotifyAction action, string objectID)
     {
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
@@ -84,7 +82,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
     }
 
 
-    public virtual async Task SubscribeAsync(INotifyAction action, string objectID, IRecipient recipient)
+    public async Task SubscribeAsync(INotifyAction action, string objectID, IRecipient recipient)
     {
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
@@ -92,7 +90,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         await _subscriptionProvider.SubscribeAsync(action, objectID, recipient);
     }
 
-    public virtual async Task UnSubscribeAsync(INotifyAction action, string objectID, IRecipient recipient)
+    public async Task UnSubscribeAsync(INotifyAction action, string objectID, IRecipient recipient)
     {
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
@@ -114,7 +112,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         await _subscriptionProvider.UnSubscribeAsync(action);
     }
 
-    public virtual async Task UnSubscribeAsync(INotifyAction action, IRecipient recipient)
+    public async Task UnSubscribeAsync(INotifyAction action, IRecipient recipient)
     {
         var objects = await GetSubscriptionsAsync(action, recipient);
         foreach (var objectID in objects)
@@ -123,7 +121,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         }
     }
 
-    public virtual async Task UpdateSubscriptionMethodAsync(INotifyAction action, IRecipient recipient, params string[] senderNames)
+    public async Task UpdateSubscriptionMethodAsync(INotifyAction action, IRecipient recipient, params string[] senderNames)
     {
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
@@ -132,7 +130,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         await _subscriptionProvider.UpdateSubscriptionMethodAsync(action, recipient, senderNames);
     }
 
-    public virtual async Task<object> GetSubscriptionRecordAsync(INotifyAction action, IRecipient recipient, string objectID)
+    public async Task<object> GetSubscriptionRecordAsync(INotifyAction action, IRecipient recipient, string objectID)
     {
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
@@ -159,7 +157,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         return subscriptionRecord;
     }
 
-    public virtual async Task<string[]> GetSubscriptionsAsync(INotifyAction action, IRecipient recipient, bool checkSubscribe = true)
+    public async Task<string[]> GetSubscriptionsAsync(INotifyAction action, IRecipient recipient, bool checkSubscribe = true)
     {
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);

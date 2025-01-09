@@ -207,7 +207,7 @@ public class NotifyClient(WorkContext notifyContext,
             return;
         }
         
-        var roomUrl = pathProvider.GetRoomsUrl(roomId);
+        var roomUrl = pathProvider.GetRoomsUrl(roomId, false);
 
         var room = await folderDao.GetFolderAsync(id);
 
@@ -341,7 +341,7 @@ public class NotifyClient(WorkContext notifyContext,
         var recipientsProvider = notifySource.GetRecipientsProvider();
 
         var folderId = folder.Id.ToString();
-        var roomUrl = pathProvider.GetRoomsUrl(folderId);
+        var roomUrl = pathProvider.GetRoomsUrl(folderId, false);
 
         foreach (var ace in aces)
         {

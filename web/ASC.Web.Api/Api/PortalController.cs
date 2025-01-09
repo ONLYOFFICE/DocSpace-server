@@ -141,27 +141,6 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Returns a link specified in the request in the shortened format.
-    /// </summary>
-    /// <short>Get a shortened link</short>
-    /// <path>api/2.0/portal/getshortenlink</path>
-    [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "Shortened link", typeof(object))]
-    [HttpPut("getshortenlink")]
-    public async Task<object> GetShortenLinkAsync(ShortenLinkRequestsDto inDto)
-    {
-        try
-        {
-            return await urlShortener.GetShortenLinkAsync(inDto.Link);
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorGetShortenLink(ex);
-            return inDto.Link;
-        }
-    }
-
-    /// <summary>
     /// Returns an extra tenant license for the portal.
     /// </summary>
     /// <short>
@@ -262,7 +241,7 @@ public class PortalController(
             DelayDueDate = source.DelayDueDate,
             LicenseDate = source.LicenseDate,
             CustomerId = source.CustomerId,
-            Quotas = source.Quotas,
+            Quotas = source.Quotas
         };
 
         if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))

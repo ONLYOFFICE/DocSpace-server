@@ -54,7 +54,7 @@ public class IdentityModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(help
         new("identity_clients", "client_id", "identity_client_redirect_uris", "client_id"),
         new("identity_clients", "client_id", "identity_client_scopes", "client_id"),
         new("identity_clients", "client_id", "identity_consents", "registered_client_id"),
-        new("identity_clients", "client_id", "identity_consent_scopes", "registered_client_id"),
+        new("identity_clients", "client_id", "identity_consent_scopes", "registered_client_id")
     ];
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)

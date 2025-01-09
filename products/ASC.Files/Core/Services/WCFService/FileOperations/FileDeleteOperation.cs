@@ -91,7 +91,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         this[OpType] = (int)FileOperationType.Delete;
     }
 
-    protected override async Task DoJob(IServiceScope serviceScope)
+    protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
         var filesMessageService = serviceScope.ServiceProvider.GetService<FilesMessageService>();
@@ -114,7 +114,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
         if (root != null)
         {
-            this[Res] += string.Format("folder_{0}{1}", root.Id, SplitChar);
+            this[Res] += $"folder_{root.Id}{SplitChar}";
         }
         if (_isEmptyTrash)
         {

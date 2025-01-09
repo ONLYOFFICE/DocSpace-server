@@ -27,11 +27,8 @@
 namespace ASC.Core.Notify.Senders;
 
 [Singleton]
-public class PushSender(ILoggerProvider options, IServiceProvider serviceProvider) : INotifySender
+public class PushSender(ILogger<PushSender> logger, IServiceProvider serviceProvider) : INotifySender
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
-
-
     public void Init(IDictionary<string, string> properties) { }
 
     public async Task<NoticeSendResult> SendAsync(NotifyMessage m)
@@ -44,13 +41,13 @@ public class PushSender(ILoggerProvider options, IServiceProvider serviceProvide
         try
         {
             using var scope = serviceProvider.CreateScope();
-            var FirebaseHelper = scope.ServiceProvider.GetService<FirebaseHelper>();
-            await FirebaseHelper.SendMessageAsync(m);
+            var firebaseHelper = scope.ServiceProvider.GetService<FirebaseHelper>();
+            await firebaseHelper.SendMessageAsync(m);
             return NoticeSendResult.OK;
         }
         catch (Exception e)
         {
-            _logger.ErrorUnexpected(e);
+            logger.ErrorUnexpected(e);
             return NoticeSendResult.SendingImpossible;
         }
     }

@@ -1069,4 +1069,10 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Yönetici sayısı sınırı aşıyor: {0}/{1}.</value>
   </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Kâr amacı gütmeyen</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>En az 1 izin verilen IP adresi ekleyin.</value>
+  </data>
 </root>

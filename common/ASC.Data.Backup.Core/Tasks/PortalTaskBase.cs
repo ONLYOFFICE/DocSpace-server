@@ -127,7 +127,6 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     "mailaggregator",
                     "whitelabel",
                     "customnavigation",
-                    "userPhotos",
                     "room_logos",
                     "webplugins"
                 };
@@ -151,10 +150,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     protected void SetStepsCount(int value)
     {
-        if (value <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(value));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
+        
         _stepsCount = value;
         Logger.DebugCountSteps(+_stepsCount);
     }

@@ -96,6 +96,7 @@ public class AuthKey
     /// <summary>
     /// Value
     /// </summary>
+    [StringLength(255)]
     public string Value { get; init; }
 
     /// <summary>

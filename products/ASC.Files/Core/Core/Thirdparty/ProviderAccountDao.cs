@@ -252,7 +252,7 @@ internal class ProviderAccountDao(
 
         var forUpdateCount = await filesDbContext.UpdateThirdPartyAccountsAsync(tenantId, linkId, login, password, token, url);
 
-        return forUpdateCount == 1 ? linkId : default;
+        return forUpdateCount == 1 ? linkId : 0;
     }
 
     public virtual async Task<int> UpdateProviderInfoAsync(int linkId, string customerTitle, AuthData newAuthData, FolderType folderType, Guid? userId = null)
@@ -340,7 +340,7 @@ internal class ProviderAccountDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        return toUpdateCount == 1 ? linkId : default;
+        return toUpdateCount == 1 ? linkId : 0;
     }
 
     public virtual async Task<int> UpdateBackupProviderInfoAsync(string providerKey, string customerTitle, AuthData newAuthData)

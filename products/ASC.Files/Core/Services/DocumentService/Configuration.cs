@@ -653,29 +653,18 @@ public class Paragraph
     [JsonPropertyName("runs")]
     public List<Run> Runs { get; set; }
 }
-public class Run
+public class Run(string text, bool usedInHash = true)
 {
-    private readonly bool _usedInHash;
-
-    internal bool UsedInHash => _usedInHash;
-
-    public Run(string text, bool usedInHash = true)
-    {
-        FontSize = "26";
-        Fill = [124, 124, 124];
-        Text = text;
-
-        _usedInHash = usedInHash;
-    }
+    internal bool UsedInHash => usedInHash;
 
     [JsonPropertyName("fill")]
-    public int[] Fill { get; set; }
+    public int[] Fill { get; set; } = [124, 124, 124];
 
     [JsonPropertyName("text")]
-    public string Text { get; set; }
+    public string Text { get; set; } = text;
 
     [JsonPropertyName("font-size")]
-    public string FontSize { get; set; }
+    public string FontSize { get; set; } = "26";
 }
 
 public class FileReference
@@ -894,7 +883,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// Embed url
     /// </summary>
-    public string EmbedUrl => ShareLinkParam != null && ShareLinkParam.IndexOf(FilesLinkUtility.ShareKey) != -1 ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null;
+    public string EmbedUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null;
 
     /// <summary>
     /// Save url
@@ -909,7 +898,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// Share url
     /// </summary>
-    public string ShareUrl => ShareLinkParam != null && ShareLinkParam.IndexOf(FilesLinkUtility.ShareKey) != -1 ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null;
+    public string ShareUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null;
 
     /// <summary>
     /// Toolbar docked

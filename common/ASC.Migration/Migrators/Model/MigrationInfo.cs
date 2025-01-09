@@ -43,7 +43,7 @@ public class MigrationInfo
     public int FailedUsers { get; set; }
     public List<string> Errors { get; set; } = [];
 
-    public virtual MigrationApiInfo ToApiInfo()
+    public MigrationApiInfo ToApiInfo()
     {
         return new MigrationApiInfo
         {
@@ -56,12 +56,12 @@ public class MigrationInfo
             FailedUsers = FailedUsers,
             Errors = Errors,
             Groups = Groups.Select(g => g.Value.ToApiInfo()).ToList(),
-            Operation = Operation.ToString().ToLower(),
+            Operation = Operation.ToStringLowerFast(),
             Files = Files
         };
     }
 
-    public virtual void Merge(MigrationApiInfo apiInfo)
+    public void Merge(MigrationApiInfo apiInfo)
     {
         Users.AddRange(ExistUsers);
         Users.AddRange(WithoutEmailUsers);

@@ -44,7 +44,7 @@ public class InvitationValidator(
         return signature.Create(linkId + "." + createBy);
     }
 
-    public async Task<LinkValidationResult> ValidateAsync(string key, string email, EmployeeType employeeType, Guid? userId = default)
+    public async Task<LinkValidationResult> ValidateAsync(string key, string email, EmployeeType employeeType, Guid? userId = null)
     {
         var result = new LinkValidationResult
         {
@@ -161,20 +161,20 @@ public class InvitationValidator(
     private (EmailValidationKeyProvider.ValidationResult, Guid) ValidateCommonWithRoomLink(string key, Guid? userId = null)
     {
         var linkId = signature.Read<Guid>(key);
-        if (linkId == default && userId.HasValue)
+        if (linkId == Guid.Empty && userId.HasValue)
         {
             var combined = signature.Read<string>(key);
             if (!string.IsNullOrEmpty(combined))
             {
                 var split = combined.Split('.');
-                if (split.Length == 2 && Guid.TryParse(split[0], out linkId) && Guid.TryParse(split[1], out var uId) && !Equals(uId, userId.Value))
+                if (split.Length == 2 && Guid.TryParse(split[0], out linkId) && Guid.TryParse(split[1], out var uId) && !uId.Equals(userId.Value))
                 {
-                    linkId = default;
+                    linkId = Guid.Empty;
                 }
             }
         }
         
-        return linkId == default ? (EmailValidationKeyProvider.ValidationResult.Invalid, default) : (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
+        return linkId == Guid.Empty ? (EmailValidationKeyProvider.ValidationResult.Invalid, default) : (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
     }
 
     private async Task<DbAuditEvent> GetLinkVisitMessageAsync(int tenantId, string email, string key)

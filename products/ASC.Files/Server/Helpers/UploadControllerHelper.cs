@@ -55,7 +55,7 @@ public class UploadControllerHelper(
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
-        return await CreateUploadSessionAsync(file, false, default, true);
+        return await CreateUploadSessionAsync(file, false, null, true);
     }
 
     public async Task<List<string>> CheckUploadAsync<T>(T folderId, IEnumerable<string> filesTitle)

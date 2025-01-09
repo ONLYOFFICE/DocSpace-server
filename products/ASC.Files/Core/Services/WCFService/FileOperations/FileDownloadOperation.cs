@@ -227,7 +227,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         this[OpType] = (int)FileOperationType.Download;
     }
 
-    protected override async Task DoJob(IServiceScope serviceScope)
+    protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
         if (Files.Count == 0 && Folders.Count == 0)
         {
@@ -303,7 +303,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         return entriesPathId;
     }
 
-    private async Task<(ItemNameValueCollection<T>, IEnumerable<FileEntry<T>>, IEnumerable<FileEntry<T>>)> GetEntriesPathIdAsync(IServiceScope scope)
+    private async Task<(ItemNameValueCollection<T>, IEnumerable<FileEntry<T>>, IEnumerable<FileEntry<T>>)> GetEntriesPathIdAsync(AsyncServiceScope scope)
     {
         var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
         var entriesPathId = new ItemNameValueCollection<T>();
@@ -608,7 +608,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             CancellationToken.ThrowIfCancellationRequested();
 
-            if (200 >= path.Length || 0 >= path.IndexOf('/'))
+            if (200 >= path.Length || path.Contains('/'))
             {
                 continue;
             }
