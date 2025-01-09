@@ -239,7 +239,7 @@ public class ProductEntryPoint : Product
                 }
             }
 
-            activityInfo.RoomUri = _pathProvider.GetRoomsUrl(roomId.ToString());
+            activityInfo.RoomUri = _pathProvider.GetRoomsUrl(roomId.ToString(), false);
             activityInfo.RoomTitle = additionalInfo.RoomTitle;
             activityInfo.RoomOldTitle = additionalInfo.RoomOldTitle;
 

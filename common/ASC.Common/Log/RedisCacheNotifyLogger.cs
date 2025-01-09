@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,26 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.ApiSystem.Models;
+namespace ASC.Common.Log;
 
-/// <summary>
-/// Request parameters
-/// </summary>
-public class CoreSettingsModel
+internal static partial class RedisCacheNotifyLogger
 {
-    /// <summary>
-    /// Tenant
-    /// </summary>
-    public int Tenant { get; set; } = -1;
+    [LoggerMessage(LogLevel.Error, "RedisCacheNotify Publish")]
+    public static partial void ErrorRedisCacheNotifyPublish(this ILogger logger, Exception exception);
 
-    /// <summary>
-    /// Key
-    /// </summary>
-    [StringLength(255)]
-    public string Key { get; set; }
-
-    /// <summary>
-    /// Value
-    /// </summary>
-    public string Value { get; set; }
+    [LoggerMessage(LogLevel.Error, "RedisCacheNotify Subscribe")]
+    public static partial void ErrorRedisCacheNotifySubscribe(this ILogger logger, Exception exception);
 }

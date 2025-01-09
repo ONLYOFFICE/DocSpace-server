@@ -122,6 +122,7 @@ public class LicenseReader(
                 if (temp)
                 {
                     await SaveLicenseAsync(licenseStream, LicensePath);
+                    await Task.Delay(100);
                 }
 
                 if (!await validateFunc())
@@ -249,7 +250,7 @@ public class LicenseReader(
 
         var tariff = new Tariff
         {
-            Quotas = [new(quota.TenantId, 1)],
+            Quotas = [new Quota(quota.TenantId, 1)],
             DueDate = license.DueDate
         };
 
