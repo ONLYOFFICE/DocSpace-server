@@ -160,7 +160,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
             .Replace("${tempFileName}", tempFileName)
             .Replace("${inputData}", JsonConvert.SerializeObject(data));
 
-        var scriptParts = script.Split("${items}");
+        var scriptParts = script.Split("${inputDataItems}");
 
         await using (var writer = new StreamWriter(scriptFilePath))
         {
@@ -249,15 +249,18 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
                 });
             }
 
-            var jsonArray = JsonConvert.SerializeObject(items);
-
-            var text = separator + jsonArray.TrimStart('[').TrimEnd(']');
-
-            await writer.WriteAsync(text);
-
-            if (string.IsNullOrEmpty(separator))
+            if (items.Count > 0)
             {
-                separator = ",";
+                var jsonArray = JsonConvert.SerializeObject(items);
+
+                var text = separator + jsonArray.TrimStart('[').TrimEnd(']');
+
+                await writer.WriteAsync(text);
+
+                if (string.IsNullOrEmpty(separator))
+                {
+                    separator = ",";
+                }
             }
 
             if (typedEntries.Count < count)
