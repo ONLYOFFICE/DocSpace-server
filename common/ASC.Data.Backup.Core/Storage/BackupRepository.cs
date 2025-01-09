@@ -184,7 +184,7 @@ static file class Queries
                         s => s.TenantId,
                         t => t.Id,
                         (s, t) => new { schedule = s, tenant = t })
-                    .Where(q => q.tenant.Status == TenantStatus.Active)
+                    .Where(q => q.tenant.Status == TenantStatus.Active || q.tenant.Id == -1)
                     .Select(q => q.schedule));
 
     public static readonly Func<BackupsContext, int, bool, Task<BackupSchedule>> BackupScheduleWithDumpAsync =
