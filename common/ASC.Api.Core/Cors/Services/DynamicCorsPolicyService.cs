@@ -8,8 +8,7 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
     private readonly CorsOptions _options;
     private readonly IDynamicCorsPolicyResolver _dynamicCorsPolicyResolver;
 
-    public DynamicCorsPolicyService(IOptions<CorsOptions> options,
-        IDynamicCorsPolicyResolver dynamicCorsPolicyResolver)
+    public DynamicCorsPolicyService(IOptions<CorsOptions> options, IDynamicCorsPolicyResolver dynamicCorsPolicyResolver)
     {
         ArgumentNullException.ThrowIfNull(options);
 
@@ -163,9 +162,9 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
             return;
         }
 
-        for (var i = 0; i < headerValues.Count; i++)
+        foreach (var t in headerValues)
         {
-            target.Add(headerValues[i]);
+            target.Add(t);
         }
     }
 

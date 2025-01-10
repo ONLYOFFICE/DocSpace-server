@@ -250,7 +250,7 @@ public class LicenseReader(
 
         var tariff = new Tariff
         {
-            Quotas = [new(quota.TenantId, 1)],
+            Quotas = [new Quota(quota.TenantId, 1)],
             DueDate = license.DueDate
         };
 
