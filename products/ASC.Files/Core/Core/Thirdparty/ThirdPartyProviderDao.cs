@@ -234,7 +234,7 @@ internal abstract class ThirdPartyProviderDao
     public Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
-        return null;
+        return Task.FromResult(0);
     }
 
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
