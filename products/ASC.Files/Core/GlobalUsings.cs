@@ -76,6 +76,7 @@ global using ASC.Core.Common.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
+global using ASC.Core.Common.Hosting;
 global using ASC.Core.Common.Messaging;
 global using ASC.Core.Common.Notify;
 global using ASC.Core.Common.Quota;

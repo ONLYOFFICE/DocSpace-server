@@ -33,12 +33,11 @@ public interface IRoomNotifyQueue<T>
     void RegisterCallback(Action<string> callback);
 }
 
-public class RoomNotifyQueue<T> : IRoomNotifyQueue<T>, IDisposable
+public class RoomNotifyQueue<T> : IRoomNotifyQueue<T>
 {
     protected readonly TenantManager _tenantManager;
     private readonly NotifyClient _notifyClient;
     private readonly FileSecurity _fileSecurity;
-    private Timer _timer;
 
     protected readonly int _tenantId;
     private readonly Folder<T> _room;
@@ -65,11 +64,6 @@ public class RoomNotifyQueue<T> : IRoomNotifyQueue<T>, IDisposable
     public void AddMessage(File<T> file)
     {
         _messages.Enqueue(file);
-
-        if (_timer == null)
-        {
-            _timer = new Timer(_ => ProcessQueueAsync().Wait(), null, TimeSpan.FromSeconds(30), Timeout.InfiniteTimeSpan);
-        }
     }
 
     public async Task ProcessQueueAsync()
@@ -97,12 +91,5 @@ public class RoomNotifyQueue<T> : IRoomNotifyQueue<T>, IDisposable
         }
 
         _removeCallback?.Invoke(_room.Id.ToString());
-        _timer?.Dispose();
-        _timer = null;
-    }
-
-    public void Dispose()
-    {
-        _timer?.Dispose();
     }
 }
