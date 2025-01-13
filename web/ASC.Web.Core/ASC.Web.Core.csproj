@@ -536,7 +536,7 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.404.10" />
     <PackageReference Include="GoogleAuthenticator" Version="3.2.0" />
-    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.2.0" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.4.0" />
     <PackageReference Include="SkiaSharp" Version="2.88.9" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.9" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.9" />

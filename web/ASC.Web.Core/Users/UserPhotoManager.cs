@@ -259,7 +259,7 @@ public class UserPhotoManager(UserManager userManager,
 
     public async Task<string> GetPhotoAbsoluteWebPath(Guid userID)
     {
-        var path = await SearchInCache(userID, SizeExtend.Empty());
+        var path = await SearchInCache(userID, SizeExtend.Empty);
         if (!string.IsNullOrEmpty(path))
         {
             return path;
@@ -280,7 +280,7 @@ public class UserPhotoManager(UserManager userManager,
                 (photoUrl, fileName) = await SaveOrUpdatePhotoAsync(userID, data, -1, null, false);
             }
 
-            await userPhotoManagerCache.AddToCache(userID, SizeExtend.Empty(), fileName, (tenantManager.GetCurrentTenant()).Id);
+            await userPhotoManagerCache.AddToCache(userID, SizeExtend.Empty, fileName, (tenantManager.GetCurrentTenant()).Id);
 
             return photoUrl;
         }
@@ -379,7 +379,7 @@ public class UserPhotoManager(UserManager userManager,
                         if (match.Success && match.Groups["user"].Success)
                         {
                             var parsedUserId = new Guid(match.Groups["user"].Value);
-                            var size = SizeExtend.Empty();
+                            var size = SizeExtend.Empty;
                             if (match.Groups["width"].Success && match.Groups["height"].Success)
                             {
                                 //Parse size
@@ -482,7 +482,7 @@ public class UserPhotoManager(UserManager userManager,
             await Task.WhenAll(t1, t2, t3, t4, t5);
         }
         
-        await userPhotoManagerCache.AddToCache(userID, SizeExtend.Empty(), fileName, tenantManager.GetCurrentTenantId());
+        await userPhotoManagerCache.AddToCache(userID, SizeExtend.Empty, fileName, tenantManager.GetCurrentTenantId());
         
         return (photoUrl, fileName);
     }
@@ -928,6 +928,6 @@ public static class SizeExtend
         (w, h) = (size.Width, size.Height);
     }
 
-    public static IMagickGeometry Empty() => new MagickGeometry(0, 0);
+    public static IMagickGeometry Empty => new MagickGeometry(0, 0);
 
 }

@@ -73,15 +73,8 @@ public static class UserPhotoThumbnailManager
             a.Colorize(MagickColors.White, new Percentage());
         });
         
-        result = result.CloneAndMutate(a =>
-        {
-            a.Crop(new MagickGeometry(x, y, (uint)width, (uint)height));
-        });
-        
-        result = result.CloneAndMutate(a =>
-        {
-            a.Resize(size.Width, size.Height);
-        });
+        result.Crop(new MagickGeometry(x, y, (uint)width, (uint)height));
+        result.Resize(size.Width, size.Height);
 
         return result;
     }

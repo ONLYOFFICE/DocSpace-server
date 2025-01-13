@@ -421,16 +421,21 @@ public class Builder<T>(
 
     private IMagickImage GetImageThumbnail(MagickImage sourceBitmap, uint thumbnailWidth, uint thumbnailHeight)
     {
-        if (sourceBitmap.BoundingBox != null && 
-            (sourceBitmap.BoundingBox.Width > sourceBitmap.BoundingBox.Height && thumbnailWidth < thumbnailHeight ||
-            sourceBitmap.BoundingBox.Width < sourceBitmap.BoundingBox.Height && thumbnailWidth > thumbnailHeight))
+        if ((sourceBitmap.Width > sourceBitmap.Height && thumbnailWidth < thumbnailHeight ||
+             sourceBitmap.Width < sourceBitmap.Height && thumbnailWidth > thumbnailHeight))
         {
             (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
         }
-        
-        sourceBitmap.Resize(thumbnailWidth, thumbnailHeight);
-        sourceBitmap.AutoOrient();
 
-        return sourceBitmap;
+        var size = new MagickGeometry(thumbnailWidth, thumbnailHeight);
+
+        var result = sourceBitmap.CloneAndMutate(r =>
+        {
+            r.Thumbnail(size);
+        });
+        
+        result.Minify();
+
+        return result;
     }
 }
