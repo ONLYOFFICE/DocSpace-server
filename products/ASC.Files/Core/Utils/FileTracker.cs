@@ -78,7 +78,7 @@ public class FileTrackerHelper
         _logger.Debug("FileTracker subscribed");
     }
 
-    public async Task<bool> ProlongEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, string baseUri, bool editingAlone = false, string token = null)
+    public async Task<bool> ProlongEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, string baseUri, string docKey, bool editingAlone = false, string token = null)
     {
         var checkRight = true;
         var tracker = GetTracker(fileId);
@@ -97,15 +97,13 @@ public class FileTrackerHelper
                     UserId = userId,
                     NewScheme = tabId == userId,
                     EditingAlone = editingAlone,
-                    TenantId = tenantId,
-                    BaseUri = baseUri,
                     Token = token
                 });
             }
         }
         else
         {
-            tracker = new FileTracker(tabId, userId, tabId == userId, editingAlone, tenantId, baseUri, token);
+            tracker = new FileTracker(tabId, userId, tabId == userId, editingAlone, tenant, baseUri, docKey, token);
         }
 
         await SetTrackerAsync(fileId, tracker);
@@ -240,7 +238,7 @@ public class FileTrackerHelper
                 return;
             }
 
-            var fId = cacheFileId.ToString()?.Substring(Tracker.Length);
+            var fId = cacheFileId.ToString()?[Tracker.Length..];
             
             var t = int.TryParse(fId, out var internalFileId) ? 
                 Callback(internalFileId, fileTracker as FileTracker).ConfigureAwait(false) : 
@@ -253,13 +251,11 @@ public class FileTrackerHelper
         {
             try
             {
-                if (fileTracker.EditingBy == null || fileTracker.EditingBy.Count == 0)
+                if (fileTracker.EditingBy == null || fileTracker.EditingBy.IsEmpty)
                 {
                     return;
                 }
 
-                var editedBy = fileTracker.EditingBy.FirstOrDefault();
-                
                 var token = fileTracker.EditingBy
                     .OrderByDescending(x => x.Value.TrackTime)
                     .Where(x => !string.IsNullOrEmpty(x.Value.Token))
@@ -268,25 +264,16 @@ public class FileTrackerHelper
 
                 await using var scope = _serviceProvider.CreateAsyncScope();
                 var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-                await tenantManager.SetCurrentTenantAsync(editedBy.Value.TenantId);
+                tenantManager.SetCurrentTenant(fileTracker.Tenant);
 
                 var commonLinkUtility = scope.ServiceProvider.GetRequiredService<BaseCommonLinkUtility>();
-                commonLinkUtility.ServerUri = editedBy.Value.BaseUri;
+                commonLinkUtility.ServerUri = fileTracker.BaseUri;
                 
-                var helper = scope.ServiceProvider.GetRequiredService<DocumentServiceHelper>();
                 var tracker = scope.ServiceProvider.GetRequiredService<DocumentServiceTrackerHelper>();
-                var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-
-                var file = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
-                if (file == null)
-                {
-                    return;
-                }
-
-                var docKey = await helper.GetDocKeyAsync(file);
+                
                 using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}") }))
                 {
-                    if (await tracker.StartTrackAsync(fileId.ToString(), docKey, token))
+                    if (await tracker.StartTrackAsync(fileId.ToString(), fileTracker.DocKey, token))
                     {
                         await SetTrackerAsync(fileId, fileTracker);
                     }
@@ -303,7 +290,7 @@ public class FileTrackerHelper
         }
     }
 
-    private string GetCacheKey<T>(T fileId)
+    private static string GetCacheKey<T>(T fileId)
     {
         return Tracker + fileId;
     }
@@ -324,19 +311,29 @@ public record FileTracker
 {
     [ProtoMember(1)]
     public ConcurrentDictionary<Guid, TrackInfo> EditingBy { get; set; }
+    
+    [ProtoMember(2)]
+    public Tenant Tenant { get; set; }
+    
+    [ProtoMember(3)]
+    public string BaseUri { get; set; }
+    
+    [ProtoMember(4)]
+    public string DocKey { get; set; }
 
     public FileTracker() { }
     
-    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, int tenantId, string baseUri, string token = null)
+    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, Tenant tenant, string baseUri, string docKey, string token = null)
     {
+        DocKey = docKey;
+        Tenant = tenant;
+        BaseUri = baseUri;
         EditingBy = new ConcurrentDictionary<Guid, TrackInfo>();
         EditingBy.TryAdd(tabId, new TrackInfo 
         {
             UserId = userId,
             NewScheme = newScheme,
             EditingAlone = editingAlone,
-            TenantId = tenantId,
-            BaseUri = baseUri,
             Token = token
         });
     }
@@ -354,18 +351,12 @@ public record FileTracker
         public required Guid UserId { get; init; }
         
         [ProtoMember(4)]
-        public required int TenantId { get; init; }
-        
-        [ProtoMember(5)]
-        public required string BaseUri { get; init; }
-        
-        [ProtoMember(6)]
         public required bool NewScheme { get;  init; }
         
-        [ProtoMember(7)]
+        [ProtoMember(5)]
         public required bool EditingAlone { get;  init; }
         
-        [ProtoMember(8)]
+        [ProtoMember(6)]
         public string Token { get; init; }
     }
 }

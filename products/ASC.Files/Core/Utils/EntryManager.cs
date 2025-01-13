@@ -1689,24 +1689,26 @@ public class EntryManager(IDaoFactory daoFactory,
         return file;
     }
 
-    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
+    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false)
     {
         var token = externalShare.GetKey();
+        
+        var file = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+        if (file == null)
+        {
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var docKey = await documentServiceHelper.GetDocKeyAsync(file);
         
         bool checkRight;
         if ((await fileTracker.GetEditingByAsync(fileId)).Contains(userId))
         {
-            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone, token);
+            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token);
             if (!checkRight)
             {
                 return null;
             }
-        }
-
-        var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
-        if (file == null)
-        {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
         
         if (!await CanEditAsync(userId, file))
@@ -1724,7 +1726,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone, token);
+        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token);
         if (checkRight)
         {
             await fileTracker.ChangeRight(fileId, userId, false);
