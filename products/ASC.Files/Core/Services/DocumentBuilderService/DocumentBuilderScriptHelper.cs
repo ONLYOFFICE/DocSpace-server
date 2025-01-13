@@ -30,9 +30,9 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 public class DocumentBuilderScriptHelper
 {
-    public static string GetTempFileName()
+    public static string GetTempFileName(string ext)
     {
-        return $"temp{DateTime.UtcNow.Ticks}.xlsx";
+        return $"temp{DateTime.UtcNow.Ticks}{ext}";
     }
     
     public static async Task<string> ReadTemplateFromEmbeddedResource(string templateFileName)
