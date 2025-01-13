@@ -1689,17 +1689,17 @@ public class EntryManager(IDaoFactory daoFactory,
         return file;
     }
 
-    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false)
+    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false, File<T> file = null, string docKey = null)
     {
         var token = externalShare.GetKey();
         
-        var file = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+        file ??= await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        var docKey = await documentServiceHelper.GetDocKeyAsync(file);
+        docKey ??= await documentServiceHelper.GetDocKeyAsync(file);
         
         bool checkRight;
         if ((await fileTracker.GetEditingByAsync(fileId)).Contains(userId))
@@ -1741,7 +1741,7 @@ public class EntryManager(IDaoFactory daoFactory,
                    || await fileSecurity.CanReviewAsync(entry, guid)
                    || await fileSecurity.CanFillFormsAsync(entry, guid)
                    || await fileSecurity.CanCommentAsync(entry, guid);
-    }
+        }
     }
 
     public async Task<File<T>> UpdateToVersionFileAsync<T>(T fileId, int version, bool checkRight = true, bool finalize = false)
