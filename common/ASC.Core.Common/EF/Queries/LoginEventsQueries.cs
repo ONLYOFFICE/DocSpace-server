@@ -148,7 +148,7 @@ static file class Queries
                         x.reference.EntryType == entryType &&
                         (fromDate == null || x.@event.Date >= fromDate) &&
                         (toDate == null || x.@event.Date <= toDate))
-                    .OrderByDescending(x => x.@event.Date)
+                    .OrderByDescending(x => x.@event.Id)
                     .Skip(offset)
                     .Take(count)
                     .Select(x => x.@event));
@@ -166,7 +166,7 @@ static file class Queries
                              (files.Contains(x.reference.EntryId) && filterFileActions.Contains(x.@event.Action ?? 0) && x.reference.EntryType == 2)) &&
                              (fromDate == null || x.@event.Date >= fromDate) &&
                              (toDate == null || x.@event.Date <= toDate))
-                .OrderByDescending(x => x.@event.Date)
+                .OrderByDescending(x => x.@event.Id)
                 .GroupBy(x => x.@event.Id)
                 .Where(g => g.Count() > 1)
                 .Skip(offset)

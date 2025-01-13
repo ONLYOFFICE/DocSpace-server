@@ -717,7 +717,7 @@ public class S3Storage(TempStream tempStream,
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
         var obj = tmp
-            .Where(x => x.Key.EndsWith("/"))
+            .Where(x => x.Key.EndsWith('/'))
             .Select(x => x.Key[(MakePath(domain, path) + "/").Length..]);
         foreach (var e in obj)
         {
@@ -742,7 +742,7 @@ public class S3Storage(TempStream tempStream,
                 InputStream = buffered,
                 Headers =
                     {
-                        CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds),
+                        CacheControl = $"public, maxage={(int)TimeSpan.FromDays(5).TotalSeconds}",
                         ExpiresUtc = DateTime.UtcNow.Add(TimeSpan.FromDays(5)),
                         ContentDisposition = "attachment"
                     }
@@ -897,7 +897,7 @@ public class S3Storage(TempStream tempStream,
     public override async IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
-        var obj = tmp.Where(x=> !x.Key.EndsWith("/"))
+        var obj = tmp.Where(x=> !x.Key.EndsWith('/'))
             .Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x.Key)))
             .Select(x => x.Key[(MakePath(domain, path) + "/").Length..].TrimStart('/'));
 
@@ -953,7 +953,7 @@ public class S3Storage(TempStream tempStream,
     }
     public override async Task DeleteDirectoryAsync(string domain, string path, Guid ownerId)
     {
-        await DeleteFilesAsync(domain, path, "*", true);
+        await DeleteFilesAsync(domain, path, "*", true, ownerId);
     }
 
     public override async Task<long> GetFileSizeAsync(string domain, string path)
@@ -1472,11 +1472,11 @@ public class S3Storage(TempStream tempStream,
         if (prevFileSize % blockSize != 0)
         {
             var endBlock = new byte[blockSize - prevFileSize % blockSize];
-            ms.Write(endBlock);
+            await ms.WriteAsync(endBlock, token);
         }
-        ms.Write(header);
+        await ms.WriteAsync(header, token);
 
-        stream.Position = 0;
+        stream.Position = 0; 
         await stream.CopyToAsync(ms, token);
         await stream.DisposeAsync();
 
@@ -1572,9 +1572,11 @@ public class S3Storage(TempStream tempStream,
         if (prevFileSize % blockSize != 0)
         {
             var endBlock = new byte[blockSize - prevFileSize % blockSize];
-            stream.Write(endBlock);
+            await stream.WriteAsync(endBlock, token);
         }
-        stream.Write(header);
+        
+        await stream.WriteAsync(header, token);
+        
         stream.Position = 0;
 
         var uploadRequest = new UploadPartRequest
@@ -1646,7 +1648,7 @@ public class S3Storage(TempStream tempStream,
             }
         }
         var stream = new MemoryStream();
-        stream.Write(buffer);
+        await stream.WriteAsync(buffer);
         stream.Position = 0;
 
         var uploadRequest = new UploadPartRequest
@@ -1742,7 +1744,7 @@ public class S3Storage(TempStream tempStream,
         {
             using var stream = new MemoryStream();
             var buffer = new byte[5 * 1024 * 1024];
-            stream.Write(buffer);
+            await stream.WriteAsync(buffer, token);
             stream.Position = 0;
 
             var uploadRequest = new UploadPartRequest

@@ -30,7 +30,7 @@ global using System.IO.Compression;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
-global using ASC.Api.Core.Extensions;
+
 global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Common.Security.Authentication;

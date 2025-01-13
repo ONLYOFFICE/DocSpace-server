@@ -31,7 +31,7 @@ public class AuthorizationManager(IAzService service, TenantManager tenantManage
 {
     public async Task<IEnumerable<AzRecord>> GetAcesAsync(Guid subjectId, Guid actionId)
     {
-        var aces = await service.GetAcesAsync(await tenantManager.GetCurrentTenantIdAsync(), default);
+        var aces = await service.GetAcesAsync(tenantManager.GetCurrentTenantId(), default);
 
         return aces
             .Where(a => a.Action == actionId && (a.Subject == subjectId || subjectId == Guid.Empty))
@@ -40,7 +40,7 @@ public class AuthorizationManager(IAzService service, TenantManager tenantManage
 
     public async Task<IEnumerable<AzRecord>> GetAcesAsync(Guid subjectId, Guid actionId, ISecurityObjectId objectId)
     {
-        var aces = await service.GetAcesAsync(await tenantManager.GetCurrentTenantIdAsync(), default);
+        var aces = await service.GetAcesAsync(tenantManager.GetCurrentTenantId(), default);
 
         return FilterAces(aces, subjectId, actionId, objectId)
             .ToList();
@@ -54,7 +54,7 @@ public class AuthorizationManager(IAzService service, TenantManager tenantManage
         }
 
         var result = new List<AzRecord>();
-        var aces = await service.GetAcesAsync(await tenantManager.GetCurrentTenantIdAsync(), default);
+        var aces = await service.GetAcesAsync(tenantManager.GetCurrentTenantId(), default);
         result.AddRange(FilterAces(aces, subjectId, actionId, objectId));
 
         var inherits = new List<AzRecord>();
@@ -73,12 +73,12 @@ public class AuthorizationManager(IAzService service, TenantManager tenantManage
 
     public async Task AddAceAsync(AzRecord r)
     {
-        await service.SaveAceAsync(await tenantManager.GetCurrentTenantIdAsync(), r);
+        await service.SaveAceAsync(tenantManager.GetCurrentTenantId(), r);
     }
 
     public async Task RemoveAceAsync(AzRecord r)
     {
-        await service.RemoveAceAsync(await tenantManager.GetCurrentTenantIdAsync(), r);
+        await service.RemoveAceAsync(tenantManager.GetCurrentTenantId(), r);
     }
 
     public async Task RemoveAllAcesAsync(ISecurityObjectId id)
@@ -89,12 +89,12 @@ public class AuthorizationManager(IAzService service, TenantManager tenantManage
         }
     }
 
-    private IEnumerable<AzRecord> DistinctAces(IEnumerable<AzRecord> inheritAces)
+    private static IEnumerable<AzRecord> DistinctAces(IEnumerable<AzRecord> inheritAces)
     {
         var aces = new Dictionary<string, AzRecord>();
         foreach (var a in inheritAces)
         {
-            aces[string.Format("{0}{1}{2:D}", a.Subject, a.Action, a.AceType)] = a;
+            aces[$"{a.Subject}{a.Action}{a.AceType:D}"] = a;
         }
 
         return aces.Values;

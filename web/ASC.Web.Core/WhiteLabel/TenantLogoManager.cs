@@ -55,7 +55,7 @@ public class TenantLogoManager(
             if (timeParam)
             {
                 var now = DateTime.Now;
-                faviconPath = string.Format("{0}?t={1}", faviconPath, now.Ticks);
+                faviconPath = $"{faviconPath}?t={now.Ticks}";
             }
         }
         else
@@ -206,29 +206,29 @@ public class TenantLogoManager(
 
         foreach (var customCulture in customCultures)
         {
-            await distributedCache.RemoveAsync(await GetCacheKey(customCulture));
+            await distributedCache.RemoveAsync(GetCacheKey(customCulture));
         }
 
-        await distributedCache.RemoveAsync(await GetCacheKey(string.Empty));
+        await distributedCache.RemoveAsync(GetCacheKey(string.Empty));
     }
 
 
     private async Task<byte[]> GetMailLogoDataFromCacheAsync(string culture)
     {
-        return await distributedCache.GetAsync(await GetCacheKey(culture));
+        return await distributedCache.GetAsync(GetCacheKey(culture));
     }
 
     private async Task InsertMailLogoDataToCacheAsync(byte[] data, string culture)
     {
-        await distributedCache.SetAsync(await GetCacheKey(culture), data, new DistributedCacheEntryOptions
+        await distributedCache.SetAsync(GetCacheKey(culture), data, new DistributedCacheEntryOptions
         {
             AbsoluteExpiration = DateTime.UtcNow.Add(TimeSpan.FromDays(1))
         });
     }
 
-    private async Task<string> GetCacheKey(string culture)
+    private string GetCacheKey(string culture)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var regionalPath = GetLogoRegionalPath(culture);
         return $"letterlogodata{tenantId}{regionalPath}";
     }

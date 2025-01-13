@@ -251,7 +251,7 @@ public class GoogleCloudStorage(TempStream tempStream,
             var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), mime, buffered, uploadObjectOptions);
 
             uploaded.ContentEncoding = contentEncoding;
-            uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds);
+            uploaded.CacheControl = $"public, maxage={(int)TimeSpan.FromDays(cacheDays).TotalSeconds}";
 
             uploaded.Metadata ??= new Dictionary<string, string>();
 
@@ -419,7 +419,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         var dstKey = MakePath(newDomain, newPath);
         var size = await GetFileSizeAsync(srcDomain, srcPath);
 
-        storage.CopyObject(_bucket, srcKey, _bucket, dstKey, new CopyObjectOptions
+        await storage.CopyObjectAsync(_bucket, srcKey, _bucket, dstKey, new CopyObjectOptions
         {
             DestinationPredefinedAcl = GetDomainACL(newDomain)
         });
@@ -638,7 +638,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
             var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), "application/octet-stream", buffered, uploadObjectOptions);
 
-            uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds);
+            uploaded.CacheControl = $"public, maxage={(int)TimeSpan.FromDays(5).TotalSeconds}";
             uploaded.ContentDisposition = "attachment";
             uploaded.Metadata ??= new Dictionary<string, string>();
             uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R", CultureInfo.InvariantCulture);

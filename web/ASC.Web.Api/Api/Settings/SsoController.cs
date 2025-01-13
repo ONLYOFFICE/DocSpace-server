@@ -208,7 +208,7 @@ public class SsoController(TenantManager tenantManager,
 
         var messageAction = enableSso ? MessageAction.SSOEnabled : MessageAction.SSODisabled;
 
-        await messageService.SendAsync(messageAction);
+        messageService.Send(messageAction);
 
         return settings;
     }
@@ -236,7 +236,7 @@ public class SsoController(TenantManager tenantManager,
 
         await ConverSsoUsersToOrdinaryAsync();
 
-        await messageService.SendAsync(MessageAction.SSODisabled);
+        messageService.Send(MessageAction.SSODisabled);
 
         return defaultSettings;
     }
@@ -274,7 +274,7 @@ public class SsoController(TenantManager tenantManager,
         }
 
         if (!coreBaseSettings.Standalone
-            && (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString())
+            && (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Sso))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Sso");

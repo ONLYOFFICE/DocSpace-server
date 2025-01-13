@@ -76,7 +76,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
         return Files.Count + Folders.Count;
     }
 
-    protected override async Task DoJob(IServiceScope serviceScope)
+    protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
         var scopeClass = serviceScope.ServiceProvider.GetService<FileMarkAsReadOperationScope>();
         var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();

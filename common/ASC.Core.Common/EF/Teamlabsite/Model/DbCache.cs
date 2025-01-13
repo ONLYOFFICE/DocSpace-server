@@ -27,6 +27,7 @@
 namespace ASC.Core.Common.EF.Teamlabsite.Model;
 public class DbCache
 {
+    [MaxLength(100)]
     public string TenantAlias { get; set; }
 }
 
@@ -54,7 +55,7 @@ public static class DbCacheExtension
 
             entity.Property(e => e.TenantAlias)
                 .HasColumnName("tenant_alias")
-                .HasColumnType("varchar(100)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -74,7 +75,7 @@ public static class DbCacheExtension
 
             entity.Property(e => e.TenantAlias)
                 .HasColumnName("tenant_alias")
-                .HasColumnType("varchar(100)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });

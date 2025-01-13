@@ -64,7 +64,7 @@ public class StaticUploader(IServiceProvider serviceProvider,
             return null;
         }
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var key = GetCacheKey(tenantId.ToString(), relativePath);
 
         lock (_locker)
@@ -102,7 +102,7 @@ public class StaticUploader(IServiceProvider serviceProvider,
             return;
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var key = typeof(UploadOperationProgress).FullName + tenant.Id;
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
@@ -112,9 +112,9 @@ public class StaticUploader(IServiceProvider serviceProvider,
                 return;
             }
 
-            var uploadOperation = new UploadOperationProgress(serviceProvider, key, tenant.Id, relativePath, mappedPath);
+            var uploadOperationProgress = new UploadOperationProgress(serviceProvider, key, tenant.Id, relativePath, mappedPath);
 
-            await _queue.EnqueueTask(uploadOperation);
+            await _queue.EnqueueTask(uploadOperationProgress);
         }
     }
 

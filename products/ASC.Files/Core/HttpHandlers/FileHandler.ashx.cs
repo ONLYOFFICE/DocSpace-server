@@ -202,7 +202,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (store.IsSupportedPreSignedUri)
         {
-            var headers = securityContext.IsAuthenticated ? null : new[] { await SecureHelper.GenerateSecureKeyHeaderAsync(path, emailValidationKeyProvider) };
+            var headers = securityContext.IsAuthenticated ? null : new[] { SecureHelper.GenerateSecureKeyHeader(path, emailValidationKeyProvider) };
 
             var tmp = await store.GetPreSignedUriAsync(FileConstant.StorageDomainTmp, path, TimeSpan.FromHours(1), headers);
             var url = tmp.ToString();
@@ -293,7 +293,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             //TODO
             //context.Response.Headers.Charset = "utf-8";
 
-            var range = (context.Request.Headers["Range"].FirstOrDefault() ?? "").Split('=', '-');
+            var range = (context.Request.Headers.Range.FirstOrDefault() ?? "").Split('=', '-');
             var isNeedSendAction = range.Length < 2 || Convert.ToInt64(range[1]) == 0;
 
             if (isNeedSendAction)
@@ -315,7 +315,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 }
             }
 
-            if (string.Equals(context.Request.Headers["If-None-Match"], GetEtag(file)))
+            if (string.Equals(context.Request.Headers.IfNoneMatch, GetEtag(file)))
             {
                 //Its cached. Reply 304
                 context.Response.StatusCode = (int)HttpStatusCode.NotModified;
@@ -473,10 +473,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             return true;
         }
 
-        return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) &&
-               file.ShareRecord is 
+        return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) && 
+               ((file.ShareRecord is 
                    { IsLink: true, Share: not FileShare.Restrict } or 
-                   { Share: FileShare.Read, SubjectType: SubjectType.User or SubjectType.Group  };
+                   { Share: FileShare.Read, SubjectType: SubjectType.User or SubjectType.Group }) || 
+               (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)));
     }
 
     private async Task TryMarkAsRecentByLink<T>(File<T> file)
@@ -496,7 +497,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     {
         ArgumentNullException.ThrowIfNull(context);
         
-        var rangeHeader = context.Request.Headers["Range"].FirstOrDefault();
+        var rangeHeader = context.Request.Headers.Range.FirstOrDefault();
         if (rangeHeader == null)
         {
             return fullLength;
@@ -587,7 +588,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey];
-                var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(id.ToString() + version, auth.FirstOrDefault() ?? "", global.StreamUrlExpire);
+                var validateResult = emailValidationKeyProvider.ValidateEmailKey(id.ToString() + version, auth.FirstOrDefault() ?? "", global.StreamUrlExpire);
                 if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
                 {
                     var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
@@ -832,7 +833,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         var fileName = context.Request.Query[FilesLinkUtility.FileTitle];
         var auth = context.Request.Query[FilesLinkUtility.AuthKey].FirstOrDefault();
 
-        var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(fileName, auth ?? "", global.StreamUrlExpire);
+        var validateResult = emailValidationKeyProvider.ValidateEmailKey(fileName, auth ?? "", global.StreamUrlExpire);
         if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
         {
             var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
@@ -906,7 +907,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey].FirstOrDefault();
-                var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(id.ToString() + version, auth ?? "", global.StreamUrlExpire);
+                var validateResult = emailValidationKeyProvider.ValidateEmailKey(id.ToString() + version, auth ?? "", global.StreamUrlExpire);
                 if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
                 {
                     var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
@@ -1485,7 +1486,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         logger.DebugDocServiceTrackFileid(fileId.ToString());
 
         var callbackSpan = TimeSpan.FromDays(128);
-        var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(fileId.ToString(), auth ?? "", callbackSpan);
+        var validateResult = emailValidationKeyProvider.ValidateEmailKey(fileId.ToString(), auth ?? "", callbackSpan);
         if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
         {
             logger.ErrorDocServiceTrackAuth(validateResult, FilesLinkUtility.AuthKey, auth);

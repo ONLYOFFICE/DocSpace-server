@@ -174,7 +174,7 @@ public class CookiesManager(
 
         if (!session)
         {
-            var tenant = await tenantManager.GetCurrentTenantIdAsync();
+            var tenant = tenantManager.GetCurrentTenantId();
             expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
         }
 
@@ -183,7 +183,7 @@ public class CookiesManager(
 
     public async Task SetLifeTimeAsync(int lifeTime, bool enabled)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (!await userManager.IsUserInGroupAsync(securityContext.CurrentAccount.ID, Constants.GroupAdmin.ID))
         {
             throw new SecurityException();
@@ -214,14 +214,14 @@ public class CookiesManager(
 
     public async Task<TenantCookieSettings> GetLifeTimeAsync()
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         return (await tenantCookieSettingsHelper.GetForTenantAsync(tenantId));
     }
 
     public async Task ResetUserCookieAsync(Guid? userId = null, bool keepMeAuthenticated = true)
     {
         var targetUserId = userId ?? securityContext.CurrentAccount.ID;
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
         var settings = await tenantCookieSettingsHelper.GetForUserAsync(targetUserId);
         settings.Index += 1;
         await tenantCookieSettingsHelper.SetForUserAsync(targetUserId, settings);
@@ -236,7 +236,7 @@ public class CookiesManager(
 
     public async Task ResetTenantCookieAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         if (!await userManager.IsUserInGroupAsync(securityContext.CurrentAccount.ID, Constants.GroupAdmin.ID))
         {
@@ -282,7 +282,7 @@ public class CookiesManager(
 
     private async Task<int> GetLoginEventIdAsync(MessageAction action)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var userId = securityContext.CurrentAccount.ID;
         var data = new MessageUserData(tenantId, userId);
 

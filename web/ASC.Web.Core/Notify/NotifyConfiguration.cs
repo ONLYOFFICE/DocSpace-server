@@ -32,7 +32,7 @@ namespace ASC.Web.Studio.Core.Notify;
 public class NotifyConfiguration(NotifyEngine notifyEngine, WorkContext workContext)
 {
     private static bool _configured;
-    private static readonly object _locker = new();
+    private static readonly Lock _locker = new();
     private static readonly Regex _urlReplacer = new(@"(<a [^>]*href=(('(?<url>[^>']*)')|(""(?<url>[^>""]*)""))[^>]*>)|(<img [^>]*src=(('(?<url>(?![data:|cid:])[^>']*)')|(""(?<url>(?![data:|cid:])[^>""]*)""))[^/>]*/?>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex _textileLinkReplacer = new(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -150,7 +150,7 @@ public class ProductSecurityInterceptor(TenantManager tenantManager,
     {
         try
         {
-            await tenantManager.GetCurrentTenantAsync();
+            tenantManager.GetCurrentTenant();
 
             var u = await userManager.SearchUserAsync(r.Recipient.ID);
 
@@ -202,7 +202,7 @@ public class NotifyTransferRequest(TenantManager tenantManager,
     {
         var aid = Guid.Empty;
         var aname = string.Empty;
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         if (authContext.IsAuthenticated)
         {

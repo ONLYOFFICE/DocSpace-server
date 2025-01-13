@@ -34,7 +34,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
     private readonly IEventBusSubscriptionsManager _subsManager;
     private readonly ILifetimeScope _autofac;
 
-    private static ConcurrentQueue<Guid> _rejectedEvents;
+    private static readonly ConcurrentQueue<Guid> _rejectedEvents = new();
     private readonly IActiveMQPersistentConnection _persistentConnection;
     private readonly IIntegrationEventSerializer _serializer;
     private ISession _consumerSession;
@@ -60,7 +60,6 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         _queueName = queueName;
         _autofac = autofac;
         _retryCount = retryCount;
-        _rejectedEvents = new ConcurrentQueue<Guid>();
         _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
         _consumers = [];
         _initializeTask = InitializeAsync();
@@ -220,7 +219,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
             while ((read = streamMessage.ReadBytes(buffer)) > 0)
             {
-                ms.Write(buffer, 0, read);
+                await ms.WriteAsync(buffer.AsMemory(0, read));
 
                 if (read < buffer.Length)
                 {
@@ -296,7 +295,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
     private static void PreProcessEvent(IntegrationEvent @event)
     {
-        if (_rejectedEvents.Count == 0)
+        if (_rejectedEvents.IsEmpty)
         {
             return;
         }

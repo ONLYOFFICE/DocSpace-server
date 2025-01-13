@@ -122,6 +122,7 @@ public class LicenseReader(
                 if (temp)
                 {
                     await SaveLicenseAsync(licenseStream, LicensePath);
+                    await Task.Delay(100);
                 }
 
                 if (!await validateFunc())
@@ -206,7 +207,7 @@ public class LicenseReader(
 
     private DateTime Validate(License license)
     {
-        var invalidLicenseType = _licenseType == LicenseType.Enterprise ? license.Customization : !license.Customization;
+        var invalidLicenseType = _licenseType == LicenseType.Enterprise ? license.Developer : !license.Developer;
 
         if (string.IsNullOrEmpty(license.CustomerId)
             || string.IsNullOrEmpty(license.Signature)
@@ -249,7 +250,7 @@ public class LicenseReader(
 
         var tariff = new Tariff
         {
-            Quotas = [new(quota.TenantId, 1)],
+            Quotas = [new Quota(quota.TenantId, 1)],
             DueDate = license.DueDate
         };
 

@@ -26,6 +26,8 @@
 
 using System.Net.Sockets;
 
+namespace ASC.Core;
+
 public class IPAddressRange(IPAddress lower, IPAddress upper)
 {
     private readonly AddressFamily _addressFamily = lower.AddressFamily;

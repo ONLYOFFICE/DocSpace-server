@@ -33,6 +33,11 @@ function customizeWorksheet() {
     oWorksheet.SetColumnWidth(4, 23);
     oWorksheet.SetColumnWidth(5, 23);
     oWorksheet.SetColumnWidth(6, 23);
+
+    oWorksheet.GetRange("B1:D1").Merge(true);
+    oWorksheet.GetRange("B2:D2").Merge(true);
+    oWorksheet.GetRange("B3:D3").Merge(true);
+    oWorksheet.GetRange("B4:D4").Merge(true);
 }
 
 function prepareInfo() {

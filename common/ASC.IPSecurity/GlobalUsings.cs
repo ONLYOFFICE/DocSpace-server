@@ -26,7 +26,7 @@
 
 global using System.Net;
 global using System.Net.Sockets;
-global using ASC.Api.Core.Extensions;
+
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Mapping;

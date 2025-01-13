@@ -76,7 +76,18 @@ public class DocumentServiceLicense(ICache cache,
     public async Task<bool> ValidateLicense()
     {
         var commandResponse = await GetDocumentServiceLicenseAsync(false);
-        return commandResponse == null || commandResponse.Error == ErrorTypes.NoError;
+
+        if (commandResponse == null)
+        {
+            return true;
+        }
+
+        if (commandResponse.Error != ErrorTypes.NoError)
+        {
+            return false;
+        }
+
+        return commandResponse.Server is { ResultType: CommandResponse.ServerInfo.ResultTypes.Success or CommandResponse.ServerInfo.ResultTypes.SuccessLimit };
     }
 
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()

@@ -24,15 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.ApiSystem.Models;
+namespace ASC.Common.Log;
 
-/// <summary>
-/// Request parameters for people
-/// </summary>
-public class FindPeopleModel
+internal static partial class RedisCacheNotifyLogger
 {
-    /// <summary>
-    /// User ids
-    /// </summary>
-    public IEnumerable<Guid> UserIds { get; set; }
+    [LoggerMessage(LogLevel.Error, "RedisCacheNotify Publish")]
+    public static partial void ErrorRedisCacheNotifyPublish(this ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "RedisCacheNotify Subscribe")]
+    public static partial void ErrorRedisCacheNotifySubscribe(this ILogger logger, Exception exception);
 }

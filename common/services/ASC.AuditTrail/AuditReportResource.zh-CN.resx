@@ -656,7 +656,7 @@
     <value>私密房间已启用</value>
   </data>
   <data name="RoomArchived" xml:space="preserve">
-    <value>房间已归档</value>
+    <value>房间已存档</value>
   </data>
   <data name="RoomCreateUser" xml:space="preserve">
     <value>已添加用户：{0}。角色：{1}</value>
@@ -677,7 +677,7 @@
     <value>已重命名房间：{0}</value>
   </data>
   <data name="RoomUnarchived" xml:space="preserve">
-    <value>已取消归档房间</value>
+    <value>已取消存档房间</value>
   </data>
   <data name="RoomUpdateAccessForUser" xml:space="preserve">
     <value>{0}已指定：{1}</value>
@@ -807,5 +807,68 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>邀请已重新发送：{0}</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>文件：{0}。索引由 {1} 更改为 {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>文件夹：{0}。索引由 {1} 更改为 {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>文件夹：{0}。索引已重新排序</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>客户端的 {0} 激活已更改</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>客户端的 {0} 可见性已更改</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>客户端已创建</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>客户端 {0} 已删除</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>为客户端 {0} 生成的授权代码</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>为客户端 {0} 生成的个人访问令牌</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>客户端 {0} 密钥已重新生成</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>撤销客户端 {0} 访问权限</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>房间：{0}。拒绝下载已禁用</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>房间：{0}。拒绝下载已启用</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>已禁用房间索引</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>已启用房间索引</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>已禁用永久有效</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>已设置有效期。值：{0}。期限：{1}。永久删除：{2}</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>房间：{0}。已启用水印</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>房间：{0}。已禁用水印</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>客户端 {0} 已更新</value>
   </data>
 </root>

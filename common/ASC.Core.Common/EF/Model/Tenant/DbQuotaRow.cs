@@ -29,8 +29,10 @@ namespace ASC.Core.Common.EF;
 public class DbQuotaRow : BaseEntity, IMapFrom<TenantQuotaRow>
 {
     public int TenantId { get; set; }
+    [MaxLength(255)]
     public string Path { get; set; }
     public long Counter { get; set; }
+    [MaxLength(1024)]
     public string Tag { get; set; }
     public DateTime LastModified { get; set; }
     public Guid UserId { get; set; }
@@ -73,7 +75,7 @@ public static class DbQuotaRowExtension
 
             entity.Property(e => e.Path)
                 .HasColumnName("path")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -87,7 +89,7 @@ public static class DbQuotaRowExtension
 
             entity.Property(e => e.Tag)
                 .HasColumnName("tag")
-                .HasColumnType("varchar(1024)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -113,8 +115,7 @@ public static class DbQuotaRowExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Path)
-                .HasColumnName("path")
-                .HasMaxLength(255);
+                .HasColumnName("path");
 
             entity.Property(e => e.Counter)
                 .HasColumnName("counter")
@@ -126,7 +127,6 @@ public static class DbQuotaRowExtension
 
             entity.Property(e => e.Tag)
                 .HasColumnName("tag")
-                .HasMaxLength(1024)
                 .HasDefaultValueSql("'0'");
 
             entity.Property(e => e.UserId)

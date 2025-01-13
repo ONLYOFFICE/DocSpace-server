@@ -167,7 +167,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            files = files.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!extension.IsNullOrEmpty())
@@ -190,7 +190,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -250,7 +250,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            files = files.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!extension.IsNullOrEmpty())
@@ -408,7 +408,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         var id = Dao.MakeId(Dao.GetId(file));
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -727,6 +727,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.FromResult<EntryProperties<string>>(null);
     }
 
+    public Task<Dictionary<string, EntryProperties<string>>> GetPropertiesAsync(IEnumerable<string> filesIds)
+    {
+        return Task.FromResult<Dictionary<string, EntryProperties<string>>>(null);
+    }
+
     public Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
     {
         return Task.CompletedTask;
@@ -743,7 +748,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = default)
+        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null)
     {
         throw new NotImplementedException();
     }
@@ -758,16 +763,16 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
 
-    public Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
-        return default;
+        return Task.FromResult(0);
     }
 
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
@@ -778,7 +783,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         {
             return long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred) 
                 ? Task.FromResult(transferred) 
-                : default;
+                : null;
         }
         
         var nativeSession = uploadSession.GetItemOrDefault<ThirdPartyUploadSessionBase>(UploadSessionKey);

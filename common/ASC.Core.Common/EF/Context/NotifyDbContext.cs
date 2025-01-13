@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class NotifyDbContext(DbContextOptions<NotifyDbContext> options) : DbContext(options)
+public class NotifyDbContext(DbContextOptions<NotifyDbContext> options) : BaseDbContext(options)
 {
     public DbSet<NotifyInfo> NotifyInfo { get; set; }
     public DbSet<NotifyQueue> NotifyQueue { get; set; }

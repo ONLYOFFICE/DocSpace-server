@@ -55,7 +55,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -239,7 +239,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         foreach (var g in groupList)
         {
-            var group = new MigrationGroup { Info = new(), UserKeys = [] };
+            var group = new MigrationGroup { Info = new GroupInfo(), UserKeys = [] };
             group.Info.Name = g.Split(',').First().Trim('\'');
             MigrationInfo.Groups.Add(group.Info.Name, group);
         }
@@ -462,7 +462,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                         {
                             Id = entry.FileId,
                             Level = j++,
-                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/',split[0..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
+                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/',split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
                             Title = split.Last()
                         };
                         user.Storage.Folders.Add(folder);
@@ -478,7 +478,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                             Id = entry.FileId,
                             Path = tmpPath,
                             Title = split.Last(),
-                            Folder = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/', split[0..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey)
+                            Folder = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/', split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey)
                         };
                         user.Storage.Files.Add(file);
                         AddShare(user, entry, true);

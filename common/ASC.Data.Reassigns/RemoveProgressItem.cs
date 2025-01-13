@@ -205,11 +205,11 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
 
         if (_httpHeaders != null)
         {
-            await messageService.SendHeadersMessageAsync(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
+            messageService.SendHeadersMessage(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
         }
         else
         {
-            await messageService.SendAsync(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
+            messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
         }
     }
 
@@ -222,11 +222,11 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
 
         if (_httpHeaders != null)
         {
-            await messageService.SendHeadersMessageAsync(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), _httpHeaders, userName);
+            messageService.SendHeadersMessage(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), _httpHeaders, userName);
         }
         else
         {
-            await messageService.SendAsync(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), userName);
+            messageService.Send(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), userName);
         }
     }
 
