@@ -40,6 +40,7 @@ public record BackupRestoreRequestIntegrationEvent : IntegrationEvent
                                   Dictionary<string, string> storageParams,
                                   bool notify,
                                   string backupId,
+                                  bool dump,
                                   string serverBaseUri = null
                                   ) : base(createBy, tenantId)
     {
@@ -48,6 +49,7 @@ public record BackupRestoreRequestIntegrationEvent : IntegrationEvent
         Notify = notify;
         BackupId = backupId;
         ServerBaseUri = serverBaseUri;
+        Dump = dump;
     }
 
     [ProtoMember(1)]
@@ -64,5 +66,8 @@ public record BackupRestoreRequestIntegrationEvent : IntegrationEvent
 
     [ProtoMember(5)]
     public string ServerBaseUri { get; set; }
+    
+    [ProtoMember(6)]
+    public bool Dump { get; set; }
 }
 

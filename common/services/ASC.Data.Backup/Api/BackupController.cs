@@ -315,6 +315,7 @@ public class BackupController(
                              storageType: storageType,
                              notify: inDto.Notify,
                              backupId: inDto.BackupId,
+                             dump: inDto.Dump,
                              serverBaseUri: serverBaseUri
                         ));
 

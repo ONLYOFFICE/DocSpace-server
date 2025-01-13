@@ -295,7 +295,12 @@ public class BackupAjaxHandler(
 
     #region restore
 
-    public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify, string serverBaseUri)
+    public async Task StartRestoreAsync(string backupId,
+        BackupStorageType storageType,
+        Dictionary<string, string> storageParams, 
+        bool notify,
+        string serverBaseUri,
+        bool dump)
     {
         await DemandPermissionsRestoreAsync();
         var tenantId = GetCurrentTenantIdAsync();
@@ -304,7 +309,8 @@ public class BackupAjaxHandler(
             TenantId = tenantId,
             NotifyAfterCompletion = notify,
             StorageParams = storageParams,
-            ServerBaseUri = serverBaseUri
+            ServerBaseUri = serverBaseUri,
+            Dump =  dump
         };
 
         if (Guid.TryParse(backupId, out var guidBackupId))
