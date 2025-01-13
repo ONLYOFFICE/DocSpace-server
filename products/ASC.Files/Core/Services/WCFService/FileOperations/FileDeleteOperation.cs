@@ -435,7 +435,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
     }
     
-    private async Task DeleteFileVersionAsync(T fileId, IEnumerable<int> versions, IServiceScope scope)
+    private async Task DeleteFileVersionAsync(T fileId, IEnumerable<int> versions, AsyncServiceScope scope)
     {
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var filesMessageService = scope.ServiceProvider.GetService<FilesMessageService>();
