@@ -765,7 +765,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     public Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
-        return null;
+        return Task.FromResult(0);
     }
 
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
