@@ -61,6 +61,11 @@ public class License
     [JsonPropertyName("customer_id")]
     public string CustomerId { get; set; }
 
+    /// <summary>Resource Key</summary>
+    /// <type>System.String, System</type>
+    [JsonPropertyName("resource_key")]
+    public string ResourceKey { get; set; }
+
     /// <summary>Number of document server users</summary>
     /// <type>System.Int32, System</type>
     [JsonPropertyName("users_count")]
