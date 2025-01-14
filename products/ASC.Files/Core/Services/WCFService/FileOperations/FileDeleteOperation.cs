@@ -114,7 +114,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
         if (root != null)
         {
-            this[Res] += string.Format("folder_{0}{1}", root.Id, SplitChar);
+            this[Res] += $"folder_{root.Id}{SplitChar}";
         }
         if (_isEmptyTrash)
         {

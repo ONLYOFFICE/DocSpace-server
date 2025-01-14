@@ -114,7 +114,7 @@ public class FactoryIndexerForm(
 
         (int, int, int) GetCount(DateTime lastIndexed)
         {
-            return new(0, 0, 0);
+            return new ValueTuple<int, int, int>(0, 0, 0);
         }
     }
 }

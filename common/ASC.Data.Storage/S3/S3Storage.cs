@@ -1472,11 +1472,11 @@ public class S3Storage(TempStream tempStream,
         if (prevFileSize % blockSize != 0)
         {
             var endBlock = new byte[blockSize - prevFileSize % blockSize];
-            ms.Write(endBlock);
+            await ms.WriteAsync(endBlock, token);
         }
-        ms.Write(header);
+        await ms.WriteAsync(header, token);
 
-        stream.Position = 0;
+        stream.Position = 0; 
         await stream.CopyToAsync(ms, token);
         await stream.DisposeAsync();
 
@@ -1572,9 +1572,11 @@ public class S3Storage(TempStream tempStream,
         if (prevFileSize % blockSize != 0)
         {
             var endBlock = new byte[blockSize - prevFileSize % blockSize];
-            stream.Write(endBlock);
+            await stream.WriteAsync(endBlock, token);
         }
-        stream.Write(header);
+        
+        await stream.WriteAsync(header, token);
+        
         stream.Position = 0;
 
         var uploadRequest = new UploadPartRequest
@@ -1646,7 +1648,7 @@ public class S3Storage(TempStream tempStream,
             }
         }
         var stream = new MemoryStream();
-        stream.Write(buffer);
+        await stream.WriteAsync(buffer);
         stream.Position = 0;
 
         var uploadRequest = new UploadPartRequest
@@ -1742,7 +1744,7 @@ public class S3Storage(TempStream tempStream,
         {
             using var stream = new MemoryStream();
             var buffer = new byte[5 * 1024 * 1024];
-            stream.Write(buffer);
+            await stream.WriteAsync(buffer, token);
             stream.Position = 0;
 
             var uploadRequest = new UploadPartRequest

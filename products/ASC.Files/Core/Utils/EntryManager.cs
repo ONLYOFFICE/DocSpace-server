@@ -208,7 +208,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
         if (!files.Any())
         {
             return;
-}
+        }
 
         var pdfs = new List<File<T>>();
 
@@ -1542,13 +1542,13 @@ public class EntryManager(IDaoFactory daoFactory,
                     var originalForm = await fileDao.GetFileAsync(originalFormId);
 
                     await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{roomId}_{originalFormId}"))
-                {
+                    {
                         var origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId);
                         if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (origProperties.FormFilling.ResultsFileID == null || Equals(origProperties.FormFilling.ResultsFileID, default(T))))
-                    {
+                        {
                             await InitFormFillingFolders(file, room, origProperties, folderDao, fileDao, originalForm.CreateBy);
                             origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId);
-            }
+                        }
 
                         origProperties.FormFilling.ResultFormNumber++;
                         await fileDao.SaveProperties(originalFormId, origProperties);
@@ -1586,12 +1586,12 @@ public class EntryManager(IDaoFactory daoFactory,
 
                         File<T> result;
                         if (tmpStream.CanSeek)
-            {
+                        {
                             pdfFile.ContentLength = tmpStream.Length;
                             result = await fileDao.SaveFileAsync(pdfFile, tmpStream, false);
-            }
-            else
-            {
+                        }
+                        else
+                        {
                             var (buffered, isNew) = await tempStream.TryGetBufferedAsync(tmpStream);
                             try
                             {
@@ -1609,7 +1609,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         await notifyClient.SendFormSubmittedAsync(room, originalForm, pdfFile);
 
                         if (fillingSessionId != null)
-                {
+                        {
                             await distributedCache.SetStringAsync(fillingSessionId, result.Id.ToString());
                         }
 
@@ -1631,7 +1631,7 @@ public class EntryManager(IDaoFactory daoFactory,
                                     ResultsFileID = origProperties.FormFilling.ResultsFileID,
                                     ResultFormNumber = origProperties.FormFilling.ResultFormNumber
                                 }
-                };
+                            };
                             await fileDao.SaveProperties(result.Id, resProp);
 
                             var aces = await fileSharing.GetSharedInfoAsync(room);
@@ -1660,8 +1660,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
                                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
                                 await linkDao.DeleteAllLinkAsync(file.Id);
-            }
                             }
+                        }
                         catch(Exception ex)
                         {
                             logger.LogError(ex, "Form submission error");
@@ -2165,9 +2165,9 @@ public class EntryManager(IDaoFactory daoFactory,
             csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".xlsx");
             csvFile.CreateBy = createBy;
 
-            var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
+        var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
 
-            return file.Id;
+        return file.Id;
         }
     
     private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)

@@ -246,7 +246,7 @@ public class BackupAjaxHandler(
             }
 
             schedule.StorageType = BackupStorageType.ThirdPartyConsumer;
-            schedule.StorageParams = new();
+            schedule.StorageParams = new Dictionary<string, string>();
             foreach (var r in consumer.AdditionalKeys)
             {
                 schedule.StorageParams.Add(r, await consumer.GetAsync(r));
