@@ -41,54 +41,48 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
         }
 
         var withStackTrace = true;
-        var criticalException = true;
+        var criticalException = false;
 
         switch (exception)
         {
             case ItemNotFoundException:
                 status = HttpStatusCode.NotFound;
                 message = "The record could not be found";
-                criticalException = false;
                 break;
             case ArgumentException e:
                 status = HttpStatusCode.BadRequest;
                 message = e.Message;
-                criticalException = false;
                 break;
             case SecurityException:
                 status = HttpStatusCode.Forbidden;
                 message = "Access denied";
-                criticalException = false;
                 break;
             case BruteForceCredentialException:
             case RecaptchaException:
                 status = HttpStatusCode.Forbidden;
                 withStackTrace = false;
-                criticalException = false;
                 break;
             case AuthenticationException:
                 status = HttpStatusCode.Unauthorized;
                 withStackTrace = false;
-                criticalException = false;
                 break;
             case InvalidOperationException:
                 status = HttpStatusCode.Forbidden;
-                criticalException = false;
                 break;
             case TenantQuotaException:
             case BillingNotFoundException:
                 status = HttpStatusCode.PaymentRequired;
-                criticalException = false;
                 break;
             case CustomHttpException httpException:
                 status = (HttpStatusCode)httpException.StatusCode;
                 withStackTrace = false;
-                criticalException = false;
                 break;
             case NotSupportedException:
                 status = HttpStatusCode.UnsupportedMediaType;
                 withStackTrace = false;
-                criticalException = false;
+                break;
+            default:
+                criticalException = true;
                 break;
         }
 
