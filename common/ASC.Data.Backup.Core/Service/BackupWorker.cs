@@ -180,7 +180,7 @@ public class BackupWorker(
         }
     }
 
-    public async Task<BackupProgress> StartRestoreAsync(StartRestoreRequest request)
+    public async Task<BackupProgress> StartRestoreAsync(StartRestoreRequest request, bool enqueueTask = true, string taskId = null)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
@@ -190,12 +190,27 @@ public class BackupWorker(
                 await _progressQueue.DequeueTask(item.Id);
                 item = null;
             }
-            if (item == null)
+
+            if (item == null || (enqueueTask && item.Id == taskId && item.Status == DistributedTaskStatus.Created))
             {
+
                 item = serviceProvider.GetService<RestoreProgressItem>();
+
                 item.Init(request, TempFolder, _upgradesPath);
 
-                await _progressQueue.EnqueueTask(item);
+                if (!string.IsNullOrEmpty(taskId))
+                {
+                    item.Id = taskId;
+                }
+
+                if (enqueueTask)
+                {
+                    await _progressQueue.EnqueueTask(item);
+                }
+                else
+                {
+                    await _progressQueue.PublishTask(item);
+                }
             }
             return ToBackupProgress(item);
         }

@@ -41,6 +41,7 @@ public record BackupRestoreRequestIntegrationEvent : IntegrationEvent
                                   bool notify,
                                   string backupId,
                                   bool dump,
+                                  string taskId,
                                   string serverBaseUri = null
                                   ) : base(createBy, tenantId)
     {
@@ -50,6 +51,7 @@ public record BackupRestoreRequestIntegrationEvent : IntegrationEvent
         BackupId = backupId;
         ServerBaseUri = serverBaseUri;
         Dump = dump;
+        TaskId = taskId;
     }
 
     [ProtoMember(1)]
@@ -69,5 +71,8 @@ public record BackupRestoreRequestIntegrationEvent : IntegrationEvent
     
     [ProtoMember(6)]
     public bool Dump { get; set; }
+    
+    [ProtoMember(7)]
+    public string TaskId { get; set; }
 }
 
