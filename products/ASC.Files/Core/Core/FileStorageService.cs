@@ -1665,7 +1665,6 @@ public class FileStorageService //: IFileStorageService
 
         foreach (var r in history)
         {
-            await entryStatusManager.SetFileStatusAsync(r);
             yield return r;
         }
     }
