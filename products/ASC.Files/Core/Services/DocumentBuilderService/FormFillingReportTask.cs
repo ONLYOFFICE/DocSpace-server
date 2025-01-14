@@ -34,7 +34,7 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
-        var tempFileName = DocumentBuilderScriptHelper.GetTempFileName();
+        var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
         
         var data = await GetFormFillingReportData(serviceProvider, _userId, _data.RoomId, _data.OriginalFormId);
         
@@ -42,10 +42,10 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
             .Replace("${tempFileName}", tempFileName)
             .Replace("${inputData}", JsonConvert.SerializeObject(data));
         
-        return new DocumentBuilderInputData(script, tempFileName, "");
+        return new DocumentBuilderInputData(null, script, tempFileName, "");
     }
 
-    protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, string fileName)
+    protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)
     {
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
