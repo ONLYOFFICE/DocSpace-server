@@ -28,6 +28,7 @@ namespace ASC.Core.Common.EF.Model;
 
 public class MobileAppInstall
 {
+    [MaxLength(255)]
     public string UserEmail { get; set; }
     public int AppType { get; set; }
     public DateTime RegisteredOn { get; set; }
@@ -57,7 +58,7 @@ public static class MobileAppInstallExtension
 
             entity.Property(e => e.UserEmail)
                 .HasColumnName("user_email")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -85,8 +86,7 @@ public static class MobileAppInstallExtension
             entity.ToTable("mobile_app_install", "onlyoffice");
 
             entity.Property(e => e.UserEmail)
-                .HasColumnName("user_email")
-                .HasMaxLength(255);
+                .HasColumnName("user_email");
 
             entity.Property(e => e.AppType).HasColumnName("app_type");
 

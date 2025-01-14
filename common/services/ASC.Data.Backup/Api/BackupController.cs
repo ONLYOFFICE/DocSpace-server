@@ -91,7 +91,7 @@ public class BackupController(
         {
             Period = inDto.CronParams.Period ?? BackupPeriod.EveryDay,
             Hour = inDto.CronParams.Hour,
-            Day = inDto.CronParams.Day.HasValue ? inDto.CronParams.Day.Value : 0
+            Day = inDto.CronParams.Day ?? 0
         };
         if(backupStored is > 30 or < 1)
         {
@@ -181,18 +181,18 @@ public class BackupController(
                 await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
-        if (storageType is BackupStorageType.ThirdPartyConsumer && !storageParams.ContainsKey("subdir"))
+        if (storageType is BackupStorageType.ThirdPartyConsumer)
         {
-            storageParams.Add("subdir", "backup");
+            storageParams.TryAdd("subdir", "backup");
         }
         
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
-            : default;
+            : null;
         
         var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
              tenantId: tenantId,
@@ -287,11 +287,11 @@ public class BackupController(
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
-            : default;
+            : null;
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)(inDto.StorageType.Value);
+        var storageType = inDto.StorageType ?? BackupStorageType.Documents;
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments && storageParams.ContainsKey("filePath"))
         {
             if (int.TryParse(storageParams["filePath"], out var fId))
@@ -303,9 +303,9 @@ public class BackupController(
                 await backupAjaxHandler.CheckAccessToFileAsync(storageParams["filePath"]);
             }
         }
-        if (storageType is BackupStorageType.ThirdPartyConsumer && !storageParams.ContainsKey("subdir"))
+        if (storageType is BackupStorageType.ThirdPartyConsumer)
         {
-            storageParams.Add("subdir", "backup");
+            storageParams.TryAdd("subdir", "backup");
         }
 
         await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(

@@ -35,9 +35,9 @@ public class CountRoomChecker(
     ITariffService tariffService)
     : TenantQuotaFeatureCheckerCount<CountRoomFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string GetExceptionMessage(long count)
+    public override string GetExceptionMessage(long size)
     {
-        return string.Format(Resource.TariffsFeature_room_exception, count);
+        return string.Format(Resource.TariffsFeature_room_exception, size);
     }
     public override async Task CheckAddAsync(int tenantId, int newValue)
     {
@@ -61,7 +61,7 @@ public class CountRoomCheckerStatistic(IServiceProvider serviceProvider) : ITena
 
         var parentId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory, false);
 
-        if (parentId == default)
+        if (parentId == 0)
         {
             return 0;
         }

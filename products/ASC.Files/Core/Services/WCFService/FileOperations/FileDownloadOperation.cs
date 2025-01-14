@@ -134,7 +134,7 @@ public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFi
             }
             else
             {
-                fileName = $@"{(await tenantManager.GetCurrentTenantAsync()).Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
+                fileName = $@"{(tenantManager.GetCurrentTenant()).Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
             }
 
             var store = await globalStore.GetStoreAsync();
@@ -227,7 +227,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         this[OpType] = (int)FileOperationType.Download;
     }
 
-    protected override async Task DoJob(IServiceScope serviceScope)
+    protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
         if (Files.Count == 0 && Folders.Count == 0)
         {
@@ -303,7 +303,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         return entriesPathId;
     }
 
-    private async Task<(ItemNameValueCollection<T>, IEnumerable<FileEntry<T>>, IEnumerable<FileEntry<T>>)> GetEntriesPathIdAsync(IServiceScope scope)
+    private async Task<(ItemNameValueCollection<T>, IEnumerable<FileEntry<T>>, IEnumerable<FileEntry<T>>)> GetEntriesPathIdAsync(AsyncServiceScope scope)
     {
         var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
         var entriesPathId = new ItemNameValueCollection<T>();
@@ -396,7 +396,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         var fileConverter = scope.ServiceProvider.GetService<FileConverter>();
         var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
 
-        using ICompress compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
+        using var compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
         await compressTo.SetStream(stream);
         string error = null;
 
@@ -608,7 +608,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             CancellationToken.ThrowIfCancellationRequested();
 
-            if (200 >= path.Length || 0 >= path.IndexOf('/'))
+            if (200 >= path.Length || path.Contains('/'))
             {
                 continue;
             }

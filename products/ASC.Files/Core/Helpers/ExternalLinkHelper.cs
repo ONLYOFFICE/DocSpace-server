@@ -190,7 +190,7 @@ public class ExternalLinkHelper(
         }
         var (currentRoomId, _) = await daoFactory.GetFolderDao<T>().GetParentRoomInfoFromFileEntryAsync(file);
         
-        if (Equals(currentRoomId, default) || !string.Equals(currentRoomId.ToString(), rootId))
+        if (Equals(currentRoomId, null) || !string.Equals(currentRoomId.ToString(), rootId))
         {
             return;
         }

@@ -31,5 +31,5 @@ public interface ITelegramService
     Task CreateOrUpdateClientAsync(int tenantId, string token, int tokenLifespan, string proxy);
     Task DisableClientAsync(int tenantId);
     Task RegisterUserAsync(string userId, int tenantId, string token);
-    void SendMessage(NotifyMessage m);
+    Task SendMessage(NotifyMessage m);
 }

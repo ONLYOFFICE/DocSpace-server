@@ -28,9 +28,9 @@ namespace ASC.Core.Common.EF;
 
 public class FireBaseUser : BaseEntity
 {
-    /// <summary>
+/// <summary>
     /// ID
-    /// </summary>
+/// </summary>
     public int Id { get; set; }
 
     /// <summary>
@@ -46,11 +46,13 @@ public class FireBaseUser : BaseEntity
     /// <summary>
     /// Firebase device token
     /// </summary>
+    [MaxLength(255)]
     public string FirebaseDeviceToken { get; set; }
 
     /// <summary>
     /// Application
     /// </summary>
+    [MaxLength(20)]
     public string Application { get; set; }
 
     /// <summary>
@@ -106,13 +108,13 @@ public static class FireBaseUserExtension
 
             entity.Property(e => e.FirebaseDeviceToken)
                 .HasColumnName("firebase_device_token")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Application)
                 .HasColumnName("application")
-                .HasColumnType("varchar(20)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -140,12 +142,10 @@ public static class FireBaseUserExtension
                 .HasMaxLength(36);
 
             entity.Property(e => e.FirebaseDeviceToken)
-                .HasColumnName("firebase_device_token")
-                .HasMaxLength(255);
+                .HasColumnName("firebase_device_token");
 
             entity.Property(e => e.Application)
-                .HasColumnName("application")
-                .HasMaxLength(20);
+                .HasColumnName("application");
         });
     }
 

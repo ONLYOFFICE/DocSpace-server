@@ -45,7 +45,6 @@ global using ASC.ElasticSearch.Service;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
 global using ASC.Files.Core;
-global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;

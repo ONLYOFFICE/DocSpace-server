@@ -28,7 +28,7 @@ using User = ASC.Core.Common.EF.User;
 
 namespace ASC.Files.Core.EF;
 
-public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) : DbContext(dbContextOptions)
+public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) : BaseDbContext(dbContextOptions)
 {
     public DbSet<DbFile> Files { get; set; }
     public DbSet<DbFolder> Folders { get; set; }

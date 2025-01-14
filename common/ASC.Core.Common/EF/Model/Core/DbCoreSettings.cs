@@ -29,6 +29,7 @@ namespace ASC.Core.Common.EF.Model;
 public class DbCoreSettings : BaseEntity
 {
     public int TenantId { get; set; }
+    [MaxLength(128)]
     public string Id { get; set; }
     public byte[] Value { get; set; }
     public DateTime LastModified { get; set; }
@@ -76,7 +77,7 @@ public static class CoreSettingsExtension
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -102,8 +103,7 @@ public static class CoreSettingsExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasMaxLength(128);
+                .HasColumnName("id");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")

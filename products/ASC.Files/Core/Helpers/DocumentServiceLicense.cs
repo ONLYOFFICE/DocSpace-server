@@ -73,23 +73,36 @@ public class DocumentServiceLicense(ICache cache,
         return commandResponse;
     }
 
-    public async Task<bool> ValidateLicense()
+    public async Task<bool> ValidateLicense(string resourceKey)
     {
-        var commandResponse = await GetDocumentServiceLicenseAsync(false);
+        var attempt = 0;
 
-        if (commandResponse == null)
+        while (attempt < 3)
         {
-            return true;
+            var commandResponse = await GetDocumentServiceLicenseAsync(false);
+
+            if (commandResponse == null)
+            {
+                return true;
+            }
+
+            if (commandResponse.Error != ErrorTypes.NoError)
+            {
+                return false;
+            }
+
+            if (commandResponse.License.ResourceKey == resourceKey)
+            {
+                return commandResponse.Server is { ResultType: CommandResponse.ServerInfo.ResultTypes.Success or CommandResponse.ServerInfo.ResultTypes.SuccessLimit };
+            }
+            else
+            {
+                await Task.Delay(1000);
+                attempt += 1;
+            }
         }
 
-        if (commandResponse.Error != ErrorTypes.NoError)
-        {
-            return false;
-        }
-
-        return commandResponse.Server != null &&
-            (commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
-            commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit);
+        return false;
     }
 
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()

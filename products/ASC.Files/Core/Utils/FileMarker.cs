@@ -407,7 +407,7 @@ public class FileMarker(
         var newTags = new List<Tag>();
         var updateTags = new List<Tag>();
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"${LockKey}_{tenantId}", TimeSpan.FromMinutes(5)))
         {
@@ -485,7 +485,7 @@ public class FileMarker(
 
         var taskData = new AsyncTaskData<T>
         {
-            TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+            TenantId = tenantManager.GetCurrentTenantId(),
             CurrentAccountId = authContext.CurrentAccount.ID,
             FileEntry = (FileEntry<T>)fileEntry.Clone(),
             UserIDs = userIDs
@@ -581,8 +581,8 @@ public class FileMarker(
         var parentFolders = await folderDao.GetParentFoldersAsync(folderId).Reverse().ToListAsync();
 
         var rootFolder = parentFolders.LastOrDefault();
-        int rootFolderId = default;
-        int cacheFolderId = default;
+        var rootFolderId = 0;
+        var cacheFolderId = 0;
         if (rootFolder != null)
         {
             switch (rootFolder.RootFolderType)
@@ -626,7 +626,7 @@ public class FileMarker(
 
         var updateTags = new List<Tag>();
 
-        if (!rootFolderId.Equals(default))
+        if (!rootFolderId.Equals(0))
         {
             var internalRootFolder = await internalFolderDao.GetFolderAsync(rootFolderId);
             await UpdateRemoveTags(internalRootFolder, userId, valueNew, updateTags, removeTags);
@@ -656,26 +656,26 @@ public class FileMarker(
         await SendChangeNoticeAsync(updateTags.Concat(toRemove).ToList(), socketManager);
     }
 
-    private async Task UpdateRemoveTags<TFolder>(FileEntry<TFolder> folder, Guid userId, int valueNew, ICollection<Tag> updateTags,  ICollection<Tag> removeTags)
-        {
+    private async Task UpdateRemoveTags<TFolder>(FileEntry<TFolder> folder, Guid userId, int valueNew, List<Tag> updateTags,  List<Tag> removeTags)
+    {
         var tagDao = daoFactory.GetTagDao<TFolder>();
         var newTags = tagDao.GetNewTagsAsync(userId, folder);
-            var parentTag = await newTags.FirstOrDefaultAsync();
+        var parentTag = await newTags.FirstOrDefaultAsync();
 
-            if (parentTag != null)
+        if (parentTag != null)
+        {
+            parentTag.Count -= valueNew;
+
+            if (parentTag.Count > 0)
             {
-                parentTag.Count -= valueNew;
-
-                if (parentTag.Count > 0)
-                {
-                    updateTags.Add(parentTag);
-                }
-                else
-                {
-                    removeTags.Add(parentTag);
-                }
+                updateTags.Add(parentTag);
+            }
+            else
+            {
+                removeTags.Add(parentTag);
             }
         }
+    }
 
     public async Task RemoveMarkAsNewForAllAsync<T>(FileEntry<T> fileEntry)
     {
@@ -1171,7 +1171,7 @@ public class FileMarker(
                 return MarkResult.NotMarked;
             }
 
-            if (await globalFolder.GetFolderMyAsync(daoFactory) == default)
+            if (await globalFolder.GetFolderMyAsync(daoFactory) == 0)
             {
                 return MarkResult.NotMarked;
             }
@@ -1228,7 +1228,7 @@ public class FileMarker(
 
     private async Task RemoveFromCacheAsync<T>(T folderId, Guid userId)
     {
-        if (Equals(folderId, default))
+        if (Equals(folderId, null))
         {
             return;
         }
@@ -1271,5 +1271,5 @@ public enum MarkResult
 {
     Marked,
     NotMarked,
-    MarkExists,
+    MarkExists
 }

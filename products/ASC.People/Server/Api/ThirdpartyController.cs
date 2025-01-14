@@ -67,7 +67,7 @@ public class ThirdpartyController(
     public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(AuthProvidersRequestDto inDto)
     {
         var infos = new List<AccountInfoDto>();
-        IEnumerable<LoginProfile> linkedAccounts = new List<LoginProfile>();
+        var linkedAccounts = new List<LoginProfile>();
 
         if (authContext.IsAuthenticated)
         {
@@ -126,7 +126,7 @@ public class ThirdpartyController(
         if (string.IsNullOrEmpty(profile.AuthorizationError))
         {
             await accountLinker.AddLinkAsync(securityContext.CurrentAccount.ID, profile);
-            await messageService.SendAsync(MessageAction.UserLinkedSocialAccount, GetMeaningfulProviderName(profile.Provider));
+            messageService.Send(MessageAction.UserLinkedSocialAccount, GetMeaningfulProviderName(profile.Provider));
         }
         else
         {
@@ -209,7 +209,7 @@ public class ThirdpartyController(
                 model?.UiD);
             
             var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
-            await messageService.SendAsync(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
+            messageService.Send(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
             userId = newUser.Id;
             if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
             {
@@ -255,7 +255,7 @@ public class ThirdpartyController(
     {
         await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID.ToString(), inDto.Provider);
 
-        await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
+        messageService.Send(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
     }
 
     private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, 

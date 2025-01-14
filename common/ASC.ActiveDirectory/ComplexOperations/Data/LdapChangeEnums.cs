@@ -62,13 +62,13 @@ public static class LdapUserMapping
 {
     public static readonly List<string> Fields =
     [
-        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.FirstName),
-        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.LastName),
-        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Mail),
-        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Phone),
-        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Title),
-        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Location),
-        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Sid),
-        Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Member)
+        Enum.GetName(LdapItemChangeKey.FirstName),
+        Enum.GetName(LdapItemChangeKey.LastName),
+        Enum.GetName(LdapItemChangeKey.Mail),
+        Enum.GetName(LdapItemChangeKey.Phone),
+        Enum.GetName(LdapItemChangeKey.Title),
+        Enum.GetName(LdapItemChangeKey.Location),
+        Enum.GetName(LdapItemChangeKey.Sid),
+        Enum.GetName(LdapItemChangeKey.Member)
     ];
 }

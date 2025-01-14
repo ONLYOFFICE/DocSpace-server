@@ -48,7 +48,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var progressItem = await queueWorkerRemove.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         return TaskProgressResponseDto.Get(progressItem);
@@ -69,7 +69,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     public async Task<object> SendInstructionsToDeleteAsync()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         if (user.IsLDAP() || user.IsOwner(tenant))
         {
@@ -77,7 +77,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         }
 
         await studioNotifyService.SendMsgProfileDeletionAsync(user);
-        await messageService.SendAsync(MessageAction.UserSentDeleteInstructions);
+        messageService.Send(MessageAction.UserSentDeleteInstructions);
 
         return string.Format(Resource.SuccessfullySentNotificationDeleteUserInfoMessage, "<b>" + user.Email + "</b>");
     }
@@ -107,7 +107,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         var currentUserType = await userManager.GetUserTypeAsync(currentUser.Id); 
         
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) || user.IsMe(authContext) || user.Status != EmployeeStatus.Terminated)
         {
             throw new ArgumentException("Can not delete user with id = " + inDto.UserId);
@@ -140,7 +140,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         await queueWorkerRemove.Terminate(tenant.Id, inDto.UserId);
     }
 }

@@ -85,9 +85,9 @@ public class EmailValidationKeyProvider
         _logger = logger;
     }
 
-    public async Task<string> GetEmailKeyAsync(string email)
+    public string GetEmailKey(string email)
     {
-        return GetEmailKey(await _tenantManager.GetCurrentTenantIdAsync(), email);
+        return GetEmailKey(_tenantManager.GetCurrentTenantId(), email);
     }
 
     public string GetEmailKey(int tenantId, string email)
@@ -118,14 +118,14 @@ public class EmailValidationKeyProvider
         }
     }
 
-    public async Task<ValidationResult> ValidateEmailKeyAsync(string email, string key)
+    public ValidationResult ValidateEmailKey(string email, string key)
     {
-        return await ValidateEmailKeyAsync(email, key, TimeSpan.MaxValue);
+        return ValidateEmailKey(email, key, TimeSpan.MaxValue);
     }
 
-    public async Task<ValidationResult> ValidateEmailKeyAsync(string email, string key, TimeSpan validInterval)
+    public ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var result = ValidateEmailKey(email, key, validInterval, tenantId);
         _logger.DebugValidationResult(result, email, key, validInterval, tenantId);
         return result;

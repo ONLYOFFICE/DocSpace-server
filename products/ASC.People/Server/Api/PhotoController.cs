@@ -96,7 +96,7 @@ public class PhotoController(
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserUpdatedAvatarThumbnails, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserUpdatedAvatarThumbnails, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
@@ -123,7 +123,7 @@ public class PhotoController(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
@@ -131,7 +131,7 @@ public class PhotoController(
 
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserDeletedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserDeletedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -181,7 +181,7 @@ public class PhotoController(
             throw new SecurityException();
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
@@ -193,7 +193,7 @@ public class PhotoController(
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserAddedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserAddedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -229,7 +229,7 @@ public class PhotoController(
 
                 await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(userId), Constants.Action_EditUser);
 
-                var tenant = await tenantManager.GetCurrentTenantAsync();
+                var tenant = tenantManager.GetCurrentTenant();
                 if (securityContext.CurrentAccount.ID != tenant.OwnerId && await _userManager.IsDocSpaceAdminAsync(userId) && userId != securityContext.CurrentAccount.ID)
                 {
                     throw new Exception(Resource.ErrorAccessDenied);

@@ -44,7 +44,7 @@ internal class SharePointTagDao(
     {
         var mapping = _daoFactory.GetMapping<string>();
         var folderId = DaoSelector.ConvertId(parentFolder.Id);
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix).ToListAsync();
 

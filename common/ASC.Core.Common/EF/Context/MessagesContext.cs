@@ -26,7 +26,7 @@
 
 namespace ASC.MessagingSystem.EF.Context;
 
-public partial class MessagesContext(DbContextOptions<MessagesContext> options) : DbContext(options)
+public partial class MessagesContext(DbContextOptions<MessagesContext> options) : BaseDbContext(options)
 {
     public DbSet<DbAuditEvent> AuditEvents { get; set; }
     public DbSet<DbLoginEvent> LoginEvents { get; set; }

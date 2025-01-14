@@ -479,7 +479,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             GetLinksUsersAsync(shares.Where(r => r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)) 
             : Task.FromResult(Enumerable.Empty<Guid>());
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var copyShares = shares.GroupBy(k => k.Subject).ToDictionary(k => k.Key);
 
         FileShareRecord<T>[] defaultRecords;
@@ -811,7 +811,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isGuest = userType is EmployeeType.Guest;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isUser = userType is EmployeeType.User;
-        var isAuthenticated =  authContext.IsAuthenticated || (await authManager.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId)).IsAuthenticated;
+        var isAuthenticated =  authContext.IsAuthenticated || (await authManager.GetAccountByIDAsync(tenantManager.GetCurrentTenantId(), userId)).IsAuthenticated;
 
         var accessSnapshot = entry.Access;
         
@@ -910,9 +910,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
-            if (folder.FolderType == FolderType.Recent && isGuest)
+            if (folder.FolderType == FolderType.Recent)
             {
-                return false;
+                if (isGuest)
+                {
+                    return false;
+                }
+
+                return action == FilesSecurityActions.Read;
             }
 
             if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && 
@@ -1121,13 +1126,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                    file != null )
                 {
                     var parentFolders = await GetFileParentFolders(file.ParentId);
-                    if (parentFolders != null)
+                    var fileFolder = parentFolders?.LastOrDefault();
+                    if (fileFolder?.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
                     {
-                        var fileFolder = parentFolders.LastOrDefault();
-                        if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
                 
@@ -1229,8 +1231,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             var cachedRecords = GetCachedRecords<T>();
             if ((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive &&
-                 cachedRecords.TryGetValue(await GetCacheKey(e.ParentId, userId), out var value)) ||
-                cachedRecords.TryGetValue(await GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
+                 cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) ||
+                cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
             {
                 ace = value.Clone();
                 ace.EntryId = e.Id;
@@ -1244,17 +1246,20 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
 
-                    cachedRecords.TryAdd(await GetCacheKey(e.ParentId, id), ace);
+                    cachedRecords.TryAdd(GetCacheKey(e.ParentId, id), ace);
                 }
             }
         }
 
         var defaultShare =
-            e.RootFolderType == FolderType.VirtualRooms ? DefaultVirtualRoomsShare :
-            e.RootFolderType == FolderType.USER ? DefaultMyShare :
-            e.RootFolderType == FolderType.Privacy ? DefaultPrivacyShare :
-            e.RootFolderType == FolderType.Archive ? DefaultArchiveShare :
-            DefaultCommonShare;
+            e.RootFolderType switch
+            {
+                FolderType.VirtualRooms => DefaultVirtualRoomsShare,
+                FolderType.USER => DefaultMyShare,
+                FolderType.Privacy => DefaultPrivacyShare,
+                FolderType.Archive => DefaultArchiveShare,
+                _ => DefaultCommonShare
+            };
 
         e.ShareRecord = ace;
         e.Access = ace?.Share ?? defaultShare;
@@ -1566,13 +1571,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                         break;
                     default:
-                        if (e.Access == FileShare.RoomManager ||
-                            (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
-                        {
-                            return true;
-                        }
-
-                        break;
+                        return true;
                 }
 
                 break;
@@ -1775,7 +1774,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var securityDao = daoFactory.GetSecurityDao<T>();
         var r = new FileShareRecord<T>
         {
-            TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+            TenantId = tenantManager.GetCurrentTenantId(),
             EntryId = entryId,
             EntryType = entryType,
             Subject = @for,
@@ -2527,7 +2526,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return entry.CreateBy == userId;
         }
 
-        if (_cachedRoomOwner.TryGetValue(await GetCacheKey(entry.ParentId), out var roomOwner))
+        if (_cachedRoomOwner.TryGetValue(GetCacheKey(entry.ParentId), out var roomOwner))
         {
             return roomOwner == userId;
         }
@@ -2540,7 +2539,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
 
-        _cachedRoomOwner.TryAdd(await GetCacheKey(entry.ParentId), room.CreateBy);
+        _cachedRoomOwner.TryAdd(GetCacheKey(entry.ParentId), room.CreateBy);
 
         return room.CreateBy == userId;
     }
@@ -2559,15 +2558,15 @@ public class FileSecurity(IDaoFactory daoFactory,
         return false;
     }
 
-    private async Task<string> GetCacheKey<T>(T parentId, Guid userId)
+    private string GetCacheKey<T>(T parentId, Guid userId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         return $"{tenantId}-{userId}-{parentId}";
     }
 
-    private async Task<string> GetCacheKey<T>(T parentId)
+    private string GetCacheKey<T>(T parentId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         return $"{tenantId}-{parentId}";
     }
 

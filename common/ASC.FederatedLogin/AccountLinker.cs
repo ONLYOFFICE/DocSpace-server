@@ -79,14 +79,14 @@ public class AccountLinker(
         return (await GetLinkedProfilesAsync(objects)).Where(o => o.Value.Provider.Equals(provider)).ToDictionary(k => k.Key, v => v.Value);
     }
 
-    public async Task<IEnumerable<LoginProfile>> GetLinkedProfilesAsync(string obj)
+    public async Task<List<LoginProfile>> GetLinkedProfilesAsync(string obj)
     {
         return await accountLinkerStorage.GetFromCacheAsync(obj, GetLinkedProfilesFromDBAsync);
     }
 
     public async Task<IEnumerable<LoginProfile>> GetLinkedProfilesAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
         var cacheKey = CacheKey(tenant);
         
         var profiles = await accountLinkerStorage.GetFromCacheAsync(cacheKey, async _ =>
@@ -112,7 +112,7 @@ public class AccountLinker(
         };
 
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
 
         if (await Queries.ExistAccountAsync(accountLinkContext, tenant, profile.HashId))
         {
@@ -133,7 +133,7 @@ public class AccountLinker(
     public async Task RemoveProviderAsync(string obj, string provider = null, string hashId = null)
     {
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
 
         var accountLink = await Queries.AccountLinkAsync(accountLinkContext, obj, provider, hashId);
 

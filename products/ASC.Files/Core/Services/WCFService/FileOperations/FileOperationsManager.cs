@@ -145,7 +145,7 @@ public class FileOperationsManager(
             return;
         }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
@@ -178,7 +178,7 @@ public class FileOperationsManager(
             return;
         }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var (folderIntIds, folderStringIds) = GetIds(folders);
@@ -222,7 +222,7 @@ public class FileOperationsManager(
             return;
         }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
@@ -282,7 +282,7 @@ public class FileOperationsManager(
             return;
         }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
@@ -358,7 +358,7 @@ public class FileOperationsManager(
             return;
         }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
         
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
@@ -452,7 +452,7 @@ public class FileOperationsManager(
                 if (item.Id.TryGetProperty("password", out var p))
                 {
                     password = p.GetString();
-                };
+                }
 
                 if (key.ValueKind == JsonValueKind.Number)
                 {
