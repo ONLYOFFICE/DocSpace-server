@@ -2160,12 +2160,12 @@ public class EntryManager(IDaoFactory daoFactory,
     private async Task<T> CreateFillResultsFile<T>(T resultsFolderId, Guid createBy, string sourceTitle, IFileDao<T> fileDao)
     {
         using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(""));
-            var csvFile = serviceProvider.GetService<File<T>>();
-            csvFile.ParentId = resultsFolderId;
-            csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".xlsx");
-            csvFile.CreateBy = createBy;
+        var resultsFile = serviceProvider.GetService<File<T>>();
+        resultsFile.ParentId = resultsFolderId;
+        resultsFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".xlsx");
+        resultsFile.CreateBy = createBy;
 
-        var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
+        var file = await fileDao.SaveFileAsync(resultsFile, textStream, false);
 
         return file.Id;
         }

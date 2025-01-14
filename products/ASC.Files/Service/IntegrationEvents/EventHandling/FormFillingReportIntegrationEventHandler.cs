@@ -31,7 +31,6 @@ public class FormFillingReportIntegrationEventHandler(
     ILogger<FormFillingReportIntegrationEventHandler> logger,
     CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
-    SecurityContext securityContext,
     DocumentBuilderTaskManager documentBuilderTaskManager,
     IServiceProvider serviceProvider)
     : IIntegrationEventHandler<FormFillingReportIntegrationEvent>

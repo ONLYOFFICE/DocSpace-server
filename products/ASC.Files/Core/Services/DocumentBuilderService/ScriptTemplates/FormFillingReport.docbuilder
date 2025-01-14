@@ -3,9 +3,6 @@ builder.CreateFile("xlsx");
 
 var defaultFontSize = 11;
 var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
-var defaultFontColorGray = Api.CreateColorFromRGB(127, 127, 127);
-var defaultBgColorGray = Api.CreateColorFromRGB(242, 242, 242);
-var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
 
 var inputData = ${inputData};
 
@@ -38,7 +35,7 @@ function prepareData(startColIndex, startRowIndex) {
 
     var kA = [];
     for (var i = 0; i < inputData.data.keys.length; i++){
-        kA.push({ "value": inputData.data.keys[i], "bold": true, "fontColor": defaultFontColorBlack, "bgColor": defaultBgColorGray, valign: "center", "borderColor": defaultBorderColorWhite });
+        kA.push({ "value": inputData.data.keys[i], "bold": true, "fontColor": defaultFontColorBlack, valign: "center",});
     }
     var dataTable = [
         {
@@ -125,7 +122,6 @@ var dataTable = prepareData(currentColIndex, currentRowIndex);
 var formattedTableRange = toColumnName(currentColIndex) + (currentRowIndex) + ":" + toColumnName(dataTable[0].dataArray.length) + (currentRowIndex + dataTable.length - 3);
 
 writeTable(dataTable);
-
 
 oWorksheet.GetRange(toColumnName(1) + 1).Select();
 

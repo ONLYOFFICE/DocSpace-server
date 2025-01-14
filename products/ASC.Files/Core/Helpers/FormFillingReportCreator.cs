@@ -28,7 +28,6 @@ namespace ASC.Files.Core.Helpers;
 
 [Scope]
 public class FormFillingReportCreator(
-    ExportToCSV exportToCSV,
     ExportToXLSX exportToXLSX,
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
@@ -48,7 +47,7 @@ public class FormFillingReportCreator(
 
     public async Task UpdateFormFillingReport<T>(int originalFormId, int roomId, int resultFormNumber,string formsDataUrl, File<T> formsDataFile)
     {
-        _ = await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
+        await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
         await exportToXLSX.UpdateXlsxReport(roomId, originalFormId);
     }
 
@@ -75,12 +74,6 @@ public class FormFillingReportCreator(
 
     public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId)
     {
-        var folderDao = daoFactory.GetFolderDao<int>();
-        var folder = await folderDao.GetFolderAsync(roomId);
-        if (folder?.FolderType != FolderType.FillingFormsRoom)
-        {
-            return [];
-        }
         factoryIndexerForm.Refresh();
         var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId));
 
@@ -88,11 +81,10 @@ public class FormFillingReportCreator(
         {
             return result;
         }
-
         return [];
     }
 
-    private async Task<SubmitFormsData> GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int roomId, int resultFormNumber, string url)
+    private async Task GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int roomId, int resultFormNumber, string url)
     {
         var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
         var request = new HttpRequestMessage
@@ -113,20 +105,9 @@ public class FormFillingReportCreator(
                 Value = resultFormNumber.ToString()
             }
         };
-        List<FormsItemData> formInfo = 
-        [
-                new() { Key = FilesCommonResource.ResourceManager.GetString("Date", tenantCulture), Value = $"=\"{tenantUtil.DateTimeNow().ToString("G", tenantCulture)}\"" },
-                new() { Key = FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture), Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture)}\")" }
-        ];
         
         var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
         fromData.FormsData = fromData.FormsData.Where(f => f.Type != "picture").ToList();
-
-        var result = new SubmitFormsData
-        {
-            FormsData =  formNumber.Concat(fromData.FormsData).ToList()
-        };
-        result.FormsData = result.FormsData.Concat(formInfo).ToList();
 
         var now = DateTime.UtcNow;
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -141,13 +122,11 @@ public class FormFillingReportCreator(
                 OriginalFormId = originalFormId,
                 RoomId = roomId,
                 CreateOn = now,
-                FormsData = fromData.FormsData
+                FormsData = formNumber.Concat(fromData.FormsData)
             };
 
             _ = factoryIndexerForm.IndexAsync(searchItems);
         }
-
-        return result;
     }
 
     public class BoolToStringConverter : System.Text.Json.Serialization.JsonConverter<string>

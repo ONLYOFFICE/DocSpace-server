@@ -37,12 +37,12 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
         
         var data = await GetFormFillingReportData(serviceProvider, _userId, _data.RoomId, _data.OriginalFormId);
-        
+
         script = script
             .Replace("${tempFileName}", tempFileName)
             .Replace("${inputData}", JsonConvert.SerializeObject(data));
         
-        return new DocumentBuilderInputData(null, script, tempFileName, "");
+        return new DocumentBuilderInputData(script, null, tempFileName, "");
     }
 
     protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)
@@ -100,9 +100,9 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
         var user = await userManager.GetUsersAsync(userId);
         var fileDao = daoFactory.GetFileDao<int>();
 
-        var usertCulture = user.GetCulture();
-        CultureInfo.CurrentCulture = usertCulture;
-        CultureInfo.CurrentUICulture = usertCulture;
+        var userCulture = user.GetCulture();
+        CultureInfo.CurrentCulture = userCulture;
+        CultureInfo.CurrentUICulture = userCulture;
 
         var formFillingResults = await formFillingReportCreator.GetFormFillingResults(roomId, originalFormId);
         var tenantCulture = tenantManager.GetCurrentTenant().GetCulture();
@@ -116,10 +116,6 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
             {
                 foreach(var field in formsData)
                 {
-                    if (field.Type == "picture") 
-                    { 
-                        continue;
-                    }
                     keys.Add(field.Key);
                 }
                 keys.Add(FilesCommonResource.ResourceManager.GetString("Date", tenantCulture));
@@ -161,9 +157,7 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
         }
 
         var properties = await daoFactory.GetFileDao<int>().GetProperties(originalFormId);
-
         var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
-
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
 
         var data = new

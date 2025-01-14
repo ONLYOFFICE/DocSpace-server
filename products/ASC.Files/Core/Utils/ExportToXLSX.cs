@@ -51,7 +51,7 @@ public class ExportToXLSX(
             var baseUri = commonLinkUtility.ServerRootPath;
             task.Init(baseUri, tenantId, userId, null);
 
-            var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
+            _ = await documentBuilderTaskManager.StartTask(task, false);
 
             var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
             var evt = new FormFillingReportIntegrationEvent(userId, tenantId, roomId, originalFormId, baseUri, headers: headers != null
