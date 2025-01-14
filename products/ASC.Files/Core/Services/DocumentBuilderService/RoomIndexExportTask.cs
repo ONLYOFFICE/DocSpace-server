@@ -158,7 +158,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
         script = script
             .Replace("${tempFileName}", tempFileName)
-            .Replace("${inputData}", JsonConvert.SerializeObject(data));
+            .Replace("${inputData}", JsonSerializer.Serialize(data));
 
         var scriptParts = script.Split("${inputDataItems}");
 
@@ -251,7 +251,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
             if (items.Count > 0)
             {
-                var jsonArray = JsonConvert.SerializeObject(items);
+                var jsonArray = JsonSerializer.Serialize(items);
 
                 var text = separator + jsonArray.TrimStart('[').TrimEnd(']');
 
