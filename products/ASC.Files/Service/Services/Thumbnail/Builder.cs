@@ -433,9 +433,9 @@ public class Builder<T>(
         {
             r.Thumbnail(size);
         });
-        
-        result.Minify();
 
+        result.Quality = 50;
+        
         return result;
     }
 }
