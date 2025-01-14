@@ -142,13 +142,13 @@ public static class AclExtension
 
             entity.Property(e => e.Subject)
                 .HasColumnName("subject")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Action)
                 .HasColumnName("action")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

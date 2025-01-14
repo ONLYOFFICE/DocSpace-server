@@ -100,7 +100,7 @@ public static class DbFolderExtension
             entity.Property(e => e.CreateBy)
                 .IsRequired()
                 .HasColumnName("create_by")
-                .HasColumnType("char(38)")
+                .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -123,7 +123,7 @@ public static class DbFolderExtension
             entity.Property(e => e.ModifiedBy)
                 .IsRequired()
                 .HasColumnName("modified_by")
-                .HasColumnType("char(38)")
+                .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

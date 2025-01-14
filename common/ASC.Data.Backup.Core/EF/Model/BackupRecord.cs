@@ -87,7 +87,7 @@ public static class BackupRecordExtension
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .HasColumnType("char(38)")
+                .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

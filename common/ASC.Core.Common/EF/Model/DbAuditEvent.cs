@@ -131,7 +131,7 @@ public static class AuditEventExtension
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")
                 .IsRequired(false)
-                .HasColumnType("char(38)")
+                .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });

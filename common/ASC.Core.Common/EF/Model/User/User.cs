@@ -135,7 +135,7 @@ public static class DbUserExtension
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

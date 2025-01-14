@@ -84,7 +84,7 @@ public static class DbFilesLinkExtension
 
             entity.Property(e => e.LinkedFor)
                 .HasColumnName("linked_for")
-                .HasColumnType("char(38)")
+                .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });

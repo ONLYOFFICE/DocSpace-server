@@ -282,7 +282,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.OwnerId)
                 .HasColumnName("owner_id")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar(36)")
                 .IsRequired(false)
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");

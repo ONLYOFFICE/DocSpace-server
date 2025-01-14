@@ -68,7 +68,7 @@ public static class DbFilesThirdpartyAppExtension
 
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

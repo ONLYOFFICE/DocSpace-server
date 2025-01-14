@@ -75,13 +75,13 @@ public static class DbGroupExtension
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.CategoryId)
                 .HasColumnName("categoryid")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -98,7 +98,7 @@ public static class DbGroupExtension
 
             entity.Property(e => e.ParentId)
                 .HasColumnName("parentid")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

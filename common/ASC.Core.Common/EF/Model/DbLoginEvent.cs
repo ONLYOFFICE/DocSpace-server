@@ -127,7 +127,7 @@ public static class LoginEventsExtension
             entity.Property(e => e.UserId)
                 .IsRequired()
                 .HasColumnName("user_id")
-                .HasColumnType("char(38)")
+                .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });

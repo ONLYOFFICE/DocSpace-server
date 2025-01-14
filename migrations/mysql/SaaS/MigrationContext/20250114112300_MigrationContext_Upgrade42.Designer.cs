@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20250114112300_MigrationContext_Upgrade42")]
+    partial class MigrationContext_Upgrade42
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5463,9 +5466,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.Data.Backup.EF.Model.BackupRecord", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("char(38)")
                         .HasColumnName("id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5613,9 +5616,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.EventBus.Extensions.Logger.IntegrationEventLogEntry", b =>
                 {
-                    b.Property<Guid>("EventId")
+                    b.Property<string>("EventId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("char(38)")
                         .HasColumnName("event_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5627,8 +5630,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<Guid>("CreateBy")
-                        .HasColumnType("char(36)")
+                    b.Property<string>("CreateBy")
+                        .IsRequired()
+                        .HasColumnType("char(38)")
                         .HasColumnName("create_by")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5717,8 +5721,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<Guid>("CreateBy")
-                        .HasColumnType("char(36)")
+                    b.Property<string>("CreateBy")
+                        .IsRequired()
+                        .HasColumnType("char(38)")
                         .HasColumnName("create_by")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5751,8 +5756,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("forcesave")
                         .HasDefaultValueSql("'0'");
 
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<string>("ModifiedBy")
+                        .IsRequired()
+                        .HasColumnType("char(38)")
                         .HasColumnName("modified_by")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5898,8 +5904,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<Guid>("LinkedFor")
-                        .HasColumnType("char(36)")
+                    b.Property<string>("LinkedFor")
+                        .IsRequired()
+                        .HasColumnType("char(38)")
                         .HasColumnName("linked_for")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5957,8 +5964,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("entry_type");
 
-                    b.Property<Guid>("Subject")
-                        .HasColumnType("char(36)")
+                    b.Property<string>("Subject")
+                        .HasColumnType("char(38)")
                         .HasColumnName("subject")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5969,8 +5976,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<Guid>("Owner")
-                        .HasColumnType("char(36)")
+                    b.Property<string>("Owner")
+                        .IsRequired()
+                        .HasColumnType("char(38)")
                         .HasColumnName("owner")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6071,8 +6079,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("tag_count")
                         .HasDefaultValueSql("'0'");
 
-                    b.Property<Guid?>("CreateBy")
-                        .HasColumnType("char(36)")
+                    b.Property<string>("CreateBy")
+                        .HasColumnType("char(38)")
                         .HasColumnName("create_by")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6295,8 +6303,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("counter")
                         .HasDefaultValueSql("'0'");
 
-                    b.Property<Guid>("CreateBy")
-                        .HasColumnType("char(36)")
+                    b.Property<string>("CreateBy")
+                        .IsRequired()
+                        .HasColumnType("char(38)")
                         .HasColumnName("create_by")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6323,8 +6332,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("foldersCount")
                         .HasDefaultValueSql("'0'");
 
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("char(36)")
+                    b.Property<string>("ModifiedBy")
+                        .IsRequired()
+                        .HasColumnType("char(38)")
                         .HasColumnName("modified_by")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6540,8 +6550,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("char(36)")
+                    b.Property<string>("UserId")
+                        .HasColumnType("char(38)")
                         .HasColumnName("user_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6622,9 +6632,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("char(36)")
+                        .HasColumnType("char(38)")
                         .HasColumnName("user_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");

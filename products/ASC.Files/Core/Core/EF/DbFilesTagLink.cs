@@ -88,7 +88,7 @@ public static class DbFilesTagLinkExtension
 
             entity.Property(e => e.CreateBy)
                 .HasColumnName("create_by")
-                .HasColumnType("char(38)")
+                .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 

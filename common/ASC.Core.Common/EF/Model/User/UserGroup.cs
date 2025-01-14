@@ -90,13 +90,13 @@ public static class DbUserGroupExtension
 
             entity.Property(e => e.Userid)
                 .HasColumnName("userid")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.UserGroupId)
                 .HasColumnName("groupid")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
