@@ -35,7 +35,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
     {
         var (scriptFilePath, tempFileName, outputFileName) = await GetRoomIndexExportData(serviceProvider, _userId, _data.RoomId);
 
-        return new DocumentBuilderInputData(null, scriptFilePath, tempFileName, outputFileName);
+        return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
     }
 
     protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)
@@ -73,9 +73,9 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
         await filesMessageService.SendAsync(MessageAction.RoomIndexExportSaved, room, headers: headers);
 
-        if (System.IO.File.Exists(inputData.ScriptFilePath))
+        if (System.IO.File.Exists(inputData.Script))
         {
-            System.IO.File.Delete(inputData.ScriptFilePath);
+            System.IO.File.Delete(inputData.Script);
         }
 
         return file;
