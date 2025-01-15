@@ -26,7 +26,8 @@
 
 using System.Reflection;
 
-using Image = SixLabors.ImageSharp.Image;
+using ImageMagick;
+
 using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
 namespace ASC.Files.Core.VirtualRooms;
@@ -55,10 +56,10 @@ public class RoomLogoManager(
     private const string TempDomainPath = "logos_temp";
     private static readonly SemaphoreSlim _semaphore = new(1);
 
-    private static readonly (SizeName, Size) _originalLogoSize = (SizeName.Original, new Size(1280, 1280));
-    private static readonly (SizeName, Size) _largeLogoSize = (SizeName.Large, new Size(192, 192));
-    private static readonly (SizeName, Size) _mediumLogoSize = (SizeName.Medium, new Size(64, 64));
-    private static readonly (SizeName, Size) _smallLogoSize = (SizeName.Small, new Size(32, 32));
+    private static readonly (SizeName, IMagickGeometry) _originalLogoSize = (SizeName.Original, new MagickGeometry(1280, 1280));
+    private static readonly (SizeName, IMagickGeometry) _largeLogoSize = (SizeName.Large, new MagickGeometry(192, 192));
+    private static readonly (SizeName, IMagickGeometry) _mediumLogoSize = (SizeName.Medium, new MagickGeometry(64, 64));
+    private static readonly (SizeName, IMagickGeometry) _smallLogoSize = (SizeName.Small, new MagickGeometry(32, 32));
 
     private IDataStore _logoStore;
     public bool EnableAudit { get; set; } = true;
@@ -75,7 +76,7 @@ public class RoomLogoManager(
         return _logoStore;
     }
 
-    public async Task<Folder<T>> CreateAsync<T>(T id, string tempFile, int x, int y, int width, int height)
+    public async Task<Folder<T>> CreateAsync<T>(T id, string tempFile, int x, int y, uint width, uint height)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
@@ -100,7 +101,7 @@ public class RoomLogoManager(
         return room;
     }
 
-    public async Task SaveLogo<T>(string tempFile, int x, int y, int width, int height, Folder<T> room, IFolderDao<T> folderDao)
+    public async Task SaveLogo<T>(string tempFile, int x, int y, uint width, uint height, Folder<T> room, IFolderDao<T> folderDao)
     {
         var store = await GetLogoStoreAsync();
         var fileName = Path.GetFileName(tempFile);
@@ -108,7 +109,7 @@ public class RoomLogoManager(
 
         var stringId = GetId(room);
 
-        await SaveWithProcessAsync(store, stringId, data, -1, new Point(x, y), new Size(width, height));
+        await SaveWithProcessAsync(store, stringId, data, -1, new Point(x, y), new MagickGeometry(width, height));
         await RemoveTempAsync(store, fileName);
 
         room.SettingsHasLogo = true;
@@ -278,7 +279,7 @@ public class RoomLogoManager(
                 
         UserPhotoThumbnailManager.CheckImgFormat(data);
         
-        data = UserPhotoThumbnailManager.TryParseImage(data, maxFileSize, _originalLogoSize.Item2);
+        data = await UserPhotoThumbnailManager.TryParseImage(data, maxFileSize, _originalLogoSize.Item2);
 
         var fileName = $"{Guid.NewGuid()}{LogosPathSplitter}{securityContext.CurrentAccount.ID}.png";
 
@@ -399,10 +400,10 @@ public class RoomLogoManager(
         
         if (color != null && room.SettingsColor != color)
         {
-            if (color != "" && !Color.TryParse(color, out _))
-            {
-                throw new ArgumentException(null, nameof(color));
-            }
+            // if (color != "" && !Color.TryParse(color, out _))
+            // {
+            //     throw new ArgumentException(null, nameof(color));
+            // }
 
             room.SettingsColor = color == "" ? null : color;
             colorChanged = true;
@@ -434,7 +435,7 @@ public class RoomLogoManager(
     {
         var rand = new Random();
         var color = fileUtilityConfiguration.LogoColors[rand.Next(fileUtilityConfiguration.LogoColors.Count - 1)];
-        var result = Color.FromRgba(color.R, color.G, color.B, 1).ToHex();
+        var result = MagickColor.FromRgba(color.R, color.G, color.B, 1).ToHexString();
         return result[..^2];//without opacity
     }
 
@@ -453,9 +454,9 @@ public class RoomLogoManager(
         }
     }
 
-    private async Task SaveWithProcessAsync(IDataStore store, string id, byte[] imageData, long maxFileSize, Point position, Size cropSize)
+    private async Task SaveWithProcessAsync(IDataStore store, string id, byte[] imageData, long maxFileSize, Point position, MagickGeometry cropSize)
     {
-        imageData = UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
+        imageData = await UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
         
         var fileName = GetFileName(id, SizeName.Original);
         
@@ -483,17 +484,17 @@ public class RoomLogoManager(
         try
         {
             using var imageStream = new MemoryStream(imageData);
-            using var img = await Image.LoadAsync(imageStream);
+            using var img = new MagickImage(imageStream);
             foreach (var size in sizes)
             {
-                if (size.Item2 != img.Size)
+                if (size.Item2.Width != img.Width || size.Item2.Height != img.Height)
                 {
                     using var img2 = UserPhotoThumbnailManager.GetImage(img, size.Item2, new UserPhotoThumbnailSettings(position, cropSize));
-                    imageData = CommonPhotoManager.SaveToBytes(img2);
+                    imageData = await CommonPhotoManager.SaveToBytes(img2);
                 }
                 else
                 {
-                    imageData = CommonPhotoManager.SaveToBytes(img);
+                    imageData = await CommonPhotoManager.SaveToBytes(img);
                 }
 
                 var imageFileName = string.Format(LogosPath, ProcessFolderId(id), size.Item1.ToStringLowerFast());
@@ -509,7 +510,7 @@ public class RoomLogoManager(
     }
     private async Task SaveWatermarkImageAsync(IDataStore store, string id, byte[] imageData, long maxFileSize)
     {
-        imageData = UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
+        imageData = await UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
 
         var fileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
 

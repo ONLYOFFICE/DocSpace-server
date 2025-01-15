@@ -1746,7 +1746,6 @@ public class FileStorageService //: IFileStorageService
 
         foreach (var r in history)
         {
-            await entryStatusManager.SetFileStatusAsync(r);
             yield return r;
         }
     }
@@ -3621,7 +3620,7 @@ public class FileStorageService //: IFileStorageService
     {
         if (!authContext.IsAuthenticated)
         {
-            return null;
+            return Task.FromResult<List<MentionWrapper>>(null);
         }
 
         return InternalSharedUsersAsync(fileId);

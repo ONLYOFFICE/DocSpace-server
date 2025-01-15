@@ -100,15 +100,15 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
     #region Logo available sizes
 
-    public static readonly Size LogoLightSmallSize = new(422, 48);
-    public static readonly Size LogoLoginPageSize = new(772, 88);
-    public static readonly Size LogoFaviconSize = new(32, 32);
-    public static readonly Size LogoDocsEditorSize = new(172, 40);
-    public static readonly Size LogoDocsEditorEmbedSize = new(172, 40);
-    public static readonly Size LogoLeftMenuSize = new(56, 56);
-    public static readonly Size LogoAboutPageSize = new(442, 48);
-    public static readonly Size LogoNotificationSize = new(386, 44);
-    public static Size GetSize(WhiteLabelLogoType type)
+    public static readonly IMagickGeometry LogoLightSmallSize = new MagickGeometry(422, 48);
+    public static readonly IMagickGeometry LogoLoginPageSize = new MagickGeometry(772, 88);
+    public static readonly IMagickGeometry LogoFaviconSize = new MagickGeometry(32, 32);
+    public static readonly IMagickGeometry LogoDocsEditorSize = new MagickGeometry(172, 40);
+    public static readonly IMagickGeometry LogoDocsEditorEmbedSize = new MagickGeometry(172, 40);
+    public static readonly IMagickGeometry LogoLeftMenuSize = new MagickGeometry(56, 56);
+    public static readonly IMagickGeometry LogoAboutPageSize = new MagickGeometry(442, 48);
+    public static readonly IMagickGeometry LogoNotificationSize = new MagickGeometry(386, 44);
+    public static IMagickGeometry GetSize(WhiteLabelLogoType type)
     {
         return type switch
         {
@@ -119,7 +119,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             WhiteLabelLogoType.DocsEditorEmbed => LogoDocsEditorEmbedSize,
             WhiteLabelLogoType.LeftMenu => LogoLeftMenuSize,
             WhiteLabelLogoType.AboutPage => LogoAboutPageSize,
-            _ => new Size()
+            _ => new MagickGeometry()
         };
     }
 
@@ -738,7 +738,7 @@ public class TenantWhiteLabelSettingsHelper(
         return $"{type.ToStringLowerFast()}.{fileExt}";
     }
 
-    private static Size GetSize(WhiteLabelLogoType type)
+    private static IMagickGeometry GetSize(WhiteLabelLogoType type)
     {
         return type switch
         {
@@ -750,7 +750,7 @@ public class TenantWhiteLabelSettingsHelper(
             WhiteLabelLogoType.LeftMenu => TenantWhiteLabelSettings.LogoLeftMenuSize,
             WhiteLabelLogoType.AboutPage => TenantWhiteLabelSettings.LogoAboutPageSize,
             WhiteLabelLogoType.Notification => TenantWhiteLabelSettings.LogoNotificationSize,
-            _ => new Size(0, 0)
+            _ => new MagickGeometry(0, 0)
         };
     }
 

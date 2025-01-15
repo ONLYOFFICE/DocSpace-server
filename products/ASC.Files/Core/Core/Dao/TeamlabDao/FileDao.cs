@@ -482,8 +482,8 @@ internal class FileDao(
        
         var isNew = false;
         DbFile toInsert = null;
-            var cloneStreamForSave = new MemoryStream();
-            var streamChange = false;
+        var cloneStreamForSave = new MemoryStream();
+        var streamChange = false;
         await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
         {                
                 var parentFolders = await filesDbContext.DbFolderTreesAsync(file.ParentId).ToListAsync();
@@ -497,7 +497,7 @@ internal class FileDao(
                 {
                     await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
-                        if (file.Id == 0)
+                    if (file.Id == 0)
                     {
                             file.Id = await filesDbContext.FileMaxIdAsync() + 1;
                         file.Version = 1;
@@ -512,7 +512,7 @@ internal class FileDao(
                     file.ModifiedBy = _authContext.CurrentAccount.ID;
                     file.ModifiedOn = _tenantUtil.DateTimeNow();
                         
-                        if (file.CreateBy == Guid.Empty)
+                    if (file.CreateBy == Guid.Empty)
                     {
                         file.CreateBy = _authContext.CurrentAccount.ID;
                     }
@@ -527,62 +527,62 @@ internal class FileDao(
                             await filesDbContext.DisableCurrentVersionAsync(tenantId, file.Id);
                     }
 
-                        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+                    var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
-                        if (fileType == FileType.Pdf && file.Category == (int)FilterType.None)
+                    if (fileType == FileType.Pdf && file.Category == (int)FilterType.None)
+                    {
+                        var originalCopyStream = new MemoryStream();
+                        await fileStream.CopyToAsync(originalCopyStream);
+
+                        var cloneStreamForCheck = await tempStream.CloneMemoryStream(originalCopyStream, 300);
+                        cloneStreamForSave = await tempStream.CloneMemoryStream(originalCopyStream);
+                        streamChange = true;
+                        try
                         {
-                            var originalCopyStream = new MemoryStream();
-                            await fileStream.CopyToAsync(originalCopyStream);
-
-                            var cloneStreamForCheck = await tempStream.CloneMemoryStream(originalCopyStream, 300);
-                            cloneStreamForSave = await tempStream.CloneMemoryStream(originalCopyStream);
-                            streamChange = true;
-                            try
+                            if (await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck))
                             {
-                                if (await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck))
-                                {
-                                    file.Category = (int)FilterType.PdfForm;
-                                }
-                            }
-                            finally
-                            {
-                                await originalCopyStream.DisposeAsync();
-                                await cloneStreamForCheck.DisposeAsync();
+                                file.Category = (int)FilterType.PdfForm;
                             }
                         }
-
-                        toInsert = new DbFile
+                        finally
                         {
-                            Id = file.Id,
-                            Version = file.Version,
-                            VersionGroup = file.VersionGroup,
-                            CurrentVersion = true,
-                            ParentId = file.ParentId,
-                            Title = file.Title,
-                            ContentLength = file.ContentLength,
-                            Category = file.Category != (int)FilterType.None ? file.Category : (int)file.FilterType,
-                            CreateBy = file.CreateBy,
-                            CreateOn = _tenantUtil.DateTimeToUtc(file.CreateOn),
-                            ModifiedBy = file.ModifiedBy,
-                            ModifiedOn = _tenantUtil.DateTimeToUtc(file.ModifiedOn),
-                            ConvertedType = file.ConvertedType,
-                            Comment = file.Comment,
-                            Encrypted = file.Encrypted,
-                            Forcesave = file.Forcesave,
-                            ThumbnailStatus = file.ThumbnailStatus,
-                            TenantId = tenantId
-                        };
+                            await originalCopyStream.DisposeAsync();
+                            await cloneStreamForCheck.DisposeAsync();
+                        }
+                    }
 
-                        if (isNew)
-                        {
-                            await filesDbContext.Files.AddAsync(toInsert);
-                        }
-                        else
-                        {                    
-                            await filesDbContext.AddOrUpdateAsync(r => r.Files, toInsert);
-                        }
-                        await filesDbContext.SaveChangesAsync();
-                        await tx.CommitAsync();
+                    toInsert = new DbFile
+                    {
+                        Id = file.Id,
+                        Version = file.Version,
+                        VersionGroup = file.VersionGroup,
+                        CurrentVersion = true,
+                        ParentId = file.ParentId,
+                        Title = file.Title,
+                        ContentLength = file.ContentLength,
+                        Category = file.Category != (int)FilterType.None ? file.Category : (int)file.FilterType,
+                        CreateBy = file.CreateBy,
+                        CreateOn = _tenantUtil.DateTimeToUtc(file.CreateOn),
+                        ModifiedBy = file.ModifiedBy,
+                        ModifiedOn = _tenantUtil.DateTimeToUtc(file.ModifiedOn),
+                        ConvertedType = file.ConvertedType,
+                        Comment = file.Comment,
+                        Encrypted = file.Encrypted,
+                        Forcesave = file.Forcesave,
+                        ThumbnailStatus = file.ThumbnailStatus,
+                        TenantId = tenantId
+                    };
+
+                    if (isNew)
+                    {
+                        await filesDbContext.Files.AddAsync(toInsert);
+                    }
+                    else
+                    {                    
+                        await filesDbContext.AddOrUpdateAsync(r => r.Files, toInsert);
+                    }
+                    await filesDbContext.SaveChangesAsync();
+                    await tx.CommitAsync();
                 });
 
                 file.PureTitle = file.Title;
@@ -619,26 +619,26 @@ internal class FileDao(
                                 var properties = fileProp ?? new EntryProperties<int> { FormFilling = new FormFillingProperties<int>() };
                                 if (!properties.FormFilling.CollectFillForm)
                                 {
-                                        var inProcessFormFolder = await folderDao.GetFoldersAsync(currentRoom.Id, FolderType.InProcessFormFolder).FirstOrDefaultAsync();
-                                        var readyFormFolder = await folderDao.GetFoldersAsync(currentRoom.Id, FolderType.ReadyFormFolder).FirstOrDefaultAsync();
+                                    var inProcessFormFolder = await folderDao.GetFoldersAsync(currentRoom.Id, FolderType.InProcessFormFolder).FirstOrDefaultAsync();
+                                    var readyFormFolder = await folderDao.GetFoldersAsync(currentRoom.Id, FolderType.ReadyFormFolder).FirstOrDefaultAsync();
 
-                                        if (inProcessFormFolder == null && readyFormFolder == null)
+                                    if (inProcessFormFolder == null && readyFormFolder == null)
+                                    {
+                                        var (readyFormFolderId, inProcessFormFolderId) = await entryManager.InitSystemFormFillingFolders(currentRoom.Id, folderDao, file.CreateBy);
+                                        var systemFormFillingFolders = new List<Folder<int>>
                                         {
-                                            var (readyFormFolderId, inProcessFormFolderId) = await entryManager.InitSystemFormFillingFolders(currentRoom.Id, folderDao, file.CreateBy);
-                                            var systemFormFillingFolders = new List<Folder<int>>
-                                            {
-                                                await folderDao.GetFolderAsync(readyFormFolderId),
-                                                await folderDao.GetFolderAsync(inProcessFormFolderId)
-                                            };
-                                            foreach (var formFolder in systemFormFillingFolders)
-                                            {
-                                                var a = await fileSharing.GetSharedInfoAsync(formFolder);
-                                                var u = a.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
+                                            await folderDao.GetFolderAsync(readyFormFolderId),
+                                            await folderDao.GetFolderAsync(inProcessFormFolderId)
+                                        };
+                                        foreach (var formFolder in systemFormFillingFolders)
+                                        {
+                                            var a = await fileSharing.GetSharedInfoAsync(formFolder);
+                                            var u = a.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
 
-                                                await socketManager.CreateFolderAsync(formFolder, u);
-                                                await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
-                                            }
+                                            await socketManager.CreateFolderAsync(formFolder, u);
+                                            await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
                                         }
+                                    }
                                     properties.FormFilling.StartFilling = true;
                                     properties.FormFilling.CollectFillForm = true;
                                     properties.FormFilling.OriginalFormId = file.Id;
@@ -647,7 +647,7 @@ internal class FileDao(
                                     if (file.IsForm)
                                     {
                                         await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
-            }
+                                    }
                                 }
                             }
                             else
@@ -658,36 +658,36 @@ internal class FileDao(
                                 throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                             }
                         }
-                        }
                     }
+                }
             }
 
             if (fileStream != null)
-                    {
-                try
-                {
-                        await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
-                    }
-            catch (Exception saveException)
             {
                 try
                 {
-                    if (isNew)
-                    {
-                        var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
-                        await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
-                    }
-                    else if (!await IsExistOnStorageAsync(file))
-                    {
-                        await DeleteVersionAsync(file);
-                    }
+                    await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
                 }
-                catch (Exception deleteException)
+                catch (Exception saveException)
                 {
-                    throw new Exception(saveException.Message, deleteException);
+                    try
+                    {
+                        if (isNew)
+                        {
+                            var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
+                            await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
+                        }
+                        else if (!await IsExistOnStorageAsync(file))
+                        {
+                            await DeleteVersionAsync(file);
+                        }
+                    }
+                    catch (Exception deleteException)
+                    {
+                        throw new Exception(saveException.Message, deleteException);
+                    }
+                    throw;
                 }
-                throw;
-            }
                 finally
                 {
                     await cloneStreamForSave.DisposeAsync();
@@ -1694,20 +1694,20 @@ internal class FileDao(
     }
 
 
-    public string GetUniqThumbnailPath(File<int> file, int width, int height)
+    public string GetUniqThumbnailPath(File<int> file, uint width, uint height)
     {
         var thumbnailName = GetThumbnailName(width, height);
 
         return GetUniqFilePath(file, thumbnailName);
     }
 
-    public async Task<Stream> GetThumbnailAsync(int fileId, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(int fileId, uint width, uint height)
     {
         var file = await GetFileAsync(fileId);
         return await GetThumbnailAsync(file, width, height);
     }
 
-    public async Task<Stream> GetThumbnailAsync(File<int> file, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(File<int> file, uint width, uint height)
     {
         var thumnailName = GetThumbnailName(width, height);
         var path = GetUniqFilePath(file, thumnailName);
@@ -1792,7 +1792,7 @@ internal class FileDao(
         return chunks.Sum(c => c.Value?.Length ?? 0);
     }
 
-    private string GetThumbnailName(int width, int height)
+    private string GetThumbnailName(uint width, uint height)
     {
         return $"{ThumbnailTitle}.{width}x{height}.{global.ThumbnailExtension}";
     }

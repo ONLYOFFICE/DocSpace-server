@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Collections.Immutable;
+
 namespace ASC.FederatedLogin.LoginProviders;
 
 [Scope]
@@ -37,7 +39,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
     public const string GoogleUrlFile = "https://www.googleapis.com/drive/v3/files/";
     public const string GoogleUrlFileUpload = "https://www.googleapis.com/upload/drive/v3/files";
     public const string GoogleUrlProfile = "https://people.googleapis.com/v1/people/me";
-    public static readonly Dictionary<string, string> GoogleAdditionalArgs = new() { { "access_type", "offline" }, { "prompt", "consent" } };
+    public static readonly ImmutableDictionary<string, string> GoogleAdditionalArgs =  new Dictionary<string, string> { { "access_type", "offline" }, { "prompt", "consent" } }.ToImmutableDictionary();
 
     public override string AccessTokenUrl => "https://www.googleapis.com/oauth2/v4/token";
     public override string CodeUrl => "https://accounts.google.com/o/oauth2/v2/auth";

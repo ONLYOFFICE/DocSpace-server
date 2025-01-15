@@ -113,6 +113,9 @@ global using ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;
 global using ASC.Web.Studio.Utility;
 global using Google.Authenticator;
 global using ICSharpCode.SharpZipLib.Zip;
+
+global using ImageMagick;
+
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
@@ -124,11 +127,7 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Net.Http.Headers;
 global using MimeKit.Utils;
 global using ProtoBuf;
-global using SixLabors.ImageSharp;
-global using SixLabors.ImageSharp.Formats;
-global using SixLabors.ImageSharp.Formats.Png;
-global using SixLabors.ImageSharp.PixelFormats;
-global using SixLabors.ImageSharp.Processing;
+
 global using SkiaSharp;
 global using TMResourceData;
 global using Twilio.Clients;

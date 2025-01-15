@@ -58,12 +58,16 @@ global using ASC.Migration.Core.Migrators.Model;
 global using ASC.Migration.Core.Models.Api;
 global using ASC.Migration.Core.Resources;
 global using ASC.Migration.GoogleWorkspace.Models.Parse;
+global using ASC.Web.Core;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Utils;
 global using DotNetOpenAuth.Messaging;
 global using HtmlAgilityPack;
+
+global using ImageMagick;
+
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Caching.Distributed;
@@ -71,3 +75,5 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using ProtoBuf;
+
+global using Constants = ASC.Core.Users.Constants;

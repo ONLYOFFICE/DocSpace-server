@@ -147,6 +147,21 @@ public partial class Global(
             return fromConfig;
         }
     }
+    
+    private List<string> _imageThumbnailExtension;
+    public List<string> ImageThumbnailExtension
+    {
+        get
+        {
+            if (_imageThumbnailExtension != null)
+            {
+                return _imageThumbnailExtension;
+            }
+            
+            _imageThumbnailExtension = configuration.GetSection("files:thumbnail:img-exts").Get<List<string>>() ?? [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tif", ".tga", ".webp", ".heic"];
+            return _imageThumbnailExtension;
+        }
+    }
 
     private const int MaxTitle = 170;
 
