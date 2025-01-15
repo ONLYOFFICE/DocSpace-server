@@ -85,20 +85,20 @@ public static class UserRelationExtension
         modelBuilder.Entity<DbUserRelation>(builder =>
         {
             builder.ToTable("core_user_relations");
-            
+
             builder.HasKey(e => new { e.TenantId, e.SourceUserId, e.TargetUserId })
-                .HasName("PRIMARY");
-            
+                .HasName("PK_CoreUserRelations");
+
             builder.Property(e => e.TenantId)
-                .HasColumnName("tenant");
-            
+                .HasColumnName("tenant_id");
+
             builder.Property(e => e.SourceUserId)
                 .HasColumnName("source_user_id")
-                .HasMaxLength(36);
-            
+                .HasColumnType("uuid");
+
             builder.Property(e => e.TargetUserId)
                 .HasColumnName("target_user_id")
-                .HasMaxLength(36);
+                .HasColumnType("uuid");
         });
     }
 }

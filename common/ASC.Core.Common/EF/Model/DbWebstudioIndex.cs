@@ -74,16 +74,18 @@ public static class DbWebstudioIndexExtension
         modelBuilder.Entity<DbWebstudioIndex>(entity =>
         {
             entity.HasKey(e => e.IndexName)
-                .HasName("webstudio_index_pkey");
+                .HasName("pk_webstudio_index");
 
-            entity.ToTable("webstudio_index", "onlyoffice");
+            entity.ToTable("webstudio_index");
 
             entity.Property(e => e.IndexName)
-                .HasColumnName("index_name");
+                .HasColumnName("index_name")
+                .HasColumnType("varchar(50)");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasColumnType("timestamp");
         });
+        
     }
 }

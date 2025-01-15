@@ -101,39 +101,43 @@ public static class DbFilesTagLinkExtension
                 .HasDefaultValueSql("'0'");
         });
     }
+
     public static void PgSqlAddDbFilesTagLink(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesTagLink>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.TagId, e.EntryType, e.EntryId })
-                .HasName("files_tag_link_pkey");
+            entity.HasKey(e => new { e.TenantId, e.TagId, e.EntryId, e.EntryType })
+                .HasName("pk_files_tag_link");
 
-            entity.ToTable("files_tag_link", "onlyoffice");
+            entity.ToTable("files_tag_link");
 
             entity.HasIndex(e => e.CreateOn)
-                .HasDatabaseName("create_on_files_tag_link");
+                .HasDatabaseName("idx_create_on");
 
-            entity.HasIndex(e => new { e.TenantId, e.EntryType, e.EntryId })
-                .HasDatabaseName("entry_id");
+            entity.HasIndex(e => new { e.TenantId, e.EntryId, e.EntryType })
+                .HasDatabaseName("idx_entry_id");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.TagId).HasColumnName("tag_id");
 
-            entity.Property(e => e.EntryType).HasColumnName("entry_type");
-
             entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id");
+                .HasColumnName("entry_id")
+                .HasColumnType("varchar(32)");
+
+            entity.Property(e => e.EntryType).HasColumnName("entry_type");
 
             entity.Property(e => e.CreateBy)
                 .HasColumnName("create_by")
-                .HasMaxLength(38)
-                .IsFixedLength()
-                .HasDefaultValueSql("NULL::bpchar");
+                .HasColumnType("uuid");
 
-            entity.Property(e => e.CreateOn).HasColumnName("create_on");
+            entity.Property(e => e.CreateOn)
+                .HasColumnName("create_on")
+                .HasColumnType("timestamp");
 
-            entity.Property(e => e.Count).HasColumnName("tag_count");
+            entity.Property(e => e.Count)
+                .HasColumnName("tag_count")
+                .HasDefaultValue(0);
         });
     }
 }

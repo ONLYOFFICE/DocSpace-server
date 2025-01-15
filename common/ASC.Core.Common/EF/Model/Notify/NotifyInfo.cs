@@ -78,29 +78,37 @@ public static class NotifyInfoExtension
                 .HasDefaultValueSql("'0'");
         });
     }
+
     public static void PgSqlAddNotifyInfo(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<NotifyInfo>(entity =>
         {
             entity.HasKey(e => e.NotifyId)
-                .HasName("notify_info_pkey");
+                .HasName("PK_notify_info"); // PostgreSQL constraint name standard
 
-            entity.ToTable("notify_info", "onlyoffice");
+            entity.ToTable("notify_info"); // Specify the table name
 
             entity.HasIndex(e => e.State)
-                .HasDatabaseName("state");
+                .HasDatabaseName("IX_notify_info_state"); // Define an index for the "state" column
 
             entity.Property(e => e.NotifyId)
-                .HasColumnName("notify_id")
-                .ValueGeneratedNever();
+                .HasColumnName("notify_id"); // Map NotifyId to "notify_id"
 
-            entity.Property(e => e.Attempts).HasColumnName("attempts");
+            entity.Property(e => e.Attempts)
+                .HasColumnName("attempts")
+                .HasDefaultValue(0); // Default value for PostgreSQL
 
-            entity.Property(e => e.ModifyDate).HasColumnName("modify_date");
+            entity.Property(e => e.ModifyDate)
+                .HasColumnName("modify_date")
+                .HasColumnType("timestamp without time zone"); // Typical timestamp configuration for PostgreSQL
 
-            entity.Property(e => e.Priority).HasColumnName("priority");
+            entity.Property(e => e.Priority)
+                .HasColumnName("priority")
+                .HasDefaultValue(0); // Default value for Priority
 
-            entity.Property(e => e.State).HasColumnName("state");
+            entity.Property(e => e.State)
+                .HasColumnName("state")
+                .HasDefaultValue(0); // Default value for State
         });
     }
 }

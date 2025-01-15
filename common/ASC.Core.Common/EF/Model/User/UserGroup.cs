@@ -112,36 +112,43 @@ public static class DbUserGroupExtension
             .HasDefaultValueSql("'0'");
         });
     }
+
     public static void PgSqlAddUserGroup(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserGroup>(entity =>
         {
+            // Define composite primary key
             entity.HasKey(e => new { e.TenantId, e.Userid, e.UserGroupId, e.RefType })
                 .HasName("core_usergroup_pkey");
 
-            entity.ToTable("core_usergroup", "onlyoffice");
+            // Define the table name
+            entity.ToTable("core_usergroup");
 
+            // Define indexes
             entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("last_modified_core_usergroup");
+                .HasDatabaseName("core_usergroup_last_modified_idx");
 
+            // Map properties to database columns
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Userid)
                 .HasColumnName("userid")
-                .HasMaxLength(38);
+                .HasColumnType("uuid"); // PostgreSQL UUID type
 
             entity.Property(e => e.UserGroupId)
                 .HasColumnName("groupid")
-                .HasMaxLength(38);
+                .HasColumnType("uuid"); // PostgreSQL UUID type
 
             entity.Property(e => e.RefType).HasColumnName("ref_type");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasColumnType("timestamp");
 
-            entity.Property(e => e.Removed).HasColumnName("removed");
+            entity.Property(e => e.Removed)
+                .HasColumnName("removed")
+                .HasColumnType("boolean")
+                .HasDefaultValueSql("false");
         });
-
     }
 }

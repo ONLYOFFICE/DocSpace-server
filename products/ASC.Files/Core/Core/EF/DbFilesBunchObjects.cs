@@ -83,26 +83,37 @@ public static class DbFilesBunchObjectsExtension
                 .UseCollation("utf8_general_ci");
         });
     }
+    
     public static void PgSqlAddDbFilesBunchObjects(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesBunchObjects>(entity =>
         {
+            // Define composite primary key
             entity.HasKey(e => new { e.TenantId, e.RightNode })
-                .HasName("files_bunch_objects_pkey");
+                .HasName("pk_files_bunch_objects");
 
-            entity.ToTable("files_bunch_objects", "onlyoffice");
+            // Map to PostgreSQL table
+            entity.ToTable("files_bunch_objects");
 
+            // Create an index for LeftNode
             entity.HasIndex(e => e.LeftNode)
-                .HasDatabaseName("left_node");
+                .HasDatabaseName("idx_files_bunch_objects_left_node");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            // Map TenantId column
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
 
+            // Map RightNode column with PostgreSQL-specific type
             entity.Property(e => e.RightNode)
-                .HasColumnName("right_node");
+                .HasColumnName("right_node")
+                .HasColumnType("varchar")
+                .IsRequired();
 
+            // Map LeftNode column with PostgreSQL-specific type
             entity.Property(e => e.LeftNode)
-                .IsRequired()
-                .HasColumnName("left_node");
+                .HasColumnName("left_node")
+                .HasColumnType("varchar")
+                .IsRequired();
         });
     }
 }

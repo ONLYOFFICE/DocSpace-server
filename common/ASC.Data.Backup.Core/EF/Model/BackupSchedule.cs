@@ -126,59 +126,52 @@ public static class BackupScheduleExtension
     {
         modelBuilder.Entity<BackupSchedule>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId })
+            entity.HasKey(e => e.TenantId)
                 .HasName("PRIMARY");
 
             entity.ToTable("backup_schedule");
 
             entity.Property(e => e.TenantId)
-                .IsRequired()
                 .HasColumnName("tenant_id")
-                .HasMaxLength(10);
+                .HasColumnType("integer")
+                .ValueGeneratedNever();
 
             entity.Property(e => e.Cron)
                 .IsRequired()
                 .HasColumnName("cron")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasColumnType("varchar(255)");
 
             entity.Property(e => e.BackupsStored)
                 .IsRequired()
                 .HasColumnName("backups_stored")
-                .HasMaxLength(10);
+                .HasColumnType("integer");
 
             entity.Property(e => e.StorageType)
                 .IsRequired()
                 .HasColumnName("storage_type")
-                .HasMaxLength(10);
+                .HasColumnType("integer");
 
             entity.Property(e => e.StorageBasePath)
                 .HasColumnName("storage_base_path")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar(255)");
 
             entity.Property(e => e.LastBackupTime)
                 .IsRequired()
                 .HasColumnName("last_backup_time")
-                .HasColumnType("datetime");
+                .HasColumnType("timestamp");
 
             entity.Property(e => e.StorageParams)
                 .HasColumnName("storage_params")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("text");
 
             entity.Property(e => e.Dump)
                 .HasColumnName("dump")
-                .HasColumnType("tinyint(1)")
-                .HasDefaultValueSql("'0'");
+                .HasColumnType("boolean");
 
             entity.HasOne(e => e.Tenant)
-                   .WithOne()
-                   .HasForeignKey<BackupSchedule>(b => b.TenantId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                .WithOne()
+                .HasForeignKey<BackupSchedule>(b => b.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

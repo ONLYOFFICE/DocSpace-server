@@ -143,50 +143,48 @@ public static class NotifyQueueExtension
         modelBuilder.Entity<NotifyQueue>(entity =>
         {
             entity.HasKey(e => e.NotifyId)
-                .HasName("notify_queue_pkey");
+                .HasName("pk_notify_queue");
 
-            entity.ToTable("notify_queue", "onlyoffice");
+            entity.ToTable("notify_queue");
 
             entity.Property(e => e.NotifyId).HasColumnName("notify_id");
 
-            entity.Property(e => e.Attachments).HasColumnName("attachments");
+            entity.Property(e => e.Attachments)
+                .HasColumnName("attachments");
 
             entity.Property(e => e.AutoSubmitted)
-                .HasColumnName("auto_submitted")
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("auto_submitted");
 
-            entity.Property(e => e.Content).HasColumnName("content");
+            entity.Property(e => e.Content)
+                .HasColumnName("content");
 
             entity.Property(e => e.ContentType)
-                .HasColumnName("content_type")
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("content_type");
 
-            entity.Property(e => e.CreationDate).HasColumnName("creation_date");
+            entity.Property(e => e.CreationDate)
+                .HasColumnName("creation_date")
+                .HasColumnType("timestamp without time zone");
 
             entity.HasIndex(e => e.CreationDate)
-                    .HasDatabaseName("creation_date_notify_queue");
+                .HasDatabaseName("idx_creation_date");
 
             entity.Property(e => e.Reciever)
-                .HasColumnName("reciever")
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("reciever");
 
             entity.Property(e => e.ReplyTo)
-                .HasColumnName("reply_to")
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("reply_to");
 
             entity.Property(e => e.Sender)
-                .HasColumnName("sender")
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("sender");
 
             entity.Property(e => e.SenderType)
-                .HasColumnName("sender_type")
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("sender_type");
 
             entity.Property(e => e.Subject)
-                .HasColumnName("subject")
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("subject");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
         });
+        
     }
 }

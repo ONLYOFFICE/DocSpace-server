@@ -116,6 +116,7 @@ public static class DbGroupExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });
     }
+    
     private static void PgSqlAddDbGroup(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbGroup>(entity =>
@@ -123,39 +124,44 @@ public static class DbGroupExtension
             entity.ToTable("core_group");
 
             entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("last_modified");
+                .HasDatabaseName("ix_last_modified");
 
             entity.HasIndex(e => new { e.TenantId, e.ParentId })
-                .HasDatabaseName("parentid");
+                .HasDatabaseName("ix_parentid");
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .HasMaxLength(38);
+                .HasColumnType("uuid");
 
             entity.Property(e => e.CategoryId)
                 .HasColumnName("categoryid")
-                .HasMaxLength(38)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("uuid");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasColumnType("timestamp");
 
             entity.Property(e => e.Name)
                 .IsRequired()
-                .HasColumnName("name");
+                .HasColumnName("name")
+                .HasColumnType("varchar(128)");
 
             entity.Property(e => e.ParentId)
                 .HasColumnName("parentid")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("uuid");
 
-            entity.Property(e => e.Removed).HasColumnName("removed");
+            entity.Property(e => e.Removed)
+                .HasColumnName("removed")
+                .HasColumnType("boolean")
+                .HasDefaultValue(false);
 
             entity.Property(e => e.Sid)
                 .HasColumnName("sid")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar(512)");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant")
+                .HasColumnType("integer");
         });
     }
 }

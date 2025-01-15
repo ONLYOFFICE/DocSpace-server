@@ -98,32 +98,41 @@ public static class UserSecurityExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });
     }
+
     public static void PgSqlAddUserSecurity(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserSecurity>(entity =>
         {
+            // Define the primary key
             entity.HasKey(e => e.UserId)
-                .HasName("core_usersecurity_pkey");
+                .HasName("pk_usersecurity");
 
-            entity.ToTable("core_usersecurity", "onlyoffice");
+            // Map the table name
+            entity.ToTable("core_usersecurity");
 
+            // Define indexes
             entity.HasIndex(e => e.PwdHash)
-                .HasDatabaseName("pwdhash");
+                .HasDatabaseName("idx_pwdhash");
 
             entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_core_usersecurity");
+                .HasDatabaseName("idx_tenant");
 
+            // Map the columns and types
             entity.Property(e => e.UserId)
-                .HasColumnName("userid")
-                .HasMaxLength(38);
+                .HasColumnName("userid") // Column name in the database
+                .HasColumnType("uuid"); // PostgreSQL uses "uuid" for GUIDs
 
-            entity.Property(e => e.LastModified).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant");
 
             entity.Property(e => e.PwdHash)
                 .HasColumnName("pwdhash")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+            entity.Property(e => e.LastModified)
+                .HasColumnName("lastmodified")
+                .HasColumnType("timestamp")
+                .IsRequired(false); // LastModified can be null
         });
     }
 }

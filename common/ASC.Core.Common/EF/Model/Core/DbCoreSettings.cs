@@ -98,20 +98,23 @@ public static class CoreSettingsExtension
             entity.HasKey(e => new { e.TenantId, e.Id })
                 .HasName("core_settings_pkey");
 
-            entity.ToTable("core_settings", "onlyoffice");
+            entity.ToTable("core_settings");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Id)
-                .HasColumnName("id");
+                .HasColumnName("id")
+                .HasColumnType("character varying")
+                .HasMaxLength(128);
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasColumnType("timestamp without time zone");
 
             entity.Property(e => e.Value)
                 .IsRequired()
-                .HasColumnName("value");
+                .HasColumnName("value")
+                .HasColumnType("bytea");
         });
     }
 }

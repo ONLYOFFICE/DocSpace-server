@@ -132,57 +132,64 @@ public static class LoginEventsExtension
                 .UseCollation("utf8_general_ci");
         });
     }
+
     public static void PgSqlAddLoginEvents(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbLoginEvent>(entity =>
         {
-            entity.ToTable("login_events", "onlyoffice");
+            entity.ToTable("login_events");
 
             entity.HasIndex(e => e.Date)
-                .HasDatabaseName("date_login_events");
+                .HasDatabaseName("idx_date");
 
-            entity.HasIndex(e => new { e.UserId, e.TenantId })
-                .HasDatabaseName("tenant_id_login_events");
+            entity.HasIndex(e => new { e.TenantId, e.UserId })
+                .HasDatabaseName("idx_tenant_id_user_id");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .HasColumnName("id");
 
-            entity.Property(e => e.Action).HasColumnName("action");
+            entity.Property(e => e.Action)
+                .HasColumnName("action")
+                .IsRequired(false);
 
             entity.Property(e => e.Browser)
                 .HasColumnName("browser")
-                .HasDefaultValueSql("NULL::character varying");
+                .HasColumnType("varchar");
 
-            entity.Property(e => e.Date).HasColumnName("date");
+            entity.Property(e => e.Date)
+                .HasColumnName("date")
+                .HasColumnType("timestamp");
 
             entity.Property(e => e.DescriptionRaw)
                 .HasColumnName("description")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Ip)
                 .HasColumnName("ip")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Login)
                 .HasColumnName("login")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Page)
                 .HasColumnName("page")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Platform)
                 .HasColumnName("platform")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
 
-            entity.Property(e => e.Active).HasColumnName("active");
+            entity.Property(e => e.Active)
+                .HasColumnName("active");
 
             entity.Property(e => e.UserId)
                 .IsRequired()
                 .HasColumnName("user_id")
-                .HasMaxLength(38)
-                .IsFixedLength();
+                .HasColumnType("uuid");
         });
     }
 }
