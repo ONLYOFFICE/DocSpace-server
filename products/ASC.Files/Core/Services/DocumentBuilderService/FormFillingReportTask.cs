@@ -42,7 +42,7 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
             .Replace("${tempFileName}", tempFileName)
             .Replace("${inputData}", JsonConvert.SerializeObject(data));
         
-        return new DocumentBuilderInputData(script, null, tempFileName, "");
+        return new DocumentBuilderInputData(script, tempFileName, "");
     }
 
     protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)
