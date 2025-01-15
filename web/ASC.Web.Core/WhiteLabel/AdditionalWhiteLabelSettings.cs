@@ -128,17 +128,9 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
             VideoGuidesUrl = AdditionalWhiteLabelSettingsHelper?.DefaultVideoGuidesUrl,
             SalesEmail = AdditionalWhiteLabelSettingsHelper?.DefaultMailSalesEmail,
             BuyUrl = AdditionalWhiteLabelSettingsHelper?.DefaultBuyUrl,
-            LicenseAgreementsEnabled = true,
-            LicenseAgreementsUrl = DefaultLicenseAgreements
+            LicenseAgreementsEnabled = AdditionalWhiteLabelSettingsHelper?.DefaultLicenseAgreementsUrl != null,
+            LicenseAgreementsUrl = AdditionalWhiteLabelSettingsHelper?.DefaultLicenseAgreementsUrl
         };
-    }
-
-    public static string DefaultLicenseAgreements
-    {
-        get
-        {
-            return "https://help.onlyoffice.com/Products/Files/doceditor.aspx?fileid=6795868&doc=RG5GaVN6azdUQW5kLzZQNzBXbHZ4Rm9QWVZuNjZKUmgya0prWnpCd2dGcz0_IjY3OTU4Njgi0";
-        }
     }
 }
 
@@ -169,6 +161,15 @@ public class AdditionalWhiteLabelSettingsHelper(AdditionalWhiteLabelSettingsHelp
 [Singleton]
 public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration)
 {
+    public string DefaultLicenseAgreementsUrl
+    {
+        get
+        {
+            var url = configuration["externalresources:license"];
+            return string.IsNullOrEmpty(url) ? null : url;
+        }
+    }
+
     /// <summary>
     /// Default help center URL
     /// </summary>
@@ -176,7 +177,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = configuration["web:help-center"];
+            var url = configuration["externalresources:helpcenter"];
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -188,7 +189,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = configuration["web:support-feedback"];
+            var url = configuration["externalresources:support"];
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -200,7 +201,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = configuration["web:user-forum"];
+            var url = configuration["externalresources:forum"];
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -212,8 +213,8 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = DefaultHelpCenterUrl;
-            return string.IsNullOrEmpty(url) ? null : url + "/video.aspx";
+            var url = configuration["externalresources:videoguides"];
+            return string.IsNullOrEmpty(url) ? null : url;
         }
     }
 
@@ -224,7 +225,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var email = configuration["core:payment:email"];
+            var email = configuration["externalresources:paymentemail"];
             return !string.IsNullOrEmpty(email) ? email : "sales@onlyoffice.com";
         }
     }
@@ -236,9 +237,8 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var site = configuration["web:teamlab-site"];
             var type = configuration["license:type"] ?? "enterprise";
-            return !string.IsNullOrEmpty(site) ? $"{site}/post.ashx?type=buydocspace{type}" : "";
+            return configuration["externalresources:buy" + type] ?? "";
         }
     }
 }

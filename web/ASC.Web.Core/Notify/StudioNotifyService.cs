@@ -853,7 +853,7 @@ public class StudioNotifyService(
             }
 
             var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
-            var salesEmail = settings.SalesEmail ?? setupInfo.SalesEmail;
+            var salesEmail = settings.SalesEmail;
 
             if (string.IsNullOrEmpty(salesEmail))
             {

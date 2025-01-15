@@ -656,13 +656,7 @@ public class PortalController(
         }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
-        var redirectLink = setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#";
-        var parameters = Convert.ToBase64String(Encoding.UTF8.GetBytes("{\"firstname\":\"" + owner.FirstName +
-                                                                                "\",\"lastname\":\"" + owner.LastName +
-                                                                                "\",\"alias\":\"" + tenant.Alias +
-                                                                                "\",\"email\":\"" + owner.Email + "\"}"));
-
-        redirectLink += HttpUtility.UrlEncode(parameters);
+        var redirectLink = setupInfo.LinksToExternalResources.Get("removeportalfeedbackform");
 
         await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 

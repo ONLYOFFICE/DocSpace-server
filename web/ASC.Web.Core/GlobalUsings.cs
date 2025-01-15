@@ -77,6 +77,7 @@ global using ASC.Core.Users;
 global using ASC.Data.Storage;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
+global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
 global using ASC.FederatedLogin.Profile;
 global using ASC.MessagingSystem;

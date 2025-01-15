@@ -272,14 +272,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                                 toowner = true;
 
                                 orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
-
-                                var owner = await userManager.GetUsersAsync(tenant.OwnerId);
-                                orangeButtonUrl = setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#" +
-                                            HttpUtility.UrlEncode(Convert.ToBase64String(
-                                                Encoding.UTF8.GetBytes("{\"firstname\":\"" + owner.FirstName +
-                                                                                    "\",\"lastname\":\"" + owner.LastName +
-                                                                                    "\",\"alias\":\"" + tenant.Alias +
-                                                                                    "\",\"email\":\"" + owner.Email + "\"}")));
+                                orangeButtonUrl = setupInfo.LinksToExternalResources.Get("removeportalfeedbackform");
 
                                 topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
 
@@ -367,14 +360,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         toowner = true;
 
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
-
-                        var owner = await userManager.GetUsersAsync(tenant.OwnerId);
-                        orangeButtonUrl = setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#" +
-                                  HttpUtility.UrlEncode(Convert.ToBase64String(
-                                      Encoding.UTF8.GetBytes("{\"firstname\":\"" + owner.FirstName +
-                                                                         "\",\"lastname\":\"" + owner.LastName +
-                                                                         "\",\"alias\":\"" + tenant.Alias +
-                                                                         "\",\"email\":\"" + owner.Email + "\"}")));
+                        orangeButtonUrl = setupInfo.LinksToExternalResources.Get("removeportalfeedbackform");
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
 

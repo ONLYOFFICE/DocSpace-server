@@ -99,8 +99,8 @@ public partial class SettingsController(MessageService messageService,
             TenantStatus = tenant.Status,
             TenantAlias = tenant.Alias,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
-            LegalTerms = setupInfo.LegalTerms,
-            LicenseUrl = setupInfo.LicenseUrl,
+            LegalTerms = setupInfo.LinksToExternalResources.Get("legalterms"),
+            LicenseUrl = setupInfo.LinksToExternalResources.Get("license"),
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
             ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager),
@@ -131,8 +131,8 @@ public partial class SettingsController(MessageService messageService,
             settings.DomainValidator = tenantDomainValidator;
             settings.ZendeskKey = setupInfo.ZendeskKey;
             settings.TagManagerId = setupInfo.TagManagerId;
-            settings.BookTrainingEmail = setupInfo.BookTrainingEmail;
-            settings.DocumentationEmail = setupInfo.DocumentationEmail;
+            settings.BookTrainingEmail = setupInfo.LinksToExternalResources.Get("booktrainingemail");
+            settings.DocumentationEmail = setupInfo.LinksToExternalResources.Get("documentationemail");
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
 
@@ -150,7 +150,7 @@ public partial class SettingsController(MessageService messageService,
 
             settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
             settings.FeedbackAndSupportLink = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
-            settings.ApiDocsLink = configuration["web:api-docs"];
+            settings.ApiDocsLink = setupInfo.LinksToExternalResources.Get("api");
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
             {
@@ -213,6 +213,18 @@ public partial class SettingsController(MessageService messageService,
         }
 
         return settings;
+    }
+
+    /// <summary>
+    /// Returns links to external resources
+    /// </summary>
+    /// <path>api/2.0/settings/externalresources</path>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Ok", typeof(Dictionary<string, string>))]
+    [HttpGet("externalresources")]
+    public Dictionary<string, string> GetLinksToExternalResources()
+    {
+        return setupInfo.LinksToExternalResources;
     }
 
     /// <summary>

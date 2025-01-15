@@ -120,7 +120,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            var url = BaseCommonLinkUtility.GetRegionalUrl(configuration["web:support-feedback"] ?? string.Empty, null);
+            var url = BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:support"] ?? string.Empty, null);
 
             return !string.IsNullOrEmpty(url) ? url : "http://helpdesk.onlyoffice.com";
         }
@@ -130,7 +130,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            var email = configuration["web:support-email"];
+            var email = configuration["externalresources:supportemail"];
 
             return !string.IsNullOrEmpty(email) ? email : "support@onlyoffice.com";
         }
@@ -140,7 +140,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            var email = configuration["core:payment:email"];
+            var email = configuration["externalresources:paymentemail"];
 
             return !string.IsNullOrEmpty(email) ? email : "sales@onlyoffice.com";
         }
@@ -150,7 +150,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            var url = BaseCommonLinkUtility.GetRegionalUrl(configuration["web:demo-order"] ?? string.Empty, null);
+            var url = BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:orderdemo"] ?? string.Empty, null);
 
             return !string.IsNullOrEmpty(url) ? url : "https://www.onlyoffice.com/demo-order.aspx";
         }
@@ -160,9 +160,19 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            var url = configuration["web:teamlab-site"];
+            var url = configuration["externalresources:site"];
 
             return !string.IsNullOrEmpty(url) ? url : "https://www.onlyoffice.com";
+        }
+    }
+
+    public string DefaultMailForumUrl
+    {
+        get
+        {
+            var url = configuration["externalresources:forum"];
+
+            return !string.IsNullOrEmpty(url) ? url : "https://forum.onlyoffice.com";
         }
     }
 }
