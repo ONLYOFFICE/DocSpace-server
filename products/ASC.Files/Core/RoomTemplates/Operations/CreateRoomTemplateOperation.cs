@@ -77,6 +77,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         _tags = tags;
         _emails = emails;
         _title = title;
+        TemplateId = -1;
     }
 
     protected override async Task DoJob()
@@ -136,9 +137,12 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         }
         catch (Exception ex)
         {
-            await folderDao.DeleteFolderAsync(TemplateId);
             Exception = ex;
             IsCompleted = true;
+            if (TemplateId != -1) 
+            {
+                await folderDao.DeleteFolderAsync(TemplateId);
+            }
         }
         finally
         {

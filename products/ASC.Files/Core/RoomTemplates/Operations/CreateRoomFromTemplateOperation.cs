@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Data;
 using ASC.Files.Core.RoomTemplates.Events;
 
 namespace ASC.Files.Core.RoomTemplates.Operations;
@@ -74,6 +75,7 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
         _title = title;
         _logo = logo;
         _tags = tags;
+        RoomId = -1;
     }
 
     protected override async Task DoJob()
@@ -84,6 +86,7 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
         var fileStorageService = serviceProvider.GetService<FileStorageService>();
         var dbFactory = serviceProvider.GetService<IDbContextFactory<FilesDbContext>>();
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
+        var folderDao = daoFactory.GetFolderDao<int>();
 
         try
         {
@@ -109,7 +112,6 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
             RoomId = (await fileStorageService.CreateRoomFromTemplateAsync(_templateId, _title, _tags, dtoLogo)).Id;
 
             var fileDao = daoFactory.GetFileDao<int>();
-            var folderDao = daoFactory.GetFolderDao<int>();
             var files = await fileDao.GetFilesAsync(_templateId).ToListAsync();
             var folders = await folderDao.GetFoldersAsync(_templateId).Select(r => r.Id).ToListAsync();
             _totalCount = await fileDao.GetFilesCountAsync(_templateId, FilterType.None, false, Guid.Empty, string.Empty, null, false, true);
@@ -136,6 +138,10 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
         catch (Exception ex)
         {
             Exception = ex;
+            if (RoomId != -1)
+            {
+                await folderDao.DeleteFolderAsync(RoomId);
+            }
         }
         finally
         {

@@ -393,7 +393,7 @@ public abstract class VirtualRoomsController<T>(
         if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync 
             && inDto.RoomInvitation.Invitations.Any(i=> i.Access != FileShare.None && i.Access != FileShare.RoomManager))
         {
-            throw new ItemNotFoundException();
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
         }
 
         var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.RoomInvitation.Invitations);
