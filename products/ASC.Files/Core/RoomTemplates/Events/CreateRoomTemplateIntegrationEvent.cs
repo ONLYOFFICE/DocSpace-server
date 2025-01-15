@@ -65,8 +65,8 @@ public record LogoSettings
     public int Y { get; set; }
 
     [ProtoMember(4)]
-    public int Width { get; set; }
+    public uint Width { get; set; }
 
     [ProtoMember(5)]
-    public int Height { get; set; }
+    public uint Height { get; set; }
 }
