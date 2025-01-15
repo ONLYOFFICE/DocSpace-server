@@ -30,20 +30,10 @@ namespace ASC.Web.Studio.Core;
 public class SetupInfo
 {
     private static string _webAutotestSecretEmail;
-    private static string[] _webDisplayMobappsBanner;
     private static string[] _hideSettings;
 
-    public string MetaImageURL { get; private set; }
-    public string StatisticTrackURL { get; private set; }
-    public string DemoOrder { get; private set; }
-    public string RequestTraining { get; private set; }
     public string ZendeskKey { get; private set; }
     public string TagManagerId { get; private set; }
-    public string BookTrainingEmail { get; private set; }
-    public string DocumentationEmail { get; private set; }
-    public string UserVoiceURL { get; private set; }
-    public string MainLogoURL { get; private set; }
-    public string MainLogoMailTmplURL { get; private set; }
     public long MaxImageUploadSize { get; private set; }
 
     /// <summary>
@@ -55,19 +45,14 @@ public class SetupInfo
     }
 
     public long AvailableFileSize { get; }
-    public string TeamlabSiteRedirect { get; private set; }
     public int MaxUploadThreadCount { get; set; }
     public long ChunkUploadSize { get; set; }
     public long ProviderMaxUploadSize { get; private set; }
     public bool ThirdPartyAuthEnabled { get; private set; }
-    public string LegalTerms { get; private set; }
-    public string LicenseUrl { get; private set; }
-    public string NoTenantRedirectURL { get; private set; }
     public string NotifyAddress { get; private set; }
     public string TipsAddress { get; private set; }
-    public string SupportFeedback { get; private set; }
     public string WebApiBaseUrl { get { return VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/")); } }
-    public string SalesEmail { get; private set; }
+
     public static bool IsSecretEmail(string email)
     {
         email = Regex.Replace(email ?? "", "\\.*(?=\\S*(@gmail.com$))", "").ToLower();
@@ -80,21 +65,8 @@ public class SetupInfo
         return regex.IsMatch(email);
     }
 
-    public static bool DisplayMobappBanner(string product)
-    {
-        return _webDisplayMobappsBanner.Contains(product, StringComparer.InvariantCultureIgnoreCase);
-    }
-
-    public string ShareTwitterUrl { get; private set; }
-    public string ShareFacebookUrl { get; private set; }
     public string ControlPanelUrl { get; private set; }
-    public string FontOpenSansUrl { get; private set; }
-    public string StartProductList { get; private set; }
     public string SsoSamlLoginUrl { get; private set; }
-    public string DownloadForDesktopUrl { get; private set; }
-    public string DownloadForIosDocuments { get; private set; }
-    public string DownloadForIosProjects { get; private set; }
-    public string DownloadForAndroidDocuments { get; private set; }
     public string SsoSamlLogoutUrl { get; private set; }
     public bool SmsTrial { get; private set; }
     public string TfaRegistration { get; private set; }
@@ -110,46 +82,28 @@ public class SetupInfo
     public string AmiMetaUrl { get; private set; }
     public string AmiTokenUrl { get; private set; }
     public int InvitationLimit { get; private set; }
+    public Dictionary<string, string> LinksToExternalResources { get; private set; }
 
     private readonly IConfiguration _configuration;
 
     public SetupInfo(IConfiguration configuration)
     {
         _configuration = configuration;
-        MetaImageURL = GetAppSettings("web.meta-image-url", "https://download.onlyoffice.com/assets/fb/fb_icon_325x325.jpg");
-        StatisticTrackURL = GetAppSettings("web.track-url", string.Empty);
-        UserVoiceURL = GetAppSettings("web.uservoice", string.Empty);
-        DemoOrder = GetAppSettings("web.demo-order", string.Empty);
+
         ZendeskKey = GetAppSettings("web:zendesk-key", string.Empty);
         TagManagerId = GetAppSettings("web:tagmanager-id", string.Empty);
-        BookTrainingEmail = GetAppSettings("web:book-training-email", string.Empty);
-        DocumentationEmail = GetAppSettings("web:documentation-email", string.Empty);
-        RequestTraining = GetAppSettings("web.request-training", string.Empty);
-        MainLogoURL = GetAppSettings("web.logo.main", string.Empty);
-        MainLogoMailTmplURL = GetAppSettings("web.logo.mail.tmpl", string.Empty);
-        DownloadForDesktopUrl = GetAppSettings("web.download.for.desktop.url", "https://www.onlyoffice.com/desktop.aspx");
-        DownloadForIosDocuments = GetAppSettings("web.download.for.ios.doc", "https://itunes.apple.com/app/onlyoffice-documents/id944896972");
-        DownloadForIosProjects = GetAppSettings("web.download.for.ios.proj", "https://itunes.apple.com/app/onlyoffice-projects/id1353395928?mt=8");
-        DownloadForAndroidDocuments = GetAppSettings("web.download.for.android.doc", "https://play.google.com/store/apps/details?id=com.onlyoffice.documents");
-        
-        MaxImageUploadSize = GetAppSettings<long>("web:max-upload-size", 1024 * 1024);
-        AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
 
-        TeamlabSiteRedirect = GetAppSettings("web:teamlab-site", string.Empty);
+        MaxImageUploadSize = GetAppSettings("web:max-upload-size", 1024L * 1024L);
+        AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
         MaxUploadThreadCount = GetAppSettings("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests", 15);
         ChunkUploadSize = GetAppSettings("files:uploader:chunk-size", 10 * 1024 * 1024);
         ProviderMaxUploadSize = GetAppSettings("files:provider:max-upload-size", 1024L * 1024L * 1024L);
         ThirdPartyAuthEnabled = string.Equals(GetAppSettings("web:thirdparty-auth", "true"), "true");
-        NoTenantRedirectURL = GetAppSettings("web.notenant-url", "");
-        LegalTerms = GetAppSettings("web:legalterms", "");
-        LicenseUrl = GetAppSettings("web:license-url", "");
 
         NotifyAddress = GetAppSettings("web.promo-url", string.Empty);
         TipsAddress = GetAppSettings("web.promo-tips-url", string.Empty);
-        SupportFeedback = GetAppSettings("web.support-feedback", string.Empty);
 
-        SalesEmail = GetAppSettings("web.payment.email", "sales@onlyoffice.com");
-        _webAutotestSecretEmail = (configuration["web:autotest:secret-email"] ?? "").Trim();
+        _webAutotestSecretEmail = GetAppSettings("web:autotest:secret-email", string.Empty);
 
         RecaptchaPublicKey = GetAppSettings("web:recaptcha:public-key", null);
         RecaptchaPrivateKey = GetAppSettings("web:recaptcha:private-key", null);
@@ -159,12 +113,8 @@ public class SetupInfo
         HcaptchaPrivateKey = GetAppSettings("web:hcaptcha:private-key", null);
         HcaptchaVerifyUrl = GetAppSettings("web:hcaptcha:verify-url", "https://api.hcaptcha.com/siteverify");
 
-        _webDisplayMobappsBanner = (configuration["web.display.mobapps.banner"] ?? "").Trim().Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries);
-        ShareTwitterUrl = GetAppSettings("web.share.twitter", "https://twitter.com/intent/tweet?text={0}");
-        ShareFacebookUrl = GetAppSettings("web.share.facebook", "");
         ControlPanelUrl = GetAppSettings("web:controlpanel:url", "");
-        FontOpenSansUrl = GetAppSettings("web.font.opensans.url", "");
-        StartProductList = GetAppSettings("web.start.product.list", "");
+
         SsoSamlLoginUrl = GetAppSettings("web:sso:saml:login:url", "");
         SsoSamlLogoutUrl = GetAppSettings("web:sso:saml:logout:url", "");
 
@@ -182,6 +132,8 @@ public class SetupInfo
         AmiTokenUrl = GetAppSettings("web:ami:token", "");
 
         InvitationLimit = GetAppSettings("web:invitation-limit", int.MaxValue);
+
+        LinksToExternalResources = configuration.GetSection("externalresources").Get<Dictionary<string, string>>() ?? [];
     }
 
 
