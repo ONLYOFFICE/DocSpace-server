@@ -189,8 +189,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
                 InitSocialFooter(settings, out footerSocialContent);
                 break;
             case "opensource":
-                footerContent = NotifyTemplateResource.FooterOpensourceV10;
-                footerSocialContent = NotifyTemplateResource.SocialNetworksFooter;
+                InitOpensourceFooter(settings, out footerContent, out footerSocialContent);
                 break;
         }
     }
@@ -242,7 +241,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
                 .Replace("%SALESEMAIL%", settings.SalesEmail)
                 .Replace("%DEMOURL%", string.IsNullOrEmpty(settings.DemoUrl) ? "mailto:" + settings.SalesEmail : settings.DemoUrl);
 
-            footerSocialContent = settings.FooterSocialEnabled ? (NotifyTemplateResource.SocialNetworksFooter) : string.Empty;
+            footerSocialContent = settings.FooterSocialEnabled ? NotifyTemplateResource.SocialNetworksFooter : string.Empty;
         }
     }
 
@@ -253,6 +252,33 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         if (settings == null || (settings.FooterEnabled && settings.FooterSocialEnabled))
         {
             footerSocialContent = NotifyTemplateResource.SocialNetworksFooter;
+        }
+    }
+
+    private void InitOpensourceFooter(MailWhiteLabelSettings settings, out string footerContent, out string footerSocialContent)
+    {
+        footerContent = string.Empty;
+        footerSocialContent = string.Empty;
+
+        if (settings == null)
+        {
+            footerContent =
+                NotifyTemplateResource.FooterOpensourceV10
+                                      .Replace("%SUPPORTURL%", mailWhiteLabelSettingsHelper.DefaultMailForumUrl)
+                                      .Replace("%SALESEMAIL%", mailWhiteLabelSettingsHelper.DefaultMailSalesEmail)
+                                      .Replace("%DEMOURL%", mailWhiteLabelSettingsHelper.DefaultMailDemoUrl);
+            footerSocialContent = NotifyTemplateResource.SocialNetworksFooter;
+
+        }
+        else if (settings.FooterEnabled)
+        {
+            footerContent =
+                NotifyTemplateResource.FooterOpensourceV10
+                .Replace("%SUPPORTURL%", mailWhiteLabelSettingsHelper.DefaultMailForumUrl)
+                .Replace("%SALESEMAIL%", settings.SalesEmail)
+                .Replace("%DEMOURL%", string.IsNullOrEmpty(settings.DemoUrl) ? "mailto:" + settings.SalesEmail : settings.DemoUrl);
+
+            footerSocialContent = settings.FooterSocialEnabled ? NotifyTemplateResource.SocialNetworksFooter : string.Empty;
         }
     }
 
