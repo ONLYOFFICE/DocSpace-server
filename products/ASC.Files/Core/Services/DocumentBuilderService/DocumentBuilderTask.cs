@@ -121,14 +121,14 @@ public abstract class DocumentBuilderTask<TId, TData>(IServiceScopeFactory servi
     protected abstract Task<File<TId>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData);
 }
 
-public record DocumentBuilderInputData(string Script, string ScriptFilePath, string TempFileName, string OutputFileName);
+public record DocumentBuilderInputData(string Script, string TempFileName, string OutputFileName);
 
 [Scope]
 public class DocumentBuilderTask(DocumentServiceConnector documentServiceConnector)
 {
     internal async Task<string> BuildFileAsync(DocumentBuilderInputData inputData, CancellationToken cancellationToken)
     {
-        var resultTuple = await documentServiceConnector.DocbuilderRequestAsync(null, inputData.Script ?? inputData.ScriptFilePath, true);
+        var resultTuple = await documentServiceConnector.DocbuilderRequestAsync(null, inputData.Script, true);
 
         if (string.IsNullOrEmpty(resultTuple.BuilderKey))
         {

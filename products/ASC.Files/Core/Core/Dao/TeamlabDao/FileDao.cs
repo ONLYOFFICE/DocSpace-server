@@ -1694,20 +1694,20 @@ internal class FileDao(
     }
 
 
-    public string GetUniqThumbnailPath(File<int> file, int width, int height)
+    public string GetUniqThumbnailPath(File<int> file, uint width, uint height)
     {
         var thumbnailName = GetThumbnailName(width, height);
 
         return GetUniqFilePath(file, thumbnailName);
     }
 
-    public async Task<Stream> GetThumbnailAsync(int fileId, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(int fileId, uint width, uint height)
     {
         var file = await GetFileAsync(fileId);
         return await GetThumbnailAsync(file, width, height);
     }
 
-    public async Task<Stream> GetThumbnailAsync(File<int> file, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(File<int> file, uint width, uint height)
     {
         var thumnailName = GetThumbnailName(width, height);
         var path = GetUniqFilePath(file, thumnailName);
@@ -1792,7 +1792,7 @@ internal class FileDao(
         return chunks.Sum(c => c.Value?.Length ?? 0);
     }
 
-    private string GetThumbnailName(int width, int height)
+    private string GetThumbnailName(uint width, uint height)
     {
         return $"{ThumbnailTitle}.{width}x{height}.{global.ThumbnailExtension}";
     }
