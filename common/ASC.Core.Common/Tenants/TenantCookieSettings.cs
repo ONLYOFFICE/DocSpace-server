@@ -59,8 +59,7 @@ public class TenantCookieSettings : ISettings<TenantCookieSettings>
 [Singleton]
 public class TenantCookieSettingsConfig(IConfiguration configuration)
 {
-    public bool IsVisibleSettings { get; } = !(configuration["web:hide-settings"] ?? string.Empty)
-                    .Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries)
+    public bool IsVisibleSettings { get; } = !(configuration.GetSection("web:hide-settings").Get<string[]>() ?? [])
                     .Contains("CookieSettings", StringComparer.CurrentCultureIgnoreCase);
 }
 

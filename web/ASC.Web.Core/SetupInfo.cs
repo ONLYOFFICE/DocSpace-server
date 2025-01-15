@@ -168,11 +168,11 @@ public class SetupInfo
         SsoSamlLoginUrl = GetAppSettings("web:sso:saml:login:url", "");
         SsoSamlLogoutUrl = GetAppSettings("web:sso:saml:logout:url", "");
 
-        _hideSettings = GetAppSettings("web:hide-settings", string.Empty).Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries);
+        _hideSettings = configuration.GetSection("web:hide-settings").Get<string[]>() ?? [];
 
         SmsTrial = GetAppSettings("core.sms.trial", false);
 
-        TfaRegistration = (GetAppSettings("core.tfa.registration", "") ?? "").Trim().ToLower();
+        TfaRegistration = GetAppSettings("core.tfa.registration", "").ToLower();
 
         TfaAppBackupCodeLength = GetAppSettings("web.tfaapp.backup.length", 6);
         TfaAppBackupCodeCount = GetAppSettings("web.tfaapp.backup.count", 5);
