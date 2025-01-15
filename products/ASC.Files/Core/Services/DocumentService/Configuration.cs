@@ -776,7 +776,7 @@ public class CustomizationConfig<T>(
             return null;
         }
 
-        var link = await commonLinkUtility.GetFeedbackAndSupportLink(settingsManager);
+        var link = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
 
         if (string.IsNullOrEmpty(link))
         {

@@ -123,6 +123,8 @@ public class CommonLinkUtility(
 
     #endregion
 
+    #region links to external resources
+
     public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).UserForumEnabled)
@@ -139,8 +141,6 @@ public class CommonLinkUtility(
 
         return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
     }
-    
-    #region Help Centr
 
     public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
@@ -185,25 +185,16 @@ public class CommonLinkUtility(
 
     public string GetSupportEmail()
     {
-        var url = mailWhiteLabelSettingsHelper.DefaultMailSupportEmail;
+        var email = mailWhiteLabelSettingsHelper.DefaultMailSupportEmail;
 
-        return string.IsNullOrEmpty(url) ? string.Empty : url;
+        return string.IsNullOrEmpty(email) ? string.Empty : email;
     }
 
     public string GetSalesEmail()
     {
-        var mail = additionalWhiteLabelSettingsHelper.DefaultMailSalesEmail;
+        var email = additionalWhiteLabelSettingsHelper.DefaultMailSalesEmail;
 
-        return string.IsNullOrEmpty(mail) ? string.Empty : mail;
-    }
-
-    public async Task<string> GetFeedbackAndSupportLink(SettingsManager settingsManager, bool inCurrentCulture = true)
-    {
-        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
-
-        return !settings.FeedbackAndSupportEnabled || string.IsNullOrEmpty(settings.FeedbackAndSupportUrl)
-            ? string.Empty
-            : GetRegionalUrl(settings.FeedbackAndSupportUrl, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(email) ? string.Empty : email;
     }
 
     #endregion
