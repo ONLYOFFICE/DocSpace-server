@@ -334,11 +334,11 @@ public interface IFileDao<T>
 
     Task SetThumbnailStatusAsync(File<T> file, Thumbnail status);
 
-    string GetUniqThumbnailPath(File<T> file, int width, int height);
+    string GetUniqThumbnailPath(File<T> file, uint width, uint height);
 
-    Task<Stream> GetThumbnailAsync(File<T> file, int width, int height);
+    Task<Stream> GetThumbnailAsync(File<T> file, uint width, uint height);
 
-    Task<Stream> GetThumbnailAsync(T fileId, int width, int height);
+    Task<Stream> GetThumbnailAsync(T fileId, uint width, uint height);
 
     Task<EntryProperties<T>> GetProperties(T fileId);
 

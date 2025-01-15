@@ -520,14 +520,14 @@ internal class ProviderFileDao(
         return file;
     }
 
-    public override Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public override Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
         return fileDao.GetThumbnailAsync(selector.ConvertId(fileId), width, height);
     }
 
-    public override Task<Stream> GetThumbnailAsync(File<string> file, int width, int height)
+    public override Task<Stream> GetThumbnailAsync(File<string> file, uint width, uint height)
     {
         var fileDao = GetFileDao(file);
         return fileDao.GetThumbnailAsync(file, width, height);
