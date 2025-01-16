@@ -37,6 +37,8 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         = new(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix,
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
+    private readonly Dictionary<string, string> _externalResources = configuration.GetSection("externalresources").Get<Dictionary<string, string>>() ?? [];
+
     static TextileStyler()
     {
         const string file = "ASC.Core.Common.Notify.Stylers.Resources.style.css";
@@ -192,6 +194,13 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
                 InitOpensourceFooter(settings, out footerContent, out footerSocialContent);
                 break;
         }
+
+        footerSocialContent = footerSocialContent
+            .Replace("%SOCIALNETWORKFACEBOOK%", _externalResources.GetValueOrDefault("socialnetworkfacebook"))
+            .Replace("%SOCIALNETWORKTWITTER%", _externalResources.GetValueOrDefault("socialnetworktwitter"))
+            .Replace("%SOCIALNETWORKYOUTUBE%", _externalResources.GetValueOrDefault("socialnetworkyoutube"))
+            .Replace("%SOCIALNETWORKINSTAGRAM%", _externalResources.GetValueOrDefault("socialnetworkinstagram"))
+            .Replace("%SOCIALNETWORKTIKTOK%", _externalResources.GetValueOrDefault("socialnetworktiktok"));
     }
 
     private void InitTopImage(NoticeMessage message, MailWhiteLabelSettings settings, out string footerTop)
