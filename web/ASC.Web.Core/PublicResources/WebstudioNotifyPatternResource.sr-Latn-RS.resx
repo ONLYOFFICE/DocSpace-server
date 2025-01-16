@@ -1617,7 +1617,7 @@ $TrulyYours</value>
 
 Proces dešifrovanja datoteke na vašem portalu "${PortalUrl}":"${PortalUrl}" nije uspeo.
 
-Neke datoteke nisu mogle da se dešifruju. Pronađite više detalja u "Kontrolnoj tabli":"${ControlPanelUrl}/storage".</value>
+Neke datoteke nisu mogle da se dešifruju. Pronađite više detalja u "Kontrolnoj tabli":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Zdravo, $UserName!
@@ -1638,7 +1638,7 @@ Vaš portal je ponovo dostupan.</value>
 
 Proces šifrovanja datoteke na portalu "${PortalUrl}":"${PortalUrl}" nije uspeo.
 
-Neke datoteke nisu mogle da se šifruju. Pronađite više detalja u "Kontrolnoj tabli":"${ControlPanelUrl}/storage".</value>
+Neke datoteke nisu mogle da se šifruju. Pronađite više detalja u "Kontrolnoj tabli":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Zdravo, $UserName!

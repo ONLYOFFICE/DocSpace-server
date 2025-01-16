@@ -664,7 +664,7 @@ $TrulyYours</value>
 
 L'échec s'est poduit lors de processus du déchiffrement sur votre portail "${PortalUrl}":"${PortalUrl}".
 
-Plusieurs fichiers ne peuvent pas être déchiffrés. Trouvez plus de détails dans le "Panneau de configuration":"${ControlPanelUrl}/storage".</value>
+Plusieurs fichiers ne peuvent pas être déchiffrés. Trouvez plus de détails dans le "Panneau de configuration":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Bonjour, $UserName !
@@ -685,7 +685,7 @@ Votre portail est de nouveau disponible.</value>
 
 Le processus du chiffrement de fichier sur le portail "${PortalUrl}":"${PortalUrl}" est terminé.
 
-Impossible de rechiffrer quelques fichiers. Trouvez plus de détails dans le "Panneau de configuration":"${ControlPanelUrl}/storage".</value>
+Impossible de rechiffrer quelques fichiers. Trouvez plus de détails dans le "Panneau de configuration":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Bonjour, $UserName !

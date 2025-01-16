@@ -38,7 +38,6 @@ public class StudioNotifyService(
     TenantManager tenantManager,
     CoreBaseSettings coreBaseSettings,
     CommonLinkUtility commonLinkUtility,
-    SetupInfo setupInfo,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserInvitationLimitHelper userInvitationLimitHelper,
     SettingsManager settingsManager,
@@ -929,27 +928,8 @@ public class StudioNotifyService(
             [await studioNotifyHelper.ToRecipientAsync(u.Id)],
             [EMailSenderName],
             new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-            new TagValue(Tags.PortalUrl, serverRootPath),
-            new TagValue(Tags.ControlPanelUrl, GetControlPanelUrl(serverRootPath)));
+            new TagValue(Tags.PortalUrl, serverRootPath));
         }
-    }
-
-    private string GetControlPanelUrl(string serverRootPath)
-    {
-        var controlPanelUrl = setupInfo.ControlPanelUrl;
-
-        if (string.IsNullOrEmpty(controlPanelUrl))
-        {
-            return string.Empty;
-        }
-
-        if (controlPanelUrl.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase) ||
-            controlPanelUrl.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
-        {
-            return controlPanelUrl;
-        }
-
-        return serverRootPath + "/" + controlPanelUrl.TrimStart('~', '/').TrimEnd('/');
     }
 
     #endregion

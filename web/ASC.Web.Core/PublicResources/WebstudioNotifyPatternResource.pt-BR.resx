@@ -747,7 +747,7 @@ $TrulyYours</value>
 
 O processo de descriptografia de arquivos em seu portal "${PortalUrl}":"${PortalUrl}" falhou.
 
-Alguns arquivos não puderam ser descriptografados. Encontre mais detalhes no "Painel de Controle":"${ControlPanelUrl}/storage".</value>
+Alguns arquivos não puderam ser descriptografados. Encontre mais detalhes no "Painel de Controle":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Olá, $UserName!
@@ -768,7 +768,7 @@ Seu portal está disponível novamente.</value>
 
 O processo de criptografia de arquivos no portal "${PortalUrl}":"${PortalUrl}" falhou.
 
-Alguns arquivos não puderam ser criptografados. Encontre mais detalhes no "Painel de Controle":"${ControlPanelUrl}/storage".</value>
+Alguns arquivos não puderam ser criptografados. Encontre mais detalhes no "Painel de Controle":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Olá, $UserName!

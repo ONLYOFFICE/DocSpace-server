@@ -1572,7 +1572,7 @@ $TrulyYours</value>
 
 Процес дешифрування файлів на вашому порталі "${PortalUrl}":"${PortalUrl}" закінчився збоєм.
 
-Деякі файли не вдається дешифрувати. Додаткову інформацію див. на "панелі керування":"${ControlPanelUrl}/storage".</value>
+Деякі файли не вдається дешифрувати. Додаткову інформацію див. на "панелі керування":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Вітаємо, $UserName!
@@ -1593,7 +1593,7 @@ $TrulyYours</value>
 
 Процес шифрування файлів на порталі "${PortalUrl}":"${PortalUrl}" завершився збоєм.
 
-Деякі файли не вдається зашифрувати. Додаткову інформацію див. на "панелі керування":"${ControlPanelUrl}/storage".</value>
+Деякі файли не вдається зашифрувати. Додаткову інформацію див. на "панелі керування":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Вітаємо, $UserName!

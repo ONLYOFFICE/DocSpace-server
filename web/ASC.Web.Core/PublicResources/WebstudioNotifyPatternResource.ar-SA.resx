@@ -1753,7 +1753,7 @@ $TrulyYours</value>
 
 فشلت عملية فك تشفير الملف على البوابة الإلكترونية "${PortalUrl}":"${PortalUrl}"
 
-تعذر فك تشفير بعض الملفات. يمكنك العثور على مزيد من التفاصيل في "لوحة التحكم":"${ControlPanelUrl}/storage".</value>
+تعذر فك تشفير بعض الملفات. يمكنك العثور على مزيد من التفاصيل في "لوحة التحكم":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>مرحبا $UserName!
@@ -1774,7 +1774,7 @@ $TrulyYours</value>
 
 فشلت عملية تشفير الملفات على المدخل "${PortalUrl}":"${PortalUrl}"
 
-تعذر تشفير بعض الملفات. يمكنك العثور على مزيد من التفاصيل في "لوحة التحكم":"${ControlPanelUrl}/storage".</value>
+تعذر تشفير بعض الملفات. يمكنك العثور على مزيد من التفاصيل في "لوحة التحكم":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>مرحبا $UserName!

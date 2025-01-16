@@ -1465,7 +1465,7 @@ $TrulyYours</value>
 
 Процес дешифровања датотеке на вашем порталу "${PortalUrl}":"${PortalUrl}" није успео.
 
-Неке датотеке нису могле да се дешифрују. Пронађите више детаља у "Контролној табли":"${ControlPanelUrl}/storage".</value>
+Неке датотеке нису могле да се дешифрују. Пронађите више детаља у "Контролној табли":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Здраво, $UserName!
@@ -1486,7 +1486,7 @@ $TrulyYours</value>
 
 Процес шифровања датотеке на порталу "${PortalUrl}":"${PortalUrl}" није успео.
 
-Неке датотеке нису могле да се шифрују. Пронађите више детаља у "Контролној табли":"${ControlPanelUrl}/storage".</value>
+Неке датотеке нису могле да се шифрују. Пронађите више детаља у "Контролној табли":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Здраво, $UserName!

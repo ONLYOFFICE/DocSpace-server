@@ -1568,7 +1568,7 @@ $TrulyYours</value>
 
 Faila atšifrēšanas process jūsu portālā "${PortalUrl}":${PortalUrl}" neizdevās.
 
-Dažus failus nevarēja atšifrēt. Sīkāku informāciju skatiet "Vadības panelī":"${ControlPanelUrl}/storage".</value>
+Dažus failus nevarēja atšifrēt. Sīkāku informāciju skatiet "Vadības panelī":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -1589,7 +1589,7 @@ Jūsu portāls atkal ir pieejams.</value>
 
 Faila šifrēšanas process "${PortalUrl}":"${PortalUrl}" portālā neizdevās.
 
-Dažus failus nevarēja šifrēt. Sīkāku informāciju skatiet "Vadības panelī":"${ControlPanelUrl}/storage".</value>
+Dažus failus nevarēja šifrēt. Sīkāku informāciju skatiet "Vadības panelī":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Sveiki, $UserName!

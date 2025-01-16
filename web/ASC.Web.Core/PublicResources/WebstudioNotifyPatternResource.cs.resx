@@ -1378,7 +1378,7 @@ $TrulyYours</value>
 
 Proces dešifrování souboru na vašem portálu "${PortalUrl}":"${PortalUrl}" se nezdařil.
 
-Některé soubory nebylo možné dešifrovat. Další podrobnosti najdete v "Ovládacím panelu":"${ControlPanelUrl}/storage".</value>
+Některé soubory nebylo možné dešifrovat. Další podrobnosti najdete v "Ovládacím panelu":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -1399,7 +1399,7 @@ Váš portál je opět k dispozici.</value>
 
 Proces šifrování souboru na portálu "${PortalUrl}":"${PortalUrl}" se nezdařil.
 
-Některé soubory nebylo možné zašifrovat. Další podrobnosti najdete v "Ovládacím panelu":"${ControlPanelUrl}/storage".</value>
+Některé soubory nebylo možné zašifrovat. Další podrobnosti najdete v "Ovládacím panelu":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Dobrý den, $UserName!

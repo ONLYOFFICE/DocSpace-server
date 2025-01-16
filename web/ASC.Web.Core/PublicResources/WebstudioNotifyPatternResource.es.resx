@@ -707,7 +707,7 @@ $TrulyYours</value>
 
 El proceso de descifrado de archivos en su portal "${PortalUrl}":"${PortalUrl}" ha fracasado.
 
-Algunos archivos no pudieron ser descifrados. Encuentre más detalles en el "Panel de Control":"${ControlPanelUrl}/storage".</value>
+Algunos archivos no pudieron ser descifrados. Encuentre más detalles en el "Panel de Control":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>¡Hola, $UserName!
@@ -728,7 +728,7 @@ Su portal está disponible de nuevo.</value>
 
 El proceso de cifrado de archivos en el portal "${PortalUrl}":"${PortalUrl}" ha fracasado.
 
-Algunos archivos no se han podido ser cifrados. Para más detalles, consulte el "Panel de Control":"${ControlPanelUrl}/storage".</value>
+Algunos archivos no se han podido ser cifrados. Para más detalles, consulte el "Panel de Control":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>¡Hola, $UserName!

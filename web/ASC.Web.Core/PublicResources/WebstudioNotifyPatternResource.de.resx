@@ -748,7 +748,7 @@ $TrulyYours</value>
 
 Die Entschlüsselung von Dateien in Ihrem Portal "${PortalUrl}":"${PortalUrl}" ist fehlgeschlagen.
 
-Einige Dateien konnten nicht entschlüsselt werden. Weitere Informationen finden Sie in den "Einstellungen":"${ControlPanelUrl}/storage".</value>
+Einige Dateien konnten nicht entschlüsselt werden. Weitere Informationen finden Sie in den "Einstellungen":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Hallo $UserName!
@@ -769,7 +769,7 @@ Ihr Portal steht wieder zur Verfügung.</value>
 
 Die Dateiverschlüsselung im Portal "${PortalUrl}":"${PortalUrl}" wurde abgeschlossen.
 
-Einige Dateien konnten nicht wieder verschlüsselt werden. Mehr Details finden Sie im "Control Panel":"${ControlPanelUrl}/storage".</value>
+Einige Dateien konnten nicht wieder verschlüsselt werden. Mehr Details finden Sie im "Control Panel":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Hallo $UserName!

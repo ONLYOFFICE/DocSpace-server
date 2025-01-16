@@ -1658,7 +1658,7 @@ $TrulyYours</value>
 
 Procedura de decriptare a fișierului pe portalul "${PortalUrl}":"${PortalUrl}" eșuată.
 
-Unele fișiere nu au putut fi decriptate. Aflați mai multe detalii în Panou de control:"${ControlPanelUrl}/storage".</value>
+Unele fișiere nu au putut fi decriptate. Aflați mai multe detalii în Panou de control:"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Salut, $UserName!
@@ -1679,7 +1679,7 @@ Portalul dvs este din nou disponibil.</value>
 
 Procedura de criptare a fișierului pe portalul "${PortalUrl}":"${PortalUrl}" eșuată.
 
-Unele fișiere nu au putut fi criptate. Aflați mai multe detalii în Panou de control:"${ControlPanelUrl}/storage".</value>
+Unele fișiere nu au putut fi criptate. Aflați mai multe detalii în Panou de control:"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Salut, $UserName!

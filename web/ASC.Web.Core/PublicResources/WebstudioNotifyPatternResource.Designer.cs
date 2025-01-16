@@ -2071,7 +2071,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///The file decryption process on your portal &quot;${PortalUrl}&quot;:&quot;${PortalUrl}&quot; has been failed.
         ///
-        ///Some files could not be decrypted. Find more details in the &quot;Control Panel&quot;:&quot;${ControlPanelUrl}/storage&quot;..
+        ///Some files could not be decrypted. Find more details in the &quot;Control Panel&quot;:&quot;${PortalUrl}/management/settings&quot;..
         /// </summary>
         public static string pattern_storage_decryption_error {
             get {
@@ -2110,7 +2110,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///The file encryption process on the &quot;${PortalUrl}&quot;:&quot;${PortalUrl}&quot; portal has been failed.
         ///
-        ///Some files could not be encrypted. Find more details in the &quot;Control Panel&quot;:&quot;${ControlPanelUrl}/storage&quot;..
+        ///Some files could not be encrypted. Find more details in the &quot;Control Panel&quot;:&quot;${PortalUrl}/management/settings&quot;..
         /// </summary>
         public static string pattern_storage_encryption_error {
             get {

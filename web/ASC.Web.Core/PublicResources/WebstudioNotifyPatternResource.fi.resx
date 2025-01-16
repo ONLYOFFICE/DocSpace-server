@@ -1361,7 +1361,7 @@ ONLYOFFICE -tukitiimi
 
 Tiedoston salauksen purku portaalissasi "${PortalUrl}":"${PortalUrl}" on epäonnistunut.
 
-Joitakin tiedostojen salausta ei pystynyt purkamaan. Lisätietoja "Ohjauspaneelissa":"${ControlPanelUrl}/storage".</value>
+Joitakin tiedostojen salausta ei pystynyt purkamaan. Lisätietoja "Ohjauspaneelissa":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Hei, $UserName!
@@ -1382,7 +1382,7 @@ Portaalisi on taas käytettävissä.</value>
 
 Tiedoston salauksen purku portaalissasi "${PortalUrl}":"${PortalUrl}" on epäonnistunut.
 
-Joitakin tiedostojen salausta ei pystynyt purkamaan. Lisätietoja "Ohjauspaneelissa":"${ControlPanelUrl}/storage".</value>
+Joitakin tiedostojen salausta ei pystynyt purkamaan. Lisätietoja "Ohjauspaneelissa":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Hei, $UserName!

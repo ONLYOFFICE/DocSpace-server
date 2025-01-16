@@ -1181,7 +1181,7 @@ $activity
 
 Ձեր "${PortalUrl}":"${PortalUrl}" պորտալի ֆայլերի վերծանման գործընթացը ձախողվել է:
 
-Որոշ ֆայլեր չհաջողվեց վերծանել: Գտեք ավելի շատ մանրամասներ "Կառավարման վահանակում":"${ControlPanelUrl}/storage".</value>
+Որոշ ֆայլեր չհաջողվեց վերծանել: Գտեք ավելի շատ մանրամասներ "Կառավարման վահանակում":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_smtp_test" xml:space="preserve">
     <value>SMTP թեստային հաղորդագրություն
@@ -1210,7 +1210,7 @@ $TrulyYours</value>
 
 "${PortalUrl}":"${PortalUrl}" պորտալում ֆայլերի գաղտնագրման գործընթացը ձախողվել է:
 
-Որոշ ֆայլեր չհաջողվեց գաղտնագրել: Գտեք ավելի շատ մանրամասներ "Կառավարման վահանակում":"${ControlPanelUrl}/storage".</value>
+Որոշ ֆայլեր չհաջողվեց գաղտնագրել: Գտեք ավելի շատ մանրամասներ "Կառավարման վահանակում":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Բարև, $UserName:

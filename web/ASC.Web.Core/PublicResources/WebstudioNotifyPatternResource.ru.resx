@@ -749,7 +749,7 @@ $TrulyYours</value>
 
 Не удалось выполнить процесс расшифровки файлов на портале "${PortalUrl}":"${PortalUrl}".
 
-Некоторые файлы не удалось расшифровать. Подробности можно найти в "Панели управления":"${ControlPanelUrl}/storage".</value>
+Некоторые файлы не удалось расшифровать. Подробности можно найти в "Панели управления":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Здравствуйте, $UserName!
@@ -770,7 +770,7 @@ $TrulyYours</value>
 
 Не удалось выполнить процесс шифрования файлов на портале "${PortalUrl}":"${PortalUrl}".
 
-Некоторые файлы не удалось зашифровать. Подробности можно найти в "Панели управления":"${ControlPanelUrl}/storage".</value>
+Некоторые файлы не удалось зашифровать. Подробности можно найти в "Панели управления":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Здравствуйте, $UserName,

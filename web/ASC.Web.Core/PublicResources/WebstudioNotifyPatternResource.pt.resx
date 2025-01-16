@@ -1624,7 +1624,7 @@ $TrulyYours</value>
 
 O processo de decriptação no seu portal "${PortalUrl}":"${PortalUrl}" falhou.
 
-Não foi possível desencriptar alguns ficheiros. Saiba mais detalhes no "Painel de Controlo":"${ControlPanelUrl}/storage".</value>
+Não foi possível desencriptar alguns ficheiros. Saiba mais detalhes no "Painel de Controlo":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Olá, $UserName!
@@ -1645,7 +1645,7 @@ O seu portal está novamente disponível.</value>
 
 O processo de encriptação de ficheiros no seu portal "${PortalUrl}":"${PortalUrl}" falhou.
 
-Não foi possível encriptar alguns ficheiros. Saiba mais detalhes no "Painel de Controlo":"${ControlPanelUrl}/storage".</value>
+Não foi possível encriptar alguns ficheiros. Saiba mais detalhes no "Painel de Controlo":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Olá, $UserName!

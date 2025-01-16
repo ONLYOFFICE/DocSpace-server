@@ -1524,7 +1524,7 @@ $TrulyYours</value>
 
 Процесът на дешифриране на файла на вашия портал "${PortalUrl}":"${PortalUrl}" се провали.
 
-Някои файлове не можаха да бъдат дешифрирани. Намерете повече подробности в "Контролен панел":"${ControlPanelUrl}/storage".</value>
+Някои файлове не можаха да бъдат дешифрирани. Намерете повече подробности в "Контролен панел":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Здравейте, $UserName!
@@ -1545,7 +1545,7 @@ $TrulyYours</value>
 
 Процесът на шифроване на файлове на портала "${PortalUrl}":"${PortalUrl}" е неуспешен.
 
-Някои файлове не можаха да бъдат шифровани. Намерете повече подробности в "Контролен панел":"${ControlPanelUrl}/storage".</value>
+Някои файлове не можаха да бъдат шифровани. Намерете повече подробности в "Контролен панел":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Здравейте, $UserName!

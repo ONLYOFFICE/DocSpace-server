@@ -1567,7 +1567,7 @@ Użytkownik [$__AuthorName]($__AuthorUrl) zmienił swoje dane profilowe w portal
 
 Proces odszyfrowywania plików w Twoim portalu "${PortalUrl}":"${PortalUrl}" nie powiódł się.
 
-Nie udało się odszyfrować pewnych plików. Dowiedz się więcej w sekcji "Panel sterowania":"${ControlPanelUrl}/storage".</value>
+Nie udało się odszyfrować pewnych plików. Dowiedz się więcej w sekcji "Panel sterowania":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Witaj, $UserName!
@@ -1588,7 +1588,7 @@ Twój portal jest ponownie dostępny.</value>
 
 Proces szyfrowania plików w Twoim portalu "${PortalUrl}":"${PortalUrl}" nie powiódł się.
 
-Nie udało się zaszyfrować pewnych plików. Dowiedz się więcej w sekcji "Panel sterowania":"${ControlPanelUrl}/storage".</value>
+Nie udało się zaszyfrować pewnych plików. Dowiedz się więcej w sekcji "Panel sterowania":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Witaj, $UserName!

@@ -1471,7 +1471,7 @@ Se hai ricevuto questa email per errore, ignorala o contatta il tuo amministrato
 
 Il processo di decrittografia dei file sul tuo portale "${PortalUrl}":"${PortalUrl}" non è riuscito.
 
-Alcuni file non possono essere decifrati. Trovi maggiori dettagli nel "Pannello di controllo":"${ControlPanelUrl}/storage".</value>
+Alcuni file non possono essere decifrati. Trovi maggiori dettagli nel "Pannello di controllo":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1492,7 +1492,7 @@ Il tuo portale è di nuovo disponibile.</value>
 
 Il processo di crittografia dei file sul portale "${PortalUrl}":"${PortalUrl}" non è riuscito.
 
-Alcuni file non possono essere crittografati. Trovi maggiori dettagli nel "Pannello di controllo":"${ControlPanelUrl}/storage".</value>
+Alcuni file non possono essere crittografati. Trovi maggiori dettagli nel "Pannello di controllo":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Salve, $UserName!

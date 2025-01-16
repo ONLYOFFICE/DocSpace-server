@@ -1407,7 +1407,7 @@ $TrulyYours</value>
 
 "${PortalUrl}":"${PortalUrl}" 门户上的文件解密流程失败。
 
-部分文件无法解密。请在"控制面板":"${ControlPanelUrl}/storage"中了解更多详情。</value>
+部分文件无法解密。请在"控制面板":"${PortalUrl}/management/settings"中了解更多详情。</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>您好，$UserName！
@@ -1428,7 +1428,7 @@ $TrulyYours</value>
 
 "${PortalUrl}":"${PortalUrl}" 门户上的文件加密流程失败。
 
-部分文件无法加密。请在"控制面板":"${ControlPanelUrl}/storage"中了解更多详情。</value>
+部分文件无法加密。请在"控制面板":"${PortalUrl}/management/settings"中了解更多详情。</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>您好，$UserName！

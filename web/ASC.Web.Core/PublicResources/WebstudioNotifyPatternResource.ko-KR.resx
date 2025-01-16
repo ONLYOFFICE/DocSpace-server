@@ -1619,7 +1619,7 @@ $TrulyYours</value>
 
 "${PortalUrl}":"${PortalUrl}" 포털의 파일 복호화 프로세스가 실패했습니다.
 
-일부 파일을 복호화하지 못했습니다. 자세한 내용은 "제어판":"${ControlPanelUrl}/storage" 에서 확인하세요.</value>
+일부 파일을 복호화하지 못했습니다. 자세한 내용은 "제어판":"${PortalUrl}/management/settings" 에서 확인하세요.</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -1640,7 +1640,7 @@ $TrulyYours</value>
 
 "${PortalUrl}":"${PortalUrl}" 포털의 파일 암호화 프로세스가 실패했습니다.
 
-일부 파일을 암호화하지 못했습니다. 자세한 내용은 "제어판":"${ControlPanelUrl}/storage" 에서 확인하세요.</value>
+일부 파일을 암호화하지 못했습니다. 자세한 내용은 "제어판":"${PortalUrl}/management/settings" 에서 확인하세요.</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>$UserName님, 안녕하세요!

@@ -65,7 +65,6 @@ public class SetupInfo
         return regex.IsMatch(email);
     }
 
-    public string ControlPanelUrl { get; private set; }
     public string SsoSamlLoginUrl { get; private set; }
     public string SsoSamlLogoutUrl { get; private set; }
     public bool SmsTrial { get; private set; }
@@ -112,8 +111,6 @@ public class SetupInfo
         HcaptchaPublicKey = GetAppSettings("web:hcaptcha:public-key", null);
         HcaptchaPrivateKey = GetAppSettings("web:hcaptcha:private-key", null);
         HcaptchaVerifyUrl = GetAppSettings("web:hcaptcha:verify-url", "https://api.hcaptcha.com/siteverify");
-
-        ControlPanelUrl = GetAppSettings("web:controlpanel:url", "");
 
         SsoSamlLoginUrl = GetAppSettings("web:sso:saml:login:url", "");
         SsoSamlLogoutUrl = GetAppSettings("web:sso:saml:logout:url", "");

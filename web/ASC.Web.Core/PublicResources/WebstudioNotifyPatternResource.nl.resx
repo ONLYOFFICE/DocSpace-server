@@ -1508,7 +1508,7 @@ $TrulyYours</value>
 
 Het decryptieproces van het bestand op uw portaal "${PortalUrl}":"${PortalUrl}" is mislukt.
 
-Enkele bestanden konden niet worden ontsleuteld. Meer details vindt u in het "Configuratiescherm":"${ControlPanelUrl}/storage".</value>
+Enkele bestanden konden niet worden ontsleuteld. Meer details vindt u in het "Configuratiescherm":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Hallo $UserName!
@@ -1529,7 +1529,7 @@ Uw portaal is weer beschikbaar.</value>
 
 Het encryptieproces van het bestand op uw portaal "${PortalUrl}":"${PortalUrl}" is mislukt.
 
-Bepaalde bestanden konden niet worden ontsleuteld. Meer details vindt u in het "Configuratiescherm":"${ControlPanelUrl}/storage".</value>
+Bepaalde bestanden konden niet worden ontsleuteld. Meer details vindt u in het "Configuratiescherm":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Hallo $UserName!

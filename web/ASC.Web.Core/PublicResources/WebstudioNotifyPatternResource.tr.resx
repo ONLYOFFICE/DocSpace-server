@@ -1417,7 +1417,7 @@ $TrulyYours</value>
 
 "${PortalUrl}":"${PortalUrl}" portalınızdaki dosya şifre çözme işlemi başarısız oldu.
 
-Bazı dosyaların şifresi çözülemedi. "Kontrol Paneli":"${ControlPanelUrl}/storage" bölümünden daha fazla bilgi alabilirsiniz.</value>
+Bazı dosyaların şifresi çözülemedi. "Kontrol Paneli":"${PortalUrl}/management/settings" bölümünden daha fazla bilgi alabilirsiniz.</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Merhaba, $UserName!
@@ -1438,7 +1438,7 @@ Portalınız yeniden kullanılabilir.</value>
 
 "${PortalUrl}":"${PortalUrl}" portalındaki dosya şifreleme işlemi başarısız oldu.
 
-Bazı dosyalar şifrelenemedi. "Kontrol Paneli":"${ControlPanelUrl}/storage" bölümünden daha fazla bilgi alabilirsiniz.</value>
+Bazı dosyalar şifrelenemedi. "Kontrol Paneli":"${PortalUrl}/management/settings" bölümünden daha fazla bilgi alabilirsiniz.</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Merhaba, $UserName!

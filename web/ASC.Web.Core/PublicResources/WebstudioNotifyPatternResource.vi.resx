@@ -1494,7 +1494,7 @@ $TrulyYours</value>
 
 Quá trình giải mã tập tin trên cổng thông tin "${PortalUrl}":"${PortalUrl}" của bạn không thành công.
 
-Không thể giải mã một số tập tin. Xem thêm chi tiết trong "Bảng điều khiển":"${ControlPanelUrl}/storage".</value>
+Không thể giải mã một số tập tin. Xem thêm chi tiết trong "Bảng điều khiển":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -1515,7 +1515,7 @@ Cổng thông tin của bạn đã hoạt động trở lại.</value>
 
 Quá trình mã hóa tập tin trên cổng thông tin "${PortalUrl}":"${PortalUrl}" đã không thành công.
 
-Không thể mã hóa một số tập tin. Xem thêm chi tiết trong "Bảng điều khiển":"${ControlPanelUrl}/storage".</value>
+Không thể mã hóa một số tập tin. Xem thêm chi tiết trong "Bảng điều khiển":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Xin chào $UserName!

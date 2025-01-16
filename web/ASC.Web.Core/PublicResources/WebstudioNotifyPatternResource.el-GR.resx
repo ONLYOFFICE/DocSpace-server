@@ -1546,7 +1546,7 @@ $TrulyYours</value>
 
 Η διαδικασία αποκρυπτογράφησης του αρχείου στην πύλη σας "${PortalUrl}":"${PortalUrl}" απέτυχε.
 
-Ορισμένα αρχεία δεν μπόρεσαν να αποκρυπτογραφηθούν. Βρείτε περισσότερες λεπτομέρειες στον "Πίνακα ελέγχου":"${ControlPanelUrl}/storage".</value>
+Ορισμένα αρχεία δεν μπόρεσαν να αποκρυπτογραφηθούν. Βρείτε περισσότερες λεπτομέρειες στον "Πίνακα ελέγχου":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Γεια σας, $UserName!
@@ -1567,7 +1567,7 @@ $TrulyYours</value>
 
 Η διαδικασία κρυπτογράφησης αρχείων στην πύλη "${PortalUrl}":"${PortalUrl}" απέτυχε.
 
-Ορισμένα αρχεία δεν μπόρεσαν να κρυπτογραφηθούν. Βρείτε περισσότερες λεπτομέρειες στον "Πίνακα ελέγχου":"${ControlPanelUrl}/storage".</value>
+Ορισμένα αρχεία δεν μπόρεσαν να κρυπτογραφηθούν. Βρείτε περισσότερες λεπτομέρειες στον "Πίνακα ελέγχου":"${PortalUrl}/management/settings".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Γεια σας, $UserName!

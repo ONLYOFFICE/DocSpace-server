@@ -1425,7 +1425,7 @@ $TrulyYours</value>
 
 "${PortalUrl}":"${PortalUrl}"ポータルのファイル復号化処理は失敗しました。
 
-一部のファイルが復号化できませんでした。"コントロールパネル":"${ControlPanelUrl}/storage "で詳細をご確認ください。</value>
+一部のファイルが復号化できませんでした。"コントロールパネル":"${PortalUrl}/management/settings "で詳細をご確認ください。</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>$UserName 様
@@ -1446,7 +1446,7 @@ $TrulyYours</value>
 
 "${PortalUrl}":"${PortalUrl}"ポータルでのファイル暗号化処理は失敗しました。
 
-一部のファイルを暗号化できませんでした。"管理パネル":"${ControlPanelUrl}/storage "で詳細をご確認ください。</value>
+一部のファイルを暗号化できませんでした。"管理パネル":"${PortalUrl}/management/settings "で詳細をご確認ください。</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>$UserName 様

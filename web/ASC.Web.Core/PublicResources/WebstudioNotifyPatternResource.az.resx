@@ -748,7 +748,7 @@ $TrulyYours</value>
 
 "${PortalUrl}":"${PortalUrl}" portalınızda faylın şifrəsinin açılması prosesi uğursuz oldu.
 
-Bəzi faylların şifrəsini açmaq mümkün olmadı. Ətraflı məlumata "İdarəetmə Paneli":"${ControlPanelUrl}/storage" ndə baxın.</value>
+Bəzi faylların şifrəsini açmaq mümkün olmadı. Ətraflı məlumata "İdarəetmə Paneli":"${PortalUrl}/management/settings" ndə baxın.</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Salam, $UserName!
@@ -769,7 +769,7 @@ Portalınız yenidən əlçatandır.</value>
 
 "${PortalUrl}":"${PortalUrl}" portalında fayl şifrələmə prosesi uğursuz oldu.
 
-Bəzi fayllar şifrələnə bilmədi. Ətraflı məlumata "İdarəetmə Paneli":"${ControlPanelUrl}/storage" ndə baxın.</value>
+Bəzi fayllar şifrələnə bilmədi. Ətraflı məlumata "İdarəetmə Paneli":"${PortalUrl}/management/settings" ndə baxın.</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Salam, $UserName!
