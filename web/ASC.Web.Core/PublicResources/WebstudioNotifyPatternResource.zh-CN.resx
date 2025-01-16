@@ -302,7 +302,7 @@ $TrulyYours</value>
 *重要提示！您门户上存储的所有数据以及您的注册信息将丢失，且无法恢复。
 
 #if($AutoRenew == "True")
-在删除门户前，请确保自动计费已关闭。您可以在 "Avangate账户":"https://secure.avangate.com/myaccount/" 中查看自动计费状态.
+在删除门户前，请确保自动计费已关闭。您可以在 Stripe 账户 中查看自动计费状态.
 #end
 
 如果您仍想删除 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户，请使用下面的链接确认操作。
@@ -1288,7 +1288,7 @@ ONLYOFFICE 支持团队
 _重要！存储在您门户上的所有数据（包括注册信息）都将丢失且无法恢复_
 
 #if($AutoRenew == "True")
-删除门户前，请确保已关闭自动计费。您可以在 [Avangate 账户](https://secure.avangate.com/myaccount/")中检查自动计费状态。
+删除门户前，请确保已关闭自动计费。您可以在 Stripe 账户 中检查自动计费状态。
 #end
 
 如果您仍然想要删除 [${__VirtualRootPath}](${__VirtualRootPath}) 门户，请点击下方的链接以确认操作：

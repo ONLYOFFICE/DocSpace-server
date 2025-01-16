@@ -1386,7 +1386,7 @@ $OwnerName님,
 *중요! 공간에 저장된 모든 데이터 및 등록 정보를 잃게 되며 복구할 수 없습니다.*
 
 #if($AutoRenew == "True")
-공간을 삭제하기 전에 자동 청구 기능이 꺼져 있는지 확인하세요. "Avangate 계정":"https://secure.avangate.com/myaccount/" 에서 자동 결제 상태를 확인할 수 있습니다.
+공간을 삭제하기 전에 자동 청구 기능이 꺼져 있는지 확인하세요. Stripe 계정 에서 자동 결제 상태를 확인할 수 있습니다.
 #end
 
 그래도 "${__VirtualRootPath}":"${__VirtualRootPath}" 공간을 삭제하고 싶다면 아래 링크를 따라 작업을 확인해 주세요.
@@ -1409,7 +1409,7 @@ $OwnerName님,
 _중요! 포털에 저장된 모든 데이터 및 등록 정보를 잃게 되며 복구할 수 없습니다._
 
 #if($AutoRenew == "True")
-포털을 삭제하기 전에 자동 청구 기능이 꺼져 있는지 확인하세요. [Avangate 계정](https://secure.avangate.com/myaccount/")에서 자동 결제 상태를 확인할 수 있습니다.
+포털을 삭제하기 전에 자동 청구 기능이 꺼져 있는지 확인하세요. Stripe 계정 에서 자동 결제 상태를 확인할 수 있습니다.
 #end
 
 그래도 [${__VirtualRootPath}](${__VirtualRootPath}) 포털을 삭제하고 싶다면 아래 링크를 따라 작업을 확인해주세요.

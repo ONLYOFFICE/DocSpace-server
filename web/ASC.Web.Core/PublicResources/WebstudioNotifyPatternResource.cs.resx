@@ -294,7 +294,7 @@ Požádal jste o trvalé odstranění Vašeho prostoru "${__VirtualRootPath}":"$
 *Důležité! Všechna data uložená na prostoru, stejně jako Vaše registrační údaje budou ztraceny a nemohou být obnoveny.*
 
 #if($AutoRenew == "True")
-Než odstraníte prostor, ujistěte se, že automatické vyúčtování je vypnuté. Můžete si zkontrolovat stav automatické fakturace v Vašem "Avangate učtu":"https://secure.avangate.com/myaccount/".
+Než odstraníte prostor, ujistěte se, že automatické vyúčtování je vypnuté. Můžete si zkontrolovat stav automatické fakturace v Vašem Stripe učtu.
 #end
 
 Pokud stále chcete odstranit Váš prostor "${__VirtualRootPath}":"${__VirtualRootPath}", prosím následujte odkaz níže pro potvrzení operace:
@@ -1289,7 +1289,7 @@ požádali jste o trvalé odstranění portálu [${__VirtualRootPath}](${__Virtu
 _Důležité! Veškerá data uložená na portálu, stejně jako vaše registrační údaje, budou ztracena a nebude možné je obnovit.
 
 #if($AutoRenew == "True")
-Před odstraněním portálu se ujistěte, že je vypnutá automatická fakturace. Stav automatické fakturace můžete zkontrolovat ve svém [účtu Avangate] (https://secure.avangate.com/myaccount/").
+Před odstraněním portálu se ujistěte, že je vypnutá automatická fakturace. Stav automatické fakturace můžete zkontrolovat ve svém účtu Stripe.
 #end
 
 Pokud přesto chcete svůj portál [${__VirtualRootPath}](${__VirtualRootPath}) odstranit, potvrďte operaci pomocí níže uvedeného odkazu:

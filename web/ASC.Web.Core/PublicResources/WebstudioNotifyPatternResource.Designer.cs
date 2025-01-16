@@ -1363,7 +1363,10 @@ namespace ASC.Web.Core.PublicResources {
         ///*Important! All the data stored in your space, as well as your registration details will be lost and cannot be recovered.*
         ///
         ///#if($AutoRenew == &quot;True&quot;)
-        ///Before you delete the space, please make sure that automatic billing is turned off. You may check the status of automatic billing in your &quot;Avangate account&quot;:&quot;https [rest of string was truncated]&quot;;.
+        ///Before you delete the space, please make sure that automatic billing is turned off. You may check the status of automatic billing in your Stripe account.
+        ///#end
+        ///
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_delete {
             get {
@@ -1392,7 +1395,10 @@ namespace ASC.Web.Core.PublicResources {
         ///_Important! All the data stored on your portal, as well as your registration details will be lost and cannot be recovered._
         ///
         ///#if($AutoRenew == &quot;True&quot;)
-        ///Before you delete the portal, please make sure that automatic billing is turned off. You may check the status of automatic billing in your [Avangate account](https:/ [rest of string was truncated]&quot;;.
+        ///Before you delete the portal, please make sure that automatic billing is turned off. You may check the status of automatic billing in your Stripe account.
+        ///#end
+        ///
+        ///I [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_delete_tg {
             get {

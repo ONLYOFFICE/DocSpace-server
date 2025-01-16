@@ -295,7 +295,7 @@ Bạn đã yêu cầu xóa vĩnh viễn cổng thông tin "${__VirtualRootPath}"
 *Quan trọng! Tất cả dữ liệu được lưu trữ trên cổng thông tin cũng như chi tiết đăng ký của bạn sẽ bị mất và không thể khôi phục.*
 
 #if($AutoRenew == "True")
-Trước khi xóa cổng thông tin này, hãy đảm bảo rằng thanh toán tự động đã được tắt. Bạn có thể kiểm tra trạng thái thanh toán tự động trong "tài khoản Avangate":"https://secure.avangate.com/myaccount/" của bạn.
+Trước khi xóa cổng thông tin này, hãy đảm bảo rằng thanh toán tự động đã được tắt. Bạn có thể kiểm tra trạng thái thanh toán tự động trong tài khoản Stripe của bạn.
 #end
 
 Nếu bạn vẫn muốn xoá cổng "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn, vui lòng truy cập liên kết bên dưới để xác nhận thao tác:
@@ -1375,7 +1375,7 @@ Bạn đã yêu cầu xóa vĩnh viễn cổng thông tin [${__VirtualRootPath}]
 _Quan trọng! Tất cả dữ liệu được lưu trữ trên cổng thông tin của bạn, cũng như thông tin đăng ký của bạn sẽ bị mất và không thể được phục hồi._
 
 #if($AutoRenew == "True")
-Trước khi bạn xóa cổng thông tin, xin vui lòng đảm bảo rằng thanh toán tự động đã được tắt. Bạn có thể kiểm tra trạng thái thanh toán tự động trong [tài khoản Avangate của mình](https://secure.avangate.com/myaccount/").
+Trước khi bạn xóa cổng thông tin, xin vui lòng đảm bảo rằng thanh toán tự động đã được tắt. Bạn có thể kiểm tra trạng thái thanh toán tự động trong tài khoản Stripe của mình.
 #end
 
 Nếu bạn vẫn muốn xóa cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) của mình, vui lòng nhấp vào liên kết bên dưới để xác nhận thao tác:

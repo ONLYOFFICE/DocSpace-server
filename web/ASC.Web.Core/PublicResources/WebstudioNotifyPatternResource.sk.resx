@@ -328,7 +328,7 @@ Požiadali ste o trvalé odstránenie Vášho priestoru "${__VirtualRootPath}":"
 *Dôležité! Všetky dáta uložené na Vašom priestore, ako aj Vaše registračné údaje, budú stratené a nebude možné ich obnoviť.
 
 #if($AutoRenew == "True")
-Predtým, ako vymažete priestor, prosím uistite sa, že automatická fakturácia je vypnutá. Stav automatickej fakturácie si môžete skontrolovať na Vašom "Avangate účte":"https://secure.avangate.com/myaccount/".
+Predtým, ako vymažete priestor, prosím uistite sa, že automatická fakturácia je vypnutá. Stav automatickej fakturácie si môžete skontrolovať na Vašom Stripe účte.
 #end
 
 Ak stále chcete vymazať Váš "${__VirtualRootPath}":"${__VirtualRootPath}" priestor, prosím postupujte podľa nižšieho linku pre potvrdenie operácie:
@@ -1440,7 +1440,7 @@ požiadali ste o trvalé vymazanie vášho portálu [${__VirtualRootPath}](${__V
 _Dôležité! Všetky údaje uložené na vašom portáli, ako aj vaše registračné údaje budú stratené a nebude možné ich obnoviť._
 
 #if($AutoRenew == "True")
-Pred vymazaním portálu sa uistite, že je vypnutá automatická fakturácia. Stav automatickej fakturácie si môžete skontrolovať vo svojom [Avangate account](https://secure.avangate.com/myaccount/").
+Pred vymazaním portálu sa uistite, že je vypnutá automatická fakturácia. Stav automatickej fakturácie si môžete skontrolovať vo svojom Stripe account.
 #end
 
 Ak aj napriek tomu chcete vymazať svoj portál [${__VirtualRootPath}](${__VirtualRootPath}), prejdite na nižšie uvedený odkaz a potvrďte operáciu:

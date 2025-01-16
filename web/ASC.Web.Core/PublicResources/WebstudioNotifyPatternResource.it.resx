@@ -460,7 +460,7 @@ Hai richiesto la rimozione definitiva del tuo spazio "${__VirtualRootPath}":"${_
 *Importante! Tutti i dati memorizzati sul tuo portale, così come i tuoi dati di registrazione, saranno persi e non possono essere recuperati. *
 
 #if($AutoRenew == "True")
-Prima di procedere all'eliminazione del portale, assicurati che la fatturazione automatica sia disattivata. Puoi verificare lo stato della fatturazione automatica nel tuo account"account Avangate":"https://secure.avangate.com/myaccount/".
+Prima di procedere all'eliminazione del portale, assicurati che la fatturazione automatica sia disattivata. Puoi verificare lo stato della fatturazione automatica nel tuo account Stripe.
 #end
 
 Se vuoi ancora eliminare il tuo portale "${__VirtualRootPath}":"${__VirtualRootPath}" andare sul link seguente per confermare l'operazione:
@@ -1409,7 +1409,7 @@ Hai richiesto di eliminare definitivamente il tuo portale [${__VirtualRootPath}]
 _Importante! Tutti i dati memorizzati sul tuo portale, così come i tuoi dati di registrazione andranno persi e non potranno essere recuperati._
 
 #if($AutoRenew == "True")
-Prima di eliminare il portale, assicurati che la fatturazione automatica sia disattivata. Puoi controllare lo stato della fatturazione automatica nel tuo [Avangate account](https://secure.avangate.com/myaccount/").
+Prima di eliminare il portale, assicurati che la fatturazione automatica sia disattivata. Puoi controllare lo stato della fatturazione automatica nel tuo Stripe account.
 #end
 
 Se desideri comunque eliminare il tuo portale [${__VirtualRootPath}](${__VirtualRootPath}), segui il link sottostante per confermare l'operazione:

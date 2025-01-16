@@ -298,7 +298,7 @@ Jūs pieprasījāt neatgriezeniski dzēst savu "${__VirtualRootPath}":"${__Virtu
 *Svarīgi! Visi portālā uzglabātie dati, kā arī reģistrācijas dati tiks zaudēti un tos nevarēs atjaunot.*
 
 #if($AutoRenew == "True")
-Pirms portāla dzēšanas pārliecinieties, ka automātiskais rēķins ir izslēgts. Jūs varat pārbaudīt automātiskā rēķina statusu savā "Avangate kontā":"https://secure.avangate.com/myaccount/".
+Pirms portāla dzēšanas pārliecinieties, ka automātiskais rēķins ir izslēgts. Jūs varat pārbaudīt automātiskā rēķina statusu savā Stripe kontā.
 #end
 
 Ja joprojām vēlaties dzēst savu "${__VirtualRootPath}":"${__VirtualRootPath}" portālu, lūdzu, sekojiet zemāk esošajai saitei, lai apstiprinātu operāciju:
@@ -1470,7 +1470,7 @@ Jūs pieprasījāt neatgriezeniski izdzēst savu [${__VirtualRootPath}](${__Virt
 _Important! Visi jūsu portālā saglabātie dati, kā arī jūsu reģistrācijas dati tiks zaudēti un tos nevarēs atgūt._
 
 #if($AutoRenew == "True")
-Pirms izdzēst portālu, pārliecinieties, vai automātiska norēķināšanās ir izslēgta. You may check the status of automatic billing in your [Avangate account](https://secure.avangate.com/myaccount/").
+Pirms izdzēst portālu, pārliecinieties, vai automātiska norēķināšanās ir izslēgta. You may check the status of automatic billing in your Stripe account.
 #end
 
 Ja joprojām vēlies izdzēst savu [${__VirtualRootPath}](${__VirtualRootPath}) portālu, izmantojiet tālāk norādīto saiti, lai apstiprinātu darbību:

@@ -480,7 +480,7 @@ Siz "${__VirtualRootPath}":"${__VirtualRootPath}" sahənizi həmişəlik silməy
 *Vacib! Sahənizdə saxlanılan bütün məlumatlar, eləcə də qeydiyyat məlumatlarınız itəcək və onları bərpa etmək mümkün olmayacaq.
 
 #if($AutoRenew == "True")
-Sahəni silməzdən əvvəl təkrar ödəniş seçiminin deaktiv edilib-edilmədiyini yoxlayın. Bunu "Avangate saytındakı şəxsi hesabınızda":"https://secure.avangate.com/myaccount/" edə bilərsiniz.
+Sahəni silməzdən əvvəl təkrar ödəniş seçiminin deaktiv edilib-edilmədiyini yoxlayın. Bunu Stripe saytındakı şəxsi hesabınızda edə bilərsiniz.
 #end
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" sahənizi silmək istəyirsinizsə, əməliyyatı təsdiqləmək üçün aşağıdakı linki izləyin:
@@ -503,7 +503,7 @@ Hörmətli $OwnerName,
 _Vacib! Portalınızda saxlanılan bütün məlumatlar, eləcə də qeydiyyat məlumatlarınız silinəcək və onları bərpa etmək mümkün olmayacaq._
 
 #if($AutoRenew == "True")
-Portalı silməzdən əvvəl avtomatik ödənişləri deaktiv etdiyinizə əmin olun. Siz avtomatik ödənişlərin statusunu [Avangate Hesabınızda yoxlaya bilərsiniz](https://secure.avangate.com/myaccount/").
+Portalı silməzdən əvvəl avtomatik ödənişləri deaktiv etdiyinizə əmin olun. Siz avtomatik ödənişlərin statusunu Stripe Hesabınızda yoxlaya bilərsiniz.
 #end
 
 [${__VirtualRootPath}](${__VirtualRootPath}) portalını silmək istəyirsinizsə, əməliyyatı təsdiqləmək üçün bu linki izləyin:

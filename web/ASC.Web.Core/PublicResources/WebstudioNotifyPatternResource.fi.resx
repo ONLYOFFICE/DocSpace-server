@@ -1305,7 +1305,7 @@ Olet pyytänyt [${__VirtualRootPath}](${__VirtualRootPath}) -portaalin lopullist
 *Tärkeää! Kaikki tilaasi tallennettu tieto mukaan lukien rekisteröintitiedot poistetaan eikä niitä voi palauttaa.*
 
 #if($AutoRenew == "True")
-Ennen kuin poistat tilan, ole hyvä ja varmista, että automaattinen laskutus on kytketty pois päältä. Voit tarkistaa automaattisen laskutuksen tilan [Avangate-tililläsi](https://secure.avangate.com/myaccount/").
+Ennen kuin poistat tilan, ole hyvä ja varmista, että automaattinen laskutus on kytketty pois päältä. Voit tarkistaa automaattisen laskutuksen tilan Stripe-tililläsi.
 #end
 
 Jos haluat silti poistaa "${__VirtualRootPath}":"${__VirtualRootPath}" -tilasi ole hyvä ja seuraa alla olevaa linkkiä vahvistaaksesi operaation:
@@ -1328,7 +1328,7 @@ Olet pyytänyt [${__VirtualRootPath}](${__VirtualRootPath}) -portaalin lopullist
 _Tärkeää! Kaikki portaaliisi tallennettu tieto mukaan lukien rekisteröintitiedot poistetaan eikä niitä voi palauttaa._
 
 #if($AutoRenew == "True")
-Ennen kuin poistat portaalin, ole hyvä ja varmista, että automaattinen laskutus on kytketty pois päältä. Voit tarkistaa automaattisen laskutuksen tilan [Avangate-tililläsi](https://secure.avangate.com/myaccount/").
+Ennen kuin poistat portaalin, ole hyvä ja varmista, että automaattinen laskutus on kytketty pois päältä. Voit tarkistaa automaattisen laskutuksen tilan Stripe-tililläsi.
 #end
 
 Jos haluat silti poistaa [${__VirtualRootPath}](${__VirtualRootPath}) -portaalisi ole hyvä ja seuraa alla olevaa linkkiä vahvistaaksesi operaation:

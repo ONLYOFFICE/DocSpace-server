@@ -330,7 +330,7 @@ Değerli $OwnerName,
 *Önemli! Alanınızdaki tüm veriler, kayıt bilgileri kaybolacak ve kurtarılamayacaktır.*
 
 #if($AutoRenew == "True")
-Alanınızı silmeden önce otomatik faturalandırmanın kapalı olduğundan emin olun. Otomatik faturalandırma statüsünü kontrol etmek için "Avangate hesabı":"https://secure.avangate.com/myaccount/" bölümüne gidebilirsiniz.
+Alanınızı silmeden önce otomatik faturalandırmanın kapalı olduğundan emin olun. Otomatik faturalandırma statüsünü kontrol etmek için Stripe hesabı bölümüne gidebilirsiniz.
 #end
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" alanınızı kesinlikle silmek istiyorsanız lütfen aşağıdaki linke tıklayın:
@@ -1298,7 +1298,7 @@ Sayın $OwnerName,
 _Önemli! Portalınızda saklanan tüm veriler ve kayıt bilgileriniz kaybolacaktır ve kurtarılamazlar._
 
 #if($AutoRenew == "True")
-Portalı silmeden önce, lütfen otomatik faturalamanın kapalı olduğundan emin olun. Otomatik faturalamanın durumunu [Avangate hesabı](https://secure.avangate.com/myaccount/") sayfanızdan kontrol edebilirsiniz.
+Portalı silmeden önce, lütfen otomatik faturalamanın kapalı olduğundan emin olun. Otomatik faturalamanın durumunu Stripe hesabı sayfanızdan kontrol edebilirsiniz.
 #end
 
 [${__VirtualRootPath}](${__VirtualRootPath}) portalınızı silmeye devam etmek istiyorsanız, lütfen işlemi onaylamak için aşağıdaki bağlantıya tıklayın:

@@ -294,7 +294,7 @@ Witam, $OwnerName,
 *Ważne! Wszystkie dane zapisane na Swojej stronie, a także informacje o rejestracji zostaną całkowicie usunięte bez możliwości odzyskania danych.*
 
 #if($AutoRenew == "True")
-Przed tym, jak usunąć miejsce, prosimy upewnić się, że opcja automatycznego odnowienia posiadanego abonamentu jest wyłączona. Sprawdzić stan tej opcji można w "gabinecie na miejscu Avangate":"https://secure.avangate.com/myaccount/".
+Przed tym, jak usunąć miejsce, prosimy upewnić się, że opcja automatycznego odnowienia posiadanego abonamentu jest wyłączona. Sprawdzić stan tej opcji można w gabinecie na miejscu Stripe.
 #end
 
 Jeśli nadal chcesz usunąć miejsce "${__VirtualRootPath}":"${__VirtualRootPath}", kliknij na poniższy link, aby potwierdzić operację:
@@ -1448,7 +1448,7 @@ Poproszono o trwałe usunięcie portalu [${__VirtualRootPath}](${__VirtualRootPa
 _Uwaga! Wszystkie dane przechowywane w portalu oraz dane rejestracyjne zostaną bezpowrotnie utracone._
 
 #if($AutoRenew == "True")
-Zanim usuniesz portal, upewnij się, że automatyczne fakturowanie jest wyłączone. Status automatycznego fakturowania sprawdzisz na koncie [Avangate](https://secure.avangate.com/myaccount/").
+Zanim usuniesz portal, upewnij się, że automatyczne fakturowanie jest wyłączone. Status automatycznego fakturowania sprawdzisz na koncie Stripe.
 #end
 
 Jeśli nadal chcesz usunąć portal [${__VirtualRootPath}](${__VirtualRootPath}), kliknij poniższy link, aby potwierdzić operację:

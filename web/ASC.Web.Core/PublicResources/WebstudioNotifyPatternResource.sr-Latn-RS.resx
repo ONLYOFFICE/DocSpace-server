@@ -1307,7 +1307,7 @@ Zahtevali ste da trajno izbrišete svoj prostor "${__VirtualRootPath}":"${__Virt
 *Važno! Svi podaci uskladišteni u vašem prostoru, kao i vaši podaci o registraciji biće izgubljeni i neće se moći povratiti.*
 
 #if($AutoRenew == "True")
-Pre nego što izbrišete prostor, uverite se da je automatski obračun isključen. Status automatske naplate možete da proverite u svom "Avangate account":"https://secure.avangate.com/myaccount/".
+Pre nego što izbrišete prostor, uverite se da je automatski obračun isključen. Status automatske naplate možete da proverite u svom Stripe account.
 #end
 
 Ako i dalje želite da izbrišete svoj prostor "${__VirtualRootPath}":"${__VirtualRootPath}", pratite link ispod da biste potvrdili operaciju:
@@ -1341,7 +1341,7 @@ Zahtevali ste da trajno izbrišete svoj [${__VirtualRootPath}](${__VirtualRootPa
 _Važno! Svi podaci sačuvani na vašem portalu, kao i vaši podaci o registraciji biće izgubljeni i ne mogu se povratiti._
 
 #if($AutoRenew == "True")
-Pre nego što izbrišete portal, uverite se da je automatski obračun isključen. Status automatskog obračuna možete da proverite na svom [Avangate account](https://secure.avangate.com/myaccount/").
+Pre nego što izbrišete portal, uverite se da je automatski obračun isključen. Status automatskog obračuna možete da proverite na svom Stripe account.
 #end
 
 Ako i dalje želite da izbrišete svoj portal [${__VirtualRootPath}](${__VirtualRootPath}), pratite donji link da biste potvrdili operaciju:

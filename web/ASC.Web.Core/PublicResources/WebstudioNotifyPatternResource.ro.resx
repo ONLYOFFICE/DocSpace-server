@@ -1328,7 +1328,7 @@ Ați solicitat ștergerea definitivă a spațiului "${__VirtualRootPath}":"${__V
 *Important! Toate datele stocate în spațiul dvs, inclusiv detaliile de înregistrare, se vor pierde nerecuperabil.*
 
 #if($AutoRenew == "True")
-Înainte să ştergeţi spaţiul, asiguraţi-vă că opţiunea de facturare automată este dezactivată. Puteţi verifica starea facturării automate pentru "contul dvs Avangate":"https://secure.avangate.com/myaccount/".
+Înainte să ştergeţi spaţiul, asiguraţi-vă că opţiunea de facturare automată este dezactivată. Puteţi verifica starea facturării automate pentru contul dvs Stripe.
 #end
 
 Dacă doriți totuși să ștergeți spațiul dvs "${__VirtualRootPath}":"${__VirtualRootPath}", urmăriți linkul de mai jos pentru a confirma acțiunea:
@@ -1351,7 +1351,7 @@ Ați solicitat ștergerea definitivă a portalului dvs [${__VirtualRootPath}](${
 _ Important! Toate datele stocate pe portalul dvs, inclusiv detaliile de înregistrare, se vor pierde nerecuperabil._
 
 #if($AutoRenew == "True")
-Înainte să ştergeţi portalul, asiguraţi-vă că opţiunea de facturare automată este dezactivată. Puteţi verifica starea facturării automate în [Avangate account](https://secure.avangate.com/myaccount/").
+Înainte să ştergeţi portalul, asiguraţi-vă că opţiunea de facturare automată este dezactivată. Puteţi verifica starea facturării automate în Stripe account.
 #end
 
 Dacă doriți totuși să ștergeți portalul [${__VirtualRootPath}](${__VirtualRootPath}), urmăriți linkul de mai jos pentru a confirma acțiunea:

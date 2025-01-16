@@ -500,7 +500,7 @@ Você solicitou a exclusão permanente do espaço "${__VirtualRootPath}":"${__Vi
 *Importante! Todos dados armazenados no seu portal, bem como suas informações de registro serão perdidos e não poderão ser recuperados.*
 
 #if($AutoRenew == "True")
-Antes de excluir o seu portal, por favor, certifique-se de que o faturamento automático esteja desativado. Você pode verificar o status do faturamento automático em sua "conta do Avangate":"https://secure.avangate.com/myaccount/".
+Antes de excluir o seu portal, por favor, certifique-se de que o faturamento automático esteja desativado. Você pode verificar o status do faturamento automático em sua conta do Stripe.
 #end
 
 Se você ainda assim quiser excluir o seu portal "${__VirtualRootPath}":"${__VirtualRootPath}", por favor, siga o link abaixo para confirmar a operação:
@@ -523,7 +523,7 @@ Você solicitou a eliminação permanente de seu portal [${__VirtualRootPath}]($
 _Importante! Todos os dados armazenados em seu portal, assim como seus dados de registro serão perdidos e não poderão ser recuperados._
 
 #if($AutoRenovar == "Verdadeiro")
-Antes de excluir o portal, certifique-se de que o faturamento automático esteja desligado. Você pode verificar o status da cobrança automática em sua [conta Avangate](https://secure.avangate.com/myaccount/").
+Antes de excluir o portal, certifique-se de que o faturamento automático esteja desligado. Você pode verificar o status da cobrança automática em sua conta Stripe.
 #final
 
 Se você ainda quiser excluir seu portal [${__VirtualRootPath}](${__VirtualRootPath}), por favor, siga o link abaixo para confirmar a operação:

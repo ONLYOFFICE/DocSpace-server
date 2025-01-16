@@ -480,7 +480,7 @@ Sie haben permanent Ihr DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" z
 *Wichtig! Alle Daten, die auf dem DocSpace gespeicherten wurden, sowie Ihre Registrierungsdaten, werden gelöscht und können nicht wiederhergestellt werden.*
  
 #if($AutoRenew == "True")
-Bevor Sie Ihr DocSpace löschen lassen, vergewissern Sie sich, dass die Option der automatischen Verlängerung Ihres Abonnements ausgeschaltet ist. Überprüfen Sie den Status dieser Option über Ihr persönliches Konto auf der "Avangate-Website":"https://secure.avangate.com/myaccount/".
+Bevor Sie Ihr DocSpace löschen lassen, vergewissern Sie sich, dass die Option der automatischen Verlängerung Ihres Abonnements ausgeschaltet ist. Überprüfen Sie den Status dieser Option über Ihr persönliches Konto auf der Stripe-Website.
 #end
  
 Wenn Sie noch Ihr DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" löschen möchten, folgen Sie bitte dem Link herunter, um den Vorgang zu bestätigen:
@@ -503,7 +503,7 @@ Sie haben das dauerhaft Löschen Ihres Portals [${__VirtualRootPath}](${__Virtua
 _Wichtig! Alle im Portal gespeicherten Daten und alle Registrierungs-Details werden dadurch verloren gehen und können nicht wieder hergestellt werden._
 
 #if($AutoRenew == "True")
-Bitte stelle Sie vor dem Löschen des Portals sicher, dass die automatische Rechnungsstellung ausgeschaltet ist. Sie können den Status der automatischen Rechnungsstellung in Ihrem [Avangate Account](https://secure.avangate.com/myaccount/") kontrollieren.
+Bitte stelle Sie vor dem Löschen des Portals sicher, dass die automatische Rechnungsstellung ausgeschaltet ist. Sie können den Status der automatischen Rechnungsstellung in Ihrem Stripe Account kontrollieren.
 #end
 
 Wenn Sie Ihr Portal [${__VirtualRootPath}](${__VirtualRootPath}) wirklich löschen wollen, bestätigen Sie bitte die Operation mit folgendem Link:

@@ -295,7 +295,7 @@ U heeft een verzoek gedaan voor permanente verwijdering van uw ruimte "${__Virtu
 *Belangrijk! Alle data die is opgeslagen op uw ruimte, en ook uw registratiegegevens gaan verloren en kunnen niet worden hersteld.*
 
 #if($AutoRenew == "True")
-Zorg er, voordat u het ruimte verwijdert, alstublieft voor dat automatische facturering uit staat. U kunt de status van automatische facturering bekijken in uw "Avangate account":"https://secure.avangate.com/myaccount/".
+Zorg er, voordat u het ruimte verwijdert, alstublieft voor dat automatische facturering uit staat. U kunt de status van automatische facturering bekijken in uw Stripe account.
 #end
 
 Als u uw ruimte "${__VirtualRootPath}":"${__VirtualRootPath}" nog steeds wilt verwijderen, klik dan alstublieft op de link om de actie te bevestigen:
@@ -1384,7 +1384,7 @@ U hebt verzocht om uw ruimte [${__VirtualRootPath}](${__VirtualRootPath}) defini
 _Belangrijk Alle in uw ruimte opgeslagen gegevens en uw registratiegegevens gaan verloren en kunnen niet worden hersteld.
 
 #if($AutoRenew == "True")
-Voordat u de ruimte verwijdert, moet u ervoor zorgen dat automatische facturatie is uitgeschakeld. U kunt de automatische facturatie status controleren in uw [Avangate account](https://secure.avangate.com/myaccount/").
+Voordat u de ruimte verwijdert, moet u ervoor zorgen dat automatische facturatie is uitgeschakeld. U kunt de automatische facturatie status controleren in uw Stripe account.
 #end
 
 Als u toch uw ruimte [${__VirtualRootPath}](${__VirtualRootPath}) wilt verwijderen, volg dan de onderstaande link om de handeling te bevestigen:

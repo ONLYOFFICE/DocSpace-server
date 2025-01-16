@@ -418,7 +418,7 @@ Usted ha solicitado eliminación permanente de su portal "${__VirtualRootPath}":
 *¡Importante! Todos los datos almacenados en su portal, así como sus datos de registro se perderán y no pueden recuperarse.*
 
 #if($AutoRenew == "True")
-Antes de eliminar el portal, por favor, asegúrese de que la opción de renovación automática de la suscripción utilizada sea desactivada. Verificar el estado de esta opción Usted puede en la "cuenta privada en el sitio web Avangate":"https://secure.avangate.com/myaccount/".
+Antes de eliminar el portal, por favor, asegúrese de que la opción de renovación automática de la suscripción utilizada sea desactivada. Verificar el estado de esta opción Usted puede en la cuenta privada en el sitio web Stripe.
 #end
 
 Si todavía desea borrar su portal "${__VirtualRootPath}":"${__VirtualRootPath}" por favor siga el siguiente enlace para confirmar la operación:
@@ -441,7 +441,7 @@ Ha solicitado eliminar permanentemente su portal [${__VirtualRootPath}](${__Virt
 _¡Importante! Todos los datos almacenados en su portal, así como sus datos de registro, se perderán y no podrán ser recuperados._
 
 #if($AutoRenew == "True")
-Antes de eliminar el portal, por favor asegúrese de que la facturación automática esté desactivada. Puede comprobar el estado de la facturación automática en su [cuenta Avangate](https://secure.avangate.com/myaccount/").
+Antes de eliminar el portal, por favor asegúrese de que la facturación automática esté desactivada. Puede comprobar el estado de la facturación automática en su cuenta Stripe.
 #end
 
 Si todavía quiere eliminar su portal [${__VirtualRootPath}](${__VirtualRootPath}), por favor siga el enlace de abajo para confirmar la operación:

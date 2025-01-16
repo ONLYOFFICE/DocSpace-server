@@ -417,7 +417,7 @@ Vous avez demandé de supprimer définitivement votre espace "${__VirtualRootPat
 *Important ! Toutes les données stockées sur votre espace, ainsi que les détails de votre inscription seront perdues et ne peuvent pas être récupérées.*
 
 #if($AutoRenew == "True")
-Avant de supprimer l'espace veuillez vérifier si l'option du paiement récurrent est desactivée. Vous pouvez le faire dans votre "compte personnel sur le site Avangate":"https://secure.avangate.com/myaccount/".
+Avant de supprimer l'espace veuillez vérifier si l'option du paiement récurrent est desactivée. Vous pouvez le faire dans votre compte personnel sur le site Stripe.
 #end
 
 Si vous souhaitez supprimer votre espace "${__VirtualRootPath}":"${__VirtualRootPath}", veuillez suivre le lien ci-dessous pour confirmer l'opération:
@@ -440,7 +440,7 @@ Vous avez démandé de supprimer temporairement votre portail [${__VirtualRootPa
 _Important ! Toutes les données stockées sur votre portail, aussi bien que vos données d'enregistrement seront effacées et ne pourront pas être récupérées._
 
 #if($AutoRenew == "True")
-Avant de supprimer le portail, assurez-vous d'avoir désactivé les paiements automatiques. Vous pouvez vérifier le statut des paiements automatiques dans votre [Compte Avangate](https://secure.avangate.com/myaccount/").
+Avant de supprimer le portail, assurez-vous d'avoir désactivé les paiements automatiques. Vous pouvez vérifier le statut des paiements automatiques dans votre Compte Stripe.
 #end
 
 Si vous voulez supprimer le portail [${__VirtualRootPath}](${__VirtualRootPath}), suivez ce lien pour confirmer l'opération :

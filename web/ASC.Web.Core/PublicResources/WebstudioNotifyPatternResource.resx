@@ -589,7 +589,7 @@ You have requested to permanently delete your "${__VirtualRootPath}":"${__Virtua
 *Important! All the data stored in your space, as well as your registration details will be lost and cannot be recovered.*
 
 #if($AutoRenew == "True")
-Before you delete the space, please make sure that automatic billing is turned off. You may check the status of automatic billing in your "Avangate account":"https://secure.avangate.com/myaccount/".
+Before you delete the space, please make sure that automatic billing is turned off. You may check the status of automatic billing in your Stripe account.
 #end
 
 If you still want to delete your "${__VirtualRootPath}":"${__VirtualRootPath}" space please follow the link below to confirm the operation:
@@ -612,7 +612,7 @@ You have requested to permanently delete your [${__VirtualRootPath}](${__Virtual
 _Important! All the data stored on your portal, as well as your registration details will be lost and cannot be recovered._
 
 #if($AutoRenew == "True")
-Before you delete the portal, please make sure that automatic billing is turned off. You may check the status of automatic billing in your [Avangate account](https://secure.avangate.com/myaccount/").
+Before you delete the portal, please make sure that automatic billing is turned off. You may check the status of automatic billing in your Stripe account.
 #end
 
 If you still want to delete your [${__VirtualRootPath}](${__VirtualRootPath}) portal please follow the link below to confirm the operation:
