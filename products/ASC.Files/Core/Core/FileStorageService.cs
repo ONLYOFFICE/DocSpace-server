@@ -4311,7 +4311,7 @@ public class FileStorageService //: IFileStorageService
 
     private Exception GenerateException(Exception error, bool warning = false)
     {
-        if (warning)
+        if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
         {
             _logger.Information(error.ToString());
         }
