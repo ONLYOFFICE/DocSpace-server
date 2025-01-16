@@ -49,7 +49,6 @@ public class SetupInfo
     public long ChunkUploadSize { get; set; }
     public long ProviderMaxUploadSize { get; private set; }
     public bool ThirdPartyAuthEnabled { get; private set; }
-    public string NotifyAddress { get; private set; }
     public string TipsAddress { get; private set; }
     public string WebApiBaseUrl { get { return VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/")); } }
 
@@ -99,7 +98,6 @@ public class SetupInfo
         ProviderMaxUploadSize = GetAppSettings("files:provider:max-upload-size", 1024L * 1024L * 1024L);
         ThirdPartyAuthEnabled = string.Equals(GetAppSettings("web:thirdparty-auth", "true"), "true");
 
-        NotifyAddress = GetAppSettings("web.promo-url", string.Empty);
         TipsAddress = GetAppSettings("web.promo-tips-url", string.Empty);
 
         _webAutotestSecretEmail = GetAppSettings("web:autotest:secret-email", string.Empty);
