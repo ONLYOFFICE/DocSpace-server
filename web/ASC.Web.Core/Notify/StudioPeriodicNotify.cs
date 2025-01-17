@@ -124,6 +124,20 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var img5 = string.Empty;
                 var img6 = string.Empty;
                 var img7 = string.Empty;
+                var url1 = string.Empty;
+                var url2 = string.Empty;
+                var url3 = string.Empty;
+                var url4 = string.Empty;
+                var url5 = string.Empty;
+                var url6 = string.Empty;
+                var url7 = string.Empty;
+                var url8 = string.Empty;
+                var url9 = string.Empty;
+                var url10 = string.Empty;
+                var url11 = string.Empty;
+                var url12 = string.Empty;
+                var url13 = string.Empty;
+                var url14 = string.Empty;
                 Func<CultureInfo, string> txtTrulyYours = c =>  WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
                 var topGif = string.Empty;
 
@@ -165,7 +179,22 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img5 = studioNotifyHelper.GetNotificationImageUrl("administration.png");
 
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonWatchFullPlaylist", c);
-                        orangeButtonUrl = "https://www.youtube.com/playlist?list=PLCF48HEKMOYM8MBnwYs8q5J0ILMK9NzIx";
+                        orangeButtonUrl = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesplaylist");
+
+                        url1 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspacefull");
+                        url2 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspacerooms");
+                        url3 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspaceroles");
+                        url4 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspacesecurity");
+                        url5 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspacecreatefiles");
+                        url6 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspaceprofile");
+                        url7 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspacebackup");
+                        url8 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspacewhatis");
+                        url9 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspaceoperationswithfiles");
+                        url10 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspaceactivesessions");
+                        url11 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspacearchive");
+                        url12 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspacefilterfiles");
+                        url13 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspacefileversions");
+                        url14 = setupInfo.LinksToExternalResources.GetValueOrDefault("videoguidesdocspacehotkeys");
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("video_guides.gif");
 
@@ -433,6 +462,21 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         new TagValue("IMG4", img4),
                         new TagValue("IMG5", img5),
                         new TagValue("IMG6", img6),
+                        new TagValue("IMG7", img7),
+                        new TagValue("URL1", url1),
+                        new TagValue("URL2", url2),
+                        new TagValue("URL3", url3),
+                        new TagValue("URL4", url4),
+                        new TagValue("URL5", url5),
+                        new TagValue("URL6", url6),
+                        new TagValue("URL7", url7),
+                        new TagValue("URL8", url8),
+                        new TagValue("URL9", url9),
+                        new TagValue("URL10", url10),
+                        new TagValue("URL11", url11),
+                        new TagValue("URL12", url12),
+                        new TagValue("URL13", url13),
+                        new TagValue("URL14", url14),
                         new TagValue(CommonTags.TopGif, topGif),
                         new TagValue(Tags.PaymentDelay, tariffService.GetPaymentDelay()),
                         new TagValue(CommonTags.Footer, await userManager.IsDocSpaceAdminAsync(u) ? "common" : "social"));
