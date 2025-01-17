@@ -572,7 +572,7 @@ $activity.Key
   <!-- saas admin trial modules v1 for DocSpace -->
   <pattern id="saas_admin_modules_v1">
     <subject resource="|subject_saas_admin_modules_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_modules_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_modules_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <pattern id="saas_custom_mode_reg_data">
