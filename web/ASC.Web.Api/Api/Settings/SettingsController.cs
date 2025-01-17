@@ -99,8 +99,8 @@ public partial class SettingsController(MessageService messageService,
             TenantStatus = tenant.Status,
             TenantAlias = tenant.Alias,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
-            LegalTerms = setupInfo.LinksToExternalResources.Get("legalterms"),
-            LicenseUrl = setupInfo.LinksToExternalResources.Get("license"),
+            LegalTerms = setupInfo.LinksToExternalResources.GetValueOrDefault("legalterms"),
+            LicenseUrl = setupInfo.LinksToExternalResources.GetValueOrDefault("license"),
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
             ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager),
@@ -131,8 +131,8 @@ public partial class SettingsController(MessageService messageService,
             settings.DomainValidator = tenantDomainValidator;
             settings.ZendeskKey = setupInfo.ZendeskKey;
             settings.TagManagerId = setupInfo.TagManagerId;
-            settings.BookTrainingEmail = setupInfo.LinksToExternalResources.Get("booktrainingemail");
-            settings.DocumentationEmail = setupInfo.LinksToExternalResources.Get("documentationemail");
+            settings.BookTrainingEmail = setupInfo.LinksToExternalResources.GetValueOrDefault("booktrainingemail");
+            settings.DocumentationEmail = setupInfo.LinksToExternalResources.GetValueOrDefault("documentationemail");
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
 
@@ -150,7 +150,7 @@ public partial class SettingsController(MessageService messageService,
 
             settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
             settings.FeedbackAndSupportLink = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
-            settings.ApiDocsLink = setupInfo.LinksToExternalResources.Get("api");
+            settings.ApiDocsLink = setupInfo.LinksToExternalResources.GetValueOrDefault("api");
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
             {

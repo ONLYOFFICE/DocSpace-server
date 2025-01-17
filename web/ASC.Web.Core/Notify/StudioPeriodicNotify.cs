@@ -310,7 +310,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                                 toowner = true;
 
                                 orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
-                                orangeButtonUrl = setupInfo.LinksToExternalResources.Get("removeportalfeedbackform");
+                                orangeButtonUrl = setupInfo.LinksToExternalResources.GetValueOrDefault("removeportalfeedbackform");
 
                                 topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
 
@@ -398,7 +398,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         toowner = true;
 
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
-                        orangeButtonUrl = setupInfo.LinksToExternalResources.Get("removeportalfeedbackform");
+                        orangeButtonUrl = setupInfo.LinksToExternalResources.GetValueOrDefault("removeportalfeedbackform");
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
 

@@ -656,7 +656,7 @@ public class PortalController(
         }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
-        var redirectLink = setupInfo.LinksToExternalResources.Get("removeportalfeedbackform");
+        var redirectLink = setupInfo.LinksToExternalResources.GetValueOrDefault("removeportalfeedbackform");
 
         await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 
