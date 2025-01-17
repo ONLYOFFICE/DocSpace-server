@@ -269,6 +269,11 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         orangeButtonText5 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
                         orangeButtonUrl5 = GetExternalResource("integrationpipedrive");
 
+                        url1 = c => GetExternalResource("integrationzoomlearnmore");
+                        url2 = c => GetExternalResource("integrationzapierlearnmore");
+                        url3 = c => GetExternalResource("integrationwordpresslearnmore");
+                        url4 = c => GetExternalResource("integrationdrupallearnmore");
+
                         topGif = studioNotifyHelper.GetNotificationImageUrl("integration.gif");
 
                         trulyYoursAsTebleRow = true;
