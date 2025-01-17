@@ -35,7 +35,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
     {
         var (scriptFilePath, tempFileName, outputFileName) = await GetRoomIndexExportData(serviceProvider, _userId, _data.RoomId);
 
-        return new DocumentBuilderInputData(null, scriptFilePath, tempFileName, outputFileName);
+        return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
     }
 
     protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)
@@ -73,9 +73,9 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
         await filesMessageService.SendAsync(MessageAction.RoomIndexExportSaved, room, headers: headers);
 
-        if (System.IO.File.Exists(inputData.ScriptFilePath))
+        if (System.IO.File.Exists(inputData.Script))
         {
-            System.IO.File.Delete(inputData.ScriptFilePath);
+            System.IO.File.Delete(inputData.Script);
         }
 
         return file;
@@ -158,7 +158,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
         script = script
             .Replace("${tempFileName}", tempFileName)
-            .Replace("${inputData}", JsonConvert.SerializeObject(data));
+            .Replace("${inputData}", JsonSerializer.Serialize(data));
 
         var scriptParts = script.Split("${inputDataItems}");
 
@@ -251,7 +251,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
             if (items.Count > 0)
             {
-                var jsonArray = JsonConvert.SerializeObject(items);
+                var jsonArray = JsonSerializer.Serialize(items);
 
                 var text = separator + jsonArray.TrimStart('[').TrimEnd(']');
 

@@ -96,8 +96,6 @@ global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.Hosting.WindowsServices;
-global using SixLabors.ImageSharp;
-global using SixLabors.ImageSharp.Formats;
 
 global using Swashbuckle.AspNetCore.Annotations;
 

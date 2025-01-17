@@ -52,6 +52,23 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
     }
 }
 
+public class Size
+{
+    public uint Height { get; set; }
+    public uint Width { get; set; }
+
+    public static implicit operator Size(MagickGeometry cache)
+    {
+        return new Size
+        {
+            Height = cache.Height, 
+            Width = cache.Width
+        };
+    }
+}
+
+public record Point(int X, int Y);
+
 [Scope]
 public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
     StorageFactory storageFactory,
@@ -83,7 +100,7 @@ public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
         catch
         {
         }
-        tenantInfoSettings.CompanyLogoSize = default;
+        tenantInfoSettings.CompanyLogoSize = null;
 
         await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
     }
@@ -103,9 +120,9 @@ public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
             }
         }
         using (var memory = new MemoryStream(data))
-        using (var image = await Image.LoadAsync(memory))
+        using (var image = new MagickImage(memory))
         {
-            tenantInfoSettings.CompanyLogoSize = image.Size;
+            tenantInfoSettings.CompanyLogoSize = new MagickGeometry(image.Width, image.Height);
 
             memory.Seek(0, SeekOrigin.Begin);
             await store.SaveAsync(companyLogoFileName, memory);
