@@ -297,6 +297,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img3 = studioNotifyHelper.GetNotificationImageUrl("linux.png");
                         img4 = studioNotifyHelper.GetNotificationImageUrl("android.png");
 
+                        url1 = c => GetExternalResource("sitedownload-desktop");
+                        url2 = c => GetExternalResource("sitedownload-mobile");
+
                         trulyYoursAsTebleRow = true;
                     }
 
@@ -626,6 +629,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img2 = studioNotifyHelper.GetNotificationImageUrl("apple.png");
                         img3 = studioNotifyHelper.GetNotificationImageUrl("linux.png");
                         img4 = studioNotifyHelper.GetNotificationImageUrl("android.png");
+
+                        url1 = c => GetExternalResource("sitedownload-desktop");
+                        url2 = c => GetExternalResource("sitedownload-mobile");
 
                         trulyYoursAsTableRow = true;
                     }
