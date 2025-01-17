@@ -326,7 +326,7 @@ $activity.Key
   <!-- saas admin activation v1 for docspace-->
   <pattern id="saas_admin_activation_v1">
     <subject resource="|subject_saas_admin_activation_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_activation_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_activation_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise admin activationv1 for docspace -->
