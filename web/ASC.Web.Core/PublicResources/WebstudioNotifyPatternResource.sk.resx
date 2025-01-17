@@ -130,7 +130,7 @@ Vážený $OwnerName,
 
 Zálohový súbor obsahujúci dáta z Vášho "${__VirtualRootPath}":"${__VirtualRootPath}" portálu bol vytvorený.
 
-Viac informácií o zálohovaní nájdete v našej "Data backup":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block" užívateľskej príručke.
+Viac informácií o zálohovaní nájdete v našej "Data backup":"$URL1" užívateľskej príručke.
 
 
 Ak máte nejaké otázky alebo potrebujete asistenciu, prosím neváhajte nás kontaktovať na "${__SupportLink}":"${__SupportLink}"
@@ -1142,7 +1142,7 @@ Vážený / Vážená $OwnerName,
 
 Záložný súbor obsahujúci údaje z vášho portálu [${__VirtualRootPath}](${__VirtualRootPath}) bol vytvorený.
 
-Viac informácií o postupe zálohovania nájdete v našej [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) príručke pre používateľov.
+Viac informácií o postupe zálohovania nájdete v našej [Data backup](${URL1}) príručke pre používateľov.
 
 Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať na adrese [${__SupportLink}](${__SupportLink})
 
@@ -1850,7 +1850,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Upozornenie:&lt;/b&gt; niektoré nastavenia sú dostupné len v rámci tarifu DocSpace Business.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Navštívte naše &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Centrum pomoci&lt;/a&gt; a dozviete sa viac o konfigurácii a správe vášho priestoru ONLYOFFICE DocSpace. Môžete doň nahliadnuť aj v prípade otázok o funkcionalite.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Navštívte naše &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Centrum pomoci&lt;/a&gt; a dozviete sa viac o konfigurácii a správe vášho priestoru ONLYOFFICE DocSpace. Môžete doň nahliadnuť aj v prípade otázok o funkcionalite.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

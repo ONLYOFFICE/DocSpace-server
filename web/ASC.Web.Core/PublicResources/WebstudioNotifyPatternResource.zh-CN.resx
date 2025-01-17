@@ -103,7 +103,7 @@ $OrangeButton
 
 含有来自您的 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户的备份文件已创建。
 
-若想了解关于备份流程的详情，请参考我们的 "数据备份":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block" 用户指南。
+若想了解关于备份流程的详情，请参考我们的 "数据备份":"$URL1" 用户指南。
 
 
 若您有任何问题或需要帮助，请随时联系我们，网站为"${__SupportLink}":"${__SupportLink}"
@@ -990,7 +990,7 @@ $TrulyYours</value>
 
 已创建包含来自 [${__VirtualRootPath}](${__VirtualRootPath}) 门户数据的备份文件。
 
-如需了解更多有关备份流程的信息，请参考我们的[数据备份](${__HelpLink}/tipstricks/data-backup-restore.aspx)用户指南。
+如需了解更多有关备份流程的信息，请参考我们的[数据备份](${URL1})用户指南。
  
 如果您有任何问题或是需要协助，欢迎随时通过[${__SupportLink}](${__SupportLink}) 联系我们
 
@@ -1851,7 +1851,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;请注意：&lt;/b&gt;部分设置仅在协作空间专业版可用。&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;欢迎访问我们的&lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;帮助中心&lt;/a&gt;详细了解有关配置，管理您的 ONLYOFFICE 协作空间。若您对功能有疑问，也欢迎咨询。&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;欢迎访问我们的&lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;帮助中心&lt;/a&gt;详细了解有关配置，管理您的 ONLYOFFICE 协作空间。若您对功能有疑问，也欢迎咨询。&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

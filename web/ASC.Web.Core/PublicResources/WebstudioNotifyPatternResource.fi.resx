@@ -911,7 +911,7 @@ Hyvä $OwnerName,
 
 Varmuuskopiotiedosto, joka sisältää tiedot portaalistasi "${__VirtualRootPath}":"${__VirtualRootPath}" on luotu.
 
-Lisätietoa varmuuskopioinnista löytyy "Tietojen varmuuskopiointi":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block" - käyttäjäoppaasta.
+Lisätietoa varmuuskopioinnista löytyy "Tietojen varmuuskopiointi":"$URL1" - käyttäjäoppaasta.
 
 Jos sinulla on kysyttävää tai tarvitset apua ole hyvä ja ota meihin yhteyttä "${__SupportLink}":"${__SupportLink}"
 
@@ -924,7 +924,7 @@ Hyvä $OwnerName,
 
 Varmuuskopiotiedosto, joka sisältää tiedot portaalistasi [${__VirtualRootPath}](${__VirtualRootPath}) on luotu.
 
-Lisätietoa varmuuskopioinnista löytyy [Tietojen varmuuskopiointi](${__HelpLink}/tipstricks/data-backup-restore.aspx) käyttäjäoppaasta.
+Lisätietoa varmuuskopioinnista löytyy [Tietojen varmuuskopiointi](${URL1}) käyttäjäoppaasta.
 
 Jos sinulla on kysyttävää tai tarvitset apua ole hyvä ja ota meihin yhteyttä [${__SupportLink}](${__SupportLink})
 
@@ -1826,7 +1826,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Huom:&lt;/b&gt; jotkut asetuksista ovat saatavilla ainoastaan DocSpace Businekseen.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Käy &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Help Centerissämme&lt;/a&gt; oppiaksesi enemmän ONLYOFFICE DocSpacesi konfiguroinnista ja hallinnasta. Olet myös tervetullut kysymään neuvoja, jos sinulla on kysymyksiä käytettävyydestä.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Käy &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Help Centerissämme&lt;/a&gt; oppiaksesi enemmän ONLYOFFICE DocSpacesi konfiguroinnista ja hallinnasta. Olet myös tervetullut kysymään neuvoja, jos sinulla on kysymyksiä käytettävyydestä.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

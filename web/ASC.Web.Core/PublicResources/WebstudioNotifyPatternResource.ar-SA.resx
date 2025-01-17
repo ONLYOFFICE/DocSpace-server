@@ -555,7 +555,7 @@ $OrangeButton
 
 تم إنشاء ملف نسخ احتياطي يحتوي على بيانات من بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
 
-لمعرفة المزيد حول إجراء النسخ الاحتياطي ، يرجى الرجوع إلى دليل المستخدم "النسخ الاحتياطي للبيانات":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block"
+لمعرفة المزيد حول إجراء النسخ الاحتياطي ، يرجى الرجوع إلى دليل المستخدم "النسخ الاحتياطي للبيانات":"$URL1"
 
 
 إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة فلا تتردد في الاتصال بنا على "${__SupportLink}":"${__SupportLink}"
@@ -570,7 +570,7 @@ $TrulyYours</value>
 
 تم إنشاء ملف نسخ احتياطي يحتوي على بيانات من بوابة [${__VirtualRootPath}](${__VirtualRootPath}).
 
-لمعرفة المزيد حول إجراء النسخ الاحتياطي ، يرجى الرجوع إلى دليل المستخدم [النسخ الاحتياطي للبيانات](${__HelpLink}/tipstricks/data-backup-restore.aspx).
+لمعرفة المزيد حول إجراء النسخ الاحتياطي ، يرجى الرجوع إلى دليل المستخدم [النسخ الاحتياطي للبيانات](${URL1}).
 
 إذا كان لديك أي أسئلة أو كنت بحاجة إلى مساعدة ، فلا تتردد في الاتصال بنا على [${__SupportLink}](${__SupportLink})
 
@@ -1974,7 +1974,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;ملاحظة:&lt;/b&gt; بعض الإعدادات متاحة فقط في خطة "DocSpace Business".&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;تفضل بزيارة &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;مركز المساعدة&lt;/a&gt; مركز المساعدة&lt;/a&gt; لمعرفة المزيد حول تكوين وإدارة ONLYOFFICE DocSpace. نرحب أيضا بالرجوع إليها عندما تكون لديك أسئلة حول الوظيفة.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;تفضل بزيارة &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;مركز المساعدة&lt;/a&gt; مركز المساعدة&lt;/a&gt; لمعرفة المزيد حول تكوين وإدارة ONLYOFFICE DocSpace. نرحب أيضا بالرجوع إليها عندما تكون لديك أسئلة حول الوظيفة.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

@@ -207,7 +207,7 @@ Dear $OwnerName,
 
 A backup file containing data from your "${__VirtualRootPath}":"${__VirtualRootPath}" portal has been created.
 
-To learn more on the backup procedure please refer to our "Data backup":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block" user guide.
+To learn more on the backup procedure please refer to our "Data backup":"$URL1" user guide.
 
 
 If you have any questions or need assistance please feel free to contact us at "${__SupportLink}":"${__SupportLink}"
@@ -221,7 +221,7 @@ Dear $OwnerName,
 
 A backup file containing data from your [${__VirtualRootPath}](${__VirtualRootPath}) portal has been created.
 
-To learn more on the backup procedure please refer to our [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) user guide.
+To learn more on the backup procedure please refer to our [Data backup](${URL1}) user guide.
 
 If you have any questions or need assistance please feel free to contact us at [${__SupportLink}](${__SupportLink})
 
@@ -2314,7 +2314,7 @@ $TrulyYours</comment>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Please note:&lt;/b&gt; some of the settings are available in the DocSpace Business plan only.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Visit our &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Help Center&lt;/a&gt; to learn more about configuring and managing your ONLYOFFICE DocSpace. You are also welcome to consult it when you have questions about the functionality.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Visit our &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Help Center&lt;/a&gt; to learn more about configuring and managing your ONLYOFFICE DocSpace. You are also welcome to consult it when you have questions about the functionality.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
     <comment>Configure your ONLYOFFICE DocSpace

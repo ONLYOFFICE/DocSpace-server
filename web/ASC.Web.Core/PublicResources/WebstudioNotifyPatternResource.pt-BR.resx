@@ -145,7 +145,7 @@ Caro(a) $OwnerName,
 
 Um arquivo de backup contendo dados do seu portal "${__VirtualRootPath}":"${__VirtualRootPath}" foi criado.
 
-Para saber mais sobre o procedimento de backup, por favor, consulte nosso guia de usuário "Backup de dados":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
+Para saber mais sobre o procedimento de backup, por favor, consulte nosso guia de usuário "Backup de dados":"$URL1".
 
 
 Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "${__SupportLink}":"${__SupportLink}"
@@ -159,7 +159,7 @@ Prezado $OwnerName,
 
 Um arquivo de backup contendo dados de seu portal [${__VirtualRootPath}](${__VirtualRootPath}) foi criado.
 
-Para saber mais sobre o procedimento de backup, consulte nosso guia do usuário [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx).
+Para saber mais sobre o procedimento de backup, consulte nosso guia do usuário [Data backup](${URL1}).
 
 Se você tiver alguma dúvida ou precisar de assistência, sinta-se à vontade para nos contatar em [${__SupportLink}](${__SupportLink})
 
@@ -1834,7 +1834,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Observação:&lt;/b&gt; algumas das configurações estão disponíveis apenas no plano DocSpace Business.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Visite nosso &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Centro de Ajuda&lt;/a&gt; para saber mais sobre como configurar e gerenciar seu ONLYOFFICE DocSpace. Você também pode consultá-lo quando tiver dúvidas sobre a funcionalidade.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Visite nosso &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Centro de Ajuda&lt;/a&gt; para saber mais sobre como configurar e gerenciar seu ONLYOFFICE DocSpace. Você também pode consultá-lo quando tiver dúvidas sobre a funcionalidade.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

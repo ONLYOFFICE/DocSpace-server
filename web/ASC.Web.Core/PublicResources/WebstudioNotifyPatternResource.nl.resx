@@ -97,7 +97,7 @@ Beste $OwnerName,
 
 Er is een back-upbestand met data van uw "${__VirtualRootPath}":"${__VirtualRootPath}" portaal aangemaakt. 
 
-Om meer te weten te komen over de back-upprocedure ga alstublieft naar onze "Data back-up":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block" handleiding.
+Om meer te weten te komen over de back-upprocedure ga alstublieft naar onze "Data back-up":"$URL1" handleiding.
 
 
 Als u vragen of hulp nodig heeft neem dan gerust contact met ons op via "${__SupportLink}":"${__SupportLink}"
@@ -1077,7 +1077,7 @@ Beste $OwnerName,
 
 Er is een back-up bestand gemaakt met gegevens van uw [${__VirtualRootPath}](${__VirtualRootPath}) portaal.
 
-Raadpleeg voor meer informatie over de back-up procedure onze gebruikershandleiding [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx).
+Raadpleeg voor meer informatie over de back-up procedure onze gebruikershandleiding [Data backup](${URL1}).
 
 Als u vragen hebt of hulp nodig hebt, kunt u contact met ons opnemen via [${__SupportLink}](${__SupportLink})
 
@@ -1812,7 +1812,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Let op:&lt;/b&gt; een aantal instellingen zijn alleen beschikbaar in het DocSpace Business abonnement.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ga naar ons &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Helpcentrum&lt;/a&gt; voor meer informatie over het configureren en beheren van uw ONLYOFFICE DocSpace. U kunt het ook raadplegen als u vragen hebt over de functionaliteit.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ga naar ons &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Helpcentrum&lt;/a&gt; voor meer informatie over het configureren en beheren van uw ONLYOFFICE DocSpace. U kunt het ook raadplegen als u vragen hebt over de functionaliteit.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

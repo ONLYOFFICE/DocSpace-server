@@ -148,7 +148,7 @@ Buenos días $OwnerName,
 
 Un archivo de copia de seguridad con los datos de su portal ONLYOFFICE "${__VirtualRootPath}":"${__VirtualRootPath}" ha sido creado.
 
-Para obtener más información sobre procedimiento de creación de copia de seguridad/restauración por favor consulte nuestra guía de usuario "¿Cómo crear y restaurar la copia de seguridad de portal ONLYOFFICE":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
+Para obtener más información sobre procedimiento de creación de copia de seguridad/restauración por favor consulte nuestra guía de usuario "¿Cómo crear y restaurar la copia de seguridad de portal ONLYOFFICE":"$URL1".
 
 
 Si hay algunas preguntas o necesita ayuda no dude en ponerse en contacto con nosotros vía "support.onlyoffice.com"${__SupportLink}":"${__SupportLink}"
@@ -162,7 +162,7 @@ Estimado $OwnerName,
 
 Se ha creado un archivo de copia de seguridad que contiene los datos de su portal [${__VirtualRootPath}](${__VirtualRootPath}).
 
-Para obtener más información sobre el procedimiento de copia de seguridad, consulte nuestra guía de usuario [Copia de seguridad de datos](${__HelpLink}/tipstricks/data-backup-restore.aspx).
+Para obtener más información sobre el procedimiento de copia de seguridad, consulte nuestra guía de usuario [Copia de seguridad de datos](${URL1}).
 
 Si tiene alguna pregunta o necesita ayuda por favor no dude en contactarnos en [${__SupportLink}](${__SupportLink})
 
@@ -1829,7 +1829,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Por favor, tenga en cuenta:&lt;/b&gt; algunos de los ajustes solo están disponibles en el plan DocSpace Business.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Visite nuestro &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Centro de Ayuda&lt;/a&gt; para saber más sobre la configuración y gestión de su ONLYOFFICE DocSpace. También le invitamos a consultarlo cuando tenga preguntas sobre la funcionalidad.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Visite nuestro &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Centro de Ayuda&lt;/a&gt; para saber más sobre la configuración y gestión de su ONLYOFFICE DocSpace. También le invitamos a consultarlo cuando tenga preguntas sobre la funcionalidad.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

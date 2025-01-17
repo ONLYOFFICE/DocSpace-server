@@ -486,7 +486,7 @@ $OrangeButton
 
 Ստեղծվել է պահուստային ֆայլ, որը պարունակում է տվյալներ ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալից:
 
-Պահուստավորման ընթացակարգի մասին ավելին իմանալու համար այցելեք մեր "Տվյալների կրկնօրինակում":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block" օգտատիրոջ ուղեցույցը:
+Պահուստավորման ընթացակարգի մասին ավելին իմանալու համար այցելեք մեր "Տվյալների կրկնօրինակում":"$URL1" օգտատիրոջ ուղեցույցը:
 
 
 Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}" հասցեով
@@ -500,7 +500,7 @@ $TrulyYours</value>
 
 Ստեղծվել է ձեր [${__VirtualRootPath}](${__VirtualRootPath}) պորտալի տվյալները պարունակող կրկնօրինակ ֆայլ:
 
-Պահուստավորման ընթացակարգի մասին ավելին իմանալու համար այցելեք մեր [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) օգտատիրոջ ուղեցույցը:
+Պահուստավորման ընթացակարգի մասին ավելին իմանալու համար այցելեք մեր [Data backup](${URL1}) օգտատիրոջ ուղեցույցը:
 
 Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SupportLink}](${__SupportLink}) հասցեով:
 
@@ -1888,7 +1888,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt; Խնդրում ենք նկատի ունենալ՝ &lt;b&gt; որոշ կարգավորումները հասանելի են միայն DocSpace Բրզնես սակագնային պլանում:&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Այցելեք մեր &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Օգնության կենտրոն&lt;/a&gt; Ուսումնասիրելու համար ձեր ONLYOFFICE DocSpace-ի կոնֆիգուրացիայի և կառավարման մասին, կարող եք նաև հարցումներ կատարել, եթե ունեք հարցեր ֆունկցիոնալության վերաբերյալ:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Այցելեք մեր &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Օգնության կենտրոն&lt;/a&gt; Ուսումնասիրելու համար ձեր ONLYOFFICE DocSpace-ի կոնֆիգուրացիայի և կառավարման մասին, կարող եք նաև հարցումներ կատարել, եթե ունեք հարցեր ֆունկցիոնալության վերաբերյալ:&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

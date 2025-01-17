@@ -148,7 +148,7 @@ Hörmətli $OwnerName,
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" portal məlumatınız olan ehtiyat faylı yaradıldı.
 
-Yedəkləmə proseduru haqqında daha çox öyrənmək üçün "Məlumatların Yedəklənməsi":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block" istifadəçi təlimatımıza baxın.
+Yedəkləmə proseduru haqqında daha çox öyrənmək üçün "Məlumatların Yedəklənməsi":"$URL1" istifadəçi təlimatımıza baxın.
 
 Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin "${__SupportLink}":"${__SupportLink}"
 
@@ -161,7 +161,7 @@ Hörmətli $OwnerName,
 
 [${__VirtualRootPath}](${__VirtualRootPath}) portal məlumatınız olan ehtiyat faylı yaradıldı.
 
-Yedəkləmə proseduru haqqında daha çox öyrənmək üçün [Məlumatların Yedəklənməsi](${__HelpLink}/tipstricks/data-backup-restore.aspx) istifadəçi təlimatımıza baxın.
+Yedəkləmə proseduru haqqında daha çox öyrənmək üçün [Məlumatların Yedəklənməsi](${URL1}) istifadəçi təlimatımıza baxın.
 
 Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin [${__SupportLink}](${__SupportLink})
 
@@ -1828,7 +1828,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Bəzi parametrlərin yalnız DocSpace Biznes planında mövcud olduğunu nəzərə alın.&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;ONLYOFFICE DocSpace-in konfiqurasiyası və idarə edilməsi haqqında daha çox öyrənmək üçün &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Yardım Mərkəzimizə&lt;/a&gt; daxil olun. Funksionallıqla bağlı suallarınız olduqda da ona müraciət edə bilərsiniz.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;ONLYOFFICE DocSpace-in konfiqurasiyası və idarə edilməsi haqqında daha çox öyrənmək üçün &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Yardım Mərkəzimizə&lt;/a&gt; daxil olun. Funksionallıqla bağlı suallarınız olduqda da ona müraciət edə bilərsiniz.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

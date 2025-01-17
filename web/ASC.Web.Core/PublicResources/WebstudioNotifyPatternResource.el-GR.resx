@@ -900,7 +900,7 @@ $OrangeButton
 
 Δημιουργήθηκε ένα αρχείο αντιγράφου ασφαλείας που περιέχει δεδομένα από την πύλη σας "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Για να μάθετε περισσότερα σχετικά με τη διαδικασία δημιουργίας αντιγράφων ασφαλείας, ανατρέξτε στον οδηγό χρήσης "Δημιουργία αντιγράφων ασφαλείας δεδομένων":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
+Για να μάθετε περισσότερα σχετικά με τη διαδικασία δημιουργίας αντιγράφων ασφαλείας, ανατρέξτε στον οδηγό χρήσης "Δημιουργία αντιγράφων ασφαλείας δεδομένων":"$URL1".
 
 
 Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας στο "${__SupportLink}":"${__SupportLink}"
@@ -914,7 +914,7 @@ $TrulyYours</value>
 
 Δημιουργήθηκε ένα αρχείο αντιγράφου ασφαλείας που περιέχει δεδομένα από την πύλη σας [${__VirtualRootPath}](${__VirtualRootPath}).
 
-Για να μάθετε περισσότερα σχετικά με τη διαδικασία δημιουργίας αντιγράφων ασφαλείας, ανατρέξτε στον οδηγό χρήσης [Δημιουργία αντιγράφων ασφαλείας δεδομένων](${__HelpLink}/tipstricks/data-backup-restore.aspx).
+Για να μάθετε περισσότερα σχετικά με τη διαδικασία δημιουργίας αντιγράφων ασφαλείας, ανατρέξτε στον οδηγό χρήσης [Δημιουργία αντιγράφων ασφαλείας δεδομένων](${URL1}).
 
 Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας στο [${__SupportLink}](${__SupportLink})
 
@@ -1829,7 +1829,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Σημείωση:&lt;/b&gt; ορισμένες από τις ρυθμίσεις είναι διαθέσιμες μόνο στο πακέτο DocSpace Business.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Επισκεφθείτε το &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Κέντρο βοήθειας&lt;/a&gt; για να μάθετε περισσότερα σχετικά με τη διαμόρφωση και τη διαχείριση του DocSpace σας στο ONLYOFFICE. Είστε επίσης ευπρόσδεκτοι να το συμβουλεύεστε όταν έχετε ερωτήσεις σχετικά με τη λειτουργικότητα.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Επισκεφθείτε το &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Κέντρο βοήθειας&lt;/a&gt; για να μάθετε περισσότερα σχετικά με τη διαμόρφωση και τη διαχείριση του DocSpace σας στο ONLYOFFICE. Είστε επίσης ευπρόσδεκτοι να το συμβουλεύεστε όταν έχετε ερωτήσεις σχετικά με τη λειτουργικότητα.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

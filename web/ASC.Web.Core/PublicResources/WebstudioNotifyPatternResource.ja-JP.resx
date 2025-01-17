@@ -705,7 +705,7 @@ $OwnerName 様
 
 $OwnerName様の"${__VirtualRootPath}":"${__VirtualRootPath}"ポータルのデータを含むバックアップファイルが作成されました。
 
-バックアップ手順の詳細については、「データのバックアップ」:"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block"ユーザーガイドをご参照ください。
+バックアップ手順の詳細については、"「データのバックアップ」":"$URL1" ユーザーガイドをご参照ください。
 
 
 ご質問やサポートが必要な場合は、お気軽に "${__SupportLink}":"${__SupportLink}"までご連絡ください。
@@ -719,7 +719,7 @@ $OwnerName 様
 
 お客様の [${__VirtualRootPath}](${__VirtualRootPath}) ポータルのデータを含むバックアップファイルが作成されました。
 
-バックアップ手順の詳細については、[データバックアップ](${__HelpLink}/tipstricks/data-backup-restore.aspx)ユーザーガイドをご参照ください。
+バックアップ手順の詳細については、[データバックアップ](${URL1})ユーザーガイドをご参照ください。
 
 ご質問やサポートが必要な場合は、[${__SupportLink}](${__SupportLink}) までお気軽にお問い合わせください。
 
@@ -1843,7 +1843,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;ご注意ください：&lt;/b&gt;一部の設定はDocSpaceビジネスプランでのみご利用いただけます。&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;ONLYOFFICE DocSpaceの設定や管理については &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;ヘルプセンター&lt;/a&gt; ヘルプセンター&lt;/a&gt;をご覧ください。また、機能についての質問も受け付けております。&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;ONLYOFFICE DocSpaceの設定や管理については &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;ヘルプセンター&lt;/a&gt; ヘルプセンター&lt;/a&gt;をご覧ください。また、機能についての質問も受け付けております。&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

@@ -97,7 +97,7 @@ Witam, $OwnerName,
 
 Utworzony plik kopii zapasowej, który zawiera dane z portalu "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Aby uzyskać dodatkowe informacje na temat procedury tworzenia kopii zapasowych, proszę odnieść się do naszej instrukcji "Kopia zapasowa":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
+Aby uzyskać dodatkowe informacje na temat procedury tworzenia kopii zapasowych, proszę odnieść się do naszej instrukcji "Kopia zapasowa":"$URL1".
 
 
 Jeśli masz jakieś pytania, zawsze możesz napisać do nas na adres "${__SupportLink}":"${__SupportLink}"
@@ -1120,7 +1120,7 @@ Witaj, $OwnerName
 
 Plik kopii zapasowej zawierający dane z Twojego portalu [${__VirtualRootPath}](${__VirtualRootPath}) został utworzony.
 
-Aby dowiedzieć się więcej na temat procedury tworzenia kopii zapasowych, sprawdź nasz przewodnik [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx).
+Aby dowiedzieć się więcej na temat procedury tworzenia kopii zapasowych, sprawdź nasz przewodnik [Data backup](${URL1}).
 
 Jeśli masz jakiekolwiek pytania lub potrzebujesz pomocy, skontaktuj się z nami pod adresem [${__SupportLink}](${__SupportLink})
 
@@ -1828,7 +1828,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Uwaga:&lt;/b&gt; niektóre ustawienia są dostępne wyłącznie w planie DocSpace Business.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Odwiedź nasze &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Centrum pomocy&lt;/a&gt;, aby dowiedzieć się więcej na temat konfiguracji i zarządzania swoim kontem ONLYOFFICE DocSpace. Możesz z niego skorzystać również w razie pytań dotyczących funkcji usługi.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Odwiedź nasze &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Centrum pomocy&lt;/a&gt;, aby dowiedzieć się więcej na temat konfiguracji i zarządzania swoim kontem ONLYOFFICE DocSpace. Możesz z niego skorzystać również w razie pytań dotyczących funkcji usługi.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

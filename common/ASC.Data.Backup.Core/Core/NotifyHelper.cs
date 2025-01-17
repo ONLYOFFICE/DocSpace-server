@@ -37,6 +37,7 @@ public class NotifyHelper(UserManager userManager,
     TenantManager tenantManager,
     AuthManager authManager,
     WorkContext workContext,
+    SetupInfo setupInfo,
     CommonLinkUtility commonLinkUtility,
     TenantLogoManager tenantLogoManager,
     IUrlShortener urlShortener,
@@ -80,6 +81,7 @@ public class NotifyHelper(UserManager userManager,
             user,
             StudioNotifyService.EMailSenderName,
             new TagValue(Tags.OwnerName, user.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue("URL1", setupInfo.LinksToExternalResources.GetValueOrDefault("helpcenterabackup")),
             TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
     }
 

@@ -168,6 +168,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~/portal-settings/");
                         topGif = studioNotifyHelper.GetNotificationImageUrl("configure_docspace.gif");
 
+                        url1 = c => GetExternalResource("helpcenterdocspace");
+
                         trulyYoursAsTebleRow = true;
                     }
 

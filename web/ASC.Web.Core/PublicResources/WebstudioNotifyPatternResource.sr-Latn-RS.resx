@@ -498,7 +498,7 @@ Dragi $OwnerName,
 
 Napravljena je rezervna datoteka koja sadrži podatke sa vašeg "${__VirtualRootPath}":"${__VirtualRootPath}" portala.
 
-Da biste saznali više o proceduri pravljenja rezervnih kopija, pogledajte naš korisnički vodič "Rezervna kopija podataka":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
+Da biste saznali više o proceduri pravljenja rezervnih kopija, pogledajte naš korisnički vodič "Rezervna kopija podataka":"$URL1".
 
 
 Ako imate bilo kakvih pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte na "${__SupportLink}":"${__SupportLink}"
@@ -512,7 +512,7 @@ Dragi $OwnerName,
 
 Rezervna datoteka koja sadrži podatke sa vašeg [${__VirtualRootPath}](${__VirtualRootPath}) portala je kreirana.
 
-Da biste naučili više o proceduri rezervne kopije molimo pogledajte naše [Rezervna kopija podataka](${__HelpLink}/tipstricks/data-backup-restore.aspx) uputstvo za upotrebu.
+Da biste naučili više o proceduri rezervne kopije molimo pogledajte naše [Rezervna kopija podataka](${URL1}) uputstvo za upotrebu.
 
 Ako imate bilo koja pitanja ili vam treba pomoć molimo kontaktirajte nas na
 [${__SupportLink}](${__SupportLink})
@@ -1871,7 +1871,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Napomena:&lt;/b&gt; Neka podešavanja su dostupna samo u DocSpace Business planu.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Posetite naš &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Centar za pomoć&lt;/a&gt; da biste saznali više o konfigurisanju i upravljanju ONLYOFFICE DocSpace-om. Takođe ste dobrodošli da ga konsultujete kada imate pitanja o funkcionalnosti.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Posetite naš &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Centar za pomoć&lt;/a&gt; da biste saznali više o konfigurisanju i upravljanju ONLYOFFICE DocSpace-om. Takođe ste dobrodošli da ga konsultujete kada imate pitanja o funkcionalnosti.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

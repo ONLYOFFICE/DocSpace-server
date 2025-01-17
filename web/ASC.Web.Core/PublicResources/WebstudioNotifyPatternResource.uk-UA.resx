@@ -101,7 +101,7 @@ $OrangeButton
 
 Був створено файл резервної копії, що містить дані вашого порталу "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Щоб дізнатись більше про процедуру резервного копіювання, зверніться до нашого "Резервного копіювання даних":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
+Щоб дізнатись більше про процедуру резервного копіювання, зверніться до нашого "Резервного копіювання даних":"$URL1".
 
 
 Якщо у вас виникли будь-які питання або потрібна допомога, будь ласка, зв'яжіться з нами за адресою "${__SupportLink}":"${__SupportLink}"
@@ -1141,7 +1141,7 @@ $TrulyYours</value>
 
 Створено файл резервної копії, що містить дані з вашого порталу [${__VirtualRootPath}](${__VirtualRootPath}).
 
-Щоб дізнатися більше про процедуру резервного копіювання, зверніться до нашого посібника користувача [Резервне копіювання даних](${__HelpLink}/tipstricks/data-backup-restore.aspx).
+Щоб дізнатися більше про процедуру резервного копіювання, зверніться до нашого посібника користувача [Резервне копіювання даних](${URL1}).
 
 Якщо у вас виникли запитання або потрібна допомога, зв’яжіться з нами на сторінці [${__SupportLink}](${__SupportLink})
 
@@ -1834,7 +1834,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Зверніть увагу:&lt;/b&gt; деякі параметри доступні лише в плані DocSpace Business.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Перейдіть до нашого &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Довідкового центру&lt;/a&gt; щоб отримати додаткову інформацію про налаштування ONLYOFFICE DocSpace та керування ним. Тут ви також знайдете відповіді на запитання щодо функціонала.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Перейдіть до нашого &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Довідкового центру&lt;/a&gt; щоб отримати додаткову інформацію про налаштування ONLYOFFICE DocSpace та керування ним. Тут ви також знайдете відповіді на запитання щодо функціонала.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

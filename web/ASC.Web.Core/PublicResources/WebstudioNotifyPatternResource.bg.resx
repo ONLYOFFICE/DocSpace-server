@@ -139,7 +139,7 @@ $OrangeButton
 
 Създаден е архивен файл, съдържащ данни от вашия "${__VirtualRootPath}":"${__VirtualRootPath}" портал.
 
-За да научите повече за процедурата за архивиране, вижте ръководството за потребителя "Резервиране на данни":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
+За да научите повече за процедурата за архивиране, вижте ръководството за потребителя "Резервиране на данни":"$URL1".
 
 Ако имате някакви въпроси или имате нужда от помощ, моля не се колебайте да се свържете с нас на адрес "${__SupportLink}":"${__SupportLink}"
 
@@ -1164,7 +1164,7 @@ $TrulyYours</value>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>Създаден е архивен файл, съдържащ данни от вашия [${__VirtualRootPath}](${__VirtualRootPath}) портал.
 
-За да научите повече за процедурата по архивиране, моля, вижте нашето ръководство за потребителя [Архивиране на данни](${__HelpLink}/tipstricks/data-backup-restore.aspx).
+За да научите повече за процедурата по архивиране, моля, вижте нашето ръководство за потребителя [Архивиране на данни](${URL1}).
 
 Ако имате някакви въпроси или се нуждаете от помощ, моля не се колебайте да се свържете с нас на [${__SupportLink}](${__SupportLink})
 
@@ -1821,7 +1821,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b&gt;Бележка:&lt;/b&gt; някои от настройките са налични само в бизнес плана на DocSpace.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Посетете нашия &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}/administration/docspace.aspx"&gt;Помощен център&lt;/a&gt; за да научите повече за конфигурирането и управлението на вашия ONLYOFFICE DocSpace. Също така, там може да намерите информация, когато имате въпроси относно функционалността.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Посетете нашия &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Помощен център&lt;/a&gt; за да научите повече за конфигурирането и управлението на вашия ONLYOFFICE DocSpace. Също така, там може да намерите информация, когато имате въпроси относно функционалността.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

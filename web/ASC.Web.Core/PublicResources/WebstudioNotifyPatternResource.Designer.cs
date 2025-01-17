@@ -543,7 +543,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///A backup file containing data from your &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal has been created.
         ///
-        ///To learn more on the backup procedure please refer to our &quot;Data backup&quot;:&quot;${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block&quot; user guide.
+        ///To learn more on the backup procedure please refer to our &quot;Data backup&quot;:&quot;$URL1&quot; user guide.
         ///
         ///
         ///If you have any questions or need assistance please feel free to contact us at &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
@@ -563,13 +563,13 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///A backup file containing data from your [${__VirtualRootPath}](${__VirtualRootPath}) portal has been created.
         ///
-        ///To learn more on the backup procedure please refer to our [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) user guide.
+        ///To learn more on the backup procedure please refer to our [Data backup](${URL1}) user guide.
         ///
         ///If you have any questions or need assistance please feel free to contact us at [${__SupportLink}](${__SupportLink})
         ///
         ///Best regards,
         ///ONLYOFFICE Support Team
-        ///[www.onlyoff [rest of string was truncated]&quot;;.
+        ///[www.onlyoffice.com](https://onlyoffice.com/).
         /// </summary>
         public static string pattern_backup_created_tg {
             get {
@@ -2230,6 +2230,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 5 tips for effective work on your docs.
+        /// </summary>
+        public static string subject_docs_tips {
+            get {
+                return ResourceManager.GetString("subject_docs_tips", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
         public static string subject_enterprise_admin_activation_v1 {
@@ -2730,15 +2739,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_saas_admin_user_apps_tips_v1 {
             get {
                 return ResourceManager.GetString("subject_saas_admin_user_apps_tips_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 5 tips for effective work on your docs.
-        /// </summary>
-        public static string subject_docs_tips {
-            get {
-                return ResourceManager.GetString("subject_docs_tips", resourceCulture);
             }
         }
         
