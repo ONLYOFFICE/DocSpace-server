@@ -109,10 +109,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.EnterpriseWhitelabelAdminWelcomeV1,
                 Actions.OpensourceAdminWelcomeV1,
 
-                Actions.SaasAdminUserDocsTipsV1,
-                Actions.OpensourceAdminDocsTipsV1,
-                Actions.OpensourceUserDocsTipsV1,
-                Actions.EnterpriseAdminUserDocsTipsV1,
+                Actions.DocsTips,
 
                 Actions.SaasAdminTrialWarningAfterHalfYearV1,
                 Actions.SaasAdminStartupWarningAfterYearV1,

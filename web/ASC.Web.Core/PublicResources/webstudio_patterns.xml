@@ -515,22 +515,16 @@ $activity.Key
     <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
-  <!-- enterprise admin user docs tips v1 for DocSpace -->
-  <pattern id="enterprise_admin_user_docs_tips_v1">
-    <subject resource="|subject_enterprise_admin_user_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_user_docs_tips_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  <!-- docs tips -->
+  <pattern id="docs_tips">
+    <subject resource="|subject_docs_tips|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_docs_tips|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise admin user apps tips v1 for DocSpace -->
   <pattern id="enterprise_admin_user_apps_tips_v1">
     <subject resource="|subject_enterprise_admin_user_apps_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_enterprise_admin_user_apps_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>  
- 
-  <!-- saas admin user docs tips v1 for DocSpace -->
-  <pattern id="saas_admin_user_docs_tips_v1">
-    <subject resource="|subject_saas_admin_user_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_user_docs_tips_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- saas admin user apps tips v1 for DocSpace -->
@@ -581,18 +575,6 @@ $activity.Key
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_modules_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
-  <!-- opensource admin docs tips v1 for DocSpace -->
-  <pattern id="opensource_admin_docs_tips_v1">
-    <subject resource="|subject_opensource_admin_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_user_docs_tips_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-
-  <!-- opensource user docs tips v1 for DocSpace -->
-  <pattern id="opensource_user_docs_tips_v1">
-    <subject resource="|subject_opensource_user_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_user_docs_tips_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-	
   <pattern id="saas_custom_mode_reg_data">
     <subject resource="|subject_saas_custom_mode_reg_data|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_custom_mode_reg_data|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />

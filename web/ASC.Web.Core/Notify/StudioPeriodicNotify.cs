@@ -216,7 +216,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     else if (createdDate.AddDays(7) == nowDate)
                     {
-                        action = Actions.SaasAdminUserDocsTipsV1;
+                        action = Actions.DocsTips;
                         paymentMessage = false;
                         toadmins = true;
                         tousers = true;
@@ -574,7 +574,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     if (createdDate.AddDays(7) == nowDate)
                     {
-                        action = Actions.EnterpriseAdminUserDocsTipsV1;
+                        action = Actions.DocsTips;
                         paymentMessage = false;
                         toadmins = true;
                         tousers = true;
@@ -819,7 +819,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         Thread.CurrentThread.CurrentUICulture = culture;
 
                         await client.SendNoticeToAsync(
-                            await userManager.IsDocSpaceAdminAsync(u) ? Actions.OpensourceAdminDocsTipsV1 : Actions.OpensourceUserDocsTipsV1,
+                            Actions.DocsTips,
                             u,
                             senderName,
                             new TagValue(CommonTags.Culture, culture.Name),
