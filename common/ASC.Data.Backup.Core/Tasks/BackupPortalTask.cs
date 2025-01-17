@@ -253,7 +253,7 @@ public class BackupPortalTask(
                 await using (var stream = File.OpenWrite(path))
                 {
                     var bytes = Encoding.UTF8.GetBytes(creates.ToString());
-                    stream.Write(bytes, 0, bytes.Length);
+                    await stream.WriteAsync(bytes);
                 }
 
                 await SetStepCompleted();

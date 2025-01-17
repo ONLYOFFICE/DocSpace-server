@@ -43,9 +43,4 @@ public class AccountInfoDto
     /// Specifies if an account is linked or not
     /// </summary>
     public bool Linked { get; set; }
-
-    /// <summary>
-    /// Class
-    /// </summary>
-    public string Class { get; set; }
 }

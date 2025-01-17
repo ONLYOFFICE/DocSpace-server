@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using SixLabors.ImageSharp;
+using ImageMagick;
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
@@ -38,7 +38,7 @@ public class WhiteLabelItemDto
     /// <summary>
     /// Size
     /// </summary>
-    public Size Size { get; set; }
+    public IMagickGeometry Size { get; set; }
 
     /// <summary>
     /// Path
