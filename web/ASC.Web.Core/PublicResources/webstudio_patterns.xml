@@ -350,7 +350,7 @@ $activity.Key
   <!-- saas admin welcome v1 for docspace -->
   <pattern id="saas_admin_welcome_v1" sender="email.sender">
     <subject resource="|subject_saas_admin_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_admin_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise admin welcome v1 for docspace -->
