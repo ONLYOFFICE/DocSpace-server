@@ -324,6 +324,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                                 orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
                                 orangeButtonUrl = GetExternalResource("removeportalfeedbackform");
 
+                                url1 = c => GetExternalResource("legalterms");
+
                                 topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
 
                                 trulyYoursAsTebleRow = true;
@@ -411,6 +413,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
                         orangeButtonUrl = GetExternalResource("removeportalfeedbackform");
+
+                        url1 = c => GetExternalResource("legalterms");
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
 

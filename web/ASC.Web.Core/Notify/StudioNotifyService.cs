@@ -38,6 +38,7 @@ public class StudioNotifyService(
     TenantManager tenantManager,
     CoreBaseSettings coreBaseSettings,
     CommonLinkUtility commonLinkUtility,
+    SetupInfo setupInfo,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserInvitationLimitHelper userInvitationLimitHelper,
     SettingsManager settingsManager,
@@ -719,8 +720,9 @@ public class StudioNotifyService(
                 [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, url),
                 TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+                new TagValue("URL1", setupInfo.LinksToExternalResources.GetValueOrDefault("legalterms")),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("docspace_deactivated.gif")),
-                    new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
+                new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
     }
 
     #endregion
