@@ -214,15 +214,15 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img7 = studioNotifyHelper.GetNotificationImageUrl("pipedrive.png");
 
                         orangeButtonText1 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl1 = "https://marketplace.zoom.us/apps/OW6rOq-nRgCihG5eps_p-g";
+                        orangeButtonUrl1 = setupInfo.LinksToExternalResources.GetValueOrDefault("integrationzoom");
                         orangeButtonText2 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", c);
-                        orangeButtonUrl2 = "https://zapier.com/apps/onlyoffice-docspace/integrations";
+                        orangeButtonUrl2 = setupInfo.LinksToExternalResources.GetValueOrDefault("integrationzapier");
                         orangeButtonText3 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl3 = "https://wordpress.org/plugins/onlyoffice-docspace/";
+                        orangeButtonUrl3 = setupInfo.LinksToExternalResources.GetValueOrDefault("integrationwordpress");
                         orangeButtonText4 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl4 = "https://www.drupal.org/project/onlyoffice_docspace";
+                        orangeButtonUrl4 = setupInfo.LinksToExternalResources.GetValueOrDefault("integrationdrupal");
                         orangeButtonText5 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl5 = "https://www.pipedrive.com/en/marketplace/app/onlyoffice-doc-space/4cb3b5d9d19a1918";
+                        orangeButtonUrl5 = setupInfo.LinksToExternalResources.GetValueOrDefault("integrationpipedrive");
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("integration.gif");
 
