@@ -256,20 +256,26 @@ public class PortalController(
 
         var result = new TariffDto
         {
-            Id = source.Id,
             State = source.State,
-            DueDate = source.DueDate,
-            DelayDueDate = source.DelayDueDate,
-            LicenseDate = source.LicenseDate,
-            CustomerId = source.CustomerId,
-            Quotas = source.Quotas,
         };
+        
+        var currentUserType = await userManager.GetUserTypeAsync(securityContext.CurrentAccount.ID);
 
+        if (currentUserType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
+        {
+            result.DueDate = source.DueDate;
+            result.DelayDueDate = source.DelayDueDate;
+        }
+        
         if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
         {
+            result.Id = source.Id;
             result.OpenSource = tenantExtra.Opensource;
             result.Enterprise = tenantExtra.Enterprise;
             result.Developer = tenantExtra.Developer;
+            result.CustomerId = source.CustomerId;
+            result.LicenseDate = source.LicenseDate;
+            result.Quotas = source.Quotas;
         }
         
         return result;
