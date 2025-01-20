@@ -120,9 +120,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            var url = BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:support"] ?? string.Empty, null);
-
-            return !string.IsNullOrEmpty(url) ? url : "http://helpdesk.onlyoffice.com";
+            return BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:support"] ?? string.Empty, null);
         }
     }
 
@@ -130,9 +128,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            var email = configuration["externalresources:supportemail"];
-
-            return !string.IsNullOrEmpty(email) ? email : "support@onlyoffice.com";
+            return configuration["externalresources:supportemail"];
         }
     }
 
@@ -140,9 +136,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            var email = configuration["externalresources:paymentemail"];
-
-            return !string.IsNullOrEmpty(email) ? email : "sales@onlyoffice.com";
+            return configuration["externalresources:paymentemail"];
         }
     }
 
@@ -150,9 +144,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            var url = BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:orderdemo"] ?? string.Empty, null);
-
-            return !string.IsNullOrEmpty(url) ? url : "https://www.onlyoffice.com/demo-order.aspx";
+            return BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:orderdemo"] ?? string.Empty, null);
         }
     }
 
@@ -160,9 +152,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            var url = configuration["externalresources:site"];
-
-            return !string.IsNullOrEmpty(url) ? url : "https://www.onlyoffice.com";
+            return configuration["externalresources:site"];
         }
     }
 
@@ -170,9 +160,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            var url = configuration["externalresources:forum"];
-
-            return !string.IsNullOrEmpty(url) ? url : "https://forum.onlyoffice.com";
+            return configuration["externalresources:forum"];
         }
     }
 }
