@@ -725,7 +725,7 @@ $OwnerName 様
 
 何卒よろしくお願いいたします。
 ONLYOFFICE サポートチーム
-[www.onlyoffice.com](http://onlyoffice.com/ja)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>${LetterLogoText}アカウントのメールアドレスを変更しますか？
@@ -987,7 +987,7 @@ _ご注意_: このリンクは7日間のみ有効です。期間内にポータ
 
 よろしくお願いいたします
 ONLYOFFICE サポートチーム
-[www.onlyoffice.com](http://onlyoffice.com/ja/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"スペースの削除
@@ -1084,7 +1084,7 @@ _ご注意_: このリンクは7日間のみ有効です。期間内にポータ
 
 どうぞよろしくお願いいたします。
 ONLYOFFICE サポートチーム
-[www.onlyoffice.com](http://onlyoffice.com/ja/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"でのアカウントの無効化

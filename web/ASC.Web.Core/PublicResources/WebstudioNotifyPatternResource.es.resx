@@ -151,7 +151,7 @@ Un archivo de copia de seguridad con los datos de su portal ONLYOFFICE "${__Virt
 Para obtener más información sobre procedimiento de creación de copia de seguridad/restauración por favor consulte nuestra guía de usuario "¿Cómo crear y restaurar la copia de seguridad de portal ONLYOFFICE":"$URL1".
 
 
-Si hay algunas preguntas o necesita ayuda no dude en ponerse en contacto con nosotros vía "support.onlyoffice.com"${__SupportLink}":"${__SupportLink}"
+Si hay algunas preguntas o necesita ayuda no dude en ponerse en contacto con nosotros vía "${__SupportLink}":"${__SupportLink}"
 
 $TrulyYours</value>
   </data>

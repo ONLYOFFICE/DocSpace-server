@@ -1170,7 +1170,7 @@ $TrulyYours</value>
 
 С най-добри пожелания,
 Екип за поддръжка на ONLYOFFICE
-[www.onlyoffice.com]( https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Искате ли да промените имейла в акаунта си ${LetterLogoText}?

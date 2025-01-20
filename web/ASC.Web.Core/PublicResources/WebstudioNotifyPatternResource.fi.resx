@@ -930,7 +930,7 @@ Jos sinulla on kysyttävää tai tarvitset apua ole hyvä ja ota meihin yhteytt�
 
 Ystävällisin terveisin,
 ONLYOFFICE-tukitiimi
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Haluatko vaihtaa sähköpostisi ${LetterLogoText} -tililläsi?

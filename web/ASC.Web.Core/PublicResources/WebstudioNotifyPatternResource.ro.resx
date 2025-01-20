@@ -625,7 +625,7 @@ Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne co
 
 Cu stimă,
 Echipă de Asistență ONLYOFFICE
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>Notificarea privind modificarea profilului de portal [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1168,7 +1168,7 @@ Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne co
 
 Best regards,
 ONLYOFFICE Support Team
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Ștergerea spațiului "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1216,7 +1216,7 @@ Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne co
 
 Cu stimă,
 Echipă de Asistență ONLYOFFICE
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_user_ldap_activation" xml:space="preserve">
     <value>Stimată/Stimate $UserName,
