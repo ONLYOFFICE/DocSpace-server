@@ -71,4 +71,10 @@ public class AccountsEntriesRequestDto<T>
     /// </summary>
     [FromQuery(Name = "area")]
     public Area Area { get; set; } = Area.All;
+
+    /// <summary>
+    /// Employee Types
+    /// </summary>
+    [FromQuery(Name = "employeeTypes")]
+    public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();
 }
