@@ -1126,7 +1126,7 @@ Jeśli masz jakiekolwiek pytania lub potrzebujesz pomocy, skontaktuj się z nami
 
 Pozdrawiamy,
 Zespół pomocy technicznej ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Chcesz zmienić adres e-mail dla swojego konta ${LetterLogoText}?
@@ -1288,7 +1288,7 @@ Jeśli masz jakiekolwiek pytania lub potrzebujesz pomocy, skontaktuj się z nami
 
 Pozdrawiamy,
 Zespół pomocy technicznej ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Usunięcie [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1313,7 +1313,7 @@ Jeśli masz jakiekolwiek pytania lub potrzebujesz pomocy, skontaktuj się z nami
 
 Pozdrawiamy,
 Zespół wsparcia ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Użytkownik "$ FromUserName":"$ FromUserLink" usunął swój profil i dany profil jest obecnie zablokowany. Wszystkie pliki użytkownika nadal są do niego przypisane i zajmują miejsce na dysku. 

@@ -167,7 +167,7 @@ Per qualsiasi domanda o in caso di assistenza non esitate a contattarci [${__Sup
 
 Cordiali saluti,
 Il team di supporto ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Richiesta cambio numero di cellulare
@@ -448,7 +448,7 @@ Se hai domande o hai bisogno di assistenza, non esitate a contattarci all'indiri
 
 Cordiali Saluti,
 Il supporto tecnico ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Eliminazione del portale "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1283,7 +1283,7 @@ Se hai domande o hai bisogno di assistenza, non esitare a contattarci all'indiri
 
 Distinti saluti,
 Team di supporto di ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_request_tariff1" xml:space="preserve">
     <value>h1.Richiesta tariffa SAAS per "${__VirtualRootPath}":"${__VirtualRootPath}"

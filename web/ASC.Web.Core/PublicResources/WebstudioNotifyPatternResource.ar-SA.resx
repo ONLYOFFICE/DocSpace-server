@@ -576,7 +576,7 @@ $TrulyYours</value>
 
 مع خالص تحياتي
 فريق دعم ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>هل تريد تغيير كلمة المرور على حساب ONLYOFFICE الخاص بك؟ انقر فوق الزر أدناه للتأكيد.
@@ -1167,7 +1167,7 @@ _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرج�
 
 مع أطيب التحيات،
 فريق دعم ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>عزيزي $OwnerName،
@@ -1225,7 +1225,7 @@ _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرج�
 
  مع أطيب التحيات،
 فريق دعم ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.تغيير عنوان البوابة الإلكترونية

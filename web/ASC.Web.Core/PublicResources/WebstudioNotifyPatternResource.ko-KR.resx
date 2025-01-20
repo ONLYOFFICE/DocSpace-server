@@ -925,7 +925,7 @@ $OwnerName님,
 
 감사합니다,
 ONLYOFFICE 지원팀
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>${LetterLogoText} 계정의 이메일을 변경하고 싶으세요?
@@ -1226,7 +1226,7 @@ _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 비
 
 감사합니다,
 ONLYOFFICE 지원팀
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 공간 삭제
@@ -1274,7 +1274,7 @@ _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 삭
 
 감사합니다,
 ONLYOFFICE 지원팀
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.포털 주소 변경

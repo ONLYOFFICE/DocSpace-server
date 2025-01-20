@@ -526,7 +526,7 @@ $TrulyYours</value>
 
 Срдачан поздрав,
 ONLYOFFICE™ Тим за подршку
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Желите да промените емаил на свом ${LetterLogoText} налогу?
@@ -1411,7 +1411,7 @@ _Напомена_: овај линк важи само 7 дана. Молимо
 
 Срдачан поздрав,
 ONLYOFFICE™ тим за подршку
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Брисање "${__VirtualRootPath}":"${__VirtualRootPath}" простора
@@ -1469,7 +1469,7 @@ _Напомена_: ова веза важи само 7 дана. Довршит
 
 Срдачан поздрав,
 ONLYOFFICE™ Тим за подршку
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Промена адресе портала

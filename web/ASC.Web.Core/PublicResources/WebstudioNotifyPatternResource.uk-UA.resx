@@ -1147,7 +1147,7 @@ $TrulyYours</value>
 
 З найкращими побажаннями
 команда підтримки ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Хочете змінити адресу електронної пошти у своєму обліковому запису ${LetterLogoText}?
@@ -1288,7 +1288,7 @@ _Примітка_. Це посилання дійсне лише протяго
 
 З найкращими побажаннями
 команда підтримки ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Видалення порталу [${__VirtualRootPath}](${__VirtualRootPath}) 
@@ -1313,7 +1313,7 @@ _Примітка_. Це посилання дійсне лише протяго
 
 З найкращими побажаннями
 команда підтримки ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Користувач "$FromUserName":"$FromUserLink" видалив свій профіль, і цей профіль тепер заблоковано. Усі файли користувача все ще призначені йому і займають дисковий простір. 

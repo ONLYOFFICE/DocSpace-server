@@ -1083,7 +1083,7 @@ Als u vragen hebt of hulp nodig hebt, kunt u contact met ons opnemen via [${__Su
 
 Met vriendelijke groet,
 ONLYOFFICE Ondersteuningsteam
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Wilt u het e-mailadres op uw ${LetterLogoText} account wijzigen?
@@ -1224,7 +1224,7 @@ Als u vragen heeft of hulp nodig heeft, neem dan gerust contact met ons op via [
 
 Met vriendelijke groet,
 ONLYOFFICE Ondersteuningsteam
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Verwijdering van het ruimte [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1249,7 +1249,7 @@ Als u vragen heeft of hulp nodig heeft, neem dan gerust contact met ons op via [
 
 Met vriendelijke groet,
 ONLYOFFICE Ondersteuningsteam
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Gebruiker $FromUserName":"$FromUserLink" heeft zijn/haar profiel verwijderd, en dit profiel is nu geblokkeerd. Alle bestanden van de gebruiker zijn nog steeds aan hem/haar toegewezen en nemen schijfruimte in beslag. 

@@ -482,9 +482,7 @@ Poskrbite, da boste svojo poslovno naročnino plačali še danes. Tako boste lah
 
 $OrangeButton
 
-S spoštovanjem,
-Ekipa ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Pozdravljeni!
@@ -892,7 +890,7 @@ Datoteka varnostne kopije, ki vsebuje podatke iz vašega [${__VirtualRootPath}](
 
 Lep pozdrav,
 ONLYOFFICE Ekipa za podporo
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Želite spremeniti email naslov na svojem ${LetterLogoText} računu?
@@ -1193,7 +1191,7 @@ Svoj portal lahko kadar koli znova aktivirate s klikom na naslednjo povezavo:
 
 Z najlepšimi pozdravi,
 Podporna ekipa ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Izbris prostora "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1241,7 +1239,7 @@ _Opomba_: ta povezava velja samo 7 dni. Prosimo, dokončajte postopek izbrisa po
 
 Z najlepšimi pozdravi,
 Podporna ekipa ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Sprememba naslova portala

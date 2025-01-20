@@ -168,7 +168,7 @@ $TrulyYours</value>
 
 С уважением,
 команда ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Хотите изменить адрес электронной почты в своем аккаунте ${LetterLogoText}?
@@ -469,7 +469,7 @@ _Обратите внимание_: эта ссылка действитель�
 
 С уважением,
 команда ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Удаление портала "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -517,7 +517,7 @@ _Обратите внимание_: эта ссылка действитель�
 
 С уважением,
 команда ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Изменение адреса портала

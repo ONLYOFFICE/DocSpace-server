@@ -167,7 +167,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, ünvanında bi
 
 Sizin,
 ONLYOFFICE komandası
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>${LetterLogoText} hesabınızdakı e-poçtu dəyişmək istəyirsiniz?
@@ -468,7 +468,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, [${__SalesEmail
 
 Sizin,
 ONLYOFFICE komandası
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" sahəsinin silinməsi: 
@@ -516,7 +516,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, [${__SalesEmail
 
 Sizin,
 ONLYOFFICE Dəstək Komandası
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Portal ünvanının dəyişdirilməsi

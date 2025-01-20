@@ -1169,7 +1169,7 @@ Ja tev ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīme
 
 Ar cieņu
 ONLYOFFICE atbalsta komanda
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Vai vēlaties mainīt e-pasta adresi savā ${LetterLogoText} kontā?
@@ -1310,7 +1310,7 @@ Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīm
 
 Ar cieņu
 ONLYOFFICE atbalsta komanda
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portāla dzēšana
@@ -1335,7 +1335,7 @@ Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīm
 
 Ar cieņu
 ONLYOFFICE atbalsta komanda
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Lietotājs "$FromUserName":"$ FromUserLink" izdzēsa savu profilu, un šis profils tagad ir bloķēts. Visi lietotāja faili joprojām ir piešķirti viņam/viņai un aizņem vietu diskā. 

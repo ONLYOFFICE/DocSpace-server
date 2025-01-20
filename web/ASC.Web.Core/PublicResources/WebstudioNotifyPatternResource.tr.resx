@@ -1006,7 +1006,7 @@ Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__Su
 
 Saygılarımızla,
 ONLYOFFICE Destek Ekibi
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>${LetterLogoText} hesabınızdaki e-postayı değiştirmek mi istiyorsunuz?
@@ -1147,7 +1147,7 @@ Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__Sa
 
 Saygılarımızla,
 ONLYOFFICE Destek Ekibi
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portalının silinmesi
@@ -1172,7 +1172,7 @@ Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__Sa
 
 Saygılarımızla,
 ONLYOFFICE Destek Ekibi
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>"$FromUserName":"$FromUserLink" kullanıcısı profilini sildi ve bu profil artık bloke edilmiştir. Kullanıcıya tüm dosyaları hâlâ kendisine atanmış durumdadır ve disk alanı kaplamaktadır.

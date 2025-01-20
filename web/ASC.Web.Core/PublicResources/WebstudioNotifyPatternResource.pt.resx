@@ -890,7 +890,7 @@ Se tem alguma questão ou se precisar de ajuda por favor não hesite em nos cont
 
 Com os melhores cumprimentos,
 A Equipa de Apoio da ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Deseja alterar o e-mail da sua ${LetterLogoText} conta?
@@ -1226,7 +1226,7 @@ Se tiver alguma questão ou se precisar de ajuda, não hesite em nos contactar a
 
 Com os melhores cumprimentos,
 A Equipa de Suporte da ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Eliminação do espaço "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1274,7 +1274,7 @@ Se tem alguma questão ou se necessitar de ajuda, por favor não hesite em nos c
 
 Com os melhores cumprimentos,
 A Equipa da ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Alteração do endereço do portal

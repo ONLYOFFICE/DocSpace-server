@@ -519,7 +519,7 @@ Ako imate bilo koja pitanja ili vam treba pomoć molimo kontaktirajte nas na
 
 Srdačan pozdrav,
 ONLYOFFICE Tim Za Podršku
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Želite da promenite email na svom ${LetterLogoText} nalogu?
@@ -1181,7 +1181,7 @@ Ako imate bilo kakvih pitanja ili vam je potrebna pomoć, slobodno nas kontakti
 
 Srdačan pozdrav,
 ONLYOFFICE tim za podršku
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Brisanje "${__VirtualRootPath}":"${__VirtualRootPath}" prostora
@@ -1239,7 +1239,7 @@ Ako imate bilo kakvih pitanja ili vam je potrebna pomoć, slobodno nas kontakti
 
 Srdačan pozdrav,
 ONLYOFFICE Tim Za Podršku
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Promena adrese portala

@@ -569,7 +569,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Best regards,
         ///ONLYOFFICE Support Team
-        ///[www.onlyoffice.com](https://onlyoffice.com/).
+        ///[${__SiteLink}](${__SiteLink}).
         /// </summary>
         public static string pattern_backup_created_tg {
             get {

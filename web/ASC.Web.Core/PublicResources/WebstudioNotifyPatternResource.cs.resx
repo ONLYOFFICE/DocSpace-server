@@ -997,7 +997,7 @@ Pokud máte jakékoli dotazy nebo potřebujete pomoc, neváhejte nás kontaktova
 
 S pozdravem,
 tým podpory ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Chcete změnit e-mail na svém účtu ${LetterLogoText}?
@@ -1138,7 +1138,7 @@ V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktova
 
 S pozdravem,
 tým podpory ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Odstranění portálu [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1163,7 +1163,7 @@ V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktova
 
 S pozdravem,
 tým podpory ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Uživatel "$FromUserName":"$FromUserLink" smazal svůj profil a tento profil je nyní zablokován. Všechny soubory uživatele jsou mu stále přiřazeny a zabírají místo na disku. 

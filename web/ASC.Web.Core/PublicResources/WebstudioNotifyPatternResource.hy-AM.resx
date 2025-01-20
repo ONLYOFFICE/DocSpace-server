@@ -506,7 +506,7 @@ $TrulyYours</value>
 
 Հարգանքներով՝
 ONLYOFFICE աջակցման թիմ
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել նամակը ձեր ${LetterLogoText} հաշվի վրա:
@@ -1047,7 +1047,7 @@ _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդր�
 
 Հարգանքներով՝
 ONLYOFFICE աջակցման թիմ
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի ջնջում
@@ -1230,7 +1230,7 @@ _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդր�
 
 Հարգանքներով՝
 ONLYOFFICE աջակցման թիմ
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1. Պորտալի հասցեի փոփոխություն

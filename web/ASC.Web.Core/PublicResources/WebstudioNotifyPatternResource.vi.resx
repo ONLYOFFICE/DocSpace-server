@@ -1215,7 +1215,7 @@ Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòn
 
 Trân trọng,
 Nhóm hỗ trợ ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Xóa cổng thong tin [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1240,7 +1240,7 @@ Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòn
 
 Trân trọng,
 Nhóm hỗ trợ ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Người dùng "$FromUserName":"$FromUserLink" đã xóa hồ sơ của mình và hồ sơ này hiện đã bị chặn. Tất cả các tập tin của người dùng vẫn được phân cho anh/cô ấy và chiếm không gian đĩa. 
@@ -1468,7 +1468,7 @@ Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòn
 
 Trân trọng,
 Nhóm hỗ trợ ONLYOFFICE
-[www.onlyoffice.com](https://onlyoffice.com/)</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Định cấu hình ứng dụng xác thực</value>
