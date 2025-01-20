@@ -226,7 +226,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         get
         {
             var email = configuration["externalresources:paymentemail"];
-            return !string.IsNullOrEmpty(email) ? email : "sales@onlyoffice.com";
+            return string.IsNullOrEmpty(email) ? null : email;
         }
     }
 
