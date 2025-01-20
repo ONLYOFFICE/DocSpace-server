@@ -377,6 +377,8 @@ public class StudioNotifyService(
         var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
+        var url1 = setupInfo.LinksToExternalResources.GetValueOrDefault("helpcenteruserguidesdocspace");
+
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
@@ -390,6 +392,7 @@ public class StudioNotifyService(
         new TagValue("IMG2", img2),
         new TagValue("IMG3", img3),
         new TagValue("IMG4", img4),
+        new TagValue("URL1", url1),
         new TagValue(CommonTags.Footer, footer));
     }
 
@@ -431,6 +434,8 @@ public class StudioNotifyService(
         var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
+        var url1 = setupInfo.LinksToExternalResources.GetValueOrDefault("helpcenteruserguidesdocspace");
+
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
@@ -444,6 +449,7 @@ public class StudioNotifyService(
         new TagValue("IMG2", img2),
         new TagValue("IMG3", img3),
         new TagValue("IMG4", img4),
+        new TagValue("URL1", url1),
         new TagValue(CommonTags.Footer, footer));
     }
 
