@@ -144,7 +144,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:orderdemo"] ?? string.Empty, null);
+            return BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:site_demo-order"] ?? string.Empty, null);
         }
     }
 

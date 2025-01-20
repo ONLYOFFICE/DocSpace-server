@@ -238,7 +238,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         get
         {
             var type = configuration["license:type"] ?? "enterprise";
-            return configuration["externalresources:buy" + type] ?? "";
+            return configuration["externalresources:site_buy" + type] ?? "";
         }
     }
 }

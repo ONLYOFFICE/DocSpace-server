@@ -237,7 +237,7 @@ public class FirstTimeTenantSettings(
     {
         try
         {
-            var url = setupInfo.LinksToExternalResources.GetValueOrDefault("subscribe");
+            var url = setupInfo.LinksToExternalResources.GetValueOrDefault("site_subscribe");
 
             if (string.IsNullOrEmpty(url))
             {

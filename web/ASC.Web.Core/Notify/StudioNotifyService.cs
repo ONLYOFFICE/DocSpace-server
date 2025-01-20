@@ -377,7 +377,7 @@ public class StudioNotifyService(
         var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
-        var url1 = setupInfo.LinksToExternalResources.GetValueOrDefault("helpcenteruserguidesdocspace");
+        var url1 = setupInfo.LinksToExternalResources.GetValueOrDefault("helpcenter_docspace-index");
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
@@ -434,7 +434,7 @@ public class StudioNotifyService(
         var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
-        var url1 = setupInfo.LinksToExternalResources.GetValueOrDefault("helpcenteruserguidesdocspace");
+        var url1 = setupInfo.LinksToExternalResources.GetValueOrDefault("helpcenter_docspace-index");
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,

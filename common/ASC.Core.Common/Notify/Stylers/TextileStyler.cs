@@ -196,11 +196,11 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         }
 
         footerSocialContent = footerSocialContent
-            .Replace("%SOCIALNETWORKFACEBOOK%", _externalResources.GetValueOrDefault("socialnetworkfacebook"))
-            .Replace("%SOCIALNETWORKTWITTER%", _externalResources.GetValueOrDefault("socialnetworktwitter"))
-            .Replace("%SOCIALNETWORKYOUTUBE%", _externalResources.GetValueOrDefault("socialnetworkyoutube"))
-            .Replace("%SOCIALNETWORKINSTAGRAM%", _externalResources.GetValueOrDefault("socialnetworkinstagram"))
-            .Replace("%SOCIALNETWORKTIKTOK%", _externalResources.GetValueOrDefault("socialnetworktiktok"));
+            .Replace("%SOCIALNETWORKFACEBOOK%", _externalResources.GetValueOrDefault("socialnetwork_facebook"))
+            .Replace("%SOCIALNETWORKTWITTER%", _externalResources.GetValueOrDefault("socialnetwork_twitter"))
+            .Replace("%SOCIALNETWORKYOUTUBE%", _externalResources.GetValueOrDefault("socialnetwork_youtube"))
+            .Replace("%SOCIALNETWORKINSTAGRAM%", _externalResources.GetValueOrDefault("socialnetwork_instagram"))
+            .Replace("%SOCIALNETWORKTIKTOK%", _externalResources.GetValueOrDefault("socialnetwork_tiktok"));
     }
 
     private void InitTopImage(NoticeMessage message, MailWhiteLabelSettings settings, out string footerTop)
