@@ -51,4 +51,9 @@ public class BackupRestoreDto
     /// Notifies users about portal restoring process or not
     /// </summary>
     public bool Notify { get; set; }
+
+    /// <summary>
+    /// Expect  dump or not
+    /// </summary>
+    public bool Dump { get; set; }
 }
