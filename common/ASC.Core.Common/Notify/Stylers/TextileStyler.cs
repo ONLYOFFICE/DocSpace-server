@@ -37,7 +37,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         = new(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix,
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
-    private readonly Dictionary<string, string> _externalResources = configuration.GetSection("externalresources").Get<Dictionary<string, string>>() ?? [];
+    private readonly Dictionary<string, string> _externalResources = configuration.GetSection("externalresources:default").Get<Dictionary<string, string>>() ?? [];
 
     static TextileStyler()
     {

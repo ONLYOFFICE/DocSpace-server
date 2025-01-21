@@ -120,7 +120,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:support"] ?? string.Empty, null);
+            return BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:default:support"] ?? string.Empty, null);
         }
     }
 
@@ -128,7 +128,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return configuration["externalresources:supportemail"];
+            return configuration["externalresources:default:supportemail"];
         }
     }
 
@@ -136,7 +136,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return configuration["externalresources:paymentemail"];
+            return configuration["externalresources:default:paymentemail"];
         }
     }
 
@@ -144,7 +144,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:site_demo-order"] ?? string.Empty, null);
+            return BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:default:site_demo-order"] ?? string.Empty, null);
         }
     }
 
@@ -152,7 +152,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return configuration["externalresources:site"];
+            return configuration["externalresources:default:site"];
         }
     }
 
@@ -160,7 +160,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return configuration["externalresources:forum"];
+            return configuration["externalresources:default:forum"];
         }
     }
 }

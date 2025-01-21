@@ -165,7 +165,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = configuration["externalresources:license"];
+            var url = configuration["externalresources:default:license"];
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -177,7 +177,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = configuration["externalresources:helpcenter"];
+            var url = configuration["externalresources:default:helpcenter"];
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -189,7 +189,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = configuration["externalresources:support"];
+            var url = configuration["externalresources:default:support"];
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -201,7 +201,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = configuration["externalresources:forum"];
+            var url = configuration["externalresources:default:forum"];
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -213,7 +213,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = configuration["externalresources:videoguides"];
+            var url = configuration["externalresources:default:videoguides"];
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -225,7 +225,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var email = configuration["externalresources:paymentemail"];
+            var email = configuration["externalresources:default:paymentemail"];
             return string.IsNullOrEmpty(email) ? null : email;
         }
     }
@@ -238,7 +238,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         get
         {
             var type = configuration["license:type"] ?? "enterprise";
-            return configuration["externalresources:site_buy" + type] ?? "";
+            return configuration["externalresources:default:site_buy" + type] ?? "";
         }
     }
 }

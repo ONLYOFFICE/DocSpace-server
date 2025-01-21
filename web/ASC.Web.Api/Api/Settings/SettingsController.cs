@@ -42,6 +42,7 @@ public partial class SettingsController(MessageService messageService,
         CommonLinkUtility commonLinkUtility,
         IConfiguration configuration,
         SetupInfo setupInfo,
+        ExternalResourceSettings externalResourceSettings,
         GeolocationHelper geolocationHelper,
         ConsumerFactory consumerFactory,
         TimeZoneConverter timeZoneConverter,
@@ -99,8 +100,8 @@ public partial class SettingsController(MessageService messageService,
             TenantStatus = tenant.Status,
             TenantAlias = tenant.Alias,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
-            LegalTerms = setupInfo.LinksToExternalResources.GetValueOrDefault("legalterms"),
-            LicenseUrl = setupInfo.LinksToExternalResources.GetValueOrDefault("license"),
+            LegalTerms = externalResourceSettings.Get("legalterms"),
+            LicenseUrl = externalResourceSettings.Get("license"),
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
             ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager),
@@ -131,8 +132,8 @@ public partial class SettingsController(MessageService messageService,
             settings.DomainValidator = tenantDomainValidator;
             settings.ZendeskKey = setupInfo.ZendeskKey;
             settings.TagManagerId = setupInfo.TagManagerId;
-            settings.BookTrainingEmail = setupInfo.LinksToExternalResources.GetValueOrDefault("booktrainingemail");
-            settings.DocumentationEmail = setupInfo.LinksToExternalResources.GetValueOrDefault("documentationemail");
+            settings.BookTrainingEmail = externalResourceSettings.Get("booktrainingemail");
+            settings.DocumentationEmail = externalResourceSettings.Get("documentationemail");
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
 
@@ -150,7 +151,7 @@ public partial class SettingsController(MessageService messageService,
 
             settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
             settings.FeedbackAndSupportLink = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
-            settings.ApiDocsLink = setupInfo.LinksToExternalResources.GetValueOrDefault("api");
+            settings.ApiDocsLink = externalResourceSettings.Get("api");
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
             {
@@ -222,9 +223,11 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Ok", typeof(Dictionary<string, string>))]
     [HttpGet("externalresources")]
-    public Dictionary<string, string> GetLinksToExternalResources()
+    public async Task<Dictionary<string, string>> GetLinksToExternalResources()
     {
-        return setupInfo.LinksToExternalResources;
+        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
+
+        return externalResourceSettings.GetDictionary(whiteLabelSettings: settings);
     }
 
     /// <summary>

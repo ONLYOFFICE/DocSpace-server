@@ -80,7 +80,6 @@ public class SetupInfo
     public string AmiMetaUrl { get; private set; }
     public string AmiTokenUrl { get; private set; }
     public int InvitationLimit { get; private set; }
-    public Dictionary<string, string> LinksToExternalResources { get; private set; }
 
     private readonly IConfiguration _configuration;
 
@@ -127,8 +126,6 @@ public class SetupInfo
         AmiTokenUrl = GetAppSettings("web:ami:token", "");
 
         InvitationLimit = GetAppSettings("web:invitation-limit", int.MaxValue);
-
-        LinksToExternalResources = configuration.GetSection("externalresources").Get<Dictionary<string, string>>() ?? [];
     }
 
 

@@ -37,7 +37,7 @@ public class NotifyHelper(UserManager userManager,
     TenantManager tenantManager,
     AuthManager authManager,
     WorkContext workContext,
-    SetupInfo setupInfo,
+    IConfiguration configuration,
     CommonLinkUtility commonLinkUtility,
     TenantLogoManager tenantLogoManager,
     IUrlShortener urlShortener,
@@ -81,7 +81,7 @@ public class NotifyHelper(UserManager userManager,
             user,
             StudioNotifyService.EMailSenderName,
             new TagValue(Tags.OwnerName, user.DisplayUserName(displayUserSettingsHelper)),
-            new TagValue("URL1", setupInfo.LinksToExternalResources.GetValueOrDefault("helpcenter_docspace-settings_creatingbackup")),
+            new TagValue("URL1", configuration["externalresources:default:helpcenter_docspace-settings_creatingbackup"]),
             TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
     }
 

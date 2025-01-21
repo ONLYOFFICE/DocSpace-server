@@ -38,7 +38,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         TenantExtra tenantExtra,
         CommonLinkUtility commonLinkUtility,
         ApiSystemHelper apiSystemHelper,
-        SetupInfo setupInfo,
+        ExternalResourceSettings externalResourceSettings,
         SettingsManager settingsManager,
         CoreBaseSettings coreBaseSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
@@ -52,13 +52,6 @@ public class StudioPeriodicNotify(ILoggerProvider log,
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
 
     private const string CacheKey = "notification_date_for_unused_portals";
-
-    private string GetExternalResource(string resourceKey, string cultureName = null)
-    {
-        return setupInfo.LinksToExternalResources.TryGetValue(resourceKey + cultureName, out var resource)
-            ? resource
-            : setupInfo.LinksToExternalResources.GetValueOrDefault(resourceKey);
-    }
 
     public async ValueTask SendSaasLettersAsync(string senderName, DateTime scheduleDate)
     {
@@ -168,7 +161,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~/portal-settings/");
                         topGif = studioNotifyHelper.GetNotificationImageUrl("configure_docspace.gif");
 
-                        url1 = c => GetExternalResource("helpcenter_docspace");
+                        url1 = c => externalResourceSettings.Get("helpcenter_docspace", c.Name);
 
                         trulyYoursAsTebleRow = true;
                     }
@@ -190,22 +183,22 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img5 = studioNotifyHelper.GetNotificationImageUrl("administration.png");
 
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonWatchFullPlaylist", c);
-                        orangeButtonUrl = GetExternalResource("videoguides_playlist");
+                        orangeButtonUrl = externalResourceSettings.Get("videoguides_playlist");
 
-                        url1 = c => GetExternalResource("videoguides_docspacefull", c.Name);
-                        url2 = c => GetExternalResource("videoguides_docspacerooms", c.Name);
-                        url3 = c => GetExternalResource("videoguides_docspaceroles", c.Name);
-                        url4 = c => GetExternalResource("videoguides_docspacesecurity", c.Name);
-                        url5 = c => GetExternalResource("videoguides_docspacecreatefiles", c.Name);
-                        url6 = c => GetExternalResource("videoguides_docspaceprofile", c.Name);
-                        url7 = c => GetExternalResource("videoguides_docspacebackup", c.Name);
-                        url8 = c => GetExternalResource("videoguides_docspacewhatis", c.Name);
-                        url9 = c => GetExternalResource("videoguides_docspaceoperationswithfiles", c.Name);
-                        url10 = c => GetExternalResource("videoguides_docspaceactivesessions", c.Name);
-                        url11 = c => GetExternalResource("videoguides_docspacearchive", c.Name);
-                        url12 = c => GetExternalResource("videoguides_docspacefilterfiles", c.Name);
-                        url13 = c => GetExternalResource("videoguides_docspacefileversions", c.Name);
-                        url14 = c => GetExternalResource("videoguides_docspacehotkeys", c.Name);
+                        url1 = c => externalResourceSettings.Get("videoguides_docspacefull", c.Name);
+                        url2 = c => externalResourceSettings.Get("videoguides_docspacerooms", c.Name);
+                        url3 = c => externalResourceSettings.Get("videoguides_docspaceroles", c.Name);
+                        url4 = c => externalResourceSettings.Get("videoguides_docspacesecurity", c.Name);
+                        url5 = c => externalResourceSettings.Get("videoguides_docspacecreatefiles", c.Name);
+                        url6 = c => externalResourceSettings.Get("videoguides_docspaceprofile", c.Name);
+                        url7 = c => externalResourceSettings.Get("videoguides_docspacebackup", c.Name);
+                        url8 = c => externalResourceSettings.Get("videoguides_docspacewhatis", c.Name);
+                        url9 = c => externalResourceSettings.Get("videoguides_docspaceoperationswithfiles", c.Name);
+                        url10 = c => externalResourceSettings.Get("videoguides_docspaceactivesessions", c.Name);
+                        url11 = c => externalResourceSettings.Get("videoguides_docspacearchive", c.Name);
+                        url12 = c => externalResourceSettings.Get("videoguides_docspacefilterfiles", c.Name);
+                        url13 = c => externalResourceSettings.Get("videoguides_docspacefileversions", c.Name);
+                        url14 = c => externalResourceSettings.Get("videoguides_docspacehotkeys", c.Name);
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("video_guides.gif");
 
@@ -232,12 +225,12 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", c);
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
-                        url1 = c => GetExternalResource("site_collaboration-rooms");
-                        url2 = c => GetExternalResource("site_public-rooms");
-                        url3 = c => GetExternalResource("site_custom-rooms");
-                        url4 = c => GetExternalResource("site_form-filling-rooms");
-                        url5 = c => GetExternalResource("site_seamless-collaboration");
-                        url6 = c => GetExternalResource("site_openai", c.Name);
+                        url1 = c => externalResourceSettings.Get("site_collaboration-rooms", c.Name);
+                        url2 = c => externalResourceSettings.Get("site_public-rooms", c.Name);
+                        url3 = c => externalResourceSettings.Get("site_custom-rooms", c.Name);
+                        url4 = c => externalResourceSettings.Get("site_form-filling-rooms", c.Name);
+                        url5 = c => externalResourceSettings.Get("site_seamless-collaboration", c.Name);
+                        url6 = c => externalResourceSettings.Get("site_openai", c.Name);
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
                     }
@@ -261,20 +254,20 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img7 = studioNotifyHelper.GetNotificationImageUrl("pipedrive.png");
 
                         orangeButtonText1 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl1 = GetExternalResource("integration_zoom");
+                        orangeButtonUrl1 = externalResourceSettings.Get("integration_zoom");
                         orangeButtonText2 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", c);
-                        orangeButtonUrl2 = GetExternalResource("integration_zapier");
+                        orangeButtonUrl2 = externalResourceSettings.Get("integration_zapier");
                         orangeButtonText3 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl3 = GetExternalResource("integration_wordpress");
+                        orangeButtonUrl3 = externalResourceSettings.Get("integration_wordpress");
                         orangeButtonText4 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl4 = GetExternalResource("integration_drupal");
+                        orangeButtonUrl4 = externalResourceSettings.Get("integration_drupal");
                         orangeButtonText5 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl5 = GetExternalResource("integration_pipedrive");
+                        orangeButtonUrl5 = externalResourceSettings.Get("integration_pipedrive");
 
-                        url1 = c => GetExternalResource("site_office-for-zoom");
-                        url2 = c => GetExternalResource("site_office-for-zapier");
-                        url3 = c => GetExternalResource("site_office-for-wordpress");
-                        url4 = c => GetExternalResource("site_office-for-drupal");
+                        url1 = c => externalResourceSettings.Get("site_office-for-zoom", c.Name);
+                        url2 = c => externalResourceSettings.Get("site_office-for-zapier", c.Name);
+                        url3 = c => externalResourceSettings.Get("site_office-for-wordpress", c.Name);
+                        url4 = c => externalResourceSettings.Get("site_office-for-drupal", c.Name);
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("integration.gif");
 
@@ -299,8 +292,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img3 = studioNotifyHelper.GetNotificationImageUrl("linux.png");
                         img4 = studioNotifyHelper.GetNotificationImageUrl("android.png");
 
-                        url1 = c => GetExternalResource("site_download-desktop");
-                        url2 = c => GetExternalResource("site_download-mobile");
+                        url1 = c => externalResourceSettings.Get("site_download-desktop", c.Name);
+                        url2 = c => externalResourceSettings.Get("site_download-mobile", c.Name);
 
                         trulyYoursAsTebleRow = true;
                     }
@@ -327,9 +320,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                                 toowner = true;
 
                                 orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
-                                orangeButtonUrl = GetExternalResource("site_registration-canceled");
+                                orangeButtonUrl = externalResourceSettings.Get("site_registration-canceled");
 
-                                url1 = c => GetExternalResource("legalterms");
+                                url1 = c => externalResourceSettings.Get("legalterms", c.Name);
 
                                 topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
 
@@ -417,9 +410,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         toowner = true;
 
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
-                        orangeButtonUrl = GetExternalResource("site_registration-canceled");
+                        orangeButtonUrl = externalResourceSettings.Get("site_registration-canceled");
 
-                        url1 = c => GetExternalResource("legalterms");
+                        url1 = c => externalResourceSettings.Get("legalterms", c.Name);
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
 
@@ -577,7 +570,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 var trulyYoursAsTableRow = false;
 
-                var pricingPageUrl = GetExternalResource("site_docspace-prices");
+                var pricingPageUrl = externalResourceSettings.Get("site_docspace-prices");
 
                 if (quota.Trial && defaultRebranding)
                 {
@@ -598,12 +591,12 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img4 = studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
                         img5 = studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
 
-                        url1 = c => GetExternalResource("site_collaboration-rooms");
-                        url2 = c => GetExternalResource("site_public-rooms");
-                        url3 = c => GetExternalResource("site_custom-rooms");
-                        url4 = c => GetExternalResource("site_form-filling-rooms");
-                        url5 = c => GetExternalResource("site_seamless-collaboration");
-                        url6 = c => GetExternalResource("site_openai", c.Name);
+                        url1 = c => externalResourceSettings.Get("site_collaboration-rooms", c.Name);
+                        url2 = c => externalResourceSettings.Get("site_public-rooms", c.Name);
+                        url3 = c => externalResourceSettings.Get("site_custom-rooms", c.Name);
+                        url4 = c => externalResourceSettings.Get("site_form-filling-rooms", c.Name);
+                        url5 = c => externalResourceSettings.Get("site_seamless-collaboration", c.Name);
+                        url6 = c => externalResourceSettings.Get("site_openai", c.Name);
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
 
@@ -631,8 +624,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img3 = studioNotifyHelper.GetNotificationImageUrl("linux.png");
                         img4 = studioNotifyHelper.GetNotificationImageUrl("android.png");
 
-                        url1 = c => GetExternalResource("site_download-desktop");
-                        url2 = c => GetExternalResource("site_download-mobile");
+                        url1 = c => externalResourceSettings.Get("site_download-desktop", c.Name);
+                        url2 = c => externalResourceSettings.Get("site_download-mobile", c.Name);
 
                         trulyYoursAsTableRow = true;
                     }
@@ -819,12 +812,12 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     var img4 = studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
                     var img5 = studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
 
-                    Func<CultureInfo, string> url1 = c => GetExternalResource("site_collaboration-rooms");
-                    Func<CultureInfo, string> url2 = c => GetExternalResource("site_public-rooms");
-                    Func<CultureInfo, string> url3 = c => GetExternalResource("site_custom-rooms");
-                    Func<CultureInfo, string> url4 = c => GetExternalResource("site_form-filling-rooms");
-                    Func<CultureInfo, string> url5 = c => GetExternalResource("site_seamless-collaboration");
-                    Func<CultureInfo, string> url6 = c => GetExternalResource("site_openai", c.Name);
+                    Func<CultureInfo, string> url1 = c => externalResourceSettings.Get("site_collaboration-rooms", c.Name);
+                    Func<CultureInfo, string> url2 = c => externalResourceSettings.Get("site_public-rooms", c.Name);
+                    Func<CultureInfo, string> url3 = c => externalResourceSettings.Get("site_custom-rooms", c.Name);
+                    Func<CultureInfo, string> url4 = c => externalResourceSettings.Get("site_form-filling-rooms", c.Name);
+                    Func<CultureInfo, string> url5 = c => externalResourceSettings.Get("site_seamless-collaboration", c.Name);
+                    Func<CultureInfo, string> url6 = c => externalResourceSettings.Get("site_openai", c.Name);
 
                     var topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
 

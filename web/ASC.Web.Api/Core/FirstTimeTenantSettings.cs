@@ -34,6 +34,7 @@ public class FirstTimeTenantSettings(
     SettingsManager settingsManager,
     UserManager userManager,
     SetupInfo setupInfo,
+    ExternalResourceSettings externalResourceSettings,
     SecurityContext securityContext,
     MessageService messageService,
     LicenseReader licenseReader,
@@ -237,7 +238,7 @@ public class FirstTimeTenantSettings(
     {
         try
         {
-            var url = setupInfo.LinksToExternalResources.GetValueOrDefault("site_subscribe");
+            var url = externalResourceSettings.Get("site_subscribe");
 
             if (string.IsNullOrEmpty(url))
             {
