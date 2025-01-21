@@ -31,7 +31,7 @@ public class RoomTemplateDto
     public string Title { get; set; }
     public LogoRequest Logo { get; set; }
     public IEnumerable<string> Share { get; set; }
-    public IEnumerable<Guid> Groups { get; set; }
+    public List<Guid> Groups { get; set; }
     public bool Public { get; set; }
     public IEnumerable<string> Tags { get; set; }
 }

@@ -7,7 +7,7 @@ public class RoomTemplatesIntegrationEventHandler(RoomTemplatesWorker worker)
 {
     public async Task Handle(CreateRoomTemplateIntegrationEvent @event)
     {
-        await worker.StartCreateTemplateAsync(@event.TenantId, @event.CreateBy, @event.RoomId, @event.Title, @event.Emails, @event.Logo, @event.Tags);
+        await worker.StartCreateTemplateAsync(@event.TenantId, @event.CreateBy, @event.RoomId, @event.Title, @event.Emails, @event.Logo, @event.Tags, @event.Groups);
     }
 
     public async Task Handle(CreateRoomFromTemplateIntegrationEvent @event)

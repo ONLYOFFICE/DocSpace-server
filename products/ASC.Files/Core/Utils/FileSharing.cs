@@ -139,15 +139,20 @@ public class FileSharingAceHelper(
 
             if (room != null)
             {
-                if (!FileSecurity.AvailableRoomAccesses.TryGetValue(room.FolderType, out var subjectAccesses)
-                    || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
+                if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
                 {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                    if (w.Access != FileShare.RoomManager && w.Access != FileShare.None)
+                    {
+                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                    }
                 }
-
-                if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync && w.Access != FileShare.RoomManager && w.Access != FileShare.None)
+                else
                 {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                    if (!FileSecurity.AvailableRoomAccesses.TryGetValue(room.FolderType, out var subjectAccesses)
+                    || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
+                    {
+                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                    }
                 }
 
                 if (w.FileShareOptions != null)
@@ -177,8 +182,8 @@ public class FileSharingAceHelper(
 
             if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
-                if (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) || 
-                    !userAccesses.Contains(w.Access))
+                if (room.RootId is int root && root != await globalFolderHelper.FolderRoomTemplatesAsync && (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) || 
+                    !userAccesses.Contains(w.Access)))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }

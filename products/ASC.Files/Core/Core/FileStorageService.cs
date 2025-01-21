@@ -520,7 +520,7 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
-    public async Task<Folder<int>> CreateRoomTemplateAsync(int roomId, string title, IEnumerable<string> emails, IEnumerable<string> tags, LogoRequest logo)
+    public async Task<Folder<int>> CreateRoomTemplateAsync(int roomId, string title, IEnumerable<FileShareParams> share, IEnumerable<string> tags, LogoRequest logo)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.FolderRoomTemplatesAsync;
@@ -547,11 +547,6 @@ public class FileStorageService //: IFileStorageService
             };
         }
 
-        IEnumerable<FileShareParams> share = null;
-        if (emails != null)
-        {
-            share = emails.Select(e => new FileShareParams() { Email = e, Access = FileShare.RoomManager });
-        }
         return await CreateRoomAsync(async () =>
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))

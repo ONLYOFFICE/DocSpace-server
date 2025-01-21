@@ -35,6 +35,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
     private LogoSettings _logo;
     private IEnumerable<string> _tags;
     private IEnumerable<string> _emails;
+    private IEnumerable<Guid> _groups;
     private string _title;
 
     private int _roomId;
@@ -68,7 +69,8 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         string title,
         IEnumerable<string> emails,
         LogoSettings logo,
-        IEnumerable<string> tags)
+        IEnumerable<string> tags,
+        IEnumerable<Guid> groups)
     {
         TenantId = tenantId;
         _userId = userId;
@@ -77,6 +79,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         _tags = tags;
         _emails = emails;
         _title = title;
+        _groups = groups;
         TemplateId = -1;
     }
 
@@ -109,7 +112,28 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
                 };
             }
 
-            TemplateId = (await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, _emails, _tags, dtoLogo)).Id;
+            List<AceWrapper> wrappers = null;
+            if (_emails != null)
+            {
+                wrappers = _emails.Select(e => new AceWrapper() { Email = e, Access = FileShare.RoomManager }).ToList();
+            }
+            if (_groups != null)
+            {
+                wrappers = _groups.Select(e => new AceWrapper() { Id = e, Access = FileShare.RoomManager }).ToList();
+            }
+
+
+            TemplateId = (await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, new List<FileShareParams>(), _tags, dtoLogo)).Id;
+
+            var aceCollection = new AceCollection<int>
+            {
+                Files = Array.Empty<int>(),
+                Folders = [TemplateId],
+                Aces = wrappers,
+                Message = string.Empty
+            };
+
+            var warning = await fileStorageService.SetAceObjectAsync(aceCollection, false);
 
             _totalCount = await fileDao.GetFilesCountAsync(_roomId, FilterType.None, false, Guid.Empty, string.Empty, null, false, true);
             var files = fileDao.GetFilesAsync(_roomId);

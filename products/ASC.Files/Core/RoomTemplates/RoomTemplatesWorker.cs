@@ -39,7 +39,14 @@ public class RoomTemplatesWorker(
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "room_templates";
 
-    public async Task StartCreateTemplateAsync(int tenantId, Guid userId, int roomId, string title, IEnumerable<string> emails, LogoSettings logo, IEnumerable<string> tags)
+    public async Task StartCreateTemplateAsync(int tenantId,
+        Guid userId,
+        int roomId, 
+        string title, 
+        IEnumerable<string> emails, 
+        LogoSettings logo,
+        IEnumerable<string> tags, 
+        IEnumerable<Guid> groups)
     {
         try
         {
@@ -56,7 +63,7 @@ public class RoomTemplatesWorker(
             {
                 item = serviceProvider.GetService<CreateRoomTemplateOperation>();
 
-                item.Init(tenantId, userId, roomId, title, emails, logo, tags);
+                item.Init(tenantId, userId, roomId, title, emails, logo, tags, groups);
 
                 await _queue.EnqueueTask(item);
             }
