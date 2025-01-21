@@ -577,8 +577,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 var trulyYoursAsTableRow = false;
 
-                var siteUrl = commonLinkUtility.GetSiteLink();
-                var pricingPageUrl = $"{siteUrl}/docspace-prices.aspx";
+                var pricingPageUrl = GetExternalResource("site_docspace-prices");
 
                 if (quota.Trial && defaultRebranding)
                 {
