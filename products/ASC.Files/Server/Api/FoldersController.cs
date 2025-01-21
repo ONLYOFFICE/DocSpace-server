@@ -63,16 +63,22 @@ public class FoldersControllerInternal(
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("folder/{folderId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(HistoryFolderRequestDto inDto)
+    public IAsyncEnumerable<HistoryDto> GetActivityHistoryAsync(HistoryFolderRequestDto inDto)
     {
         return historyApiHelper.GetFolderHistoryAsync(inDto.FolderId, inDto.FromDate, inDto.ToDate);
     }
-    
+
+    /// <summary>
+    /// Get form filter of a folder with id specified in request
+    /// </summary>
+    /// <short>Get folder form filter</short>
+    /// <path>api/2.0/files/{folderId}/formfilter</path>
+    [Tags("Files / Folders")]
     [AllowAnonymous]
     [HttpGet("{folderId:int}/formfilter")]
-    public async Task<IEnumerable<FormsItemDto>> GetFolderAsync(int folderId)
+    public async Task<IEnumerable<FormsItemDto>> GetFolderAsync(FolderIdRequestDto<int> inDto)
     {
-        return (await formFillingReportCreator.GetFormsFields(folderId)).Select(r => new FormsItemDto(r.Key, r.Type));
+        return (await formFillingReportCreator.GetFormsFields(inDto.FolderId)).Select(r => new FormsItemDto(r.Key, r.Type));
     }
 }
 
