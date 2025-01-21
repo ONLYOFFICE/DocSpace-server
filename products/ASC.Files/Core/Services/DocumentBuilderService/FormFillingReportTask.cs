@@ -96,6 +96,7 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
         var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
         var filesLinkUtility = serviceProvider.GetService<FilesLinkUtility>();
         var fileUtility = serviceProvider.GetService<FileUtility>();
+        var tenantUtil = serviceProvider.GetService<TenantUtil>();
 
         var user = await userManager.GetUsersAsync(userId);
         var fileDao = daoFactory.GetFileDao<int>();
@@ -114,7 +115,8 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
             var formsData = formFillingResults.FirstOrDefault().FormsData;
             if(formsData.Any())
             {
-                foreach(var field in formsData)
+                keys.Add(FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture));
+                foreach (var field in formsData.Skip(1))
                 {
                     keys.Add(field.Key);
                 }
@@ -139,8 +141,8 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
                     }
                     t.Add(new
                     {
-                        format = $"{tenantCulture.DateTimeFormat.LongTimePattern}",
-                        value = formFillingRes.CreateOn.ToString("G", tenantCulture),
+                        format = $"{tenantCulture.DateTimeFormat.ShortDatePattern} {tenantCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}",
+                        value = tenantUtil.DateTimeFromUtc(formFillingRes.CreateOn).ToString("G", tenantCulture),
                         url = ""
                     });
                     var formsDataFile = await fileDao.GetFileAsync(formFillingRes.Id);

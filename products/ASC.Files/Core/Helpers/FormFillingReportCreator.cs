@@ -31,7 +31,6 @@ public class FormFillingReportCreator(
     ExportToXLSX exportToXLSX,
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
-    TenantUtil tenantUtil,
     TenantManager tenantManager,
     FactoryIndexerForm factoryIndexerForm,
     CommonLinkUtility commonLinkUtility,
@@ -101,7 +100,7 @@ public class FormFillingReportCreator(
         {
             new()
             {
-                Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture),
+                Key = "FormNumber",
                 Value = resultFormNumber.ToString()
             }
         };
