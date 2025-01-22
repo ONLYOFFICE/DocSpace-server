@@ -112,28 +112,30 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
                 };
             }
 
-            List<AceWrapper> wrappers = null;
-            if (_emails != null)
-            {
-                wrappers = _emails.Select(e => new AceWrapper() { Email = e, Access = FileShare.RoomManager }).ToList();
-            }
-            if (_groups != null)
-            {
-                wrappers = _groups.Select(e => new AceWrapper() { Id = e, Access = FileShare.RoomManager }).ToList();
-            }
-
-
             TemplateId = (await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, new List<FileShareParams>(), _tags, dtoLogo)).Id;
 
-            var aceCollection = new AceCollection<int>
-            {
-                Files = Array.Empty<int>(),
-                Folders = [TemplateId],
-                Aces = wrappers,
-                Message = string.Empty
-            };
+                List<AceWrapper> wrappers = null;
+                if (_emails != null)
+                {
+                    wrappers = _emails.Select(e => new AceWrapper() { Email = e, Access = FileShare.RoomManager }).ToList();
+                }
+                if (_groups != null)
+                {
+                    wrappers = _groups.Select(e => new AceWrapper() { Id = e, Access = FileShare.RoomManager }).ToList();
+                }
 
-            var warning = await fileStorageService.SetAceObjectAsync(aceCollection, false);
+            if (wrappers != null)
+            {
+                    var aceCollection = new AceCollection<int>
+                {
+                    Files = Array.Empty<int>(),
+                    Folders = [TemplateId],
+                    Aces = wrappers,
+                    Message = string.Empty
+                };
+
+                var warning = await fileStorageService.SetAceObjectAsync(aceCollection, false);
+            }
 
             _totalCount = await fileDao.GetFilesCountAsync(_roomId, FilterType.None, false, Guid.Empty, string.Empty, null, false, true);
             var files = fileDao.GetFilesAsync(_roomId);

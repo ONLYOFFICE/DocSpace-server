@@ -620,14 +620,21 @@ public class FileStorageService //: IFileStorageService
         
         await filesMessageService.SendAsync(MessageAction.RoomCreated, folder, folder.Title);
 
-        switch (folder.FolderType)
+        if (folder.ParentId is int parent && parent == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
-            case FolderType.PublicRoom:
-                await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
-                break;
-            case FolderType.FillingFormsRoom:
-                await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.FillForms, FilesCommonResource.FillOutExternalLinkTitle, primary: true);
-                break;
+            await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.RoomManager, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+        } 
+        else
+        {
+            switch (folder.FolderType)
+            {
+                case FolderType.PublicRoom:
+                    await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+                    break;
+                case FolderType.FillingFormsRoom:
+                    await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.FillForms, FilesCommonResource.FillOutExternalLinkTitle, primary: true);
+                    break;
+            }
         }
         
         if (privacy)
