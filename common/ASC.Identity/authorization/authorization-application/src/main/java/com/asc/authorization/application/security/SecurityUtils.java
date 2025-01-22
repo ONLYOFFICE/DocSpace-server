@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,50 +27,38 @@
 
 package com.asc.authorization.application.security;
 
-import com.asc.authorization.application.configuration.security.AnonymousFilterSecurityConfigurationProperties;
+import com.asc.authorization.application.configuration.properties.SecurityConfigurationProperties;
 import com.asc.common.utilities.HttpUtils;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
+/**
+ * Utility class for handling security-related tasks such as setting security headers and managing
+ * authentication error redirection.
+ *
+ * <p>This class provides methods to enhance HTTP responses with security protections and handle
+ * redirection in case of authentication errors.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class SecurityUtils {
-  private final AnonymousFilterSecurityConfigurationProperties securityConfigProperties;
+  private final SecurityConfigurationProperties securityConfigProperties;
   private final HttpUtils httpUtils;
 
   /**
-   * Retrieves the value of the authentication cookie.
+   * Sets security headers on the HTTP response to mitigate common web vulnerabilities.
    *
-   * @param request the HttpServletRequest.
-   * @return an Optional containing the value of the authentication cookie, if present.
-   */
-  public Optional<String> getAuthCookieValue(HttpServletRequest request) {
-    return Optional.ofNullable(request.getCookies())
-        .flatMap(
-            cookies ->
-                Arrays.stream(cookies)
-                    .filter(
-                        cookie ->
-                            securityConfigProperties
-                                .getAuthCookieName()
-                                .equalsIgnoreCase(cookie.getName()))
-                    .findFirst()
-                    .map(Cookie::getValue));
-  }
-
-  /**
-   * Sets security headers to protect against various attacks.
+   * <p>The headers include protections against MIME sniffing, cross-site scripting (XSS),
+   * clickjacking, and other common attacks. They also enforce strict transport security and content
+   * security policies.
    *
-   * @param response the HttpServletResponse to set the headers on.
+   * @param response the {@link HttpServletResponse} to set the headers on.
    */
   public void setSecurityHeaders(HttpServletResponse response) {
     response.setHeader("X-Content-Type-Options", "nosniff");
@@ -82,12 +70,16 @@ public class SecurityUtils {
   }
 
   /**
-   * Redirects the response with the specified authentication error.
+   * Redirects the response to a login page with an authentication error message.
    *
-   * @param request the HttpServletRequest.
-   * @param response the HttpServletResponse.
-   * @param clientId the client ID.
-   * @param error the AuthenticationError.
+   * <p>This method constructs a redirect URI based on the request scheme and client IP. It appends
+   * query parameters for the client ID, error type, and authentication context. The constructed URI
+   * is logged and sent to the client as a redirect response.
+   *
+   * @param request the {@link HttpServletRequest} containing the original request details.
+   * @param response the {@link HttpServletResponse} to send the redirect.
+   * @param clientId the client ID associated with the request.
+   * @param error the error code describing the authentication failure.
    * @throws IOException if an I/O error occurs during the redirect process.
    */
   public void redirectWithError(

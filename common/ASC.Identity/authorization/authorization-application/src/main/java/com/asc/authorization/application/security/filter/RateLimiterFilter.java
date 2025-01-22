@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,23 +45,35 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/** Filter for rate limiting requests based on client IP using Bucket4j. */
+/**
+ * Filter for rate limiting requests based on client IP using Bucket4j.
+ *
+ * <p>This filter enforces rate limiting by tracking requests from clients identified by their IP
+ * address. It uses Bucket4j to manage token consumption and applies configurable rate-limiting
+ * policies based on the HTTP method of the request.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class RateLimiterFilter extends OncePerRequestFilter {
+  /** HTTP response header for remaining rate limit tokens. */
   private static final String X_RATE_REMAINING = "X-Ratelimit-Remaining";
+
+  /** HTTP response header for rate limit reset time. */
   private static final String X_RATE_RESET = "X-Ratelimit-Reset";
 
   private final Function<HttpMethod, Supplier<BucketConfiguration>> bucketFactory;
   private final ProxyManager<String> proxyManager;
 
   /**
-   * Filters requests to enforce rate limiting based on client IP.
+   * Filters incoming requests and enforces rate limiting based on client IP.
    *
-   * @param request the HttpServletRequest.
-   * @param response the HttpServletResponse.
-   * @param chain the FilterChain.
+   * <p>If the client exceeds the allowed rate limit, the response includes headers indicating the
+   * remaining tokens and reset time, and returns a 429 Too Many Requests status code.
+   *
+   * @param request the {@link HttpServletRequest}.
+   * @param response the {@link HttpServletResponse}.
+   * @param chain the {@link FilterChain}.
    * @throws ServletException if an error occurs during the filter process.
    * @throws IOException if an I/O error occurs during the filter process.
    */
@@ -91,8 +103,11 @@ public class RateLimiterFilter extends OncePerRequestFilter {
   /**
    * Adds rate limit headers to the response.
    *
-   * @param response the HttpServletResponse to set the headers on.
-   * @param probe the ConsumptionProbe containing rate limit information.
+   * <p>This method sets the headers {@code X-Ratelimit-Remaining} and {@code X-Ratelimit-Reset} to
+   * provide feedback about the remaining tokens and the reset time.
+   *
+   * @param response the {@link HttpServletResponse} to set the headers on.
+   * @param probe the {@link ConsumptionProbe} containing rate limit information.
    */
   private void addRateLimitHeaders(HttpServletResponse response, ConsumptionProbe probe) {
     response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
@@ -104,8 +119,11 @@ public class RateLimiterFilter extends OncePerRequestFilter {
   /**
    * Handles the response when the rate limit is exceeded.
    *
-   * @param response the HttpServletResponse.
-   * @param probe the ConsumptionProbe containing rate limit information.
+   * <p>This method returns a 429 Too Many Requests response with headers indicating the remaining
+   * tokens and reset time, along with a JSON content type.
+   *
+   * @param response the {@link HttpServletResponse}.
+   * @param probe the {@link ConsumptionProbe} containing rate limit information.
    * @throws IOException if an I/O error occurs during the response handling.
    */
   private void handleRateLimitExceeded(HttpServletResponse response, ConsumptionProbe probe)
@@ -117,9 +135,12 @@ public class RateLimiterFilter extends OncePerRequestFilter {
   }
 
   /**
-   * Retrieves the client IP from the request.
+   * Retrieves the client IP address from the request.
    *
-   * @param request the HttpServletRequest.
+   * <p>If the {@code X-Forwarded-For} header is present, the first IP address is used. Otherwise,
+   * the remote address from the request is used.
+   *
+   * @param request the {@link HttpServletRequest}.
    * @return the client IP address.
    */
   private String getClientIp(HttpServletRequest request) {
