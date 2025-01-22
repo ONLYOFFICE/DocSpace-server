@@ -260,6 +260,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         searchArea = parent.FolderType == FolderType.Archive ? SearchArea.Archive : searchArea;
+        searchArea = parent.FolderType == FolderType.RoomTemplates ? SearchArea.Templates : searchArea;
 
         int total;
         IEnumerable<FileEntry> entries;

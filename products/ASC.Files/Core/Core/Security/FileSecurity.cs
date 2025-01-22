@@ -1919,6 +1919,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             SearchArea.Active => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
             SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(daoFactory)],
+            SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
@@ -2015,6 +2016,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             SearchArea.Active => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
             SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(daoFactory)],
+            SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
