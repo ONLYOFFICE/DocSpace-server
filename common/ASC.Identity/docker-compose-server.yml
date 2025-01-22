@@ -1,0 +1,56 @@
+services:
+  registration-service:
+    image: registration-service:latest
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_PROFILES_ACTIVE: dev,server
+      SPRING_APPLICATION_NAME: ASC.Identity.Registration
+      JDBC_URL: onlyoffice-mysql-server:3306
+      JDBC_DATABASE: docspace
+      JDBC_USER_NAME: root
+      JDBC_PASSWORD: my-secret-pw
+      REDIS_HOST: onlyoffice-redis
+      RABBIT_HOST: onlyoffice-rabbitmq
+      RABBIT_URI: amqp://guest:guest@onlyoffice-rabbitmq/
+      GRPC_CLIENT_AUTHORIZATION_ADDRESS: static://authorization-service:9999
+    depends_on:
+      migration-runner:
+        condition: service_completed_successfully
+      onlyoffice-mysql-server:
+        condition: service_healthy
+      onlyoffice-rabbitmq:
+        condition: service_started
+      onlyoffice-redis:
+        condition: service_started
+    networks:
+      - onlyoffice
+
+  authorization-service:
+    image: authorization-container:latest
+    ports:
+      - "9090:9090"
+    environment:
+      SERVER_PORT: 9090
+      SPRING_PROFILES_ACTIVE: dev,server
+      SPRING_APPLICATION_NAME: ASC.Identity.Authorization
+      JDBC_URL: onlyoffice-mysql-server:3306
+      JDBC_DATABASE: docspace
+      JDBC_USER_NAME: root
+      JDBC_PASSWORD: my-secret-pw
+      REDIS_HOST: onlyoffice-redis
+      RABBIT_HOST: onlyoffice-rabbitmq
+      RABBIT_URI: amqp://guest:guest@onlyoffice-rabbitmq/
+      GRPC_CLIENT_REGISTRATION_ADDRESS: static://registration-service:8888
+    depends_on:
+      migration-runner:
+        condition: service_completed_successfully
+      onlyoffice-mysql-server:
+        condition: service_healthy
+      onlyoffice-rabbitmq:
+        condition: service_started
+      onlyoffice-redis:
+        condition: service_started
+    networks:
+      - onlyoffice

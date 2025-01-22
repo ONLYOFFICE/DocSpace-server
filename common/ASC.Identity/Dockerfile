@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM maven:3.8.8-eclipse-temurin-21-alpine as builder
+FROM maven:3.8.8-eclipse-temurin-21 AS builder
 WORKDIR /app
 
 # Copy the root pom.xml and all necessary module pom.xml files
@@ -12,6 +12,7 @@ COPY authorization/authorization-data/pom.xml authorization/authorization-data/
 COPY authorization/authorization-messaging/pom.xml authorization/authorization-messaging/
 
 COPY common/pom.xml common/
+COPY common/common-autoconfigurations/pom.xml common/common-autoconfigurations/
 COPY common/common-application/pom.xml common/common-application/
 COPY common/common-core/pom.xml common/common-core/
 COPY common/common-core/common-domain/pom.xml common/common-core/common-domain/
@@ -35,7 +36,7 @@ COPY registration/registration-core/registration-domain/pom.xml registration/reg
 COPY registration/registration-core/registration-service/pom.xml registration/registration-core/registration-service/
 
 # Download the project dependencies without running tests
-RUN mvn dependency:go-offline
+RUN mvn dependency:go-offline -B
 
 # Copy the source code
 COPY authorization authorization/
@@ -45,7 +46,7 @@ COPY registration registration/
 
 # Build the project based on the specified module
 ARG MODULE
-RUN mvn clean package -DskipTests -pl ${MODULE} -am
+RUN mvn clean package -DskipTests -pl ${MODULE} -am -B
 
 # Stage 2: Create the runtime image
 FROM eclipse-temurin:21-jre-alpine
