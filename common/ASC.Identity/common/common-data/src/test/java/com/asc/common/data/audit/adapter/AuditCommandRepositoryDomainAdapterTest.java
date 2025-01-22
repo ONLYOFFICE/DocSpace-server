@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -86,14 +86,11 @@ class AuditCommandRepositoryDomainAdapterTest {
   }
 
   @Test
-  void saveAudit() {
-    // Arrange
+  void whenSavingAudit_thenRepositorySavesAuditEntityCorrectly() {
     when(auditDataAccessMapper.toEntity(audit)).thenReturn(auditEntity);
 
-    // Act
     auditCommandRepositoryDomainAdapter.saveAudit(audit);
 
-    // Assert
     ArgumentCaptor<AuditEntity> auditEntityArgumentCaptor =
         ArgumentCaptor.forClass(AuditEntity.class);
     verify(jpaAuditRepository).save(auditEntityArgumentCaptor.capture());
