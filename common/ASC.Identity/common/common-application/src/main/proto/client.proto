@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.asc.common.application.proto";
+option java_outer_classname = "ClientRegistrationServiceProto";
+
+import "google/protobuf/timestamp.proto";
+
+service ClientRegistrationService {
+  rpc GetClient (GetClientRequest) returns (ClientResponse) {
+  };
+}
+
+message GetClientRequest {
+  string client_id = 1;
+}
+
+message ClientResponse {
+  string name = 1;
+  string client_id = 2;
+  string client_secret = 3;
+  string description = 4;
+  string website_url = 5;
+  string terms_url = 6;
+  string policy_url = 7;
+  repeated string authentication_methods = 8;
+  int64 tenant = 9;
+  repeated string redirect_uris = 10;
+  repeated string allowed_origins = 11;
+  repeated string logout_redirect_uris = 12;
+  repeated string scopes = 13;
+  google.protobuf.Timestamp created_on = 14;
+  string created_by = 15;
+  google.protobuf.Timestamp modified_on = 16;
+  string modified_by = 17;
+  bool is_public = 18;
+  bool enabled = 19;
+}
