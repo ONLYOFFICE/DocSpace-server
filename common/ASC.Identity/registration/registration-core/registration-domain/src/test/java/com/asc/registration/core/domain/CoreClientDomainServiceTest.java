@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,7 +58,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testCreateClient() {
+  void whenClientIsCreated_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var event = service.createClient(audit, client);
 
@@ -72,7 +72,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testEnableClient() {
+  void whenClientIsEnabled_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var event = service.enableClient(audit, client);
 
@@ -86,7 +86,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testDisableClient() {
+  void whenClientIsDisabled_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var event = service.disableClient(audit, client);
 
@@ -100,11 +100,11 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testInvalidateClient() {
+  void whenClientIsDeleted_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
-    var event = service.invalidateClient(audit, client);
+    var event = service.deleteClient(audit, client);
 
-    verify(client).invalidate(captor.capture());
+    verify(client).disable(captor.capture());
 
     assertEquals("test@example.com", captor.getValue());
     assertNotNull(event);
@@ -114,7 +114,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testRegenerateClientSecret() {
+  void whenClientSecretIsRegenerated_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var event = service.regenerateClientSecret(audit, client);
 
@@ -128,7 +128,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testUpdateClientInfo() {
+  void whenClientInfoIsUpdated_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var clientInfo = new ClientInfo("Updated Client", "Updated Description", "Updated Logo URL");
     var event = service.updateClientInfo(audit, client, clientInfo);
@@ -143,7 +143,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testUpdateClientWebsiteInfo() {
+  void whenClientWebsiteInfoIsUpdated_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var clientWebsiteInfo =
         ClientWebsiteInfo.Builder.builder()
@@ -163,7 +163,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testUpdateClientRedirectInfo() {
+  void whenClientRedirectInfoIsUpdated_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var clientRedirectInfo =
         new ClientRedirectInfo(
@@ -182,7 +182,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testAddAuthenticationMethod() {
+  void whenAuthenticationMethodIsAdded_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var method = AuthenticationMethod.DEFAULT_AUTHENTICATION;
     var event = service.addAuthenticationMethod(audit, client, method);
@@ -197,7 +197,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testRemoveAuthenticationMethod() {
+  void whenAuthenticationMethodIsRemoved_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var method = AuthenticationMethod.DEFAULT_AUTHENTICATION;
     var event = service.removeAuthenticationMethod(audit, client, method);
@@ -212,7 +212,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testAddScope() {
+  void whenScopeIsAdded_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var scope = "newScope";
     var event = service.addScope(audit, client, scope);
@@ -227,7 +227,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testRemoveScope() {
+  void whenScopeIsRemoved_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var scope = "existingScope";
     var event = service.removeScope(audit, client, scope);
@@ -242,7 +242,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testMakeClientPublic() {
+  void whenClientIsMadePublic_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var event = service.makeClientPublic(audit, client);
 
@@ -256,7 +256,7 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testMakeClientPrivate() {
+  void whenClientIsMadePrivate_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var event = service.makeClientPrivate(audit, client);
 

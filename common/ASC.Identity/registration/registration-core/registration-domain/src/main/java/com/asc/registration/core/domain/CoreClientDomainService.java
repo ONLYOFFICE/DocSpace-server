@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -108,14 +108,14 @@ public class CoreClientDomainService implements ClientDomainService {
   }
 
   /**
-   * Invalidates an existing client, marking it for removal.
+   * Deletes an existing client, disabling and removing it.
    *
    * @param audit the audit information related to the update
    * @param client the client to be invalidated
    * @return a {@link ClientDeletedEvent} indicating the client was invalidated
    */
-  public ClientDeletedEvent invalidateClient(Audit audit, Client client) {
-    client.invalidate(audit.getUserEmail());
+  public ClientDeletedEvent deleteClient(Audit audit, Client client) {
+    client.disable(audit.getUserEmail());
     return new ClientDeletedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
