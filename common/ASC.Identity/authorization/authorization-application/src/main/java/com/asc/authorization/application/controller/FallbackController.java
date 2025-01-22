@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,32 +38,48 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/** Controller for handling fallback errors and redirecting to the login page. */
+/**
+ * Controller for handling fallback errors and redirecting to the login page.
+ *
+ * <p>This controller processes requests to the default error path and ensures users are redirected
+ * to the OAuth2 login page with the appropriate query parameters.
+ */
 @Controller
 public class FallbackController extends AbstractErrorController {
+  /** The default path for handling errors. */
   private static final String PATH = "/error";
+
   private HttpUtils httpUtils;
 
   /**
-   * Constructs a new FallbackController with the given error attributes.
+   * Constructs a new FallbackController with the provided {@link ErrorAttributes}.
    *
-   * @param errorAttributes the error attributes.
+   * @param errorAttributes the attributes used to retrieve error information.
    */
   public FallbackController(ErrorAttributes errorAttributes) {
     super(errorAttributes);
   }
 
+  /**
+   * Sets the {@link HttpUtils} utility used for retrieving client information.
+   *
+   * @param httpUtils the {@link HttpUtils} instance to set.
+   */
   @Autowired
   public void setHttpUtils(HttpUtils httpUtils) {
     this.httpUtils = httpUtils;
   }
 
   /**
-   * Handles errors by redirecting to the login page.
+   * Handles errors by redirecting the user to the login page.
    *
+   * <p>The redirect URL includes query parameters for the OAuth2 type and the client ID. If no
+   * client ID is provided, a default value of "error" is used.
+   *
+   * @param clientId the client ID associated with the error, passed as a query parameter.
    * @param request the {@link HttpServletRequest} that triggered the error.
-   * @param response the {@link HttpServletResponse} to which the redirect is sent.
-   * @throws IOException if an input or output exception occurs.
+   * @param response the {@link HttpServletResponse} used to send the redirect.
+   * @throws IOException if an input or output exception occurs during the redirect.
    */
   @RequestMapping(PATH)
   public void handleError(
@@ -80,7 +96,7 @@ public class FallbackController extends AbstractErrorController {
   /**
    * Returns the error path used by this controller.
    *
-   * @return the error path.
+   * @return the error path as a {@link String}.
    */
   public String getErrorPath() {
     return PATH;
