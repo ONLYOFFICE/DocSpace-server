@@ -1,0 +1,12 @@
+grpc:
+  client:
+    authorizationService:
+      address: ${GRPC_CLIENT_AUTHORIZATION_ADDRESS:static://localhost:9999}
+      negotiation-type: ${GRPC_CLIENT_AUTHORIZATION_NEGOTIATION_TYPE:plaintext}
+  server:
+    port: ${GRPC_REGISTRATION_SERVER_PORT:8888}
+    security:
+      enabled: ${GRPC_REGISTRATION_SERVER_SECURITY_ENABLED:false}
+      certificateChainPath: ${GRPC_REGISTRATION_SERVER_SECURITY_CERTIFICATE_PATH:classpath:certs/server.crt}
+      privateKeyPath: ${GRPC_REGISTRATION_SERVER_SECURITY_PRIVATE_KEY_PATH:classpath:certs/server.key}
+      clientAuth: NONE

@@ -25,30 +25,43 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.container;
+package com.asc.registration.container.service;
 
-import com.asc.registration.core.domain.ClientDomainService;
-import com.asc.registration.core.domain.CoreClientDomainService;
+import com.asc.common.application.proto.AuthorizationServiceGrpc;
+import net.devh.boot.grpc.client.channelfactory.GrpcChannelFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
- * Configuration class for defining application beans.
+ * Configuration class for setting up the gRPC client for the Authorization Service.
  *
- * <p>This class provides the necessary bean definitions required by the application, enabling
- * dependency injection and configuration of core services.
+ * <p>This configuration provides a blocking stub for interacting with the Authorization Service via
+ * gRPC. The channel is created using the {@link GrpcChannelFactory}.
  */
-@Configuration
-public class BeanConfiguration {
+@Component
+public class GrpcAuthorizationClientConfiguration {
+
+  private final GrpcChannelFactory grpcChannelFactory;
 
   /**
-   * Creates and registers a {@link ClientDomainService} bean in the application context.
+   * Constructor for injecting the gRPC channel factory.
    *
-   * @return a new instance of {@link CoreClientDomainService}, which implements {@link
-   *     ClientDomainService}.
+   * @param grpcChannelFactory the factory responsible for creating gRPC channels.
+   */
+  public GrpcAuthorizationClientConfiguration(GrpcChannelFactory grpcChannelFactory) {
+    this.grpcChannelFactory = grpcChannelFactory;
+  }
+
+  /**
+   * Creates and registers a blocking stub for the Authorization Service gRPC client.
+   *
+   * @return the {@link AuthorizationServiceGrpc.AuthorizationServiceBlockingStub} for interacting
+   *     with the Authorization Service.
    */
   @Bean
-  public ClientDomainService clientDomainService() {
-    return new CoreClientDomainService();
+  public AuthorizationServiceGrpc.AuthorizationServiceBlockingStub
+      authorizationServiceBlockingStub() {
+    var managedChannel = grpcChannelFactory.createChannel("authorizationService");
+    return AuthorizationServiceGrpc.newBlockingStub(managedChannel);
   }
 }
