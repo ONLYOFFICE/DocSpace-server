@@ -25,28 +25,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.common.service.ports.input.service;
-
-import com.asc.common.core.domain.entity.Audit;
+package com.asc.common.service.ports.output.message.publisher;
 
 /**
- * Interface for the Audit Application Service.
+ * Interface for publishing authorization-related messages.
  *
- * <p>This service provides methods to manage audit records within the application.
+ * <p>This interface defines a contract for publishing messages to an external messaging system.
  *
- * @see com.asc.common.core.domain.entity.Audit
+ * @param <E> the type of the message to be published.
  */
-public interface AuditApplicationService {
+public interface AuthorizationMessagePublisher<E> {
 
   /**
-   * Creates a new audit record.
+   * Publishes the given message to the designated messaging system.
    *
-   * <p>This method is responsible for creating and persisting a new audit record based on the
-   * provided {@link Audit} object.
-   *
-   * @param audit the {@link Audit} object containing the audit details to be created.
-   * @return the created {@link Audit} object with any generated fields populated (e.g., ID,
-   *     timestamps).
+   * @param message the message to be published.
    */
-  Audit createAudit(Audit audit);
+  void publish(E message);
 }

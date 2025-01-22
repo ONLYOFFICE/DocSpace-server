@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -82,7 +82,7 @@ public class ClientResponse implements Serializable {
   private Set<String> authenticationMethods;
 
   /** The tenant ID associated with the client. */
-  private int tenant;
+  private long tenant;
 
   /** The redirect URIs registered for the client. */
   @JsonProperty("redirect_uris")
@@ -115,23 +115,10 @@ public class ClientResponse implements Serializable {
   @JsonProperty("modified_by")
   private String modifiedBy;
 
-  /** The avatar of the creator. Included only if it is not null. */
-  @JsonProperty("creator_avatar")
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private String creatorAvatar;
-
-  /** The display name of the creator. Included only if it is not null. */
-  @JsonProperty("creator_display_name")
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private String creatorDisplayName;
-
   /** Indicates if the client is public. */
   @JsonProperty("is_public")
   private boolean isPublic;
 
   /** Indicates if the client is enabled. */
   private boolean enabled;
-
-  /** Indicates if the client is invalidated. */
-  private boolean invalidated;
 }
