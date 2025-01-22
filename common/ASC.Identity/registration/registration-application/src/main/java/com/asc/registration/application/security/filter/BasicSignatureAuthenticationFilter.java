@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,13 +27,12 @@
 
 package com.asc.registration.application.security.filter;
 
-import com.asc.registration.application.security.authentication.AscAuthenticationToken;
+import com.asc.registration.application.security.authentication.BasicSignatureToken;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -41,60 +40,52 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * AscCookieAuthenticationFilter is a Spring Security filter that processes requests to validate
- * users based on ASC authentication cookies.
+ * Filter for authenticating requests using a basic signature token. This filter checks the presence
+ * of a signature header in the HTTP request and attempts to authenticate the token using the
+ * provided {@link AuthenticationManager}. If authentication succeeds, the security context is
+ * updated; otherwise, the request is rejected.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AscCookieAuthenticationFilter extends OncePerRequestFilter {
-  private static final String AUTH_COOKIE_NAME = "asc_auth_key";
-
-  private final AscCookieAuthenticationProcessor ascCookieAuthenticationProcessor;
+public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
+  private static final String SIGNATURE_HEADER = "X-Signature";
   private final AuthenticationManager authenticationManager;
 
   /**
-   * Filters the request to validate users based on the ASC authentication cookie.
+   * Performs filtering of incoming HTTP requests to authenticate requests containing the signature
+   * header.
    *
-   * @param request the HTTP request
-   * @param response the HTTP response
-   * @param chain the filter chain
-   * @throws ServletException in case of servlet errors
-   * @throws IOException in case of I/O errors
+   * <p>If the {@code X-Signature} header is present in the request, the token is validated and
+   * authenticated using the {@link AuthenticationManager}. On successful authentication, the
+   * security context is updated with the authenticated token. If authentication fails, the response
+   * is set to {@code 403 Forbidden}.
+   *
+   * @param request the incoming HTTP request
+   * @param response the HTTP response to be sent
+   * @param chain the filter chain to pass the request and response to the next filter
+   * @throws ServletException if an error occurs during the filtering process
+   * @throws IOException if an I/O error occurs
    */
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
+    var token = request.getHeader(SIGNATURE_HEADER);
+    if (token == null || token.isBlank()) {
+      chain.doFilter(request, response);
+      return;
+    }
+
     try {
       MDC.put("request_uri", request.getRequestURI());
       log.debug("Validating user");
 
-      if (request.getCookies() == null) {
-        chain.doFilter(request, response);
-        return;
-      }
-
-      var authCookie =
-          Arrays.stream(request.getCookies())
-              .filter(c -> AUTH_COOKIE_NAME.equalsIgnoreCase(c.getName()))
-              .findFirst();
-
-      if (authCookie.isEmpty()) {
-        chain.doFilter(request, response);
-        return;
-      }
-
-      var tokenPrincipal =
-          ascCookieAuthenticationProcessor.processAscCookies(
-              request, authCookie.get().getName(), authCookie.get().getValue());
-
-      var authentication = new AscAuthenticationToken(tokenPrincipal, authCookie.get().getValue());
+      var authentication = new BasicSignatureToken(token);
       authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
       var authenticated = authenticationManager.authenticate(authentication);
@@ -104,9 +95,9 @@ public class AscCookieAuthenticationFilter extends OncePerRequestFilter {
       }
 
       chain.doFilter(request, response);
-    } catch (UsernameNotFoundException | BadCredentialsException ex) {
+    } catch (BadCredentialsException ex) {
       log.warn("Authentication failed: {}", ex.getMessage());
-      response.setStatus(HttpStatus.UNAUTHORIZED.value());
+      response.setStatus(HttpStatus.FORBIDDEN.value());
     } finally {
       MDC.clear();
     }

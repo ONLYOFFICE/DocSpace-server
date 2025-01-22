@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,54 +25,54 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.application.security.provider;
+package com.asc.registration.application.security.manager;
 
-import com.asc.registration.application.security.authentication.AscAuthenticationToken;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-/** Provides authentication logic for ASC application. */
+/**
+ * Custom Authentication Manager that delegates authentication to a list of authentication
+ * providers.
+ */
+@Slf4j
 @Component
-public class AscAuthenticationProvider implements AuthenticationProvider {
+@RequiredArgsConstructor
+public class SignatureAuthenticationManager implements AuthenticationManager {
+  private static final String UNSUPPORTED_ERROR =
+      "Authentication type is not supported by any authentication provider";
+  private final List<AuthenticationProvider> providers;
 
   /**
-   * Authenticates the provided authentication token.
+   * Attempts to authenticate the provided authentication object using the configured providers.
    *
    * @param authentication the authentication request object.
-   * @return a fully authenticated object including authorities.
+   * @return a fully authenticated object including credentials.
    * @throws AuthenticationException if authentication fails.
    */
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-    if (authentication instanceof AscAuthenticationToken token) {
-      var principal = token.getPrincipal();
-      if (principal == null
-          || principal.me() == null
-          || principal.tenant() == null
-          || principal.settings() == null) {
-        throw new BadCredentialsException("Got malformed authentication data");
+    for (AuthenticationProvider provider : providers) {
+      MDC.put("provider", provider.getClass().getName());
+      log.debug("Checking an authentication provider");
+
+      if (provider.supports(authentication.getClass())) {
+        log.debug("Provider is supported");
+        MDC.clear();
+
+        return provider.authenticate(authentication);
       }
 
-      var role =
-          (principal.me().getIsAdmin() || principal.me().getIsOwner()) ? "ROLE_ADMIN" : "ROLE_USER";
-      return new AscAuthenticationToken(
-          principal, token.getCredentials(), List.of(new SimpleGrantedAuthority(role)));
+      MDC.clear();
     }
 
-    throw new BadCredentialsException("Could not cast authentication to the supported type");
-  }
-
-  /**
-   * Checks if this provider supports the given authentication class.
-   *
-   * @param authentication the authentication class.
-   * @return true if the authentication class is supported, false otherwise.
-   */
-  public boolean supports(Class<?> authentication) {
-    return AscAuthenticationToken.class.isAssignableFrom(authentication);
+    log.error(UNSUPPORTED_ERROR);
+    throw new BadCredentialsException(UNSUPPORTED_ERROR);
   }
 }

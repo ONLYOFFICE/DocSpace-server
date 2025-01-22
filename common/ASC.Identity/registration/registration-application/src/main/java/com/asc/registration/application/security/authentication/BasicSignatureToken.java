@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,19 +35,18 @@ import org.springframework.util.Assert;
 
 /** Custom authentication token for ASC application. */
 @Getter
-public class AscAuthenticationToken extends AbstractAuthenticationToken {
-  private final AscAuthenticationTokenPrincipal principal;
+public class BasicSignatureToken extends AbstractAuthenticationToken {
+  private final BasicSignatureTokenPrincipal principal;
   private String credentials;
 
   /**
-   * Constructs an unauthenticated token with the specified principal and credentials.
+   * Constructs an unauthenticated token with the specified credentials (signature).
    *
-   * @param principal the principal.
    * @param credentials the credentials.
    */
-  public AscAuthenticationToken(AscAuthenticationTokenPrincipal principal, String credentials) {
+  public BasicSignatureToken(String credentials) {
     super(null);
-    this.principal = principal;
+    this.principal = null;
     this.credentials = credentials;
     this.setAuthenticated(false);
   }
@@ -59,8 +58,8 @@ public class AscAuthenticationToken extends AbstractAuthenticationToken {
    * @param credentials the credentials.
    * @param authorities the authorities.
    */
-  public AscAuthenticationToken(
-      AscAuthenticationTokenPrincipal principal,
+  public BasicSignatureToken(
+      BasicSignatureTokenPrincipal principal,
       String credentials,
       Collection<? extends GrantedAuthority> authorities) {
     super(authorities);
@@ -72,13 +71,11 @@ public class AscAuthenticationToken extends AbstractAuthenticationToken {
   /**
    * Factory method to create an unauthenticated token.
    *
-   * @param principal the principal.
    * @param credentials the credentials.
    * @return the unauthenticated token.
    */
-  public static AscAuthenticationToken unauthenticated(
-      AscAuthenticationTokenPrincipal principal, String credentials) {
-    return new AscAuthenticationToken(principal, credentials);
+  public static BasicSignatureToken unauthenticated(String credentials) {
+    return new BasicSignatureToken(credentials);
   }
 
   /**
@@ -89,11 +86,11 @@ public class AscAuthenticationToken extends AbstractAuthenticationToken {
    * @param authorities the authorities.
    * @return the authenticated token.
    */
-  public static AscAuthenticationToken authenticated(
-      AscAuthenticationTokenPrincipal principal,
+  public static BasicSignatureToken authenticated(
+      BasicSignatureTokenPrincipal principal,
       String credentials,
       Collection<? extends GrantedAuthority> authorities) {
-    return new AscAuthenticationToken(principal, credentials, authorities);
+    return new BasicSignatureToken(principal, credentials, authorities);
   }
 
   /**

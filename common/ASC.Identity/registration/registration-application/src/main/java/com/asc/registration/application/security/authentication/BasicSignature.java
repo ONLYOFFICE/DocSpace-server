@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,46 @@
 
 package com.asc.registration.application.security.authentication;
 
-import com.asc.common.application.transfer.response.AscPersonResponse;
-import com.asc.common.application.transfer.response.AscSettingsResponse;
-import com.asc.common.application.transfer.response.AscTenantResponse;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
- * Represents the principal in ASC authentication token, holding information about the person,
- * tenant, and settings.
+ * Model class representing a basic signature containing user and tenant information.
  *
- * @param me the asc person response.
- * @param tenant the asc tenant response.
- * @param settings the asc settings response.
+ * <p>This class is used to encapsulate essential user and tenant details in the context of
+ * authentication and authorization. It supports JSON serialization and deserialization using
+ * snake_case naming strategy and ignores unknown properties during deserialization.
  */
-public record AscAuthenticationTokenPrincipal(
-    AscPersonResponse me, AscTenantResponse tenant, AscSettingsResponse settings) {}
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+public class BasicSignature {
+
+  /** The unique identifier for the user. */
+  private String userId;
+
+  /** The username of the user. */
+  private String userName;
+
+  /** The email address of the user. */
+  private String userEmail;
+
+  /** The unique identifier for the tenant associated with the user. */
+  private long tenantId;
+
+  /** The URL of the tenant associated with the user. */
+  private String tenantUrl;
+
+  /** Indicates whether the user has administrative privileges. */
+  @JsonProperty("is_admin")
+  private boolean isAdmin;
+}
