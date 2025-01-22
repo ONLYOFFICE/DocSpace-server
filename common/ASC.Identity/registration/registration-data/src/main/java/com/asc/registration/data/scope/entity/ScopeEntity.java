@@ -25,52 +25,58 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.data.scope.adapter;
+package com.asc.registration.data.scope.entity;
 
-import com.asc.registration.core.domain.entity.Scope;
-import com.asc.registration.data.scope.mapper.ScopeDataAccessMapper;
-import com.asc.registration.data.scope.repository.JpaScopeRepository;
-import com.asc.registration.service.ports.output.repository.ScopeQueryRepository;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.io.Serializable;
+import lombok.*;
 
 /**
- * Adapter class for handling scope query operations. Implements the {@link ScopeQueryRepository}
- * interface.
+ * Entity class representing a scope in the identity management system.
+ *
+ * <p>This class is mapped to the {@code identity_scopes} table in the database and is used to store
+ * information about different scopes, which are used for access control in the system.
+ *
+ * <p>The class includes fields for the scope's name, group, and type, all of which are unique and
+ * non-nullable.
+ *
+ * <p>The class is annotated with Lombok annotations to generate boilerplate code such as getters,
+ * setters, constructors, and the builder pattern.
  */
-@Slf4j
-@Repository
-@RequiredArgsConstructor
-public class ScopeQueryRepositoryAdapter implements ScopeQueryRepository {
-  private final JpaScopeRepository jpaScopeRepository;
-  private final ScopeDataAccessMapper scopeDataAccessMapper;
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "identity_scopes")
+public class ScopeEntity implements Serializable {
 
   /**
-   * Finds a scope by its name.
+   * The name of the scope.
    *
-   * @param name the name of the scope
-   * @return an optional containing the found scope, or empty if not found
+   * <p>This field is used as the primary key in the database and must be unique and non-null.
    */
-  public Optional<Scope> findByName(String name) {
-    log.debug("Querying scope by name: {}", name);
-
-    return jpaScopeRepository.findById(name).map(scopeDataAccessMapper::toDomain);
-  }
+  @Id
+  @Column(name = "name", nullable = false, unique = true)
+  private String name;
 
   /**
-   * Finds all available scopes.
+   * The group to which the scope belongs.
    *
-   * @return a set of all scopes
+   * <p>This field must be unique and non-null.
    */
-  public Set<Scope> findAll() {
-    log.debug("Querying all scopes");
+  @Column(name = "group", nullable = false, unique = true)
+  private String group;
 
-    return jpaScopeRepository.findAll().stream()
-        .map(scopeDataAccessMapper::toDomain)
-        .collect(Collectors.toSet());
-  }
+  /**
+   * The type of the scope.
+   *
+   * <p>This field must be unique and non-null.
+   */
+  @Column(name = "type", nullable = false, unique = true)
+  private String type;
 }

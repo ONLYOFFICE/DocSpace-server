@@ -25,52 +25,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.data.scope.adapter;
+package com.asc.registration.data.scope.repository;
 
-import com.asc.registration.core.domain.entity.Scope;
-import com.asc.registration.data.scope.mapper.ScopeDataAccessMapper;
-import com.asc.registration.data.scope.repository.JpaScopeRepository;
-import com.asc.registration.service.ports.output.repository.ScopeQueryRepository;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
+import com.asc.registration.data.scope.entity.ScopeEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * Adapter class for handling scope query operations. Implements the {@link ScopeQueryRepository}
- * interface.
+ * JPA repository interface for performing CRUD operations on {@link ScopeEntity} objects.
+ *
+ * <p>This interface extends {@link JpaRepository}, providing methods for interacting with {@link
+ * ScopeEntity} instances stored in the database. It allows for basic CRUD operations, pagination,
+ * and sorting functionality.
+ *
+ * <p>Spring Data JPA will automatically generate the implementation of this interface at runtime,
+ * allowing you to use the repository without providing an implementation.
  */
-@Slf4j
-@Repository
-@RequiredArgsConstructor
-public class ScopeQueryRepositoryAdapter implements ScopeQueryRepository {
-  private final JpaScopeRepository jpaScopeRepository;
-  private final ScopeDataAccessMapper scopeDataAccessMapper;
-
-  /**
-   * Finds a scope by its name.
-   *
-   * @param name the name of the scope
-   * @return an optional containing the found scope, or empty if not found
-   */
-  public Optional<Scope> findByName(String name) {
-    log.debug("Querying scope by name: {}", name);
-
-    return jpaScopeRepository.findById(name).map(scopeDataAccessMapper::toDomain);
-  }
-
-  /**
-   * Finds all available scopes.
-   *
-   * @return a set of all scopes
-   */
-  public Set<Scope> findAll() {
-    log.debug("Querying all scopes");
-
-    return jpaScopeRepository.findAll().stream()
-        .map(scopeDataAccessMapper::toDomain)
-        .collect(Collectors.toSet());
-  }
-}
+public interface JpaScopeRepository extends JpaRepository<ScopeEntity, String> {}

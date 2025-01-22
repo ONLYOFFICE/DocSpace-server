@@ -35,7 +35,7 @@ import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.event.ClientEvent;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
-import com.asc.registration.data.client.repository.JpaClientRepository;
+import com.asc.registration.data.client.repository.DynamoClientRepository;
 import com.asc.registration.service.ports.output.repository.ClientCommandRepository;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -47,157 +47,131 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Adapter class for handling client command operations and mapping between domain and data layers.
- * Implements the {@link ClientCommandRepository} interface.
+ * Adapter implementation of the {@link ClientCommandRepository} interface for DynamoDB. This class
+ * provides methods for managing client data in a DynamoDB repository, including saving, updating,
+ * regenerating secrets, changing visibility or activation, and deleting clients.
  */
 @Slf4j
 @Repository
-@Profile("!saas")
+@Profile(value = "saas")
 @RequiredArgsConstructor
-public class ClientCommandRepositoryDomainAdapter implements ClientCommandRepository {
+public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommandRepository {
   private static final String UTC = "UTC";
 
-  private final JpaClientRepository jpaClientRepository;
+  private final DynamoClientRepository dynamoClientRepository;
   private final ClientDataAccessMapper clientDataAccessMapper;
   private final AuthorizationMessagePublisher<ClientRemovedEvent> authorizationMessagePublisher;
   private final DomainEventPublisher<ClientEvent> messagePublisher;
 
   /**
-   * Saves a client entity to the database.
+   * Saves a client to the DynamoDB repository and publishes the associated event.
    *
-   * @param client the client entity to save
+   * @param event the client event to be published
+   * @param client the client entity to be saved
    * @return the saved client entity
    */
-  @Transactional(
-      timeout = 2,
-      rollbackFor = {Exception.class})
+  @Transactional(readOnly = true)
   public Client saveClient(ClientEvent event, Client client) {
-    log.debug("Persisting a new client");
-
-    var entity = clientDataAccessMapper.toEntity(client);
-    var result = jpaClientRepository.save(entity);
-
+    dynamoClientRepository.save(clientDataAccessMapper.toDynamoEntity(client));
     messagePublisher.publish(event);
+    return client;
+  }
 
+  /**
+   * Updates a client in the DynamoDB repository and publishes the associated event.
+   *
+   * @param event the client event to be published
+   * @param client the client entity to be updated
+   * @return the updated client entity
+   */
+  @Transactional(readOnly = true)
+  public Client updateClient(ClientEvent event, Client client) {
+    var result = dynamoClientRepository.update(clientDataAccessMapper.toDynamoEntity(client));
+    messagePublisher.publish(event);
     return clientDataAccessMapper.toDomain(result);
   }
 
   /**
-   * Updates an existing client entity in the database.
+   * Regenerates the client secret for a specific tenant and client in the DynamoDB repository and
+   * publishes the associated event.
    *
-   * <p>This method retrieves the existing client entity from the database using its ID and then
-   * merges the new values from the provided {@link Client} domain object into the existing entity.
-   * The updated entity is then saved back to the database.
-   *
-   * @param client the {@link Client} domain object containing the updated values
-   * @return the updated {@link Client} domain object after being persisted
-   */
-  @Transactional(
-      timeout = 2,
-      rollbackFor = {Exception.class})
-  public Client updateClient(ClientEvent event, Client client) {
-    log.debug("Updating an existing client");
-
-    var entity = clientDataAccessMapper.toEntity(client);
-    var reference = jpaClientRepository.getReferenceById(entity.getClientId());
-
-    messagePublisher.publish(event);
-
-    return clientDataAccessMapper.toDomain(clientDataAccessMapper.merge(entity, reference));
-  }
-
-  /**
-   * Regenerates the secret for a client identified by tenant ID and client ID.
-   *
+   * @param event the client event to be published
    * @param tenantId the tenant ID
    * @param clientId the client ID
    * @return the newly generated client secret
    */
-  @Transactional(
-      timeout = 2,
-      rollbackFor = {Exception.class})
+  @Transactional(readOnly = true)
   public String regenerateClientSecretByTenantIdAndClientId(
       ClientEvent event, TenantId tenantId, ClientId clientId) {
-    log.debug("Regenerating and persisting a new secret");
-
     var secret = UUID.randomUUID().toString();
-
-    log.debug("Newly generated secret: {}", secret);
-
-    jpaClientRepository.regenerateClientSecretByClientId(
-        tenantId.getValue(),
+    dynamoClientRepository.updateClientSecret(
         clientId.getValue().toString(),
+        tenantId.getValue(),
         secret,
         ZonedDateTime.now(ZoneId.of(UTC)));
-
     messagePublisher.publish(event);
-
     return secret;
   }
 
   /**
-   * Changes the visibility of a client identified by tenant ID and client ID.
+   * Changes the visibility of a client for a specific tenant and client in the DynamoDB repository
+   * and publishes the associated event.
    *
+   * @param event the client event to be published
    * @param tenantId the tenant ID
    * @param clientId the client ID
-   * @param visible the new visibility status
+   * @param visible the new visibility state
    */
-  @Transactional(
-      timeout = 2,
-      rollbackFor = {Exception.class})
+  @Transactional(readOnly = true)
   public void changeVisibilityByTenantIdAndClientId(
       ClientEvent event, TenantId tenantId, ClientId clientId, boolean visible) {
-    log.debug("Persisting client visibility changes");
-
-    jpaClientRepository.changeVisibility(
-        tenantId.getValue(),
+    dynamoClientRepository.updateVisibility(
         clientId.getValue().toString(),
+        tenantId.getValue(),
         visible,
         ZonedDateTime.now(ZoneId.of(UTC)));
-
     messagePublisher.publish(event);
   }
 
   /**
-   * Changes the activation status of a client identified by tenant ID and client ID.
+   * Changes the activation state of a client for a specific tenant and client in the DynamoDB
+   * repository and publishes the associated event.
    *
+   * @param event the client event to be published
    * @param tenantId the tenant ID
    * @param clientId the client ID
-   * @param enabled the new activation status
+   * @param enabled the new activation state
    */
-  @Transactional(
-      timeout = 2,
-      rollbackFor = {Exception.class})
+  @Transactional(readOnly = true)
   public void changeActivationByTenantIdAndClientId(
       ClientEvent event, TenantId tenantId, ClientId clientId, boolean enabled) {
-    log.debug("Persisting activation changes");
-
-    jpaClientRepository.changeActivation(
-        tenantId.getValue(),
+    dynamoClientRepository.updateActivation(
         clientId.getValue().toString(),
+        tenantId.getValue(),
         enabled,
         ZonedDateTime.now(ZoneId.of(UTC)));
-
     messagePublisher.publish(event);
   }
 
   /**
-   * Deletes a client identified by tenant ID and client ID.
+   * Deletes a client for a specific tenant and client in the DynamoDB repository, publishes the
+   * associated removal event, and returns the result.
    *
+   * @param event the client event to be published
    * @param tenantId the tenant ID
    * @param clientId the client ID
-   * @return the number of clients deleted (typically 0 or 1)
+   * @return 1 if the client was successfully deleted, 0 otherwise
    */
-  @Transactional(
-      timeout = 2,
-      rollbackFor = {Exception.class})
+  @Transactional(readOnly = true)
   public int deleteByTenantIdAndClientId(ClientEvent event, TenantId tenantId, ClientId clientId) {
-    log.debug("Persisting invalidated marker");
 
     authorizationMessagePublisher.publish(
         ClientRemovedEvent.builder().clientId(clientId.getValue().toString()).build());
     messagePublisher.publish(event);
-    return jpaClientRepository.deleteByClientIdAndTenantId(
-        clientId.getValue().toString(), tenantId.getValue());
+    return dynamoClientRepository.deleteByIdAndTenantId(
+                clientId.getValue().toString(), tenantId.getValue())
+            != null
+        ? 1
+        : 0;
   }
 }
