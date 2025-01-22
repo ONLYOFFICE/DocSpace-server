@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 
 package com.asc.registration.application.controller;
 
-import com.asc.registration.application.security.authentication.AscAuthenticationTokenPrincipal;
+import com.asc.registration.application.security.authentication.BasicSignatureTokenPrincipal;
 import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.transfer.response.ScopeResponse;
@@ -55,7 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping(
-    value = "${web.api}/scopes",
+    value = "${spring.application.web.api}/scopes",
     produces = {MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class ScopeQueryController {
@@ -91,9 +91,9 @@ public class ScopeQueryController {
             content = @Content)
       })
   public ResponseEntity<Iterable<ScopeResponse>> getScopes(
-      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal) {
-    MDC.put("tenant_id", String.valueOf(principal.tenant().getTenantId()));
-    MDC.put("tenant_alias", principal.tenant().getTenantAlias());
+      @AuthenticationPrincipal BasicSignatureTokenPrincipal principal) {
+    MDC.put("tenant_id", String.valueOf(principal.getTenantId()));
+    MDC.put("tenant_url", principal.getTenantUrl());
     log.info("Received a request to list scopes");
 
     var scopes =
