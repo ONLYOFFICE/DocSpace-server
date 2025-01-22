@@ -681,12 +681,15 @@ internal abstract class SecurityBaseDao<T>(
         if (employeeTypes.Any())
         {
             var groups = new List<Guid>();
+            var exGroups = new List<Guid>();
             foreach(var emplType in employeeTypes)
             {
                 switch (emplType)
                 {
                     case EmployeeType.RoomAdmin:
-                        groups.Add(Constants.GroupRoomAdmin.ID);
+                        exGroups.Add(Constants.GroupGuest.ID);
+                        exGroups.Add(Constants.GroupAdmin.ID);
+                        exGroups.Add(Constants.GroupUser.ID);
                         break;
                     case EmployeeType.Guest:
                         groups.Add(Constants.GroupGuest.ID);
@@ -705,6 +708,12 @@ internal abstract class SecurityBaseDao<T>(
                         ug.TenantId == tenantId &&
                         ug.Userid == u.Id &&
                         groups.Contains(ug.UserGroupId) &&
+                        !ug.Removed) ||
+
+                        !filesDbContext.UserGroup.Any(ug =>
+                        ug.TenantId == tenantId &&
+                        ug.Userid == u.Id &&
+                        exGroups.Contains(ug.UserGroupId) &&
                         !ug.Removed));
         }
 
