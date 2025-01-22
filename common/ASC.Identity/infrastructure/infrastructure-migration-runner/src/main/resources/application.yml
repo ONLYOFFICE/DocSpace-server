@@ -1,24 +1,32 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    password: ${JDBC_PASSWORD:dev}
+    password: ${JDBC_PASSWORD:my-secret-pw}
     url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}?${JDBC_PARAMETERS:}
-    username: ${JDBC_USER_NAME:dev}
+    username: ${JDBC_USER_NAME:root}
   flyway:
     baselineOnMigrate: true
     enabled: true
-    locations: classpath:migration/mysql
-    password: ${JDBC_PASSWORD:dev}
+    locations: classpath:migration/mysql/common,classpath:migration/mysql/server
+    password: ${JDBC_PASSWORD:my-secret-pw}
     repeatable-sql-migration-prefix: R
     schemas: ${JDBC_DATABASE:docspace}
     sql-migration-prefix: V
     sql-migration-separator: __
     sql-migration-suffixes: .sql
     url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}?${JDBC_PARAMETERS:}
-    user: ${JDBC_USER_NAME:dev}
+    user: ${JDBC_USER_NAME:root}
 logging:
   level:
     org:
       flywaydb: INFO
       hibernate: INFO
     root: WARN
+---
+spring:
+  config:
+    activate:
+      on-profile:
+        - saas
+  flyway:
+    locations: classpath:migration/mysql/common,classpath:migration/mysql/saas

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,8 +30,21 @@ package com.asc.infrastructure.migration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * Entry point for the Migration application.
+ *
+ * <p>This application is responsible for running database migrations using Spring Boot's
+ * auto-configuration. It serves as a standalone tool for managing schema updates and other database
+ * migration tasks.
+ */
 @SpringBootApplication
 public class MigrationRunner {
+
+  /**
+   * The main method to launch the Migration application.
+   *
+   * @param args the command-line arguments passed to the application.
+   */
   public static void main(String[] args) {
     SpringApplication.run(MigrationRunner.class, args);
   }

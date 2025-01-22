@@ -16,7 +16,7 @@ DROP TABLE IF EXISTS identity_scopes CASCADE;
 -- Create table for identity clients
 CREATE TABLE identity_clients (
     client_id varchar(36) not null,
-    tenant_id integer not null,
+    tenant_id BIGINT not null,
     client_secret varchar(255) not null,
     name varchar(255),
     description LONGTEXT,
@@ -59,7 +59,7 @@ CREATE TABLE identity_authorizations (
     id varchar(255),
     registered_client_id varchar(36) not null,
     principal_id varchar(255) not null,
-    tenant_id integer not null,
+    tenant_id BIGINT not null,
     state varchar(500),
     attributes text,
     authorization_grant_type varchar(255),
@@ -103,24 +103,21 @@ ALTER TABLE identity_authorizations
 CREATE TABLE identity_client_authentication_methods (
     client_id varchar(36) not null,
     authentication_method enum('client_secret_post', 'none') not null,
-    index idx_client_authentication_methods_client_id (client_id),
-    foreign key (client_id) references identity_clients(client_id) on delete cascade
+    index idx_client_authentication_methods_client_id (client_id)
 ) engine=InnoDB;
 
 -- Create table for client redirect URIs
 CREATE TABLE identity_client_redirect_uris (
     client_id varchar(36) not null,
     redirect_uri tinytext not null,
-    index idx_identity_client_redirect_uris_client_id (client_id),
-    foreign key (client_id) references identity_clients(client_id) on delete cascade
+    index idx_identity_client_redirect_uris_client_id (client_id)
 ) engine=InnoDB;
 
 -- Create table for client allowed origins
 CREATE TABLE identity_client_allowed_origins (
     client_id varchar(36) not null,
     allowed_origin tinytext not null,
-    index idx_identity_client_allowed_origins_client_id (client_id),
-    foreign key (client_id) references identity_clients(client_id) on delete cascade
+    index idx_identity_client_allowed_origins_client_id (client_id)
 ) engine=InnoDB;
 
 -- Create table for identity client scopes
@@ -128,9 +125,7 @@ CREATE TABLE identity_client_scopes (
     client_id varchar(36) not null,
     scope_name varchar(255) not null,
     index idx_identity_client_scopes_client_id (client_id),
-    index idx_identity_client_scopes_scope_name (scope_name),
-    foreign key (client_id) references identity_clients(client_id) on delete cascade,
-    foreign key (scope_name) references identity_scopes(name) on delete cascade
+    index idx_identity_client_scopes_scope_name (scope_name)
 ) engine=InnoDB;
 
 -- Create table for identity consents
@@ -142,8 +137,7 @@ CREATE TABLE identity_consents (
     primary key (registered_client_id, principal_id),
     index idx_identity_consents_registered_client_id (registered_client_id),
     index idx_identity_consents_principal_id (principal_id),
-    index idx_identity_consents_is_invalidated (is_invalidated),
-    foreign key (registered_client_id) references identity_clients(client_id) on delete cascade
+    index idx_identity_consents_is_invalidated (is_invalidated)
 ) engine=InnoDB;
 
 -- Create join table for consent scopes
@@ -154,8 +148,6 @@ CREATE TABLE identity_consent_scopes (
     index idx_identity_consent_scopes_registered_client_id (registered_client_id),
     index idx_identity_consent_scopes_principal_id (principal_id),
     index idx_identity_consent_scopes_scope_name (scope_name),
-    foreign key (registered_client_id, principal_id) references identity_consents(registered_client_id, principal_id) on delete cascade,
-    foreign key (scope_name) references identity_scopes(name) on delete cascade,
     primary key (registered_client_id, principal_id, scope_name)
 ) engine=InnoDB;
 
@@ -177,3 +169,47 @@ ON SCHEDULE EVERY 1 hour
 ON COMPLETION PRESERVE
     DO
 DELETE FROM identity_authorizations ia WHERE ia.is_invalidated = 1;
+
+ALTER TABLE identity_client_authentication_methods
+    ADD CONSTRAINT FK_identity_client_authentication_methods_client_id
+    FOREIGN KEY (client_id)
+    REFERENCES identity_clients(client_id)
+    ON DELETE CASCADE;
+
+ALTER TABLE identity_client_redirect_uris
+    ADD CONSTRAINT FK_identity_client_redirect_uris_client_id
+    FOREIGN KEY (client_id)
+    REFERENCES identity_clients(client_id)
+    ON DELETE CASCADE;
+
+ALTER TABLE identity_client_allowed_origins
+    ADD CONSTRAINT FK_identity_client_allowed_origins_client_id
+    FOREIGN KEY (client_id)
+    REFERENCES identity_clients(client_id)
+    ON DELETE CASCADE;
+
+ALTER TABLE identity_client_scopes
+    ADD CONSTRAINT FK_identity_client_scopes_client_id
+    FOREIGN KEY (client_id) REFERENCES identity_clients(client_id)
+    ON DELETE CASCADE;
+
+ALTER TABLE identity_client_scopes
+    ADD CONSTRAINT FK_identity_client_scopes_scope_name
+    FOREIGN KEY (scope_name) REFERENCES identity_scopes(name)
+    ON DELETE CASCADE;
+
+ALTER TABLE identity_consents
+    ADD CONSTRAINT FK_identity_consents_client_id
+    FOREIGN KEY (registered_client_id) REFERENCES identity_clients(client_id)
+    ON DELETE CASCADE;
+
+ALTER TABLE identity_consent_scopes
+    ADD CONSTRAINT FK_identity_consent_scopes_consents
+    FOREIGN KEY (registered_client_id, principal_id)
+    REFERENCES identity_consents(registered_client_id, principal_id)
+    ON DELETE CASCADE;
+
+ALTER TABLE identity_consent_scopes
+    ADD CONSTRAINT FK_identity_consent_scopes_scope_name
+    FOREIGN KEY (scope_name) REFERENCES identity_scopes(name)
+    ON DELETE CASCADE;
