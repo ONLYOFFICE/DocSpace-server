@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -62,7 +62,6 @@ public abstract class BaseEntity<T> {
    *
    * @return A hash code value for the object.
    */
-  @Override
   public int hashCode() {
     return Objects.hash(id);
   }

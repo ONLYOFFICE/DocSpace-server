@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,14 +28,14 @@
 package com.asc.common.core.domain.value;
 
 /** This class represents a tenant ID. */
-public class TenantId extends BaseId<Integer> {
+public class TenantId extends BaseId<Long> {
 
   /**
    * Constructs a new TenantId with the specified value.
    *
    * @param value the value of the tenant ID
    */
-  public TenantId(Integer value) {
+  public TenantId(Long value) {
     super(value);
   }
 }
