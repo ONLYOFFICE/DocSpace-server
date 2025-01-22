@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,32 +27,34 @@
 
 package com.asc.authorization.application.mapper;
 
-import com.asc.common.data.consent.entity.ConsentEntity;
-import com.asc.common.data.scope.entity.ScopeEntity;
+import com.asc.authorization.data.consent.entity.ConsentEntity;
 import java.time.ZonedDateTime;
-import java.util.stream.Collectors;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;
 import org.springframework.stereotype.Component;
 
 /**
  * Mapper class for converting between {@link ConsentEntity} and {@link OAuth2AuthorizationConsent}.
+ *
+ * <p>This class provides utility methods to map data between the consent entity used for
+ * persistence ({@link ConsentEntity}) and the OAuth2 consent model ({@link
+ * OAuth2AuthorizationConsent}).
  */
 @Component
 public class ConsentMapper {
   /**
    * Converts an {@link OAuth2AuthorizationConsent} to a {@link ConsentEntity}.
    *
-   * @param authorizationConsent the OAuth2AuthorizationConsent to convert.
-   * @return the ConsentEntity.
+   * <p>This method maps the OAuth2 consent data into a database entity, including the registered
+   * client ID, principal name, scopes, and additional metadata such as the modification timestamp.
+   *
+   * @param authorizationConsent the {@link OAuth2AuthorizationConsent} to convert.
+   * @return the corresponding {@link ConsentEntity}.
    */
   public ConsentEntity toEntity(OAuth2AuthorizationConsent authorizationConsent) {
     return ConsentEntity.builder()
         .registeredClientId(authorizationConsent.getRegisteredClientId())
         .principalId(authorizationConsent.getPrincipalName())
-        .scopes(
-            authorizationConsent.getScopes().stream()
-                .map(s -> ScopeEntity.builder().name(s).build())
-                .collect(Collectors.toSet()))
+        .scopes(authorizationConsent.getScopes())
         .modifiedAt(ZonedDateTime.now())
         .invalidated(false)
         .build();
@@ -61,13 +63,16 @@ public class ConsentMapper {
   /**
    * Converts a {@link ConsentEntity} to an {@link OAuth2AuthorizationConsent}.
    *
-   * @param consent the ConsentEntity to convert.
-   * @return the OAuth2AuthorizationConsent.
+   * <p>This method constructs an OAuth2AuthorizationConsent object from the consent entity,
+   * including its associated registered client ID, principal ID, and scopes.
+   *
+   * @param consent the {@link ConsentEntity} to convert.
+   * @return the corresponding {@link OAuth2AuthorizationConsent}.
    */
   public OAuth2AuthorizationConsent toConsent(ConsentEntity consent) {
     var registeredClientId = consent.getRegisteredClientId();
     var builder = OAuth2AuthorizationConsent.withId(registeredClientId, consent.getPrincipalId());
-    consent.getScopes().stream().map(ScopeEntity::getName).forEach(builder::scope);
+    consent.getScopes().forEach(builder::scope);
     return builder.build();
   }
 }

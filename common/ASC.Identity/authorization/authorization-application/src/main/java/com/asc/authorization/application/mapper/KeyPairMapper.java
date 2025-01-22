@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,28 +36,38 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
-/** Component for mapping between Key objects and their string representations. */
+/**
+ * Component for mapping between {@link Key} objects and their Base64-encoded string
+ * representations.
+ *
+ * <p>This class provides methods for converting {@link PublicKey} and {@link PrivateKey} objects to
+ * and from their Base64 string representations, as well as utilities for handling cryptographic
+ * keys.
+ */
 @Slf4j
 @Component
 public class KeyPairMapper {
   /**
-   * Converts a Key object to its Base64 encoded string representation.
+   * Converts a {@link Key} object to its Base64-encoded string representation.
    *
-   * @param key the Key object.
-   * @return the Base64 encoded string representation of the key.
+   * @param key the {@link Key} object to convert.
+   * @return the Base64-encoded string representation of the key.
    */
   public String toString(Key key) {
     return Base64.getEncoder().encodeToString(key.getEncoded());
   }
 
   /**
-   * Converts a Base64 encoded public key string to a PublicKey object.
+   * Converts a Base64-encoded public key string to a {@link PublicKey} object.
    *
-   * @param key the Base64 encoded public key string.
-   * @param algorithm the algorithm of the key.
-   * @return the PublicKey object.
-   * @throws NoSuchAlgorithmException if the algorithm is not available.
-   * @throws InvalidKeySpecException if the key spec is invalid.
+   * <p>This method decodes the Base64 string, parses it into an {@link X509EncodedKeySpec}, and
+   * generates a {@link PublicKey} using the specified algorithm.
+   *
+   * @param key the Base64-encoded public key string.
+   * @param algorithm the algorithm used for the key (e.g., "RSA").
+   * @return the constructed {@link PublicKey} object.
+   * @throws NoSuchAlgorithmException if the specified algorithm is not available.
+   * @throws InvalidKeySpecException if the key specification is invalid.
    */
   public PublicKey toPublicKey(String key, String algorithm)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -72,13 +82,16 @@ public class KeyPairMapper {
   }
 
   /**
-   * Converts a Base64 encoded private key string to a PrivateKey object.
+   * Converts a Base64-encoded private key string to a {@link PrivateKey} object.
    *
-   * @param key the Base64 encoded private key string.
-   * @param algorithm the algorithm of the key.
-   * @return the PrivateKey object.
-   * @throws NoSuchAlgorithmException if the algorithm is not available.
-   * @throws InvalidKeySpecException if the key spec is invalid.
+   * <p>This method decodes the Base64 string, parses it into a {@link PKCS8EncodedKeySpec}, and
+   * generates a {@link PrivateKey} using the specified algorithm.
+   *
+   * @param key the Base64-encoded private key string.
+   * @param algorithm the algorithm used for the key (e.g., "RSA").
+   * @return the constructed {@link PrivateKey} object.
+   * @throws NoSuchAlgorithmException if the specified algorithm is not available.
+   * @throws InvalidKeySpecException if the key specification is invalid.
    */
   public PrivateKey toPrivateKey(String key, String algorithm)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
