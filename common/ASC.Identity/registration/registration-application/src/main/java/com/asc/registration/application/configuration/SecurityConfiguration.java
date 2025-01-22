@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,9 +27,9 @@
 
 package com.asc.registration.application.configuration;
 
-import com.asc.registration.application.security.filter.AscCookieAuthenticationFilter;
+import com.asc.registration.application.security.filter.BasicSignatureAuthenticationFilter;
 import com.asc.registration.application.security.filter.RateLimiterFilter;
-import com.asc.registration.application.security.provider.AscAuthenticationProvider;
+import com.asc.registration.application.security.provider.SignatureAuthenticationProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,12 +50,12 @@ public class SecurityConfiguration {
   @Value("${server.port}")
   private int serverPort;
 
-  @Value("${web.api}")
+  @Value("${spring.application.web.api}")
   private String webApi;
 
-  private final AscAuthenticationProvider ascAuthenticationProvider;
-  private final AscCookieAuthenticationFilter ascCookieAuthenticationFilter;
   private final RateLimiterFilter rateLimiterFilter;
+  private final BasicSignatureAuthenticationFilter basicSignatureAuthenticationFilter;
+  private final SignatureAuthenticationProvider signatureAuthenticationProvider;
 
   /**
    * Configures the security filter chain for HTTP requests.
@@ -78,13 +78,14 @@ public class SecurityConfiguration {
                         String.format("%s/scopes", webApi),
                         String.format("%s/clients/.*?/info", webApi),
                         String.format("%s/clients/info", webApi),
-                        String.format("%s/clients/consents", webApi))
+                        String.format("%s/clients/consents", webApi),
+                        String.format("%s/clients/*/revoke", webApi))
                     .hasAnyRole("ADMIN", "USER")
                     .anyRequest()
                     .hasRole("ADMIN"))
-        .addFilterAt(ascCookieAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAt(basicSignatureAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterAfter(rateLimiterFilter, UsernamePasswordAuthenticationFilter.class)
-        .authenticationProvider(ascAuthenticationProvider)
+        .authenticationProvider(signatureAuthenticationProvider)
         .csrf(AbstractHttpConfigurer::disable)
         .cors(AbstractHttpConfigurer::disable)
         .build();
