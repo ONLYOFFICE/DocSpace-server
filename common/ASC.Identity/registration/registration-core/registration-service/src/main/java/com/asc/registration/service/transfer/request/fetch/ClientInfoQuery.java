@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,7 +45,7 @@ public class ClientInfoQuery {
   /** The tenant ID to fetch private applications for. Does not affect public apps */
   @Min(value = 0, message = "tenant id must be greater than or equal to 0")
   @JsonProperty("tenant_id")
-  private int tenantId;
+  private long tenantId;
 
   /** The client ID to fetch */
   @NotBlank(message = "client id must not be blank")

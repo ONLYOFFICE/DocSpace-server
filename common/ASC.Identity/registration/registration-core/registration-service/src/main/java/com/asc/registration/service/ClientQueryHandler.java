@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,6 +32,7 @@ import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.crypto.EncryptionService;
+import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.exception.ClientNotFoundException;
 import com.asc.registration.service.mapper.ClientDataMapper;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
@@ -42,18 +43,15 @@ import com.asc.registration.service.transfer.request.fetch.TenantClientsPaginati
 import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-// Bad practice to use transactional for simple selects
-// due to round trips.
-// But need to timeout the transaction atm. TODO: Another mechanism to timeout
 /** Handles client-related queries. */
 @Slf4j
 @Component
@@ -64,14 +62,18 @@ public class ClientQueryHandler {
   private final EncryptionService encryptionService;
 
   /**
-   * Retrieves a client by tenant and client ID. Should be only accessed by tenant admins.
+   * Retrieves detailed information about a client by tenant ID and client ID. Should only be
+   * accessed by tenant admins.
    *
-   * @param query the query containing tenant ID and client ID
-   * @return the response containing client details
+   * @param query The query containing tenant ID and client ID.
+   * @return A {@link ClientResponse} containing the detailed client information.
+   * @throws ClientNotFoundException if the client is not found.
    */
-  @Transactional(timeout = 2)
   public ClientResponse getClient(TenantClientQuery query) {
-    log.info("Trying to get an active client by client id");
+    log.info(
+        "Retrieving client details for client ID: {} and tenant ID: {}",
+        query.getClientId(),
+        query.getTenantId());
 
     var client =
         clientQueryRepository
@@ -82,15 +84,43 @@ public class ClientQueryHandler {
                 () ->
                     new ClientNotFoundException(
                         String.format(
-                            "Client with id %s for tenant %d was not found",
+                            "Client with ID %s for tenant %s was not found",
                             query.getClientId(), query.getTenantId())));
 
+    return decryptAndMapClientResponse(client);
+  }
+
+  /**
+   * Retrieves detailed information about a client by client ID.
+   *
+   * @param clientId The unique identifier of the client.
+   * @return A {@link ClientResponse} containing the detailed client information.
+   * @throws ClientNotFoundException if the client is not found.
+   */
+  public ClientResponse getClient(String clientId) {
+    log.info("Retrieving client details for client ID: {}", clientId);
+
+    var client =
+        clientQueryRepository
+            .findById(new ClientId(UUID.fromString(clientId)))
+            .orElseThrow(
+                () ->
+                    new ClientNotFoundException(
+                        String.format("Client with ID %s was not found", clientId)));
+
+    return decryptAndMapClientResponse(client);
+  }
+
+  /**
+   * Decrypts sensitive client information and maps the client entity to a response.
+   *
+   * @param client The client entity to process.
+   * @return A {@link ClientResponse} with decrypted and mapped information.
+   */
+  private ClientResponse decryptAndMapClientResponse(Client client) {
     var response = clientDataMapper.toClientResponse(client);
-
-    log.info("Decrypting client secret");
-
+    log.info("Decrypting client secret for client ID: {}", client.getId().getValue());
     response.setClientSecret(encryptionService.decrypt(response.getClientSecret()));
-
     return response;
   }
 
@@ -100,7 +130,6 @@ public class ClientQueryHandler {
    * @param query the query containing client ID
    * @return the response containing client basic information
    */
-  @Transactional(timeout = 2)
   public ClientInfoResponse getClientInfo(ClientInfoQuery query) {
     log.info("Trying to get client basic information by client id");
 
@@ -123,23 +152,32 @@ public class ClientQueryHandler {
     return clientDataMapper.toClientInfoResponse(client);
   }
 
-  @Transactional(timeout = 3)
   public PageableResponse<ClientInfoResponse> getClientsInfo(ClientInfoPaginationQuery query) {
     log.info("Trying to get clients information by client id");
 
     var result =
         clientQueryRepository.findAllPublicAndPrivateByTenantId(
-            new TenantId(query.getTenantId()), query.getPage(), query.getLimit());
+            new TenantId(query.getTenantId()),
+            query.getLimit(),
+            query.getLastClientId(),
+            query.getLastCreatedOn());
+
+    if (result == null)
+      return PageableResponse.<ClientInfoResponse>builder()
+          .data(Set.of())
+          .lastClientId(null)
+          .lastCreatedOn(null)
+          .limit(query.getLimit())
+          .build();
 
     return PageableResponse.<ClientInfoResponse>builder()
-        .page(result.getPage())
+        .lastClientId(result.getLastClientId())
+        .lastCreatedOn(result.getLastCreatedOn())
         .limit(result.getLimit())
         .data(
             StreamSupport.stream(result.getData().spliterator(), false)
                 .map(clientDataMapper::toClientInfoResponse)
                 .collect(Collectors.toCollection(LinkedHashSet::new)))
-        .next(result.getNext())
-        .previous(result.getPrevious())
         .build();
   }
 
@@ -149,7 +187,6 @@ public class ClientQueryHandler {
    * @param clientId the query containing client ID
    * @return the response containing client basic information
    */
-  @Transactional(timeout = 2)
   public ClientInfoResponse getClientInfo(String clientId) {
     log.info("Trying to get client basic information by client id");
 
@@ -170,36 +207,47 @@ public class ClientQueryHandler {
    * @param query the query containing tenant ID, page, and limit
    * @return the pageable response containing client details
    */
-  @Transactional(timeout = 3)
   public PageableResponse<ClientResponse> getClients(TenantClientsPaginationQuery query) {
     log.info("Trying to get all clients by tenant id");
 
     var result =
         clientQueryRepository.findAllByTenantId(
-            new TenantId(query.getTenantId()), query.getPage(), query.getLimit());
+            new TenantId(query.getTenantId()),
+            query.getLimit(),
+            query.getLastClientId(),
+            query.getLastCreatedOn());
 
-    var futures =
+    if (result == null)
+      return PageableResponse.<ClientResponse>builder()
+          .data(Set.of())
+          .lastClientId(null)
+          .lastCreatedOn(null)
+          .limit(query.getLimit())
+          .build();
+
+    var data =
         StreamSupport.stream(result.getData().spliterator(), false)
             .map(clientDataMapper::toClientResponse)
-            .map(
-                clientResponse ->
-                    CompletableFuture.supplyAsync(
-                        () -> {
-                          clientResponse.setClientSecret(
-                              encryptionService.decrypt(clientResponse.getClientSecret()));
-                          return clientResponse;
-                        }))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
     return PageableResponse.<ClientResponse>builder()
-        .page(result.getPage())
+        .lastClientId(result.getLastClientId())
+        .lastCreatedOn(result.getLastCreatedOn())
         .limit(result.getLimit())
-        .data(
-            futures.stream()
-                .map(CompletableFuture::join)
-                .collect(Collectors.toCollection(LinkedHashSet::new)))
-        .next(result.getNext())
-        .previous(result.getPrevious())
+        .data(data)
         .build();
+  }
+
+  /**
+   * Retrieves client details for a list of client IDs.
+   *
+   * @param clientIds a list of client IDs for which details are to be retrieved.
+   * @return a list of {@link ClientResponse} containing client details.
+   */
+  public List<ClientResponse> getClients(List<ClientId> clientIds) {
+    log.info("Fetching client details for a list of clients");
+
+    var result = clientQueryRepository.findAllByClientIds(clientIds);
+    return result.stream().map(clientDataMapper::toClientResponse).toList();
   }
 }

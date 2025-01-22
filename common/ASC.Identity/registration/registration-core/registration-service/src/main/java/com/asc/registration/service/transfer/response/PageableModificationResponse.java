@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,45 +25,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.service;
+package com.asc.registration.service.transfer.response;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.ZonedDateTime;
+import lombok.*;
 
-import com.asc.common.core.domain.value.ClientId;
-import com.asc.registration.service.ports.output.repository.ConsentCommandRepository;
-import com.asc.registration.service.transfer.request.update.RevokeClientConsentCommand;
-import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+/**
+ * PageableModificationResponse is a Data Transfer Object (DTO) used to encapsulate paginated data
+ * responses.
+ *
+ * @param <D> The type of data contained in the paginated response.
+ */
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PageableModificationResponse<D> {
+  /** The data contained in the paginated response. */
+  private Iterable<D> data;
 
-public class ConsentUpdateCommandHandlerTest {
-  @InjectMocks private ConsentUpdateCommandHandler consentUpdateCommandHandler;
-  @Mock private ConsentCommandRepository consentCommandRepository;
+  @JsonProperty("last_modified_on")
+  private ZonedDateTime lastModifiedOn;
 
-  private RevokeClientConsentCommand revokeCommand;
-
-  @BeforeEach
-  public void setUp() {
-    MockitoAnnotations.openMocks(this);
-
-    revokeCommand =
-        RevokeClientConsentCommand.builder()
-            .clientId(UUID.randomUUID().toString())
-            .principalId("user@example.com")
-            .build();
-  }
-
-  @Test
-  public void testRevokeConsent() {
-    doNothing().when(consentCommandRepository).revokeConsent(any(ClientId.class), anyString());
-
-    consentUpdateCommandHandler.revokeConsent(revokeCommand);
-
-    verify(consentCommandRepository, times(1)).revokeConsent(any(ClientId.class), anyString());
-  }
+  /** The maximum number of items per page. */
+  private int limit;
 }

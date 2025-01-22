@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,6 +27,8 @@
 
 package com.asc.registration.service.transfer.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.ZonedDateTime;
 import lombok.*;
 
 /**
@@ -44,15 +46,13 @@ public class PageableResponse<D> {
   /** The data contained in the paginated response. */
   private Iterable<D> data;
 
-  /** The current page number. */
-  private int page;
+  /** The current cursor. */
+  @JsonProperty("last_client_id")
+  private String lastClientId;
+
+  @JsonProperty("last_created_on")
+  private ZonedDateTime lastCreatedOn;
 
   /** The maximum number of items per page. */
   private int limit;
-
-  /** The next page number, if available. */
-  private Integer next;
-
-  /** The previous page number, if available. */
-  private Integer previous;
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,7 @@ class ScopeDataMapperTest {
   }
 
   @Test
-  void testToScopeResponse() {
+  void whenScopeIsMappedToResponse_thenResponseIsCreated() {
     var scope = createScope();
     var response = scopeDataMapper.toScopeResponse(scope);
 
@@ -53,7 +53,7 @@ class ScopeDataMapperTest {
   }
 
   @Test
-  void testToScopeResponse_NullScope() {
+  void whenNullScopeIsMappedToResponse_thenExceptionIsThrown() {
     var exception =
         assertThrows(IllegalArgumentException.class, () -> scopeDataMapper.toScopeResponse(null));
 

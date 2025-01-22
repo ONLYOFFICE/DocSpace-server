@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -84,7 +84,7 @@ public class ClientQueryHandlerTest {
             .authenticationMethods(Set.of(AuthenticationMethod.DEFAULT_AUTHENTICATION))
             .scopes(Set.of("read", "write"))
             .clientInfo(new ClientInfo("Test Client", "Description", "Logo URL"))
-            .clientTenantInfo(new ClientTenantInfo(new TenantId(1)))
+            .clientTenantInfo(new ClientTenantInfo(new TenantId(1L)))
             .clientRedirectInfo(
                 new ClientRedirectInfo(
                     Set.of("http://redirect.url"),
@@ -107,7 +107,7 @@ public class ClientQueryHandlerTest {
   }
 
   @Test
-  public void testGetClient() {
+  public void whenClientIsFoundByIdAndTenantId_thenReturnClientResponse() {
     var query = new TenantClientQuery();
     query.setClientId(clientResponse.getClientId());
     query.setTenantId(1);
@@ -128,7 +128,7 @@ public class ClientQueryHandlerTest {
   }
 
   @Test
-  public void testGetClientNotFound() {
+  public void whenClientIsNotFoundByIdAndTenantId_thenThrowClientNotFoundException() {
     var query = new TenantClientQuery();
     query.setClientId(clientResponse.getClientId());
     query.setTenantId(1);
@@ -140,7 +140,7 @@ public class ClientQueryHandlerTest {
   }
 
   @Test
-  public void testGetClientInfo() {
+  public void whenClientInfoIsFoundById_thenReturnClientInfoResponse() {
     var query = new ClientInfoQuery();
     query.setClientId(clientResponse.getClientId());
 
@@ -156,7 +156,7 @@ public class ClientQueryHandlerTest {
   }
 
   @Test
-  public void testGetClientInfoNotFound() {
+  public void whenClientInfoIsNotFoundById_thenThrowClientNotFoundException() {
     var query = new ClientInfoQuery();
     query.setClientId(clientResponse.getClientId());
 
@@ -166,21 +166,21 @@ public class ClientQueryHandlerTest {
   }
 
   @Test
-  public void testGetClientsInfo() {
+  public void whenClientInfoPaginationQueryIsExecuted_thenReturnPageableResponse() {
     var query = new ClientInfoPaginationQuery();
     query.setTenantId(1);
-    query.setPage(0);
     query.setLimit(10);
+    query.setLastClientId("last-client-id");
+    query.setLastCreatedOn(ZonedDateTime.now(ZoneId.of("UTC")));
 
     var pageableResponse = new PageableResponse<Client>();
-    pageableResponse.setPage(0);
     pageableResponse.setLimit(10);
     pageableResponse.setData(Set.of(client));
-    pageableResponse.setNext(null);
-    pageableResponse.setPrevious(null);
+    pageableResponse.setLastClientId("next-client-id");
+    pageableResponse.setLastCreatedOn(ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(10));
 
     when(clientQueryRepository.findAllPublicAndPrivateByTenantId(
-            any(TenantId.class), anyInt(), anyInt()))
+            any(TenantId.class), eq(10), eq("last-client-id"), any(ZonedDateTime.class)))
         .thenReturn(pageableResponse);
 
     when(clientDataMapper.toClientInfoResponse(any(Client.class))).thenReturn(clientInfoResponse);
@@ -188,42 +188,44 @@ public class ClientQueryHandlerTest {
     var response = clientQueryHandler.getClientsInfo(query);
 
     verify(clientQueryRepository, times(1))
-        .findAllPublicAndPrivateByTenantId(any(TenantId.class), anyInt(), anyInt());
+        .findAllPublicAndPrivateByTenantId(
+            any(TenantId.class), eq(10), eq("last-client-id"), any(ZonedDateTime.class));
     verify(clientDataMapper, times(1)).toClientInfoResponse(any(Client.class));
 
     assertTrue(response.getData().iterator().hasNext());
     assertEquals(
         clientInfoResponse.getClientId(), response.getData().iterator().next().getClientId());
+    assertEquals("next-client-id", response.getLastClientId());
   }
 
   @Test
-  public void testGetClients() {
+  public void whenTenantClientsPaginationQueryIsExecuted_thenReturnPageableResponse() {
     var query = new TenantClientsPaginationQuery();
     query.setTenantId(1);
-    query.setPage(0);
     query.setLimit(10);
+    query.setLastClientId("last-client-id");
+    query.setLastCreatedOn(ZonedDateTime.now(ZoneId.of("UTC")));
 
     var pageableResponse = new PageableResponse<Client>();
-    pageableResponse.setPage(0);
     pageableResponse.setLimit(10);
     pageableResponse.setData(Set.of(client));
-    pageableResponse.setNext(null);
-    pageableResponse.setPrevious(null);
+    pageableResponse.setLastClientId("next-client-id");
+    pageableResponse.setLastCreatedOn(ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(10));
 
-    when(clientQueryRepository.findAllByTenantId(any(TenantId.class), anyInt(), anyInt()))
+    when(clientQueryRepository.findAllByTenantId(
+            any(TenantId.class), eq(10), eq("last-client-id"), any(ZonedDateTime.class)))
         .thenReturn(pageableResponse);
 
     when(clientDataMapper.toClientResponse(any(Client.class))).thenReturn(clientResponse);
-    when(encryptionService.decrypt(anyString())).thenReturn("decryptedSecret");
 
     var response = clientQueryHandler.getClients(query);
 
     verify(clientQueryRepository, times(1))
-        .findAllByTenantId(any(TenantId.class), anyInt(), anyInt());
+        .findAllByTenantId(
+            any(TenantId.class), eq(10), eq("last-client-id"), any(ZonedDateTime.class));
     verify(clientDataMapper, times(1)).toClientResponse(any(Client.class));
-    verify(encryptionService, times(1)).decrypt(anyString());
 
     assertTrue(response.getData().iterator().hasNext());
-    assertEquals("decryptedSecret", response.getData().iterator().next().getClientSecret());
+    assertEquals("next-client-id", response.getLastClientId());
   }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,14 +28,12 @@
 package com.asc.registration.service;
 
 import com.asc.common.core.domain.entity.Audit;
-import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.crypto.EncryptionService;
 import com.asc.registration.core.domain.ClientDomainService;
-import com.asc.registration.core.domain.event.ClientEvent;
 import com.asc.registration.core.domain.exception.ClientDomainException;
 import com.asc.registration.core.domain.exception.ClientNotFoundException;
 import com.asc.registration.core.domain.value.ClientInfo;
@@ -43,7 +41,6 @@ import com.asc.registration.core.domain.value.ClientRedirectInfo;
 import com.asc.registration.service.mapper.ClientDataMapper;
 import com.asc.registration.service.ports.output.repository.ClientCommandRepository;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
-import com.asc.registration.service.ports.output.repository.ConsentCommandRepository;
 import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import java.util.UUID;
@@ -55,7 +52,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ClientUpdateCommandHandler handles the updates of the existing clients. This component
@@ -66,12 +62,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class ClientUpdateCommandHandler {
-  private final ConsentCommandRepository consentCommandRepository;
   private final ClientCommandRepository clientCommandRepository;
   private final ClientDataMapper clientDataMapper;
   private final ClientDomainService clientDomainService;
   private final ClientQueryRepository clientQueryRepository;
-  private final DomainEventPublisher<ClientEvent> messagePublisher;
   private final EncryptionService encryptionService;
 
   /**
@@ -84,9 +78,6 @@ public class ClientUpdateCommandHandler {
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
-  @Transactional(
-      timeout = 3,
-      rollbackFor = {Exception.class})
   public ClientSecretResponse regenerateSecret(
       Audit audit, RegenerateTenantClientSecretCommand command) {
     log.info("Trying to regenerate client secret");
@@ -111,11 +102,9 @@ public class ClientUpdateCommandHandler {
     log.debug("Generated a new secret");
     MDC.remove("client_secret");
 
-    messagePublisher.publish(event);
-
-    var response = clientDataMapper.toClientSecret(clientCommandRepository.updateClient(client));
+    var response =
+        clientDataMapper.toClientSecret(clientCommandRepository.updateClient(event, client));
     response.setClientSecret(clientSecret);
-
     return response;
   }
 
@@ -140,6 +129,20 @@ public class ClientUpdateCommandHandler {
   }
 
   /**
+   * Recovers from a generic failure and re-throws an exception.
+   *
+   * @param e The exception that triggered recovery.
+   * @param audit Audit information for tracking the operation.
+   * @param command Command containing client and tenant information.
+   * @throws Exception If the operation cannot recover.
+   */
+  @Recover
+  public ClientSecretResponse recoverRegenerateSecret(
+      Exception e, Audit audit, RegenerateTenantClientSecretCommand command) throws Exception {
+    throw e;
+  }
+
+  /**
    * Changes the visibility of a client to either public or private based on the command. If the
    * operation encounters an optimistic locking exception, it retries based on the specified retry
    * policy.
@@ -151,9 +154,6 @@ public class ClientUpdateCommandHandler {
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
-  @Transactional(
-      timeout = 3,
-      rollbackFor = {Exception.class})
   public void changeVisibility(Audit audit, ChangeTenantClientVisibilityCommand command) {
     log.info("Trying to change client visibility");
 
@@ -172,15 +172,15 @@ public class ClientUpdateCommandHandler {
     if (command.isPublic()) {
       log.info("Changing client visibility to public");
       var event = clientDomainService.makeClientPublic(audit, client);
-      clientCommandRepository.updateClient(client);
-      messagePublisher.publish(event);
+      clientCommandRepository.changeVisibilityByTenantIdAndClientId(
+          event, client.getClientTenantInfo().tenantId(), client.getId(), command.isPublic());
       return;
     }
 
     log.info("Changing client visibility to private");
     var event = clientDomainService.makeClientPrivate(audit, client);
-    clientCommandRepository.updateClient(client);
-    messagePublisher.publish(event);
+    clientCommandRepository.changeVisibilityByTenantIdAndClientId(
+        event, client.getClientTenantInfo().tenantId(), client.getId(), command.isPublic());
   }
 
   /**
@@ -204,6 +204,20 @@ public class ClientUpdateCommandHandler {
   }
 
   /**
+   * Recovers from a generic failure and re-throws an exception.
+   *
+   * @param e The exception that triggered recovery.
+   * @param audit Audit information for tracking the operation.
+   * @param command Command containing client and tenant information.
+   * @throws Exception If the operation cannot recover.
+   */
+  @Recover
+  public void recoverChangeVisibility(
+      Exception e, Audit audit, ChangeTenantClientVisibilityCommand command) throws Exception {
+    throw e;
+  }
+
+  /**
    * Changes the activation status of a client.
    *
    * @param audit the audit information
@@ -213,9 +227,6 @@ public class ClientUpdateCommandHandler {
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
-  @Transactional(
-      timeout = 3,
-      rollbackFor = {Exception.class})
   public void changeActivation(Audit audit, ChangeTenantClientActivationCommand command) {
     log.info("Trying to change client activation");
 
@@ -234,16 +245,15 @@ public class ClientUpdateCommandHandler {
     if (command.isEnabled()) {
       log.info("Changing client activation to enabled");
       var event = clientDomainService.enableClient(audit, client);
-      clientCommandRepository.updateClient(client);
-      messagePublisher.publish(event);
+      clientCommandRepository.changeActivationByTenantIdAndClientId(
+          event, client.getClientTenantInfo().tenantId(), client.getId(), command.isEnabled());
       return;
     }
 
     log.info("Changing client activation to disabled");
     var event = clientDomainService.disableClient(audit, client);
-    clientCommandRepository.updateClient(client);
-    consentCommandRepository.revokeAllConsents(client.getId());
-    messagePublisher.publish(event);
+    clientCommandRepository.changeActivationByTenantIdAndClientId(
+        event, client.getClientTenantInfo().tenantId(), client.getId(), command.isEnabled());
   }
 
   /**
@@ -267,6 +277,20 @@ public class ClientUpdateCommandHandler {
   }
 
   /**
+   * Recovers from a generic failure and re-throws an exception.
+   *
+   * @param e The exception that triggered recovery.
+   * @param audit Audit information for tracking the operation.
+   * @param command Command containing client and tenant information.
+   * @throws Exception If the operation cannot recover.
+   */
+  @Recover
+  public void recoverChangeActivation(
+      Exception e, Audit audit, ChangeTenantClientActivationCommand command) throws Exception {
+    throw e;
+  }
+
+  /**
    * Updates the client information.
    *
    * @param audit the audit information
@@ -277,9 +301,6 @@ public class ClientUpdateCommandHandler {
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
-  @Transactional(
-      timeout = 3,
-      rollbackFor = {Exception.class})
   public ClientResponse updateClient(Audit audit, UpdateTenantClientCommand command) {
     log.info("Trying to update client info");
 
@@ -323,8 +344,7 @@ public class ClientUpdateCommandHandler {
 
     if (command.isPublic()) clientDomainService.makeClientPublic(audit, client);
     else clientDomainService.makeClientPrivate(audit, client);
-    messagePublisher.publish(event);
-    return clientDataMapper.toClientResponse(clientCommandRepository.updateClient(client));
+    return clientDataMapper.toClientResponse(clientCommandRepository.updateClient(event, client));
   }
 
   /**
@@ -346,6 +366,20 @@ public class ClientUpdateCommandHandler {
   }
 
   /**
+   * Recovers from a generic failure and re-throws an exception.
+   *
+   * @param e The exception that triggered recovery.
+   * @param audit Audit information for tracking the operation.
+   * @param command Command containing client and tenant information.
+   * @throws Exception If the operation cannot recover.
+   */
+  @Recover
+  public ClientResponse recoverUpdateClient(
+      Exception e, Audit audit, UpdateTenantClientCommand command) throws Exception {
+    throw e;
+  }
+
+  /**
    * Deletes a client.
    *
    * @param audit the audit information
@@ -354,9 +388,6 @@ public class ClientUpdateCommandHandler {
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
-  @Transactional(
-      timeout = 3,
-      rollbackFor = {Exception.class})
   public void deleteClient(Audit audit, DeleteTenantClientCommand command) {
     log.info("Trying to remove client");
 
@@ -371,10 +402,9 @@ public class ClientUpdateCommandHandler {
                             "Client with id %s for tenant %d was not found",
                             command.getClientId(), command.getTenantId())));
 
-    var event = clientDomainService.invalidateClient(audit, client);
-    messagePublisher.publish(event);
-    clientCommandRepository.updateClient(client);
-    consentCommandRepository.revokeAllConsents(clientId);
+    var event = clientDomainService.deleteClient(audit, client);
+    clientCommandRepository.deleteByTenantIdAndClientId(
+        event, client.getClientTenantInfo().tenantId(), client.getId());
   }
 
   /**
@@ -392,5 +422,19 @@ public class ClientUpdateCommandHandler {
     throw new ClientDomainException(
         String.format(
             "Could not delete client with id %s due to concurrent access", command.getClientId()));
+  }
+
+  /**
+   * Recovers from a generic failure and re-throws an exception.
+   *
+   * @param e The exception that triggered recovery.
+   * @param audit Audit information for tracking the operation.
+   * @param command Command containing client and tenant information.
+   * @throws Exception If the operation cannot recover.
+   */
+  @Recover
+  public void recoverDeleteClient(Exception e, Audit audit, DeleteTenantClientCommand command)
+      throws Exception {
+    throw e;
   }
 }
