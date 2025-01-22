@@ -30,14 +30,13 @@ namespace ASC.Notify.Textile;
 public class TextileStyler(CoreBaseSettings coreBaseSettings,
         IConfiguration configuration,
         InstanceCrypto instanceCrypto,
+        ExternalResourceSettingsHelper externalResourceSettingsHelper,
         MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
     : IPatternStyler
 {
     private static readonly Regex _velocityArguments
         = new(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix,
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-
-    private readonly Dictionary<string, string> _externalResources = configuration.GetSection("externalresources:default").Get<Dictionary<string, string>>() ?? [];
 
     static TextileStyler()
     {
@@ -195,12 +194,14 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
                 break;
         }
 
+        var externalResources = externalResourceSettingsHelper.Values.GetValueOrDefault(externalResourceSettingsHelper.DefaultCultureName) ?? [];
+
         footerSocialContent = footerSocialContent
-            .Replace("%SOCIALNETWORKFACEBOOK%", _externalResources.GetValueOrDefault("socialnetwork_facebook"))
-            .Replace("%SOCIALNETWORKTWITTER%", _externalResources.GetValueOrDefault("socialnetwork_twitter"))
-            .Replace("%SOCIALNETWORKYOUTUBE%", _externalResources.GetValueOrDefault("socialnetwork_youtube"))
-            .Replace("%SOCIALNETWORKINSTAGRAM%", _externalResources.GetValueOrDefault("socialnetwork_instagram"))
-            .Replace("%SOCIALNETWORKTIKTOK%", _externalResources.GetValueOrDefault("socialnetwork_tiktok"));
+            .Replace("%SOCIALNETWORKFACEBOOK%", externalResources.GetValueOrDefault("socialnetwork_facebook"))
+            .Replace("%SOCIALNETWORKTWITTER%", externalResources.GetValueOrDefault("socialnetwork_twitter"))
+            .Replace("%SOCIALNETWORKYOUTUBE%", externalResources.GetValueOrDefault("socialnetwork_youtube"))
+            .Replace("%SOCIALNETWORKINSTAGRAM%", externalResources.GetValueOrDefault("socialnetwork_instagram"))
+            .Replace("%SOCIALNETWORKTIKTOK%", externalResources.GetValueOrDefault("socialnetwork_tiktok"));
     }
 
     private void InitTopImage(NoticeMessage message, MailWhiteLabelSettings settings, out string footerTop)

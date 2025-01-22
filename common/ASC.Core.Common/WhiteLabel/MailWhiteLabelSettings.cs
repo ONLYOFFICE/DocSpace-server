@@ -32,7 +32,7 @@ namespace ASC.Web.Core.WhiteLabel;
 public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 {
     private readonly MailWhiteLabelSettingsHelper _mailWhiteLabelSettingsHelper;
-    private readonly IConfiguration _configuration;
+    private readonly ExternalResourceSettingsHelper _externalResourceSettingsHelper;
 
     /// <summary>Specifies if the mail footer is enabled or not</summary>
     /// <type>System.Boolean, System</type>
@@ -65,10 +65,10 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
     [JsonIgnore]
     public Guid ID => new("{C3602052-5BA2-452A-BD2A-ADD0FAF8EB88}");
 
-    public MailWhiteLabelSettings(IConfiguration configuration)
+    public MailWhiteLabelSettings(ExternalResourceSettingsHelper externalResourceSettingsHelper)
     {
-        _mailWhiteLabelSettingsHelper = new MailWhiteLabelSettingsHelper(configuration);
-        _configuration = configuration;
+        _mailWhiteLabelSettingsHelper = new MailWhiteLabelSettingsHelper(externalResourceSettingsHelper);
+        _externalResourceSettingsHelper = externalResourceSettingsHelper;
     }
 
     public MailWhiteLabelSettings()
@@ -78,7 +78,7 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 
     public MailWhiteLabelSettings GetDefault()
     {
-        return new MailWhiteLabelSettings(_configuration)
+        return new MailWhiteLabelSettings(_externalResourceSettingsHelper)
         {
             FooterEnabled = true,
             FooterSocialEnabled = true,
@@ -114,13 +114,15 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 }
 
 [Singleton]
-public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
+public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externalResourceSettingsHelper)
 {
+    private readonly Dictionary<string, string> _externalResources = externalResourceSettingsHelper.Values.GetValueOrDefault(externalResourceSettingsHelper.DefaultCultureName) ?? [];
+
     public string DefaultMailSupportUrl
     {
         get
         {
-            return BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:default:support"] ?? string.Empty, null);
+            return BaseCommonLinkUtility.GetRegionalUrl(_externalResources.GetValueOrDefault("support"), null);
         }
     }
 
@@ -128,7 +130,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return configuration["externalresources:default:supportemail"];
+            return _externalResources.GetValueOrDefault("supportemail");
         }
     }
 
@@ -136,7 +138,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return configuration["externalresources:default:paymentemail"];
+            return _externalResources.GetValueOrDefault("paymentemail");
         }
     }
 
@@ -144,7 +146,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return BaseCommonLinkUtility.GetRegionalUrl(configuration["externalresources:default:site_demo-order"] ?? string.Empty, null);
+            return BaseCommonLinkUtility.GetRegionalUrl(_externalResources.GetValueOrDefault("site_demo-order"), null);
         }
     }
 
@@ -152,7 +154,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return configuration["externalresources:default:site"];
+            return _externalResources.GetValueOrDefault("site");
         }
     }
 
@@ -160,7 +162,7 @@ public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
     {
         get
         {
-            return configuration["externalresources:default:forum"];
+            return _externalResources.GetValueOrDefault("forum");
         }
     }
 }

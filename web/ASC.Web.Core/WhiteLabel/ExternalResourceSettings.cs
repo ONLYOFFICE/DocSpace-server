@@ -40,15 +40,15 @@ public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
 
         if (helper.Values.TryGetValue(cultureName, out var specificDictionary))
         {
-            foreach (var key in specificDictionary.Keys)
+            foreach (var item in specificDictionary)
             {
-                defaultDictionary[key] = specificDictionary[key];
+                defaultDictionary[item.Key] = item.Value;
             }
         }
 
         return defaultDictionary
             .Where(x => CheckEnabled(x.Key, whiteLabelSettings))
-            .ToDictionary();
+            .ToDictionary(x => x.Key, x => x.Value);
     }
 
     public string Get(string key, string cultureName = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
@@ -107,13 +107,4 @@ public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
 
         return true;
     }
-}
-
-[Singleton]
-public class ExternalResourceSettingsHelper(IConfiguration configuration)
-{
-    public readonly string DefaultCultureName = "default";
-
-    public Dictionary<string, Dictionary<string, string>> Values => 
-        configuration.GetSection("externalresources").Get<Dictionary<string, Dictionary<string, string>>>();
 }
