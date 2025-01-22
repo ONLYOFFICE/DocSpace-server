@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,34 +25,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.messaging.listener;
+package com.asc.registration.messaging.publisher;
 
-import com.asc.common.messaging.mapper.AuditDataMapper;
-import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
-import com.asc.registration.core.domain.event.ClientEvent;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionalEventListener;
+import static org.mockito.Mockito.*;
 
-/** ClientApplicationDomainEventListener listens for client domain events and processes them. */
-@Slf4j
-@Component
-@RequiredArgsConstructor
-public class ClientApplicationDomainEventListener {
-  // We do not need outbox here since it is
-  // not that crucial to handle all the incoming
-  // audit messages
-  private final AuditMessagePublisher messagePublisher;
-  private final AuditDataMapper auditDataMapper;
+import com.asc.common.messaging.publisher.RabbitAuthorizationAuditMessagePublisher;
+import com.asc.common.service.transfer.message.AuditMessage;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.core.AmqpTemplate;
 
-  /**
-   * Processes client domain events and publishes audit messages.
-   *
-   * @param event The client event to process.
-   */
-  @TransactionalEventListener
-  public void process(ClientEvent event) {
-    messagePublisher.publish(auditDataMapper.toMessage(event.getAudit()));
+@ExtendWith(MockitoExtension.class)
+public class AuditMessagePublisherTest {
+  @InjectMocks private RabbitAuthorizationAuditMessagePublisher publisher;
+  @Mock private AmqpTemplate amqpClient;
+  @Mock private AuditMessage auditMessage;
+
+  @Test
+  void whenPublishFails_thenExceptionIsThrown() {
+    doThrow(new RuntimeException())
+        .when(amqpClient)
+        .convertAndSend(anyString(), anyString(), (Object) any());
+
+    publisher.publish(auditMessage);
   }
 }

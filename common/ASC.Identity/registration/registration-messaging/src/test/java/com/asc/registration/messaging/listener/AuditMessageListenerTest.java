@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,39 +25,49 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.messaging.publisher;
+package com.asc.registration.messaging.listener;
 
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.asc.common.core.domain.entity.Audit;
-import com.asc.common.core.domain.value.enums.AuditCode;
-import com.asc.registration.core.domain.event.ClientEvent;
+import com.asc.common.messaging.mapper.RabbitAuditDataMapper;
+import com.asc.common.service.AuditCreateCommandHandler;
+import com.asc.common.service.transfer.message.AuditMessage;
+import com.rabbitmq.client.Channel;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.messaging.Message;
 
 @ExtendWith(MockitoExtension.class)
-public class ClientApplicationDomainEventPublisherTest {
-  @InjectMocks private ClientApplicationDomainEventPublisher publisher;
-  @Mock private ApplicationEventPublisher applicationEventPublisher;
+public class AuditMessageListenerTest {
+  @InjectMocks private AuditMessageListener listener;
+  @Mock private AuditCreateCommandHandler auditCreateCommandHandler;
+  @Mock private RabbitAuditDataMapper auditDataMapper;
   @Mock private Audit audit;
-  @Mock private ClientEvent clientEvent;
+  @Mock private AuditMessage auditMessage;
+  @Mock private Message<AuditMessage> message;
+  @Mock private Channel channel;
 
   @BeforeEach
   void setUp() {
-    when(clientEvent.getAudit()).thenReturn(audit);
-    when(audit.getUserId()).thenReturn("testUser");
-    when(audit.getAuditCode()).thenReturn(AuditCode.CREATE_CLIENT);
+    when(message.getPayload()).thenReturn(auditMessage);
+    when(auditDataMapper.toAudit(auditMessage)).thenReturn(audit);
   }
 
   @Test
-  void testPublish() {
-    publisher.publish(clientEvent);
-    verify(applicationEventPublisher).publishEvent(clientEvent);
+  void whenMessagesAreReceived_thenAuditsAreCreated() {
+    List<Message<AuditMessage>> messages = Stream.of(message).collect(Collectors.toList());
+    listener.receiveMessage(messages, channel);
+
+    verify(auditCreateCommandHandler).createAudits(anySet());
   }
 }

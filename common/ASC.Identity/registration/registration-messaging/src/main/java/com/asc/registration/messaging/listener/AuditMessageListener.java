@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 
 package com.asc.registration.messaging.listener;
 
-import com.asc.common.messaging.mapper.AuditDataMapper;
+import com.asc.common.messaging.mapper.RabbitAuditDataMapper;
 import com.asc.common.service.AuditCreateCommandHandler;
 import com.asc.common.service.transfer.message.AuditMessage;
 import com.rabbitmq.client.Channel;
@@ -45,9 +45,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RabbitClientAuditMessageListener {
+public class AuditMessageListener {
   private final AuditCreateCommandHandler auditCreateCommandHandler;
-  private final AuditDataMapper auditDataMapper;
+  private final RabbitAuditDataMapper auditDataMapper;
 
   /**
    * Receives and processes audit messages from RabbitMQ.
@@ -56,7 +56,7 @@ public class RabbitClientAuditMessageListener {
    * @param channel The RabbitMQ channel.
    */
   @RabbitListener(
-      queues = "${spring.cloud.messaging.rabbitmq.queues.audit.queue}",
+      queues = "asc_identity_audit_${spring.application.region}_queue",
       containerFactory = "batchRabbitListenerContainerFactory")
   public void receiveMessage(@Payload List<Message<AuditMessage>> messages, Channel channel) {
     if (!messages.isEmpty()) {

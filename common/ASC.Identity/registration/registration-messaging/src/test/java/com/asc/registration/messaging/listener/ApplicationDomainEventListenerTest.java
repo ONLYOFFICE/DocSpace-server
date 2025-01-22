@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.asc.common.core.domain.entity.Audit;
-import com.asc.common.messaging.mapper.AuditDataMapper;
+import com.asc.common.messaging.mapper.RabbitAuditDataMapper;
 import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
 import com.asc.common.service.transfer.message.AuditMessage;
 import com.asc.registration.core.domain.event.ClientEvent;
@@ -43,10 +43,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ClientApplicationDomainEventListenerTest {
-  @InjectMocks private ClientApplicationDomainEventListener listener;
+public class ApplicationDomainEventListenerTest {
+  @InjectMocks private ApplicationDomainEventListener listener;
   @Mock private AuditMessagePublisher messagePublisher;
-  @Mock private AuditDataMapper auditDataMapper;
+  @Mock private RabbitAuditDataMapper auditDataMapper;
   @Mock private Audit audit;
   @Mock private ClientEvent clientEvent;
   @Mock private AuditMessage auditMessage;
@@ -58,7 +58,7 @@ public class ClientApplicationDomainEventListenerTest {
   }
 
   @Test
-  void testProcess() {
+  void whenClientEventIsProcessed_thenPublishAuditMessage() {
     listener.process(clientEvent);
 
     verify(auditDataMapper).toMessage(audit);
