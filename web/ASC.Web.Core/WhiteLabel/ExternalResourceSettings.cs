@@ -48,7 +48,7 @@ public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
 
         return defaultDictionary
             .Where(x => CheckEnabled(x.Key, whiteLabelSettings))
-            .ToDictionary(x => x.Key, x => x.Value);
+            .ToDictionary(x => x.Key, x => BaseCommonLinkUtility.GetRegionalUrl(x.Value, cultureName));
     }
 
     public string Get(string key, string cultureName = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
@@ -60,17 +60,10 @@ public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
 
         cultureName = string.IsNullOrEmpty(cultureName) ? CultureInfo.CurrentCulture.Name : cultureName;
 
-        if (helper.Values.TryGetValue(cultureName, out var dictionary) && dictionary.TryGetValue(key, out var result))
-        {
-            return result;
-        }
+        var result = helper.Values.GetValueOrDefault(cultureName)?.GetValueOrDefault(key)
+            ?? helper.Values.GetValueOrDefault(helper.DefaultCultureName)?.GetValueOrDefault(key);
 
-        if (helper.Values.TryGetValue(helper.DefaultCultureName, out dictionary) && dictionary.TryGetValue(key, out result))
-        {
-            return result;
-        }
-
-        return null;
+        return BaseCommonLinkUtility.GetRegionalUrl(result, cultureName);
     }
 
     private static bool CheckEnabled(string key, AdditionalWhiteLabelSettings whiteLabelSettings)

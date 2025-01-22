@@ -154,7 +154,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return _externalResources.GetValueOrDefault("site");
+            return BaseCommonLinkUtility.GetRegionalUrl(_externalResources.GetValueOrDefault("site"), null);
         }
     }
 
@@ -162,7 +162,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return _externalResources.GetValueOrDefault("forum");
+            return BaseCommonLinkUtility.GetRegionalUrl(_externalResources.GetValueOrDefault("forum"), null);
         }
     }
 }

@@ -168,7 +168,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         get
         {
             var url = _externalResources.GetValueOrDefault("license");
-            return string.IsNullOrEmpty(url) ? null : url;
+            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
         }
     }
 
@@ -180,7 +180,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         get
         {
             var url = _externalResources.GetValueOrDefault("helpcenter");
-            return string.IsNullOrEmpty(url) ? null : url;
+            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
         }
     }
 
@@ -192,7 +192,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         get
         {
             var url = _externalResources.GetValueOrDefault("support");
-            return string.IsNullOrEmpty(url) ? null : url;
+            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
         }
     }
 
@@ -204,7 +204,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         get
         {
             var url = _externalResources.GetValueOrDefault("forum");
-            return string.IsNullOrEmpty(url) ? null : url;
+            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
         }
     }
 
@@ -216,7 +216,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         get
         {
             var url = _externalResources.GetValueOrDefault("videoguides");
-            return string.IsNullOrEmpty(url) ? null : url;
+            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
         }
     }
 
@@ -241,7 +241,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         {
             var type = configuration["license:type"] ?? "enterprise";
             var url = _externalResources.GetValueOrDefault("site_buy" + type);
-            return string.IsNullOrEmpty(url) ? null : url;
+            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
         }
     }
 }
