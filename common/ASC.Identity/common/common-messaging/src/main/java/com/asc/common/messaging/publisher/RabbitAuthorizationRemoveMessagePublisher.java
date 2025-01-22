@@ -27,47 +27,41 @@
 
 package com.asc.common.messaging.publisher;
 
-import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
-import com.asc.common.service.transfer.message.AuditMessage;
+import com.asc.common.messaging.configuration.AuthorizationMessagingConfiguration;
+import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * RabbitMQ message publisher for broadcasting client removal events.
+ *
+ * <p>This component implements {@link AuthorizationMessagePublisher} to send {@link
+ * ClientRemovedEvent} messages to the specified exchange for authorization cleanup.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RabbitAuthorizationAuditMessagePublisher implements AuditMessagePublisher {
-  @Value("${spring.application.region}")
-  private String region;
+public class RabbitAuthorizationRemoveMessagePublisher
+    implements AuthorizationMessagePublisher<ClientRemovedEvent> {
 
   private final AmqpTemplate amqpClient;
 
   /**
-   * Publishes the given audit message to RabbitMQ.
+   * Publishes a {@link ClientRemovedEvent} to the authorization cleanup exchange.
    *
-   * <p>This method retrieves the RabbitMQ queue configuration for the "audit" queue, and attempts
-   * to send the audit message using the {@link AmqpTemplate}. If an exception occurs during message
-   * sending, it logs the error along with the action, tenant ID, and user ID from the message using
-   * the MDC (Mapped Diagnostic Context).
+   * <p>The message is sent to the {@link AuthorizationMessagingConfiguration#ENTRY_EXCHANGE} with
+   * an empty routing key.
    *
-   * @param message the audit message to be published
+   * @param message the {@link ClientRemovedEvent} containing details of the client to be removed.
    */
-  public void publish(AuditMessage message) {
-    log.debug("Sending an audit message: {}", message);
-
-    try {
-      amqpClient.convertAndSend(
-          String.format("asc_identity_audit_%s_exchange", region), Strings.EMPTY, message);
-    } catch (Exception e) {
-      MDC.put("action", String.valueOf(message.getAction()));
-      MDC.put("tenant_id", String.valueOf(message.getTenantId()));
-      MDC.put("user_id", message.getUserId());
-      log.error("Could not send an audit message", e);
-      MDC.clear();
-    }
+  @Override
+  public void publish(ClientRemovedEvent message) {
+    log.debug("Broadcasting a remove authorizations event: {}", message);
+    amqpClient.convertAndSend(
+        AuthorizationMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message);
   }
 }

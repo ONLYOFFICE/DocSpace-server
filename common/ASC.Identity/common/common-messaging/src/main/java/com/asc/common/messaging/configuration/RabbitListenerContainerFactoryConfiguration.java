@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,16 +29,15 @@ package com.asc.common.messaging.configuration;
 
 import com.asc.common.service.transfer.message.AuditMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.AcknowledgeMode;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
@@ -62,70 +61,9 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Configuration
 @ConfigurationProperties(prefix = "spring.cloud.messaging.rabbitmq")
-public class RabbitMQConfiguration {
-  private final Map<String, RabbitMQGenericQueueConfiguration> queues = new HashMap<>();
+public class RabbitListenerContainerFactoryConfiguration {
   private int prefetch = 500;
   private int batchSize = 20;
-
-  /**
-   * Bean for creating and configuring a RabbitAdmin instance.
-   *
-   * @param connectionFactory the RabbitMQ connection factory
-   * @return a configured RabbitAdmin instance
-   */
-  @Bean
-  public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
-    var rabbitAdmin = new RabbitAdmin(connectionFactory);
-    queues.forEach(
-        (key, value) -> {
-          value.validate();
-
-          var builder = QueueBuilder.durable(value.getQueue());
-          if (value.isNonDurable()) builder = QueueBuilder.nonDurable(value.getQueue());
-          if (value.isAutoDelete()) {
-            builder.autoDelete();
-          } else
-            builder
-                .withArgument("x-delivery-limit", value.getDeliveryLimit())
-                .withArgument("x-queue-type", "quorum");
-          var deadQueueName = value.getDeadQueue();
-          var deadExchangeName = value.getDeadExchange();
-          var deadRoutingName = value.getDeadRouting();
-          if (deadQueueName != null) {
-            var deadQueue =
-                QueueBuilder.durable(deadQueueName)
-                    .withArgument("x-max-length-bytes", value.getDeadMaxBytes())
-                    .withArgument("x-message-ttl", value.getMessageTTL())
-                    .withArgument("x-queue-type", "quorum")
-                    .build();
-            var deadExchange = new TopicExchange(deadExchangeName);
-            var deadBinding = BindingBuilder.bind(deadQueue).to(deadExchange).with(deadRoutingName);
-            builder
-                .withArgument("x-dead-letter-exchange", deadExchangeName)
-                .withArgument("x-dead-letter-routing-key", deadRoutingName);
-            rabbitAdmin.declareQueue(deadQueue);
-            rabbitAdmin.declareExchange(deadExchange);
-            rabbitAdmin.declareBinding(deadBinding);
-          }
-
-          Exchange exchange = new TopicExchange(value.getExchange());
-          if (value.isFanOut()) exchange = new FanoutExchange(value.getExchange());
-          var queue =
-              builder
-                  .withArgument("x-max-length-bytes", value.getMaxBytes())
-                  .withArgument("x-message-ttl", value.getMessageTTL())
-                  .withArgument("x-overflow", "reject-publish")
-                  .withArgument("x-single-active-consumer", value.isSingleActiveConsumer())
-                  .build();
-          var binding = BindingBuilder.bind(queue).to(exchange).with(value.getRouting()).noargs();
-
-          rabbitAdmin.declareQueue(queue);
-          rabbitAdmin.declareExchange(exchange);
-          rabbitAdmin.declareBinding(binding);
-        });
-
-    return rabbitAdmin;
-  }
 
   /**
    * Bean for creating and configuring a Jackson2JsonMessageConverter instance.
@@ -188,6 +126,28 @@ public class RabbitMQConfiguration {
     factory.setBatchListener(true);
     factory.setBatchSize(batchSize);
     factory.setConsumerBatchEnabled(true);
+    return factory;
+  }
+
+  /**
+   * Configures a {@link SimpleRabbitListenerContainerFactory} bean for RabbitMQ listeners with
+   * manual acknowledgment. This factory ensures that messages are acknowledged explicitly by the
+   * listener, allowing for better control over message processing and error handling. It is
+   * configured with a prefetch count of 1 to process one message at a time, reducing the risk of
+   * message loss or unprocessed batches.
+   *
+   * @param connectionFactory the RabbitMQ {@link ConnectionFactory} to be used for establishing
+   *     connections.
+   * @return a configured {@link SimpleRabbitListenerContainerFactory} with manual acknowledgment
+   *     and single-message prefetch.
+   */
+  @Bean("rabbitSingleManualContainerFactory")
+  public SimpleRabbitListenerContainerFactory rabbitSingleManualContainerFactory(
+      ConnectionFactory connectionFactory) {
+    SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+    factory.setConnectionFactory(connectionFactory);
+    factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+    factory.setPrefetchCount(1);
     return factory;
   }
 
