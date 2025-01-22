@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,25 +25,46 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.configuration.security;
+package com.asc.authorization.application.configuration.properties;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-/** Configuration properties for OAuth2 registered client settings. */
+/**
+ * Configuration properties for OAuth2 registered client settings.
+ *
+ * <p>This class defines configurable properties for managing token lifetimes in an OAuth2
+ * authorization server. The properties are loaded from the application's configuration file and can
+ * be customized using the prefix {@code spring.security.oauth2.registered-client}.
+ */
 @Getter
 @Setter
 @Configuration
 @ConfigurationProperties(prefix = "spring.security.oauth2.registered-client")
-public class RegisteredClientConfiguration {
-  /** Time-to-live (TTL) for access tokens, in minutes. Default value is 60 minutes. */
+public class RegisteredClientConfigurationProperties {
+  /**
+   * Time-to-live (TTL) for access tokens, in minutes.
+   *
+   * <p>This property determines how long an access token remains valid before it expires. The
+   * default value is 60 minutes.
+   */
   private int accessTokenMinutesTTL = 60;
 
-  /** Time-to-live (TTL) for refresh tokens, in days. Default value is 365 days. */
-  private int refreshTokenDaysTTL = 365;
+  /**
+   * Time-to-live (TTL) for refresh tokens, in days.
+   *
+   * <p>This property defines the lifespan of a refresh token before it becomes invalid. The default
+   * value is 30 days.
+   */
+  private int refreshTokenDaysTTL = 30;
 
-  /** Time-to-live (TTL) for authorization codes, in minutes. Default value is 1 minute. */
+  /**
+   * Time-to-live (TTL) for authorization codes, in minutes.
+   *
+   * <p>This property specifies the validity period of an authorization code. The default value is 1
+   * minute.
+   */
   private int authorizationCodeMinutesTTL = 1;
 }

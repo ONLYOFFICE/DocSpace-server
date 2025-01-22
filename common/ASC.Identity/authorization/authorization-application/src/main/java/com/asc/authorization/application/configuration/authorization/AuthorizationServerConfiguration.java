@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,19 +25,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.configuration.security;
+package com.asc.authorization.application.configuration.authorization;
 
-import com.asc.authorization.application.security.converter.PersonalAccessTokenAuthenticationConverter;
-import com.asc.authorization.application.security.filter.AnonymousReplacerAuthenticationFilter;
+import com.asc.authorization.application.security.filter.BasicSignatureAuthenticationFilter;
 import com.asc.authorization.application.security.filter.RateLimiterFilter;
-import com.asc.authorization.application.security.provider.AscCodeAuthenticationProvider;
-import com.asc.authorization.application.security.provider.AscPersonalAccessTokenAuthenticationProvider;
-import com.asc.authorization.application.security.provider.AscTokenIntrospectionAuthenticationProvider;
-import com.asc.common.application.client.AscApiClient;
-import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
-import com.asc.common.utilities.HttpUtils;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
+import com.asc.authorization.application.security.oauth.converter.PersonalAccessTokenAuthenticationConverter;
+import com.asc.authorization.application.security.oauth.provider.PersonalAccessTokenAuthenticationProvider;
+import com.asc.authorization.application.security.oauth.provider.TokenIntrospectionAuthenticationProvider;
+import com.asc.authorization.application.security.provider.SignatureAuthenticationProvider;
 import jakarta.servlet.RequestDispatcher;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -50,15 +45,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.OAuth2Token;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
-import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -66,37 +54,38 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-/** Configuration class for setting up the OAuth2 Authorization Server. */
+/**
+ * Configuration class for setting up the OAuth2 Authorization Server.
+ *
+ * <p>This configuration class handles the security settings, endpoint configurations, and various
+ * authentication-related components for the OAuth2 Authorization Server.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class AuthorizationServerConfiguration {
   private final AuthorizationFormConfiguration formConfiguration;
 
-  private final AscApiClient ascApiClient;
-  private final AuditMessagePublisher auditMessagePublisher;
+  private final RateLimiterFilter rateLimiterFilter;
+  private final BasicSignatureAuthenticationFilter authenticationFilter;
 
-  private final HttpUtils httpUtils;
+  private final PersonalAccessTokenAuthenticationConverter
+      personalAccessTokenAuthenticationConverter;
 
-  private final OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer;
-  private final JWKSource<SecurityContext> jwkSource;
-
-  private final OAuth2AuthorizationService authorizationService;
-
-  private final AscCodeAuthenticationProvider codeAuthenticationProvider;
-  private final AscTokenIntrospectionAuthenticationProvider
-      tokenIntrospectionAuthenticationProvider;
+  private final PersonalAccessTokenAuthenticationProvider personalAccessTokenAuthenticationProvider;
+  private final SignatureAuthenticationProvider codeAuthenticationProvider;
+  private final TokenIntrospectionAuthenticationProvider tokenIntrospectionAuthenticationProvider;
 
   private final AuthenticationSuccessHandler authenticationSuccessHandler;
   private final AuthenticationFailureHandler authenticationFailureHandler;
 
-  private final RateLimiterFilter rateLimiterFilter;
-  private final AnonymousReplacerAuthenticationFilter authenticationFilter;
-
   /**
    * Configures the security filter chain for the authorization server.
    *
-   * @param http the {@link HttpSecurity} to modify.
-   * @return the {@link SecurityFilterChain} that is built.
+   * <p>This method sets up the endpoint-specific security rules, authentication providers, filters,
+   * and exception handling for the OAuth2 Authorization Server.
+   *
+   * @param http the {@link HttpSecurity} object used to configure security settings.
+   * @return the constructed {@link SecurityFilterChain}.
    */
   @Bean
   @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -119,18 +108,9 @@ public class AuthorizationServerConfiguration {
         .tokenEndpoint(
             t ->
                 t.accessTokenRequestConverters(
-                        converters ->
-                            converters.add(
-                                new PersonalAccessTokenAuthenticationConverter(
-                                    ascApiClient, httpUtils)))
+                        converters -> converters.add(personalAccessTokenAuthenticationConverter))
                     .authenticationProviders(
-                        providers ->
-                            providers.add(
-                                new AscPersonalAccessTokenAuthenticationProvider(
-                                    httpUtils,
-                                    auditMessagePublisher,
-                                    authorizationService,
-                                    tokenGenerator()))))
+                        providers -> providers.add(personalAccessTokenAuthenticationProvider)))
         .authorizationEndpoint(
             e -> {
               e.consentPage(formConfiguration.getConsent());
@@ -160,9 +140,12 @@ public class AuthorizationServerConfiguration {
   }
 
   /**
-   * Creates the client settings bean.
+   * Configures client settings for the OAuth2 Authorization Server.
    *
-   * @return the {@link ClientSettings} bean.
+   * <p>The client settings determine whether authorization consent and proof keys are required for
+   * client interactions.
+   *
+   * @return the configured {@link ClientSettings} bean.
    */
   @Bean
   public ClientSettings clientSettings() {
@@ -173,47 +156,15 @@ public class AuthorizationServerConfiguration {
   }
 
   /**
-   * Creates the JWT encoder bean using the provided JWK source.
+   * Configures the password encoder.
    *
-   * @return the {@link JwtEncoder} bean.
-   */
-  @Bean
-  public JwtEncoder jwtEncoder() {
-    return new NimbusJwtEncoder(jwkSource);
-  }
-
-  /**
-   * Creates the JWT decoder bean using the provided JWK source.
-   *
-   * @return the {@link JwtDecoder} bean.
-   */
-  @Bean
-  public JwtDecoder jwtDecoder() {
-    return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
-  }
-
-  /**
-   * Creates the password encoder bean.
+   * <p>In this implementation, a NoOpPasswordEncoder is used, which does not apply any encoding.
+   * Since we rely on X-Signature instead of users, we do not really need an encoder.
    *
    * @return the {@link PasswordEncoder} bean.
    */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return NoOpPasswordEncoder.getInstance();
-  }
-
-  /**
-   * Creates the token generator bean.
-   *
-   * @return the {@link OAuth2TokenGenerator} bean.
-   */
-  @Bean
-  public OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator() {
-    var generator = new JwtGenerator(jwtEncoder());
-    generator.setJwtCustomizer(jwtCustomizer);
-    var accessTokenGenerator = new OAuth2AccessTokenGenerator();
-    var refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
-    return new DelegatingOAuth2TokenGenerator(
-        generator, accessTokenGenerator, refreshTokenGenerator);
   }
 }

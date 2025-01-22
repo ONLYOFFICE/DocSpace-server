@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,7 +25,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.configuration.security;
+package com.asc.authorization.application.configuration.properties;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -36,19 +36,12 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "security.auth")
-public class AnonymousFilterSecurityConfigurationProperties {
-  /** The name of the authentication cookie. Default value is "asc_auth_key". */
-  private String authCookieName = "asc_auth_key";
-
-  /**
-   * The name of the redirect cookie back to the beginning of oauth flow. Default value is
-   * "x-redirect-authorization-uri".
-   */
-  private String redirectAuthorizationCookie = "x-redirect-authorization-uri";
+@ConfigurationProperties(prefix = "spring.security.oauth2.authentication")
+public class SecurityConfigurationProperties {
+  private String signatureHeader = "X-Signature";
 
   /** The parameter name for the client ID. Default value is "client_id". */
-  private String clientIdParam = "client_id";
+  private String clientIdParameter = "client_id";
 
   /** The name of the header to indicate that redirect must be performed via the redirectHeader */
   private String disableRedirectHeader = "X-Disable-Redirect";
