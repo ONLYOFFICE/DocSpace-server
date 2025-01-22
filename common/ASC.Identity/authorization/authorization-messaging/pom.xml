@@ -11,4 +11,15 @@
     </parent>
 
     <artifactId>authorization-messaging</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>common-messaging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>authorization-data</artifactId>
+        </dependency>
+    </dependencies>
 </project>
