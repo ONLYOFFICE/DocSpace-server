@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,11 +27,16 @@
 
 package com.asc.common.utilities.crypto;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+
 /**
  * The NoOpEncryptionService class provides a no-operation implementation of the EncryptionService
  * interface. This implementation simply returns the input text or cipher without performing any
  * encryption or decryption.
  */
+@Component
+@ConditionalOnProperty(value = "spring.application.encryption.type", havingValue = "noop")
 public class NoOpEncryptionService implements EncryptionService {
 
   /**

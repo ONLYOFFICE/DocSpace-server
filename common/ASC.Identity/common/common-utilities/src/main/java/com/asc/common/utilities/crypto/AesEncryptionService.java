@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,9 +46,14 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 /** Provides AES encryption and decryption services using the AES/GCM/NoPadding algorithm. */
 @Slf4j
+@Component
+@ConditionalOnProperty(value = "spring.application.encryption.type", havingValue = "aes")
 public class AesEncryptionService implements EncryptionService {
   private static final String ALGORITHM = "AES/GCM/NoPadding";
   private static final String FACTORY_INSTANCE = "PBKDF2WithHmacSHA256";
@@ -59,7 +64,6 @@ public class AesEncryptionService implements EncryptionService {
   private static final int KEY_LENGTH = 128;
   private static final int ITERATION_COUNT = 1200; // Min 1000
   private static final Charset UTF_8 = StandardCharsets.UTF_8;
-
   private final String secret;
 
   /**
@@ -67,7 +71,7 @@ public class AesEncryptionService implements EncryptionService {
    *
    * @param secret the secret key to use for encryption and decryption
    */
-  public AesEncryptionService(String secret) {
+  public AesEncryptionService(@Value("${spring.application.encryption.secret}") String secret) {
     this.secret = secret;
   }
 
