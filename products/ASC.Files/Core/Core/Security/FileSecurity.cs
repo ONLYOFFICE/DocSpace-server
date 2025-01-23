@@ -2060,6 +2060,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             switch (searchArea)
             {
                 case SearchArea.Archive when entry.RootFolderType == FolderType.Archive:
+                case SearchArea.Templates when entry.RootFolderType == FolderType.RoomTemplates:
                 case SearchArea.Active when entry.RootFolderType == FolderType.VirtualRooms:
                 case SearchArea.Any when entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive:
                     {

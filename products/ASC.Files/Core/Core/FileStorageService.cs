@@ -215,7 +215,16 @@ public class FileStorageService //: IFileStorageService
                 
                 parent.ParentRoomType = parentRoom.FolderType;
             }
-            
+
+            if (parent.RootFolderType == FolderType.RoomTemplates)
+            {
+                parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.RoomTemplates && !parent.ProviderEntry ?
+                    await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) :
+                    parent;
+
+                parent.ParentRoomType = parentRoom.FolderType;
+            }
+
         }
         catch (Exception e)
         {
