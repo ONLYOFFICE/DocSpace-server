@@ -121,7 +121,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
                 }
                 if (_groups != null)
                 {
-                    wrappers = _groups.Select(e => new AceWrapper() { Id = e, Access = FileShare.RoomManager }).ToList();
+                    wrappers = _groups.Select(e => new AceWrapper() { Id = e, Access = FileShare.RoomManager, SubjectType = SubjectType.Group }).ToList();
                 }
 
             if (wrappers != null)
