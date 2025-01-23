@@ -273,6 +273,14 @@ public interface IFileDao<T>
     /// <param name="file"></param>
     /// <returns></returns>
     bool UseTrashForRemove(File<T> file);
+    /// <summary>
+    /// Save form role mappings
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <param name="formRolesParams"></param>
+    /// <returns></returns>
+    Task SaveFormRoleMapping(T formId, IEnumerable<FormRoleParams> formRolesParams);
+    
     string GetUniqFilePath(File<T> file, string fileTitle);
 
     #region chunking

@@ -526,4 +526,9 @@ internal class SharePointFileDao(
         
         return Task.FromResult(transferred);
     }
+
+    public Task SaveFormRoleMapping(string formId, IEnumerable<FormRoleParams> formRolesParams)
+    {
+        throw new NotImplementedException();
+    }
 }

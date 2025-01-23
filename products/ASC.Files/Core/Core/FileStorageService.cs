@@ -4309,6 +4309,38 @@ public class FileStorageService //: IFileStorageService
         return [..users];
     }
 
+    public async Task SaveFormRoleMapping<T>(T formId, IEnumerable<FormRoleParams> formRolesParams)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+
+        var form = await fileDao.GetFileAsync(formId);
+        if (form == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!form.IsForm)
+        {
+            throw new InvalidOperationException();
+        }
+        if (!await fileSecurity.CanEditRoomAsync(form))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
+
+        if (currentRoom == null)
+        {
+            throw new InvalidOperationException();
+        }
+        if (!await fileSecurity.CanEditRoomAsync(currentRoom))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
+        }
+        await fileDao.SaveFormRoleMapping(formId, formRolesParams);
+
+    }
     private Exception GenerateException(Exception error, bool warning = false)
     {
         if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)

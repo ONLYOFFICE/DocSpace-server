@@ -529,6 +529,15 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         return await filesControllerHelper.SaveAsPdf(inDto.Id, inDto.File.FolderId, inDto.File.Title);
     }
+
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Updated information about form role mappings", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    [HttpPost("file/{fileId}/formrolemapping")]
+    public async Task SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
+    {
+        await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.FormRolesParams);
+    }
 }
 
 public class FilesControllerCommon(

@@ -455,6 +455,11 @@ internal class ProviderFileDao(
         return fileDao.UseTrashForRemove(file);
     }
 
+    public Task SaveFormRoleMapping(string formId, IEnumerable<FormRoleParams> formRolesParams)
+    {
+        throw new NotImplementedException();
+    }
+
     #region chunking
 
     public async Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)

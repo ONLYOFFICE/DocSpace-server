@@ -1369,6 +1369,34 @@ internal class FileDao(
         return match.Success && match.Groups.TryGetValue(FileIdGroupName, out var group) && int.TryParse(group.Value, out fileId);
     }
 
+    public async Task SaveFormRoleMapping(int formId, IEnumerable<FormRoleParams> formRoleParams)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        if (formRoleParams == null || !formRoleParams.Any())
+        {
+            await filesDbContext.DeleteFormRoleMappingsAsync(tenantId, formId);
+            return;
+        }
+
+        var newRecords = formRoleParams.Select(param => new DbFilesFormRoleMapping
+        {
+            TenantId = tenantId,
+            FormId = formId,
+            RoomId = 0,
+            RoleId = param.RoleId,
+            UserId = param.UserId,
+            RoleName = param.RoleName,
+            Sequence = param.Sequence,
+            Submitted = param.Submitted
+        }).ToList();
+
+        await filesDbContext.FilesFormRoleMapping.AddRangeAsync(newRecords);
+        await filesDbContext.SaveChangesAsync();
+    }
+
     #region chunking
 
     public async Task<ChunkedUploadSession<int>> CreateUploadSessionAsync(File<int> file, long contentLength)

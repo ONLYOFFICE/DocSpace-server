@@ -783,6 +783,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         return Task.FromResult(nativeSession.BytesTransferred);
     }
+
+    public Task SaveFormRoleMapping(string formId, IEnumerable<FormRoleParams> formRolesParams)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 static file class Queries

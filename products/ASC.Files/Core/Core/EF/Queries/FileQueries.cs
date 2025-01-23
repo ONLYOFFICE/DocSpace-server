@@ -290,6 +290,12 @@ public partial class FilesDbContext
     {
         return FileQueries.FilesConvertsAsync(this);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    public Task DeleteFormRoleMappingsAsync(int tenantId, int formRoom)
+    {
+        return FileQueries.DeleteFormRoleMappingsAsync(this, tenantId, formRoom);
+    }
 }
 
 static file class FileQueries
@@ -854,4 +860,13 @@ static file class FileQueries
     
     public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FilesConvertsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteFormRoleMappingsAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, int formId) =>
+            ctx.FilesFormRoleMapping
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.FormId == formId)
+                .ExecuteDelete());
+
 }
