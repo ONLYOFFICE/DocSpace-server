@@ -214,7 +214,6 @@ global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
 global using OpenSearch.Client;
 global using ProtoBuf;
-global using SixLabors.ImageSharp;
 global using WebDav;
 global using static ASC.Files.Core.Data.AbstractDao;
 global using static ASC.Files.Core.Helpers.DocumentService;

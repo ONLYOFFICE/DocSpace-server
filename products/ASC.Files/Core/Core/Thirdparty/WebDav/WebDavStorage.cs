@@ -77,7 +77,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         return root is { IsCollection: true };
     }
 
-    public Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         return Task.FromResult<Stream>(null);
     }

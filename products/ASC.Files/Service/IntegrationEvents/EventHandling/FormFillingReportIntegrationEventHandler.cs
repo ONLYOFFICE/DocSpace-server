@@ -24,42 +24,51 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class BackupRestoreRequestedIntegrationEventHandler(
-        BackupAjaxHandler backupAjaxHandler,
-        ILogger<BackupRestoreRequestedIntegrationEventHandler> logger,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        BackupWorker backupWorker)
-    : IIntegrationEventHandler<BackupRestoreRequestIntegrationEvent>
+public class FormFillingReportIntegrationEventHandler(
+    ILogger<FormFillingReportIntegrationEventHandler> logger,
+    CommonLinkUtility commonLinkUtility,
+    TenantManager tenantManager,
+    DocumentBuilderTaskManager documentBuilderTaskManager,
+    IServiceProvider serviceProvider)
+    : IIntegrationEventHandler<FormFillingReportIntegrationEvent>
 {
-    public async Task Handle(BackupRestoreRequestIntegrationEvent @event)
+    
+    public async Task Handle(FormFillingReportIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
+
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered && await backupWorker.IsInstanceTooBusy())
+            try
             {
-                throw new IntegrationEventRejectExeption(@event.Id);
+                if (@event.Terminate)
+                {
+                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(@event.BaseUri))
+                {
+                    commonLinkUtility.ServerUri = @event.BaseUri;
+                }
+
+                await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+
+                var task = serviceProvider.GetService<FormFillingReportTask>();
+
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new FormFillingReportTaskData(@event.RoomId, @event.OriginalFormId, @event.Headers));
+
+                await documentBuilderTaskManager.StartTask(task);
             }
-
-            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-
-            await backupAjaxHandler.StartRestoreAsync(@event.BackupId,
-                                            @event.StorageType,
-                                            @event.StorageParams,
-                                            @event.Notify,
-                                            @event.ServerBaseUri,
-                                            @event.Dump,
-                                            true,
-                                            @event.TaskId);
-
-            await Task.CompletedTask;
+            catch (Exception ex)
+            {
+                logger.ErrorWithException(ex);
+            }
         }
     }
 }
