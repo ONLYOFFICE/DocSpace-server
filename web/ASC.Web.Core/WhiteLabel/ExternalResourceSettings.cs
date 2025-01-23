@@ -29,16 +29,16 @@ namespace ASC.Web.Core.WhiteLabel;
 [Scope]
 public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
 {
-    public Dictionary<string, string> GetDictionary(string cultureName = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
+    public Dictionary<string, string> GetDictionary(CultureInfo culture = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
     {
         if (!helper.Values.TryGetValue(helper.DefaultCultureName, out var defaultDictionary))
         {
             return null;
         }
 
-        cultureName = string.IsNullOrEmpty(cultureName) ? CultureInfo.CurrentCulture.Name : cultureName;
+        culture = culture ?? CultureInfo.CurrentCulture;
 
-        if (helper.Values.TryGetValue(cultureName, out var specificDictionary))
+        if (helper.Values.TryGetValue(culture.Name, out var specificDictionary))
         {
             foreach (var item in specificDictionary)
             {
@@ -48,22 +48,22 @@ public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
 
         return defaultDictionary
             .Where(x => CheckEnabled(x.Key, whiteLabelSettings))
-            .ToDictionary(x => x.Key, x => BaseCommonLinkUtility.GetRegionalUrl(x.Value, cultureName));
+            .ToDictionary(x => x.Key, x => BaseCommonLinkUtility.GetRegionalUrl(x.Value, culture.TwoLetterISOLanguageName));
     }
 
-    public string Get(string key, string cultureName = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
+    public string Get(string key, CultureInfo culture = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
     {
         if (!CheckEnabled(key, whiteLabelSettings))
         {
             return null;
         }
 
-        cultureName = string.IsNullOrEmpty(cultureName) ? CultureInfo.CurrentCulture.Name : cultureName;
+        culture = culture ?? CultureInfo.CurrentCulture;
 
-        var result = helper.Values.GetValueOrDefault(cultureName)?.GetValueOrDefault(key)
+        var result = helper.Values.GetValueOrDefault(culture.Name)?.GetValueOrDefault(key)
             ?? helper.Values.GetValueOrDefault(helper.DefaultCultureName)?.GetValueOrDefault(key);
 
-        return BaseCommonLinkUtility.GetRegionalUrl(result, cultureName);
+        return BaseCommonLinkUtility.GetRegionalUrl(result, culture.TwoLetterISOLanguageName);
     }
 
     private static bool CheckEnabled(string key, AdditionalWhiteLabelSettings whiteLabelSettings)

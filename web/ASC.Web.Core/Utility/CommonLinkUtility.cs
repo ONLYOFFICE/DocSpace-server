@@ -125,7 +125,7 @@ public class CommonLinkUtility(
 
     #region links to external resources
 
-    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
+    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).UserForumEnabled)
         {
@@ -134,15 +134,10 @@ public class CommonLinkUtility(
 
         var url = additionalWhiteLabelSettingsHelper.DefaultUserForumUrl;
 
-        if (string.IsNullOrEmpty(url))
-        {
-            return string.Empty;
-        }
-
-        return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
-    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
+    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).HelpCenterEnabled)
         {
@@ -151,15 +146,10 @@ public class CommonLinkUtility(
 
         var url = additionalWhiteLabelSettingsHelper.DefaultHelpCenterUrl;
 
-        if (string.IsNullOrEmpty(url))
-        {
-            return string.Empty;
-        }
-
-        return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
-    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
+    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).FeedbackAndSupportEnabled)
         {
@@ -168,12 +158,7 @@ public class CommonLinkUtility(
 
         var url = additionalWhiteLabelSettingsHelper.DefaultFeedbackAndSupportUrl;
 
-        if (string.IsNullOrEmpty(url))
-        {
-            return string.Empty;
-        }
-
-        return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
     public string GetSiteLink()
