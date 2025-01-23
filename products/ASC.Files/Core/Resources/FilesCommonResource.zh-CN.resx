@@ -384,7 +384,7 @@
     <value>角色不可用于此用户类型</value>
   </data>
   <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>您没有足够的权限来归档房间</value>
+    <value>您没有足够的权限来存档房间</value>
   </data>
   <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
     <value>您没有复制此文件夹的权限</value>
@@ -396,10 +396,10 @@
     <value>您没有移动此文件夹的权限</value>
   </data>
   <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>您没有足够的权限来取消归档房间</value>
+    <value>您没有足够的权限来取消存档房间</value>
   </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>您不能编辑已归档的房间</value>
+    <value>您不能编辑已存档的房间</value>
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>您不能固定房间</value>

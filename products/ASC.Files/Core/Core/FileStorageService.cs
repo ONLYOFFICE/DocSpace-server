@@ -1447,7 +1447,7 @@ public class FileStorageService //: IFileStorageService
             }
             else
             {
-                await entryManager.TrackEditingAsync(fileId, tabId, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId());
+                await entryManager.TrackEditingAsync(fileId, tabId, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant());
             }
 
             return new KeyValuePair<bool, string>(true, string.Empty);
@@ -1558,7 +1558,7 @@ public class FileStorageService //: IFileStorageService
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFileTwice);
                 }
 
-                await entryManager.TrackEditingAsync(fileId, Guid.Empty, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId(), true);
+                await entryManager.TrackEditingAsync(fileId, Guid.Empty, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant(), true);
 
                 //without StartTrack, track via old scheme
                 return await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue);
@@ -1667,7 +1667,6 @@ public class FileStorageService //: IFileStorageService
 
         foreach (var r in history)
         {
-            await entryStatusManager.SetFileStatusAsync(r);
             yield return r;
         }
     }
@@ -3542,7 +3541,7 @@ public class FileStorageService //: IFileStorageService
     {
         if (!authContext.IsAuthenticated)
         {
-            return null;
+            return Task.FromResult<List<MentionWrapper>>(null);
         }
 
         return InternalSharedUsersAsync(fileId);
@@ -4312,7 +4311,7 @@ public class FileStorageService //: IFileStorageService
 
     private Exception GenerateException(Exception error, bool warning = false)
     {
-        if (warning)
+        if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
         {
             _logger.Information(error.ToString());
         }

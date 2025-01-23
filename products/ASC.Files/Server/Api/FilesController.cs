@@ -458,7 +458,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [HttpPut("{fileId}/order")]
-    public async Task SetOrder(OrderFileRequestDto<T> inDto)
+    public async Task SetOrderFile(OrderFileRequestDto<T> inDto)
     {
         await fileStorageService.SetFileOrder(inDto.FileId, inDto.Order.Order);
     }
