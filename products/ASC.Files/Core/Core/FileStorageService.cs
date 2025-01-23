@@ -1447,7 +1447,7 @@ public class FileStorageService //: IFileStorageService
             }
             else
             {
-                await entryManager.TrackEditingAsync(fileId, tabId, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId());
+                await entryManager.TrackEditingAsync(fileId, tabId, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant());
             }
 
             return new KeyValuePair<bool, string>(true, string.Empty);
@@ -1558,7 +1558,7 @@ public class FileStorageService //: IFileStorageService
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFileTwice);
                 }
 
-                await entryManager.TrackEditingAsync(fileId, Guid.Empty, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId(), true);
+                await entryManager.TrackEditingAsync(fileId, Guid.Empty, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant(), true);
 
                 //without StartTrack, track via old scheme
                 return await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue);
