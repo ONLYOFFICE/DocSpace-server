@@ -86,6 +86,8 @@ public partial class SettingsController(MessageService messageService,
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
+        var additionalWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
+
         var tenant = tenantManager.GetCurrentTenant();
 
         var settings = new SettingsDto
@@ -100,18 +102,16 @@ public partial class SettingsController(MessageService messageService,
             TenantStatus = tenant.Status,
             TenantAlias = tenant.Alias,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
-            LegalTerms = externalResourceSettings.Get("legalterms"),
-            LicenseUrl = externalResourceSettings.Get("license"),
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
-            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager),
             DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !(await tenantManager.GetCurrentTenantQuotaAsync()).Branding,
             DeepLink = new DeepLinkDto
             {
                 AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",
                 Url = configuration["deeplink:url"] ?? "",
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
-            }
+            },
+            ExternalResources = externalResourceSettings.GetDictionary(whiteLabelSettings: additionalWhiteLabelSettings)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
@@ -132,8 +132,6 @@ public partial class SettingsController(MessageService messageService,
             settings.DomainValidator = tenantDomainValidator;
             settings.ZendeskKey = setupInfo.ZendeskKey;
             settings.TagManagerId = setupInfo.TagManagerId;
-            settings.BookTrainingEmail = externalResourceSettings.Get("booktrainingemail");
-            settings.DocumentationEmail = externalResourceSettings.Get("documentationemail");
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
 
@@ -148,10 +146,6 @@ public partial class SettingsController(MessageService messageService,
                 MeasurementId = configuration["firebase:measurementId"] ?? "",
                 DatabaseURL = configuration["firebase:databaseURL"] ?? ""
             };
-
-            settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
-            settings.FeedbackAndSupportLink = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
-            settings.ApiDocsLink = externalResourceSettings.Get("api");
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
             {
@@ -214,20 +208,6 @@ public partial class SettingsController(MessageService messageService,
         }
 
         return settings;
-    }
-
-    /// <summary>
-    /// Returns links to external resources
-    /// </summary>
-    /// <path>api/2.0/settings/externalresources</path>
-    [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Ok", typeof(Dictionary<string, string>))]
-    [HttpGet("externalresources")]
-    public async Task<Dictionary<string, string>> GetLinksToExternalResources()
-    {
-        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
-
-        return externalResourceSettings.GetDictionary(whiteLabelSettings: settings);
     }
 
     /// <summary>

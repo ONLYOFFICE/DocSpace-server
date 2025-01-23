@@ -163,29 +163,9 @@ public class SettingsDto
     public string TenantAlias { get; set; }
 
     /// <summary>
-    /// Link to the help
-    /// </summary>
-    public string HelpLink { get; set; }
-    
-    /// <summary>
-    /// Link to the feedback and support
-    /// </summary>
-    public string FeedbackAndSupportLink { get; set; }
-
-    /// <summary>
-    /// Link to the forum
-    /// </summary>
-    public string ForumLink { get; set; }
-
-    /// <summary>
     /// Specifies whether to display the About section
     /// </summary>
     public bool DisplayAbout { get; set; }
-
-    /// <summary>
-    /// API documentation link
-    /// </summary>
-    public string ApiDocsLink { get; set; }
 
     /// <summary>
     /// Domain validator
@@ -201,26 +181,6 @@ public class SettingsDto
     /// Tag manager ID
     /// </summary>
     public string TagManagerId { get; set; }
-
-    /// <summary>
-    /// Email for training booking
-    /// </summary>
-    public string BookTrainingEmail { get; set; }
-
-    /// <summary>
-    /// Documentation email
-    /// </summary>
-    public string DocumentationEmail { get; set; }
-
-    /// <summary>
-    /// Legal terms
-    /// </summary>
-    public string LegalTerms { get; set; }
-
-    /// <summary>
-    /// License url
-    /// </summary>
-    public string LicenseUrl { get; set; }
 
     /// <summary>
     /// Specifies whether the cookie settings are enabled
@@ -261,4 +221,9 @@ public class SettingsDto
     /// Max image upload size
     /// </summary>
     public long MaxImageUploadSize { get; set; }
+
+    /// <summary>
+    /// External resources
+    /// </summary>
+    public Dictionary<string, string> ExternalResources { get; set; }
 }
