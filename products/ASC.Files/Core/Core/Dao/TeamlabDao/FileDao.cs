@@ -1385,7 +1385,6 @@ internal class FileDao(
         {
             TenantId = tenantId,
             FormId = formId,
-            RoomId = 0,
             RoleId = param.RoleId,
             UserId = param.UserId,
             RoleName = param.RoleName,

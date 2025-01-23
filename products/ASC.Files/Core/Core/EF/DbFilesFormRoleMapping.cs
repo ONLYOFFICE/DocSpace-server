@@ -30,7 +30,6 @@ public class DbFilesFormRoleMapping : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
     public int FormId { get; set; }
-    public int RoomId { get; set; }
     public int RoleId { get; set; }
     public Guid UserId { get; set; }
     [MaxLength(255)]
@@ -39,10 +38,9 @@ public class DbFilesFormRoleMapping : BaseEntity, IDbFile
     public bool Submitted { get; set; }
 
     public DbTenant Tenant { get; set; }
-    public DbFolder Room { get; set; }
     public override object[] GetKeys()
     {
-        return [TenantId, FormId, RoomId, RoleId, UserId];
+        return [TenantId, FormId, RoleId, UserId];
     }
 }
 
@@ -51,7 +49,6 @@ public static class DbFilesFormRoleMappingExtension
     public static ModelBuilderWrapper AddDbFilesFormRoleMapping(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbFilesFormRoleMapping>().Navigation(e => e.Tenant).AutoInclude(false);
-        modelBuilder.Entity<DbFilesFormRoleMapping>().Navigation(e => e.Room).AutoInclude(false);
 
         modelBuilder
             .Add(MySqlAddDbFilesFormRoleMapping, Provider.MySql)
@@ -64,21 +61,20 @@ public static class DbFilesFormRoleMappingExtension
     {
         modelBuilder.Entity<DbFilesFormRoleMapping>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.FormId, e.RoomId, e.RoleId, e.UserId })
+            entity.HasKey(e => new { e.TenantId, e.FormId, e.RoleId, e.UserId })
                 .HasName("PRIMARY");
 
             entity.ToTable("files_form_role_mapping")
                 .HasCharSet("utf8");
 
-            entity.HasIndex(e => new { e.TenantId, e.RoomId, e.FormId})
-               .HasDatabaseName("tenant_id_room_id_form_id");
+            entity.HasIndex(e => new { e.TenantId, e.FormId})
+               .HasDatabaseName("tenant_id_form_id");
 
-            entity.HasIndex(e => new { e.TenantId, e.RoomId, e.FormId, e.UserId })
-                .HasDatabaseName("tenant_id_room_id_form_id_user_id");
+            entity.HasIndex(e => new { e.TenantId, e.FormId, e.UserId })
+                .HasDatabaseName("tenant_id_form_id_user_id");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
             entity.Property(e => e.FormId).HasColumnName("form_id");
-            entity.Property(e => e.RoomId).HasColumnName("room_id");
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")
@@ -105,20 +101,19 @@ public static class DbFilesFormRoleMappingExtension
     {
         modelBuilder.Entity<DbFilesFormRoleMapping>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.FormId, e.RoomId, e.RoleId, e.UserId })
+            entity.HasKey(e => new { e.TenantId, e.FormId, e.RoleId, e.UserId })
                 .HasName("files_form_role_mapping_pkey");
 
             entity.ToTable("files_form_role_mapping", "onlyoffice");
 
-            entity.HasIndex(e => new { e.TenantId, e.RoomId, e.FormId })
-                .HasDatabaseName("tenant_id_room_id_form_id");
+            entity.HasIndex(e => new { e.TenantId, e.FormId })
+                .HasDatabaseName("tenant_id_form_id");
 
-            entity.HasIndex(e => new { e.TenantId, e.RoomId, e.FormId, e.UserId })
-                .HasDatabaseName("tenant_id_room_id_form_id_user_id");
+            entity.HasIndex(e => new { e.TenantId, e.FormId, e.UserId })
+                .HasDatabaseName("tenant_id_form_id_user_id");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
             entity.Property(e => e.FormId).HasColumnName("form_id");
-            entity.Property(e => e.RoomId).HasColumnName("room_id");
             entity.Property(e => e.RoleId).HasColumnName("role_id");
 
             entity.Property(e => e.UserId)

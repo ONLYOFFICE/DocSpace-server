@@ -5804,10 +5804,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("form_id");
 
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int")
-                        .HasColumnName("room_id");
-
                     b.Property<int>("RoleId")
                         .HasColumnType("int")
                         .HasColumnName("role_id");
@@ -5833,16 +5829,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("submitted");
 
-                    b.HasKey("TenantId", "FormId", "RoomId", "RoleId", "UserId")
+                    b.HasKey("TenantId", "FormId", "RoleId", "UserId")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("RoomId");
+                    b.HasIndex("TenantId", "FormId")
+                        .HasDatabaseName("tenant_id_form_id");
 
-                    b.HasIndex("TenantId", "RoomId", "FormId")
-                        .HasDatabaseName("tenant_id_room_id_form_id");
-
-                    b.HasIndex("TenantId", "RoomId", "FormId", "UserId")
-                        .HasDatabaseName("tenant_id_room_id_form_id_user_id");
+                    b.HasIndex("TenantId", "FormId", "UserId")
+                        .HasDatabaseName("tenant_id_form_id_user_id");
 
                     b.ToTable("files_form_role_mapping", (string)null);
 
@@ -7575,19 +7569,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesFormRoleMapping", b =>
                 {
-                    b.HasOne("ASC.Files.Core.EF.DbFolder", "Room")
-                        .WithMany()
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Room");
 
                     b.Navigation("Tenant");
                 });
