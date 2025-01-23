@@ -66,7 +66,7 @@ public class PortalController(
     EmailValidationKeyProvider emailValidationKeyProvider,
     StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-    ExternalResourceSettings externalResourceSettings,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
     IMapper mapper,
     IHttpContextAccessor httpContextAccessor,
     QuotaHelper quotaHelper,
@@ -658,7 +658,7 @@ public class PortalController(
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
 
-        var redirectLink = externalResourceSettings.Get("site_registration-canceled");
+        var redirectLink = externalResourceSettingsHelper.GetFullEntry("site_registration-canceled");
 
         await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 

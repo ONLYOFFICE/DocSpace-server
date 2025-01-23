@@ -31,6 +31,63 @@ public class ExternalResourceSettingsHelper(IConfiguration configuration)
 {
     public readonly string DefaultCultureName = "default";
 
-    public Dictionary<string, Dictionary<string, string>> Values =>
+    public Dictionary<string, Dictionary<string, string>> CultureSpecificEntries =
         configuration.GetSection("externalresources").Get<Dictionary<string, Dictionary<string, string>>>();
+
+    public string GetDefaultFullEntry(string key, bool regional = true)
+    {
+        var value = GetEntry(key, DefaultCultureName);
+
+        if (string.IsNullOrEmpty(value))
+        {
+            return value;
+        }
+
+        if (value.StartsWith('/'))
+        {
+            var baseValue = GetBaseEntry(key, DefaultCultureName);
+            value = $"{baseValue}{value}";
+        }
+
+        return regional ? BaseCommonLinkUtility.GetRegionalUrl(value, null) : value;
+    }
+
+    public string GetFullEntry(string key, CultureInfo culture = null, bool regional = true)
+    {
+        culture = culture ?? CultureInfo.CurrentCulture;
+
+        var value = GetEntry(key, culture.Name);
+
+        if (string.IsNullOrEmpty(value))
+        {
+            return value;
+        }
+
+        if (value.StartsWith('/'))
+        {
+            var baseValue = GetBaseEntry(key, culture.Name);
+            value = $"{baseValue}{value}";
+        }
+
+        return regional ? BaseCommonLinkUtility.GetRegionalUrl(value, culture.TwoLetterISOLanguageName) : value;
+    }
+
+    public string GetEntry(string key, string cultureName)
+    {
+        return CultureSpecificEntries.GetValueOrDefault(cultureName)?.GetValueOrDefault(key) ??
+               CultureSpecificEntries.GetValueOrDefault(DefaultCultureName)?.GetValueOrDefault(key);
+    }
+
+    private string GetBaseEntry(string key, string cultureName)
+    {
+        var index = key.IndexOf('_');
+        if (index == -1)
+        {
+            return null;
+        }
+
+        var baseKey = key.Substring(0, index);
+
+        return GetEntry(baseKey, cultureName);
+    }
 }

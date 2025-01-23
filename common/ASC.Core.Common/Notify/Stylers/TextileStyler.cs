@@ -194,14 +194,12 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
                 break;
         }
 
-        var externalResources = externalResourceSettingsHelper.Values.GetValueOrDefault(externalResourceSettingsHelper.DefaultCultureName) ?? [];
-
         footerSocialContent = footerSocialContent
-            .Replace("%SOCIALNETWORKFACEBOOK%", externalResources.GetValueOrDefault("socialnetwork_facebook"))
-            .Replace("%SOCIALNETWORKTWITTER%", externalResources.GetValueOrDefault("socialnetwork_twitter"))
-            .Replace("%SOCIALNETWORKYOUTUBE%", externalResources.GetValueOrDefault("socialnetwork_youtube"))
-            .Replace("%SOCIALNETWORKINSTAGRAM%", externalResources.GetValueOrDefault("socialnetwork_instagram"))
-            .Replace("%SOCIALNETWORKTIKTOK%", externalResources.GetValueOrDefault("socialnetwork_tiktok"));
+            .Replace("%SOCIALNETWORKFACEBOOK%", externalResourceSettingsHelper.GetDefaultFullEntry("socialnetwork_facebook"))
+            .Replace("%SOCIALNETWORKTWITTER%", externalResourceSettingsHelper.GetDefaultFullEntry("socialnetwork_twitter"))
+            .Replace("%SOCIALNETWORKYOUTUBE%", externalResourceSettingsHelper.GetDefaultFullEntry("socialnetwork_youtube"))
+            .Replace("%SOCIALNETWORKINSTAGRAM%", externalResourceSettingsHelper.GetDefaultFullEntry("socialnetwork_instagram"))
+            .Replace("%SOCIALNETWORKTIKTOK%", externalResourceSettingsHelper.GetDefaultFullEntry("socialnetwork_tiktok"));
     }
 
     private void InitTopImage(NoticeMessage message, MailWhiteLabelSettings settings, out string footerTop)

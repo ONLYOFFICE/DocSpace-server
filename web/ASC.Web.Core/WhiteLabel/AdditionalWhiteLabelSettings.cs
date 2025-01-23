@@ -161,14 +161,12 @@ public class AdditionalWhiteLabelSettingsHelper(AdditionalWhiteLabelSettingsHelp
 [Singleton]
 public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration, ExternalResourceSettingsHelper externalResourceSettingsHelper)
 {
-    private readonly Dictionary<string, string> _externalResources = externalResourceSettingsHelper.Values.GetValueOrDefault(externalResourceSettingsHelper.DefaultCultureName) ?? [];
-
     public string DefaultLicenseAgreementsUrl
     {
         get
         {
-            var url = _externalResources.GetValueOrDefault("license");
-            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
+            var url = externalResourceSettingsHelper.GetDefaultFullEntry("license");
+            return string.IsNullOrEmpty(url) ? null : url;
         }
     }
 
@@ -179,8 +177,8 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = _externalResources.GetValueOrDefault("helpcenter");
-            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
+            var url = externalResourceSettingsHelper.GetDefaultFullEntry("helpcenter");
+            return string.IsNullOrEmpty(url) ? null : url;
         }
     }
 
@@ -191,8 +189,8 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = _externalResources.GetValueOrDefault("support");
-            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
+            var url = externalResourceSettingsHelper.GetDefaultFullEntry("support");
+            return string.IsNullOrEmpty(url) ? null : url;
         }
     }
 
@@ -203,8 +201,8 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = _externalResources.GetValueOrDefault("forum");
-            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
+            var url = externalResourceSettingsHelper.GetDefaultFullEntry("forum");
+            return string.IsNullOrEmpty(url) ? null : url;
         }
     }
 
@@ -215,8 +213,8 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = _externalResources.GetValueOrDefault("videoguides");
-            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
+            var url = externalResourceSettingsHelper.GetDefaultFullEntry("videoguides");
+            return string.IsNullOrEmpty(url) ? null : url;
         }
     }
 
@@ -227,7 +225,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var email = _externalResources.GetValueOrDefault("paymentemail");
+            var email = externalResourceSettingsHelper.GetDefaultFullEntry("paymentemail", false);
             return string.IsNullOrEmpty(email) ? null : email;
         }
     }
@@ -240,8 +238,8 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         get
         {
             var type = configuration["license:type"] ?? "enterprise";
-            var url = _externalResources.GetValueOrDefault("site_buy" + type);
-            return string.IsNullOrEmpty(url) ? null : BaseCommonLinkUtility.GetRegionalUrl(url, null);
+            var url = externalResourceSettingsHelper.GetDefaultFullEntry("site_buy" + type);
+            return string.IsNullOrEmpty(url) ? null : url;
         }
     }
 }

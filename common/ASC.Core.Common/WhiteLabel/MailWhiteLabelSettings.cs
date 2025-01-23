@@ -116,13 +116,11 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 [Singleton]
 public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externalResourceSettingsHelper)
 {
-    private readonly Dictionary<string, string> _externalResources = externalResourceSettingsHelper.Values.GetValueOrDefault(externalResourceSettingsHelper.DefaultCultureName) ?? [];
-
     public string DefaultMailSupportUrl
     {
         get
         {
-            return BaseCommonLinkUtility.GetRegionalUrl(_externalResources.GetValueOrDefault("support"), null);
+            return externalResourceSettingsHelper.GetDefaultFullEntry("support");
         }
     }
 
@@ -130,7 +128,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return _externalResources.GetValueOrDefault("supportemail");
+            return externalResourceSettingsHelper.GetDefaultFullEntry("supportemail", false);
         }
     }
 
@@ -138,7 +136,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return _externalResources.GetValueOrDefault("paymentemail");
+            return externalResourceSettingsHelper.GetDefaultFullEntry("paymentemail", false);
         }
     }
 
@@ -146,7 +144,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return BaseCommonLinkUtility.GetRegionalUrl(_externalResources.GetValueOrDefault("site_demo-order"), null);
+            return externalResourceSettingsHelper.GetDefaultFullEntry("site_demo-order");
         }
     }
 
@@ -154,7 +152,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return BaseCommonLinkUtility.GetRegionalUrl(_externalResources.GetValueOrDefault("site"), null);
+            return externalResourceSettingsHelper.GetDefaultFullEntry("site");
         }
     }
 
@@ -162,7 +160,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return BaseCommonLinkUtility.GetRegionalUrl(_externalResources.GetValueOrDefault("forum"), null);
+            return externalResourceSettingsHelper.GetDefaultFullEntry("forum");
         }
     }
 }

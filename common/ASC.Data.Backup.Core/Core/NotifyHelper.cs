@@ -37,7 +37,7 @@ public class NotifyHelper(UserManager userManager,
     TenantManager tenantManager,
     AuthManager authManager,
     WorkContext workContext,
-    ExternalResourceSettings externalResourceSettings,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
     CommonLinkUtility commonLinkUtility,
     TenantLogoManager tenantLogoManager,
     IUrlShortener urlShortener,
@@ -74,14 +74,16 @@ public class NotifyHelper(UserManager userManager,
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
 
-        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", user.GetCulture());
+        var culture = user.GetCulture();
+
+        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
 
         await client.SendNoticeToAsync(
             Actions.BackupCreated,
             user,
             StudioNotifyService.EMailSenderName,
             new TagValue(Tags.OwnerName, user.DisplayUserName(displayUserSettingsHelper)),
-            new TagValue("URL1", externalResourceSettings.Get("helpcenter_docspace-settings_creatingbackup")),
+            new TagValue("URL1", externalResourceSettingsHelper.GetFullEntry("helpcenter_docspace-settings_creatingbackup", culture)),
             TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
     }
 

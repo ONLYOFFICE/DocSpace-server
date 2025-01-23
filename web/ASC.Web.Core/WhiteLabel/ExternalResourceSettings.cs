@@ -29,16 +29,16 @@ namespace ASC.Web.Core.WhiteLabel;
 [Scope]
 public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
 {
-    public Dictionary<string, string> GetDictionary(CultureInfo culture = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
+    public Dictionary<string, string> GetEntries(CultureInfo culture = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
     {
-        if (!helper.Values.TryGetValue(helper.DefaultCultureName, out var defaultDictionary))
+        if (!helper.CultureSpecificEntries.TryGetValue(helper.DefaultCultureName, out var defaultDictionary))
         {
             return null;
         }
 
         culture = culture ?? CultureInfo.CurrentCulture;
 
-        if (helper.Values.TryGetValue(culture.Name, out var specificDictionary))
+        if (helper.CultureSpecificEntries.TryGetValue(culture.Name, out var specificDictionary))
         {
             foreach (var item in specificDictionary)
             {
@@ -51,19 +51,9 @@ public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
             .ToDictionary(x => x.Key, x => BaseCommonLinkUtility.GetRegionalUrl(x.Value, culture.TwoLetterISOLanguageName));
     }
 
-    public string Get(string key, CultureInfo culture = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
+    public string GetFullEntry(string key, CultureInfo culture = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
     {
-        if (!CheckEnabled(key, whiteLabelSettings))
-        {
-            return null;
-        }
-
-        culture = culture ?? CultureInfo.CurrentCulture;
-
-        var result = helper.Values.GetValueOrDefault(culture.Name)?.GetValueOrDefault(key)
-            ?? helper.Values.GetValueOrDefault(helper.DefaultCultureName)?.GetValueOrDefault(key);
-
-        return BaseCommonLinkUtility.GetRegionalUrl(result, culture.TwoLetterISOLanguageName);
+        return CheckEnabled(key, whiteLabelSettings) ? helper.GetFullEntry(key, culture) : null;
     }
 
     private static bool CheckEnabled(string key, AdditionalWhiteLabelSettings whiteLabelSettings)

@@ -38,7 +38,7 @@ public class StudioNotifyService(
     TenantManager tenantManager,
     CoreBaseSettings coreBaseSettings,
     CommonLinkUtility commonLinkUtility,
-    ExternalResourceSettings externalResourceSettings,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserInvitationLimitHelper userInvitationLimitHelper,
     SettingsManager settingsManager,
@@ -377,7 +377,7 @@ public class StudioNotifyService(
         var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
-        var url1 = externalResourceSettings.Get("helpcenter_docspace-index");
+        var url1 = externalResourceSettingsHelper.GetFullEntry("helpcenter_docspace-index", culture);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
@@ -434,7 +434,7 @@ public class StudioNotifyService(
         var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
-        var url1 = externalResourceSettings.Get("helpcenter_docspace-index");
+        var url1 = externalResourceSettingsHelper.GetFullEntry("helpcenter_docspace-index", culture);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
@@ -726,7 +726,7 @@ public class StudioNotifyService(
                 [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, url),
                 TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
-                new TagValue("URL1", externalResourceSettings.Get("legalterms")),
+                new TagValue("URL1", externalResourceSettingsHelper.GetFullEntry("legalterms", culture)),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("docspace_deactivated.gif")),
                 new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
     }
