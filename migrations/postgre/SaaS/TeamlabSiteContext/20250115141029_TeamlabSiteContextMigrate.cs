@@ -18,7 +18,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => x.tenant_alias);
+                    table.PrimaryKey("PK_tenants_cache", x => x.tenant_alias);
                 });
         }
 

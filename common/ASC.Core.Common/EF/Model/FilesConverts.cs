@@ -670,13 +670,11 @@ public static class FilesConvertsExtension
 
             entity.Property(e => e.Input)
                 .HasColumnName("input")
-                .HasColumnType("varchar")
-                .UseCollation("pg_catalog.default");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Output)
                 .HasColumnName("output")
-                .HasColumnType("varchar")
-                .UseCollation("pg_catalog.default");
+                .HasColumnType("varchar");
         });
     }
 }

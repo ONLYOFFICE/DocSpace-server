@@ -99,7 +99,7 @@ public static class DbUserExtension
                 ActivationStatus = 0,
                 WorkFromDate = new DateTime(2021, 3, 9, 9, 52, 55, 764, DateTimeKind.Utc).AddTicks(9157),
                 LastModified = new DateTime(2021, 3, 9, 9, 52, 55, 765, DateTimeKind.Utc).AddTicks(1420),
-                CreateDate = new DateTime(2022, 7, 8)
+                CreateDate = new DateTime(2022, 7, 8, 0, 0, 0, DateTimeKind.Utc)
             });
 
         return modelBuilder;
@@ -325,11 +325,11 @@ public static class DbUserExtension
 
             entity.Property(e => e.CreateDate)
                 .HasColumnName("create_date")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Removed)
                 .HasColumnName("removed")
@@ -343,7 +343,7 @@ public static class DbUserExtension
 
             entity.Property(e => e.BirthDate)
                 .HasColumnName("birth_date")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Notes)
                 .HasColumnName("notes")

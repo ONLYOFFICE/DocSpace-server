@@ -221,7 +221,7 @@ public static class DbFilesThirdpartyAccountExtension
 
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
-                .HasColumnType("timestamp")
+                .HasColumnType("timestamptz")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
         

@@ -57,7 +57,7 @@ public static class UserSecurityExtension
                 TenantId = 1,
                 UserId = Guid.Parse("66faa6e4-f133-11ea-b126-00ffeec8b4ef"),
                 PwdHash = "jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=",
-                LastModified = new DateTime(2022, 7, 8)
+                LastModified = new DateTime(2022, 7, 8, 0, 0, 0, DateTimeKind.Utc)
             });
 
         return modelBuilder;
@@ -131,7 +131,7 @@ public static class UserSecurityExtension
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("lastmodified")
-                .HasColumnType("timestamp")
+                .HasColumnType("timestamptz")
                 .IsRequired(false); // LastModified can be null
         });
     }

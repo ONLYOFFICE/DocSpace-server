@@ -158,7 +158,7 @@ public static class BackupScheduleExtension
             entity.Property(e => e.LastBackupTime)
                 .IsRequired()
                 .HasColumnName("last_backup_time")
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.StorageParams)
                 .HasColumnName("storage_params")

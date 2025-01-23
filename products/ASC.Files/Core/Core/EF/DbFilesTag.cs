@@ -101,8 +101,7 @@ public static class DbFilesTagExtension
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
-                .HasColumnType("varchar")
-                .UseCollation("pg_catalog.default");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Owner)
                 .IsRequired()

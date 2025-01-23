@@ -101,7 +101,7 @@ public static class InstanceRegistrationExtension
 
             entity.Property(e => e.LastUpdated)
                   .HasColumnName("last_updated")
-                  .HasColumnType("timestamp");
+                  .HasColumnType("timestamptz");
         });
     }
 }

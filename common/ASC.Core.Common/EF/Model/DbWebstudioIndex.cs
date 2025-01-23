@@ -84,7 +84,7 @@ public static class DbWebstudioIndexExtension
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
         });
         
     }

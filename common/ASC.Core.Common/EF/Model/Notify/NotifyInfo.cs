@@ -100,7 +100,7 @@ public static class NotifyInfoExtension
 
             entity.Property(e => e.ModifyDate)
                 .HasColumnName("modify_date")
-                .HasColumnType("timestamp without time zone"); // Typical timestamp configuration for PostgreSQL
+                .HasColumnType("timestamptz"); // Typical timestamp configuration for PostgreSQL
 
             entity.Property(e => e.Priority)
                 .HasColumnName("priority")

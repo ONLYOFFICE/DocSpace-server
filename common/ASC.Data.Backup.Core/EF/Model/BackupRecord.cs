@@ -215,11 +215,11 @@ public static class BackupRecordExtension
             entity.Property(e => e.CreatedOn)
                 .IsRequired()
                 .HasColumnName("created_on")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.ExpiresOn)
                 .HasColumnName("expires_on")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamptz")
                 .HasDefaultValueSql("'0001-01-01 00:00:00'");
 
             entity.Property(e => e.StorageParams)

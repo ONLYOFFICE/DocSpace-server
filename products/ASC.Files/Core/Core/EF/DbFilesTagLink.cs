@@ -133,7 +133,7 @@ public static class DbFilesTagLinkExtension
 
             entity.Property(e => e.CreateOn)
                 .HasColumnName("create_on")
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Count)
                 .HasColumnName("tag_count")

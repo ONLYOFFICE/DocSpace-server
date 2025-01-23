@@ -163,7 +163,7 @@ public static class NotifyQueueExtension
 
             entity.Property(e => e.CreationDate)
                 .HasColumnName("creation_date")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.HasIndex(e => e.CreationDate)
                 .HasDatabaseName("idx_creation_date");

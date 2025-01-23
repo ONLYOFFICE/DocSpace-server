@@ -63,11 +63,11 @@ public static class IdentityShedlockExtension
                 .HasColumnName("name");
 
             entity.Property(e => e.LockUntil)
-                .HasColumnType("timestamp without time zone") // PostgreSQL specific timestamp type
+                .HasColumnType("timestamptz") // PostgreSQL specific timestamp type
                 .HasColumnName("lock_until");
 
             entity.Property(e => e.LockedAt)
-                .HasColumnType("timestamp without time zone") // PostgreSQL specific timestamp type
+                .HasColumnType("timestamptz") // PostgreSQL specific timestamp type
                 .HasColumnName("locked_at");
 
             entity.Property(e => e.LockedBy)

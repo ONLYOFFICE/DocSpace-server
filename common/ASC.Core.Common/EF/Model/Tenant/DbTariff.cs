@@ -110,11 +110,11 @@ public static class DbTariffExtension
 
             entity.Property(e => e.CreateOn)
                 .HasColumnName("create_on")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Stamp)
                 .HasColumnName("stamp")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.CustomerId)
                 .IsRequired()

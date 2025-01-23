@@ -189,7 +189,7 @@ public static class DbTenantExtension
                 Name = "Web Office",
                 CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
                 OwnerId = Guid.Parse("66faa6e4-f133-11ea-b126-00ffeec8b4ef"),
-                LastModified = new DateTime(2022, 7, 8)
+                LastModified = new DateTime(2022, 7, 8, 0, 0, 0, DateTimeKind.Utc),
             }
             )
             .HasData(
@@ -200,7 +200,7 @@ public static class DbTenantExtension
                 Name = "Web Office",
                 CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
                 OwnerId = Guid.Parse("00000000-0000-0000-0000-000000000000"),
-                LastModified = new DateTime(2022, 7, 8),
+                LastModified = new DateTime(2022, 7, 8, 0, 0, 0, DateTimeKind.Utc),
                 Status = TenantStatus.Suspended
             });
 
@@ -364,7 +364,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.CreationDateTime)
                 .HasColumnName("creationdatetime")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Industry)
                 .HasColumnName("industry")
@@ -379,7 +379,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.MappedDomain)
                 .HasColumnName("mappeddomain")
@@ -406,7 +406,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.StatusChanged)
                 .HasColumnName("statuschanged")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.TimeZone)
                 .HasColumnName("timezone")
@@ -426,7 +426,7 @@ public static class DbTenantExtension
 
             entity.Property(e => e.Version_Changed)
                 .HasColumnName("version_changed")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Ignore(c => c.StatusChangedHack);
             entity.Ignore(c => c.VersionChanged);

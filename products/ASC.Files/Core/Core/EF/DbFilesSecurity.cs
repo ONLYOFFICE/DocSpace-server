@@ -138,8 +138,7 @@ public static class DbFilesSecurityExtension
 
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")
-                .HasColumnType("character varying(50)")
-                .UseCollation("pg_catalog.default");
+                .HasColumnType("character varying(50)");
 
             entity.Property(e => e.EntryType).HasColumnName("entry_type");
 
@@ -156,7 +155,7 @@ public static class DbFilesSecurityExtension
 
             entity.Property(e => e.TimeStamp)
                 .HasColumnName("timestamp")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.SubjectType).HasColumnName("subject_type");
 

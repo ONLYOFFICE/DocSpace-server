@@ -617,7 +617,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("categoryid");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("last_modified");
 
                     b.Property<string>("Name")
@@ -802,7 +802,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("0");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestampz")
                         .HasColumnName("last_modified");
 
                     b.Property<string>("Tag")
@@ -1122,7 +1122,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("comment");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("create_on");
 
                     b.Property<string>("CustomerId")
@@ -1132,7 +1132,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("customer_id");
 
                     b.Property<DateTime>("Stamp")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("stamp");
 
                     b.Property<int>("TenantId")
@@ -1277,7 +1277,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("id");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("last_modified");
 
                     b.Property<byte[]>("Value")
@@ -1295,21 +1295,21 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         {
                             TenantId = -1,
                             Id = "CompanyWhiteLabelSettings",
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Value = new byte[] { 245, 71, 4, 138, 72, 101, 23, 21, 135, 217, 206, 188, 138, 73, 108, 96, 29, 150, 3, 31, 44, 28, 62, 145, 96, 53, 57, 66, 238, 118, 93, 172, 211, 22, 244, 181, 244, 40, 146, 67, 111, 196, 162, 27, 154, 109, 248, 255, 181, 17, 253, 127, 42, 65, 19, 90, 26, 206, 203, 145, 159, 159, 243, 105, 24, 71, 188, 165, 53, 85, 57, 37, 186, 251, 57, 96, 18, 162, 218, 80, 0, 101, 250, 100, 66, 97, 24, 51, 240, 215, 216, 169, 105, 100, 15, 253, 29, 83, 182, 236, 203, 53, 68, 251, 2, 150, 149, 148, 58, 136, 84, 37, 151, 82, 92, 227, 30, 52, 111, 40, 154, 155, 7, 126, 149, 100, 169, 87, 10, 129, 228, 138, 177, 101, 77, 67, 177, 216, 189, 201, 1, 213, 136, 216, 107, 198, 253, 221, 106, 255, 198, 17, 68, 14, 110, 90, 174, 182, 68, 222, 188, 77, 157, 19, 26, 68, 86, 97, 15, 81, 24, 171, 214, 114, 191, 175, 56, 56, 48, 52, 125, 82, 253, 113, 71, 41, 201, 5, 8, 118, 162, 191, 99, 196, 48, 198, 223, 79, 204, 174, 31, 97, 236, 20, 213, 218, 85, 34, 16, 74, 196, 209, 235, 14, 71, 209, 32, 131, 195, 84, 11, 66, 74, 19, 115, 255, 99, 69, 235, 210, 204, 15, 13, 4, 143, 127, 152, 125, 212, 91 }
                         },
                         new
                         {
                             TenantId = -1,
                             Id = "FullTextSearchSettings",
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Value = new byte[] { 8, 120, 207, 5, 153, 181, 23, 202, 162, 211, 218, 237, 157, 6, 76, 62, 220, 238, 175, 67, 31, 53, 166, 246, 66, 220, 173, 160, 72, 23, 227, 81, 50, 39, 187, 177, 222, 110, 43, 171, 235, 158, 16, 119, 178, 207, 49, 140, 72, 152, 20, 84, 94, 135, 117, 1, 246, 51, 251, 190, 148, 2, 44, 252, 221, 2, 91, 83, 149, 151, 58, 245, 16, 148, 52, 8, 187, 86, 150, 46, 227, 93, 163, 95, 47, 131, 116, 207, 95, 209, 38, 149, 53, 148, 73, 215, 206, 251, 194, 199, 189, 17, 42, 229, 135, 82, 23, 154, 162, 165, 158, 94, 23, 128, 30, 88, 12, 204, 96, 250, 236, 142, 189, 211, 214, 18, 196, 136, 102, 102, 217, 109, 108, 240, 96, 96, 94, 100, 201, 10, 31, 170, 128, 192 }
                         },
                         new
                         {
                             TenantId = -1,
                             Id = "SmtpSettings",
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Value = new byte[] { 240, 82, 224, 144, 161, 163, 117, 13, 173, 205, 78, 153, 97, 218, 4, 170, 81, 239, 1, 151, 226, 192, 98, 60, 241, 44, 88, 56, 191, 164, 10, 155, 72, 186, 239, 203, 227, 113, 88, 119, 49, 215, 227, 220, 158, 124, 96, 9, 116, 47, 158, 65, 93, 86, 219, 15, 10, 224, 142, 50, 248, 144, 75, 44, 68, 28, 198, 87, 198, 69, 67, 234, 238, 38, 32, 68, 162, 139, 67, 53, 220, 176, 240, 196, 233, 64, 29, 137, 31, 160, 99, 105, 249, 132, 202, 45, 71, 92, 134, 194, 55, 145, 121, 97, 197, 130, 119, 105, 131, 21, 133, 35, 10, 102, 172, 119, 135, 230, 251, 86, 253, 62, 55, 56, 146, 103, 164, 106 }
                         });
                 });
@@ -1430,7 +1430,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("true");
 
                     b.Property<DateTime>("CreationDateTime")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("creationdatetime");
 
                     b.Property<int>("Industry")
@@ -1448,7 +1448,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("'en-US'");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("last_modified");
 
                     b.Property<string>("MappedDomain")
@@ -1478,7 +1478,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("0");
 
                     b.Property<DateTime?>("StatusChanged")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("statuschanged");
 
                     b.Property<string>("TimeZone")
@@ -1504,7 +1504,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("2");
 
                     b.Property<DateTime?>("Version_Changed")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("version_changed");
 
                     b.HasKey("Id");
@@ -1532,7 +1532,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                             Calls = false,
                             CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
                             Industry = 0,
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Web Office",
                             OwnerId = new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"),
                             Status = 0,
@@ -1546,7 +1546,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                             Calls = false,
                             CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
                             Industry = 0,
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Web Office",
                             OwnerId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Status = 1,
@@ -1648,7 +1648,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("index_name");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("last_modified");
 
                     b.HasKey("IndexName")
@@ -1699,14 +1699,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("Input")
                         .HasMaxLength(50)
                         .HasColumnType("varchar")
-                        .HasColumnName("input")
-                        .UseCollation("pg_catalog.default");
+                        .HasColumnName("input");
 
                     b.Property<string>("Output")
                         .HasMaxLength(50)
                         .HasColumnType("varchar")
-                        .HasColumnName("output")
-                        .UseCollation("pg_catalog.default");
+                        .HasColumnName("output");
 
                     b.HasKey("Input", "Output");
 
@@ -4412,11 +4410,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("app_type");
 
                     b.Property<DateTime?>("LastSign")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("last_sign");
 
                     b.Property<DateTime>("RegisteredOn")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("registered_on");
 
                     b.HasKey("UserEmail", "AppType")
@@ -4440,7 +4438,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("attempts");
 
                     b.Property<DateTime>("ModifyDate")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("modify_date");
 
                     b.Property<int>("Priority")
@@ -4491,7 +4489,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("content_type");
 
                     b.Property<DateTime>("CreationDate")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("creation_date");
 
                     b.Property<string>("Reciever")
@@ -4878,7 +4876,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("activation_status");
 
                     b.Property<DateTime?>("BirthDate")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("birth_date");
 
                     b.Property<string>("Contacts")
@@ -4887,7 +4885,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("contacts");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("create_date");
 
                     b.Property<Guid?>("CreatedBy")
@@ -4909,7 +4907,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("first_name");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("last_modified");
 
                     b.Property<string>("LastName")
@@ -4995,7 +4993,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         {
                             Id = new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"),
                             ActivationStatus = 0,
-                            CreateDate = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreateDate = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "",
                             FirstName = "Administrator",
                             LastModified = new DateTime(2021, 3, 9, 9, 52, 55, 765, DateTimeKind.Utc).AddTicks(1420),
@@ -5044,7 +5042,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("ref_type");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("last_modified");
 
                     b.Property<bool>("Removed")
@@ -5068,7 +5066,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                             Userid = new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"),
                             UserGroupId = new Guid("cd84e66b-b803-40fc-99f9-b2969a54a1de"),
                             RefType = 0,
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Removed = false
                         });
                 });
@@ -5106,7 +5104,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("userid");
 
                     b.Property<DateTime?>("LastModified")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("lastmodified");
 
                     b.Property<string>("PwdHash")
@@ -5133,7 +5131,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         new
                         {
                             UserId = new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"),
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             PwdHash = "jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=",
                             TenantId = 1
                         });
@@ -5151,7 +5149,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("is_active");
 
                     b.Property<DateTime?>("LastUpdated")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("last_updated");
 
                     b.Property<string>("WorkerTypeName")
@@ -5177,12 +5175,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("created_on");
 
                     b.Property<DateTime>("ExpiresOn")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("expires_on")
                         .HasDefaultValueSql("'0001-01-01 00:00:00'");
 
@@ -5269,7 +5267,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("dump");
 
                     b.Property<DateTime>("LastBackupTime")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("last_backup_time");
 
                     b.Property<string>("StorageBasePath")
@@ -5308,7 +5306,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("create_on");
 
                     b.Property<string>("EventTypeName")
@@ -5386,7 +5384,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("create_on");
 
                     b.Property<bool>("CurrentVersion")
@@ -5418,7 +5416,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("modified_on");
 
                     b.Property<int>("ParentId")
@@ -5584,8 +5582,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("EntryId")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
-                        .HasColumnName("entry_id")
-                        .UseCollation("pg_catalog.default");
+                        .HasColumnName("entry_id");
 
                     b.Property<int>("EntryType")
                         .HasColumnType("integer")
@@ -5611,9 +5608,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("subject_type");
 
-                    b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("timestamp");
+                    b.Property<DateTime>("timestamptz")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("timestamptz");
 
                     b.HasKey("TenantId", "EntryId", "EntryType", "Subject")
                         .HasName("files_security_pkey");
@@ -5639,8 +5636,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar")
-                        .HasColumnName("name")
-                        .UseCollation("pg_catalog.default");
+                        .HasColumnName("name");
 
                     b.Property<Guid>("Owner")
                         .HasColumnType("uuid")
@@ -5694,7 +5690,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime?>("CreateOn")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("create_on");
 
                     b.HasKey("TenantId", "TagId", "EntryId", "EntryType")
@@ -5723,7 +5719,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("color");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("create_on");
 
                     b.Property<string>("FolderId")
@@ -5740,7 +5736,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.Property<DateTime>("ModifiedOn")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("modified_on")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
@@ -5812,7 +5808,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("app");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("modified_on");
 
                     b.Property<int>("TenantId")
@@ -5875,7 +5871,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("create_by");
 
                     b.Property<DateTime>("CreateOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("create_on");
 
                     b.Property<int>("FilesCount")
@@ -5901,7 +5897,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("modified_on");
 
                     b.Property<int>("ParentId")
@@ -6045,7 +6041,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("browser");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("date");
 
                     b.Property<string>("DescriptionRaw")
@@ -6115,7 +6111,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("browser");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("date");
 
                     b.Property<string>("DescriptionRaw")
@@ -6169,13 +6165,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("AccessTokenExpiresAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamptz");
 
                     b.Property<string>("AccessTokenHash")
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("AccessTokenIssuedAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamptz");
 
                     b.Property<string>("AccessTokenMetadata")
                         .HasColumnType("jsonb");
@@ -6193,10 +6189,10 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("jsonb");
 
                     b.Property<DateTime?>("AuthorizationCodeExpiresAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamptz");
 
                     b.Property<DateTime?>("AuthorizationCodeIssuedAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamptz");
 
                     b.Property<string>("AuthorizationCodeMetadata")
                         .HasColumnType("jsonb");
@@ -6217,20 +6213,20 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamptz");
 
                     b.Property<string>("PrincipalId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("RefreshTokenExpiresAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamptz");
 
                     b.Property<string>("RefreshTokenHash")
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("RefreshTokenIssuedAt")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamptz");
 
                     b.Property<string>("RefreshTokenMetadata")
                         .HasColumnType("jsonb");
@@ -6616,11 +6612,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("name");
 
                     b.Property<DateTime>("LockUntil")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("lock_until");
 
                     b.Property<DateTime>("LockedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("locked_at");
 
                     b.Property<string>("LockedBy")

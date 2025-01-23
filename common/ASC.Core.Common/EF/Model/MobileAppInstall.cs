@@ -103,13 +103,13 @@ public static class MobileAppInstallExtension
             // Configure the RegisteredOn property
             entity.Property(e => e.RegisteredOn)
                 .HasColumnName("registered_on")
-                .HasColumnType("timestamp") // Use timestamp for date-time in PostgreSQL
+                .HasColumnType("timestamptz") // Use timestamp for date-time in PostgreSQL
                 .IsRequired(); // Ensure it is not null
 
             // Configure the LastSign property
             entity.Property(e => e.LastSign)
                 .HasColumnName("last_sign")
-                .HasColumnType("timestamp") // Optional date-time column
+                .HasColumnType("timestamptz") // Optional date-time column
                 .IsRequired(false) // Not required (nullable)
                 .HasDefaultValue(null); // Default value is NULL
         });

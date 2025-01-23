@@ -158,7 +158,7 @@ public static class LoginEventsExtension
 
             entity.Property(e => e.Date)
                 .HasColumnName("date")
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.DescriptionRaw)
                 .HasColumnName("description")

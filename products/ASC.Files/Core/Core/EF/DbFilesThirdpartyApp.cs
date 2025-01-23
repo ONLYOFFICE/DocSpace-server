@@ -125,7 +125,7 @@ public static class DbFilesThirdpartyAppExtension
             // Map the ModifiedOn property
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
-                .HasColumnType("timestamp without time zone"); // TIMESTAMP type in PostgreSQL
+                .HasColumnType("timestamptz"); // TIMESTAMP type in PostgreSQL
         });
     }
 }

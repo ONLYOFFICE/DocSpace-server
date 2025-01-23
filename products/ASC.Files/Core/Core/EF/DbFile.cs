@@ -294,7 +294,7 @@ public static class DbFileExtension
 
             entity.Property(e => e.CreateOn)
                 .HasColumnName("create_on")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.CurrentVersion)
                 .HasColumnName("current_version")
@@ -329,7 +329,7 @@ public static class DbFileExtension
 
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Title)
                 .IsRequired()

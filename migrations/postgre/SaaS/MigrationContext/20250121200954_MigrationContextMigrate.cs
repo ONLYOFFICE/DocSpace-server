@@ -61,8 +61,8 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 name: "files_converts",
                 columns: table => new
                 {
-                    input = table.Column<string>(type: "varchar", maxLength: 50, nullable: false, collation: "pg_catalog.default"),
-                    output = table.Column<string>(type: "varchar", maxLength: 50, nullable: false, collation: "pg_catalog.default")
+                    input = table.Column<string>(type: "varchar", maxLength: 50, nullable: false),
+                    output = table.Column<string>(type: "varchar", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -74,7 +74,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 columns: table => new
                 {
                     instance_registration_id = table.Column<string>(type: "varchar", maxLength: 255, nullable: false),
-                    last_updated = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    last_updated = table.Column<DateTime>(type: "timestamptz", nullable: true),
                     worker_type_name = table.Column<string>(type: "varchar", maxLength: 255, nullable: false),
                     is_active = table.Column<bool>(type: "boolean", nullable: false)
                 },
@@ -95,7 +95,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => x.id);
+                    table.PrimaryKey("PK_identity_certs", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -116,8 +116,8 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 columns: table => new
                 {
                     name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    lock_until = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    locked_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    lock_until = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    locked_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     locked_by = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
                 },
                 constraints: table =>
@@ -131,8 +131,8 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     user_email = table.Column<string>(type: "varchar", maxLength: 255, nullable: false),
                     app_type = table.Column<int>(type: "integer", nullable: false),
-                    registered_on = table.Column<DateTime>(type: "timestamp", nullable: false),
-                    last_sign = table.Column<DateTime>(type: "timestamp", nullable: true)
+                    registered_on = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    last_sign = table.Column<DateTime>(type: "timestamptz", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -147,7 +147,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     state = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     attempts = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
-                    modify_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    modify_date = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     priority = table.Column<int>(type: "integer", nullable: false, defaultValue: 0)
                 },
                 constraints: table =>
@@ -206,18 +206,18 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     alias = table.Column<string>(type: "varchar", maxLength: 100, nullable: false),
                     mappeddomain = table.Column<string>(type: "varchar", maxLength: 100, nullable: true),
                     version = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "2"),
-                    version_changed = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    version_changed = table.Column<DateTime>(type: "timestamptz", nullable: true),
                     language = table.Column<string>(type: "char(10)", maxLength: 10, nullable: false, defaultValueSql: "'en-US'"),
                     timezone = table.Column<string>(type: "varchar", maxLength: 50, nullable: true),
                     trusteddomains = table.Column<string>(type: "varchar", maxLength: 1024, nullable: true),
-                    trusteddomainsenabled = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "false"),
+                    trusteddomainsenabled = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "0"),
                     status = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "0"),
-                    statuschanged = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    creationdatetime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    statuschanged = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    creationdatetime = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     owner_id = table.Column<Guid>(type: "uuid", nullable: true),
                     payment_id = table.Column<string>(type: "varchar", maxLength: 38, nullable: true),
                     industry = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "0"),
-                    last_modified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    last_modified = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     calls = table.Column<bool>(type: "boolean", nullable: false, defaultValueSql: "true")
                 },
                 constraints: table =>
@@ -259,7 +259,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 columns: table => new
                 {
                     index_name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    last_modified = table.Column<DateTime>(type: "timestamp", nullable: false)
+                    last_modified = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -278,7 +278,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     ip = table.Column<string>(type: "varchar", maxLength: 50, nullable: true),
                     browser = table.Column<string>(type: "varchar", maxLength: 200, nullable: true),
                     platform = table.Column<string>(type: "varchar", maxLength: 200, nullable: true),
-                    date = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    date = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     tenant_id = table.Column<int>(type: "integer", nullable: false),
                     user_id = table.Column<Guid>(type: "uuid", nullable: true),
                     page = table.Column<string>(type: "varchar", maxLength: 300, nullable: true),
@@ -307,14 +307,14 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     storage_type = table.Column<int>(type: "integer", nullable: false),
                     storage_base_path = table.Column<string>(type: "character varying", maxLength: 255, nullable: true, defaultValueSql: "NULL"),
                     storage_path = table.Column<string>(type: "character varying", maxLength: 255, nullable: false),
-                    created_on = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    expires_on = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "'0001-01-01 00:00:00'"),
+                    created_on = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    expires_on = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "'0001-01-01 00:00:00'"),
                     storage_params = table.Column<string>(type: "text", nullable: true, defaultValueSql: "NULL"),
                     removed = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => x.id);
+                    table.PrimaryKey("PK_backup_backup", x => x.id);
                     table.ForeignKey(
                         name: "FK_backup_backup_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
@@ -332,13 +332,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     backups_stored = table.Column<int>(type: "integer", nullable: false),
                     storage_type = table.Column<int>(type: "integer", nullable: false),
                     storage_base_path = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true),
-                    last_backup_time = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    last_backup_time = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     storage_params = table.Column<string>(type: "text", nullable: true),
                     dump = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => x.tenant_id);
+                    table.PrimaryKey("PK_backup_schedule", x => x.tenant_id);
                     table.ForeignKey(
                         name: "FK_backup_schedule_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
@@ -379,7 +379,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     parentid = table.Column<Guid>(type: "uuid", nullable: true),
                     sid = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: true),
                     removed = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    last_modified = table.Column<DateTime>(type: "timestamp", nullable: false)
+                    last_modified = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -399,7 +399,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     tenant = table.Column<int>(type: "integer", nullable: false),
                     id = table.Column<string>(type: "character varying", maxLength: 128, nullable: false),
                     value = table.Column<byte[]>(type: "bytea", nullable: false),
-                    last_modified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                    last_modified = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -501,7 +501,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     groupid = table.Column<Guid>(type: "uuid", nullable: false),
                     ref_type = table.Column<int>(type: "integer", nullable: false),
                     removed = table.Column<bool>(type: "boolean", nullable: false, defaultValueSql: "false"),
-                    last_modified = table.Column<DateTime>(type: "timestamp", nullable: false)
+                    last_modified = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -540,7 +540,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     userid = table.Column<Guid>(type: "uuid", nullable: false),
                     tenant = table.Column<int>(type: "integer", nullable: false),
                     pwdhash = table.Column<string>(type: "varchar", maxLength: 512, nullable: true),
-                    lastmodified = table.Column<DateTime>(type: "timestamp", nullable: true)
+                    lastmodified = table.Column<DateTime>(type: "timestamptz", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -561,7 +561,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     event_type_name = table.Column<string>(type: "varchar", maxLength: 255, nullable: false),
                     state = table.Column<int>(type: "integer", nullable: false),
                     times_sent = table.Column<int>(type: "integer", nullable: false),
-                    create_on = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    create_on = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     create_by = table.Column<Guid>(type: "uuid", nullable: false),
                     content = table.Column<string>(type: "text", nullable: false),
                     TransactionId = table.Column<string>(type: "text", nullable: true),
@@ -612,9 +612,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     file_status = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "0"),
                     category = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "0"),
                     create_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    create_on = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    create_on = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     modified_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    modified_on = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    modified_on = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     converted_type = table.Column<string>(type: "character varying", maxLength: 10, nullable: true),
                     comment = table.Column<string>(type: "character varying", maxLength: 255, nullable: true),
                     changes = table.Column<string>(type: "text", nullable: true),
@@ -643,9 +643,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     title = table.Column<string>(type: "character varying", maxLength: 400, nullable: false),
                     folder_type = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "0"),
                     create_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    create_on = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    create_on = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     modified_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    modified_on = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    modified_on = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     tenant_id = table.Column<int>(type: "integer", nullable: false),
                     foldersCount = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "0"),
                     filesCount = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "0"),
@@ -673,7 +673,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.source_id, x.linked_id });
+                    table.PrimaryKey("PK_files_link", x => new { x.tenant_id, x.source_id, x.linked_id });
                     table.ForeignKey(
                         name: "FK_files_link_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
@@ -694,7 +694,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("primary", x => new { x.tenant_id, x.entry_id, x.entry_type });
+                    table.PrimaryKey("PK_files_order", x => new { x.tenant_id, x.entry_id, x.entry_type });
                     table.ForeignKey(
                         name: "FK_files_order_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
@@ -727,13 +727,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 columns: table => new
                 {
                     tenant_id = table.Column<int>(type: "integer", nullable: false),
-                    entry_id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, collation: "pg_catalog.default"),
+                    entry_id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     entry_type = table.Column<int>(type: "integer", nullable: false),
                     subject = table.Column<Guid>(type: "uuid", nullable: false),
                     subject_type = table.Column<int>(type: "integer", nullable: false),
                     owner = table.Column<Guid>(type: "uuid", nullable: false),
                     security = table.Column<int>(type: "integer", nullable: false),
-                    timestamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    timestamp = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     options = table.Column<FileShareOptions>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
@@ -754,7 +754,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     tenant_id = table.Column<int>(type: "integer", nullable: false),
-                    name = table.Column<string>(type: "varchar", maxLength: 255, nullable: false, collation: "pg_catalog.default"),
+                    name = table.Column<string>(type: "varchar", maxLength: 255, nullable: false),
                     owner = table.Column<Guid>(type: "uuid", nullable: false),
                     flag = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "0")
                 },
@@ -778,7 +778,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     entry_type = table.Column<int>(type: "integer", nullable: false),
                     entry_id = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: false),
                     create_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    create_on = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    create_on = table.Column<DateTime>(type: "timestamptz", nullable: true),
                     tag_count = table.Column<int>(type: "integer", nullable: false, defaultValue: 0)
                 },
                 constraints: table =>
@@ -806,14 +806,14 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     folder_type = table.Column<int>(type: "integer", nullable: false),
                     room_type = table.Column<int>(type: "integer", nullable: false),
-                    create_on = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    create_on = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     url = table.Column<string>(type: "text", nullable: true),
                     tenant_id = table.Column<int>(type: "integer", nullable: false),
                     folder_id = table.Column<string>(type: "text", nullable: true),
                     @private = table.Column<bool>(name: "private", type: "boolean", nullable: false),
                     has_logo = table.Column<bool>(type: "boolean", nullable: false),
                     color = table.Column<string>(type: "char(6)", maxLength: 6, nullable: true),
-                    modified_on = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                    modified_on = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
@@ -834,7 +834,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     app = table.Column<string>(type: "character varying (50)", maxLength: 50, nullable: false),
                     token = table.Column<string>(type: "text", nullable: true),
                     tenant_id = table.Column<int>(type: "integer", nullable: false),
-                    modified_on = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                    modified_on = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -935,7 +935,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     ip = table.Column<string>(type: "varchar", maxLength: 50, nullable: true),
                     browser = table.Column<string>(type: "varchar", maxLength: 200, nullable: true),
                     platform = table.Column<string>(type: "varchar", maxLength: 200, nullable: true),
-                    date = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    date = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     tenant_id = table.Column<int>(type: "integer", nullable: false),
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     page = table.Column<string>(type: "varchar", maxLength: 300, nullable: true),
@@ -966,7 +966,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     content = table.Column<string>(type: "text", nullable: true),
                     sender_type = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     reply_to = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
-                    creation_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    creation_date = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     attachments = table.Column<string>(type: "text", nullable: true),
                     auto_submitted = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
                 },
@@ -993,7 +993,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => x.id);
+                    table.PrimaryKey("PK_short_links", x => x.id);
                     table.ForeignKey(
                         name: "FK_short_links_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
@@ -1071,7 +1071,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     counter = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "0"),
                     tag = table.Column<string>(type: "varchar(1024)", maxLength: 1024, nullable: true),
-                    last_modified = table.Column<DateTime>(type: "timestamp", nullable: false)
+                    last_modified = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1091,10 +1091,10 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     tenant = table.Column<int>(type: "integer", nullable: false),
-                    stamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    stamp = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     customer_id = table.Column<string>(type: "varchar", maxLength: 255, nullable: false),
                     comment = table.Column<string>(type: "varchar", maxLength: 255, nullable: true),
-                    create_on = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                    create_on = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1137,7 +1137,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     first_name = table.Column<string>(type: "character varying", maxLength: 64, nullable: true),
                     last_name = table.Column<string>(type: "character varying", maxLength: 64, nullable: true),
                     sex = table.Column<bool>(type: "boolean", nullable: true),
-                    birth_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    birth_date = table.Column<DateTime>(type: "timestamptz", nullable: true),
                     status = table.Column<int>(type: "integer", nullable: false),
                     activation_status = table.Column<int>(type: "integer", nullable: false),
                     email = table.Column<string>(type: "character varying", maxLength: 255, nullable: true),
@@ -1154,8 +1154,8 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     SsoNameId = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
                     SsoSessionId = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
                     removed = table.Column<bool>(type: "boolean", nullable: false),
-                    create_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    last_modified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    create_date = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    last_modified = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     Spam = table.Column<bool>(type: "boolean", nullable: true)
                 },
@@ -1393,22 +1393,22 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     AuthorizedScopes = table.Column<string>(type: "text", nullable: true),
                     AuthorizationCodeValue = table.Column<string>(type: "text", nullable: true),
                     AuthorizationCodeMetadata = table.Column<string>(type: "jsonb", nullable: true),
-                    AuthorizationCodeIssuedAt = table.Column<DateTime>(type: "timestamp", nullable: true),
-                    AuthorizationCodeExpiresAt = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    AuthorizationCodeIssuedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    AuthorizationCodeExpiresAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
                     AccessTokenType = table.Column<string>(type: "text", nullable: true),
                     AccessTokenValue = table.Column<string>(type: "text", nullable: true),
                     AccessTokenHash = table.Column<string>(type: "text", nullable: true),
                     AccessTokenScopes = table.Column<string>(type: "text", nullable: true),
                     AccessTokenMetadata = table.Column<string>(type: "jsonb", nullable: true),
-                    AccessTokenIssuedAt = table.Column<DateTime>(type: "timestamp", nullable: true),
-                    AccessTokenExpiresAt = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    AccessTokenIssuedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    AccessTokenExpiresAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
                     RefreshTokenValue = table.Column<string>(type: "text", nullable: true),
                     RefreshTokenHash = table.Column<string>(type: "text", nullable: true),
                     RefreshTokenMetadata = table.Column<string>(type: "jsonb", nullable: true),
-                    RefreshTokenIssuedAt = table.Column<DateTime>(type: "timestamp", nullable: true),
-                    RefreshTokenExpiresAt = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    RefreshTokenIssuedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    RefreshTokenExpiresAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
                     IsInvalidated = table.Column<bool>(type: "boolean", nullable: true),
-                    ModifiedAt = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    ModifiedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
                     IdentityClientClientId = table.Column<string>(type: "character varying(255)", nullable: true)
                 },
                 constraints: table =>
@@ -2093,17 +2093,17 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
             migrationBuilder.InsertData(
                 table: "tenants_tenants",
                 columns: new[] { "id", "alias", "creationdatetime", "last_modified", "mappeddomain", "name", "owner_id", "payment_id", "status", "statuschanged", "timezone", "trusteddomains", "version_changed" },
-                values: new object[] { -1, "settings", new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Web Office", new Guid("00000000-0000-0000-0000-000000000000"), null, 1, null, null, null, null });
+                values: new object[] { -1, "settings", new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc), null, "Web Office", new Guid("00000000-0000-0000-0000-000000000000"), null, 1, null, null, null, null });
 
             migrationBuilder.InsertData(
                 table: "tenants_tenants",
                 columns: new[] { "id", "alias", "creationdatetime", "last_modified", "mappeddomain", "name", "owner_id", "payment_id", "statuschanged", "timezone", "trusteddomains", "version_changed" },
-                values: new object[] { 1, "localhost", new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Web Office", new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), null, null, null, null, null });
+                values: new object[] { 1, "localhost", new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc), null, "Web Office", new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), null, null, null, null, null });
 
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "id", "activation_status", "birth_date", "contacts", "create_date", "CreatedBy", "culture_name", "email", "first_name", "last_modified", "last_name", "location", "mobile_phone", "mobile_phone_activation", "notes", "removed", "sex", "Sid", "Spam", "SsoNameId", "SsoSessionId", "status", "tenant_id", "TerminatedDate", "title", "username", "WorkFromDate" },
-                values: new object[] { new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), 0, null, null, new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "", "Administrator", new DateTime(2021, 3, 9, 9, 52, 55, 765, DateTimeKind.Utc).AddTicks(1420), "", null, null, 0, null, false, null, null, null, null, null, 1, 1, null, null, "administrator", new DateTime(2021, 3, 9, 9, 52, 55, 764, DateTimeKind.Utc).AddTicks(9157) });
+                values: new object[] { new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), 0, null, null, new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc), null, null, "", "Administrator", new DateTime(2021, 3, 9, 9, 52, 55, 765, DateTimeKind.Utc).AddTicks(1420), "", null, null, 0, null, false, null, null, null, null, null, 1, 1, null, null, "administrator", new DateTime(2021, 3, 9, 9, 52, 55, 764, DateTimeKind.Utc).AddTicks(9157) });
 
             migrationBuilder.InsertData(
                 table: "core_acl",
@@ -2186,9 +2186,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 columns: new[] { "id", "tenant", "last_modified", "value" },
                 values: new object[,]
                 {
-                    { "CompanyWhiteLabelSettings", -1, new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), new byte[] { 245, 71, 4, 138, 72, 101, 23, 21, 135, 217, 206, 188, 138, 73, 108, 96, 29, 150, 3, 31, 44, 28, 62, 145, 96, 53, 57, 66, 238, 118, 93, 172, 211, 22, 244, 181, 244, 40, 146, 67, 111, 196, 162, 27, 154, 109, 248, 255, 181, 17, 253, 127, 42, 65, 19, 90, 26, 206, 203, 145, 159, 159, 243, 105, 24, 71, 188, 165, 53, 85, 57, 37, 186, 251, 57, 96, 18, 162, 218, 80, 0, 101, 250, 100, 66, 97, 24, 51, 240, 215, 216, 169, 105, 100, 15, 253, 29, 83, 182, 236, 203, 53, 68, 251, 2, 150, 149, 148, 58, 136, 84, 37, 151, 82, 92, 227, 30, 52, 111, 40, 154, 155, 7, 126, 149, 100, 169, 87, 10, 129, 228, 138, 177, 101, 77, 67, 177, 216, 189, 201, 1, 213, 136, 216, 107, 198, 253, 221, 106, 255, 198, 17, 68, 14, 110, 90, 174, 182, 68, 222, 188, 77, 157, 19, 26, 68, 86, 97, 15, 81, 24, 171, 214, 114, 191, 175, 56, 56, 48, 52, 125, 82, 253, 113, 71, 41, 201, 5, 8, 118, 162, 191, 99, 196, 48, 198, 223, 79, 204, 174, 31, 97, 236, 20, 213, 218, 85, 34, 16, 74, 196, 209, 235, 14, 71, 209, 32, 131, 195, 84, 11, 66, 74, 19, 115, 255, 99, 69, 235, 210, 204, 15, 13, 4, 143, 127, 152, 125, 212, 91 } },
-                    { "FullTextSearchSettings", -1, new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), new byte[] { 8, 120, 207, 5, 153, 181, 23, 202, 162, 211, 218, 237, 157, 6, 76, 62, 220, 238, 175, 67, 31, 53, 166, 246, 66, 220, 173, 160, 72, 23, 227, 81, 50, 39, 187, 177, 222, 110, 43, 171, 235, 158, 16, 119, 178, 207, 49, 140, 72, 152, 20, 84, 94, 135, 117, 1, 246, 51, 251, 190, 148, 2, 44, 252, 221, 2, 91, 83, 149, 151, 58, 245, 16, 148, 52, 8, 187, 86, 150, 46, 227, 93, 163, 95, 47, 131, 116, 207, 95, 209, 38, 149, 53, 148, 73, 215, 206, 251, 194, 199, 189, 17, 42, 229, 135, 82, 23, 154, 162, 165, 158, 94, 23, 128, 30, 88, 12, 204, 96, 250, 236, 142, 189, 211, 214, 18, 196, 136, 102, 102, 217, 109, 108, 240, 96, 96, 94, 100, 201, 10, 31, 170, 128, 192 } },
-                    { "SmtpSettings", -1, new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), new byte[] { 240, 82, 224, 144, 161, 163, 117, 13, 173, 205, 78, 153, 97, 218, 4, 170, 81, 239, 1, 151, 226, 192, 98, 60, 241, 44, 88, 56, 191, 164, 10, 155, 72, 186, 239, 203, 227, 113, 88, 119, 49, 215, 227, 220, 158, 124, 96, 9, 116, 47, 158, 65, 93, 86, 219, 15, 10, 224, 142, 50, 248, 144, 75, 44, 68, 28, 198, 87, 198, 69, 67, 234, 238, 38, 32, 68, 162, 139, 67, 53, 220, 176, 240, 196, 233, 64, 29, 137, 31, 160, 99, 105, 249, 132, 202, 45, 71, 92, 134, 194, 55, 145, 121, 97, 197, 130, 119, 105, 131, 21, 133, 35, 10, 102, 172, 119, 135, 230, 251, 86, 253, 62, 55, 56, 146, 103, 164, 106 } }
+                    { "CompanyWhiteLabelSettings", -1, new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc), new byte[] { 245, 71, 4, 138, 72, 101, 23, 21, 135, 217, 206, 188, 138, 73, 108, 96, 29, 150, 3, 31, 44, 28, 62, 145, 96, 53, 57, 66, 238, 118, 93, 172, 211, 22, 244, 181, 244, 40, 146, 67, 111, 196, 162, 27, 154, 109, 248, 255, 181, 17, 253, 127, 42, 65, 19, 90, 26, 206, 203, 145, 159, 159, 243, 105, 24, 71, 188, 165, 53, 85, 57, 37, 186, 251, 57, 96, 18, 162, 218, 80, 0, 101, 250, 100, 66, 97, 24, 51, 240, 215, 216, 169, 105, 100, 15, 253, 29, 83, 182, 236, 203, 53, 68, 251, 2, 150, 149, 148, 58, 136, 84, 37, 151, 82, 92, 227, 30, 52, 111, 40, 154, 155, 7, 126, 149, 100, 169, 87, 10, 129, 228, 138, 177, 101, 77, 67, 177, 216, 189, 201, 1, 213, 136, 216, 107, 198, 253, 221, 106, 255, 198, 17, 68, 14, 110, 90, 174, 182, 68, 222, 188, 77, 157, 19, 26, 68, 86, 97, 15, 81, 24, 171, 214, 114, 191, 175, 56, 56, 48, 52, 125, 82, 253, 113, 71, 41, 201, 5, 8, 118, 162, 191, 99, 196, 48, 198, 223, 79, 204, 174, 31, 97, 236, 20, 213, 218, 85, 34, 16, 74, 196, 209, 235, 14, 71, 209, 32, 131, 195, 84, 11, 66, 74, 19, 115, 255, 99, 69, 235, 210, 204, 15, 13, 4, 143, 127, 152, 125, 212, 91 } },
+                    { "FullTextSearchSettings", -1, new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc), new byte[] { 8, 120, 207, 5, 153, 181, 23, 202, 162, 211, 218, 237, 157, 6, 76, 62, 220, 238, 175, 67, 31, 53, 166, 246, 66, 220, 173, 160, 72, 23, 227, 81, 50, 39, 187, 177, 222, 110, 43, 171, 235, 158, 16, 119, 178, 207, 49, 140, 72, 152, 20, 84, 94, 135, 117, 1, 246, 51, 251, 190, 148, 2, 44, 252, 221, 2, 91, 83, 149, 151, 58, 245, 16, 148, 52, 8, 187, 86, 150, 46, 227, 93, 163, 95, 47, 131, 116, 207, 95, 209, 38, 149, 53, 148, 73, 215, 206, 251, 194, 199, 189, 17, 42, 229, 135, 82, 23, 154, 162, 165, 158, 94, 23, 128, 30, 88, 12, 204, 96, 250, 236, 142, 189, 211, 214, 18, 196, 136, 102, 102, 217, 109, 108, 240, 96, 96, 94, 100, 201, 10, 31, 170, 128, 192 } },
+                    { "SmtpSettings", -1, new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc), new byte[] { 240, 82, 224, 144, 161, 163, 117, 13, 173, 205, 78, 153, 97, 218, 4, 170, 81, 239, 1, 151, 226, 192, 98, 60, 241, 44, 88, 56, 191, 164, 10, 155, 72, 186, 239, 203, 227, 113, 88, 119, 49, 215, 227, 220, 158, 124, 96, 9, 116, 47, 158, 65, 93, 86, 219, 15, 10, 224, 142, 50, 248, 144, 75, 44, 68, 28, 198, 87, 198, 69, 67, 234, 238, 38, 32, 68, 162, 139, 67, 53, 220, 176, 240, 196, 233, 64, 29, 137, 31, 160, 99, 105, 249, 132, 202, 45, 71, 92, 134, 194, 55, 145, 121, 97, 197, 130, 119, 105, 131, 21, 133, 35, 10, 102, 172, 119, 135, 230, 251, 86, 253, 62, 55, 56, 146, 103, 164, 106 } }
                 });
 
             migrationBuilder.InsertData(
@@ -2261,12 +2261,12 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
             migrationBuilder.InsertData(
                 table: "core_usergroup",
                 columns: new[] { "ref_type", "tenant", "groupid", "userid", "last_modified" },
-                values: new object[] { 0, 1, new Guid("cd84e66b-b803-40fc-99f9-b2969a54a1de"), new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified) });
+                values: new object[] { 0, 1, new Guid("cd84e66b-b803-40fc-99f9-b2969a54a1de"), new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc) });
 
             migrationBuilder.InsertData(
                 table: "core_usersecurity",
                 columns: new[] { "userid", "lastmodified", "pwdhash", "tenant" },
-                values: new object[] { new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), "jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=", 1 });
+                values: new object[] { new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc), "jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=", 1 });
 
             migrationBuilder.InsertData(
                 table: "webstudio_settings",
@@ -2374,7 +2374,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 columns: new[] { "tenant_id", "folder_id", "title" });
 
             migrationBuilder.CreateIndex(
-                name: "modified_on",
+                name: "IX_files_folder_modified_on",
                 table: "files_folder",
                 column: "modified_on");
 
@@ -2440,7 +2440,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 columns: new[] { "tenant_id", "entry_id", "entry_type" });
 
             migrationBuilder.CreateIndex(
-                name: "tenant_id",
+                name: "IX_files_thirdparty_account_tenant_id",
                 table: "files_thirdparty_account",
                 column: "tenant_id");
 
@@ -2577,7 +2577,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "tenant_id",
+                name: "IX_short_links_tenant_id",
                 table: "short_links",
                 column: "tenant_id");
 
@@ -2597,7 +2597,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 column: "last_modified");
 
             migrationBuilder.CreateIndex(
-                name: "tenant",
+                name: "IX_tenants_tariff_tenant",
                 table: "tenants_tariff",
                 column: "tenant");
 
@@ -2608,7 +2608,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "last_modified",
+                name: "IX_tenants_tenants_last_modified",
                 table: "tenants_tenants",
                 column: "last_modified");
 

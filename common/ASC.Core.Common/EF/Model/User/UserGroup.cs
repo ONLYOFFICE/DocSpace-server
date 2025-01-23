@@ -66,7 +66,7 @@ public static class DbUserGroupExtension
                 Userid = Guid.Parse("66faa6e4-f133-11ea-b126-00ffeec8b4ef"),
                 UserGroupId = Guid.Parse("cd84e66b-b803-40fc-99f9-b2969a54a1de"),
                 RefType = 0,
-                LastModified = new DateTime(2022, 7, 8)
+                LastModified = new DateTime(2022, 7, 8, 0, 0, 0, DateTimeKind.Utc)
             }
             );
 
@@ -143,7 +143,7 @@ public static class DbUserGroupExtension
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Removed)
                 .HasColumnName("removed")
