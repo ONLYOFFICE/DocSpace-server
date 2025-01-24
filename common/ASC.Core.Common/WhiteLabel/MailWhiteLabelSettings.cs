@@ -120,7 +120,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return externalResourceSettingsHelper.GetDefaultFullEntry("support");
+            return externalResourceSettingsHelper.Support.GetDefaultRegionalDomain();
         }
     }
 
@@ -128,7 +128,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return externalResourceSettingsHelper.GetDefaultFullEntry("supportemail", false);
+            return externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("supportemail");
         }
     }
 
@@ -136,7 +136,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return externalResourceSettingsHelper.GetDefaultFullEntry("paymentemail", false);
+            return externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
         }
     }
 
@@ -144,7 +144,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return externalResourceSettingsHelper.GetDefaultFullEntry("site_demo-order");
+            return externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("demoorder");
         }
     }
 
@@ -152,7 +152,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return externalResourceSettingsHelper.GetDefaultFullEntry("site");
+            return externalResourceSettingsHelper.Site.GetDefaultRegionalDomain();
         }
     }
 
@@ -160,7 +160,7 @@ public class MailWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externa
     {
         get
         {
-            return externalResourceSettingsHelper.GetDefaultFullEntry("forum");
+            return externalResourceSettingsHelper.Forum.GetDefaultRegionalDomain();
         }
     }
 }

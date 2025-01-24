@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024 ?? def ?? defaultExternalResource?.Domain,
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,17 +24,55 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.WhiteLabel;
+namespace ASC.Core.Common.WhiteLabel;
 
 [Singleton]
 public class ExternalResourceSettingsHelper(IConfiguration configuration)
 {
+    public ExternalResource Api = new(configuration.GetSection("externalresources:api").Get<Dictionary<string, CultureSpecificExternalResource>>());
+    public ExternalResource Common = new(configuration.GetSection("externalresources:common").Get<Dictionary<string, CultureSpecificExternalResource>>());
+    public ExternalResource Forum = new(configuration.GetSection("externalresources:forum").Get<Dictionary<string, CultureSpecificExternalResource>>());
+    public ExternalResource Helpcenter = new(configuration.GetSection("externalresources:helpcenter").Get<Dictionary<string, CultureSpecificExternalResource>>());
+    public ExternalResource Integrations = new(configuration.GetSection("externalresources:integrations").Get<Dictionary<string, CultureSpecificExternalResource>>());
+    public ExternalResource Site = new(configuration.GetSection("externalresources:site").Get<Dictionary<string, CultureSpecificExternalResource>>());
+    public ExternalResource SocialNetworks = new(configuration.GetSection("externalresources:socialnetworks").Get<Dictionary<string, CultureSpecificExternalResource>>());
+    public ExternalResource Support = new(configuration.GetSection("externalresources:support").Get<Dictionary<string, CultureSpecificExternalResource>>());
+    public ExternalResource Videoguides = new(configuration.GetSection("externalresources:videoguides").Get<Dictionary<string, CultureSpecificExternalResource>>());
+}
+
+public class ExternalResource(Dictionary<string, CultureSpecificExternalResource> cultureSpecificExternalResources)
+{
     public readonly string DefaultCultureName = "default";
 
-    public Dictionary<string, Dictionary<string, string>> CultureSpecificEntries =
-        configuration.GetSection("externalresources").Get<Dictionary<string, Dictionary<string, string>>>();
+    public string GetDomain(string cultureName)
+    {
+        return cultureSpecificExternalResources.GetValueOrDefault(cultureName)?.Domain ??
+               cultureSpecificExternalResources.GetValueOrDefault(DefaultCultureName)?.Domain;
+    }
 
-    public string GetDefaultFullEntry(string key, bool regional = true)
+    public string GetDefaultRegionalDomain()
+    {
+        var value = GetDomain(DefaultCultureName);
+
+        return BaseCommonLinkUtility.GetRegionalUrl(value, null);
+    }
+
+    public string GetRegionalDomain(CultureInfo culture = null)
+    {
+        culture = culture ?? CultureInfo.CurrentCulture;
+
+        var value = GetDomain(culture.Name);
+
+        return BaseCommonLinkUtility.GetRegionalUrl(value, culture.TwoLetterISOLanguageName);
+    }
+
+    public string GetEntry(string key, string cultureName)
+    {
+        return cultureSpecificExternalResources.GetValueOrDefault(cultureName)?.Entries?.GetValueOrDefault(key) ??
+               cultureSpecificExternalResources.GetValueOrDefault(DefaultCultureName)?.Entries?.GetValueOrDefault(key);
+    }
+
+    public string GetDefaultRegionalFullEntry(string key)
     {
         var value = GetEntry(key, DefaultCultureName);
 
@@ -45,14 +83,14 @@ public class ExternalResourceSettingsHelper(IConfiguration configuration)
 
         if (value.StartsWith('/'))
         {
-            var baseValue = GetBaseEntry(key, DefaultCultureName);
-            value = $"{baseValue}{value}";
+            var domain = GetDomain(DefaultCultureName);
+            value = $"{domain}{value}";
         }
 
-        return regional ? BaseCommonLinkUtility.GetRegionalUrl(value, null) : value;
+        return BaseCommonLinkUtility.GetRegionalUrl(value, null);
     }
 
-    public string GetFullEntry(string key, CultureInfo culture = null, bool regional = true)
+    public string GetRegionalFullEntry(string key, CultureInfo culture = null)
     {
         culture = culture ?? CultureInfo.CurrentCulture;
 
@@ -65,29 +103,48 @@ public class ExternalResourceSettingsHelper(IConfiguration configuration)
 
         if (value.StartsWith('/'))
         {
-            var baseValue = GetBaseEntry(key, culture.Name);
-            value = $"{baseValue}{value}";
+            var domain = GetDomain(culture.Name);
+            value = $"{domain}{value}";
         }
 
-        return regional ? BaseCommonLinkUtility.GetRegionalUrl(value, culture.TwoLetterISOLanguageName) : value;
+        return BaseCommonLinkUtility.GetRegionalUrl(value, culture.TwoLetterISOLanguageName);
     }
 
-    public string GetEntry(string key, string cultureName)
+    public CultureSpecificExternalResource GetMerged(CultureInfo culture = null)
     {
-        return CultureSpecificEntries.GetValueOrDefault(cultureName)?.GetValueOrDefault(key) ??
-               CultureSpecificEntries.GetValueOrDefault(DefaultCultureName)?.GetValueOrDefault(key);
-    }
+        culture = culture ?? CultureInfo.CurrentCulture;
 
-    private string GetBaseEntry(string key, string cultureName)
-    {
-        var index = key.IndexOf('_');
-        if (index == -1)
+        var defaultExternalResource = cultureSpecificExternalResources.GetValueOrDefault(DefaultCultureName);
+        var specificExternalResource = cultureSpecificExternalResources.GetValueOrDefault(culture.Name);
+
+        var result = new CultureSpecificExternalResource
         {
-            return null;
+            Domain = BaseCommonLinkUtility.GetRegionalUrl(specificExternalResource?.Domain ?? defaultExternalResource?.Domain, culture.TwoLetterISOLanguageName),
+            Entries = defaultExternalResource?.Entries?.ToDictionary(entry => entry.Key, entry => entry.Value)
+        };
+
+        if (specificExternalResource == null)
+        {
+            return result;
         }
 
-        var baseKey = key.Substring(0, index);
+        if (result.Entries == null)
+        {
+            result.Entries = specificExternalResource?.Entries?.ToDictionary(entry => entry.Key, entry => entry.Value);
+            return result;
+        }
 
-        return GetEntry(baseKey, cultureName);
+        foreach (var entry in specificExternalResource.Entries)
+        {
+            result.Entries[entry.Key] = entry.Value;
+        }
+
+        return result;
     }
+}
+
+public class CultureSpecificExternalResource
+{
+    public string Domain { get; set; }
+    public Dictionary<string, string> Entries { get; set; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024helper.ExterHelper.Forum.GetMerged(culture) : null,
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,65 +29,34 @@ namespace ASC.Web.Core.WhiteLabel;
 [Scope]
 public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
 {
-    public Dictionary<string, string> GetEntries(CultureInfo culture = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
+    public CultureSpecificExternalResources GetCultureSpecificExternalResources(CultureInfo culture = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
     {
-        if (!helper.CultureSpecificEntries.TryGetValue(helper.DefaultCultureName, out var defaultDictionary))
-        {
-            return null;
-        }
-
         culture = culture ?? CultureInfo.CurrentCulture;
 
-        if (helper.CultureSpecificEntries.TryGetValue(culture.Name, out var specificDictionary))
+        return new()
         {
-            foreach (var item in specificDictionary)
-            {
-                defaultDictionary[item.Key] = item.Value;
-            }
-        }
-
-        return defaultDictionary
-            .Where(x => CheckEnabled(x.Key, whiteLabelSettings))
-            .ToDictionary(x => x.Key, x => BaseCommonLinkUtility.GetRegionalUrl(x.Value, culture.TwoLetterISOLanguageName));
+            Api = helper.Api.GetMerged(culture),
+            Common = helper.Common.GetMerged(culture),
+            Forum = whiteLabelSettings.UserForumEnabled ? helper.Forum.GetMerged(culture) : null,
+            Helpcenter = whiteLabelSettings.HelpCenterEnabled ? helper.Helpcenter.GetMerged(culture) : null,
+            Integrations = helper.Integrations.GetMerged(culture),
+            Site = helper.Site.GetMerged(culture),
+            SocialNetworks = helper.SocialNetworks.GetMerged(culture),
+            Support = whiteLabelSettings.FeedbackAndSupportEnabled ? helper.Support.GetMerged(culture) : null,
+            Videoguides = whiteLabelSettings.VideoGuidesEnabled ? helper.Videoguides.GetMerged(culture) : null
+        };
     }
+}
 
-    public string GetFullEntry(string key, CultureInfo culture = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
-    {
-        return CheckEnabled(key, whiteLabelSettings) ? helper.GetFullEntry(key, culture) : null;
-    }
-
-    private static bool CheckEnabled(string key, AdditionalWhiteLabelSettings whiteLabelSettings)
-    {
-        if (whiteLabelSettings == null)
-        {
-            return true;
-        }
-
-        if (key.StartsWith("license"))
-        {
-            return whiteLabelSettings.LicenseAgreementsEnabled;
-        }
-
-        if (key.StartsWith("forum"))
-        {
-            return whiteLabelSettings.UserForumEnabled;
-        }
-
-        if (key.StartsWith("helpcenter"))
-        {
-            return whiteLabelSettings.HelpCenterEnabled;
-        }
-
-        if (key.StartsWith("support"))
-        {
-            return whiteLabelSettings.FeedbackAndSupportEnabled;
-        }
-
-        if (key.StartsWith("videoguides"))
-        {
-            return whiteLabelSettings.VideoGuidesEnabled;
-        }
-
-        return true;
-    }
+public class CultureSpecificExternalResources
+{
+    public CultureSpecificExternalResource Api { get; set; }
+    public CultureSpecificExternalResource Common { get; set; }
+    public CultureSpecificExternalResource Forum { get; set; }
+    public CultureSpecificExternalResource Helpcenter { get; set; }
+    public CultureSpecificExternalResource Integrations { get; set; }
+    public CultureSpecificExternalResource Site { get; set; }
+    public CultureSpecificExternalResource SocialNetworks { get; set; }
+    public CultureSpecificExternalResource Support { get; set; }
+    public CultureSpecificExternalResource Videoguides { get; set; }
 }

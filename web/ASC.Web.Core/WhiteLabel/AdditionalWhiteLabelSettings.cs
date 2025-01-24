@@ -165,7 +165,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = externalResourceSettingsHelper.GetDefaultFullEntry("license");
+            var url = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("license");
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -177,7 +177,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = externalResourceSettingsHelper.GetDefaultFullEntry("helpcenter");
+            var url = externalResourceSettingsHelper.Helpcenter.GetDefaultRegionalDomain();
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -189,7 +189,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = externalResourceSettingsHelper.GetDefaultFullEntry("support");
+            var url = externalResourceSettingsHelper.Support.GetDefaultRegionalDomain();
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -201,7 +201,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = externalResourceSettingsHelper.GetDefaultFullEntry("forum");
+            var url = externalResourceSettingsHelper.Forum.GetDefaultRegionalDomain();
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -213,7 +213,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var url = externalResourceSettingsHelper.GetDefaultFullEntry("videoguides");
+            var url = externalResourceSettingsHelper.Videoguides.GetDefaultRegionalDomain();
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -225,7 +225,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
     {
         get
         {
-            var email = externalResourceSettingsHelper.GetDefaultFullEntry("paymentemail", false);
+            var email = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
             return string.IsNullOrEmpty(email) ? null : email;
         }
     }
@@ -238,7 +238,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         get
         {
             var type = configuration["license:type"] ?? "enterprise";
-            var url = externalResourceSettingsHelper.GetDefaultFullEntry("site_buy" + type);
+            var url = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("buy" + type);
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }

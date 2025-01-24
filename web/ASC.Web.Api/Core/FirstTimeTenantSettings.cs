@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.WhiteLabel;
+
 namespace ASC.Web.Studio.UserControls.FirstTime;
 
 [Transient]
@@ -238,7 +240,7 @@ public class FirstTimeTenantSettings(
     {
         try
         {
-            var url = externalResourceSettingsHelper.GetDefaultFullEntry("site_subscribe");
+            var url = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("subscribe");
 
             if (string.IsNullOrEmpty(url))
             {

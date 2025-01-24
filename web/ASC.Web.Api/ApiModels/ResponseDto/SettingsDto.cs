@@ -225,5 +225,5 @@ public class SettingsDto
     /// <summary>
     /// External resources
     /// </summary>
-    public Dictionary<string, string> ExternalResources { get; set; }
+    public CultureSpecificExternalResources ExternalResources { get; set; }
 }

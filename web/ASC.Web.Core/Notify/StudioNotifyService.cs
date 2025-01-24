@@ -377,7 +377,7 @@ public class StudioNotifyService(
         var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
-        var url1 = externalResourceSettingsHelper.GetFullEntry("helpcenter_docspace-index", culture);
+        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
@@ -434,7 +434,7 @@ public class StudioNotifyService(
         var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
-        var url1 = externalResourceSettingsHelper.GetFullEntry("helpcenter_docspace-index", culture);
+        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
@@ -726,7 +726,7 @@ public class StudioNotifyService(
                 [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, url),
                 TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
-                new TagValue("URL1", externalResourceSettingsHelper.GetFullEntry("legalterms", culture)),
+                new TagValue("URL1", externalResourceSettingsHelper.Common.GetRegionalFullEntry("legalterms", culture)),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("docspace_deactivated.gif")),
                 new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
     }

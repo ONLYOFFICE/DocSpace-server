@@ -111,7 +111,7 @@ public partial class SettingsController(MessageService messageService,
                 Url = configuration["deeplink:url"] ?? "",
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
             },
-            ExternalResources = externalResourceSettings.GetEntries(whiteLabelSettings: additionalWhiteLabelSettings)
+            ExternalResources = externalResourceSettings.GetCultureSpecificExternalResources(whiteLabelSettings: additionalWhiteLabelSettings)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
