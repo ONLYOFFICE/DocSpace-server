@@ -292,10 +292,29 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
-    public Task DeleteFormRoleMappingsAsync(int tenantId, int formRoom)
+    public Task DeleteFormRoleMappingsAsync(int tenantId, int formId)
     {
-        return FileQueries.DeleteFormRoleMappingsAsync(this, tenantId, formRoom);
+        return FileQueries.DeleteFormRoleMappingsAsync(this, tenantId, formId);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<FormRoleParams> DbFormUserRoleQueryAsync(int tenantId, int formId, Guid userId)
+    {
+        return FileQueries.DbFormUserRoleQueryAsync(this, tenantId, formId, userId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<int> DbFormRoleCurrentStepAsync(int tenantId, int formId)
+    {
+        return FileQueries.DbFormRoleCurrentStepAsync(this, tenantId, formId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<FormRoleParams> DbFormRolesAsync(int tenantId, int formId)
+    {
+        return FileQueries.DbFormRolesAsync(this, tenantId, formId);
+    }
+
 }
 
 static file class FileQueries
@@ -869,4 +888,47 @@ static file class FileQueries
                 .Where(r => r.FormId == formId)
                 .ExecuteDelete());
 
+    public static readonly Func<FilesDbContext, int, int, Guid, Task<FormRoleParams>> DbFormUserRoleQueryAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, int formId, Guid userId) =>
+            ctx.FilesFormRoleMapping
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.FormId == formId)
+                .Where(r => r.UserId == userId)
+                .Select(r => new FormRoleParams
+                {
+                    RoleId = r.RoleId,
+                    UserId = r.UserId,
+                    RoleName = r.RoleName,
+                    Sequence = r.Sequence,
+                    Submitted = r.Submitted
+                })
+                .FirstOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DbFormRoleCurrentStepAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, int formId) =>
+            ctx.FilesFormRoleMapping
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.FormId == formId)
+                .Where(r => r.Submitted == false)
+                .OrderBy(r => r.Sequence)
+                .Select(r => r.Sequence)
+                .FirstOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<FormRoleParams>> DbFormRolesAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, int formId) =>
+            ctx.FilesFormRoleMapping
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.FormId == formId)
+                .OrderBy(r => r.Sequence)
+                .Select(r => new FormRoleParams
+                {
+                    RoleId = r.RoleId,
+                    UserId = r.UserId,
+                    RoleName = r.RoleName,
+                    Sequence = r.Sequence,
+                    Submitted = r.Submitted
+                }));
 }

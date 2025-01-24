@@ -531,4 +531,12 @@ internal class SharePointFileDao(
     {
         throw new NotImplementedException();
     }
+    public Task<FormRoleParams> GetFormRoles(string formId)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<(int, FormRoleParams)> GetUserFormRole(string formId, Guid userId)
+    {
+        throw new NotImplementedException();
+    }
 }

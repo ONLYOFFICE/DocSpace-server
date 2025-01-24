@@ -280,7 +280,21 @@ public interface IFileDao<T>
     /// <param name="formRolesParams"></param>
     /// <returns></returns>
     Task SaveFormRoleMapping(T formId, IEnumerable<FormRoleParams> formRolesParams);
-    
+
+    /// <summary>
+    /// Get form role mappings
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <returns></returns>
+    Task<FormRoleParams> GetFormRoles(T formId);
+
+    /// <summary>
+    /// Get form role mappings
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    Task<(int, FormRoleParams)> GetUserFormRole(T formId, Guid userId);
     string GetUniqFilePath(File<T> file, string fileTitle);
 
     #region chunking

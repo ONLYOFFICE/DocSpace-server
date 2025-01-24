@@ -1395,6 +1395,25 @@ internal class FileDao(
         await filesDbContext.FilesFormRoleMapping.AddRangeAsync(newRecords);
         await filesDbContext.SaveChangesAsync();
     }
+    public async Task<(int, FormRoleParams)> GetUserFormRole(int formId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return (await filesDbContext.DbFormRoleCurrentStepAsync(tenantId, formId), await filesDbContext.DbFormUserRoleQueryAsync(tenantId, formId, userId));
+    }
+    public async IAsyncEnumerable<FormRoleParams> GetFormRoles(int formId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var e in filesDbContext.DbFormRolesAsync(tenantId, formId))
+        {
+            yield return e;
+        }
+    }
 
     #region chunking
 
