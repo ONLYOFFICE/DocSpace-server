@@ -230,6 +230,20 @@ public class SettingsController(
     }
 
     /// <summary>
+    /// Hide confirmation dialog when changing room lifetime settings.
+    /// </summary>
+    /// <short>Hide confirmation dialog when changing room lifetime settings</short>
+    /// <path>api/2.0/files/hideconfirmroomlifetime</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [HttpPut("hideconfirmroomlifetime")]
+    public async Task<bool> HideConfirmRoomLifetime(SettingsRequestDto inDto)
+    {
+        return await filesSettingsHelper.SetHideConfirmRoomLifetime(inDto.Set);
+    }
+
+    /// <summary>
     /// Checks if the Private Room settings are available or not.
     /// </summary>
     /// <short>Check the Private Room availability</short>
