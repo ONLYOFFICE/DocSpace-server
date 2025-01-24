@@ -61,6 +61,24 @@ namespace ASC.Data.Backup.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Something went wrong while creating the backup. Please try creating it again or contact support..
+        /// </summary>
+        internal static string BackupException {
+            get {
+                return ResourceManager.GetString("BackupException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The backup file is invalid. .
+        /// </summary>
+        internal static string BackupInvalid {
+            get {
+                return ResourceManager.GetString("BackupInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The backup file is invalid. Please use the file created in the same portal..
         /// </summary>
         internal static string BackupNotFound {
@@ -84,6 +102,15 @@ namespace ASC.Data.Backup.Core {
         internal static string LargeBackup {
             get {
                 return ResourceManager.GetString("LargeBackup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Something went wrong while restoring the backup. Please try restoring it again or contact support..
+        /// </summary>
+        internal static string RestoreException {
+            get {
+                return ResourceManager.GetString("RestoreException", resourceCulture);
             }
         }
     }

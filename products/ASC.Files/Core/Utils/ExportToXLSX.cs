@@ -24,16 +24,48 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Common.Core;
+using ASC.Files.Core.Services.DocumentBuilderService;
 
-public enum Area
+namespace ASC.Web.Files.Utils;
+[Transient]
+public class ExportToXLSX(
+    ILogger<AuditReportUploader> logger,
+    IServiceProvider serviceProvider,
+    TenantManager tenantManager,
+    IEventBus eventBus,
+    DocumentBuilderTaskManager documentBuilderTaskManager,
+    IHttpContextAccessor httpContextAccessor,
+    AuthContext authContext)
 {
-    [SwaggerEnum("All")]
-    All,
 
-    [SwaggerEnum("People")]
-    People,
+    public async Task UpdateXlsxReport(int roomId, int originalFormId)
+    {
+        try
+        {
+            var tenantId = tenantManager.GetCurrentTenantId();
+            var userId = authContext.CurrentAccount.ID;
 
-    [SwaggerEnum("Guests")]
-    Guests
+            var task = serviceProvider.GetService<FormFillingReportTask>();
+
+            var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
+            var baseUri = commonLinkUtility.ServerRootPath;
+            task.Init(baseUri, tenantId, userId, null);
+
+            _ = await documentBuilderTaskManager.StartTask(task, false);
+
+            var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
+            var evt = new FormFillingReportIntegrationEvent(userId, tenantId, roomId, originalFormId, baseUri, headers: headers != null
+                ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
+                : []);
+
+            await eventBus.PublishAsync(evt);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWhileUploading(ex);
+            throw;
+        }
+    }
+
+    
 }
