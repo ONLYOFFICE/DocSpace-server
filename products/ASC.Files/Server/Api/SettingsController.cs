@@ -220,7 +220,6 @@ public class SettingsController(
     /// </summary>
     /// <short>Hide the confirmation dialog when converting</short>
     /// <path>api/2.0/files/hideconfirmconvert</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(Module))]
     [HttpPut("hideconfirmconvert")]
@@ -234,7 +233,6 @@ public class SettingsController(
     /// </summary>
     /// <short>Hide confirmation dialog when changing room lifetime settings</short>
     /// <path>api/2.0/files/hideconfirmroomlifetime</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("hideconfirmroomlifetime")]
