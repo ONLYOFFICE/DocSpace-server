@@ -802,7 +802,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDefaultValueSql("0");
 
                     b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestampz")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("last_modified");
 
                     b.Property<string>("Tag")
@@ -1490,7 +1490,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("trusteddomainsenabled")
-                        .HasDefaultValueSql("false");
+                        .HasDefaultValueSql("0");
 
                     b.Property<string>("TrustedDomainsRaw")
                         .HasMaxLength(1024)
@@ -5608,9 +5608,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("subject_type");
 
-                    b.Property<DateTime>("timestamptz")
+                    b.Property<DateTime>("TimeStamp")
                         .HasColumnType("timestamptz")
-                        .HasColumnName("timestamptz");
+                        .HasColumnName("timestamp");
 
                     b.HasKey("TenantId", "EntryId", "EntryType", "Subject")
                         .HasName("files_security_pkey");

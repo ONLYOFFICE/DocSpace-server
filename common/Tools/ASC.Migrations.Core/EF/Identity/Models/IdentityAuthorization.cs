@@ -220,10 +220,10 @@ public static class IdentityExtension
                 .HasColumnType("jsonb");
 
             entity.Property(e => e.AuthorizationCodeIssuedAt)
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.AuthorizationCodeExpiresAt)
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.AccessTokenType)
                 .HasColumnType("text");
@@ -241,10 +241,10 @@ public static class IdentityExtension
                 .HasColumnType("jsonb");
 
             entity.Property(e => e.AccessTokenIssuedAt)
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.AccessTokenExpiresAt)
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.RefreshTokenValue)
                 .HasColumnType("text");
@@ -256,16 +256,16 @@ public static class IdentityExtension
                 .HasColumnType("jsonb");
 
             entity.Property(e => e.RefreshTokenIssuedAt)
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.RefreshTokenExpiresAt)
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.IsInvalidated)
                 .HasColumnType("boolean");
 
             entity.Property(e => e.ModifiedAt)
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             // Configure relationships and navigation properties.
             entity.HasOne(e => e.RegisteredClient)

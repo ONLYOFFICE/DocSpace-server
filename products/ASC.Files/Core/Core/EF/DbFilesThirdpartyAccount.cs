@@ -177,7 +177,7 @@ public static class DbFilesThirdpartyAccountExtension
 
             entity.Property(e => e.CreateOn)
                 .HasColumnName("create_on")
-                .HasColumnType("timestamp");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Title)
                 .IsRequired()
