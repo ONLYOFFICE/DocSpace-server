@@ -312,7 +312,7 @@ internal class FolderDao(
     }
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
-        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms };
+        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates };
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = _tenantManager.GetCurrentTenantId();
         var result = new FilesStatisticsResultDto();
@@ -1652,7 +1652,7 @@ internal class FolderDao(
     {
         var rootFolderType = entry.RootFolderType;
 
-        if (rootFolderType != FolderType.VirtualRooms && rootFolderType != FolderType.Archive)
+        if (rootFolderType != FolderType.VirtualRooms && rootFolderType != FolderType.RoomTemplates && rootFolderType != FolderType.Archive)
         {
             return Task.FromResult((-1, ""));
         }

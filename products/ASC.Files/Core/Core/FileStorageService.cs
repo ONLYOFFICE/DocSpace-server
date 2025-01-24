@@ -268,8 +268,12 @@ public class FileStorageService //: IFileStorageService
             orderBy.SortedBy = SortedByType.New;
         }
 
-        searchArea = parent.FolderType == FolderType.Archive ? SearchArea.Archive : searchArea;
-        searchArea = parent.FolderType == FolderType.RoomTemplates ? SearchArea.Templates : searchArea;
+        searchArea = parent.FolderType switch
+        {
+            FolderType.Archive => SearchArea.Archive,
+            FolderType.RoomTemplates => SearchArea.Templates,
+            _ => searchArea
+        };
 
         int total;
         IEnumerable<FileEntry> entries;
@@ -1298,6 +1302,7 @@ public class FileStorageService //: IFileStorageService
         {
             folder = await folderDao.GetFolderAsync(fileWrapper.ParentId);
             var canCreate = await fileSecurity.CanCreateAsync(folder) && folder.FolderType != FolderType.VirtualRooms
+                                                                      && folder.FolderType != FolderType.RoomTemplates
                                                                       && folder.FolderType != FolderType.Archive;
 
             if (!canCreate)
@@ -2237,7 +2242,7 @@ public class FileStorageService //: IFileStorageService
             {
                 CustomerTitle = r.CustomerTitle,
                 Corporate = r.RootFolderType == FolderType.COMMON,
-                RoomsStorage = r.RootFolderType is FolderType.VirtualRooms or FolderType.Archive,
+                RoomsStorage = r.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive,
                 ProviderId = r.ProviderId,
                 ProviderKey = r.ProviderKey
             };
@@ -2370,7 +2375,7 @@ public class FileStorageService //: IFileStorageService
                         await fileMarker.RemoveMarkAsNewForAllAsync(lostFolder);
                         break;
                     }
-                case FolderType.VirtualRooms or FolderType.Archive:
+                case FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive:
                     {
                         var updatedProvider = await providerDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = currentProviderId, AuthData = thirdPartyParams.AuthData });
                         currentProviderId = updatedProvider.ProviderId;

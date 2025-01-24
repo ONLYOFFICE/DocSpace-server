@@ -862,6 +862,11 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
         return await FolderArchiveAsync;
     }
 
+    public async ValueTask<int> GetFolderRoomTemplatesAsync()
+    {
+        return await FolderRoomTemplatesAsync;
+    }
+
     public async ValueTask<T> GetFolderShareAsync<T>()
     {
         return IdConverter.Convert<T>(await FolderShareAsync);

@@ -57,6 +57,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     public readonly FileShare DefaultPrivacyShare = FileShare.Restrict;
     public readonly FileShare DefaultArchiveShare = FileShare.Restrict;
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
+    public readonly FileShare DefaultRoomTemplatesShare = FileShare.Restrict;
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
 
@@ -1013,6 +1014,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                 if (folder.FolderType == FolderType.Archive)
                 {
                     return true;
+                
+                }if (folder.FolderType == FolderType.RoomTemplates)
+                {
+                    return true;
                 }
             }
         }
@@ -1049,7 +1054,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return true;
                 }
                 break;
-            case FolderType.VirtualRooms:
+            case FolderType.VirtualRooms or FolderType.RoomTemplates:
                 if (action == FilesSecurityActions.Delete && isRoom)
                 {
                     return false;
@@ -1230,7 +1235,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (ace == null)
         {
             var cachedRecords = GetCachedRecords<T>();
-            if ((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive &&
+            if ((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive &&
                  cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) ||
                 cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
             {
@@ -1241,7 +1246,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             {
                 ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, shares);
 
-                if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
+                if (e.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive && 
                     ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
                 {
                     var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
@@ -1258,6 +1263,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FolderType.USER => DefaultMyShare,
                 FolderType.Privacy => DefaultPrivacyShare,
                 FolderType.Archive => DefaultArchiveShare,
+                FolderType.RoomTemplates => DefaultRoomTemplatesShare,
                 _ => DefaultCommonShare
             };
 
@@ -1705,7 +1711,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (e.Access != FileShare.Restrict &&
             e.CreateBy == userId &&
             (e.FileEntryType == FileEntryType.File || folder.FolderType != FolderType.COMMON) &&
-            e.RootFolderType != FolderType.Archive && e.RootFolderType != FolderType.VirtualRooms)
+            e.RootFolderType != FolderType.Archive && e.RootFolderType != FolderType.RoomTemplates && e.RootFolderType != FolderType.VirtualRooms)
         {
             return true;
         }
