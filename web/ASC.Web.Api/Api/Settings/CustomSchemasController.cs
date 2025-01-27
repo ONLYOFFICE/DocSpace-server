@@ -44,7 +44,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <path>api/2.0/settings/customschemas</path>
     /// <collection>list</collection>
     [Tags("Settings / Team templates")]
-    [SwaggerResponse(200, "List of team templates with the following parameters", typeof(SchemaRequestsDto))]
+    [SwaggerResponse(200, "List of team templates with the following parameters", typeof(List<SchemaRequestsDto>))]
     [HttpGet("")]
     public async Task<List<SchemaRequestsDto>> PeopleSchemasAsync()
     {
