@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Services.NotifyService;
 using ASC.Files.Service.Services;
 using ASC.Files.Service.Services.Thumbnail;
 using ASC.Web.Files.Configuration;
@@ -61,10 +62,14 @@ public class Startup : BaseWorkerStartup
             services.AddActivePassiveHostedService<FileConverterService<int>>(Configuration);
             services.AddActivePassiveHostedService<FileConverterService<string>>(Configuration);
 
+            services.AddActivePassiveHostedService<PushNotificationService<int>>(Configuration);
+
             services.AddHostedService<ThumbnailBuilderService>();
             services.AddActivePassiveHostedService<AutoCleanTrashService>(Configuration);
             services.AddActivePassiveHostedService<DeleteExpiredService>(Configuration);
             services.AddActivePassiveHostedService<CleanupLifetimeExpiredService>(Configuration);
+
+            services.AddSingleton(typeof(INotifyQueueManager<>), typeof(RoomNotifyQueueManager<>));
 
             if (Configuration["core:base-domain"] == "localhost" && !string.IsNullOrEmpty(Configuration["license:file:path"]))
             {

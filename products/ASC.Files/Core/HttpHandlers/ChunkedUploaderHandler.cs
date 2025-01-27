@@ -51,7 +51,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
     FileDtoHelper filesWrapperHelper,
     AuthContext authContext,
     IDaoFactory daoFactory,
-    IServiceScopeFactory serviceScopeFactory)
+    IEventBus eventBus)
 {
     public async Task Invoke(HttpContext context)
     {
@@ -91,9 +91,6 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                 return;
             }
-
-            using var scope = serviceScopeFactory.CreateScope();
-            var roomNotifyEventQueue = scope.ServiceProvider.GetRequiredService<INotifyQueueManager<T>>();
 
             switch (request.Type())
             {
@@ -137,8 +134,11 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
                                 if (room != null)
                                 {
-                                    var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room, authContext.CurrentAccount.ID);
-                                    queue.AddMessage(resumedSession.File);
+                                    if (room.Id is int rId)
+                                    {
+                                        var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id, rId, Convert.ToInt32(resumedSession.File.Id));
+                                        await eventBus.PublishAsync(evt);
+                                    }
                                 }
                             }
                         }
@@ -193,8 +193,11 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         var room = await folderDao.GetParentFoldersAsync(session.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
                         if (room != null)
                         {
-                            var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, room, authContext.CurrentAccount.ID);
-                            queue.AddMessage(session.File);
+                            if (room.Id is int rId)
+                            {
+                                var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id, rId, Convert.ToInt32(session.File.Id));
+                                await eventBus.PublishAsync(evt);
+                            }
                         }
                     }
                     return;
