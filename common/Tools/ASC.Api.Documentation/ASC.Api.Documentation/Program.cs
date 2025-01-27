@@ -123,7 +123,7 @@ public class Programm
                                 var summaryText = summaryNode.ToString();
 
                                 methodDetails["description"] = methodDetails.TryGetPropertyValue("description", out var existingDescriptionNode)
-                                    ? (JsonNode)$"{summaryText}\n\n**Note**: {existingDescriptionNode}"
+                                    ? (JsonNode)$"{summaryText}\n\n {existingDescriptionNode}"
                                     : (JsonNode)summaryText;
                             }
 
@@ -179,7 +179,7 @@ public class Programm
                             if (methodDetails.TryGetValue("summary", out var summary) && summary is string summaryText)
                             {
                                 methodDetails["description"] = methodDetails.TryGetValue("description", out var existingDescription)
-                                    ? $"{summaryText}\n\n**Note**: {existingDescription}"
+                                    ? $"{summaryText}\n\n {existingDescription}"
                                     : (object)summaryText;
                             }
 

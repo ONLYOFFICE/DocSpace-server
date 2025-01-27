@@ -244,6 +244,11 @@ public class FilesSettingsDto
     public bool HideConfirmConvertOpen { get; set; }
 
     /// <summary>
+    /// Hide confirm room lifetime
+    /// </summary>
+    public bool HideConfirmRoomLifetime { get; set; }
+
+    /// <summary>
     /// Default order
     /// </summary>
     public OrderBy DefaultOrder { get; set; }
@@ -364,6 +369,7 @@ public class FilesSettingsDtoConverter(
             DisplayFileExtension = await filesSettingsHelper.GetDisplayFileExtension(),
             HideConfirmConvertSave = await filesSettingsHelper.GetHideConfirmConvertSave(),
             HideConfirmConvertOpen = await filesSettingsHelper.GetHideConfirmConvertOpen(),
+            HideConfirmRoomLifetime = await filesSettingsHelper.GetHideConfirmRoomLifetime(),
             DefaultOrder = await filesSettingsHelper.GetDefaultOrder(),
             Forcesave = filesSettingsHelper.GetForcesave(),
             StoreForcesave = filesSettingsHelper.GetStoreForcesave(),

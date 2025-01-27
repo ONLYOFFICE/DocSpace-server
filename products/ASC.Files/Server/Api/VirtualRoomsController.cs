@@ -596,7 +596,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<NewItemsDto<FileEntryDto>>))]
     [HttpGet("{id}/news")]
-    public async Task<List<NewItemsDto<FileEntryDto>>> GetNewItemsAsync(RoomIdRequestDto<T> inDto)
+    public async Task<List<NewItemsDto<FileEntryDto>>> GetNewItemsFromRoomAsync(RoomIdRequestDto<T> inDto)
     {
         var newItems = await _fileStorageService.GetNewRoomFilesAsync(inDto.Id);
         var result = new List<NewItemsDto<FileEntryDto>>();
@@ -704,9 +704,10 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [SwaggerResponse(200, "New tag name", typeof(object))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("tags")]
-    public async Task<object> CreateTagAsync(CreateTagRequestDto inDto)
+    public async Task<string> CreateTagAsync(CreateTagRequestDto inDto)
     {
-        return (await customTagsService.CreateTagAsync(inDto.Name)).Name;
+        var createdTag = await customTagsService.CreateTagAsync(inDto.Name);
+        return createdTag.Name;
     }
 
     /// <summary>

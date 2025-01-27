@@ -79,8 +79,9 @@ public static class StringExtension
                 return true;
             }
         }
-        catch (ArgumentException)
+        catch (ArgumentException ex) when(ex.ParamName == "unicode")
         {
+            return true;
         }
         
         return false;

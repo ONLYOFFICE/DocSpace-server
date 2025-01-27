@@ -29,6 +29,9 @@ namespace ASC.Files.Core;
 [Flags]
 public enum FileEntryType
 {
+    [SwaggerEnum("Folder")]
     Folder = 1,
+
+    [SwaggerEnum("File")]
     File = 2
 }
