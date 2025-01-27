@@ -36,6 +36,11 @@ services:
       - onlyoffice
 
   migration-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: infrastructure/infrastructure-migration-runner
     image: migration-runner:latest
     environment:
       SPRING_PROFILES_ACTIVE: dev

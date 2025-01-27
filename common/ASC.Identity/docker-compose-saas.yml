@@ -1,5 +1,10 @@
 services:
   registration-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: registration/registration-container
     image: registration-service:latest
     ports:
       - "8080:8080"
@@ -33,7 +38,12 @@ services:
       - onlyoffice
 
   authorization-service:
-    image: authorization-container:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: authorization/authorization-container
+    image: authorization-service:latest
     ports:
       - "9090:9090"
     environment:
