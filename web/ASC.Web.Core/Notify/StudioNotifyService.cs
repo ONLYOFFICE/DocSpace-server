@@ -68,11 +68,11 @@ public class StudioNotifyService(
 
     public async Task SendMsgToSalesAsync(string email, string userName, string message)
     {
-        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
+        var salesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.UserMessageToSales,
-            await studioNotifyHelper.RecipientFromEmailAsync(settings.SalesEmail, false),
+            await studioNotifyHelper.RecipientFromEmailAsync(salesEmail, false),
             [EMailSenderName],
             new TagValue(Tags.Body, message),
             new TagValue(Tags.UserEmail, email),
@@ -859,8 +859,7 @@ public class StudioNotifyService(
                 return;
             }
 
-            var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
-            var salesEmail = settings.SalesEmail;
+            var salesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
 
             if (string.IsNullOrEmpty(salesEmail))
             {

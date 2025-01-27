@@ -36,19 +36,13 @@ public class AdditionalWhiteLabelSettingsConverter(
     {
         var result = new AdditionalWhiteLabelSettingsDto
         {
-            BuyUrl = source.BuyUrl,
             FeedbackAndSupportEnabled = source.FeedbackAndSupportEnabled,
-            FeedbackAndSupportUrl = source.FeedbackAndSupportUrl,
             HelpCenterEnabled = source.HelpCenterEnabled,
             IsDefault = additionalWhiteLabelSettingsHelper.IsDefault(source),
             LicenseAgreementsEnabled = source.LicenseAgreementsEnabled,
-            LicenseAgreementsUrl = source.LicenseAgreementsUrl,
-            SalesEmail = source.SalesEmail,
             StartDocsEnabled = source.StartDocsEnabled,
             UserForumEnabled = source.UserForumEnabled,
-            UserForumUrl = source.UserForumUrl,
-            VideoGuidesEnabled = source.VideoGuidesEnabled,
-            VideoGuidesUrl = source.VideoGuidesUrl
+            VideoGuidesEnabled = source.VideoGuidesEnabled
         };
 
         return result;

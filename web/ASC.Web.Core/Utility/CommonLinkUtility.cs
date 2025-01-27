@@ -65,9 +65,8 @@ public class CommonLinkUtility(
         TenantManager tenantManager,
         UserManager userManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
-        ExternalResourceSettingsHelper externalResourceSettingsHelper,
         ILoggerProvider options,
-        AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
+        ExternalResourceSettingsHelper externalResourceSettingsHelper)
     : BaseCommonLinkUtility(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options)
 {
     public const string ParamName_UserUserID = "uid";
@@ -132,7 +131,7 @@ public class CommonLinkUtility(
             return string.Empty;
         }
 
-        var url = additionalWhiteLabelSettingsHelper.DefaultUserForumUrl;
+        var url = externalResourceSettingsHelper.Forum.GetDefaultRegionalDomain();
 
         return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
@@ -144,7 +143,7 @@ public class CommonLinkUtility(
             return string.Empty;
         }
 
-        var url = additionalWhiteLabelSettingsHelper.DefaultHelpCenterUrl;
+        var url = externalResourceSettingsHelper.Helpcenter.GetDefaultRegionalDomain();
 
         return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
@@ -156,7 +155,7 @@ public class CommonLinkUtility(
             return string.Empty;
         }
 
-        var url = additionalWhiteLabelSettingsHelper.DefaultFeedbackAndSupportUrl;
+        var url = externalResourceSettingsHelper.Support.GetDefaultRegionalDomain();
 
         return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
@@ -177,7 +176,7 @@ public class CommonLinkUtility(
 
     public string GetSalesEmail()
     {
-        var email = additionalWhiteLabelSettingsHelper.DefaultMailSalesEmail;
+        var email = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
 
         return string.IsNullOrEmpty(email) ? string.Empty : email;
     }

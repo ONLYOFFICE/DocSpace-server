@@ -43,6 +43,7 @@ public partial class SettingsController(MessageService messageService,
         IConfiguration configuration,
         SetupInfo setupInfo,
         ExternalResourceSettings externalResourceSettings,
+        ExternalResourceSettingsHelper externalResourceSettingsHelper,
         GeolocationHelper geolocationHelper,
         ConsumerFactory consumerFactory,
         TimeZoneConverter timeZoneConverter,
@@ -1025,7 +1026,6 @@ public partial class SettingsController(MessageService messageService,
     public async Task<object> PaymentSettingsAsync()
     {        
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
         var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
         var currentTariff = await tenantExtra.GetCurrentTariffAsync();
 
@@ -1037,9 +1037,9 @@ public partial class SettingsController(MessageService messageService,
         return
             new
             {
-                settings.SalesEmail,
-                settings.FeedbackAndSupportUrl,
-                settings.BuyUrl,
+                salesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail"),
+                feedbackAndSupportUrl = externalResourceSettingsHelper.Support.GetDefaultRegionalDomain(),
+                buyUrl = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("buy" + (configuration["license:type"] ?? "enterprise")),
                 coreBaseSettings.Standalone,
                 currentLicense = new
                 {

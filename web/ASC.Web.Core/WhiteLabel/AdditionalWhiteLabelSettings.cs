@@ -39,7 +39,7 @@ public class AdditionalWhiteLabelSettingsWrapper
 
 public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettings>
 {
-    public AdditionalWhiteLabelSettingsHelperInit AdditionalWhiteLabelSettingsHelper;
+    public ExternalResourceSettingsHelper ExternalResourceSettingsHelper;
 
     /// <summary>
     /// Specifies if the start document is enabled or not
@@ -57,19 +57,9 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     public bool FeedbackAndSupportEnabled { get; init; }
 
     /// <summary>
-    /// Feedback and support URL
-    /// </summary>
-    public string FeedbackAndSupportUrl { get; init; }
-
-    /// <summary>
     /// Specifies if the user forum is enabled or not
     /// </summary>
     public bool UserForumEnabled { get; init; }
-
-    /// <summary>
-    /// User forum URL
-    /// </summary>
-    public string UserForumUrl { get; init; }
 
     /// <summary>
     /// Specifies if the video guides are enabled or not
@@ -77,29 +67,9 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     public bool VideoGuidesEnabled { get; init; }
 
     /// <summary>
-    /// Video guides URL
-    /// </summary>
-    public string VideoGuidesUrl { get; init; }
-
-    /// <summary>
-    /// Sales email
-    /// </summary>
-    public string SalesEmail { get; init; }
-
-    /// <summary>
-    /// URL to pay for the portal
-    /// </summary>
-    public string BuyUrl { get; init; }
-
-    /// <summary>
     /// Specifies if the license agreements are enabled or not
     /// </summary>
     public bool LicenseAgreementsEnabled { get; init; }
-
-    /// <summary>
-    /// License agreements URL
-    /// </summary>
-    public string LicenseAgreementsUrl { get; init; }
 
     [JsonIgnore]
     public Guid ID
@@ -107,139 +77,41 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
         get { return new Guid("{0108422F-C05D-488E-B271-30C4032494DA}"); }
     }
 
-    public AdditionalWhiteLabelSettings(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
+    public AdditionalWhiteLabelSettings(ExternalResourceSettingsHelper externalResourceSettingsHelper)
     {
-        this.AdditionalWhiteLabelSettingsHelper = additionalWhiteLabelSettingsHelper;
+        this.ExternalResourceSettingsHelper = externalResourceSettingsHelper;
     }
 
     public AdditionalWhiteLabelSettings() { }
 
     public AdditionalWhiteLabelSettings GetDefault()
     {
-        return new AdditionalWhiteLabelSettings(AdditionalWhiteLabelSettingsHelper)
+        return new AdditionalWhiteLabelSettings(ExternalResourceSettingsHelper)
         {
             StartDocsEnabled = true,
-            HelpCenterEnabled = AdditionalWhiteLabelSettingsHelper?.DefaultHelpCenterUrl != null,
-            FeedbackAndSupportEnabled = AdditionalWhiteLabelSettingsHelper?.DefaultFeedbackAndSupportUrl != null,
-            FeedbackAndSupportUrl = AdditionalWhiteLabelSettingsHelper?.DefaultFeedbackAndSupportUrl,
-            UserForumEnabled = AdditionalWhiteLabelSettingsHelper?.DefaultUserForumUrl != null,
-            UserForumUrl = AdditionalWhiteLabelSettingsHelper?.DefaultUserForumUrl,
-            VideoGuidesEnabled = AdditionalWhiteLabelSettingsHelper?.DefaultVideoGuidesUrl != null,
-            VideoGuidesUrl = AdditionalWhiteLabelSettingsHelper?.DefaultVideoGuidesUrl,
-            SalesEmail = AdditionalWhiteLabelSettingsHelper?.DefaultMailSalesEmail,
-            BuyUrl = AdditionalWhiteLabelSettingsHelper?.DefaultBuyUrl,
-            LicenseAgreementsEnabled = AdditionalWhiteLabelSettingsHelper?.DefaultLicenseAgreementsUrl != null,
-            LicenseAgreementsUrl = AdditionalWhiteLabelSettingsHelper?.DefaultLicenseAgreementsUrl
+            HelpCenterEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Helpcenter.GetDefaultRegionalDomain()),
+            FeedbackAndSupportEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Support.GetDefaultRegionalDomain()),
+            UserForumEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Forum.GetDefaultRegionalDomain()),
+            VideoGuidesEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Videoguides.GetDefaultRegionalDomain()),
+            LicenseAgreementsEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Common.GetDefaultRegionalFullEntry("license"))
         };
     }
 }
 
 [Scope]
-public class AdditionalWhiteLabelSettingsHelper(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelperInit)
+public class AdditionalWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externalResourceSettingsHelper)
 {
     public bool IsDefault(AdditionalWhiteLabelSettings settings)
     {
-        settings.AdditionalWhiteLabelSettingsHelper ??= additionalWhiteLabelSettingsHelperInit;
-        
+        settings.ExternalResourceSettingsHelper ??= externalResourceSettingsHelper;
+
         var defaultSettings = settings.GetDefault();
 
         return settings.StartDocsEnabled == defaultSettings.StartDocsEnabled &&
                 settings.HelpCenterEnabled == defaultSettings.HelpCenterEnabled &&
                 settings.FeedbackAndSupportEnabled == defaultSettings.FeedbackAndSupportEnabled &&
-                settings.FeedbackAndSupportUrl == defaultSettings.FeedbackAndSupportUrl &&
                 settings.UserForumEnabled == defaultSettings.UserForumEnabled &&
-                settings.UserForumUrl == defaultSettings.UserForumUrl &&
                 settings.VideoGuidesEnabled == defaultSettings.VideoGuidesEnabled &&
-                settings.VideoGuidesUrl == defaultSettings.VideoGuidesUrl &&
-                settings.SalesEmail == defaultSettings.SalesEmail &&
-                settings.BuyUrl == defaultSettings.BuyUrl &&
-                settings.LicenseAgreementsEnabled == defaultSettings.LicenseAgreementsEnabled &&
-                settings.LicenseAgreementsUrl == defaultSettings.LicenseAgreementsUrl;
-    }
-}
-
-[Singleton]
-public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration, ExternalResourceSettingsHelper externalResourceSettingsHelper)
-{
-    public string DefaultLicenseAgreementsUrl
-    {
-        get
-        {
-            var url = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("license");
-            return string.IsNullOrEmpty(url) ? null : url;
-        }
-    }
-
-    /// <summary>
-    /// Default help center URL
-    /// </summary>
-    public string DefaultHelpCenterUrl
-    {
-        get
-        {
-            var url = externalResourceSettingsHelper.Helpcenter.GetDefaultRegionalDomain();
-            return string.IsNullOrEmpty(url) ? null : url;
-        }
-    }
-
-    /// <summary>
-    /// Default feedback and support URL
-    /// </summary>
-    public string DefaultFeedbackAndSupportUrl
-    {
-        get
-        {
-            var url = externalResourceSettingsHelper.Support.GetDefaultRegionalDomain();
-            return string.IsNullOrEmpty(url) ? null : url;
-        }
-    }
-
-    /// <summary>
-    /// Default user forum URL
-    /// </summary>
-    public string DefaultUserForumUrl
-    {
-        get
-        {
-            var url = externalResourceSettingsHelper.Forum.GetDefaultRegionalDomain();
-            return string.IsNullOrEmpty(url) ? null : url;
-        }
-    }
-
-    /// <summary>
-    /// Default video guides URL
-    /// </summary>
-    public string DefaultVideoGuidesUrl
-    {
-        get
-        {
-            var url = externalResourceSettingsHelper.Videoguides.GetDefaultRegionalDomain();
-            return string.IsNullOrEmpty(url) ? null : url;
-        }
-    }
-
-    /// <summary>
-    /// Default sales email
-    /// </summary>
-    public string DefaultMailSalesEmail
-    {
-        get
-        {
-            var email = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
-            return string.IsNullOrEmpty(email) ? null : email;
-        }
-    }
-
-    /// <summary>
-    /// Default URL to pay for the portal
-    /// </summary>
-    public string DefaultBuyUrl
-    {
-        get
-        {
-            var type = configuration["license:type"] ?? "enterprise";
-            var url = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("buy" + type);
-            return string.IsNullOrEmpty(url) ? null : url;
-        }
+                settings.LicenseAgreementsEnabled == defaultSettings.LicenseAgreementsEnabled;
     }
 }

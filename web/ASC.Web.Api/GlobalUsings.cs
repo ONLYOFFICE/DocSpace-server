@@ -77,6 +77,7 @@ global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Configuration;
 global using ASC.Core.Data;
 global using ASC.Core.Encryption;
