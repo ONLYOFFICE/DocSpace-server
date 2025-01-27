@@ -30,8 +30,7 @@ namespace ASC.Notify.Textile;
 public class TextileStyler(CoreBaseSettings coreBaseSettings,
         IConfiguration configuration,
         InstanceCrypto instanceCrypto,
-        ExternalResourceSettingsHelper externalResourceSettingsHelper,
-        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
+        ExternalResourceSettingsHelper externalResourceSettingsHelper)
     : IPatternStyler
 {
     private static readonly Regex _velocityArguments
@@ -66,9 +65,9 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         var template = GetTemplate(message);
         var imagePath = GetImagePath(message);
         var mailSettings = GetMailSettings(message);
-        var unsubscribeText = await GetUnsubscribeTextAsync(message, mailSettings);
+        var unsubscribeText = await GetUnsubscribeTextAsync(message);
 
-        InitTopImage(message, mailSettings, out var topImage);
+        InitTopImage(message, out var topImage);
         InitFooter(message, mailSettings, out var footerContent, out var footerSocialContent);
 
         var content = output.GetFormattedText().Trim();
@@ -202,12 +201,12 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
             .Replace("%SOCIALNETWORKTIKTOK%", externalResourceSettingsHelper.SocialNetworks.GetDefaultRegionalFullEntry("tiktok"));
     }
 
-    private void InitTopImage(NoticeMessage message, MailWhiteLabelSettings settings, out string footerTop)
+    private void InitTopImage(NoticeMessage message, out string footerTop)
     {
         var imagePath = GetImagePath(message);
         var logoImg = GetLogoImg(message, imagePath);
         var logoText = GetLogoText(message);
-        var siteUrl = settings == null ? mailWhiteLabelSettingsHelper.DefaultMailSiteUrl : settings.SiteUrl;
+        var siteUrl = externalResourceSettingsHelper.Site.GetDefaultRegionalDomain();
         var topGif = message.GetArgument("TopGif");
 
         if (topGif != null && !string.IsNullOrEmpty((string)topGif.Value))
@@ -231,23 +230,17 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         footerContent = string.Empty;
         footerSocialContent = string.Empty;
 
-        if (settings == null)
+        if (settings.FooterEnabled)
         {
-            footerContent =
-                NotifyTemplateResource.FooterCommonV10
-                                      .Replace("%SUPPORTURL%", mailWhiteLabelSettingsHelper.DefaultMailSupportUrl)
-                                      .Replace("%SALESEMAIL%", mailWhiteLabelSettingsHelper.DefaultMailSalesEmail)
-                                      .Replace("%DEMOURL%", mailWhiteLabelSettingsHelper.DefaultMailDemoUrl);
-            footerSocialContent = NotifyTemplateResource.SocialNetworksFooter;
+            var supportUrl = externalResourceSettingsHelper.Support.GetDefaultRegionalDomain();
+            var supportEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("supportemail");
+            var salesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
+            var demoUrl = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("demoorder");
 
-        }
-        else if (settings.FooterEnabled)
-        {
-            footerContent =
-                NotifyTemplateResource.FooterCommonV10
-                .Replace("%SUPPORTURL%", string.IsNullOrEmpty(settings.SupportUrl) ? "mailto:" + settings.SupportEmail : settings.SupportUrl)
-                .Replace("%SALESEMAIL%", settings.SalesEmail)
-                .Replace("%DEMOURL%", string.IsNullOrEmpty(settings.DemoUrl) ? "mailto:" + settings.SalesEmail : settings.DemoUrl);
+            footerContent = NotifyTemplateResource.FooterCommonV10
+                .Replace("%SUPPORTURL%", string.IsNullOrEmpty(supportUrl) ? "mailto:" + supportEmail : supportUrl)
+                .Replace("%SALESEMAIL%", salesEmail)
+                .Replace("%DEMOURL%", string.IsNullOrEmpty(demoUrl) ? "mailto:" + salesEmail : demoUrl);
 
             footerSocialContent = settings.FooterSocialEnabled ? NotifyTemplateResource.SocialNetworksFooter : string.Empty;
         }
@@ -268,29 +261,23 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         footerContent = string.Empty;
         footerSocialContent = string.Empty;
 
-        if (settings == null)
+        if (settings.FooterEnabled)
         {
-            footerContent =
-                NotifyTemplateResource.FooterOpensourceV10
-                                      .Replace("%SUPPORTURL%", mailWhiteLabelSettingsHelper.DefaultMailForumUrl)
-                                      .Replace("%SALESEMAIL%", mailWhiteLabelSettingsHelper.DefaultMailSalesEmail)
-                                      .Replace("%DEMOURL%", mailWhiteLabelSettingsHelper.DefaultMailDemoUrl);
-            footerSocialContent = NotifyTemplateResource.SocialNetworksFooter;
+            var supportUrl = externalResourceSettingsHelper.Forum.GetDefaultRegionalDomain();
+            var supportEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("supportemail");
+            var salesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
+            var demoUrl = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("demoorder");
 
-        }
-        else if (settings.FooterEnabled)
-        {
-            footerContent =
-                NotifyTemplateResource.FooterOpensourceV10
-                .Replace("%SUPPORTURL%", mailWhiteLabelSettingsHelper.DefaultMailForumUrl)
-                .Replace("%SALESEMAIL%", settings.SalesEmail)
-                .Replace("%DEMOURL%", string.IsNullOrEmpty(settings.DemoUrl) ? "mailto:" + settings.SalesEmail : settings.DemoUrl);
+            footerContent = NotifyTemplateResource.FooterOpensourceV10
+                .Replace("%SUPPORTURL%", string.IsNullOrEmpty(supportUrl) ? "mailto:" + supportEmail : supportUrl)
+                .Replace("%SALESEMAIL%", salesEmail)
+                .Replace("%DEMOURL%", string.IsNullOrEmpty(demoUrl) ? "mailto:" + salesEmail : demoUrl);
 
             footerSocialContent = settings.FooterSocialEnabled ? NotifyTemplateResource.SocialNetworksFooter : string.Empty;
         }
     }
 
-    private async Task<string> GetUnsubscribeTextAsync(NoticeMessage message, MailWhiteLabelSettings settings)
+    private async Task<string> GetUnsubscribeTextAsync(NoticeMessage message)
     {
         var withoutUnsubscribe = message.GetArgument("WithoutUnsubscribe");
 
@@ -299,7 +286,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
             return string.Empty;
         }
 
-        var unsubscribeLink = await GetPortalUnsubscribeLinkAsync(message, settings);
+        var unsubscribeLink = await GetPortalUnsubscribeLinkAsync(message);
 
         if (string.IsNullOrEmpty(unsubscribeLink))
         {
@@ -308,12 +295,16 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
 
         var rootPath = message.GetArgument("__VirtualRootPath").Value;
 
+        var supportUrl = externalResourceSettingsHelper.Support.GetDefaultRegionalDomain();
+        var supportEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("supportemail");
+        var salesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
+
         return string.Format(NotifyTemplateResource.TextForFooterUnsubsribe, rootPath, unsubscribeLink)
-            .Replace("%SUPPORTURL%", string.IsNullOrEmpty(settings.SupportUrl) ? "mailto:" + settings.SupportEmail : settings.SupportUrl)
-            .Replace("%SALESEMAIL%", settings.SalesEmail);
+            .Replace("%SUPPORTURL%", string.IsNullOrEmpty(supportUrl) ? "mailto:" + supportEmail : supportUrl)
+            .Replace("%SALESEMAIL%", salesEmail);
     }
 
-    private async Task<string> GetPortalUnsubscribeLinkAsync(NoticeMessage message, MailWhiteLabelSettings settings)
+    private async Task<string> GetPortalUnsubscribeLinkAsync(NoticeMessage message)
     {
         var subscriptionConfigArgument = message.GetArgument("RecipientSubscriptionConfigURL");
 
@@ -333,10 +324,10 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
             return unsubscribeLink + "/notification";
         }
 
-        return await GetSiteUnsubscribeLinkAsync(message, settings);
+        return await GetSiteUnsubscribeLinkAsync(message);
     }
 
-    private async Task<string> GetSiteUnsubscribeLinkAsync(NoticeMessage message, MailWhiteLabelSettings settings)
+    private async Task<string> GetSiteUnsubscribeLinkAsync(NoticeMessage message)
     {
         var mail = message.Recipient.Addresses.FirstOrDefault(r => r.Contains('@'));
 
@@ -349,9 +340,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
                          ? "{0}/unsubscribe/{1}"
                          : "{0}/Unsubscribe.aspx?id={1}";
 
-        var site = settings == null
-                       ? mailWhiteLabelSettingsHelper.DefaultMailSiteUrl
-                       : settings.SiteUrl;
+        var site = externalResourceSettingsHelper.Site.GetDefaultRegionalDomain();
 
         var input = await instanceCrypto.EncryptAsync(Encoding.UTF8.GetBytes(mail.ToLowerInvariant()));
         return string.Format(format, site, WebEncoders.Base64UrlEncode(input));

@@ -65,7 +65,7 @@ public class CommonLinkUtility(
         TenantManager tenantManager,
         UserManager userManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
-        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
+        ExternalResourceSettingsHelper externalResourceSettingsHelper,
         ILoggerProvider options,
         AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
     : BaseCommonLinkUtility(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options)
@@ -163,14 +163,14 @@ public class CommonLinkUtility(
 
     public string GetSiteLink()
     {
-        var url = mailWhiteLabelSettingsHelper.DefaultMailSiteUrl;
+        var url = externalResourceSettingsHelper.Site.GetDefaultRegionalDomain();
 
         return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
     public string GetSupportEmail()
     {
-        var email = mailWhiteLabelSettingsHelper.DefaultMailSupportEmail;
+        var email = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("supportemail");
 
         return string.IsNullOrEmpty(email) ? string.Empty : email;
     }
