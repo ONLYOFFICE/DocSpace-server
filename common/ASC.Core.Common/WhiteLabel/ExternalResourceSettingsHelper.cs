@@ -29,20 +29,20 @@ namespace ASC.Core.Common.WhiteLabel;
 [Singleton]
 public class ExternalResourceSettingsHelper(IConfiguration configuration)
 {
-    public ExternalResource Api = new(configuration.GetSection("externalresources:api").Get<Dictionary<string, CultureSpecificExternalResource>>());
-    public ExternalResource Common = new(configuration.GetSection("externalresources:common").Get<Dictionary<string, CultureSpecificExternalResource>>());
-    public ExternalResource Forum = new(configuration.GetSection("externalresources:forum").Get<Dictionary<string, CultureSpecificExternalResource>>());
-    public ExternalResource Helpcenter = new(configuration.GetSection("externalresources:helpcenter").Get<Dictionary<string, CultureSpecificExternalResource>>());
-    public ExternalResource Integrations = new(configuration.GetSection("externalresources:integrations").Get<Dictionary<string, CultureSpecificExternalResource>>());
-    public ExternalResource Site = new(configuration.GetSection("externalresources:site").Get<Dictionary<string, CultureSpecificExternalResource>>());
-    public ExternalResource SocialNetworks = new(configuration.GetSection("externalresources:socialnetworks").Get<Dictionary<string, CultureSpecificExternalResource>>());
-    public ExternalResource Support = new(configuration.GetSection("externalresources:support").Get<Dictionary<string, CultureSpecificExternalResource>>());
-    public ExternalResource Videoguides = new(configuration.GetSection("externalresources:videoguides").Get<Dictionary<string, CultureSpecificExternalResource>>());
+    public readonly ExternalResource Api = new(configuration.GetSection("externalresources:api").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
+    public readonly ExternalResource Common = new(configuration.GetSection("externalresources:common").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
+    public readonly ExternalResource Forum = new(configuration.GetSection("externalresources:forum").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
+    public readonly ExternalResource Helpcenter = new(configuration.GetSection("externalresources:helpcenter").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
+    public readonly ExternalResource Integrations = new(configuration.GetSection("externalresources:integrations").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
+    public readonly ExternalResource Site = new(configuration.GetSection("externalresources:site").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
+    public readonly ExternalResource SocialNetworks = new(configuration.GetSection("externalresources:socialnetworks").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
+    public readonly ExternalResource Support = new(configuration.GetSection("externalresources:support").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
+    public readonly ExternalResource Videoguides = new(configuration.GetSection("externalresources:videoguides").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
 }
 
 public class ExternalResource(Dictionary<string, CultureSpecificExternalResource> cultureSpecificExternalResources)
 {
-    public readonly string DefaultCultureName = "default";
+    private const string DefaultCultureName = "default";
 
     public string GetDomain(string cultureName)
     {
@@ -110,7 +110,7 @@ public class ExternalResource(Dictionary<string, CultureSpecificExternalResource
         return BaseCommonLinkUtility.GetRegionalUrl(value, culture.TwoLetterISOLanguageName);
     }
 
-    public CultureSpecificExternalResource GetMerged(CultureInfo culture = null)
+    public CultureSpecificExternalResource GetCultureSpecificExternalResource(CultureInfo culture = null)
     {
         culture = culture ?? CultureInfo.CurrentCulture;
 

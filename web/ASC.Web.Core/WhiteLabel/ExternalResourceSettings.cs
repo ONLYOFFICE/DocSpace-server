@@ -35,15 +35,15 @@ public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
 
         return new()
         {
-            Api = helper.Api.GetMerged(culture),
-            Common = helper.Common.GetMerged(culture),
-            Forum = whiteLabelSettings.UserForumEnabled ? helper.Forum.GetMerged(culture) : null,
-            Helpcenter = whiteLabelSettings.HelpCenterEnabled ? helper.Helpcenter.GetMerged(culture) : null,
-            Integrations = helper.Integrations.GetMerged(culture),
-            Site = helper.Site.GetMerged(culture),
-            SocialNetworks = helper.SocialNetworks.GetMerged(culture),
-            Support = whiteLabelSettings.FeedbackAndSupportEnabled ? helper.Support.GetMerged(culture) : null,
-            Videoguides = whiteLabelSettings.VideoGuidesEnabled ? helper.Videoguides.GetMerged(culture) : null
+            Api = helper.Api.GetCultureSpecificExternalResource(culture),
+            Common = helper.Common.GetCultureSpecificExternalResource(culture),
+            Forum = whiteLabelSettings.UserForumEnabled ? helper.Forum.GetCultureSpecificExternalResource(culture) : null,
+            Helpcenter = whiteLabelSettings.HelpCenterEnabled ? helper.Helpcenter.GetCultureSpecificExternalResource(culture) : null,
+            Integrations = helper.Integrations.GetCultureSpecificExternalResource(culture),
+            Site = helper.Site.GetCultureSpecificExternalResource(culture),
+            SocialNetworks = helper.SocialNetworks.GetCultureSpecificExternalResource(culture),
+            Support = whiteLabelSettings.FeedbackAndSupportEnabled ? helper.Support.GetCultureSpecificExternalResource(culture) : null,
+            Videoguides = whiteLabelSettings.VideoGuidesEnabled ? helper.Videoguides.GetCultureSpecificExternalResource(culture) : null
         };
     }
 }
