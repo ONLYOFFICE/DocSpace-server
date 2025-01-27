@@ -24,16 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Common.Core;
+namespace ASC.Files.Core.IntegrationEvents.Events;
 
-public enum Area
+[ProtoContract]
+public record FormFillingReportIntegrationEvent : IntegrationEvent
 {
-    [SwaggerEnum("All")]
-    All,
+    private FormFillingReportIntegrationEvent() : base()
+    {
 
-    [SwaggerEnum("People")]
-    People,
+    }
 
-    [SwaggerEnum("Guests")]
-    Guests
+    public FormFillingReportIntegrationEvent(Guid createBy, int tenantId, int roomId, int originalFormId, string baseUri, bool terminate = false, IDictionary<string, string> headers = null)
+    : base(createBy, tenantId)
+    {
+        RoomId = roomId;
+        OriginalFormId = originalFormId;
+        Terminate = terminate;
+        BaseUri = baseUri;
+        Headers = headers;
+    }
+
+    [ProtoMember(1)]
+    public int RoomId { get; set; }
+
+    [ProtoMember(2)]
+    public int OriginalFormId { get; set; }
+
+    [ProtoMember(3)]
+    public string BaseUri { get; set; }
+
+    [ProtoMember(4)]
+    public bool Terminate { get; set; }
+
+    [ProtoMember(5)]
+    public IDictionary<string, string> Headers { get; set; }
 }

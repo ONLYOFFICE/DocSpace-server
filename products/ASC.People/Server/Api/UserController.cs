@@ -1233,7 +1233,7 @@ public class UserController(
         var viewerIsAdmin = await _userManager.IsDocSpaceAdminAsync(viewer);
         var user = await _userManager.GetUsersAsync(userid);
 
-        if (_userManager.IsSystemUser(user.Id))
+        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated)
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }

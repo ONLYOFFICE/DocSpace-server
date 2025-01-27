@@ -48,7 +48,7 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     [Tags("Modules")]
     [SwaggerResponse(200, "List of modules", typeof(string))]
     [HttpGet]
-    public IEnumerable<string> GetAll()
+    public IEnumerable<string> GetAllPortalModules()
     {
         var result = new List<string>();
 
