@@ -89,6 +89,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         var securityContext = serviceProvider.GetService<SecurityContext>();
         var globalHelper = serviceProvider.GetService<GlobalFolderHelper>();
         var fileStorageService = serviceProvider.GetService<FileStorageService>();
+        var roomLogoManager = serviceProvider.GetService<RoomLogoManager>();
         var dbFactory = serviceProvider.GetService<IDbContextFactory<FilesDbContext>>();
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var fileDao = daoFactory.GetFileDao<int>();
@@ -112,7 +113,8 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
                 };
             }
 
-            TemplateId = (await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, new List<FileShareParams>(), _tags, dtoLogo)).Id;
+            var template = await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, new List<FileShareParams>(), _tags, dtoLogo);
+            TemplateId = template.Id;
 
                 List<AceWrapper> wrappers = null;
                 if (_emails != null)
@@ -135,6 +137,16 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
                 };
 
                 var warning = await fileStorageService.SetAceObjectAsync(aceCollection, false);
+            }
+
+            if (_logo == null)
+            {
+                var room = await folderDao.GetFolderAsync(_roomId);
+                if (await roomLogoManager.CopyAsync(room, template))
+                {
+                    template.SettingsHasLogo = true;
+                    await folderDao.SaveFolderAsync(template);
+                }
             }
 
             _totalCount = await fileDao.GetFilesCountAsync(_roomId, FilterType.None, false, Guid.Empty, string.Empty, null, false, true);
