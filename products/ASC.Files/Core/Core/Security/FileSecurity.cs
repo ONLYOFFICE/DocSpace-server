@@ -1902,7 +1902,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
-        if (isAdmin)
+        if (isAdmin && searchArea != SearchArea.Templates)
         {
             return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, 
                 subjectFilter, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);

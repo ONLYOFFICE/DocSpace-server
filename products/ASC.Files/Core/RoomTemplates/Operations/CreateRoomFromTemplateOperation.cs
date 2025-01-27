@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Data;
 using ASC.Files.Core.RoomTemplates.Events;
 
 namespace ASC.Files.Core.RoomTemplates.Operations;
@@ -85,6 +84,7 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
         var globalHelper = serviceProvider.GetService<GlobalFolderHelper>();
         var fileStorageService = serviceProvider.GetService<FileStorageService>();
         var dbFactory = serviceProvider.GetService<IDbContextFactory<FilesDbContext>>();
+        var roomLogoManager = serviceProvider.GetService<RoomLogoManager>();
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var folderDao = daoFactory.GetFolderDao<int>();
 
@@ -109,7 +109,18 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
                 };
             }
 
-            RoomId = (await fileStorageService.CreateRoomFromTemplateAsync(_templateId, _title, _tags, dtoLogo)).Id;
+            var room = await fileStorageService.CreateRoomFromTemplateAsync(_templateId, _title, _tags, dtoLogo);
+            RoomId = room.Id;
+
+            if (_logo == null)
+            {
+                var template = await folderDao.GetFolderAsync(_templateId);
+                if (await roomLogoManager.CopyAsync(room, template))
+                {
+                    template.SettingsHasLogo = true;
+                    await folderDao.SaveFolderAsync(template);
+                }
+            }
 
             var fileDao = daoFactory.GetFileDao<int>();
             var files = await fileDao.GetFilesAsync(_templateId).ToListAsync();

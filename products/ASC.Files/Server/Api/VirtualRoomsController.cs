@@ -728,7 +728,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var parentId = inDto.SearchArea switch
         {
             SearchArea.Archive => await globalFolderHelper.GetFolderArchive(),
-            SearchArea.Templates => await globalFolderHelper.FolderRoomTemplatesAsync,
+            SearchArea.Templates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             _ => await globalFolderHelper.GetFolderVirtualRooms()
         };
 
