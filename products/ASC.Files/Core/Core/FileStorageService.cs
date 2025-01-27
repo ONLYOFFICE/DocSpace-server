@@ -705,9 +705,19 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (!await fileSecurity.CanCreateAsync(parent))
+        if (parent.FolderType == FolderType.RoomTemplates)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+            if (!await fileSecurity.CanCreateFromAsync(parent))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+            }
+        }
+        else
+        {
+            if (!await fileSecurity.CanCreateAsync(parent))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+            }
         }
 
         if (parent.RootFolderType == FolderType.Archive)

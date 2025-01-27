@@ -331,7 +331,17 @@ public class FileSecurity(IDaoFactory daoFactory,
     {
         return await CanCreateAsync(entry, authContext.CurrentAccount.ID);
     }
-    
+
+    public async Task<bool> CanCreateFromAsync<T>(FileEntry<T> entry)
+    {
+        return await CanCreateFromAsync(entry, authContext.CurrentAccount.ID);
+    }
+
+    public async Task<bool> CanCreateFromAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        return await CanAsync(entry, userId, FilesSecurityActions.CreateFrom);
+    }
+
     public async Task<bool> CanEditAsync<T>(FileEntry<T> entry, Guid userId)
     {
         return await CanAsync(entry, userId, FilesSecurityActions.Edit);
@@ -995,6 +1005,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                     if (folder.FolderType == FolderType.VirtualRooms && !isUser)
                     {
                         return action is FilesSecurityActions.Create or FilesSecurityActions.MoveTo;
+                    }
+
+                    if (folder.FolderType == FolderType.RoomTemplates && !isUser)
+                    {
+                        return action is FilesSecurityActions.CreateFrom or FilesSecurityActions.MoveTo;
                     }
 
                     if (folder.FolderType == FolderType.TRASH)
@@ -2617,6 +2632,9 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         [SwaggerEnum("Create")]
         Create,
+
+        [SwaggerEnum("CreateFrom")]
+        CreateFrom,
 
         [SwaggerEnum("Edit")]
         Edit,
