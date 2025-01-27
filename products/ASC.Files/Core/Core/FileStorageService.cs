@@ -2009,7 +2009,14 @@ public class FileStorageService //: IFileStorageService
         {
             FileEntry<T> entry = item.EntryType == FileEntryType.File ? files.Get(item.EntryId) : folders.Get(item.EntryId);
             entry.NotFoundIfNull();
-
+            
+            var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
+            var room = await daoFactory.GetCacheFolderDao<T>().GetFolderAsync(roomId);
+            
+            if (!await fileSecurity.CanEditRoomAsync(room))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
             if (!await fileSecurity.CanEditAsync(entry))
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
@@ -3853,7 +3860,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
         
-        if (!await fileSecurity.CanEditAsync(room))
+        if (!await fileSecurity.CanEditRoomAsync(room))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }

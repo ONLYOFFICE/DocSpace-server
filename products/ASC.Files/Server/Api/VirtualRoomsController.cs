@@ -704,9 +704,10 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [SwaggerResponse(200, "New tag name", typeof(object))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("tags")]
-    public async Task<object> CreateTagAsync(CreateTagRequestDto inDto)
+    public async Task<string> CreateTagAsync(CreateTagRequestDto inDto)
     {
-        return (await customTagsService.CreateTagAsync(inDto.Name)).Name;
+        var createdTag = await customTagsService.CreateTagAsync(inDto.Name);
+        return createdTag.Name;
     }
 
     /// <summary>
