@@ -14,6 +14,7 @@ spring:
   jpa:
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
         generate_statistics: ${JPA_HIBERNATE_GENERATE_STATS:false}
         jdbc:
           batch_size: ${JDBC_BATCH_SIZE:100}
