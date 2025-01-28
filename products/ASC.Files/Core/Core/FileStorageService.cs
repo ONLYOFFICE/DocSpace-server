@@ -635,7 +635,6 @@ public class FileStorageService //: IFileStorageService
 
         if (folder.ParentId is int parent && parent == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
-            await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.RoomManager, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         } 
         else
         {
