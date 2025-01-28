@@ -1069,7 +1069,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return true;
                 }
                 break;
-            case FolderType.VirtualRooms or FolderType.RoomTemplates:
+
+            case FolderType.RoomTemplates:
+                if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
+                {
+                    return true;
+                }
+                break;
+            case FolderType.VirtualRooms:
                 if (action == FilesSecurityActions.Delete && isRoom)
                 {
                     return false;

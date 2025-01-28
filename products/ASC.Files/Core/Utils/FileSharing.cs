@@ -141,7 +141,7 @@ public class FileSharingAceHelper(
             {
                 if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
                 {
-                    if (w.Access != FileShare.RoomManager && w.Access != FileShare.None || w.SubjectType != SubjectType.User && w.SubjectType != SubjectType.Group)
+                    if (w.Access != FileShare.Read && w.Access != FileShare.None || w.SubjectType != SubjectType.User && w.SubjectType != SubjectType.Group)
                     {
                         throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                     }

@@ -119,11 +119,11 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
                 List<AceWrapper> wrappers = null;
                 if (_emails != null)
                 {
-                    wrappers = _emails.Select(e => new AceWrapper() { Email = e, Access = FileShare.RoomManager }).ToList();
+                    wrappers = _emails.Select(e => new AceWrapper() { Email = e, Access = FileShare.Read }).ToList();
                 }
                 if (_groups != null)
                 {
-                    wrappers = _groups.Select(e => new AceWrapper() { Id = e, Access = FileShare.RoomManager, SubjectType = SubjectType.Group }).ToList();
+                    wrappers = _groups.Select(e => new AceWrapper() { Id = e, Access = FileShare.Read, SubjectType = SubjectType.Group }).ToList();
                 }
 
             if (wrappers != null)
