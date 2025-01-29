@@ -73,7 +73,7 @@ public class DocumentServiceLicense(ICache cache,
         return commandResponse;
     }
 
-    public async Task<bool> ValidateLicense(string resourceKey)
+    public async Task<bool> ValidateLicense(License license)
     {
         var attempt = 0;
 
@@ -91,7 +91,7 @@ public class DocumentServiceLicense(ICache cache,
                 return false;
             }
 
-            if (commandResponse.License.ResourceKey == resourceKey)
+            if (commandResponse.License.ResourceKey == license.ResourceKey || commandResponse.License.CustomerId == license.CustomerId)
             {
                 return commandResponse.Server is { ResultType: CommandResponse.ServerInfo.ResultTypes.Success or CommandResponse.ServerInfo.ResultTypes.SuccessLimit };
             }
