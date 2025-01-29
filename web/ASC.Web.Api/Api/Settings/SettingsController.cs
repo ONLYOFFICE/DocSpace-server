@@ -57,6 +57,7 @@ public partial class SettingsController(MessageService messageService,
         UserInvitationLimitHelper userInvitationLimitHelper,
         QuotaUsageManager quotaUsageManager,
         TenantDomainValidator tenantDomainValidator,
+        TenantLogoManager tenantLogoManager,
         ExternalShare externalShare,
         IMapper mapper,
         UserFormatter userFormatter,
@@ -110,7 +111,8 @@ public partial class SettingsController(MessageService messageService,
                 AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",
                 Url = configuration["deeplink:url"] ?? "",
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
-            }
+            },
+            LogoText = await tenantLogoManager.GetLogoTextAsync()
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
