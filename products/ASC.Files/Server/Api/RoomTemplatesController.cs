@@ -52,6 +52,12 @@ public class RoomTemplatesController(IEventBus eventBus,
                 Y = dto.Logo.Y
             };
         }
+        if (dto.Public)
+        {
+            dto.Share = null;
+            dto.Groups = new List<Guid> { Constants.GroupEveryone.ID };
+        }
+
         await eventBus.PublishAsync(new CreateRoomTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             RoomId = dto.RoomId,

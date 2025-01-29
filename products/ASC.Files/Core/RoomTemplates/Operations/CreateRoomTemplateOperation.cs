@@ -116,19 +116,20 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
             var template = await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, new List<FileShareParams>(), _tags, dtoLogo);
             TemplateId = template.Id;
 
-                List<AceWrapper> wrappers = null;
-                if (_emails != null)
-                {
-                    wrappers = _emails.Select(e => new AceWrapper() { Email = e, Access = FileShare.Read }).ToList();
-                }
-                if (_groups != null)
-                {
-                    wrappers = _groups.Select(e => new AceWrapper() { Id = e, Access = FileShare.Read, SubjectType = SubjectType.Group }).ToList();
-                }
+            List<AceWrapper> wrappers = null;
+            
+            if (_emails != null)
+            {
+                wrappers = _emails.Select(e => new AceWrapper() { Email = e, Access = FileShare.Read }).ToList();
+            }
+            if (_groups != null)
+            {
+                wrappers = _groups.Select(e => new AceWrapper() { Id = e, Access = FileShare.Read, SubjectType = SubjectType.Group }).ToList();
+            }
 
             if (wrappers != null)
             {
-                    var aceCollection = new AceCollection<int>
+                var aceCollection = new AceCollection<int>
                 {
                     Files = Array.Empty<int>(),
                     Folders = [TemplateId],
