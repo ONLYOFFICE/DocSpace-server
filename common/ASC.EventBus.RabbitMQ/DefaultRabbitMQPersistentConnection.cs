@@ -158,4 +158,11 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         await TryConnectAsync();
     }
+
+    public async Task<IConnection> GetConnection()
+    {
+        await TryConnectAsync();
+
+        return _connection;       
+    }
 }
