@@ -92,7 +92,10 @@ public class CoEditingConfig
 [EnumExtensions]
 public enum CoEditingConfigMode
 {
+    [SwaggerEnum("Fast")]
     Fast,
+
+    [SwaggerEnum("Strict")]
     Strict
 }
 
@@ -653,29 +656,18 @@ public class Paragraph
     [JsonPropertyName("runs")]
     public List<Run> Runs { get; set; }
 }
-public class Run
+public class Run(string text, bool usedInHash = true)
 {
-    private readonly bool _usedInHash;
-
-    internal bool UsedInHash => _usedInHash;
-
-    public Run(string text, bool usedInHash = true)
-    {
-        FontSize = "26";
-        Fill = [124, 124, 124];
-        Text = text;
-
-        _usedInHash = usedInHash;
-    }
+    internal bool UsedInHash => usedInHash;
 
     [JsonPropertyName("fill")]
-    public int[] Fill { get; set; }
+    public int[] Fill { get; set; } = [124, 124, 124];
 
     [JsonPropertyName("text")]
-    public string Text { get; set; }
+    public string Text { get; set; } = text;
 
     [JsonPropertyName("font-size")]
-    public string FontSize { get; set; }
+    public string FontSize { get; set; } = "26";
 }
 
 public class FileReference

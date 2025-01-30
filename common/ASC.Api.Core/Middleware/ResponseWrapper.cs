@@ -41,7 +41,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
         }
 
         var withStackTrace = true;
-        var criticalException = true;
+        var criticalException = false;
 
         switch (exception)
         {
@@ -65,7 +65,6 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             case AuthenticationException:
                 status = HttpStatusCode.Unauthorized;
                 withStackTrace = false;
-                criticalException = false;
                 break;
             case InvalidOperationException:
                 status = HttpStatusCode.Forbidden;
@@ -81,6 +80,9 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             case NotSupportedException:
                 status = HttpStatusCode.UnsupportedMediaType;
                 withStackTrace = false;
+                break;
+            default:
+                criticalException = true;
                 break;
         }
 

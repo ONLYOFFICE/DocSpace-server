@@ -419,7 +419,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         var dstKey = MakePath(newDomain, newPath);
         var size = await GetFileSizeAsync(srcDomain, srcPath);
 
-        storage.CopyObject(_bucket, srcKey, _bucket, dstKey, new CopyObjectOptions
+        await storage.CopyObjectAsync(_bucket, srcKey, _bucket, dstKey, new CopyObjectOptions
         {
             DestinationPredefinedAcl = GetDomainACL(newDomain)
         });

@@ -277,7 +277,7 @@ public class TariffService(
 
                 tariff = new Tariff
                 {
-                    Quotas = [new(quota.TenantId, 1)],
+                    Quotas = [new Quota(quota.TenantId, 1)],
                     DueDate = DateTime.UtcNow.AddDays(DefaultTrialPeriod)
                 };
 

@@ -228,7 +228,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                                 inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
 
                                 file = formDraft;
-                                fillingSessionId = string.Format("{0}_{1}", formDraft.Id, securityContext.CurrentAccount.ID);
+                                fillingSessionId = $"{formDraft.Id}_{securityContext.CurrentAccount.ID}";
                             }
                             else
                             {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,26 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.ApiSystem.Models;
+namespace ASC.Files.Core.IntegrationEvents.Events;
 
-/// <summary>
-/// Request parameters
-/// </summary>
-public class CoreSettingsModel
+[ProtoContract]
+public record FormFillingReportIntegrationEvent : IntegrationEvent
 {
-    /// <summary>
-    /// Tenant
-    /// </summary>
-    public int Tenant { get; set; } = -1;
+    private FormFillingReportIntegrationEvent() : base()
+    {
 
-    /// <summary>
-    /// Key
-    /// </summary>
-    [StringLength(255)]
-    public string Key { get; set; }
+    }
 
-    /// <summary>
-    /// Value
-    /// </summary>
-    public string Value { get; set; }
+    public FormFillingReportIntegrationEvent(Guid createBy, int tenantId, int roomId, int originalFormId, string baseUri, bool terminate = false, IDictionary<string, string> headers = null)
+    : base(createBy, tenantId)
+    {
+        RoomId = roomId;
+        OriginalFormId = originalFormId;
+        Terminate = terminate;
+        BaseUri = baseUri;
+        Headers = headers;
+    }
+
+    [ProtoMember(1)]
+    public int RoomId { get; set; }
+
+    [ProtoMember(2)]
+    public int OriginalFormId { get; set; }
+
+    [ProtoMember(3)]
+    public string BaseUri { get; set; }
+
+    [ProtoMember(4)]
+    public bool Terminate { get; set; }
+
+    [ProtoMember(5)]
+    public IDictionary<string, string> Headers { get; set; }
 }

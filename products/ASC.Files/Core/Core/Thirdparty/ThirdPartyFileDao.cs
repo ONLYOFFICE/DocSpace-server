@@ -582,7 +582,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return false;
     }
 
-    public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         var thirdFileId = Dao.MakeThirdId(fileId);
 
@@ -699,7 +699,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.FromResult(false);
     }
 
-    public string GetUniqThumbnailPath(File<string> file, int width, int height)
+    public string GetUniqThumbnailPath(File<string> file, uint width, uint height)
     {
         //Do nothing
         return null;
@@ -710,7 +710,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
 
-    public Task<Stream> GetThumbnailAsync(File<string> file, int width, int height)
+    public Task<Stream> GetThumbnailAsync(File<string> file, uint width, uint height)
     {
         return GetThumbnailAsync(file.Id, width, height);
     }
@@ -765,7 +765,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     public Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
-        return null;
+        return Task.FromResult(0);
     }
 
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)

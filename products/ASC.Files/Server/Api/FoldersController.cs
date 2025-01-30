@@ -59,20 +59,27 @@ public class FoldersControllerInternal(
     /// <path>api/2.0/files/folder/{folderId}/log</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "List of actions in the folder", typeof(HistoryDto))]
+    [SwaggerResponse(200, "List of actions in the folder", typeof(IAsyncEnumerable<HistoryDto>))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("folder/{folderId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(HistoryFolderRequestDto inDto)
+    public IAsyncEnumerable<HistoryDto> GetActivityHistoryAsync(HistoryFolderRequestDto inDto)
     {
         return historyApiHelper.GetFolderHistoryAsync(inDto.FolderId, inDto.FromDate, inDto.ToDate);
     }
-    
+
+    /// <summary>
+    /// Get form filter of a folder with id specified in request
+    /// </summary>
+    /// <short>Get folder form filter</short>
+    /// <path>api/2.0/files/{folderId}/formfilter</path>
+    [Tags("Files / Folders")]
     [AllowAnonymous]
+    [SwaggerResponse(200, "Ok", typeof(IEnumerable<FormsItemDto>))]
     [HttpGet("{folderId:int}/formfilter")]
-    public async Task<IEnumerable<FormsItemDto>> GetFolderAsync(int folderId)
+    public async Task<IEnumerable<FormsItemDto>> GetFolderAsync(FolderIdRequestDto<int> inDto)
     {
-        return (await formFillingReportCreator.GetFormsFields(folderId)).Select(r => new FormsItemDto(r.Key, r.Type));
+        return (await formFillingReportCreator.GetFormsFields(inDto.FolderId)).Select(r => new FormsItemDto(r.Key, r.Type));
     }
 }
 
@@ -130,7 +137,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [HttpDelete("folder/{folderId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolder<T> inDto)
     {
@@ -167,7 +174,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(404, "The required folder was not found")]
     [AllowAnonymous]
     [HttpGet("{folderId}")]
-    public async Task<FolderContentDto<T>> GetFolderAsync(GetFolderRequestDto<T> inDto)
+    public async Task<FolderContentDto<T>> GetFolderByFolderIdAsync(GetFolderRequestDto<T> inDto)
     {
 
         var split = inDto.Extension == null ? [] : inDto.Extension.Split(",");
@@ -205,7 +212,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}/path</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [HttpGet("folder/{folderId}/path")]
     public async IAsyncEnumerable<FileEntryDto> GetFolderPathAsync(FolderIdRequestDto<T> inDto)
@@ -225,7 +232,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/{folderId}/subfolders</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [HttpGet("{folderId}/subfolders")]
     public async IAsyncEnumerable<FileEntryDto> GetFoldersAsync(FolderIdRequestDto<T> inDto)
@@ -244,7 +251,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/{folderId}/news</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [HttpGet("{folderId}/news")]
     public async IAsyncEnumerable<FileEntryDto> GetNewItemsAsync(FolderIdRequestDto<T> inDto)
@@ -427,7 +434,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@root</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "List of section contents with the following parameters", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(200, "List of section contents with the following parameters", typeof(IAsyncEnumerable<FolderContentDto<int>>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@root")]

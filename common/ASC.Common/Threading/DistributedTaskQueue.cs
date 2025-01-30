@@ -43,14 +43,9 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
     /// </summary>
     private int _maxThreadsCount = 1;
     private string _name;
-    private int _timeUntilUnregisterInSeconds;
     private TaskScheduler Scheduler { get; set; } = TaskScheduler.Default;
 
-    public int TimeUntilUnregisterInSeconds
-    {
-        get => _timeUntilUnregisterInSeconds;
-        set => _timeUntilUnregisterInSeconds = value;
-    }
+    public int TimeUntilUnregisterInSeconds { get; set; }
 
     public string Name
     {

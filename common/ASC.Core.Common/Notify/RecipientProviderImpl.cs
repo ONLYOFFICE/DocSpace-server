@@ -31,27 +31,29 @@ namespace ASC.Core.Notify;
 [Scope(typeof(IRecipientProvider))]
 public class RecipientProviderImpl(UserManager userManager) : IRecipientProvider
 {
-    public virtual async Task<IRecipient> GetRecipientAsync(string id)
+    public async Task<IRecipient> GetRecipientAsync(string id)
     {
-        if (TryParseGuid(id, out var recID))
+        if (!TryParseGuid(id, out var recID))
         {
-            var user = await userManager.GetUsersAsync(recID);
-            if (user.Id != Constants.LostUser.Id)
-            {
-                return new DirectRecipient(user.Id.ToString(), user.ToString());
-            }
+            return null;
+        }
 
-            var group = await userManager.GetGroupInfoAsync(recID);
-            if (group.ID != Constants.LostGroupInfo.ID)
-            {
-                return new RecipientsGroup(group.ID.ToString(), group.Name);
-            }
+        var user = await userManager.GetUsersAsync(recID);
+        if (user.Id != Constants.LostUser.Id)
+        {
+            return new DirectRecipient(user.Id.ToString(), user.ToString());
+        }
+
+        var group = await userManager.GetGroupInfoAsync(recID);
+        if (group.ID != Constants.LostGroupInfo.ID)
+        {
+            return new RecipientsGroup(group.ID.ToString(), group.Name);
         }
 
         return null;
     }
 
-    public virtual async Task<IRecipient[]> GetGroupEntriesAsync(IRecipientsGroup group)
+    public async Task<IRecipient[]> GetGroupEntriesAsync(IRecipientsGroup group)
     {
         ArgumentNullException.ThrowIfNull(group);
 
@@ -69,7 +71,7 @@ public class RecipientProviderImpl(UserManager userManager) : IRecipientProvider
         return result.ToArray();
     }
 
-    public virtual async Task<IRecipientsGroup[]> GetGroupsAsync(IRecipient recipient)
+    public async Task<IRecipientsGroup[]> GetGroupsAsync(IRecipient recipient)
     {
         ArgumentNullException.ThrowIfNull(recipient);
 
@@ -87,17 +89,14 @@ public class RecipientProviderImpl(UserManager userManager) : IRecipientProvider
             }
             else if (recipient is IDirectRecipient)
             {
-                foreach (var group in (await userManager.GetUserGroupsAsync(recID, IncludeType.Distinct)))
-                {
-                    result.Add(new RecipientsGroup(group.ID.ToString(), group.Name));
-                }
+                result.AddRange((await userManager.GetUserGroupsAsync(recID, IncludeType.Distinct)).Select(group => new RecipientsGroup(group.ID.ToString(), group.Name)));
             }
         }
 
         return result.ToArray();
     }
 
-    public virtual async Task<string[]> GetRecipientAddressesAsync(IDirectRecipient recipient, string senderName)
+    public async Task<string[]> GetRecipientAddressesAsync(IDirectRecipient recipient, string senderName)
     {
         ArgumentNullException.ThrowIfNull(recipient);
 

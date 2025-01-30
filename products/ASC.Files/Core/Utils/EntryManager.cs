@@ -208,7 +208,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
         if (!files.Any())
         {
             return;
-}
+        }
 
         var pdfs = new List<File<T>>();
 
@@ -1542,13 +1542,13 @@ public class EntryManager(IDaoFactory daoFactory,
                     var originalForm = await fileDao.GetFileAsync(originalFormId);
 
                     await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{roomId}_{originalFormId}"))
-                {
+                    {
                         var origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId);
                         if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (origProperties.FormFilling.ResultsFileID == null || Equals(origProperties.FormFilling.ResultsFileID, default(T))))
-                    {
+                        {
                             await InitFormFillingFolders(file, room, origProperties, folderDao, fileDao, originalForm.CreateBy);
                             origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId);
-            }
+                        }
 
                         origProperties.FormFilling.ResultFormNumber++;
                         await fileDao.SaveProperties(originalFormId, origProperties);
@@ -1564,14 +1564,14 @@ public class EntryManager(IDaoFactory daoFactory,
                             var readyFormFolder = await folderDao.GetFoldersAsync(roomId, FolderType.ReadyFormFolder).FirstOrDefaultAsync();
                             var resultsFolderId = await CreateFormFillingFolder(title, readyFormFolder.Id, FolderType.FormFillingFolderDone, originalForm.CreateBy, folderDao);
 
-                            origProperties.FormFilling.ResultsFileID = await CreateCsvResult(resultsFolderId, originalForm.CreateBy, title, fileDao);
+                            origProperties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, originalForm.CreateBy, title, fileDao);
                             origProperties.FormFilling.ResultsFolderId = resultsFolderId;
 
                             await fileDao.SaveProperties(originalForm.Id, origProperties);
                         }
                         else if (resultFile == null || !resultFile.ParentId.Equals(resultFolder.Id))
                         {
-                            origProperties.FormFilling.ResultsFileID = await CreateCsvResult(resultFolder.Id, originalForm.CreateBy, Path.GetFileNameWithoutExtension(originalForm.Title), fileDao);
+                            origProperties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultFolder.Id, originalForm.CreateBy, Path.GetFileNameWithoutExtension(originalForm.Title), fileDao);
                             await fileDao.SaveProperties(originalForm.Id, origProperties);
                         }
 
@@ -1586,12 +1586,12 @@ public class EntryManager(IDaoFactory daoFactory,
 
                         File<T> result;
                         if (tmpStream.CanSeek)
-            {
+                        {
                             pdfFile.ContentLength = tmpStream.Length;
                             result = await fileDao.SaveFileAsync(pdfFile, tmpStream, false);
-            }
-            else
-            {
+                        }
+                        else
+                        {
                             var (buffered, isNew) = await tempStream.TryGetBufferedAsync(tmpStream);
                             try
                             {
@@ -1609,7 +1609,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         await notifyClient.SendFormSubmittedAsync(room, originalForm, pdfFile);
 
                         if (fillingSessionId != null)
-                {
+                        {
                             await distributedCache.SetStringAsync(fillingSessionId, result.Id.ToString());
                         }
 
@@ -1631,7 +1631,7 @@ public class EntryManager(IDaoFactory daoFactory,
                                     ResultsFileID = origProperties.FormFilling.ResultsFileID,
                                     ResultFormNumber = origProperties.FormFilling.ResultFormNumber
                                 }
-                };
+                            };
                             await fileDao.SaveProperties(result.Id, resProp);
 
                             var aces = await fileSharing.GetSharedInfoAsync(room);
@@ -1639,8 +1639,16 @@ public class EntryManager(IDaoFactory daoFactory,
 
                             await fileMarker.MarkAsNewAsync(result, users.Where(x => x != userId).ToList());
                             await socketManager.CreateFileAsync(result, users);
-                            
-                            await formFillingReportCreator.UpdateFormFillingReport(origProperties.FormFilling.ResultsFileID, resProp.FormFilling.ResultFormNumber, formsDataUrl, result);
+
+                            if (origProperties.FormFilling.OriginalFormId is int origFormId && origProperties.FormFilling.RoomId is int rId)
+                            {
+                                await formFillingReportCreator.UpdateFormFillingReport(
+                                   origFormId,
+                                   rId,
+                                   resProp.FormFilling.ResultFormNumber,
+                                   formsDataUrl,
+                                   result);
+                            }
 
                             if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                             {
@@ -1652,8 +1660,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
                                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
                                 await linkDao.DeleteAllLinkAsync(file.Id);
-            }
                             }
+                        }
                         catch(Exception ex)
                         {
                             logger.LogError(ex, "Form submission error");
@@ -1688,24 +1696,26 @@ public class EntryManager(IDaoFactory daoFactory,
         return file;
     }
 
-    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
+    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false)
     {
         var token = externalShare.GetKey();
+        
+        var file = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+        if (file == null)
+        {
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var docKey = await documentServiceHelper.GetDocKeyAsync(file);
         
         bool checkRight;
         if ((await fileTracker.GetEditingByAsync(fileId)).Contains(userId))
         {
-            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone, token);
+            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token);
             if (!checkRight)
             {
                 return null;
             }
-        }
-
-        var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
-        if (file == null)
-        {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
         
         if (!await CanEditAsync(userId, file))
@@ -1723,7 +1733,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone, token);
+        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token);
         if (checkRight)
         {
             await fileTracker.ChangeRight(fileId, userId, false);
@@ -2149,17 +2159,17 @@ public class EntryManager(IDaoFactory daoFactory,
         return await folderDao.SaveFolderAsync(folder);
     }
     
-    private async Task<T> CreateCsvResult<T>(T resultsFolderId, Guid createBy, string sourceTitle, IFileDao<T> fileDao)
+    private async Task<T> CreateFillResultsFile<T>(T resultsFolderId, Guid createBy, string sourceTitle, IFileDao<T> fileDao)
     {
         using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(""));
-            var csvFile = serviceProvider.GetService<File<T>>();
-            csvFile.ParentId = resultsFolderId;
-            csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".csv");
-            csvFile.CreateBy = createBy;
+        var resultsFile = serviceProvider.GetService<File<T>>();
+        resultsFile.ParentId = resultsFolderId;
+        resultsFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".xlsx");
+        resultsFile.CreateBy = createBy;
 
-            var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
+        var file = await fileDao.SaveFileAsync(resultsFile, textStream, false);
 
-            return file.Id;
+        return file.Id;
         }
     
     private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
@@ -2179,7 +2189,7 @@ public class EntryManager(IDaoFactory daoFactory,
         properties.FormFilling.ResultsFolderId = resultsFolderId;
         properties.FormFilling.CollectFillForm = true;
 
-        properties.FormFilling.ResultsFileID = await CreateCsvResult(resultsFolderId, createBy, sourceTitle, fileDao);
+        properties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, createBy, sourceTitle, fileDao);
 
         await fileDao.SaveProperties(sourceFileId, properties);
 

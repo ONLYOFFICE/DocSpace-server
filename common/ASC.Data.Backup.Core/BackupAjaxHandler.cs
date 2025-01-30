@@ -258,7 +258,7 @@ public class BackupAjaxHandler(
             }
 
             schedule.StorageType = BackupStorageType.ThirdPartyConsumer;
-            schedule.StorageParams = new();
+            schedule.StorageParams = new Dictionary<string, string>();
             foreach (var r in consumer.AdditionalKeys)
             {
                 schedule.StorageParams.Add(r, await consumer.GetAsync(r));
@@ -307,7 +307,14 @@ public class BackupAjaxHandler(
 
     #region restore
 
-    public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify, string serverBaseUri)
+    public async Task<string> StartRestoreAsync(string backupId,
+        BackupStorageType storageType,
+        Dictionary<string, string> storageParams, 
+        bool notify,
+        string serverBaseUri,
+        bool dump,
+        bool enqueueTask = true, 
+        string taskId = null)
     {
         await DemandPermissionsRestoreAsync();
         var tenantId = GetCurrentTenantIdAsync();
@@ -316,7 +323,8 @@ public class BackupAjaxHandler(
             TenantId = tenantId,
             NotifyAfterCompletion = notify,
             StorageParams = storageParams,
-            ServerBaseUri = serverBaseUri
+            ServerBaseUri = serverBaseUri,
+            Dump =  dump
         };
 
         if (Guid.TryParse(backupId, out var guidBackupId))
@@ -328,7 +336,7 @@ public class BackupAjaxHandler(
             restoreRequest.StorageType = storageType;
             restoreRequest.FilePathOrId = storageParams["filePath"];
 
-            if (restoreRequest.StorageType == BackupStorageType.Local)
+            if (restoreRequest.StorageType == BackupStorageType.Local && enqueueTask)
             {
                 var path = await GetTmpFilePathAsync(tenantId);
                 path = File.Exists(path + ".tar.gz") ? path + ".tar.gz" : path + ".tar";
@@ -336,7 +344,7 @@ public class BackupAjaxHandler(
             }
         }
 
-        await backupService.StartRestoreAsync(restoreRequest);
+        return await backupService.StartRestoreAsync(restoreRequest, enqueueTask, taskId);
     }
 
     public async Task<BackupProgress> GetRestoreProgressAsync()

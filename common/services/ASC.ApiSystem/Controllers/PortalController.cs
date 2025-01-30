@@ -266,7 +266,7 @@ public class PortalController(
 
                 var tariff = new Tariff
                 {
-                    Quotas = [new(trialQuotaId, 1)],
+                    Quotas = [new Quota(trialQuotaId, 1)],
                     DueDate = dueDate
                 };
                 await hostedSolution.SetTariffAsync(t.Id, tariff);
@@ -494,7 +494,7 @@ public class PortalController(
     /// <summary>
     /// Gets a list of portals
     /// </summary>
-    /// <path>apisystem/portal</path>
+    /// <path>apisystem/portal/get</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpGet("get")]

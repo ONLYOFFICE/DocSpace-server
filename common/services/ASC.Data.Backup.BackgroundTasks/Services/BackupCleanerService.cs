@@ -66,10 +66,6 @@ internal sealed class BackupCleanerService(
                     backupsToRemove.AddRange(scheduledBackupsToRemove);
                 }
             }
-            else
-            {
-                backupsToRemove.AddRange(scheduledBackups);
-            }
         }
 
         foreach (var backupRecord in backupsToRemove)

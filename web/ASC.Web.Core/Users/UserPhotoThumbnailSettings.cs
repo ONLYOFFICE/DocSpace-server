@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Size = ASC.Web.Core.WhiteLabel.Size;
+
 namespace ASC.Web.Core.Users;
 
 public class UserPhotoThumbnailSettings : ISettings<UserPhotoThumbnailSettings>
@@ -38,16 +40,16 @@ public class UserPhotoThumbnailSettings : ISettings<UserPhotoThumbnailSettings>
 
     }
 
-    public UserPhotoThumbnailSettings(Point point, Size size)
+    public UserPhotoThumbnailSettings(Point point, MagickGeometry size)
     {
         Point = point;
         Size = size;
     }
 
-    public UserPhotoThumbnailSettings(int x, int y, int width, int height)
+    public UserPhotoThumbnailSettings(int x, int y, uint width, uint height)
     {
         Point = new Point(x, y);
-        Size = new Size(width, height);
+        Size = new MagickGeometry(width, height);
     }
 
     public Point Point { get; init; }
@@ -61,7 +63,7 @@ public class UserPhotoThumbnailSettings : ISettings<UserPhotoThumbnailSettings>
         return new UserPhotoThumbnailSettings
         {
             Point = new Point(0, 0),
-            Size = new Size(UserPhotoManager.MaxFotoSize.Width, UserPhotoManager.MaxFotoSize.Height),
+            Size = new MagickGeometry(UserPhotoManager.MaxFotoSize.Width, UserPhotoManager.MaxFotoSize.Height),
             IsDefault = true
         };
     }
