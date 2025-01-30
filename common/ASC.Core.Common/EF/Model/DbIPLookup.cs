@@ -164,40 +164,86 @@ public static class DbIPLookupExtension
         {
             entity.ToTable("dbip_lookup");
 
-            // Composite Key
             entity.HasKey(e => new { e.AddrType, e.IPStart });
 
-            // Properties Configuration
             entity.Property(e => e.AddrType)
-                .IsRequired()
-                .HasColumnName("addr_type")
-                .HasColumnType("text"); // PostgreSQL does not have 'enum', so 'text' is used
+                  .IsRequired()
+                  .HasColumnName("addr_type")
+                  .HasColumnType("text");
 
             entity.Property(e => e.IPStart)
-                .IsRequired()
-                .HasColumnName("ip_start")
-                .HasColumnType("bytea"); // 'bytea' is used for binary data in PostgreSQL
+                  .IsRequired()
+                  .HasColumnName("ip_start")
+                  .HasColumnType("bytea");
 
             entity.Property(e => e.IPEnd)
-                .IsRequired()
-                .HasColumnName("ip_end")
-                .HasColumnType("bytea");
+                  .IsRequired()
+                  .HasColumnName("ip_end")
+                  .HasColumnType("bytea");
 
             entity.Property(e => e.Continent)
-                .IsRequired()
-                .HasColumnName("continent")
-                .HasColumnType("char(2)"); // Fixed length 'char'
+                  .IsRequired()
+                  .HasColumnName("continent")
+                  .HasColumnType("char(2)");
 
             entity.Property(e => e.Country)
-                .IsRequired()
-                .HasColumnName("country")
-                .HasColumnType("char(2)");
+                  .IsRequired()
+                  .HasColumnName("country")
+                  .HasColumnType("char(2)");
 
             entity.Property(e => e.StateProvCode)
-                .HasColumnName("stateprov_code")
-                .HasColumnType("character varying(15)");
+                  .HasColumnName("stateprov_code")
+                  .HasColumnType("varchar(15)");
 
-            // Add any additional properties here that you need to support
+            entity.Property(e => e.StateProv)
+                  .IsRequired()
+                  .HasColumnName("stateprov")
+                  .HasColumnType("varchar(80)");
+
+            entity.Property(e => e.District)
+                  .IsRequired()
+                  .HasColumnName("district")
+                  .HasColumnType("varchar(80)");
+
+            entity.Property(e => e.City)
+                  .IsRequired()
+                  .HasColumnName("city")
+                  .HasColumnType("varchar(80)");
+
+            entity.Property(e => e.ZipCode)
+                  .HasColumnName("zipcode")
+                  .HasColumnType("varchar(20)");
+
+            entity.Property(e => e.Latitude)
+                  .IsRequired()
+                  .HasColumnName("latitude")
+                  .HasColumnType("real");
+
+            entity.Property(e => e.Longitude)
+                  .IsRequired()
+                  .HasColumnName("longitude")
+                  .HasColumnType("real");
+
+            entity.Property(e => e.GeonameId)
+                  .IsRequired(false)
+                  .HasColumnName("geoname_id")
+                  .HasColumnType("integer");
+
+            entity.Property(e => e.TimezoneOffset)
+                  .IsRequired()
+                  .HasColumnName("timezone_offset")
+                  .HasColumnType("real");
+
+            entity.Property(e => e.TimezoneName)
+                  .IsRequired()
+                  .HasColumnName("timezone_name")
+                  .HasColumnType("varchar(64)");
+
+            entity.Property(e => e.WeatherCode)
+                  .IsRequired()
+                  .HasColumnName("weather_code")
+                  .HasColumnType("varchar(10)");
         });
+
     }
 }
