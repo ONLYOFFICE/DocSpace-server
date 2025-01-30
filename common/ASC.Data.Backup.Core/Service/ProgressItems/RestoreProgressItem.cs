@@ -43,7 +43,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private string _region;
     private string _upgradesPath;
     private string _serverBaseUri;
-    private bool _dump;
     
     public RestoreProgressItem(
         IConfiguration configuration,
@@ -81,7 +80,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         _upgradesPath = upgradesPath;
         _region = region;
         _serverBaseUri = request.ServerBaseUri;
-        _dump = request.Dump;
+        Dump = request.Dump;
     }
 
     protected override async Task DoJob()
@@ -137,7 +136,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             columnMapper.SetMapping("tenants_tenants", "alias", tenant.Alias, Guid.Parse(Id).ToString("N"));
             columnMapper.Commit();
 
-            restoreTask.Init(_region, tempFile, _dump, TenantId, columnMapper, _upgradesPath);
+            restoreTask.Init(_region, tempFile, Dump, TenantId, columnMapper, _upgradesPath);
             restoreTask.ProgressChanged = async args =>
             {
                 Percentage = Percentage = 10d + 0.65 * args.Progress;

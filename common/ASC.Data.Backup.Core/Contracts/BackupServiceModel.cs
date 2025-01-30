@@ -103,7 +103,7 @@ public class TransferRegion
 
 public class StartRestoreRequest
 {
-    public int TenantId { get; init; }
+    public int TenantId { get; set; }
     public Guid BackupId { get; set; }
     public BackupStorageType StorageType { get; set; }
     public string FilePathOrId { get; set; }

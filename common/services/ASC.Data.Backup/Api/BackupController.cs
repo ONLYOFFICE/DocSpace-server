@@ -60,7 +60,7 @@ public class BackupController(
     [SwaggerResponse(200, "Backup schedule", typeof(BackupAjaxHandler.Schedule))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackupschedule")]
-    public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule(ScheduleDto dto)
+    public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule(DumpDto dto)
     {
         return await backupAjaxHandler.GetScheduleAsync(dto.Dump);
     }
@@ -123,9 +123,13 @@ public class BackupController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackupschedule")]
-    public async Task<bool> DeleteBackupSchedule()
+    public async Task<bool> DeleteBackupSchedule(DumpDto dto)
     {
-        await backupAjaxHandler.DeleteScheduleAsync();
+        if (dto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        await backupAjaxHandler.DeleteScheduleAsync(dto.Dump);
 
         return true;
     }
@@ -204,7 +208,7 @@ public class BackupController(
              serverBaseUri: serverBaseUri
         ));
 
-        return await backupAjaxHandler.GetBackupProgressAsync();
+        return await backupAjaxHandler.GetBackupProgressAsync(inDto.Dump);
     }
 
     /// <summary>
@@ -217,9 +221,13 @@ public class BackupController(
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
-    public async Task<BackupProgress> GetBackupProgressAsync()
+    public async Task<BackupProgress> GetBackupProgressAsync(DumpDto dto)
     {
-        return await backupAjaxHandler.GetBackupProgressAsync();
+        if (dto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        return await backupAjaxHandler.GetBackupProgressAsync(dto.Dump);
     }
 
     /// <summary>
@@ -232,9 +240,13 @@ public class BackupController(
     [SwaggerResponse(200, "List of backup history records", typeof(List<BackupHistoryRecord>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackuphistory")]
-    public async Task<List<BackupHistoryRecord>> GetBackupHistory()
+    public async Task<List<BackupHistoryRecord>> GetBackupHistory(DumpDto dto)
     {
-        return await backupAjaxHandler.GetBackupHistory();
+        if (dto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        return await backupAjaxHandler.GetBackupHistoryAsync(dto.Dump);
     }
 
     /// <summary>
@@ -261,9 +273,13 @@ public class BackupController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackuphistory")]
-    public async Task<bool> DeleteBackupHistory()
+    public async Task<bool> DeleteBackupHistory(DumpDto dto)
     {
-        await backupAjaxHandler.DeleteAllBackupsAsync();
+        if (dto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        await backupAjaxHandler.DeleteAllBackupsAsync(dto.Dump);
         return true;
     }
 
@@ -281,6 +297,11 @@ public class BackupController(
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
     {
+        if (inDto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
         await backupAjaxHandler.DemandPermissionsRestoreAsync();
 
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
@@ -322,7 +343,7 @@ public class BackupController(
                         ));
 
 
-        return await backupAjaxHandler.GetRestoreProgressAsync();
+        return await backupAjaxHandler.GetRestoreProgressAsync(inDto.Dump);
     }
 
     /// <summary>
@@ -336,9 +357,13 @@ public class BackupController(
     [HttpGet("getrestoreprogress")]  //NOTE: this method doesn't check payment!!!
     [AllowAnonymous]
     [AllowNotPayment]
-    public async Task<BackupProgress> GetRestoreProgressAsync()
+    public async Task<BackupProgress> GetRestoreProgressAsync(DumpDto dto)
     {
-        return await backupAjaxHandler.GetRestoreProgressAsync();
+        if (dto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        return await backupAjaxHandler.GetRestoreProgressAsync(dto.Dump);
     }
 
     /// <summary>

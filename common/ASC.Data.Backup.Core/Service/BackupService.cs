@@ -33,7 +33,9 @@ public class BackupService(
         ILogger<BackupService> logger,
         BackupStorageFactory backupStorageFactory,
         BackupWorker backupWorker,
-        BackupRepository backupRepository)
+        BackupRepository backupRepository,
+        TenantExtra tenantExtra,
+        TenantManager tenantManager)
     {
     public async Task<string> StartBackupAsync(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
     {
@@ -48,6 +50,14 @@ public class BackupService(
     public async Task DeleteBackupAsync(Guid backupId)
     {
         var backupRecord = await backupRepository.GetBackupRecordAsync(backupId);
+        if(backupRecord.TenantId == -1)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        if (backupRecord.TenantId != tenantManager.GetCurrentTenantId())
+        {
+            return;
+        }
         await backupRepository.DeleteBackupRecordAsync(backupRecord.Id);
 
         var storage = await backupStorageFactory.GetBackupStorageAsync(backupRecord);
@@ -153,6 +163,11 @@ public class BackupService(
         return await backupWorker.GetBackupProgressAsync(tenantId);
     }
 
+    public async Task<BackupProgress> GetDumpBackupProgress()
+    {
+        return await backupWorker.GetDumpBackupProgressAsync();
+    }
+
     public async Task<BackupProgress> GetTransferProgress(int tenantId)
     {
         return await backupWorker.GetTransferProgressAsync(tenantId);
@@ -161,6 +176,11 @@ public class BackupService(
     public async Task<BackupProgress> GetRestoreProgress(int tenantId)
     {
         return await backupWorker.GetRestoreProgressAsync(tenantId);
+    }
+
+    public async Task<BackupProgress> GetDumpRestoreProgress()
+    {
+        return await backupWorker.GetDumpRestoreProgressAsync();
     }
 
     public string GetTmpFolder()

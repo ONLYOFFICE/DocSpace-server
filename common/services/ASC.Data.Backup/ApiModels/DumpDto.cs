@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.ApiModels;
 
-public class ScheduleDto
+public class DumpDto
 {
     [FromQuery]
     public bool Dump { get; set; }

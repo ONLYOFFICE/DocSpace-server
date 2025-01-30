@@ -44,7 +44,6 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
     private string _storageBasePath;
     private int _limit;
     private string _serverBaseUri;
-    private bool _dump;
 
     public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit)
     {
@@ -58,7 +57,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         _isScheduled = isScheduled;
         _tempFolder = tempFolder;
         _limit = limit;
-        _dump = schedule.Dump;
+        Dump = schedule.Dump;
     }
 
     public void Init(StartBackupRequest request, bool isScheduled, string tempFolder, int limit)
@@ -73,7 +72,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         _isScheduled = isScheduled;
         _tempFolder = tempFolder;
         _limit = limit;
-        _dump = request.Dump;
+        Dump = request.Dump;
         _serverBaseUri = request.ServerBaseUri;
     }
 
@@ -99,7 +98,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
             var backupStorage = await backupStorageFactory.GetBackupStorageAsync(_storageType, TenantId, _storageParams);
 
             var getter = backupStorage as IGetterWriteOperator;
-            var name = _dump ? "workspace" : (await tenantManager.GetTenantAsync(TenantId)).Alias;
+            var name = Dump ? "workspace" : (await tenantManager.GetTenantAsync(TenantId)).Alias;
             var backupName = string.Format("{0}_{1:yyyy-MM-dd_HH-mm-ss}.{2}", name, dateTime, await getter.GetBackupExtensionAsync(_storageBasePath));
 
             tempFile = CrossPlatform.PathCombine(_tempFolder, backupName);
@@ -107,7 +106,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
 
             var writer = await DataOperatorFactory.GetWriteOperatorAsync(tempStream, _storageBasePath, backupName, _tempFolder, _userId, getter);
 
-            backupPortalTask.Init(TenantId, tempFile, _limit, writer, _dump);
+            backupPortalTask.Init(TenantId, tempFile, _limit, writer, Dump);
 
             backupPortalTask.ProgressChanged = async args =>
             {
@@ -131,6 +130,12 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
             }
             Link = await backupStorage.GetPublicLinkAsync(storagePath);
 
+            var backupTenant = TenantId;
+            if (Dump)
+            {
+                backupTenant = -1;
+                _storageParams.TryAdd("tenantId", TenantId.ToString());
+            }
             await backupRepository.SaveBackupRecordAsync(
                 new BackupRecord
                 {

@@ -57,6 +57,18 @@ public abstract class BaseBackupProgressItem(IServiceScopeFactory serviceScopeFa
         }
     }
 
+
+    private bool _dump;
+    public bool Dump
+    {
+        get => _dump;
+        set
+        {
+            _dump = value;
+            this[nameof(_dump)] = value;
+        }
+    }
+
     public string Link
     {
         get

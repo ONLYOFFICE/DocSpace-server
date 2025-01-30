@@ -38,7 +38,7 @@ public class BackupWorker(
 
     public string TempFolder { get; } = Path.Combine(tempPath.GetTempPath(), "backup");
 
-    private DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
+    private DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME); // 1 day
     private int _limit;
     private string _upgradesPath;
     
@@ -140,6 +140,14 @@ public class BackupWorker(
         }
     }
 
+    public async Task<BackupProgress> GetDumpBackupProgressAsync()
+    {
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
+        {
+            return ToBackupProgress((await _progressQueue.GetAllTasks<BackupProgressItem>()).FirstOrDefault(t => t.Dump && t.BackupProgressItemType == BackupProgressItemType.Backup));
+        }
+    }
+
     public async Task<BackupProgress> GetTransferProgressAsync(int tenantId)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
@@ -155,6 +163,15 @@ public class BackupWorker(
             return ToBackupProgress((await _progressQueue.GetAllTasks<RestoreProgressItem>()).FirstOrDefault(t => (t.TenantId == tenantId || t.NewTenantId == tenantId) && t.BackupProgressItemType == BackupProgressItemType.Restore));
         }
     }
+
+    public async Task<BackupProgress> GetDumpRestoreProgressAsync()
+    {
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
+        {
+            return ToBackupProgress((await _progressQueue.GetAllTasks<RestoreProgressItem>()).FirstOrDefault(t => t.Dump && t.BackupProgressItemType == BackupProgressItemType.Restore));
+        }
+    }
+
 
     public async Task ResetBackupErrorAsync(int tenantId)
     {
