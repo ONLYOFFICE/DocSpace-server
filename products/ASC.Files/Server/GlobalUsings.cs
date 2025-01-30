@@ -53,6 +53,7 @@ global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Core.Core;
+global using ASC.Files.Core.Core.Entries;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;

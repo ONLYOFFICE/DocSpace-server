@@ -298,9 +298,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public Task<FormRoleParams> DbFormUserRoleQueryAsync(int tenantId, int formId, Guid userId)
+    public IAsyncEnumerable<FormRole> DbFormUserRolesQueryAsync(int tenantId, int formId, Guid userId)
     {
-        return FileQueries.DbFormUserRoleQueryAsync(this, tenantId, formId, userId);
+        return FileQueries.DbFormUserRolesQueryAsync(this, tenantId, formId, userId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
@@ -310,9 +310,15 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<FormRoleParams> DbFormRolesAsync(int tenantId, int formId)
+    public IAsyncEnumerable<FormRole> DbFormRolesAsync(int tenantId, int formId)
     {
         return FileQueries.DbFormRolesAsync(this, tenantId, formId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<DbFilesFormRoleMapping> FilesFormRoleAsync(int tenantId, int formId, int roleId, Guid userId)
+    {
+        return FileQueries.FilesFormRoleAsyncAsync(this, tenantId, formId, roleId, userId);
     }
 
 }
@@ -888,14 +894,15 @@ static file class FileQueries
                 .Where(r => r.FormId == formId)
                 .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, int, Guid, Task<FormRoleParams>> DbFormUserRoleQueryAsync =
+    public static readonly Func<FilesDbContext, int, int, Guid, IAsyncEnumerable<FormRole>> DbFormUserRolesQueryAsync =
     Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
         (FilesDbContext ctx, int tenantId, int formId, Guid userId) =>
             ctx.FilesFormRoleMapping
                 .Where(r => r.TenantId == tenantId)
                 .Where(r => r.FormId == formId)
                 .Where(r => r.UserId == userId)
-                .Select(r => new FormRoleParams
+                .OrderBy(r => r.Sequence)
+                .Select(r => new FormRole
                 {
                     RoleId = r.RoleId,
                     UserId = r.UserId,
@@ -903,7 +910,7 @@ static file class FileQueries
                     Sequence = r.Sequence,
                     Submitted = r.Submitted
                 })
-                .FirstOrDefault());
+        );
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> DbFormRoleCurrentStepAsync =
     Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -916,14 +923,14 @@ static file class FileQueries
                 .Select(r => r.Sequence)
                 .FirstOrDefault());
 
-    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<FormRoleParams>> DbFormRolesAsync =
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<FormRole>> DbFormRolesAsync =
     Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
         (FilesDbContext ctx, int tenantId, int formId) =>
             ctx.FilesFormRoleMapping
                 .Where(r => r.TenantId == tenantId)
                 .Where(r => r.FormId == formId)
                 .OrderBy(r => r.Sequence)
-                .Select(r => new FormRoleParams
+                .Select(r => new FormRole
                 {
                     RoleId = r.RoleId,
                     UserId = r.UserId,
@@ -931,4 +938,9 @@ static file class FileQueries
                     Sequence = r.Sequence,
                     Submitted = r.Submitted
                 }));
+
+    public static readonly Func<FilesDbContext, int, int, int, Guid, Task<DbFilesFormRoleMapping>> FilesFormRoleAsyncAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int formId, int roleId, Guid userId) =>
+                ctx.FilesFormRoleMapping.FirstOrDefault(r => r.TenantId == tenantId && r.FormId == formId && r.RoleId == roleId && r.UserId == userId));
 }

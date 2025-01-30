@@ -536,7 +536,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpPost("file/{fileId}/formrolemapping")]
     public async Task SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
     {
-        await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.FormRolesParams);
+        await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
     }
 }
 

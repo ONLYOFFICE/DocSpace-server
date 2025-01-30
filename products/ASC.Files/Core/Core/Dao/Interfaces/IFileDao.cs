@@ -277,16 +277,16 @@ public interface IFileDao<T>
     /// Save form role mappings
     /// </summary>
     /// <param name="formId"></param>
-    /// <param name="formRolesParams"></param>
+    /// <param name="formRoles"></param>
     /// <returns></returns>
-    Task SaveFormRoleMapping(T formId, IEnumerable<FormRoleParams> formRolesParams);
+    Task SaveFormRoleMapping(T formId, IEnumerable<FormRole> formRoles);
 
     /// <summary>
     /// Get form role mappings
     /// </summary>
     /// <param name="formId"></param>
     /// <returns></returns>
-    Task<FormRoleParams> GetFormRoles(T formId);
+    IAsyncEnumerable<FormRole> GetFormRoles(T formId);
 
     /// <summary>
     /// Get form role mappings
@@ -294,7 +294,22 @@ public interface IFileDao<T>
     /// <param name="formId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<(int, FormRoleParams)> GetUserFormRole(T formId, Guid userId);
+    Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(T formId, Guid userId);
+    /// <summary>
+    /// Updates user role
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <param name="formRole"></param>
+    /// <returns></returns>
+    Task<FormRole> ChangeUserFormRoleAsync(T formId, FormRole formRole);
+
+    /// <summary>
+    /// Deletes roles for form
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <returns></returns>
+    Task DeleteFormRolesAsync(T formId);
+
     string GetUniqFilePath(File<T> file, string fileTitle);
 
     #region chunking

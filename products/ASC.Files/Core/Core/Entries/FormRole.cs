@@ -24,33 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels;
+namespace ASC.Files.Core.Core.Entries;
 
-public class FormRoleParams
+public class FormRole
 {
-    /// <summary>
-    /// Role ID
-    /// </summary>
+
     public int RoleId { get; set; }
 
-    /// <summary>
-    /// User ID assigned to a role
-    /// </summary>
     public Guid UserId { get; set; }
 
-    /// <summary>
-    /// Role name
-    /// </summary>
     public string RoleName { get; set; }
 
-    /// <summary>
-    /// Sequential number in the queue 
-    /// </summary>
     public int Sequence { get; set; }
 
-    /// <summary>
-    /// Specifies whether the form submission process for this role is finished or not
-    /// </summary>
     public bool Submitted { get; set; }
 
 }

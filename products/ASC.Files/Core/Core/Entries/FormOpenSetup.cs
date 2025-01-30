@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,17 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.Files.Core.Core.Entries;
 
-public class SaveFormRoleMappingDto<T>
+public class FormOpenSetup<T>
 {
-    /// <summary>
-    /// Form ID
-    /// </summary>
-    public T FormId { get; set; }
+    public bool CanEdit { get; set; }
+    public bool CanFill { get; set; }
+    public bool CanStartFilling { get; set; } = true;
+    public bool IsSubmitOnly { get; set; }
+    public string FillingSessionId { get; set; }
+    public EditorType EditorType { get; set; }
+    public File<T> Draft { get; set; }
+    public int RoleId { get; set; }
 
-    /// <summary>
-    /// Form roles
-    /// </summary>
-    public IEnumerable<FormRole> Roles { get; set; }
 }

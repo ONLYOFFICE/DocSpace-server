@@ -502,4 +502,128 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         return await documentServiceConnector.CommandAsync(CommandMethod.Meta, docKeyForTrack, file.Id, meta: meta);
     }
+
+    public async Task<Folder<T>> GetRootFolderAsync<T>(File<T> fileEntry)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(fileEntry.ParentId);
+        if (DocSpaceHelper.IsRoom(folder.FolderType) ||
+            (folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone))
+        {
+            return folder;
+        }
+
+        var (rId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+        if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
+        {
+            var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
+            if (room.FolderType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom)
+            {
+                return room;
+            }
+        }
+        return folder;
+    }
+
+    public async Task<FormOpenSetup<T>> GetFormOpenSetupForFillingRoomAsync<T>(File<T> file, Folder<T> rootFolder, EditorType editorType, bool edit, EntryManager entryManager)
+    {
+        var result = new FormOpenSetup<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        var properties = await fileDao.GetProperties(file.Id);
+        var linkDao = daoFactory.GetLinkDao<T>();
+
+        result.CanStartFilling = false;
+
+        if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+        {
+            result.CanFill = true;
+            result.IsSubmitOnly = true;
+            result.FillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
+            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+            return result;
+        }
+
+        if (edit)
+        {
+            await linkDao.DeleteAllLinkAsync(file.Id);
+            await fileDao.SaveProperties(file.Id, null);
+
+            result.CanEdit = true;
+            result.EditorType = editorType;
+            return result;
+        }
+
+        if (!await fileSecurity.CanFillFormsAsync(rootFolder))
+        {
+            return result;
+        }
+
+        if (properties?.FormFilling?.StartFilling != true)
+        {
+            result.CanEdit = true;
+            return result;
+        }
+        var linkedId = await linkDao.GetLinkedAsync(file.Id);
+        var formDraft = !Equals(linkedId, default(T)) ? await fileDao.GetFileAsync(linkedId) : (await entryManager.GetFillFormDraftAsync(file, rootFolder.Id)).file;
+
+        result.CanFill = true;
+        result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+        result.Draft = formDraft;
+        result.FillingSessionId = $"{file.Id}_{securityContext.CurrentAccount.ID}";
+
+        return result;
+    }
+    public FormOpenSetup<T> GetFormOpenSetupForFolderInProgress<T>(File<T> file, EditorType editorType)
+    {
+        return new FormOpenSetup<T>
+        {
+            CanEdit = false,
+            CanFill = true,
+            FillingSessionId = $"{file.Id}_{securityContext.CurrentAccount.ID}",
+            EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded
+        };
+    }
+    public FormOpenSetup<T> GetFormOpenSetupForFolderDone<T>(EditorType editorType)
+    {
+        return new FormOpenSetup<T>
+        {
+            CanEdit = false,
+            CanFill = false,
+            EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded
+        };
+    }
+    public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, EditorType editorType, bool fill)
+    {
+        var result = new FormOpenSetup<T>();
+
+        if (!fill)
+        {
+            result.CanEdit = !fill;
+            result.CanFill = fill;
+            return result;
+        }
+        var fileDao = daoFactory.GetFileDao<T>();
+
+        var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, securityContext.CurrentAccount.ID);
+        var myRoles = await roles.ToListAsync();
+
+        if (currentStep == 0 || !myRoles.Any())
+        {
+            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+            return result;
+        }
+
+        var firstRole = myRoles.FirstOrDefault();
+        if (currentStep == firstRole.Sequence && !firstRole.Submitted)
+        {
+            result.CanFill = true;
+            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+            return result;
+        }
+
+        result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+
+        return result;
+    }
+
 }

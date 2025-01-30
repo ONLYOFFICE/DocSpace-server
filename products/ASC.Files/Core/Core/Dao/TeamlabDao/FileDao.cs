@@ -1369,41 +1369,53 @@ internal class FileDao(
         return match.Success && match.Groups.TryGetValue(FileIdGroupName, out var group) && int.TryParse(group.Value, out fileId);
     }
 
-    public async Task SaveFormRoleMapping(int formId, IEnumerable<FormRoleParams> formRoleParams)
+    public async Task SaveFormRoleMapping(int formId, IEnumerable<FormRole> formRoles)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        if (formRoleParams == null || !formRoleParams.Any())
+        if (formRoles == null || !formRoles.Any())
         {
             await filesDbContext.DeleteFormRoleMappingsAsync(tenantId, formId);
             return;
         }
 
-        var newRecords = formRoleParams.Select(param => new DbFilesFormRoleMapping
+        foreach (var formRole in formRoles)
         {
-            TenantId = tenantId,
-            FormId = formId,
-            RoleId = param.RoleId,
-            UserId = param.UserId,
-            RoleName = param.RoleName,
-            Sequence = param.Sequence,
-            Submitted = param.Submitted
-        }).ToList();
+            var roleDb = new DbFilesFormRoleMapping
+            {
+                TenantId = tenantId,
+                FormId = formId,
+                RoleId = formRole.RoleId,
+                UserId = formRole.UserId,
+                RoleName = formRole.RoleName,
+                Sequence = formRole.Sequence,
+                Submitted = formRole.Submitted
 
-        await filesDbContext.FilesFormRoleMapping.AddRangeAsync(newRecords);
+            };
+            await filesDbContext.FilesFormRoleMapping.AddOrUpdateAsync(roleDb);
+        }
+
         await filesDbContext.SaveChangesAsync();
     }
-    public async Task<(int, FormRoleParams)> GetUserFormRole(int formId, Guid userId)
+    public async Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(int formId, Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        return (await filesDbContext.DbFormRoleCurrentStepAsync(tenantId, formId), await filesDbContext.DbFormUserRoleQueryAsync(tenantId, formId, userId));
+        var currentStep = await filesDbContext.DbFormRoleCurrentStepAsync(tenantId, formId);
+        return (currentStep, IterateRoles(tenantId, formId, userId));
     }
-    public async IAsyncEnumerable<FormRoleParams> GetFormRoles(int formId)
+    private async IAsyncEnumerable<FormRole> IterateRoles(int tenantId, int formId, Guid userId)
+    {
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        await foreach (var role in context.DbFormUserRolesQueryAsync(tenantId, formId, userId))
+        {
+            yield return role;
+        }
+    }
+    public async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -1412,6 +1424,34 @@ internal class FileDao(
         await foreach (var e in filesDbContext.DbFormRolesAsync(tenantId, formId))
         {
             yield return e;
+        }
+    }
+    public async Task<FormRole> ChangeUserFormRoleAsync(int formId, FormRole formRole)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var toUpdate = await filesDbContext.FilesFormRoleAsync(tenantId, formId, formRole.RoleId, formRole.UserId);
+
+        toUpdate.RoleName = formRole.RoleName;
+        toUpdate.Sequence = formRole.Sequence;
+        toUpdate.Submitted = formRole.Submitted;
+
+        filesDbContext.Update(toUpdate);
+        await filesDbContext.SaveChangesAsync();
+
+        return formRole;
+    }
+    public async Task DeleteFormRolesAsync(int formId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var toDeleteFiles = await filesDbContext.DbFormRolesAsync(tenantId, formId).ToListAsync();
+
+        if (toDeleteFiles.Any())
+        {
+            filesDbContext.RemoveRange(toDeleteFiles);
+            await filesDbContext.SaveChangesAsync();
         }
     }
 

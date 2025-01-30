@@ -41,10 +41,8 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
-        IDaoFactory daoFactory,
-        SecurityContext securityContext,
-        FileSecurity fileSecurity)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
+        SecurityContext securityContext)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -58,10 +56,8 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
-        IDaoFactory daoFactory,
-        SecurityContext securityContext,
-        FileSecurity fileSecurity)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
+        SecurityContext securityContext)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -74,9 +70,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<T> configurationConverter,
-        IDaoFactory daoFactory,
-        SecurityContext securityContext,
-        FileSecurity fileSecurity)
+        SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
@@ -156,116 +150,35 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     public async Task<ConfigurationDto<T>> OpenEditAsync(OpenEditRequestDto<T> inDto)
     {
         var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(inDto.FileId, inDto.Version);
-        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+        FormOpenSetup<T> formOpenSetup = null;
 
-        bool canEdit;
-        bool canFill;
-        var canStartFilling = true;
-        var isSubmitOnly = false;
-
-        var fillingSessionId = "";
-        if (fileType == FileType.Pdf)
+        if (file.IsForm)
         {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var rootFolder = await folderDao.GetFolderAsync(file.ParentId);
-            if (!DocSpaceHelper.IsRoom(rootFolder.FolderType) && rootFolder.FolderType != FolderType.FormFillingFolderInProgress && rootFolder.FolderType != FolderType.FormFillingFolderDone)
+            var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
+
+            formOpenSetup = rootFolder.FolderType switch
             {
-                var (rId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(rootFolder);
-                if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
+                FolderType.FillingFormsRoom => await documentServiceHelper.GetFormOpenSetupForFillingRoomAsync(file, rootFolder, inDto.EditorType, inDto.Edit, entryManager),
+                FolderType.FormFillingFolderInProgress => documentServiceHelper.GetFormOpenSetupForFolderInProgress(file, inDto.EditorType),
+                FolderType.FormFillingFolderDone => documentServiceHelper.GetFormOpenSetupForFolderDone<T>(inDto.EditorType),
+                FolderType.VirtualDataRoom => await documentServiceHelper.GetFormOpenSetupForVirtualDataRoomAsync(file, inDto.EditorType, inDto.Fill),
+                _ => new FormOpenSetup<T>
                 {
-                    var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
-                    if (room.FolderType == FolderType.FillingFormsRoom)
-                    {
-                        rootFolder = room;
-                    }
+                    CanEdit = !inDto.Fill,
+                    CanFill = inDto.Fill,
                 }
-            }
-
-            switch (rootFolder.FolderType)
-            {
-                case FolderType.FillingFormsRoom:
-                    var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-                    var linkDao = daoFactory.GetLinkDao<T>();
-                    var fileDao = daoFactory.GetFileDao<T>();
-                    canStartFilling = false;
-
-                    if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-                    {
-                        canEdit = false;
-                        canFill = true;
-                        isSubmitOnly = true;
-                        inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
-
-                        fillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
-                        break;
-                    }
-
-                   
-                    if (inDto.Edit)
-                    {
-                        await linkDao.DeleteAllLinkAsync(file.Id);
-                        await fileDao.SaveProperties(file.Id, null);
-                        canEdit = true;
-                        canFill = false;
-                    }
-                    else
-                    {
-                        if (!await fileSecurity.CanFillFormsAsync(rootFolder))
-                        {
-                            canEdit = false;
-                            canFill = false;
-                        }
-                        else
-                        {
-                            if (properties != null && properties.FormFilling.StartFilling)
-                            {
-                                var linkedId = await linkDao.GetLinkedAsync(file.Id);
-                                var formDraft = !Equals(linkedId, default(T)) ? await fileDao.GetFileAsync(linkedId) : (await entryManager.GetFillFormDraftAsync(file, rootFolder.Id)).file;
-
-
-                                canEdit = false;
-                                canFill = true;
-                                inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
-
-                                file = formDraft;
-                                fillingSessionId = $"{formDraft.Id}_{securityContext.CurrentAccount.ID}";
-                            }
-                            else
-                            {
-                                canEdit = true;
-                                canFill = false;
-                            }
-                        }
-                    }
-
-                    break;
-
-                case FolderType.FormFillingFolderInProgress:
-                    canEdit = false;
-                    canFill = true;
-                    inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
-                    fillingSessionId = string.Format("{0}_{1}", file.Id, securityContext.CurrentAccount.ID);
-                    break;
-
-                case FolderType.FormFillingFolderDone:
-                    inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
-                    canEdit = false;
-                    canFill = false;
-                    break;
-
-                default:
-                    canEdit = !inDto.Fill;
-                    canFill = inDto.Fill;
-                    break;
-            }
-        }
-        else
-        {
-            canEdit = true;
-            canFill = true;
+            };
         }
 
-        var docParams = await documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !inDto.View, true, canFill, inDto.EditorType, isSubmitOnly);
+        var docParams = await documentServiceHelper.GetParamsAsync(
+            formOpenSetup != null && formOpenSetup.Draft != null ? formOpenSetup.Draft : file, 
+            lastVersion, 
+            formOpenSetup == null || formOpenSetup.CanEdit, 
+            !inDto.View, 
+            true, formOpenSetup == null || formOpenSetup.CanFill,
+            formOpenSetup != null ? formOpenSetup.EditorType : inDto.EditorType,
+            formOpenSetup == null || formOpenSetup.IsSubmitOnly);
+
         var configuration = docParams.Configuration;
         file = docParams.File;
 
@@ -299,19 +212,19 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
         
-        if (fileType == FileType.Pdf && file.IsForm && result.Document.Permissions.Copy && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+        if (formOpenSetup != null && file.IsForm && result.Document.Permissions.Copy && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
-            result.StartFilling = canStartFilling;
+            result.StartFilling = formOpenSetup.CanStartFilling;
         }
 
-        if (!string.IsNullOrEmpty(fillingSessionId))
+        if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
         {
-            result.FillingSessionId = fillingSessionId;
+            result.FillingSessionId = formOpenSetup.FillingSessionId;
             if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
             {
                 result.EditorConfig.User = new UserConfig
                 {
-                    Id = fillingSessionId
+                    Id = formOpenSetup.FillingSessionId
                 };
             }
         }

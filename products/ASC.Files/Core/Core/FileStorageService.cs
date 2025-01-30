@@ -4316,7 +4316,7 @@ public class FileStorageService //: IFileStorageService
         return [..users];
     }
 
-    public async Task SaveFormRoleMapping<T>(T formId, IEnumerable<FormRoleParams> formRolesParams)
+    public async Task SaveFormRoleMapping<T>(T formId, IEnumerable<FormRole> roles)
     {
         var fileDao = daoFactory.GetFileDao<T>();
 
@@ -4345,7 +4345,11 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
-        await fileDao.SaveFormRoleMapping(formId, formRolesParams);
+        await fileDao.SaveFormRoleMapping(formId, roles);
+
+        var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
+        properties.FormFilling.CollectFillForm = true;
+        await fileDao.SaveProperties(formId, properties);
 
     }
     private Exception GenerateException(Exception error, bool warning = false)

@@ -455,15 +455,23 @@ internal class ProviderFileDao(
         return fileDao.UseTrashForRemove(file);
     }
 
-    public Task SaveFormRoleMapping(string formId, IEnumerable<FormRoleParams> formRolesParams)
+    public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole> formRoles)
     {
         throw new NotImplementedException();
     }
-    public Task<FormRoleParams> GetFormRoles(string formId)
+    public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
     {
         throw new NotImplementedException();
     }
-    public Task<(int, FormRoleParams)> GetUserFormRole(string formId, Guid userId)
+    public Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
+    {
+        throw new NotImplementedException();
+    }
+    public Task DeleteFormRolesAsync(string formId)
     {
         throw new NotImplementedException();
     }
