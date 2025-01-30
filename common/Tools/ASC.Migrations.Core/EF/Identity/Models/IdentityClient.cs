@@ -59,27 +59,73 @@ public static class IdentityClientExtension
 
     public static void MySqlAddIdentityClient(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<IdentityCert>(entity =>
+        modelBuilder.Entity<IdentityClient>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.HasKey(e => e.ClientId).HasName("PRIMARY");
 
-            entity.ToTable("identity_certs");
+            entity.ToTable("identity_clients");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasMaxLength(36);
-            entity.Property(e => e.CreatedAt)
+            entity.HasIndex(e => e.ClientId, "UK_client_id").IsUnique();
+
+            entity.HasIndex(e => e.IsInvalidated, "idx_identity_clients_is_invalidated");
+
+            entity.HasIndex(e => e.TenantId, "idx_identity_clients_tenant_id");
+
+            entity.Property(e => e.ClientId)
+                .HasMaxLength(36)
+                .HasColumnName("client_id");
+            entity.Property(e => e.ClientSecret)
+                .HasMaxLength(255)
+                .HasColumnName("client_secret")
+                .IsRequired();
+            entity.Property(e => e.CreatedBy)
+                .HasMaxLength(255)
+                .HasColumnName("created_by");
+            entity.Property(e => e.CreatedOn)
                 .HasMaxLength(6)
-                .HasColumnName("created_at");
-            entity.Property(e => e.PairType).HasColumnName("pair_type");
-            entity.Property(e => e.PrivateKey)
-                .HasColumnType("text")
-                .HasColumnName("private_key")
-                .IsRequired();
-            entity.Property(e => e.PublicKey)
-                .HasColumnType("text")
-                .HasColumnName("public_key")
-                .IsRequired();
+                .HasColumnName("created_on");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.IsEnabled)
+                .HasDefaultValueSql("'1'")
+                .HasColumnName("is_enabled");
+            entity.Property(e => e.IsInvalidated)
+                .HasDefaultValueSql("'0'")
+                .HasColumnName("is_invalidated");
+            entity.Property(e => e.IsPublic)
+                .HasDefaultValueSql("'0'")
+                .HasColumnName("is_public");
+            entity.Property(e => e.Logo).HasColumnName("logo");
+            entity.Property(e => e.LogoutRedirectUri)
+                .HasColumnType("tinytext")
+                .HasColumnName("logout_redirect_uri");
+            entity.Property(e => e.ModifiedBy)
+                .HasMaxLength(255)
+                .HasColumnName("modified_by");
+            entity.Property(e => e.ModifiedOn)
+                .HasMaxLength(6)
+                .HasColumnName("modified_on");
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .HasColumnName("name");
+            entity.Property(e => e.PolicyUrl)
+                .HasColumnType("tinytext")
+                .HasColumnName("policy_url");
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.TermsUrl)
+                .HasColumnType("tinytext")
+                .HasColumnName("terms_url");
+            entity.Property(e => e.WebsiteUrl)
+                .HasColumnType("tinytext")
+                .HasColumnName("website_url");
+
+            entity.Property(e => e.Version)
+                .HasColumnName("version")
+                .HasDefaultValueSql("0");
+
+            entity.HasOne(e => e.Tenant)
+                   .WithMany()
+                   .HasForeignKey(b => b.TenantId)
+                   .OnDelete(DeleteBehavior.Cascade);
         });
     }
 
