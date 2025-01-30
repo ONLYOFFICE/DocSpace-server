@@ -664,16 +664,17 @@ public static class FilesConvertsExtension
     {
         modelBuilder.Entity<FilesConverts>(entity =>
         {
-            entity.HasKey(e => new { e.Input, e.Output })
-                .HasName("files_converts_pkey");
+            entity.HasKey(e => new { e.Input, e.Output });
 
-            entity.ToTable("files_converts", "onlyoffice");
+            entity.ToTable("files_converts");
 
             entity.Property(e => e.Input)
-                .HasColumnName("input");
+                .HasColumnName("input")
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Output)
-                .HasColumnName("output");
+                .HasColumnName("output")
+                .HasColumnType("varchar");
         });
     }
 }

@@ -164,23 +164,27 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
     }
+    
     public static void PgSqlAddDbFilesThirdpartyAccount(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesThirdpartyAccount>(entity =>
         {
-            entity.ToTable("files_thirdparty_account", "onlyoffice");
+            entity.ToTable("files_thirdparty_account");
 
             entity.HasIndex(e => e.TenantId).HasDatabaseName("tenant_id");
 
             entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.CreateOn).HasColumnName("create_on");
+            entity.Property(e => e.CreateOn)
+                .HasColumnName("create_on")
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Title)
                 .IsRequired()
                 .HasColumnName("customer_title");
 
             entity.Property(e => e.FolderType).HasColumnName("folder_type");
+
             entity.Property(e => e.RoomType).HasColumnName("room_type");
 
             entity.Property(e => e.Password)
@@ -189,8 +193,7 @@ public static class DbFilesThirdpartyAccountExtension
 
             entity.Property(e => e.Provider)
                 .IsRequired()
-                .HasColumnName("provider")
-                .HasDefaultValueSql("'0'::character varying");
+                .HasColumnName("provider");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
@@ -200,8 +203,7 @@ public static class DbFilesThirdpartyAccountExtension
 
             entity.Property(e => e.UserId)
                 .IsRequired()
-                .HasColumnName("user_id")
-                .HasMaxLength(38);
+                .HasColumnName("user_id");
 
             entity.Property(e => e.UserName)
                 .IsRequired()
@@ -214,11 +216,14 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.HasLogo).HasColumnName("has_logo");
 
             entity.Property(e => e.Color)
-                .HasColumnName("color");
+                .HasColumnName("color")
+                .HasColumnType("char(6)");
 
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
+                .HasColumnType("timestamptz")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
+        
     }
 }

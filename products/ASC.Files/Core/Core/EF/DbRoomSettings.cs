@@ -115,6 +115,54 @@ public static class DbRoomSettingsExtension
 
     private static void PgSqlAddDbRoomSettings(this ModelBuilder modelBuilder)
     {
-        throw new NotImplementedException();
+        modelBuilder.Entity<DbRoomSettings>(entity =>
+        {
+            entity.ToTable("files_room_settings");
+
+            entity.HasKey(e => new { e.TenantId, e.RoomId })
+                .HasName("pk_files_room_settings");
+
+            entity.Property(e => e.RoomId)
+                .HasColumnName("room_id");
+
+            entity.Property(e => e.Private)
+                .HasColumnName("private")
+                .HasDefaultValueSql("false");
+
+            entity.Property(e => e.HasLogo)
+                .HasColumnName("has_logo")
+                .HasDefaultValueSql("false");
+
+            entity.Property(e => e.Indexing)
+                .HasColumnName("indexing")
+                .HasDefaultValueSql("false");
+
+            entity.Property(e => e.Watermark)
+                .HasColumnName("watermark")
+                .HasColumnType("jsonb");
+
+            entity.Property(e => e.Color)
+                .HasColumnName("color")
+                .HasColumnType("char(6)");
+
+            entity.Property(e => e.Cover)
+                .HasColumnName("cover")
+                .HasColumnType("varchar(50)");
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            entity.Property(e => e.Quota)
+                .HasColumnName("quota")
+                .HasDefaultValueSql("-2");
+
+            entity.Property(e => e.Lifetime)
+                .HasColumnName("lifetime")
+                .HasColumnType("jsonb");
+
+            entity.Property(e => e.DenyDownload)
+                .HasColumnName("deny_download")
+                .HasDefaultValueSql("false");
+        });
     }
 }

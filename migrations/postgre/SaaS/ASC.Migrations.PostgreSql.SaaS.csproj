@@ -14,4 +14,8 @@
     <ProjectReference Include="..\..\..\common\Tools\ASC.Migrations.Core\ASC.Migrations.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="MigrationContext\" />
+  </ItemGroup>
+
 </Project>

@@ -84,26 +84,7 @@ public class ModelBuilderWrapper
 
     public void AddDbFunctions()
     {
-        ModelBuilder
-            .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.JsonExtract))!)
-            .HasTranslation(e =>
-            {
-                var res = new List<SqlExpression>();
-                if (e is List<SqlExpression> list)
-                {
-                    if (list[0] is SqlConstantExpression key)
-                    {
-                        res.Add(new SqlFragmentExpression($"`{key.Value}`"));
-                    }
 
-                    if (list[1] is SqlConstantExpression val)
-                    {
-                        res.Add(new SqlConstantExpression(Expression.Constant($"$.{val.Value}"), val.TypeMapping));
-                    }
-                }
-
-                return new SqlFunctionExpression("JSON_EXTRACT", res, true, res.Select(_ => false), typeof(string), null);
-            });
 
         switch (Provider)
         {
@@ -112,12 +93,52 @@ public class ModelBuilderWrapper
                     .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.SubstringIndex),
                         [typeof(string), typeof(char), typeof(int)])!)
                     .HasName("SUBSTRING_INDEX");
+                ModelBuilder
+                    .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.JsonExtract))!)
+                    .HasTranslation(e =>
+                    {
+                        var res = new List<SqlExpression>();
+                        if (e is List<SqlExpression> list)
+                        {
+                            if (list[0] is SqlConstantExpression key)
+                            {
+                                res.Add(new SqlFragmentExpression($"`{key.Value}`"));
+                            }
+
+                            if (list[1] is SqlConstantExpression val)
+                            {
+                                res.Add(new SqlConstantExpression(Expression.Constant($"$.{val.Value}"), val.TypeMapping));
+                            }
+                        }
+
+                        return new SqlFunctionExpression("JSON_EXTRACT", res, true, res.Select(_ => false), typeof(string), null);
+                    });
                 break;
             case Provider.PostgreSql:
                 ModelBuilder
                     .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.SubstringIndex),
                         [typeof(string), typeof(char), typeof(int)])!)
                     .HasName("SPLIT_PART");
+                ModelBuilder
+                    .HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.JsonExtract))!)
+                    .HasTranslation(e =>
+                    {
+                        var res = new List<SqlExpression>();
+                        if (e is List<SqlExpression> list)
+                        {
+                            if (list[0] is SqlConstantExpression key)
+                            {
+                                res.Add(new SqlFragmentExpression($"{key.Value}"));
+                            }
+
+                            if (list[1] is SqlConstantExpression val)
+                            {
+                                res.Add(new SqlConstantExpression(Expression.Constant($"{val.Value}"), val.TypeMapping));
+                            }
+                        }
+
+                        return new SqlFunctionExpression("jsonb_extract_path", res, true, res.Select(_ => false), typeof(string), null);
+                    });
                 break;
             default:
                 throw new InvalidOperationException();

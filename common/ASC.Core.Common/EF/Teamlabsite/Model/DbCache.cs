@@ -66,18 +66,15 @@ public static class DbCacheExtension
     {
         modelBuilder.Entity<DbCache>(entity =>
         {
-            entity.ToTable("tenants_cache")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+            entity.ToTable("tenants_cache");
 
             entity.HasKey(e => e.TenantAlias)
                 .HasName("PRIMARY");
 
             entity.Property(e => e.TenantAlias)
                 .HasColumnName("tenant_alias")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasColumnType("character varying")
+                .HasMaxLength(100);
         });
     }
 }

@@ -102,6 +102,7 @@ public static class DbFileExtension
 
         return modelBuilder;
     }
+    
     public static void MySqlAddDbFiles(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFile>(entity =>
@@ -227,6 +228,7 @@ public static class DbFileExtension
         });
 
     }
+    
     public static void PgSqlAddDbFiles(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFile>(entity =>
@@ -235,10 +237,9 @@ public static class DbFileExtension
             entity.Ignore(r => r.IndexName);
             entity.Ignore(r => r.Document);
 
-            entity.HasKey(e => new { e.Id, e.TenantId, e.Version })
-                .HasName("files_file_pkey");
+            entity.HasKey(e => new { e.TenantId, e.Id, e.Version });
 
-            entity.ToTable("files_file", "onlyoffice");
+            entity.ToTable("files_file");
 
             entity.HasIndex(e => e.ParentId)
                 .HasDatabaseName("folder_id");
@@ -247,7 +248,7 @@ public static class DbFileExtension
                 .HasDatabaseName("id");
 
             entity.HasIndex(e => e.ModifiedOn)
-                .HasDatabaseName("modified_on_files_file");
+                .HasDatabaseName("modified_on");
 
             entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
                 .HasDatabaseName("tenant_id_folder_id_title");
@@ -258,64 +259,87 @@ public static class DbFileExtension
             entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ContentLength })
                 .HasDatabaseName("tenant_id_folder_id_content_length");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+
+            entity.Property(e => e.Id).HasColumnName("id");
 
             entity.Property(e => e.Version).HasColumnName("version");
 
-            entity.Property(e => e.Category).HasColumnName("category");
+            entity.Property(e => e.Category)
+                .HasColumnName("category")
+                .HasDefaultValueSql("0");
 
-            entity.Property(e => e.Changes).HasColumnName("changes");
+            entity.Property(e => e.Changes)
+                .HasColumnName("changes")
+                .HasColumnType("text");
 
             entity.Property(e => e.Comment)
                 .HasColumnName("comment")
-                .HasDefaultValueSql("NULL::character varying");
+                .HasColumnType("character varying")
+                .HasMaxLength(255);
 
             entity.Property(e => e.ContentLength)
                 .HasColumnName("content_length")
-                .HasDefaultValueSql("'0'::bigint");
+                .HasDefaultValueSql("0");
 
             entity.Property(e => e.ConvertedType)
                 .HasColumnName("converted_type")
-                .HasDefaultValueSql("NULL::character varying");
+                .HasColumnType("character varying")
+                .HasMaxLength(10);
 
             entity.Property(e => e.CreateBy)
                 .IsRequired()
                 .HasColumnName("create_by")
-                .HasMaxLength(38)
-                .IsFixedLength();
+                .HasColumnType("uuid");
 
-            entity.Property(e => e.CreateOn).HasColumnName("create_on");
+            entity.Property(e => e.CreateOn)
+                .HasColumnName("create_on")
+                .HasColumnType("timestamptz");
 
-            entity.Property(e => e.CurrentVersion).HasColumnName("current_version");
+            entity.Property(e => e.CurrentVersion)
+                .HasColumnName("current_version")
+                .HasColumnType("boolean")
+                .HasDefaultValueSql("false");
 
-            entity.Property(e => e.ThumbnailStatus).HasColumnName("thumb");
+            entity.Property(e => e.ThumbnailStatus)
+                .HasColumnName("thumb")
+                .HasDefaultValueSql("0");
 
-            entity.Property(e => e.Encrypted).HasColumnName("encrypted");
+            entity.Property(e => e.Encrypted)
+                .HasColumnType("boolean")
+                .HasColumnName("encrypted")
+                .HasDefaultValueSql("false");
 
-            entity.Property(e => e.FileStatus).HasColumnName("file_status");
+            entity.Property(e => e.FileStatus)
+                .HasColumnName("file_status")
+                .HasDefaultValueSql("0");
 
-            entity.Property(e => e.ParentId).HasColumnName("folder_id");
+            entity.Property(e => e.ParentId)
+                .HasColumnName("folder_id")
+                .HasDefaultValueSql("0");
 
-            entity.Property(e => e.Forcesave).HasColumnName("forcesave");
+            entity.Property(e => e.Forcesave)
+                .HasColumnName("forcesave")
+                .HasDefaultValueSql("0");
 
             entity.Property(e => e.ModifiedBy)
                 .IsRequired()
                 .HasColumnName("modified_by")
-                .HasMaxLength(38)
-                .IsFixedLength();
+                .HasColumnType("uuid");
 
-            entity.Property(e => e.ModifiedOn).HasColumnName("modified_on");
+            entity.Property(e => e.ModifiedOn)
+                .HasColumnName("modified_on")
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Title)
                 .IsRequired()
-                .HasColumnName("title");
+                .HasColumnName("title")
+                .HasColumnType("character varying")
+                .HasMaxLength(400);
 
             entity.Property(e => e.VersionGroup)
                 .HasColumnName("version_group")
                 .HasDefaultValueSql("1");
         });
-
     }
 }

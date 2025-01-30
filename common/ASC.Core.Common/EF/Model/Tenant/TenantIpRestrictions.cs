@@ -82,24 +82,24 @@ public static class TenantIpRestrictionsExtension
     {
         modelBuilder.Entity<TenantIpRestrictions>(entity =>
         {
-            entity.ToTable("tenants_iprestrictions", "onlyoffice");
+            entity.ToTable("tenants_iprestrictions");
 
             entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_tenants_iprestrictions");
+                .HasDatabaseName("tenant");
 
             entity.Property(e => e.Id).HasColumnName("id");
 
             entity.Property(e => e.Ip)
                 .IsRequired()
-                .HasColumnName("ip");
+                .HasColumnName("ip")
+                .HasColumnType("varchar(50)");
 
             entity.Property(e => e.ForAdmin)
                 .IsRequired()
                 .HasColumnName("for_admin")
-                .HasColumnType("TINYINT(1)");
+                .HasColumnType("boolean");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });
-
     }
 }

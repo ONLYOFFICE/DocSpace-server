@@ -87,23 +87,26 @@ public static class DbFilesTagExtension
     {
         modelBuilder.Entity<DbFilesTag>(entity =>
         {
-            entity.ToTable("files_tag", "onlyoffice");
+            entity.ToTable("files_tag");
 
             entity.HasIndex(e => new { e.TenantId, e.Owner, e.Name, e.Type })
-                .HasDatabaseName("name_files_tag");
+                .HasDatabaseName("name");
 
             entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Type).HasColumnName("flag");
+            entity.Property(e => e.Type)
+                .HasColumnName("flag")
+                .HasDefaultValueSql("0");
 
             entity.Property(e => e.Name)
                 .IsRequired()
-                .HasColumnName("name");
+                .HasColumnName("name")
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Owner)
                 .IsRequired()
                 .HasColumnName("owner")
-                .HasMaxLength(38);
+                .HasColumnType("uuid");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
         });

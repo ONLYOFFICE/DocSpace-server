@@ -166,26 +166,26 @@ public static class AclExtension
     {
         modelBuilder.Entity<Acl>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.Subject, e.Action, e.Object })
-                .HasName("core_acl_pkey");
+            entity.HasKey(e => new { e.TenantId, e.Subject, e.Action, e.Object });
 
-            entity.ToTable("core_acl", "onlyoffice");
+            entity.ToTable("core_acl");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Subject)
                 .HasColumnName("subject")
-                .HasMaxLength(38);
+                .HasColumnType("uuid");
 
             entity.Property(e => e.Action)
                 .HasColumnName("action")
-                .HasMaxLength(38);
+                .HasColumnType("uuid");
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
-                .HasDefaultValueSql("''");
+                .HasColumnType("text");
 
             entity.Property(e => e.AceType).HasColumnName("acetype");
         });
+        
     }
 }

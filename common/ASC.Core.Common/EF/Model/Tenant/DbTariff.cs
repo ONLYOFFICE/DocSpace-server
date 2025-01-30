@@ -97,29 +97,32 @@ public static class DbTariffExtension
     {
         modelBuilder.Entity<DbTariff>(entity =>
         {
-            entity.ToTable("tenants_tariff", "onlyoffice");
+            entity.ToTable("tenants_tariff");
 
             entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_tenants_tariff");
+                .HasDatabaseName("tenant");
 
             entity.Property(e => e.Id).HasColumnName("id");
 
             entity.Property(e => e.Comment)
                 .HasColumnName("comment")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.CreateOn)
                 .HasColumnName("create_on")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Stamp).HasColumnName("stamp");
+            entity.Property(e => e.Stamp)
+                .HasColumnName("stamp")
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.CustomerId)
                 .IsRequired()
                 .HasColumnName("customer_id")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });
+        
     }
 }
