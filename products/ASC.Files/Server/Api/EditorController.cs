@@ -177,7 +177,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             !inDto.View, 
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup != null ? formOpenSetup.EditorType : inDto.EditorType,
-            formOpenSetup == null || formOpenSetup.IsSubmitOnly);
+            formOpenSetup != null && formOpenSetup.IsSubmitOnly);
 
         var configuration = docParams.Configuration;
         file = docParams.File;
