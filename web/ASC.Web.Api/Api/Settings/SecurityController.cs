@@ -59,7 +59,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
+    [SwaggerResponse(200, "Security settings", typeof(IAsyncEnumerable<SecurityDto>))]
     [HttpGet("")]
     public async IAsyncEnumerable<SecurityDto> GetWebItemSettingsSecurityInfo(SecuritySettingsRequestDto inDto)
     {
@@ -194,7 +194,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
+    [SwaggerResponse(200, "Security settings", typeof(IEnumerable<SecurityDto>))]
     [SwaggerResponse(403, "Security settings are disabled for an open portal")]
     [HttpPut("")]
     public async Task<IEnumerable<SecurityDto>> SetWebItemSecurity(WebItemSecurityRequestsDto inDto)
@@ -245,7 +245,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/access</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
+    [SwaggerResponse(200, "Security settings", typeof(IEnumerable<SecurityDto>))]
     [SwaggerResponse(403, "Security settings are disabled for an open portal")]
     [HttpPut("access")]
     public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemsSecurityRequestsDto inDto)
@@ -302,7 +302,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "List of product administrators with the following parameters", typeof(EmployeeDto))]
+    [SwaggerResponse(200, "List of product administrators with the following parameters", typeof(IAsyncEnumerable<EmployeeDto>))]
     [HttpGet("administrator/{productid:guid}")]
     public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(ProductIdRequestDto inDto)
     {
