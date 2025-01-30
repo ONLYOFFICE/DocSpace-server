@@ -69,13 +69,14 @@ public static class DbTenantForbidenExtension
         modelBuilder.Entity<DbTenantForbiden>(entity =>
         {
             entity.HasKey(e => e.Address)
-                .HasName("tenants_forbiden_pkey");
+                .HasName("PK_tenants_forbiden");
 
-            entity.ToTable("tenants_forbiden", "onlyoffice");
+            entity.ToTable("tenants_forbiden");
 
             entity.Property(e => e.Address)
-                .HasColumnName("address");
+                .HasColumnName("address")
+                .HasColumnType("varchar")
+                .IsRequired();
         });
-
     }
 }

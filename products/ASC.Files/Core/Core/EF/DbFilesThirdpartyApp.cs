@@ -91,29 +91,41 @@ public static class DbFilesThirdpartyAppExtension
                 .UseCollation("utf8_general_ci");
         });
     }
+    
     public static void PgSqlAddDbFilesThirdpartyApp(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesThirdpartyApp>(entity =>
         {
+            // Define the composite key for PostgreSQL
             entity.HasKey(e => new { e.UserId, e.App })
-                .HasName("files_thirdparty_app_pkey");
+                .HasName("pk_files_thirdparty_app");
 
-            entity.ToTable("files_thirdparty_app", "onlyoffice");
+            // Map the table name
+            entity.ToTable("files_thirdparty_app");
 
+            // Map the UserId property
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")
-                .HasMaxLength(38);
+                .HasColumnType("uuid"); // PostgreSQL uses 'uuid' for GUIDs
 
+            // Map the App property
             entity.Property(e => e.App)
-                .HasColumnName("app");
+                .HasColumnName("app")
+                .HasColumnType("character varying (50)"); // VARCHAR with max length 50
 
+            // Map the Token property
+            entity.Property(e => e.Token)
+                .HasColumnName("token")
+                .HasColumnType("text"); // TEXT type in PostgreSQL
+
+            // Map the TenantId property
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            // Map the ModifiedOn property
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
-
-            entity.Property(e => e.Token).HasColumnName("token");
+                .HasColumnType("timestamptz"); // TIMESTAMP type in PostgreSQL
         });
     }
 }

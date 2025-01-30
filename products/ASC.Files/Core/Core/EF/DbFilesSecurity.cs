@@ -114,49 +114,54 @@ public static class DbFilesSecurityExtension
                 .UseCollation("utf8_general_ci");
         });
     }
+
     public static void PgSqlAddDbFilesSecurity(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesSecurity>(entity =>
         {
+            // Defining a composite primary key for PostgreSQL database
             entity.HasKey(e => new { e.TenantId, e.EntryId, e.EntryType, e.Subject })
                 .HasName("files_security_pkey");
 
-            entity.ToTable("files_security", "onlyoffice");
+            // Setting the table name
+            entity.ToTable("files_security");
 
+            // Adding indexes for efficiency
             entity.HasIndex(e => e.Owner)
-                .HasDatabaseName("owner");
+                .HasDatabaseName("idx_owner");
 
-            entity.HasIndex(e => new { e.EntryId, e.TenantId, e.EntryType, e.Owner })
-                .HasDatabaseName("tenant_id_files_security");
+            entity.HasIndex(e => new { e.TenantId, e.EntryType, e.EntryId, e.Owner })
+                .HasDatabaseName("idx_tenant_id");
 
+            // Mapping Entity Properties to PostgreSQL Database Columns
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id");
+                .HasColumnName("entry_id")
+                .HasColumnType("character varying(50)");
 
             entity.Property(e => e.EntryType).HasColumnName("entry_type");
 
             entity.Property(e => e.Subject)
                 .HasColumnName("subject")
-                .HasMaxLength(38)
-                .IsFixedLength();
+                .HasColumnType("uuid");
 
             entity.Property(e => e.Owner)
                 .IsRequired()
                 .HasColumnName("owner")
-                .HasMaxLength(38)
-                .IsFixedLength();
+                .HasColumnType("uuid");
 
             entity.Property(e => e.Share).HasColumnName("security");
 
             entity.Property(e => e.TimeStamp)
                 .HasColumnName("timestamp")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.SubjectType).HasColumnName("subject_type");
 
-            entity.Property(e => e.Options).HasColumnName("options");
+            entity.Property(e => e.Options)
+                .HasColumnName("options")
+                .HasColumnType("jsonb");
         });
     }
-
 }

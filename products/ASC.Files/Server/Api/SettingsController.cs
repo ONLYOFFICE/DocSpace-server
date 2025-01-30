@@ -220,13 +220,25 @@ public class SettingsController(
     /// </summary>
     /// <short>Hide the confirmation dialog when converting</short>
     /// <path>api/2.0/files/hideconfirmconvert</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(Module))]
     [HttpPut("hideconfirmconvert")]
     public async Task<bool> HideConfirmConvert(HideConfirmConvertRequestDto inDto)
     {
         return await filesSettingsHelper.HideConfirmConvert(inDto.Save);
+    }
+
+    /// <summary>
+    /// Hide confirmation dialog when changing room lifetime settings.
+    /// </summary>
+    /// <short>Hide confirmation dialog when changing room lifetime settings</short>
+    /// <path>api/2.0/files/hideconfirmroomlifetime</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [HttpPut("hideconfirmroomlifetime")]
+    public async Task<bool> HideConfirmRoomLifetime(SettingsRequestDto inDto)
+    {
+        return await filesSettingsHelper.SetHideConfirmRoomLifetime(inDto.Set);
     }
 
     /// <summary>

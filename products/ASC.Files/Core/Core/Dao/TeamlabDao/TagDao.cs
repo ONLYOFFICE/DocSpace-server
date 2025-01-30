@@ -303,7 +303,7 @@ internal abstract class BaseTagDao<T>(
     private async Task DeleteTagsBeforeSave(FilesDbContext filesDbContext, int tenantId)
     {
         var date = _tenantUtil.DateTimeNow().AddMonths(-1);
-        await filesDbContext.MustBeDeletedFilesAsync(tenantId, date);
+        await filesDbContext.MustBeDeletedFilesAsync(tenantId, _tenantUtil.DateTimeToUtc(date));
         await filesDbContext.DeleteTagAsync();
     }
 

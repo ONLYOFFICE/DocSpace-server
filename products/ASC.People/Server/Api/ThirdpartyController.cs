@@ -61,7 +61,7 @@ public class ThirdpartyController(
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("People / Third-party accounts")]
-    [SwaggerResponse(200, "List of third-party accounts", typeof(AccountInfoDto))]
+    [SwaggerResponse(200, "List of third-party accounts", typeof(ICollection<AccountInfoDto>))]
     [AllowAnonymous, AllowNotPayment]
     [HttpGet("providers")]
     public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(AuthProvidersRequestDto inDto)

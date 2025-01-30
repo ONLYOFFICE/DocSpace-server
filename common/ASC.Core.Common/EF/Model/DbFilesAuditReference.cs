@@ -74,6 +74,21 @@ public static class FilesAuditReferenceExtension
 
     public static void PgSqlAddFilesAuditReference(this ModelBuilder modelBuilder)
     {
-        throw new NotImplementedException();
+        modelBuilder.Entity<DbFilesAuditReference>(entity =>
+        {
+            entity.ToTable("files_audit_reference");
+
+            entity.HasKey(e => new { e.EntryId, e.EntryType, e.AuditEventId })
+                .HasName("pk_files_audit_reference");
+
+            entity.Property(e => e.EntryId)
+                .HasColumnName("entry_id");
+
+            entity.Property(e => e.EntryType)
+                .HasColumnName("entry_type");
+
+            entity.Property(e => e.AuditEventId)
+                .HasColumnName("audit_event_id");
+        });
     }
 }

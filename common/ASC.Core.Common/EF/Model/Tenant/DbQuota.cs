@@ -206,10 +206,9 @@ public static class DbQuotaExtension
     {
         modelBuilder.Entity<DbQuota>(entity =>
         {
-            entity.HasKey(e => e.TenantId)
-                .HasName("tenants_quota_pkey");
+            entity.HasKey(e => e.TenantId);
 
-            entity.ToTable("tenants_quota", "onlyoffice");
+            entity.ToTable("tenants_quota");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant")
@@ -217,24 +216,30 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.ProductId)
                 .HasColumnName("product_id")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar(128)");
 
             entity.Property(e => e.Description)
                 .HasColumnName("description")
-                .HasColumnType("character varying");
+                .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.Features).HasColumnName("features");
+            entity.Property(e => e.Features)
+                .HasColumnName("features")
+                .HasColumnType("text");
 
             entity.Property(e => e.Name)
                 .HasColumnName("name")
-                .HasColumnType("character varying");
+                .HasColumnType("varchar(128)");
 
             entity.Property(e => e.Price)
                 .HasColumnName("price")
-                .HasColumnType("numeric(10,2)")
-                .HasDefaultValueSql("0.00");
+                .HasDefaultValue(0.00m)
+                .HasColumnType("decimal(10,2)");
 
-            entity.Property(e => e.Visible).HasColumnName("visible");
+            entity.Property(e => e.Visible)
+                .HasColumnName("visible")
+                .HasColumnType("boolean")
+                .HasDefaultValue(false);
         });
+        
     }
 }

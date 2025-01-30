@@ -102,29 +102,37 @@ public static class AccountLinksExtension
         modelBuilder.Entity<AccountLinks>(entity =>
         {
             entity.HasKey(e => new { e.Id, e.UId })
-                .HasName("account_links_pkey");
+                .HasName("PK_account_links");
 
-            entity.ToTable("account_links", "onlyoffice");
+            entity.ToTable("account_links");
 
             entity.HasIndex(e => e.UId)
-                .HasDatabaseName("uid");
+                .HasDatabaseName("ix_account_links_uid");
 
             entity.Property(e => e.Id)
-                .HasColumnName("id");
+                .HasColumnName("id")
+                .HasColumnType("varchar")
+                .HasMaxLength(200);
 
             entity.Property(e => e.UId)
-                .HasColumnName("uid");
+                .HasColumnName("uid")
+                .HasColumnType("varchar")
+                .HasMaxLength(200);
 
-            entity.Property(e => e.Linked).HasColumnName("linked");
+            entity.Property(e => e.Linked)
+                .HasColumnName("linked")
+                .HasColumnType("timestamp with time zone");
 
             entity.Property(e => e.Profile)
                 .IsRequired()
-                .HasColumnName("profile");
+                .HasColumnName("profile")
+                .HasColumnType("text");
 
             entity.Property(e => e.Provider)
                 .HasColumnName("provider")
-                .IsFixedLength()
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("char")
+                .HasMaxLength(60);
         });
+        
     }
 }

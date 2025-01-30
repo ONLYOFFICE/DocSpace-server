@@ -65,7 +65,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "List of storages with the following parameters", typeof(StorageDto))]
+    [SwaggerResponse(200, "List of storages with the following parameters", typeof(List<StorageDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("storage")]
     public async Task<List<StorageDto>> GetAllStoragesAsync()
@@ -391,7 +391,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/cdn</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "List of the CDN storages with the following parameters", typeof(StorageDto))]
+    [SwaggerResponse(200, "List of the CDN storages with the following parameters", typeof(List<StorageDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("storage/cdn")]
     public async Task<List<StorageDto>> GetAllCdnStoragesAsync()
@@ -480,7 +480,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/backup</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(StorageDto))]
+    [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(List<StorageDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("storage/backup")]
     public async Task<List<StorageDto>> GetAllBackupStorages()

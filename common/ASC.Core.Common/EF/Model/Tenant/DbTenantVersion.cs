@@ -88,24 +88,30 @@ public static class DbTenantVersionExtension
     {
         modelBuilder.Entity<DbTenantVersion>(entity =>
         {
-            entity.ToTable("tenants_version", "onlyoffice");
+            entity.ToTable("tenants_version");
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
                 .ValueGeneratedNever();
 
-            entity.Property(e => e.DefaultVersion).HasColumnName("default_version");
+            entity.Property(e => e.DefaultVersion)
+                .HasColumnName("default_version")
+                .HasDefaultValue(0);
 
             entity.Property(e => e.Url)
                 .IsRequired()
-                .HasColumnName("url");
+                .HasColumnName("url")
+                .HasColumnType("character varying(64)");
 
             entity.Property(e => e.Version)
                 .IsRequired()
-                .HasColumnName("version");
+                .HasColumnName("version")
+                .HasColumnType("character varying(64)");
 
-            entity.Property(e => e.Visible).HasColumnName("visible");
+            entity.Property(e => e.Visible)
+                .HasColumnName("visible")
+                .HasColumnType("boolean")
+                .HasDefaultValue(false);
         });
-
     }
 }
