@@ -34,16 +34,23 @@ public record RoomNotifyIntegrationEvent : IntegrationEvent
 
     }
 
-    public RoomNotifyIntegrationEvent(Guid createBy, int tenantId, int roomId, int fileId)
+    public RoomNotifyIntegrationEvent(Guid createBy, int tenantId)
         : base(createBy, tenantId)
     {
-        RoomId = roomId;
-        FileId = fileId;
+
     }
 
     [ProtoMember(1)]
-    public int RoomId { get; set; }
+    public RoomNotifyIntegrationData<int> Data { get; set; }
 
     [ProtoMember(2)]
-    public int FileId { get; set; }
+    public RoomNotifyIntegrationData<string> ThirdPartyData { get; set; }
+}
+[ProtoContract]
+public class RoomNotifyIntegrationData<T>
+{
+    [ProtoMember(1)]
+    public T RoomId { get; set; }
+    [ProtoMember(2)]
+    public T FileId { get; set; }
 }

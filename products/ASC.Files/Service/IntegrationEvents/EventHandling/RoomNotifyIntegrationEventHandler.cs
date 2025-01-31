@@ -32,7 +32,7 @@ namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 public class RoomNotifyIntegrationEventHandler(
     ILogger<RoomNotifyIntegrationEventHandler> logger,
     TenantManager tenantManager,
-    INotifyQueueManager<int> roomNotifyEventQueue,
+    IServiceScopeFactory serviceScopeFactory,
     IDaoFactory daoFactory)
     : IIntegrationEventHandler<RoomNotifyIntegrationEvent>
 {
@@ -47,11 +47,25 @@ public class RoomNotifyIntegrationEventHandler(
 
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
-            var folderDao = daoFactory.GetFolderDao<int>();
-            var fileDao = daoFactory.GetFileDao<int>();
+            using var scope = serviceScopeFactory.CreateScope();
+            if (@event.Data != null)
+            {
+                var folderDao = daoFactory.GetFolderDao<int>();
+                var fileDao = daoFactory.GetFileDao<int>();
+                var roomNotifyEventQueue = scope.ServiceProvider.GetRequiredService<INotifyQueueManager<int>>();
 
-            var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, await folderDao.GetFolderAsync(@event.RoomId), @event.CreateBy);
-            queue.AddMessage(await fileDao.GetFileAsync(@event.FileId));
+                var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, await folderDao.GetFolderAsync(@event.Data.RoomId), @event.CreateBy);
+                queue.AddMessage(await fileDao.GetFileAsync(@event.Data.FileId));
+            }
+            if (@event.ThirdPartyData != null)
+            {
+                var folderDao = daoFactory.GetFolderDao<string>();
+                var fileDao = daoFactory.GetFileDao<string>();
+                var roomNotifyEventQueue = scope.ServiceProvider.GetRequiredService<INotifyQueueManager<string>>();
+
+                var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, await folderDao.GetFolderAsync(@event.ThirdPartyData.RoomId), @event.CreateBy);
+                queue.AddMessage(await fileDao.GetFileAsync(@event.ThirdPartyData.FileId));
+            }
 
         }
     }

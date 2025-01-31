@@ -26,7 +26,8 @@
 
 namespace ASC.Files.Core.Services.NotifyService;
 
-[Singleton]
+[Singleton(GenericArguments = [typeof(int)])]
+[Singleton(GenericArguments = [typeof(string)])]
 public class PushNotificationService<T>(
     IServiceScopeFactory serviceScopeFactory,
     ILogger<PushNotificationService<T>> logger)

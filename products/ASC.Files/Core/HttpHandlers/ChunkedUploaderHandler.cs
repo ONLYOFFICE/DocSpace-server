@@ -134,11 +134,22 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
                                 if (room != null)
                                 {
-                                    if (room.Id is int rId)
+                                    var data = room.Id is int rId && resumedSession.File.Id is int fId
+                                        ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
+                                        : null;
+
+                                    var thirdPartyData = room.Id is string srId && resumedSession.File.Id is string sfId
+                                        ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
+                                        : null;
+
+                                    var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
                                     {
-                                        var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id, rId, Convert.ToInt32(resumedSession.File.Id));
-                                        await eventBus.PublishAsync(evt);
-                                    }
+                                        Data = data,
+                                        ThirdPartyData = thirdPartyData
+                                    };
+
+                                    await eventBus.PublishAsync(evt);
+
                                 }
                             }
                         }
@@ -193,11 +204,21 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         var room = await folderDao.GetParentFoldersAsync(session.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
                         if (room != null)
                         {
-                            if (room.Id is int rId)
+                            var data = room.Id is int rId && session.File.Id is int fId
+                                ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
+                                : null;
+
+                            var thirdPartyData = room.Id is string srId && session.File.Id is string sfId
+                                ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
+                                : null;
+
+                            var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
                             {
-                                var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id, rId, Convert.ToInt32(session.File.Id));
-                                await eventBus.PublishAsync(evt);
-                            }
+                                Data = data,
+                                ThirdPartyData = thirdPartyData
+                            };
+
+                            await eventBus.PublishAsync(evt);
                         }
                     }
                     return;

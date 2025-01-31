@@ -63,6 +63,7 @@ public class Startup : BaseWorkerStartup
             services.AddActivePassiveHostedService<FileConverterService<string>>(Configuration);
 
             services.AddActivePassiveHostedService<PushNotificationService<int>>(Configuration);
+            services.AddActivePassiveHostedService<PushNotificationService<string>>(Configuration);
 
             services.AddHostedService<ThumbnailBuilderService>();
             services.AddActivePassiveHostedService<AutoCleanTrashService>(Configuration);
