@@ -140,7 +140,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
                 new BackupRecord
                 {
                     Id = Guid.Parse(Id),
-                    TenantId = TenantId,
+                    TenantId = backupTenant,
                     IsScheduled = _isScheduled,
                     Name = Path.GetFileName(tempFile),
                     StorageType = _storageType,
