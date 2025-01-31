@@ -417,6 +417,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         var currentDocServiceUrl = filesLinkUtility.GetDocServiceUrl();
         var currentDocServiceUrlInternal = filesLinkUtility.GetDocServiceUrlInternal();
         var currentDocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl();
+        var currentDocServiceSecretValue = filesLinkUtility.GetDocServiceSignatureSecret();
+        var currentDocServiceSecretHeader = filesLinkUtility.GetDocServiceSignatureHeader();
 
         if (!ValidateUrl(inDto.DocServiceUrl) ||
             !ValidateUrl(inDto.DocServiceUrlInternal) ||
@@ -428,6 +430,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         await filesLinkUtility.SetDocServiceUrlAsync(inDto.DocServiceUrl);
         await filesLinkUtility.SetDocServiceUrlInternalAsync(inDto.DocServiceUrlInternal);
         await filesLinkUtility.SetDocServicePortalUrlAsync(inDto.DocServiceUrlPortal);
+        await filesLinkUtility.SetDocServiceSignatureSecretAsync(inDto.SignatureSecret);
+        await filesLinkUtility.SetDocServiceSignatureHeaderAsync(inDto.SignatureHeader);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
@@ -451,6 +455,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             await filesLinkUtility.SetDocServiceUrlAsync(currentDocServiceUrl);
             await filesLinkUtility.SetDocServiceUrlInternalAsync(currentDocServiceUrlInternal);
             await filesLinkUtility.SetDocServicePortalUrlAsync(currentDocServicePortalUrl);
+            await filesLinkUtility.SetDocServiceSignatureSecretAsync(currentDocServiceSecretValue);
+            await filesLinkUtility.SetDocServiceSignatureHeaderAsync(currentDocServiceSecretHeader);
 
             throw new Exception("Unable to establish a connection with the Document Server.");
         }

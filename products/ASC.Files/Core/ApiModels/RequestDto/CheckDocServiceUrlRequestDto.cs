@@ -45,4 +45,14 @@ public class CheckDocServiceUrlRequestDto
     /// The Community Server address
     /// </summary>
     public string DocServiceUrlPortal { get; set; }
+
+    /// <summary>
+    /// Signature secret
+    /// </summary>
+    public string SignatureSecret { get; set; }
+
+    /// <summary>
+    /// Signature header
+    /// </summary>
+    public string SignatureHeader { get; set; }
 }

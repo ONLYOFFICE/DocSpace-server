@@ -242,6 +242,36 @@ public class FilesLinkUtility
         }
     }
 
+    public string DocServiceSignatureSecret
+    {
+        get
+        {
+            var result = GetSignatureSetting(SignatureSecretKey, out _);
+
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                result = "";
+            }
+
+            return result;
+        }
+    }
+
+    public string DocServiceSignatureHeader
+    {
+        get
+        {
+            var result = GetSignatureSetting(SignatureHeaderKey, out _);
+
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                result = "Authorization";
+            }
+
+            return result;
+        }
+    }
+
     private const string PortalUrlKey = "portal";
 
     public string GetDocServicePortalUrl()
@@ -264,6 +294,30 @@ public class FilesLinkUtility
         await SetUrlSettingAsync(PortalUrlKey, value);
     }
 
+    private const string SignatureSecretKey = "signaturesecret";
+
+    public string GetDocServiceSignatureSecret()
+    {
+        return GetSignatureSetting(SignatureSecretKey, out _);
+    }
+
+    public async Task SetDocServiceSignatureSecretAsync(string value)
+    {
+        await SetSignatureSettingAsync(SignatureSecretKey, value);
+    }
+
+    private const string SignatureHeaderKey = "signatureheader";
+
+    public string GetDocServiceSignatureHeader()
+    {
+        return GetSignatureSetting(SignatureHeaderKey, out _);
+    }
+
+    public async Task SetDocServiceSignatureHeaderAsync(string value)
+    {
+        await SetSignatureSettingAsync(SignatureHeaderKey, value);
+    }
+
     public bool IsDefault
     {
         get
@@ -281,6 +335,18 @@ public class FilesLinkUtility
             }
 
             GetUrlSetting(PortalUrlKey, out isDefault);
+            if (!isDefault)
+            {
+                return false;
+            }
+
+            GetSignatureSetting(SignatureSecretKey, out isDefault);
+            if (!isDefault)
+            {
+                return false;
+            }
+
+            GetSignatureSetting(SignatureHeaderKey, out isDefault);
             if (!isDefault)
             {
                 return false;
@@ -461,6 +527,57 @@ public class FilesLinkUtility
         }
 
         if (GetUrlSetting(key, out _) != value)
+        {
+            await _coreSettings.SaveSettingAsync(GetSettingsKey(key), value);
+        }
+    }
+
+    private string GetSignatureSetting(string key, out bool isDefault)
+    {
+        var value = string.Empty;
+        isDefault = false;
+
+        if (_coreBaseSettings.Standalone)
+        {
+            value = _coreSettings.GetSetting(GetSettingsKey(key));
+        }
+
+        if (string.IsNullOrEmpty(value))
+        {
+            value = GetDefaultSignatureSetting(key);
+            isDefault = true;
+        }
+
+        return value;
+    }
+
+    private string GetDefaultSignatureSetting(string key)
+    {
+        return _configuration[$"files:docservice:secret:{key}"];
+    }
+
+    private async Task SetSignatureSettingAsync(string key, string value)
+    {
+        if (!_coreBaseSettings.Standalone)
+        {
+            throw new NotSupportedException("Method for server edition only.");
+        }
+        value = (value ?? "").Trim();
+        if (string.IsNullOrEmpty(value))
+        {
+            value = null;
+        }
+
+        if (value != null)
+        {
+            var def = GetDefaultSignatureSetting(key);
+            if (def == value)
+            {
+                value = null;
+            }
+        }
+
+        if (GetSignatureSetting(key, out _) != value)
         {
             await _coreSettings.SaveSettingAsync(GetSettingsKey(key), value);
         }
