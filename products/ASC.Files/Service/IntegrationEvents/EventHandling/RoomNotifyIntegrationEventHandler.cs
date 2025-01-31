@@ -54,7 +54,7 @@ public class RoomNotifyIntegrationEventHandler(
             }
             if (@event.ThirdPartyData != null)
             {
-                await AddMessage(@event.Data.RoomId, @event.Data.FileId, @event.CreateBy, @event.TenantId, scope);
+                await AddMessage(@event.ThirdPartyData.RoomId, @event.ThirdPartyData.FileId, @event.CreateBy, @event.TenantId, scope);
             }
 
         }
