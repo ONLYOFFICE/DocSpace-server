@@ -58,10 +58,10 @@ public abstract class BaseBackupProgressItem(IServiceScopeFactory serviceScopeFa
     }
 
 
-    private bool _dump;
+    private bool? _dump;
     public bool Dump
     {
-        get => _dump;
+        get => _dump ?? this[nameof(_dump)];
         set
         {
             _dump = value;
@@ -99,6 +99,7 @@ public abstract class BaseBackupProgressItem(IServiceScopeFactory serviceScopeFa
     {
         this[nameof(_tenantId)] = 0;
         this[nameof(_newTenantId)] = 0;
+        this[nameof(_dump)] = false;
         this[nameof(_link)] = "";
     }
 
