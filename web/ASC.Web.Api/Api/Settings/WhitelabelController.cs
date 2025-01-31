@@ -44,11 +44,13 @@ public class WhitelabelController(ApiContext apiContext,
         StorageFactory storageFactory)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
+    #region Logos
+
     /// <summary>
-    /// Saves the white label settings specified in the request.
+    /// Saves the white label logos specified in the request.
     /// </summary>
     /// <short>
-    /// Save the white label settings
+    /// Save the white label logos
     /// </short>
     /// <path>api/2.0/settings/whitelabel/save</path>
     [Tags("Settings / Rebranding")]
@@ -109,16 +111,14 @@ public class WhitelabelController(ApiContext apiContext,
             await tenantWhiteLabelSettingsHelper.SetLogo(settings, logoDict, storage);
         }
 
-        settings.SetLogoText(inDto.LogoText);
-
         await tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenantId, tenantLogoManager);
     }
 
     /// <summary>
-    /// Saves the white label settings from files.
+    /// Saves the white label logos from files.
     /// </summary>
     /// <short>
-    /// Save the white label settings from files
+    /// Save the white label logos from files
     /// </short>
     /// <path>api/2.0/settings/whitelabel/savefromfiles</path>
     [Tags("Settings / Rebranding")]
@@ -295,11 +295,6 @@ public class WhitelabelController(ApiContext apiContext,
             ? await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>()
             : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        yield return new IsDefaultWhiteLabelLogosDto
-        {
-            Name = "logotext",
-            Default = tenantWhiteLabelSettings.LogoText.IsNullOrEmpty() || tenantWhiteLabelSettings.LogoText.Equals(TenantWhiteLabelSettings.DefaultLogoText)
-        };
         foreach (var logoType in Enum.GetValues<WhiteLabelLogoType>())
         {
             var result = new IsDefaultWhiteLabelLogosDto
@@ -310,6 +305,103 @@ public class WhitelabelController(ApiContext apiContext,
 
             yield return result;
         }
+    }
+
+    /// <summary>
+    /// Restores the white label logos.
+    /// </summary>
+    /// <short>
+    /// Restore the white label logos
+    /// </short>
+    /// <path>api/2.0/settings/whitelabel/restore</path>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPut("whitelabel/restore")]
+    public async Task<bool> RestoreWhiteLabelLogosAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value)
+        {
+            await DemandRebrandingPermissionAsync(false);
+
+            await RestoreWhiteLabelLogosForDefaultTenantAsync();
+        }
+        else
+        {
+            await RestoreWhiteLabelLogosForCurrentTenantAsync();
+        }
+
+        return true;
+    }
+
+    private async Task RestoreWhiteLabelLogosForCurrentTenantAsync()
+    {
+        var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        var tenant = tenantManager.GetCurrentTenant();
+
+        await RestoreWhiteLabelLogosForTenantAsync(settings, null, tenant.Id);
+
+        var tenantInfoSettings = await settingsManager.LoadAsync<TenantInfoSettings>();
+        await tenantInfoSettingsHelper.RestoreDefaultLogoAsync(tenantInfoSettings, tenantLogoManager);
+        await settingsManager.SaveAsync(tenantInfoSettings);
+    }
+
+    private async Task RestoreWhiteLabelLogosForDefaultTenantAsync()
+    {
+        var settings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+        var storage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
+
+        await RestoreWhiteLabelLogosForTenantAsync(settings, storage, Tenant.DefaultTenant);
+    }
+
+    private async Task RestoreWhiteLabelLogosForTenantAsync(TenantWhiteLabelSettings settings, IDataStore storage, int tenantId)
+    {
+        await tenantWhiteLabelSettingsHelper.RestoreDefaultLogos(settings, tenantLogoManager, tenantId, storage);
+    }
+
+    #endregion
+
+    #region Logo Text
+
+    /// <summary>
+    /// Saves the white label logo text specified in the request.
+    /// </summary>
+    /// <short>
+    /// Save the white label logo text settings
+    /// </short>
+    /// <path>api/2.0/settings/whitelabel/logotext/save</path>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPost("whitelabel/logotext/save")]
+    public async Task<bool> SaveWhiteLabelLogoTextAsync(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        int tenantId;
+
+        if (inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value)
+        {
+            await DemandRebrandingPermissionAsync();
+
+            tenantId = Tenant.DefaultTenant;
+        }
+        else
+        {
+            await tenantLogoManager.DemandWhiteLabelPermissionAsync();
+
+            tenantId = tenantManager.GetCurrentTenantId();
+        }
+
+        var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>(tenantId);
+
+        settings.SetLogoText(inDto.LogoText);
+
+        await tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenantId, tenantLogoManager);
+
+        return true;
     }
 
     /// <summary>
@@ -334,61 +426,70 @@ public class WhitelabelController(ApiContext apiContext,
         return settings.LogoText ?? TenantWhiteLabelSettings.DefaultLogoText;
     }
 
-
     /// <summary>
-    /// Restores the white label options.
+    /// Specifies if the white label logo text are default or not.
     /// </summary>
     /// <short>
-    /// Restore the white label options
+    /// Check the default white label logo text
     /// </short>
-    /// <path>api/2.0/settings/whitelabel/restore</path>
+    /// <path>api/2.0/settings/whitelabel/logotext/isdefault</path>
+    /// <collection>list</collection>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Request properties of white label logos", typeof(IsDefaultWhiteLabelLogosDto))]
+    [HttpGet("whitelabel/logotext/isdefault")]
+    public async Task<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogoText([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenantWhiteLabelSettings = inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value
+            ? await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>()
+            : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+
+        return new IsDefaultWhiteLabelLogosDto
+        {
+            Name = "logotext",
+            Default = tenantWhiteLabelSettings.LogoText.IsNullOrEmpty() || tenantWhiteLabelSettings.LogoText.Equals(TenantWhiteLabelSettings.DefaultLogoText)
+        };
+    }
+
+    /// <summary>
+    /// Restores the white label logo text.
+    /// </summary>
+    /// <short>
+    /// Restore the white label logo text
+    /// </short>
+    /// <path>api/2.0/settings/whitelabel/logotext/restore</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpPut("whitelabel/restore")]
-    public async Task<bool> RestoreWhiteLabelOptionsAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    [HttpPut("whitelabel/logotext/restore")]
+    public async Task<bool> RestoreWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        int tenantId;
 
         if (inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value)
         {
             await DemandRebrandingPermissionAsync(false);
 
-            await RestoreWhiteLabelOptionsForDefaultTenantAsync();
+            tenantId = Tenant.DefaultTenant;
         }
         else
         {
-            await RestoreWhiteLabelOptionsForCurrentTenantAsync();
+            tenantId = tenantManager.GetCurrentTenantId();
         }
+
+        var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>(tenantId);
+
+        await tenantWhiteLabelSettingsHelper.RestoreDefaultLogoText(settings, tenantLogoManager, tenantId);
 
         return true;
     }
 
-    private async Task RestoreWhiteLabelOptionsForCurrentTenantAsync()
-    {
-        var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-        var tenant = tenantManager.GetCurrentTenant();
-        
+    #endregion
 
-        await RestoreWhiteLabelOptionsForTenantAsync(settings, null, tenant.Id);
-
-        var tenantInfoSettings = await settingsManager.LoadAsync<TenantInfoSettings>();
-        await tenantInfoSettingsHelper.RestoreDefaultLogoAsync(tenantInfoSettings, tenantLogoManager);
-        await settingsManager.SaveAsync(tenantInfoSettings);
-    }
-
-    private async Task RestoreWhiteLabelOptionsForDefaultTenantAsync()
-    {
-        var settings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
-        var storage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
-
-        await RestoreWhiteLabelOptionsForTenantAsync(settings, storage, Tenant.DefaultTenant);
-    }
-
-    private async Task RestoreWhiteLabelOptionsForTenantAsync(TenantWhiteLabelSettings settings, IDataStore storage, int tenantId)
-    {
-        await tenantWhiteLabelSettingsHelper.RestoreDefault(settings, tenantLogoManager, tenantId, storage);
-    }
+    #region Company
 
     /// <summary>
     /// Returns the licensor data.
@@ -490,6 +591,10 @@ public class WhitelabelController(ApiContext apiContext,
         return defaultSettings;
     }
 
+    #endregion
+
+    #region Additional
+
     /// <summary>
     /// Saves the additional white label settings specified in the request.
     /// </summary>
@@ -550,6 +655,10 @@ public class WhitelabelController(ApiContext apiContext,
 
         return defaultSettings;
     }
+
+    #endregion
+
+    #region Mail
 
     /// <summary>
     /// Saves the mail white label settings specified in the request.
@@ -614,6 +723,8 @@ public class WhitelabelController(ApiContext apiContext,
         return defaultSettings;
     }
 
+    #endregion
+
     /// <summary>
     /// Checks if the white label is enabled or not.
     /// </summary>
@@ -628,7 +739,6 @@ public class WhitelabelController(ApiContext apiContext,
 
         return await tenantLogoManager.GetEnableWhitelabelAsync();
     }
-    
 
     private async Task DemandRebrandingPermissionAsync(bool demandWhiteLabelPermission = true)
     {

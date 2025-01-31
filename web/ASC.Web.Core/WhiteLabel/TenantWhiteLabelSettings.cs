@@ -330,7 +330,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     #region Restore default
 
-    public async Task RestoreDefault(TenantWhiteLabelSettings tenantWhiteLabelSettings, TenantLogoManager tenantLogoManager, int tenantId, IDataStore storage = null)
+    public async Task RestoreDefaultLogos(TenantWhiteLabelSettings tenantWhiteLabelSettings, TenantLogoManager tenantLogoManager, int tenantId, IDataStore storage = null)
     {
         tenantWhiteLabelSettings.LogoLightSmallExt = null;
         tenantWhiteLabelSettings.DarkLogoLightSmallExt = null;
@@ -361,8 +361,6 @@ public class TenantWhiteLabelSettingsHelper(
         tenantWhiteLabelSettings.IsDefaultLogoLeftMenu = true;
         tenantWhiteLabelSettings.IsDefaultLogoAboutPage = true;
 
-        tenantWhiteLabelSettings.SetLogoText(null);
-
         var store = storage ?? await storageFactory.GetStorageAsync(tenantId, ModuleName);
 
         try
@@ -373,6 +371,13 @@ public class TenantWhiteLabelSettingsHelper(
         {
             logger.ErrorRestoreDefault(e);
         }
+
+        await SaveAsync(tenantWhiteLabelSettings, tenantId, tenantLogoManager, true);
+    }
+
+    public async Task RestoreDefaultLogoText(TenantWhiteLabelSettings tenantWhiteLabelSettings, TenantLogoManager tenantLogoManager, int tenantId)
+    {
+        tenantWhiteLabelSettings.SetLogoText(null);
 
         await SaveAsync(tenantWhiteLabelSettings, tenantId, tenantLogoManager, true);
     }
