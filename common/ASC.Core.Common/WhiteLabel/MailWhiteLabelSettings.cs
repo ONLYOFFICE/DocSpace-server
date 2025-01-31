@@ -40,7 +40,7 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 
     /// <summary>Specifies if the footer with social media contacts is enabled or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool FooterSocialEnabled { get; init; }
+    public bool FooterSocialEnabled { get; set; }
 
     /// <summary>Support URL</summary>
     /// <type>System.String, System</type>

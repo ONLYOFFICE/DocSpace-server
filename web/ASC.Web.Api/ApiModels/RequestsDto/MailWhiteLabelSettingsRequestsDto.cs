@@ -32,7 +32,12 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class MailWhiteLabelSettingsRequestsDto
 {
     /// <summary>
-    /// Specifies if the mail footer will be enabled or note
+    /// Specifies if the mail footer will be enabled or not
     /// </summary>
     public bool FooterEnabled { get; set; }
+
+    /// <summary>
+    /// Specifies if the footer with social media contacts will be enabled or not
+    /// </summary>
+    public bool FooterSocialEnabled { get; init; }
 }

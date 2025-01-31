@@ -499,10 +499,7 @@ public class WhitelabelController(ApiContext apiContext,
 
         await DemandRebrandingPermissionAsync();
 
-        if (wrapper.Settings == null)
-        {
-            throw new ArgumentNullException("settings");
-        }
+        ArgumentNullException.ThrowIfNull(wrapper.Settings, "settings");
 
         await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
@@ -554,18 +551,23 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(400, "Settings is empty")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [Tags("Settings / Rebranding")]
     [HttpPost("rebranding/mail")]
-    public async Task<bool> SaveMailWhiteLabelSettingsAsync(MailWhiteLabelSettings settings)
+    public async Task<bool> SaveMailWhiteLabelSettingsAsync(MailWhiteLabelSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(inDto);
 
-        await settingsManager.SaveForDefaultTenantAsync(settings);
+        await settingsManager.SaveForDefaultTenantAsync(new MailWhiteLabelSettings
+        {
+            FooterSocialEnabled = inDto.FooterSocialEnabled,
+            FooterEnabled = inDto.FooterEnabled
+        });
 
         return true;
     }
@@ -586,9 +588,12 @@ public class WhitelabelController(ApiContext apiContext,
 
         await DemandRebrandingPermissionAsync();
 
+        ArgumentNullException.ThrowIfNull(inDto);
+
         var settings = await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
 
         settings.FooterEnabled = inDto.FooterEnabled;
+        settings.FooterSocialEnabled = inDto.FooterSocialEnabled;
 
         await settingsManager.SaveForDefaultTenantAsync(settings);
 
