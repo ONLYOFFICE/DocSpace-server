@@ -1883,15 +1883,9 @@ public class FileStorageService //: IFileStorageService
             string sourceExt;
             
             var history = await fileDao.GetFileHistoryAsync(file.Id).ToListAsync();
-            
-            if (history.Count > 1)
+            var previousFileStable = history.OrderByDescending(r => r.Version).FirstOrDefault(r => r.Version < file.Version);
+            if (previousFileStable != null)
             {
-                var previousFileStable = history.OrderByDescending(r => r.Version).FirstOrDefault(r => r.Version < file.Version);
-                if (previousFileStable == null)
-                {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-                }
-
                 sourceFileUrl = pathProvider.GetFileStreamUrl(previousFileStable);
                 sourceExt = previousFileStable.ConvertedExtension;
 
