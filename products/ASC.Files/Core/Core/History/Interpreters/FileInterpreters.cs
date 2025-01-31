@@ -285,6 +285,14 @@ public class FileDeletedInterpreter : ActionInterpreter
     }
 }
 
+public class FileVersionDeletedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {
+        return new ValueTask<HistoryData>(new EntryData(target, description[0]));
+    }
+}
+
 public class FileRenamedInterpreter : FileActionInterpreterBase
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
