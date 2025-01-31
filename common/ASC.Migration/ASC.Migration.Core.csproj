@@ -21,7 +21,6 @@
     <PackageReference Include="FolkerKinzel.VCards" Version="7.5.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.71" />
     <PackageReference Include="Ical.Net" Version="4.3.1" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
   </ItemGroup>
 
   <ItemGroup>

@@ -205,7 +205,7 @@ internal class GoogleDriveStorage(
         return response;
     }
 
-    public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         try
         {

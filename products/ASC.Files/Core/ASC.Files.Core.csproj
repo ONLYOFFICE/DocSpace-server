@@ -10,6 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
 
+    <None Remove="Services\DocumentBuilderService\ScriptTemplates\FormFillingReport.docbuilder" />
+
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
   </ItemGroup>
   <ItemGroup>
@@ -410,6 +412,7 @@
     <None Remove="Services\NotifyService\patterns.xml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\FormFillingReport.docbuilder" />
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
     <EmbeddedResource Include="Services\NotifyService\patterns.xml" />
   </ItemGroup>

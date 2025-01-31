@@ -49,12 +49,12 @@ public class LogoRequest
     /// <summary>
     /// The rectangle width
     /// </summary>
-    public int Width { get; set; }
+    public uint Width { get; set; }
 
     /// <summary>
     /// The rectangle height
     /// </summary>
-    public int Height { get; set; }
+    public uint Height { get; set; }
 }
 
 /// <summary>

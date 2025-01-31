@@ -49,8 +49,9 @@ public class RestorePortalTask(DbFactory dbFactory,
 
     private ColumnMapper _columnMapper;
     private string _region;
+    private bool _expectDump;
 
-    public void Init(string region, string fromFilePath, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
+    public void Init(string region, string fromFilePath, bool expectDump, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(fromFilePath);
 
@@ -63,6 +64,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         UpgradesPath = upgradesPath;
         _columnMapper = columnMapper ?? new ColumnMapper();
         _region = region;
+        _expectDump = expectDump; 
         Init(tenantId);
     }
 
@@ -76,7 +78,17 @@ public class RestorePortalTask(DbFactory dbFactory,
         {
             await using (var entry = dataReader.GetEntry(KeyHelper.GetDumpKey()))
             {
-                Dump = entry != null && coreBaseSettings.Standalone;
+                Dump = entry != null;
+            }
+
+            if (Dump && !coreBaseSettings.Standalone)
+            {
+                throw new ArgumentException(BackupResource.BackupNotFound);
+            }
+
+            if (Dump != _expectDump)
+            {
+                throw new ArgumentException(BackupResource.BackupInvalid);
             }
 
             if (Dump)

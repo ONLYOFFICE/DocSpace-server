@@ -94,27 +94,31 @@ public static class DbFilesLinkExtension
     {
         modelBuilder.Entity<DbFilesLink>(entity =>
         {
+            // Define composite primary key
             entity.HasKey(e => new { e.TenantId, e.SourceId, e.LinkedId })
-                .HasName("files_link_pkey");
+                .HasName("PRIMARY");
 
-            entity.ToTable("files_link", "onlyoffice");
+            // Map entity to "files_link" table
+            entity.ToTable("files_link");
 
+            // Define index for PostgreSQL
             entity.HasIndex(e => new { e.TenantId, e.SourceId, e.LinkedId, e.LinkedFor })
-                .HasDatabaseName("linked_for_files_link");
+                .HasDatabaseName("linked_for");
 
+            // Define column configurations
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.LinkedId)
-                .HasColumnName("linked_id");
-
             entity.Property(e => e.SourceId)
-                .HasColumnName("source_id");
+                .HasColumnName("source_id")
+                .HasColumnType("varchar(32)");
+
+            entity.Property(e => e.LinkedId)
+                .HasColumnName("linked_id")
+                .HasColumnType("varchar(32)");
 
             entity.Property(e => e.LinkedFor)
                 .HasColumnName("linked_for")
-                .HasMaxLength(38)
-                .IsFixedLength()
-                .HasDefaultValueSql("NULL::bpchar");
+                .HasColumnType("uuid"); // Guid in PostgreSQL is stored as UUID
         });
     }
 }
