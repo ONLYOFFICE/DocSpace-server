@@ -24,20 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModel.RequestsDto;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// Request parameters for mail white label settings
-/// </summary>
-public class MailWhiteLabelSettingsRequestsDto
+public class MailWhiteLabelSettingsDto : IMapFrom<MailWhiteLabelSettings>
 {
-    /// <summary>
-    /// Specifies if the mail footer will be enabled or not
-    /// </summary>
+    /// <summary>Specifies if the mail footer is enabled or not</summary>
     public bool FooterEnabled { get; set; }
 
-    /// <summary>
-    /// Specifies if the footer with social media contacts will be enabled or not
-    /// </summary>
-    public bool FooterSocialEnabled { get; init; }
+    /// <summary>Specifies if the footer with social media contacts is enabled or not</summary>
+    public bool FooterSocialEnabled { get; set; }
+
+    /// <summary>Specifies if these settings are default or not</summary>
+    public bool IsDefault { get; set; }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<MailWhiteLabelSettings, MailWhiteLabelSettingsDto>()
+            .ConvertUsing<MailWhiteLabelSettingsConverter>();
+    }
 }

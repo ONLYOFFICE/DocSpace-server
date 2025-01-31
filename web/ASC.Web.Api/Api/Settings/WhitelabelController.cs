@@ -422,25 +422,32 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(400, "Settings is empty")]
+    [SwaggerResponse(400, "Argument is empty or invalid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("rebranding/company")]
-    public async Task<bool> SaveCompanyWhiteLabelSettingsAsync(CompanyWhiteLabelSettingsWrapper companyWhiteLabelSettingsWrapper)
+    public async Task<bool> SaveCompanyWhiteLabelSettingsAsync(CompanyWhiteLabelSettingsWrapper wrapper)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        if (companyWhiteLabelSettingsWrapper.Settings == null || 
-            companyWhiteLabelSettingsWrapper.Settings.Email.TestEmailPunyCode() || 
-            companyWhiteLabelSettingsWrapper.Settings.Site.TestUrlPunyCode())
+        ArgumentNullException.ThrowIfNull(wrapper?.Settings, "settings");
+        ArgumentNullException.ThrowIfNull(wrapper.Settings.Email, "email");
+        ArgumentNullException.ThrowIfNull(wrapper.Settings.Site, "site");
+
+        if (wrapper.Settings.Email.TestEmailPunyCode())
         {
-            throw new ArgumentNullException("settings");
+            throw new ArgumentException("email");
         }
 
-        companyWhiteLabelSettingsWrapper.Settings.IsLicensor = false;
+        if (wrapper.Settings.Site.TestUrlPunyCode())
+        {
+            throw new ArgumentException("site");
+        }
 
-        await settingsManager.SaveForDefaultTenantAsync(companyWhiteLabelSettingsWrapper.Settings);
+        wrapper.Settings.IsLicensor = false;
+
+        await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
         return true;
     }
@@ -499,7 +506,7 @@ public class WhitelabelController(ApiContext apiContext,
 
         await DemandRebrandingPermissionAsync();
 
-        ArgumentNullException.ThrowIfNull(wrapper.Settings, "settings");
+        ArgumentNullException.ThrowIfNull(wrapper?.Settings, "settings");
 
         await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
@@ -555,47 +562,15 @@ public class WhitelabelController(ApiContext apiContext,
     [SwaggerResponse(403, "No permissions to perform this action")]
     [Tags("Settings / Rebranding")]
     [HttpPost("rebranding/mail")]
-    public async Task<bool> SaveMailWhiteLabelSettingsAsync(MailWhiteLabelSettingsRequestsDto inDto)
+    public async Task<bool> SaveMailWhiteLabelSettingsAsync(MailWhiteLabelSettingsWrapper wrapper)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        ArgumentNullException.ThrowIfNull(inDto);
+        ArgumentNullException.ThrowIfNull(wrapper?.Settings, "settings");
 
-        await settingsManager.SaveForDefaultTenantAsync(new MailWhiteLabelSettings
-        {
-            FooterSocialEnabled = inDto.FooterSocialEnabled,
-            FooterEnabled = inDto.FooterEnabled
-        });
-
-        return true;
-    }
-
-    /// <summary>
-    /// Updates the mail white label settings with a paramater specified in the request.
-    /// </summary>
-    /// <short>Update the mail white label settings</short>
-    /// <path>api/2.0/settings/rebranding/mail</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpPut("rebranding/mail")]
-    public async Task<bool> UpdateMailWhiteLabelSettings(MailWhiteLabelSettingsRequestsDto inDto)
-    {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        await DemandRebrandingPermissionAsync();
-
-        ArgumentNullException.ThrowIfNull(inDto);
-
-        var settings = await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
-
-        settings.FooterEnabled = inDto.FooterEnabled;
-        settings.FooterSocialEnabled = inDto.FooterSocialEnabled;
-
-        await settingsManager.SaveForDefaultTenantAsync(settings);
+        await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
         return true;
     }
@@ -607,11 +582,13 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Mail white label settings", typeof(MailWhiteLabelSettings))]
+    [SwaggerResponse(200, "Mail white label settings", typeof(MailWhiteLabelSettingsDto))]
     [HttpGet("rebranding/mail")]
-    public async Task<MailWhiteLabelSettings> GetMailWhiteLabelSettingsAsync()
+    public async Task<MailWhiteLabelSettingsDto> GetMailWhiteLabelSettingsAsync()
     {
-        return await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
+        var settings = await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
+
+        return mapper.Map<MailWhiteLabelSettings, MailWhiteLabelSettingsDto>(settings);
     }
 
     /// <summary>
