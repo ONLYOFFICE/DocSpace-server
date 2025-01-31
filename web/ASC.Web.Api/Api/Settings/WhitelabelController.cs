@@ -56,7 +56,7 @@ public class WhitelabelController(ApiContext apiContext,
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpPost("whitelabel/save")]
+    [HttpPost("whitelabel/logos/save")]
     public async Task<bool> SaveWhiteLabelSettingsAsync(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -127,7 +127,7 @@ public class WhitelabelController(ApiContext apiContext,
     [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(409, "No input files")]
-    [HttpPost("whitelabel/savefromfiles")]
+    [HttpPost("whitelabel/logos/savefromfiles")]
     public async Task<bool> SaveWhiteLabelSettingsFromFilesAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -321,7 +321,7 @@ public class WhitelabelController(ApiContext apiContext,
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpPut("whitelabel/restore")]
+    [HttpPut("whitelabel/logos/restore")]
     public async Task<bool> RestoreWhiteLabelLogosAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
