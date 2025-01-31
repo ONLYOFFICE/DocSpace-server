@@ -100,7 +100,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             tenant = await _tenantManager.GetTenantAsync(TenantId);
             _tenantManager.SetCurrentTenant(tenant);
-            await _socketManager.RestoreProgressAsync(socketTenant, 0);
+            await _socketManager.RestoreProgressAsync(socketTenant, Dump, 0);
 
             _notifyHelper.SetServerBaseUri(_serverBaseUri);
 
@@ -140,13 +140,13 @@ public class RestoreProgressItem : BaseBackupProgressItem
             restoreTask.ProgressChanged = async args =>
             {
                 Percentage = Percentage = 10d + 0.65 * args.Progress;
-                await _socketManager.RestoreProgressAsync(socketTenant, (int)Percentage);
+                await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
                 await PublishChanges();
             };
             await restoreTask.RunJob(); 
             NewTenantId = columnMapper.GetTenantMapping();
 
-            await _socketManager.RestoreProgressAsync(socketTenant, (int)Percentage);
+            await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
             await PublishChanges();
 
             if (restoreTask.Dump)
@@ -184,7 +184,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             Percentage = 75;
 
-            await _socketManager.RestoreProgressAsync(socketTenant, (int)Percentage);
+            await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
             await PublishChanges();
 
             File.Delete(tempFile);
@@ -220,7 +220,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         {
             try
             {
-                await _socketManager.EndRestoreAsync(socketTenant, ToBackupProgress());
+                await _socketManager.EndRestoreAsync(socketTenant, Dump, ToBackupProgress());
                 await PublishChanges();
             }
             catch (Exception error)

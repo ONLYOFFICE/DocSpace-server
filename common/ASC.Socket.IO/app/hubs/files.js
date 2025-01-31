@@ -109,6 +109,14 @@ module.exports = (io) => {
       changeSubscription(roomParts, individual, unsubscribe);
     });
 
+    socket.on("subscribeSpace", ({ roomParts, individual }) => {
+      changeSubscription(roomParts, individual, subscribeSpace);
+    });
+
+    socket.on("unsubscribeSpace", ({ roomParts, individual }) => {
+      changeSubscription(roomParts, individual, unsubscribeSpace);
+    });
+
     socket.on("refresh-folder", (folderId) => {
       const room = getRoom(`DIR-${folderId}`);
       logger.info(`refresh folder ${folderId} in room ${room}`);
@@ -186,6 +194,42 @@ module.exports = (io) => {
         const room = getRoom(roomParts);
         logger.info(`client ${socket.id} leave room ${room}`);
         socket.leave(room);
+      }
+    }
+
+    function subscribeSpace(roomParts) {
+      if (!roomParts) return;
+
+      if (Array.isArray(roomParts)) 
+      {
+        if(!isAdmin() && !isOwner())
+        {
+          roomParts = roomParts.filter(rp=> rp != "backup");
+        }
+        logger.info(`client ${socket.id} join rooms [${roomParts.join(",")}]`);
+        socket.join(roomParts);
+      } 
+      else 
+      {
+        if(roomParts == "backup" && !isAdmin() && !isOwner())
+        {
+            return;
+        }
+        logger.info(`client ${socket.id} join room ${roomParts}`);
+        socket.join(roomParts);
+      }
+    }
+
+    function unsubscribeSpace(roomParts) {
+      if (!roomParts) return;
+
+      if (Array.isArray(roomParts))
+      {
+        logger.info(`client ${socket.id} leave rooms [${roomParts.join(",")}]`);
+        socket.leave(roomParts);
+      } else {
+        logger.info(`client ${socket.id} leave room ${roomParts}`);
+        socket.leave(roomParts);
       }
     }
 
@@ -363,20 +407,55 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
-  function backupProgress({ tenantId, percentage } = {}) {
-    filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", {progress: percentage});
+  function backupProgress({ tenantId, dump, percentage } = {}) 
+  {
+    if(dump)
+    {
+      var room = `backup`;
+    }
+    else
+    {
+      var room = `${tenantId}-backup`;
+    }
+    filesIO.to(room).emit("s:backup-progress", {progress: percentage});
   }
 
-  function restoreProgress({ tenantId, percentage } = {}) {
-    filesIO.to(`${tenantId}-restore`).emit("s:restore-progress", {progress: percentage});
+  function restoreProgress({ tenantId, dump, percentage } = {})
+  {
+    if(dump)
+      {
+        var room = `restore`;
+      }
+      else
+      {
+        var room = `${tenantId}-restore`;
+      }
+    filesIO.to(room).emit("s:restore-progress", {progress: percentage});
   }
 
-  function endBackup({ tenantId, result } = {}) {
-    filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", result);
+  function endBackup({ tenantId, dump, result } = {})
+  {
+    if(dump)
+      {
+        var room = `backup`;
+      }
+      else
+      {
+        var room = `${tenantId}-backup`;
+      }
+    filesIO.to(room).emit("s:backup-progress", result);
   }
 
-  function endRestore({ tenantId, result } = {}) {
-    filesIO.to(`${tenantId}-restore`).emit("s:restore-progress", result);
+  function endRestore({ tenantId, dump, result } = {}) {
+    if(dump)
+      {
+        var room = `restore`;
+      }
+      else
+      {
+        var room = `${tenantId}-restore`;
+      }
+    filesIO.to(room).emit("s:restore-progress", result);
   }
 
   return {

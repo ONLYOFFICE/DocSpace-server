@@ -87,7 +87,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         var tempStream = scope.ServiceProvider.GetService<TempStream>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         await tenantManager.SetCurrentTenantAsync(TenantId);
-        await socketManager.BackupProgressAsync(0);
+        await socketManager.BackupProgressAsync(0, Dump);
 
         var dateTime = coreBaseSettings.Standalone ? DateTime.Now : DateTime.UtcNow;
         var tempFile = "";
@@ -111,7 +111,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
             backupPortalTask.ProgressChanged = async args =>
             {
                 Percentage = 0.9 * args.Progress;
-                await socketManager.BackupProgressAsync((int)Percentage);
+                await socketManager.BackupProgressAsync((int)Percentage, Dump);
                 await PublishChanges();
             };
 
@@ -176,7 +176,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         {
             try
             {
-                await socketManager.EndBackupAsync(ToBackupProgress());
+                await socketManager.EndBackupAsync(ToBackupProgress(), Dump);
                 await PublishChanges();
             }
             catch (Exception error)
