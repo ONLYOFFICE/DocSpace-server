@@ -111,7 +111,9 @@ public class WhitelabelController(ApiContext apiContext,
             await tenantWhiteLabelSettingsHelper.SetLogo(settings, logoDict, storage);
         }
 
-        await tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenantId, tenantLogoManager);
+        await settingsManager.SaveAsync(settings, tenantId);
+
+        await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
     }
 
     /// <summary>
@@ -188,6 +190,8 @@ public class WhitelabelController(ApiContext apiContext,
         }
 
         await settingsManager.SaveAsync(settings, tenantId);
+
+        await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
     }
 
     private void GetParts(string fileName, out WhiteLabelLogoType logoType, out string fileExt)
@@ -399,7 +403,7 @@ public class WhitelabelController(ApiContext apiContext,
 
         settings.SetLogoText(inDto.LogoText);
 
-        await tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenantId, tenantLogoManager);
+        await settingsManager.SaveAsync(settings, tenantId);
 
         return true;
     }
@@ -482,7 +486,7 @@ public class WhitelabelController(ApiContext apiContext,
 
         var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>(tenantId);
 
-        await tenantWhiteLabelSettingsHelper.RestoreDefaultLogoText(settings, tenantLogoManager, tenantId);
+        await tenantWhiteLabelSettingsHelper.RestoreDefaultLogoText(settings, tenantId);
 
         return true;
     }
