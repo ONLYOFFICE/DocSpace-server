@@ -52,7 +52,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>
     /// Save the white label logos
     /// </short>
-    /// <path>api/2.0/settings/whitelabel/save</path>
+    /// <path>api/2.0/settings/whitelabel/logos/save</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -122,7 +122,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>
     /// Save the white label logos from files
     /// </short>
-    /// <path>api/2.0/settings/whitelabel/savefromfiles</path>
+    /// <path>api/2.0/settings/whitelabel/logos/savefromfiles</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -317,7 +317,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>
     /// Restore the white label logos
     /// </short>
-    /// <path>api/2.0/settings/whitelabel/restore</path>
+    /// <path>api/2.0/settings/whitelabel/logos/restore</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
