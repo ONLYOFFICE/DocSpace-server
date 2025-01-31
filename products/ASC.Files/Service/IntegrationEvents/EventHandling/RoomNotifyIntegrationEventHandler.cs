@@ -28,12 +28,10 @@ using ASC.Files.Core.Services.NotifyService;
 
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
-[Scope]
+[Singleton]
 public class RoomNotifyIntegrationEventHandler(
     ILogger<RoomNotifyIntegrationEventHandler> logger,
-    TenantManager tenantManager,
-    IServiceScopeFactory serviceScopeFactory,
-    IDaoFactory daoFactory)
+    IServiceScopeFactory serviceScopeFactory)
     : IIntegrationEventHandler<RoomNotifyIntegrationEvent>
 {
     
@@ -45,28 +43,32 @@ public class RoomNotifyIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
+            using var scope = serviceScopeFactory.CreateScope();
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
-            using var scope = serviceScopeFactory.CreateScope();
             if (@event.Data != null)
             {
-                var folderDao = daoFactory.GetFolderDao<int>();
-                var fileDao = daoFactory.GetFileDao<int>();
-                var roomNotifyEventQueue = scope.ServiceProvider.GetRequiredService<INotifyQueueManager<int>>();
-
-                var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, await folderDao.GetFolderAsync(@event.Data.RoomId), @event.CreateBy);
-                queue.AddMessage(await fileDao.GetFileAsync(@event.Data.FileId));
+                await AddMessage(@event.Data.RoomId, @event.Data.FileId, @event.CreateBy, @event.TenantId, scope);
             }
             if (@event.ThirdPartyData != null)
             {
-                var folderDao = daoFactory.GetFolderDao<string>();
-                var fileDao = daoFactory.GetFileDao<string>();
-                var roomNotifyEventQueue = scope.ServiceProvider.GetRequiredService<INotifyQueueManager<string>>();
-
-                var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantManager.GetCurrentTenant().Id, await folderDao.GetFolderAsync(@event.ThirdPartyData.RoomId), @event.CreateBy);
-                queue.AddMessage(await fileDao.GetFileAsync(@event.ThirdPartyData.FileId));
+                await AddMessage(@event.Data.RoomId, @event.Data.FileId, @event.CreateBy, @event.TenantId, scope);
             }
 
         }
+    }
+
+    private async Task AddMessage<T>(T roomId, T fileId, Guid createBy, int tenantId, IServiceScope scope)
+    {
+        var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
+        var roomNotifyEventQueue = scope.ServiceProvider.GetRequiredService<INotifyQueueManager<T>>();
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+
+        var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantId, await folderDao.GetFolderAsync(roomId), createBy);
+        queue.AddMessage(await fileDao.GetFileAsync(fileId));
     }
 }
