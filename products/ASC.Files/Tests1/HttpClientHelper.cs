@@ -42,14 +42,30 @@ public class HttpClientHelper
             return default;
         }
         
-        var successApiResponse = await response.Content.ReadFromJsonAsync<SuccessApiResponse>();
-        T? parsed = default!;
+        var data = await response.Content.ReadAsStringAsync();
         
-        if (successApiResponse is { Response: JsonElement jsonElement })
+        try
         {
-            parsed = jsonElement.Deserialize<T>(JsonResponseSerializerOptions);
-        }
+            var successApiResponse = JsonSerializer.Deserialize<SuccessApiResponse>(data, JsonSerializerOptions.Web);
+            T? parsed = default!;
         
-        return parsed;
+            if (successApiResponse is { Response: JsonElement jsonElement })
+            {
+                parsed = jsonElement.Deserialize<T>(JsonResponseSerializerOptions);
+            }
+        
+            return parsed;
+        }
+        catch (Exception e)
+        {
+            var errorApiResponse = JsonSerializer.Deserialize<ErrorApiResponse>(data, JsonSerializerOptions.Web);
+
+            if (errorApiResponse != null)
+            {
+                throw new Exception(errorApiResponse.Error.Message, e);
+            }
+
+            throw;
+        }
     }
 }

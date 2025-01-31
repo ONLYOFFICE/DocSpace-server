@@ -25,7 +25,16 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCFiles;
+using System.Data;
+
+using ASC.Core.Common.EF;
+using ASC.Migrations.Core.Models;
+
 using DotNet.Testcontainers.Builders;
+
+using Npgsql;
+
+using Testcontainers.PostgreSql;
 
 namespace ASC.Files.Tests1;
 
@@ -38,6 +47,10 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     
     private readonly MySqlContainer _mySqlContainer = new MySqlBuilder()
         .WithImage("mysql:8.4.3")
+        .Build();
+    
+    private readonly PostgreSqlContainer _postgresSqlContainer = new PostgreSqlBuilder()
+        .WithImage("postgres:17.2")
         .Build();
     
     private readonly RedisContainer _redisContainer = new RedisBuilder()
@@ -62,18 +75,20 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     readonly List<string> _tablesToBackup = ["files_folder", "core_user", "core_usersecurity" ];
     readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
     
-    public string MySqlConnectionString => _mySqlContainer.GetConnectionString(); 
+    public string DbConnectionString => ProviderInfo.Provider == Provider.MySql ? _mySqlContainer.GetConnectionString() : _postgresSqlContainer.GetConnectionString(); 
     public string RedisConnectionString => _redisContainer.GetConnectionString(); 
     public string RabbitMqConnectionString => _rabbitMqContainer.GetConnectionString(); 
     public string OpenSearchConnectionString => $"{_openSearchContainer.Hostname}:{_openSearchContainer.GetMappedPublicPort(9200)}"; 
     public HttpClient HttpClient { get; private set;} = null!;
     public JsonSerializerOptions JsonRequestSerializerOptions { get; } = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
+
+    public CustomProviderInfo ProviderInfo;
     
     protected override IHost CreateHost(IHostBuilder builder)
     {             
         builder.ConfigureHostConfiguration(configBuilder =>
         {
-            configBuilder.AddInMemoryCollection(Initializer.GetSettings(MySqlConnectionString, RedisConnectionString, RabbitMqConnectionString, OpenSearchConnectionString)); 
+            configBuilder.AddInMemoryCollection(Initializer.GetSettings(ProviderInfo, RedisConnectionString, RabbitMqConnectionString, OpenSearchConnectionString)); 
         });
         
         return base.CreateHost(builder);
@@ -101,9 +116,11 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
 
     public async Task InitializeAsync()
     {
-        await StartAllContainersAsync(_mySqlContainer, _redisContainer, _rabbitMqContainer, _openSearchContainer);
+        ProviderInfo = GetProviderInfo("postgres");
         
-        _dbconnection = new MySqlConnection(_mySqlContainer.GetConnectionString());
+        await StartAllContainersAsync(ProviderInfo.Provider == Provider.MySql ? _mySqlContainer : _postgresSqlContainer, _redisContainer, _rabbitMqContainer, _openSearchContainer);
+        
+        _dbconnection =  ProviderInfo.Provider == Provider.MySql ?  new MySqlConnection(_mySqlContainer.GetConnectionString()) : new NpgsqlConnection(_postgresSqlContainer.GetConnectionString());
 
         HttpClient = CreateClient();
         HttpClient.BaseAddress = new Uri(HttpClient.BaseAddress, "api/2.0/files/");
@@ -114,18 +131,30 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         await _dbconnection.OpenAsync();
         _respawner = await Respawner.CreateAsync(_dbconnection, new RespawnerOptions
         {
-            DbAdapter = DbAdapter.MySql,
+            DbAdapter = ProviderInfo.Provider == Provider.MySql ? DbAdapter.MySql : DbAdapter.Postgres,
             TablesToIgnore = tablesToIgnore.ToArray(),
             WithReseed = true
         });
     }
 
-    public new Task DisposeAsync() => _mySqlContainer.StopAsync();
-
+    public new Task DisposeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
     internal async Task BackupTables()
     {
-        await ExecuteScriptAsync("CREATE TABLE IF NOT EXISTS {1} LIKE {0}; \nREPLACE INTO {1} SELECT * FROM {0};");
+        var script = ProviderInfo.Provider switch
+        {
+            Provider.MySql => "CREATE TABLE IF NOT EXISTS {1} LIKE {0}; \nREPLACE INTO {1} SELECT * FROM {0};",
+            Provider.PostgreSql => "CREATE TABLE IF NOT EXISTS {1} (LIKE {0});\n DELETE FROM {1}; \nINSERT INTO {1} SELECT * FROM {0};",
+            _ => ""
+        };
+
+        if (!string.IsNullOrEmpty(script))
+        {
+            await ExecuteScriptAsync(script);
+        }
     }
     
     private async Task ExecuteScriptAsync(string scriptTemplate)
@@ -136,8 +165,15 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         {
             backupScript.AppendFormat(scriptTemplate, table, MakeCopyTableName(table));
         }
-            
-        await _mySqlContainer.ExecScriptAsync(backupScript.ToString());
+
+        if (ProviderInfo.Provider == Provider.MySql)
+        {
+            await _mySqlContainer.ExecScriptAsync(backupScript.ToString());
+        }
+        else
+        {
+            await _postgresSqlContainer.ExecScriptAsync(backupScript.ToString());
+        }
     }
 
     private static string MakeCopyTableName(string tableName)
@@ -151,4 +187,34 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
 
         await Task.WhenAll(tasks);
     }
+
+    private CustomProviderInfo GetProviderInfo(string dbType)
+    {
+        switch (dbType)
+        {
+            case "mysql":
+                return new CustomProviderInfo
+                {
+                    Provider = Provider.MySql,
+                    ConnectionString = _mySqlContainer.GetConnectionString,
+                    ProviderFullName = "MySql.Data.MySqlClient"
+                };
+            case "postgres":
+                return new CustomProviderInfo
+                {
+                    ConnectionString = _postgresSqlContainer.GetConnectionString,
+                    Provider = Provider.PostgreSql,
+                    ProviderFullName = "Npgsql"
+                };
+        }
+        
+        return new CustomProviderInfo();
+    }
+}
+
+public class CustomProviderInfo
+{
+    public Func<string> ConnectionString { get; set; }
+    public Provider Provider { get; set; }
+    public string ProviderFullName { get; set; }
 }

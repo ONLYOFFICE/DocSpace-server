@@ -26,6 +26,7 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
+using ASC.Migrations.Core.Models;
 
 namespace ASC.Files.Tests1.Data;
 
@@ -41,7 +42,7 @@ public static class Initializer
     [
         new("log:dir", Path.Combine("..", "..", "..", "..", "Logs", "Test")),
         new("$STORAGE_ROOT", Path.Combine("..", "..", "..", "..", "Data", "Test")),
-        new("testAssembly", $"ASC.Migrations.MySql.SaaS"),
+
         new("web:hub:internal", "")
     ];
 
@@ -51,11 +52,13 @@ public static class Initializer
         .RuleFor(x => x.Email, f => f.Person.Email)
         .RuleFor(x => x.Password, f => f.Internet.Password(8, 10));
     
-    public static List<KeyValuePair<string, string?>> GetSettings(string dbConnectionString, string redisConnectionString, string rabbitMqConnectionString, string openSearchConnectionString)
+    public static List<KeyValuePair<string, string?>> GetSettings(CustomProviderInfo providerInfo, string redisConnectionString, string rabbitMqConnectionString, string openSearchConnectionString)
     {
         var result = new List<KeyValuePair<string, string?>>(_settings)
         {
-            new("ConnectionStrings:default:connectionString", dbConnectionString),
+            new("ConnectionStrings:default:connectionString", providerInfo.ConnectionString()),
+            new("ConnectionStrings:default:providerName", providerInfo.ProviderFullName),
+            new("testAssembly", $"ASC.Migrations.{providerInfo.Provider}.SaaS")
         };
         
         var redisSplit = redisConnectionString.Split(':');
@@ -132,7 +135,7 @@ public static class Initializer
 
         void Build(IWebHostBuilder builder)
         {
-            foreach (var setting in GetSettings(filesFactory.MySqlConnectionString, filesFactory.RedisConnectionString, filesFactory.RabbitMqConnectionString, filesFactory.OpenSearchConnectionString))
+            foreach (var setting in GetSettings(filesFactory.ProviderInfo, filesFactory.RedisConnectionString, filesFactory.RabbitMqConnectionString, filesFactory.OpenSearchConnectionString))
             {
                 builder.UseSetting(setting.Key, setting.Value);
             }

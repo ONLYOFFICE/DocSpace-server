@@ -18,4 +18,9 @@
     <Folder Include="MigrationContext\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="MigrationContext\MigrationContextModelSnapshot.cs" />
+    <Compile Remove="MigrationContext\20250130155124_MigrationContextMigrate.Designer.cs" />
+  </ItemGroup>
+
 </Project>

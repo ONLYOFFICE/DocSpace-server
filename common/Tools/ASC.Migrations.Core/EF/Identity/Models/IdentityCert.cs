@@ -55,7 +55,7 @@ public static class IdentityCertExtension
     {
         modelBuilder.Entity<IdentityCert>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.HasKey(e => e.Id).HasName("PK_identity_certs");
 
             entity.ToTable("identity_certs");
 

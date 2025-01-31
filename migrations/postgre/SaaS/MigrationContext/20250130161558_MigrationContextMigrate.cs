@@ -40,17 +40,17 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     ip_end = table.Column<byte[]>(type: "bytea", nullable: false),
                     continent = table.Column<string>(type: "char(2)", maxLength: 2, nullable: false),
                     country = table.Column<string>(type: "char(2)", maxLength: 2, nullable: false),
-                    stateprov_code = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: true),
-                    StateProv = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: true),
-                    District = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: true),
-                    City = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: true),
-                    ZipCode = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
-                    Latitude = table.Column<float>(type: "real", nullable: false),
-                    Longitude = table.Column<float>(type: "real", nullable: false),
-                    GeonameId = table.Column<int>(type: "integer", nullable: true),
-                    TimezoneOffset = table.Column<float>(type: "real", nullable: false),
-                    TimezoneName = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    WeatherCode = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true)
+                    stateprov_code = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: true),
+                    stateprov = table.Column<string>(type: "varchar(80)", maxLength: 80, nullable: false),
+                    district = table.Column<string>(type: "varchar(80)", maxLength: 80, nullable: false),
+                    city = table.Column<string>(type: "varchar(80)", maxLength: 80, nullable: false),
+                    zipcode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
+                    latitude = table.Column<float>(type: "real", nullable: false),
+                    longitude = table.Column<float>(type: "real", nullable: false),
+                    geoname_id = table.Column<int>(type: "integer", nullable: true),
+                    timezone_offset = table.Column<float>(type: "real", nullable: false),
+                    timezone_name = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false),
+                    weather_code = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -450,6 +450,49 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     table.ForeignKey(
                         name: "FK_core_subscriptionmethod_tenants_tenants_tenant",
                         column: x => x.tenant,
+                        principalTable: "tenants_tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "core_user",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    tenant_id = table.Column<int>(type: "integer", nullable: false),
+                    username = table.Column<string>(type: "character varying", maxLength: 255, nullable: false),
+                    first_name = table.Column<string>(type: "character varying", maxLength: 64, nullable: true),
+                    last_name = table.Column<string>(type: "character varying", maxLength: 64, nullable: true),
+                    sex = table.Column<bool>(type: "boolean", nullable: true),
+                    birth_date = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    status = table.Column<int>(type: "integer", nullable: false),
+                    activation_status = table.Column<int>(type: "integer", nullable: false),
+                    email = table.Column<string>(type: "character varying", maxLength: 255, nullable: true),
+                    WorkFromDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    TerminatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    title = table.Column<string>(type: "character varying", maxLength: 64, nullable: true),
+                    culture_name = table.Column<string>(type: "character varying", maxLength: 20, nullable: true),
+                    contacts = table.Column<string>(type: "character varying", maxLength: 1024, nullable: true),
+                    mobile_phone = table.Column<string>(type: "character varying", maxLength: 255, nullable: true),
+                    mobile_phone_activation = table.Column<int>(type: "integer", nullable: false),
+                    location = table.Column<string>(type: "character varying", maxLength: 255, nullable: true),
+                    notes = table.Column<string>(type: "character varying", maxLength: 512, nullable: true),
+                    Sid = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
+                    SsoNameId = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
+                    SsoSessionId = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
+                    removed = table.Column<bool>(type: "boolean", nullable: false),
+                    create_date = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    last_modified = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Spam = table.Column<bool>(type: "boolean", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_core_user", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_core_user_tenants_tenants_tenant_id",
+                        column: x => x.tenant_id,
                         principalTable: "tenants_tenants",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -1128,49 +1171,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    tenant_id = table.Column<int>(type: "integer", nullable: false),
-                    username = table.Column<string>(type: "character varying", maxLength: 255, nullable: false),
-                    first_name = table.Column<string>(type: "character varying", maxLength: 64, nullable: true),
-                    last_name = table.Column<string>(type: "character varying", maxLength: 64, nullable: true),
-                    sex = table.Column<bool>(type: "boolean", nullable: true),
-                    birth_date = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false),
-                    activation_status = table.Column<int>(type: "integer", nullable: false),
-                    email = table.Column<string>(type: "character varying", maxLength: 255, nullable: true),
-                    WorkFromDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    TerminatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    title = table.Column<string>(type: "character varying", maxLength: 64, nullable: true),
-                    culture_name = table.Column<string>(type: "character varying", maxLength: 20, nullable: true),
-                    contacts = table.Column<string>(type: "character varying", maxLength: 1024, nullable: true),
-                    mobile_phone = table.Column<string>(type: "character varying", maxLength: 255, nullable: true),
-                    mobile_phone_activation = table.Column<int>(type: "integer", nullable: false),
-                    location = table.Column<string>(type: "character varying", maxLength: 255, nullable: true),
-                    notes = table.Column<string>(type: "character varying", maxLength: 512, nullable: true),
-                    Sid = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
-                    SsoNameId = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
-                    SsoSessionId = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
-                    removed = table.Column<bool>(type: "boolean", nullable: false),
-                    create_date = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    last_modified = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    Spam = table.Column<bool>(type: "boolean", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_Users_tenants_tenants_tenant_id",
-                        column: x => x.tenant_id,
-                        principalTable: "tenants_tenants",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "webhooks_config",
                 columns: table => new
                 {
@@ -1286,6 +1286,60 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "identity_authorizations",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    RegisteredClientId = table.Column<string>(type: "text", nullable: false),
+                    PrincipalId = table.Column<string>(type: "text", nullable: false),
+                    TenantId = table.Column<int>(type: "integer", nullable: false),
+                    State = table.Column<string>(type: "text", nullable: true),
+                    Attributes = table.Column<string>(type: "jsonb", nullable: true),
+                    AuthorizationGrantType = table.Column<string>(type: "text", nullable: true),
+                    AuthorizedScopes = table.Column<string>(type: "text", nullable: true),
+                    AuthorizationCodeValue = table.Column<string>(type: "text", nullable: true),
+                    AuthorizationCodeMetadata = table.Column<string>(type: "jsonb", nullable: true),
+                    AuthorizationCodeIssuedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    AuthorizationCodeExpiresAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    AccessTokenType = table.Column<string>(type: "text", nullable: true),
+                    AccessTokenValue = table.Column<string>(type: "text", nullable: true),
+                    AccessTokenHash = table.Column<string>(type: "text", nullable: true),
+                    AccessTokenScopes = table.Column<string>(type: "text", nullable: true),
+                    AccessTokenMetadata = table.Column<string>(type: "jsonb", nullable: true),
+                    AccessTokenIssuedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    AccessTokenExpiresAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    RefreshTokenValue = table.Column<string>(type: "text", nullable: true),
+                    RefreshTokenHash = table.Column<string>(type: "text", nullable: true),
+                    RefreshTokenMetadata = table.Column<string>(type: "jsonb", nullable: true),
+                    RefreshTokenIssuedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    RefreshTokenExpiresAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    IsInvalidated = table.Column<bool>(type: "boolean", nullable: true),
+                    ModifiedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    IdentityClientClientId = table.Column<string>(type: "character varying(255)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_identity_authorizations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_identity_authorizations_identity_clients_IdentityClientClie~",
+                        column: x => x.IdentityClientClientId,
+                        principalTable: "identity_clients",
+                        principalColumn: "client_id");
+                    table.ForeignKey(
+                        name: "FK_identity_authorizations_identity_clients_RegisteredClientId",
+                        column: x => x.RegisteredClientId,
+                        principalTable: "identity_clients",
+                        principalColumn: "client_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_identity_authorizations_tenants_tenants_TenantId",
+                        column: x => x.TenantId,
+                        principalTable: "tenants_tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "identity_client_allowed_origins",
                 columns: table => new
                 {
@@ -1376,60 +1430,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         column: x => x.registered_client_id,
                         principalTable: "identity_clients",
                         principalColumn: "client_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "IdentityAuthorizations",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    RegisteredClientId = table.Column<string>(type: "text", nullable: false),
-                    PrincipalId = table.Column<string>(type: "text", nullable: false),
-                    TenantId = table.Column<int>(type: "integer", nullable: false),
-                    State = table.Column<string>(type: "text", nullable: true),
-                    Attributes = table.Column<string>(type: "jsonb", nullable: true),
-                    AuthorizationGrantType = table.Column<string>(type: "text", nullable: true),
-                    AuthorizedScopes = table.Column<string>(type: "text", nullable: true),
-                    AuthorizationCodeValue = table.Column<string>(type: "text", nullable: true),
-                    AuthorizationCodeMetadata = table.Column<string>(type: "jsonb", nullable: true),
-                    AuthorizationCodeIssuedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    AuthorizationCodeExpiresAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    AccessTokenType = table.Column<string>(type: "text", nullable: true),
-                    AccessTokenValue = table.Column<string>(type: "text", nullable: true),
-                    AccessTokenHash = table.Column<string>(type: "text", nullable: true),
-                    AccessTokenScopes = table.Column<string>(type: "text", nullable: true),
-                    AccessTokenMetadata = table.Column<string>(type: "jsonb", nullable: true),
-                    AccessTokenIssuedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    AccessTokenExpiresAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    RefreshTokenValue = table.Column<string>(type: "text", nullable: true),
-                    RefreshTokenHash = table.Column<string>(type: "text", nullable: true),
-                    RefreshTokenMetadata = table.Column<string>(type: "jsonb", nullable: true),
-                    RefreshTokenIssuedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    RefreshTokenExpiresAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    IsInvalidated = table.Column<bool>(type: "boolean", nullable: true),
-                    ModifiedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    IdentityClientClientId = table.Column<string>(type: "character varying(255)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_IdentityAuthorizations", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_IdentityAuthorizations_identity_clients_IdentityClientClien~",
-                        column: x => x.IdentityClientClientId,
-                        principalTable: "identity_clients",
-                        principalColumn: "client_id");
-                    table.ForeignKey(
-                        name: "FK_IdentityAuthorizations_identity_clients_RegisteredClientId",
-                        column: x => x.RegisteredClientId,
-                        principalTable: "identity_clients",
-                        principalColumn: "client_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_IdentityAuthorizations_tenants_tenants_TenantId",
-                        column: x => x.TenantId,
-                        principalTable: "tenants_tenants",
-                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -2101,11 +2101,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 values: new object[] { 1, "localhost", new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc), null, "Web Office", new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), null, null, null, null, null });
 
             migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "id", "activation_status", "birth_date", "contacts", "create_date", "CreatedBy", "culture_name", "email", "first_name", "last_modified", "last_name", "location", "mobile_phone", "mobile_phone_activation", "notes", "removed", "sex", "Sid", "Spam", "SsoNameId", "SsoSessionId", "status", "tenant_id", "TerminatedDate", "title", "username", "WorkFromDate" },
-                values: new object[] { new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), 0, null, null, new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc), null, null, "", "Administrator", new DateTime(2021, 3, 9, 9, 52, 55, 765, DateTimeKind.Utc).AddTicks(1420), "", null, null, 0, null, false, null, null, null, null, null, 1, 1, null, null, "administrator", new DateTime(2021, 3, 9, 9, 52, 55, 764, DateTimeKind.Utc).AddTicks(9157) });
-
-            migrationBuilder.InsertData(
                 table: "core_acl",
                 columns: new[] { "action", "object", "subject", "tenant", "acetype" },
                 values: new object[,]
@@ -2259,6 +2254,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "core_user",
+                columns: new[] { "id", "activation_status", "birth_date", "contacts", "create_date", "CreatedBy", "culture_name", "email", "first_name", "last_modified", "last_name", "location", "mobile_phone", "mobile_phone_activation", "notes", "removed", "sex", "Sid", "Spam", "SsoNameId", "SsoSessionId", "status", "tenant_id", "TerminatedDate", "title", "username", "WorkFromDate" },
+                values: new object[] { new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), 0, null, null, new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc), null, null, "", "Administrator", new DateTime(2021, 3, 9, 9, 52, 55, 765, DateTimeKind.Utc).AddTicks(1420), "", null, null, 0, null, false, null, null, null, null, null, 1, 1, null, null, "administrator", new DateTime(2021, 3, 9, 9, 52, 55, 764, DateTimeKind.Utc).AddTicks(9157) });
+
+            migrationBuilder.InsertData(
                 table: "core_usergroup",
                 columns: new[] { "ref_type", "tenant", "groupid", "userid", "last_modified" },
                 values: new object[] { 0, 1, new Guid("cd84e66b-b803-40fc-99f9-b2969a54a1de"), new Guid("66faa6e4-f133-11ea-b126-00ffeec8b4ef"), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc) });
@@ -2307,6 +2307,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 name: "ix_parentid",
                 table: "core_group",
                 columns: new[] { "tenant", "parentid" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_core_user_tenant_id",
+                table: "core_user",
+                column: "tenant_id");
 
             migrationBuilder.CreateIndex(
                 name: "core_usergroup_last_modified_idx",
@@ -2465,6 +2470,21 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 column: "worker_type_name");
 
             migrationBuilder.CreateIndex(
+                name: "IX_identity_authorizations_IdentityClientClientId",
+                table: "identity_authorizations",
+                column: "IdentityClientClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_identity_authorizations_RegisteredClientId",
+                table: "identity_authorizations",
+                column: "RegisteredClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_identity_authorizations_TenantId",
+                table: "identity_authorizations",
+                column: "TenantId");
+
+            migrationBuilder.CreateIndex(
                 name: "idx_identity_client_allowed_origins_client_id",
                 table: "identity_client_allowed_origins",
                 column: "client_id");
@@ -2529,21 +2549,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 name: "idx_identity_consents_registered_client_id",
                 table: "identity_consents",
                 column: "registered_client_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_IdentityAuthorizations_IdentityClientClientId",
-                table: "IdentityAuthorizations",
-                column: "IdentityClientClientId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_IdentityAuthorizations_RegisteredClientId",
-                table: "IdentityAuthorizations",
-                column: "RegisteredClientId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_IdentityAuthorizations_TenantId",
-                table: "IdentityAuthorizations",
-                column: "TenantId");
 
             migrationBuilder.CreateIndex(
                 name: "idx_date",
@@ -2623,11 +2628,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 column: "version");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_tenant_id",
-                table: "Users",
-                column: "tenant_id");
-
-            migrationBuilder.CreateIndex(
                 name: "idx_webhooks_config_tenant_id",
                 table: "webhooks_config",
                 column: "tenant_id");
@@ -2674,6 +2674,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
             migrationBuilder.DropTable(
                 name: "core_subscriptionmethod");
+
+            migrationBuilder.DropTable(
+                name: "core_user");
 
             migrationBuilder.DropTable(
                 name: "core_user_relations");
@@ -2748,6 +2751,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 name: "hosting_instance_registration");
 
             migrationBuilder.DropTable(
+                name: "identity_authorizations");
+
+            migrationBuilder.DropTable(
                 name: "identity_certs");
 
             migrationBuilder.DropTable(
@@ -2767,9 +2773,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
             migrationBuilder.DropTable(
                 name: "identity_shedlock");
-
-            migrationBuilder.DropTable(
-                name: "IdentityAuthorizations");
 
             migrationBuilder.DropTable(
                 name: "login_events");
@@ -2815,9 +2818,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
             migrationBuilder.DropTable(
                 name: "tenants_version");
-
-            migrationBuilder.DropTable(
-                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "webhooks");

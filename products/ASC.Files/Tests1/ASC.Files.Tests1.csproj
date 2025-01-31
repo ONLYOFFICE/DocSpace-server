@@ -22,6 +22,7 @@
         <PackageReference Include="Respawn" Version="6.2.1" />
         <PackageReference Include="Testcontainers" Version="4.1.0" />
         <PackageReference Include="Testcontainers.MySql" Version="4.1.0" />
+        <PackageReference Include="Testcontainers.PostgreSql" Version="4.1.0" />
         <PackageReference Include="Testcontainers.RabbitMq" Version="4.1.0" />
         <PackageReference Include="Testcontainers.Redis" Version="4.1.0" />
         <PackageReference Include="xunit" Version="2.9.2" />
@@ -38,6 +39,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\common\Tools\ASC.Migrations.Core\ASC.Migrations.Core.csproj" />
       <ProjectReference Include="..\..\..\migrations\mysql\SaaS\ASC.Migrations.MySql.SaaS.csproj" />
+      <ProjectReference Include="..\..\..\migrations\postgre\SaaS\ASC.Migrations.PostgreSql.SaaS.csproj" />
       <ProjectReference Include="..\..\..\web\ASC.Web.Api\ASC.Web.Api.csproj" Aliases="ASCWebApi"/>
       <ProjectReference Include="..\..\ASC.People\Server\ASC.People.csproj" Aliases="ASCPeople" />
       <ProjectReference Include="..\Server\ASC.Files.csproj" Aliases="ASCFiles"/>
