@@ -413,7 +413,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         var currentDocServiceUrl = filesLinkUtility.GetDocServiceUrl();
         var currentDocServiceUrlInternal = filesLinkUtility.GetDocServiceUrlInternal();
         var currentDocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl();
@@ -427,11 +427,17 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             throw new Exception("Invalid input urls");
         }
 
+        if (!string.IsNullOrEmpty(inDto.DocServiceSignatureSecret) &&
+            string.IsNullOrEmpty(inDto.DocServiceSignatureHeader))
+        {
+            throw new Exception("Invalid signature header");
+        }
+
         await filesLinkUtility.SetDocServiceUrlAsync(inDto.DocServiceUrl);
         await filesLinkUtility.SetDocServiceUrlInternalAsync(inDto.DocServiceUrlInternal);
         await filesLinkUtility.SetDocServicePortalUrlAsync(inDto.DocServiceUrlPortal);
-        await filesLinkUtility.SetDocServiceSignatureSecretAsync(inDto.SignatureSecret);
-        await filesLinkUtility.SetDocServiceSignatureHeaderAsync(inDto.SignatureHeader);
+        await filesLinkUtility.SetDocServiceSignatureSecretAsync(inDto.DocServiceSignatureSecret);
+        await filesLinkUtility.SetDocServiceSignatureHeaderAsync(inDto.DocServiceSignatureHeader);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
@@ -510,6 +516,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
             DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
+            DocServiceSignatureHeader = filesLinkUtility.GetDocServiceSignatureHeader(),
+            DocServiceSignatureSecret = "",
             IsDefault = filesLinkUtility.IsDefault
         };
     }

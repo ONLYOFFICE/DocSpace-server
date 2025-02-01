@@ -49,10 +49,10 @@ public class CheckDocServiceUrlRequestDto
     /// <summary>
     /// Signature secret
     /// </summary>
-    public string SignatureSecret { get; set; }
+    public string DocServiceSignatureSecret { get; set; }
 
     /// <summary>
     /// Signature header
     /// </summary>
-    public string SignatureHeader { get; set; }
+    public string DocServiceSignatureHeader { get; set; }
 }

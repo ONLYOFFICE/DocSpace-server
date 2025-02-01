@@ -54,6 +54,16 @@ public class DocServiceUrlDto
     public required string DocServicePortalUrl { get; set; }
 
     /// <summary>
+    /// Doc service signature secret
+    /// </summary>
+    public string DocServiceSignatureSecret { get; set; }
+
+    /// <summary>
+    /// Doc service signature header
+    /// </summary>
+    public string DocServiceSignatureHeader { get; set; }
+
+    /// <summary>
     /// Is default
     /// </summary>
     public required bool IsDefault { get; set; }
