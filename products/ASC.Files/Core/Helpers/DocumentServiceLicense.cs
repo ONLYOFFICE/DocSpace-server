@@ -60,7 +60,8 @@ public class DocumentServiceLicense(ICache cache,
                    null,
                    null,
                    null,
-                   fileUtility.SignatureSecret,
+                   filesLinkUtility.DocServiceSignatureSecret,
+                   filesLinkUtility.DocServiceSignatureHeader,
                    clientFactory
                    );
 

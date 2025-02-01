@@ -294,7 +294,7 @@ public class FilesLinkUtility
         await SetUrlSettingAsync(PortalUrlKey, value);
     }
 
-    private const string SignatureSecretKey = "signaturesecret";
+    private const string SignatureSecretKey = "signaturevalue";
 
     public string GetDocServiceSignatureSecret()
     {
@@ -553,7 +553,7 @@ public class FilesLinkUtility
 
     private string GetDefaultSignatureSetting(string key)
     {
-        return _configuration[$"files:docservice:secret:{key}"];
+        return _configuration[$"files:docservice:secret:{key.Substring(9)}"]; //.Substring("signature".Length)
     }
 
     private async Task SetSignatureSettingAsync(string key, string value)
@@ -587,7 +587,7 @@ public class FilesLinkUtility
     {
         return "DocKey_" + key;
     }
-    
+
     private string GetFileWebMediaViewUrl(object fileId, bool external = false)
     {
         var id = HttpUtility.UrlEncode(fileId.ToString());

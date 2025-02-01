@@ -81,6 +81,7 @@ public static class DocumentService
     /// <param name="options"></param>
     /// <param name="isAsync">Perform conversions asynchronously</param>
     /// <param name="signatureSecret">Secret key to generate the token</param>
+    /// <param name="signatureHeader">Header to transfer the token</param>
     /// <param name="clientFactory"></param>
     /// <param name="toForm"></param>
     /// <returns>The percentage of completion of conversion</returns>
@@ -105,6 +106,7 @@ public static class DocumentService
         Options options,
         bool isAsync,
         string signatureSecret,
+        string signatureHeader,
        IHttpClientFactory clientFactory,
        bool toForm)
     {
@@ -119,7 +121,7 @@ public static class DocumentService
             throw new ArgumentNullException(nameof(toExtension), "Extension for conversion is not known");
         }
 
-        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, options, isAsync, signatureSecret, clientFactory, toForm);
+        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, options, isAsync, signatureSecret, signatureHeader, clientFactory, toForm);
     }
 
     private static async Task<(int ResultPercent, string ConvertedDocumentUri, string convertedFileType)> InternalGetConvertedUriAsync(
@@ -136,6 +138,7 @@ public static class DocumentService
        Options options,
        bool isAsync,
        string signatureSecret,
+       string signatureHeader,
        IHttpClientFactory clientFactory,
        bool toForm)
     {
@@ -188,7 +191,7 @@ public static class DocumentService
         {
             var token = JsonWebToken.Encode(new { payload = body }, signatureSecret);
             //todo: remove old scheme
-            request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
+            request.Headers.Add(signatureHeader, "Bearer " + token);
 
             token = JsonWebToken.Encode(body, signatureSecret);
             body.Token = token;
@@ -218,6 +221,7 @@ public static class DocumentService
     /// <param name="users">users id for drop</param>
     /// <param name="meta">file meta data for update</param>
     /// <param name="signatureSecret">Secret key to generate the token</param>
+    /// <param name="signatureHeader">Header to transfer the token</param>
     /// <param name="clientFactory"></param>
     /// <returns>Response</returns>
 
@@ -229,6 +233,7 @@ public static class DocumentService
         string[] users,
         MetaData meta,
         string signatureSecret,
+        string signatureHeader,
         IHttpClientFactory clientFactory)
     {
         documentTrackerUrl = FilesLinkUtility.AddQueryString(documentTrackerUrl, new Dictionary<string, string> {
@@ -277,7 +282,7 @@ public static class DocumentService
             var token = JsonWebToken.Encode(new { payload = body }, signatureSecret);
 
             //todo: remove old scheme
-            request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
+            request.Headers.Add(signatureHeader, "Bearer " + token);
 
             token = JsonWebToken.Encode(body, signatureSecret);
             body.Token = token;
@@ -323,6 +328,7 @@ public static class DocumentService
         string scriptUrl,
         bool isAsync,
         string signatureSecret,
+        string signatureHeader,
        IHttpClientFactory clientFactory)
     {
         ArgumentException.ThrowIfNullOrEmpty(docbuilderUrl);
@@ -332,7 +338,7 @@ public static class DocumentService
             throw new ArgumentException("requestKey or inputScript is empty");
         }
 
-        return InternalDocbuilderRequestAsync(fileUtility, docbuilderUrl, requestKey, scriptUrl, isAsync, signatureSecret, clientFactory);
+        return InternalDocbuilderRequestAsync(fileUtility, docbuilderUrl, requestKey, scriptUrl, isAsync, signatureSecret, signatureHeader, clientFactory);
     }
 
     private static async Task<(string DocBuilderKey, Dictionary<string, string> Urls)> InternalDocbuilderRequestAsync(
@@ -342,6 +348,7 @@ public static class DocumentService
        string scriptUrl,
        bool isAsync,
        string signatureSecret,
+       string signatureHeader,
        IHttpClientFactory clientFactory)
     {
         docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string> {
@@ -367,7 +374,7 @@ public static class DocumentService
         {
             var token = JsonWebToken.Encode(new { payload = body }, signatureSecret);
             //todo: remove old scheme
-            request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
+            request.Headers.Add(signatureHeader, "Bearer " + token);
 
             token = JsonWebToken.Encode(body, signatureSecret);
             body.Token = token;
