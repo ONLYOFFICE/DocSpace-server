@@ -109,12 +109,12 @@ module.exports = (io) => {
       changeSubscription(roomParts, individual, unsubscribe);
     });
 
-    socket.on("subscribeSpace", ({ roomParts, individual }) => {
-      changeSubscription(roomParts, individual, subscribeSpace);
+    socket.on("subscribeInSpaces", ({ roomParts, individual }) => {
+      changeSubscription(roomParts, individual, subscribeInSpaces);
     });
 
-    socket.on("unsubscribeSpace", ({ roomParts, individual }) => {
-      changeSubscription(roomParts, individual, unsubscribeSpace);
+    socket.on("unsubscribeInSpaces", ({ roomParts, individual }) => {
+      changeSubscription(roomParts, individual, unsubscribeInSpaces);
     });
 
     socket.on("refresh-folder", (folderId) => {
@@ -197,7 +197,7 @@ module.exports = (io) => {
       }
     }
 
-    function subscribeSpace(roomParts) {
+    function subscribeInSpaces(roomParts) {
       if (!roomParts) return;
 
       if (Array.isArray(roomParts)) 
@@ -220,7 +220,7 @@ module.exports = (io) => {
       }
     }
 
-    function unsubscribeSpace(roomParts) {
+    function unsubscribeInSpaces(roomParts) {
       if (!roomParts) return;
 
       if (Array.isArray(roomParts))
