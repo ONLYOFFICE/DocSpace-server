@@ -122,7 +122,7 @@
     <value>Habilite la aplicación para gestionar los archivos y carpetas de Box.</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para conectar su cuenta de Box al módulo Documentos. Podrá gestionar, editar y compartir archivos de Box con los usuarios de ONLYOFFICE. {0}Acceda a su cuenta en la página de desarrolladores de Box y cree una nueva aplicación para la integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
+    <value>Habilite esta aplicación para conectar su cuenta de Box al módulo Documentos. Podrá gestionar, editar y compartir archivos de Box con los usuarios de {LogoText}. {0}Acceda a su cuenta en la página de desarrolladores de Box y cree una nueva aplicación para la integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersClickatell" xml:space="preserve">
     <value>Clickatell</value>
@@ -134,7 +134,7 @@
     <value>Habilitar la aplicación de autenticación de dos factores vía Clickatell.</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Utilice esta aplicación para habilitar la autenticación de dos factores con el servicio Clickatell. {0}Acceda a su cuenta de la Plataforma SMS y cree una nueva integración de ONLYOFFICE. Copie la apiKey e insértela a continuación:</value>
+    <value>Utilice esta aplicación para habilitar la autenticación de dos factores con el servicio Clickatell. {0}Acceda a su cuenta de la Plataforma SMS y cree una nueva integración de {LogoText}. Copie la apiKey e insértela a continuación:</value>
   </data>
   <data name="ConsumersDocuSign" xml:space="preserve">
     <value>DocuSign</value>
@@ -152,7 +152,7 @@
     <value>Punto final de autentificación de DocuSign</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para firmar digitalmente documentos usando DocuSign. {0}Vaya a la consola de administración de DocuSign y añada la integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
+    <value>Habilite esta aplicación para firmar digitalmente documentos usando DocuSign. {0}Vaya a la consola de administración de DocuSign y añada la integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersDropBox" xml:space="preserve">
     <value>Dropbox</value>
@@ -161,7 +161,7 @@
     <value>Conectar la aplicación para manejar los archivos y carpetas de Dropbox.</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para conectar su cuenta de Dropbox con el módulo Documentos. Podrá administrar, editar y compartir archivos de Dropbox con los usuarios de ONLYOFFICE. {0}Inicie sesión en su cuenta en la página web de desarrolladores de Dropbox y cree una nueva aplicación para la integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
+    <value>Habilite esta aplicación para conectar su cuenta de Dropbox con el módulo Documentos. Podrá administrar, editar y compartir archivos de Dropbox con los usuarios de {LogoText}. {0}Inicie sesión en su cuenta en la página web de desarrolladores de Dropbox y cree una nueva aplicación para la integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersDropBoxKey" xml:space="preserve">
     <value>ID de Dropbox</value>
@@ -194,7 +194,7 @@
     <value>Conectar la aplicación para acceder al portal usando la cuenta Facebook.</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en ONLYOFFICE usando Facebook y vincular las cuentas de Facebook de sus clientes al módulo CRM. {0}Vaya al Portal de Desarrolladores de Facebook y cree una nueva aplicación de integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
+    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en {LogoText} usando Facebook y vincular las cuentas de Facebook de sus clientes al módulo CRM. {0}Vaya al Portal de Desarrolladores de Facebook y cree una nueva aplicación de integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
@@ -236,7 +236,7 @@
     <value>Conectar el proyecto para acceder al portal usando la cuenta de Google y manejar los archivos y carpetas de Google Drive.</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para conectar su cuenta de Google Drive al módulo Documentos. Podrá administrar, editar y compartir archivos de Google Drive con los usuarios de ONLYOFFICE. {0}Vaya a la consola de las APIs de Google y cree un nuevo proyecto para la integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
+    <value>Habilite esta aplicación para conectar su cuenta de Google Drive al módulo Documentos. Podrá administrar, editar y compartir archivos de Google Drive con los usuarios de {LogoText}. {0}Vaya a la consola de las APIs de Google y cree un nuevo proyecto para la integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersLinkedIn" xml:space="preserve">
     <value>LinkedIn</value>
@@ -245,7 +245,7 @@
     <value>Conectar la aplicación para acceder al portal usando la cuenta LinkedIn.</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en ONLYOFFICE usando sus cuentas de LinkedIn. {0}Vaya al sitio web de LinkedIn Developers y cree una nueva aplicación de integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
+    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en {LogoText} usando sus cuentas de LinkedIn. {0}Vaya al sitio web de LinkedIn Developers y cree una nueva aplicación de integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>ID de Linkedin</value>
@@ -323,7 +323,7 @@
     <value>Conectar la aplicación para manejar los archivos y carpetas de OneDrive.</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para conectar su cuenta de OneDrive al módulo Documentos. Podrá administrar, editar y compartir archivos de OneDrive con los usuarios de ONLYOFFICE. {0}Acceda a su cuenta de Microsoft Azure y cree una nueva aplicación para la integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
+    <value>Habilite esta aplicación para conectar su cuenta de OneDrive al módulo Documentos. Podrá administrar, editar y compartir archivos de OneDrive con los usuarios de {LogoText}. {0}Acceda a su cuenta de Microsoft Azure y cree una nueva aplicación para la integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersSmsc" xml:space="preserve">
     <value>Centro SMS</value>
@@ -371,7 +371,7 @@
     <value>Conectar la aplicación para acceder al portal usando la cuenta Twitter.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en ONLYOFFICE usando su Twitter y vincular las cuentas de Twitter de sus clientes al módulo CRM. {0}Vaya al Portal de Desarrolladores de Twitter y cree una nueva aplicación de integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
+    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en {LogoText} usando su Twitter y vincular las cuentas de Twitter de sus clientes al módulo CRM. {0}Vaya al Portal de Desarrolladores de Twitter y cree una nueva aplicación de integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -422,7 +422,7 @@
     <value>Habilitar la aplicación para importar contactos de Yahoo.</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para añadir nuevos usuarios del portal desde su lista de contactos de Yahoo. {0}Vaya a la página Crear Aplicación en la Red de Desarrolladores de Yahoo y cree una nueva aplicación para la integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
+    <value>Habilite esta aplicación para añadir nuevos usuarios del portal desde su lista de contactos de Yahoo. {0}Vaya a la página Crear Aplicación en la Red de Desarrolladores de Yahoo y cree una nueva aplicación para la integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersYandex" xml:space="preserve">
     <value>Yandex</value>
@@ -869,7 +869,7 @@
     <value>Habilite la aplicación para iniciar sesión en el portal utilizando una cuenta de ID de Apple.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en ONLYOFFICE usando su ID de Apple. {0}Vaya al Portal de Desarrolladores de Apple y cree una nueva aplicación de integración de ONLYOFFICE. Inserte los datos que usted recibió a continuación:</value>
+    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en {LogoText} usando su ID de Apple. {0}Vaya al Portal de Desarrolladores de Apple y cree una nueva aplicación de integración de {LogoText}. Inserte los datos que usted recibió a continuación:</value>
   </data>
   <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
     <value>Clave privada descargada desde Apple Developer</value>
@@ -905,28 +905,28 @@
     <value>Startup</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para permitir a sus usuarios recibir notificaciones sobre mensajes incluso offline. {0}Vaya a la consola Firebase y añada un nuevo proyecto para la integración de ONLYOFFICE. Inserte los datos que recibió a continuación:</value>
+    <value>Habilite esta aplicación para permitir a sus usuarios recibir notificaciones sobre mensajes incluso offline. {0}Vaya a la consola Firebase y añada un nuevo proyecto para la integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Conecte el servicio Google Cloud Storage para hacer una copia de seguridad y almacenar los datos de su portal. {0}Vaya a la Consola de la Plataforma Google Cloud y cree una nueva cuenta de servicio para ONLYOFFICE. Pegue los datos que recibió a continuación:</value>
+    <value>Conecte el servicio Google Cloud Storage para hacer una copia de seguridad y almacenar los datos de su portal. {0}Vaya a la Consola de la Plataforma Google Cloud y cree una nueva cuenta de servicio para {LogoText}. Pegue los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersRackspaceInstruction" xml:space="preserve">
     <value>Conecte el servicio Rackspace Cloud Storage service para hacer una copia de seguridad y almacenar los datos de su portal. {0}En los ajustes de seguridad del Panel de Control de Rackspace Cloud, haga clic en el enlace Mostrar junto a la Clave API de Rackspace. Pegue los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en ONLYOFFICE usando Microsoft. {0}Vaya a Microsoft Azure y cree una nueva aplicación de integración de ONLYOFFICE. Inserte los datos que usted recibió a continuación:</value>
+    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en {LogoText} usando Microsoft. {0}Vaya a Microsoft Azure y cree una nueva aplicación de integración de {LogoText}. Inserte los datos que usted recibió a continuación:</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Conecte Amazon AWS S3 para hacer una copia de seguridad y almacenar los datos de su portal. {0}Vaya a la consola de gestión de AWS y cree claves de acceso para ONLYOFFICE. Pegue los datos que recibió a continuación:</value>
+    <value>Conecte Amazon AWS S3 para hacer una copia de seguridad y almacenar los datos de su portal. {0}Vaya a la consola de gestión de AWS y cree claves de acceso para {LogoText}. Pegue los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersSelectelInstruction" xml:space="preserve">
     <value>Conecte el servicio Selectel Cloud Storage service para hacer una copia de seguridad y almacenar los datos de su portal. {0}Obtenga los datos de acceso para un usuario con derechos de Lectura/Escritura para los contenedores donde planea almacenar sus copias de seguridad y péguelos debajo:</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Habilite la aplicación para publicar fácilmente documentos en su sitio web de WordPress. {0}En la página de Desarrolladores de Wordpress, cree una nueva aplicación para la integración de ONLYOFFICE. Pegue los datos que recibió a continuación:</value>
+    <value>Habilite la aplicación para publicar fácilmente documentos en su sitio web de WordPress. {0}En la página de Desarrolladores de Wordpress, cree una nueva aplicación para la integración de {LogoText}. Pegue los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para crear bibliografías en los editores ONLYOFFICE. {0}Vaya a la página de registro de EasyBib y rellene el formulario para añadir la integración de ONLYOFFICE. Después de obtener la clave de la aplicación, péguela a continuación:</value>
+    <value>Habilite esta aplicación para crear bibliografías en los editores {LogoText}. {0}Vaya a la página de registro de EasyBib y rellene el formulario para añadir la integración de {LogoText}. Después de obtener la clave de la aplicación, péguela a continuación:</value>
   </data>
   <data name="ConsumersMicrosoftDescription" xml:space="preserve">
     <value>Habilite la aplicación para iniciar sesión en el portal utilizando una cuenta de Microsoft.</value>
@@ -992,7 +992,7 @@
     <value>Habilite la aplicación para iniciar sesión en el portal utilizando una cuenta de Zoom.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en ONLYOFFICE utilizando sus cuentas de Zoom. {0}Vaya a la página web de Zoom Developers y cree una nueva app de integración con ONLYOFFICE. Inserte los datos que ha recibido abajo:</value>
+    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en {LogoText} utilizando sus cuentas de Zoom. {0}Vaya a la página web de Zoom Developers y cree una nueva app de integración con {LogoText}. Inserte los datos que ha recibido abajo:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Demasiados intentos de inicio de sesión. Vuelva a intentarlo más tarde</value>

@@ -157,7 +157,7 @@
     <value>Enable the application to sign in to the portal using an Apple ID account.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Enable this app to allow your users to sign in to ONLYOFFICE using Apple ID. {0}Go to Apple Developers Portal and create a new app ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to allow your users to sign in to {LogoText} using Apple ID. {0}Go to Apple Developers Portal and create a new app {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>A 10-character key identifier generated for the Sign in with Apple private key</value>
@@ -202,7 +202,7 @@
     <value>Enable the application to manage Box files and folders.</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Enable this app to connect your Box account to the Documents module. You’ll be able to manage, edit, and share files from Box with ONLYOFFICE users. {0}Sign in to your account on the Box developers page and create a new app for ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to connect your Box account to the Documents module. You’ll be able to manage, edit, and share files from Box with {LogoText} users. {0}Sign in to your account on the Box developers page and create a new app for {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersClickatell" xml:space="preserve">
     <value>Clickatell</value>
@@ -214,7 +214,7 @@
     <value>Enable the application for the two-factor authentication via Clickatell.</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Use this app to enable two-factor authentication with Clickatell service. {0}Sign in to your SMS Platform account and create a new integration for ONLYOFFICE. Copy an apiKey and insert it below:</value>
+    <value>Use this app to enable two-factor authentication with Clickatell service. {0}Sign in to your SMS Platform account and create a new integration for {LogoText}. Copy an apiKey and insert it below:</value>
   </data>
   <data name="ConsumersDocuSign" xml:space="preserve">
     <value>DocuSign</value>
@@ -232,7 +232,7 @@
     <value>DocuSign authentication endpoint</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Enable this app to digitally sign documents using DocuSign. {0}Go to your DocuSign Admin Console and add ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to digitally sign documents using DocuSign. {0}Go to your DocuSign Admin Console and add {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersDropBox" xml:space="preserve">
     <value>DropBox</value>
@@ -241,7 +241,7 @@
     <value>Enable the application to manage Dropbox files and folders.</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Enable this app to connect your Dropbox account to the Documents module. You’ll be able to manage, edit, and share files from Dropbox with ONLYOFFICE users. {0}Sign in to your account on the Dropbox Developers website and create a new app for ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to connect your Dropbox account to the Documents module. You’ll be able to manage, edit, and share files from Dropbox with {LogoText} users. {0}Sign in to your account on the Dropbox Developers website and create a new app for {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersDropBoxKey" xml:space="preserve">
     <value>DropBox ID</value>
@@ -259,7 +259,7 @@
     <value>Enable this application to create bibliographic lists in documents with EasyBib.</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Enable this app to create bibliographies in ONLYOFFICE editors. {0}Go to the EasyBib signup page and fill in the form to add ONLYOFFICE integration. After you get an app key, paste it below:</value>
+    <value>Enable this app to create bibliographies in {LogoText} editors. {0}Go to the EasyBib signup page and fill in the form to add {LogoText} integration. After you get an app key, paste it below:</value>
   </data>
   <data name="ConsumersFacebook" xml:space="preserve">
     <value>Facebook</value>
@@ -277,7 +277,7 @@
     <value>Enable the application to sign in to the portal using a Facebook account.</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Enable this app to allow your users to sign in to ONLYOFFICE using Facebook and link their customers’ Facebook accounts to the CRM module. {0}Go to Facebook Developers Portal and create a new app ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to allow your users to sign in to {LogoText} using Facebook and link their customers’ Facebook accounts to the CRM module. {0}Go to Facebook Developers Portal and create a new app {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
@@ -298,7 +298,7 @@
     <value>Enable this application to receive notifications about the messages sent to you with Firebase Cloud Messaging.</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Enable this app to allow your users to receive notifications about the messages even offline. {0}Go to Firebase console and add a new project for ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to allow your users to receive notifications about the messages even offline. {0}Go to Firebase console and add a new project for {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersGoogle" xml:space="preserve">
     <value>Google</value>
@@ -322,7 +322,7 @@
     <value>Connect Google Cloud Storage service to backup and store data from your portal.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Connect Google Cloud Storage service to backup and store data from your portal. {0}Go to Google Cloud Platform Console and create a new service account for ONLYOFFICE. Paste the data you received below:</value>
+    <value>Connect Google Cloud Storage service to backup and store data from your portal. {0}Go to Google Cloud Platform Console and create a new service account for {LogoText}. Paste the data you received below:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
@@ -331,7 +331,7 @@
     <value>Connect the project to sign in to the portal using a Google account and manage Google Drive files and folders.</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Enable this app to connect your Google Drive account to the Documents module. You’ll be able to manage, edit, and share files from Google Drive with ONLYOFFICE users. {0}Go to Google APIs console and create a new project for ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to connect your Google Drive account to the Documents module. You’ll be able to manage, edit, and share files from Google Drive with {LogoText} users. {0}Go to Google APIs console and create a new project for {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersLinkedIn" xml:space="preserve">
     <value>LinkedIn</value>
@@ -340,7 +340,7 @@
     <value>Enable the application to sign in to the portal using a LinkedIn account.</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Enable this app to allow your users to sign in to ONLYOFFICE using their LinkedIn accounts. {0}Go to the LinkedIn Developers website and create a new app ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to allow your users to sign in to {LogoText} using their LinkedIn accounts. {0}Go to the LinkedIn Developers website and create a new app {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>Linkedin ID</value>
@@ -376,7 +376,7 @@
     <value>Enable the application to sign in to the portal using a Microsoft account.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Enable this app to allow your users to sign in to ONLYOFFICE using Microsoft. {0}Go to Microsoft Azure and create a new app ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to allow your users to sign in to {LogoText} using Microsoft. {0}Go to Microsoft Azure and create a new app {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace Cloud Storage</value>
@@ -418,7 +418,7 @@
     <value>Connect Amazon AWS S3 to backup and store data from your portal.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Connect Amazon AWS S3 to backup and store data from your portal. {0}Go to the AWS Management Console and create access keys for ONLYOFFICE. Paste the data you received below:</value>
+    <value>Connect Amazon AWS S3 to backup and store data from your portal. {0}Go to the AWS Management Console and create access keys for {LogoText}. Paste the data you received below:</value>
   </data>
   <data name="ConsumersS3region" xml:space="preserve">
     <value>Region</value>
@@ -469,7 +469,7 @@
     <value>Enable the application to manage OneDrive files and folders.</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Enable this app to connect your OneDrive account to the Documents module. You’ll be able to manage, edit, and share files from OneDrive with ONLYOFFICE users. {0}Sign in to your Microsoft Azure account and create a new app for ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to connect your OneDrive account to the Documents module. You’ll be able to manage, edit, and share files from OneDrive with {LogoText} users. {0}Sign in to your Microsoft Azure account and create a new app for {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersSmsc" xml:space="preserve">
     <value>SMS Center</value>
@@ -532,7 +532,7 @@
     <value>Enable the application to sign in to the portal using a Twitter account.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Enable this app to allow your users to sign in to ONLYOFFICE using their Twitter and link their customers’ Twitter accounts to the CRM module. {0}Go to Twitter Developers Portal and create a new app ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to allow your users to sign in to {LogoText} using their Twitter and link their customers’ Twitter accounts to the CRM module. {0}Go to Twitter Developers Portal and create a new app {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -565,7 +565,7 @@
     <value>Enable the application to publish documents directly in WordPress.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Enable the application to easily publish documents to your WordPress website. {0}On the Wordpress Developers page, create a new app for ONLYOFFICE integration. Paste the data you received below:</value>
+    <value>Enable the application to easily publish documents to your WordPress website. {0}On the Wordpress Developers page, create a new app for {LogoText} integration. Paste the data you received below:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>WordPress Key</value>
@@ -586,7 +586,7 @@
     <value>Enable the application to import users from the Yahoo service.</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Enable this app to add new portal users from your Yahoo contact list. {0}Go to the Create Application page in the Yahoo Developer Network and create a new app for ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to add new portal users from your Yahoo contact list. {0}Go to the Create Application page in the Yahoo Developer Network and create a new app for {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersYandex" xml:space="preserve">
     <value>Yandex</value>
@@ -1060,7 +1060,7 @@
     <value>Enable the application to sign in to the portal using a Zoom account.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Enable this app to allow your users to sign in to ONLYOFFICE using their Zoom accounts. {0}Go to the Zoom Developers website and create a new app ONLYOFFICE integration. Insert the data you received below:</value>
+    <value>Enable this app to allow your users to sign in to {LogoText} using their Zoom accounts. {0}Go to the Zoom Developers website and create a new app {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="QuotaGreaterPortalError" xml:space="preserve">
     <value>Failed to set the memory quota - the memory quota you set is greater than portals quota.</value>

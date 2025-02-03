@@ -632,7 +632,7 @@
     <value>Aktivujte aplikáciu na prihlásenie do portálu pomocou účtu Apple ID.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste umožnili používateľom prihlásiť sa na portál ONLYOFFICE pomocou Apple ID. {0}Prejdite na Apple Developers Portal a vytvorte novú aplikáciu na integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby ste umožnili používateľom prihlásiť sa na portál {LogoText} pomocou Apple ID. {0}Prejdite na Apple Developers Portal a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>10-znakový identifikačný kľúč vygenerovaný pre prihlásenie pomocou osobného kľúča Apple</value>
@@ -656,16 +656,16 @@
     <value>Box kľúč</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste prepojili svoje konto Box s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory zo služby Box s používateľmi služby ONLYOFFICE. {0}Prihláste sa do svojho účtu na stránke vývojárov služby Box a vytvorte novú aplikáciu pre integráciu s ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby ste prepojili svoje konto Box s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory zo služby Box s používateľmi služby {LogoText}. {0}Prihláste sa do svojho účtu na stránke vývojárov služby Box a vytvorte novú aplikáciu pre integráciu s {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Pomocou tejto aplikácie môžete aktivovať dvojfaktorové overovanie so službou Clickatell. {0}Prihláste sa do svojho účtu SMS Platform a vytvorte novú integráciu pre ONLYOFFICE. Skopírujte apiKey a vložte ho nižšie:</value>
+    <value>Pomocou tejto aplikácie môžete aktivovať dvojfaktorové overovanie so službou Clickatell. {0}Prihláste sa do svojho účtu SMS Platform a vytvorte novú integráciu pre {LogoText}. Skopírujte apiKey a vložte ho nižšie:</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste mohli podpisovať dokumenty pomocou DocuSign. {0}Prejdite do svojej konzoly DocuSign Admin a pridajte integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby ste mohli podpisovať dokumenty pomocou DocuSign. {0}Prejdite do svojej konzoly DocuSign Admin a pridajte integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste pripojili účet Dropbox k modulu Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory z Dropbox s používateľmi ONLYOFFICE. {0}Prihláste sa do svojho účtu na webovej stránke Dropbox Developers a vytvorte novú aplikáciu pre integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby ste pripojili účet Dropbox k modulu Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory z Dropbox s používateľmi {LogoText}. {0}Prihláste sa do svojho účtu na webovej stránke Dropbox Developers a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
     <value>Kľúč aplikácie</value>
@@ -674,19 +674,19 @@
     <value>Aktivujte túto aplikáciu, aby ste mohli vytvárať bibliografické zoznamy v dokumentoch pomocou EasyBib.</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste mohli vytvárať bibliografií v editoroch ONLYOFFICE. {0}Prejdite na registračnú stránku EasyBib a vyplňte formulár na integráciu ONLYOFFICE. Po získaní kľúča aplikácie ho vložte nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby ste mohli vytvárať bibliografií v editoroch {LogoText}. {0}Prejdite na registračnú stránku EasyBib a vyplňte formulár na integráciu {LogoText}. Po získaní kľúča aplikácie ho vložte nižšie:</value>
   </data>
   <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
     <value>Token aplikácie</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do ONLYOFFICE pomocou Facebooku a prepojiť účty ich zákazníkov na Facebooku s modulom CRM. {0}Prejdite na Facebook Developers Portal a vytvorte novú aplikáciu na integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou Facebooku a prepojiť účty ich zákazníkov na Facebooku s modulom CRM. {0}Prejdite na Facebook Developers Portal a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumersFirebaseDescription" xml:space="preserve">
     <value>Aktivujte túto aplikáciu, aby ste dostávali oznámenia o správach odoslaných cez Firebase Cloud Messaging.</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby vaši používatelia mohli dostávať oznámenia o správach aj v režime offline. {0}Prejdite do konzoly Firebase a pridajte nový projekt pre integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby vaši používatelia mohli dostávať oznámenia o správach aj v režime offline. {0}Prejdite do konzoly Firebase a pridajte nový projekt pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumersGoogleCloud" xml:space="preserve">
     <value>Google Cloud Storage</value>
@@ -704,7 +704,7 @@
     <value>Pripojte službu Google Cloud Storage na zálohovanie a ukladanie údajov z portálu.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Pripojte službu Google Cloud Storage na zálohovanie a ukladanie údajov z portálu. {0}Prejdite do konzoly Google Cloud Platform a vytvorte nový servisný účet ONLYOFFICE. Nižšie vložte údaje, ktoré ste dostali:</value>
+    <value>Pripojte službu Google Cloud Storage na zálohovanie a ukladanie údajov z portálu. {0}Prejdite do konzoly Google Cloud Platform a vytvorte nový servisný účet {LogoText}. Nižšie vložte údaje, ktoré ste dostali:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
@@ -713,10 +713,10 @@
     <value>Pripojte projekt, aby ste sa mohli prihlásiť na portál pomocou účtu Google a spravovať súbory a priečinky na disku Google.</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste prepojili svoj účet Google Drive s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory z Disku Google s používateľmi ONLYOFFICE. {0}Prejdite do konzoly Google API a vytvorte nový projekt pre integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby ste prepojili svoj účet Google Drive s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory z Disku Google s používateľmi {LogoText}. {0}Prejdite do konzoly Google API a vytvorte nový projekt pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do ONLYOFFICE pomocou svojich účtov LinkedIn. {0}Prejdite na webovú stránku LinkedIn Developers a vytvorte novú aplikáciu na integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou svojich účtov LinkedIn. {0}Prejdite na webovú stránku LinkedIn Developers a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>Linkedin ID</value>
@@ -740,7 +740,7 @@
     <value>Aktivujte aplikáciu, aby ste sa mohli prihlásiť do portálu pomocou účtu Microsoft.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do ONLYOFFICE pomocou služby Microsoft. {0}Prejdite na Microsoft Azure a vytvorte novú aplikáciu na integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou služby Microsoft. {0}Prejdite na Microsoft Azure a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace Cloud Storage</value>
@@ -785,7 +785,7 @@
     <value>Pripojte Amazon AWS S3 na zálohovanie a ukladanie údajov z portálu.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Pripojte Amazon AWS S3 na zálohovanie a ukladanie údajov z portálu. {0}Prejdite do konzoly AWS Management a vytvorte prístupové kľúče pre ONLYOFFICE. Nižšie vložte údaje, ktoré ste dostali:</value>
+    <value>Pripojte Amazon AWS S3 na zálohovanie a ukladanie údajov z portálu. {0}Prejdite do konzoly AWS Management a vytvorte prístupové kľúče pre {LogoText}. Nižšie vložte údaje, ktoré ste dostali:</value>
   </data>
   <data name="ConsumersS3region" xml:space="preserve">
     <value>Región</value>
@@ -824,7 +824,7 @@
     <value>Tajomstvo klienta</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste prepojili svoj účet OneDrive s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory zo služby OneDrive s používateľmi ONLYOFFICE. {0}Prihláste sa do svojho účtu Microsoft Azure a vytvorte novú aplikáciu pre integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby ste prepojili svoj účet OneDrive s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory zo služby OneDrive s používateľmi {LogoText}. {0}Prihláste sa do svojho účtu Microsoft Azure a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumersSmscInstruction" xml:space="preserve">
     <value>Pomocou tejto aplikácie môžete zapnúť dvojfaktorové overovanie prostredníctvom služby Centrum SMS. {0}Vložte svoje prihlasovacie meno k účtu smsc a heslo (alebo heslo hash MD5) malými písmenami:</value>
@@ -854,7 +854,7 @@
     <value>Tajomstvo klienta</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do ONLYOFFICE pomocou svojho Twitteru a prepojiť účty svojich zákazníkov na Twitteri s modulom CRM. {0}Prejdite na Twitter Developers Portal a vytvorte novú aplikáciu pre integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou svojho Twitteru a prepojiť účty svojich zákazníkov na Twitteri s modulom CRM. {0}Prejdite na Twitter Developers Portal a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Kľúč API</value>
@@ -881,7 +881,7 @@
     <value>Aktivujte aplikáciu, aby ste mohli publikovať dokumenty priamo vo WordPress.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Aktivujte aplikáciu, aby ste mohli jednoducho publikovať dokumenty na svojej webovej stránke WordPress. {0}Na stránke Wordpress Developers vytvorte novú aplikáciu pre integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte aplikáciu, aby ste mohli jednoducho publikovať dokumenty na svojej webovej stránke WordPress. {0}Na stránke Wordpress Developers vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>WordPress kľúč</value>
@@ -896,7 +896,7 @@
     <value>Tajný kód klienta</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste mohli pridávať nových používateľov portálu zo zoznamu kontaktov Yahoo. {0}Prejdite na stránku Create Application v Yahoo Developer Network a vytvorte novú aplikáciu pre integráciu ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby ste mohli pridávať nových používateľov portálu zo zoznamu kontaktov Yahoo. {0}Prejdite na stránku Create Application v Yahoo Developer Network a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ConsumersYandexClientId" xml:space="preserve">
     <value>ID</value>
@@ -992,7 +992,7 @@
     <value>Umožnite aplikácii prihlásiť sa na portál pomocou účtu Zoom.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do ONLYOFFICE cez svoje účty Zoom. {0}Prejdite na webovú stránku Zoom Developers a vytvorte novú integráciu aplikácie ONLYOFFICE. Vložte údaje, ktoré ste dostali nižšie:</value>
+    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} cez svoje účty Zoom. {0}Prejdite na webovú stránku Zoom Developers a vytvorte novú integráciu aplikácie {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Príliš veľa pokusov o prihlásenie. Prosím, skúste to znova neskôr</value>

@@ -638,7 +638,7 @@
     <value>Uygulamanın, bir Apple Kimliği hesabı kullanarak portalda oturum açmasını etkinleştirin.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Kullanıcılarınızın Apple Kimliği kullanarak ONLYOFFICE'te oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}Apple Developers Portal'a gidin ve yeni uygulama ONLYOFFICE entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>Kullanıcılarınızın Apple Kimliği kullanarak {LogoText}'te oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}Apple Developers Portal'a gidin ve yeni uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>Apple özel anahtarıyla Giriş yapmak için oluşturulan 10 karakterlik bir anahtar tanımlayıcı</value>
@@ -662,22 +662,22 @@
     <value>Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Box hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. Box’taki dosyaları ONLYOFFICE kullanıcıları ile yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Box geliştiriciler sayfasında hesabınızla oturum açın ve ONLYOFFICE entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>Box hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. Box’taki dosyaları {LogoText} kullanıcıları ile yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Box geliştiriciler sayfasında hesabınızla oturum açın ve {LogoText} entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Clickatell hizmetiyle iki faktörlü kimlik doğrulamayı etkinleştirmek için bu uygulamayı kullanın. {0}SMS Platform hesabınızda oturum açın ve ONLYOFFICE için yeni bir entegrasyon oluşturun. Bir apiKey kopyalayın ve aşağıya ekleyin:</value>
+    <value>Clickatell hizmetiyle iki faktörlü kimlik doğrulamayı etkinleştirmek için bu uygulamayı kullanın. {0}SMS Platform hesabınızda oturum açın ve {LogoText} için yeni bir entegrasyon oluşturun. Bir apiKey kopyalayın ve aşağıya ekleyin:</value>
   </data>
   <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
     <value>DocuSign Gizli</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>DocuSign kullanarak belgeleri dijital olarak imzalamak için bu uygulamayı etkinleştirin. {0}DocuSign Yönetici Konsolunuza gidin ve ONLYOFFICE entegrasyonunu ekleyin. Aldığınız verileri aşağıya girin:</value>
+    <value>DocuSign kullanarak belgeleri dijital olarak imzalamak için bu uygulamayı etkinleştirin. {0}DocuSign Yönetici Konsolunuza gidin ve {LogoText} entegrasyonunu ekleyin. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersDropBox" xml:space="preserve">
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Dropbox hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. Dropbox'taki dosyaları, ONLYOFFICE kullanıcılarıyla yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Dropbox Developers web sitesinde hesabınızda oturum açın ve ONLYOFFICE entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>Dropbox hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. Dropbox'taki dosyaları, {LogoText} kullanıcılarıyla yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Dropbox Developers web sitesinde hesabınızda oturum açın ve {LogoText} entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
     <value>Uygulama anahtarı</value>
@@ -686,7 +686,7 @@
     <value>EasyBib ile belgelerde bibliyografik listeler oluşturmak için bu uygulamayı etkinleştirin.</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>ONLYOFFICE editörlerinde kaynakça oluşturmak için bu uygulamayı etkinleştirin. {0}EasyBib kayıt sayfasına gidin ve ONLYOFFICE entegrasyonunu eklemek için formu doldurun. Bir uygulama anahtarı aldıktan sonra, onu aşağıya yapıştırın:</value>
+    <value>{LogoText} editörlerinde kaynakça oluşturmak için bu uygulamayı etkinleştirin. {0}EasyBib kayıt sayfasına gidin ve {LogoText} entegrasyonunu eklemek için formu doldurun. Bir uygulama anahtarı aldıktan sonra, onu aşağıya yapıştırın:</value>
   </data>
   <data name="ConsumersFacebook" xml:space="preserve">
     <value>Facebook</value>
@@ -695,10 +695,10 @@
     <value>App Token</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Kullanıcılarınızın Facebook kullanarak ONLYOFFICE'te oturum açmasına ve müşterilerinin Facebook hesaplarını CRM modülüne bağlamasına izin vermek için bu uygulamayı etkinleştirin. {0}Facebook Developers Portal'a gidin ve yeni uygulama ONLYOFFICE entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>Kullanıcılarınızın Facebook kullanarak {LogoText}'te oturum açmasına ve müşterilerinin Facebook hesaplarını CRM modülüne bağlamasına izin vermek için bu uygulamayı etkinleştirin. {0}Facebook Developers Portal'a gidin ve yeni uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Kullanıcılarınızın çevrimdışıyken bile mesajlarla ilgili bildirimler almasına izin vermek için bu uygulamayı etkinleştirin. {0}Firebase konsoluna gidin ve ONLYOFFICE entegrasyonu için yeni bir proje ekleyin. Aldığınız verileri aşağıya girin:</value>
+    <value>Kullanıcılarınızın çevrimdışıyken bile mesajlarla ilgili bildirimler almasına izin vermek için bu uygulamayı etkinleştirin. {0}Firebase konsoluna gidin ve {LogoText} entegrasyonu için yeni bir proje ekleyin. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersGoogleCloud" xml:space="preserve">
     <value>Google Cloud Depolama</value>
@@ -713,19 +713,19 @@
     <value>Portalınızdaki verileri yedeklemek ve depolamak için Google Cloud Depolama hizmetini bağlayın.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Portalınızdaki verileri yedeklemek ve depolamak için Google Cloud Depolama hizmetini bağlayın. {0}Google Cloud Platform Konsolu'na gidin ve ONLYOFFICE için yeni bir hizmet hesabı oluşturun. Aldığınız verileri aşağıya yapıştırın:</value>
+    <value>Portalınızdaki verileri yedeklemek ve depolamak için Google Cloud Depolama hizmetini bağlayın. {0}Google Cloud Platform Konsolu'na gidin ve {LogoText} için yeni bir hizmet hesabı oluşturun. Aldığınız verileri aşağıya yapıştırın:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Google Drive hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. Google Drive'daki dosyaları ONLYOFFICE kullanıcılarıyla yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Google APIs konsoluna gidin ve ONLYOFFICE entegrasyonu için yeni bir proje oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>Google Drive hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. Google Drive'daki dosyaları {LogoText} kullanıcılarıyla yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Google APIs konsoluna gidin ve {LogoText} entegrasyonu için yeni bir proje oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersLinkedIn" xml:space="preserve">
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Kullanıcılarınızın ONLYOFFICE'te LinkedIn hesaplarını kullanarak oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}LinkedIn Developers web sitesine gidin ve yeni uygulama ONLYOFFICE entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>Kullanıcılarınızın {LogoText}'te LinkedIn hesaplarını kullanarak oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}LinkedIn Developers web sitesine gidin ve yeni uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>Linkedin Kimliği</value>
@@ -749,7 +749,7 @@
     <value>Microsoft hesabı kullanarak portalda oturum açması için uygulamayı etkinleştirin.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Kullanıcılarınızın Microsoft kullanarak ONLYOFFICE'te oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}Microsoft Azure'a gidin ve yeni uygulama ONLYOFFICE entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>Kullanıcılarınızın Microsoft kullanarak {LogoText}'te oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}Microsoft Azure'a gidin ve yeni uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace Bulut Depolama</value>
@@ -842,7 +842,7 @@
     <value>Müşteri gizli</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>OneDrive hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. ONLYOFFICE kullanıcılarıyla OneDrive'daki dosyaları yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Microsoft Azure hesabınızda oturum açın ve ONLYOFFICE entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>OneDrive hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. {LogoText} kullanıcılarıyla OneDrive'daki dosyaları yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Microsoft Azure hesabınızda oturum açın ve {LogoText} entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersSmscInstruction" xml:space="preserve">
     <value>SMS Center hizmetiyle iki faktörlü kimlik doğrulamayı etkinleştirmek için bu uygulamayı kullanın. {0}Smsc hesabı oturum açma bilgilerinizi ve şifrenizi (veya şifre MD5 hash’ini) küçük harflerle girin:</value>
@@ -866,7 +866,7 @@
     <value>Müşteri Kimliği</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Kullanıcılarınızın, Twitter'larını kullanarak ONLYOFFICE'te oturum açmalarına ve müşterilerinin Twitter hesaplarını CRM modülüne bağlamalarına izin vermek için bu uygulamayı etkinleştirin. {0}Twitter Developers Portal'a gidin ve yeni bir uygulama ONLYOFFICE entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>Kullanıcılarınızın, Twitter'larını kullanarak {LogoText}'te oturum açmalarına ve müşterilerinin Twitter hesaplarını CRM modülüne bağlamalarına izin vermek için bu uygulamayı etkinleştirin. {0}Twitter Developers Portal'a gidin ve yeni bir uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Anahtarı</value>
@@ -896,7 +896,7 @@
     <value>Uygulamanın, belgeleri WordPress'te doğrudan yayınlamasını sağlayın.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Belgeleri WordPress web sitenizde kolayca yayınlamak için uygulamayı etkinleştirin. {0}Wordpress Developers sayfasında, ONLYOFFICE entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya yapıştırın:</value>
+    <value>Belgeleri WordPress web sitenizde kolayca yayınlamak için uygulamayı etkinleştirin. {0}Wordpress Developers sayfasında, {LogoText} entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya yapıştırın:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>WordPress Anahtarı</value>
@@ -908,7 +908,7 @@
     <value>Müşteri Kimliği</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Yahoo kişi listenizden yeni portal kullanıcıları eklemek için bu uygulamayı etkinleştirin. {0}Yahoo Geliştirici Ağı'ndaki Create Application (Uygulama Oluştur) sayfasına gidin ve ONLYOFFICE entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>Yahoo kişi listenizden yeni portal kullanıcıları eklemek için bu uygulamayı etkinleştirin. {0}Yahoo Geliştirici Ağı'ndaki Create Application (Uygulama Oluştur) sayfasına gidin ve {LogoText} entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersYandexClientId" xml:space="preserve">
     <value>ID</value>
@@ -992,7 +992,7 @@
     <value>Uygulamanın bir Zoom hesabı kullanarak portalda oturum açmasını etkinleştirin.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Kullanıcılarınızın Zoom hesaplarını kullanarak ONLYOFFICE'te oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}Zoom Developers web sitesine gidin ve yeni bir uygulama ONLYOFFICE entegrasyonu oluşturun. Aldığınız verileri aşağıya ekleyin:</value>
+    <value>Kullanıcılarınızın Zoom hesaplarını kullanarak {LogoText}'te oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}Zoom Developers web sitesine gidin ve yeni bir uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya ekleyin:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin</value>

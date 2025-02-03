@@ -635,7 +635,7 @@
     <value>Iespējojiet lietojumprogrammu, lai pierakstītos portālā, izmantojot Apple ID kontu.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietojumprogrammu, lai ļautu lietotājiem pierakstīties ONLYOFFICE, izmantojot Apple ID. {0}Dodieties uz Apple izstrādātāju portālu un izveidojiet jaunu lietotnes ONLYOFFICE integrāciju. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietojumprogrammu, lai ļautu lietotājiem pierakstīties {LogoText}, izmantojot Apple ID. {0}Dodieties uz Apple izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>10 rakstzīmju atslēgas identifikators, kas ģenerēts pierakstīšanai ar Apple privāto atslēgu</value>
@@ -659,16 +659,16 @@
     <value>Iespējojiet šo lietojumprogrammu, lai saīsinātu uzaicinājumu un dokumentu saites. {0}Ievadiet savu Bitly pieteikšanos un API atslēgu zemāk:</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietojumprogrammu, lai savienotu savu Box kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Box failus ar ONLYOFFICE lietotājiem. {0}Pierakstieties savā kontā Box izstrādātāju lapā un izveidojiet jaunu lietojumprogrammu ONLYOFFICE integrācijai. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietojumprogrammu, lai savienotu savu Box kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Box failus ar {LogoText} lietotājiem. {0}Pierakstieties savā kontā Box izstrādātāju lapā un izveidojiet jaunu lietojumprogrammu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Izmantojiet šo lietojumprogrammu, lai iespējotu divfaktoru autentifikāciju, izmantojot pakalpojumu Clickatell. {0}Pierakstieties savā SMS platformas kontā un izveidojiet jaunu ONLYOFFICE integrāciju. Nokopējiet apiKey taustiņu un ievietojiet to zemāk:</value>
+    <value>Izmantojiet šo lietojumprogrammu, lai iespējotu divfaktoru autentifikāciju, izmantojot pakalpojumu Clickatell. {0}Pierakstieties savā SMS platformas kontā un izveidojiet jaunu {LogoText} integrāciju. Nokopējiet apiKey taustiņu un ievietojiet to zemāk:</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietojumprogrammu, lai ar ciparparakstu parakstītu dokumentus, izmantojot DocuSign. {0}Dodieties uz DocuSign administratora konsoli un pievienojiet ONLYOFFICE integrāciju. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietojumprogrammu, lai ar ciparparakstu parakstītu dokumentus, izmantojot DocuSign. {0}Dodieties uz DocuSign administratora konsoli un pievienojiet {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietojumprogrammu, lai savienotu savu Box kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Dropbox failus ar ONLYOFFICE lietotājiem. {0}Pierakstieties savā kontā Dropbox izstrādātāju tīmekļa vietnē un izveidojiet jaunu lietojumprogrammu ONLYOFFICE integrācijai. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietojumprogrammu, lai savienotu savu Box kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Dropbox failus ar {LogoText} lietotājiem. {0}Pierakstieties savā kontā Dropbox izstrādātāju tīmekļa vietnē un izveidojiet jaunu lietojumprogrammu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
     <value>Lietojumprogrammas taustiņš</value>
@@ -677,19 +677,19 @@
     <value>Iespējojiet šo lietojumprogrammu, lai izveidotu bibliogrāfiskos sarakstus dokumentos ar EasyBib.</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai izveidotu bibliogrāfijas ONLYOFFICE redaktoros. {0}Dodieties uz EasyBib reģistrācijas lapu un aizpildiet veidlapu, lai pievienotu ONLYOFFICE integrāciju. Pēc programmas atslēgas saņemšanas ielīmējiet to tālāk:</value>
+    <value>Iespējojiet šo lietotni, lai izveidotu bibliogrāfijas {LogoText} redaktoros. {0}Dodieties uz EasyBib reģistrācijas lapu un aizpildiet veidlapu, lai pievienotu {LogoText} integrāciju. Pēc programmas atslēgas saņemšanas ielīmējiet to tālāk:</value>
   </data>
   <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
     <value>Lietotnes marķieris</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties ONLYOFFICE, izmantojot Facebook, un saistīt savu klientu Facebook kontus ar CRM moduli. {0}Dodieties uz Facebook izstrādātāju portālu un izveidojiet jaunu lietotnes ONLYOFFICE integrāciju. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties {LogoText}, izmantojot Facebook, un saistīt savu klientu Facebook kontus ar CRM moduli. {0}Dodieties uz Facebook izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersFirebaseDescription" xml:space="preserve">
     <value>Iespējojiet šo lietojumprogrammu, lai saņemtu paziņojumus par ziņojumiem, kas jums nosūtīti, izmantojot Firebase Cloud Messaging.</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai ļautu lietotājiem saņemt paziņojumus par ziņojumiem pat bezsaistē. {0}Dodieties uz Firebase konsoli un pievienojiet jaunu projektu ONLYOFFICE integrācijai. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietotni, lai ļautu lietotājiem saņemt paziņojumus par ziņojumiem pat bezsaistē. {0}Dodieties uz Firebase konsoli un pievienojiet jaunu projektu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersGoogleCloud" xml:space="preserve">
     <value>Google mākoņkrātuve</value>
@@ -704,16 +704,16 @@
     <value>Pievienojiet Google mākoņkrātuves pakalpojumu, lai dublētu un saglabātu datus no sava portāla.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Pievienojiet Google mākoņkrātuves pakalpojumu, lai dublētu un saglabātu datus no sava portāla. {0}Dodieties uz Google Cloud Platform Console un izveidojiet jaunu pakalpojuma kontu ONLYOFFICE. Ielīmējiet tālāk saņemtos datus:</value>
+    <value>Pievienojiet Google mākoņkrātuves pakalpojumu, lai dublētu un saglabātu datus no sava portāla. {0}Dodieties uz Google Cloud Platform Console un izveidojiet jaunu pakalpojuma kontu {LogoText}. Ielīmējiet tālāk saņemtos datus:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai savienotu savu Google Drive kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Google Drive failus ar ONLYOFFICE lietotājiem. {0}Dodieties uz Google API konsoli un izveidojiet jaunu projektu ONLYOFFICE integrācijai. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietotni, lai savienotu savu Google Drive kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Google Drive failus ar {LogoText} lietotājiem. {0}Dodieties uz Google API konsoli un izveidojiet jaunu projektu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai ļautu lietotājiem pierakstīties ONLYOFFICE, izmantojot savus LinkedIn kontus. {0}Dodieties uz LinkedIn izstrādātāju tīmekļa vietni un izveidojiet jaunu lietotnes ONLYOFFICE integrāciju. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietotni, lai ļautu lietotājiem pierakstīties {LogoText}, izmantojot savus LinkedIn kontus. {0}Dodieties uz LinkedIn izstrādātāju tīmekļa vietni un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>Linkedin ID</value>
@@ -737,7 +737,7 @@
     <value>Iespējojiet lietojumprogrammu, lai pierakstītos portālā, izmantojot Microsoft kontu.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai ļautu lietotājiem pierakstīties ONLYOFFICE, izmantojot Microsoft. {0}Dodieties uz Microsoft Azure un izveidojiet jaunu lietotnes ONLYOFFICE integrāciju. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietotni, lai ļautu lietotājiem pierakstīties {LogoText}, izmantojot Microsoft. {0}Dodieties uz Microsoft Azure un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace mākoņkrātuve</value>
@@ -788,7 +788,7 @@
     <value>Pievienojiet Amazon AWS S3, lai dublētu un saglabātu datus no sava portāla.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Pievienojiet Amazon AWS S3, lai dublētu un saglabātu datus no sava portāla. {0}Dodieties uz AWS pārvaldības konsoli un izveidojiet piekļuves atslēgas ONLYOFFICE. Ielīmējiet tālāk saņemtos datus:</value>
+    <value>Pievienojiet Amazon AWS S3, lai dublētu un saglabātu datus no sava portāla. {0}Dodieties uz AWS pārvaldības konsoli un izveidojiet piekļuves atslēgas {LogoText}. Ielīmējiet tālāk saņemtos datus:</value>
   </data>
   <data name="ConsumersS3regionDescription" xml:space="preserve">
     <value>Ievadiet AWS reģionu, kurā atrodas jūsu Amazon grozs.</value>
@@ -824,7 +824,7 @@
     <value>Klienta noslēpums</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai savienotu savu OneDrive kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot OneDrive failus ar ONLYOFFICE lietotājiem. {0}Pierakstieties savā Microsoft Azure kontā un izveidojiet jaunu lietojumprogrammu ONLYOFFICE integrācijai. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietotni, lai savienotu savu OneDrive kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot OneDrive failus ar {LogoText} lietotājiem. {0}Pierakstieties savā Microsoft Azure kontā un izveidojiet jaunu lietojumprogrammu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersSmsc" xml:space="preserve">
     <value>SMS centrs</value>
@@ -857,7 +857,7 @@
     <value>Klienta noslēpums</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties ONLYOFFICE, izmantojot viņu Twitter, un saistīt savu klientu Twitter kontus ar CRM moduli. {0}Dodieties uz Twitter izstrādātāju portālu un izveidojiet jaunu lietotnes ONLYOFFICE integrāciju. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties {LogoText}, izmantojot viņu Twitter, un saistīt savu klientu Twitter kontus ar CRM moduli. {0}Dodieties uz Twitter izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API atslēga</value>
@@ -884,7 +884,7 @@
     <value>Iespējojiet lietojumprogrammu, lai publicētu dokumentus tieši WordPress.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Iespējojiet lietojumprogrammu, lai viegli publicētu dokumentus savā WordPress vietnē. {0} Wordpress izstrādātāju lapā izveidojiet jaunu lietotni ONLYOFFICE integrācijai. Ielīmējiet tālāk saņemtos datus:</value>
+    <value>Iespējojiet lietojumprogrammu, lai viegli publicētu dokumentus savā WordPress vietnē. {0} Wordpress izstrādātāju lapā izveidojiet jaunu lietotni {LogoText} integrācijai. Ielīmējiet tālāk saņemtos datus:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>WordPress atslēga</value>
@@ -899,7 +899,7 @@
     <value>Klienta noslēpums</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai pievienotu jaunus portāla lietotājus no sava Yahoo kontaktpersonu saraksta. {0}Dodieties uz Yahoo izstrādātāju tīkla lapu Izveidot pieteikumu un izveidojiet jaunu lietotni ONLYOFFICE integrācijai. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietotni, lai pievienotu jaunus portāla lietotājus no sava Yahoo kontaktpersonu saraksta. {0}Dodieties uz Yahoo izstrādātāju tīkla lapu Izveidot pieteikumu un izveidojiet jaunu lietotni {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersYandexClientId" xml:space="preserve">
     <value>ID</value>
@@ -992,7 +992,7 @@
     <value>Iespējojiet lietojumprogrammu, lai pierakstītos portālā, izmantojot tālummaiņas kontu.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai jūsu lietotāji varētu pierakstīties pakalpojumā ONLYOFFICE, izmantojot savus tālummaiņas kontus. {0}Dodieties uz Zoom Developers tīmekļa vietni un izveidojiet jaunu lietotnes ONLYOFFICE integrāciju. Tālāk ievietojiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietotni, lai jūsu lietotāji varētu pierakstīties pakalpojumā {LogoText}, izmantojot savus tālummaiņas kontus. {0}Dodieties uz Zoom Developers tīmekļa vietni un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievietojiet saņemtos datus:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Pārāk daudz pieteikšanās mēģinājumu. Mēģiniet vēlreiz vēlāk</value>

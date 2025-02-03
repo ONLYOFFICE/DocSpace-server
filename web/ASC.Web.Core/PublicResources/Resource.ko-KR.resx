@@ -296,7 +296,7 @@
     <value>SMS 센터 서비스를 이용한 이중 인증을 활성화하려면 이 앱을 사용하세요. {0}SMSC 계정 로그인과 비밀번호(또는 비밀번호MD5 해시)를 소문자로 입력하세요:</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Clickatell 서비스를 이용한 이중 인증을 활성화하려면 이 앱을 사용하세요. {0}SMS 플랫폼 계정에 로그인한 뒤 ONLYOFFICE에 대한 새 통합을 생성하세요. API 키를 복사하여 아래에 입력하세요:</value>
+    <value>Clickatell 서비스를 이용한 이중 인증을 활성화하려면 이 앱을 사용하세요. {0}SMS 플랫폼 계정에 로그인한 뒤 {LogoText}에 대한 새 통합을 생성하세요. API 키를 복사하여 아래에 입력하세요:</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>미국 서부(오리건) 리전</value>
@@ -857,13 +857,13 @@
     <value>포털의 데이터를 백업하고 저장하려면 Rackspace 클라우드 스토리지 서비스를 연결하세요.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>포털의 데이터를 백업하고 저장하려면 Google 클라우드 스토리지 서비스를 연결하세요. {0}Google 클라우드 플랫폼 콘솔로 이동하여 ONLYOFFICE를 위한 새 서비스 계정을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>포털의 데이터를 백업하고 저장하려면 Google 클라우드 스토리지 서비스를 연결하세요. {0}Google 클라우드 플랫폼 콘솔로 이동하여 {LogoText}를 위한 새 서비스 계정을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
     <value>포털의 데이터를 백업하고 저장하려면 Google 클라우드 스토리지 서비스를 연결하세요.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>포털의 데이터를 백업하고 저장하려면 Amazon AWS S3를 연결하세요. {0}AWS 관리 콘솔로 이동하여 ONLYOFFICE를 위한 액세스 키를 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>포털의 데이터를 백업하고 저장하려면 Amazon AWS S3를 연결하세요. {0}AWS 관리 콘솔로 이동하여 {LogoText}를 위한 액세스 키를 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersS3Description" xml:space="preserve">
     <value>포털의 데이터를 백업하고 저장하려면 Amazon AWS S3를 연결하세요.</value>
@@ -884,46 +884,46 @@
     <value>초대 링크 및 문서 링크를 줄이려면 이 앱을 활성화하세요. {0}아래에 Bitly 로그인 및 API 키를 입력하세요:</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>DocuSign을 이용하여 문서에 디지털 서명하려면 이 앱을 활성화하세요. {0}DocuSign 관리 콘솔로 이동하여 ONLYOFFICE 통합을 추가하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>DocuSign을 이용하여 문서에 디지털 서명하려면 이 앱을 활성화하세요. {0}DocuSign 관리 콘솔로 이동하여 {LogoText} 통합을 추가하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>ONLYOFFICE 편집기에서 참고 문헌을 생성하려면 이 앱을 활성화하세요. {0}EasyBib 로그인 페이지로 이동하여 양식을 작성하고 ONLYOFFICE 통합을 추가하세요. 수신한 앱 키를 아래에 붙여넣으세요:</value>
+    <value>{LogoText} 편집기에서 참고 문헌을 생성하려면 이 앱을 활성화하세요. {0}EasyBib 로그인 페이지로 이동하여 양식을 작성하고 {LogoText} 통합을 추가하세요. 수신한 앱 키를 아래에 붙여넣으세요:</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>OneDrive 계정을 문서 모듈에 연결하려면 이 앱을 활성화하세요. ONLYOFFICE 사용자와 함께 OneDrive의 파일을 관리, 편집 및 공유할 수 있습니다. {0}Microsoft Azure 계정에 로그인한 뒤 ONLYOFFICE 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>OneDrive 계정을 문서 모듈에 연결하려면 이 앱을 활성화하세요. {LogoText} 사용자와 함께 OneDrive의 파일을 관리, 편집 및 공유할 수 있습니다. {0}Microsoft Azure 계정에 로그인한 뒤 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Google Drive 계정을 문서 모듈에 연결하려면 이 앱을 활성화하세요. ONLYOFFICE 사용자와 함께 Google Drive의 파일을 관리, 편집 및 공유할 수 있습니다. {0}Google API 콘솔로 이동하여 ONLYOFFICE 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>Google Drive 계정을 문서 모듈에 연결하려면 이 앱을 활성화하세요. {LogoText} 사용자와 함께 Google Drive의 파일을 관리, 편집 및 공유할 수 있습니다. {0}Google API 콘솔로 이동하여 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>DropBox 계정을 문서 모듈에 연결하려면 이 앱을 활성화하세요. ONLYOFFICE 사용자와 함께 DropBox의 파일을 관리, 편집 및 공유할 수 있습니다. {0}DropBox 개발자 페이지에서 계정에 로그인한 뒤 ONLYOFFICE 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>DropBox 계정을 문서 모듈에 연결하려면 이 앱을 활성화하세요. {LogoText} 사용자와 함께 DropBox의 파일을 관리, 편집 및 공유할 수 있습니다. {0}DropBox 개발자 페이지에서 계정에 로그인한 뒤 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Box 계정을 문서 모듈에 연결하려면 이 앱을 활성화하세요. ONLYOFFICE 사용자와 함께 Box의 파일을 관리, 편집 및 공유할 수 있습니다. {0}Box 개발자 페이지에서 계정에 로그인한 뒤 ONLYOFFICE 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>Box 계정을 문서 모듈에 연결하려면 이 앱을 활성화하세요. {LogoText} 사용자와 함께 Box의 파일을 관리, 편집 및 공유할 수 있습니다. {0}Box 개발자 페이지에서 계정에 로그인한 뒤 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>사용자가 Twitter를 사용하여 ONLYOFFICE에 로그인하고 고객의 Twitter 계정을 CRM 모듈에 연결할 수 있도록 하려면 이 앱을 활성화하세요. {0}Twitter 개발자 포털로 이동하여 ONLYOFFICE 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>사용자가 Twitter를 사용하여 {LogoText}에 로그인하고 고객의 Twitter 계정을 CRM 모듈에 연결할 수 있도록 하려면 이 앱을 활성화하세요. {0}Twitter 개발자 포털로 이동하여 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>사용자가 LinkedIn 계정을 사용하여 ONLYOFFICE에 로그인하도록 하려면 이 앱을 활성화하세요. {0}LinkedIn 개발자 포털로 이동하여 ONLYOFFICE 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>사용자가 LinkedIn 계정을 사용하여 {LogoText}에 로그인하도록 하려면 이 앱을 활성화하세요. {0}LinkedIn 개발자 포털로 이동하여 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>사용자가 Microsoft를 사용하여 포털에 로그인할 수 있도록 하려면 이 앱을 활성화하세요. {0}Microsoft Azure로 이동하여 ONLYOFFICE 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>사용자가 Microsoft를 사용하여 포털에 로그인할 수 있도록 하려면 이 앱을 활성화하세요. {0}Microsoft Azure로 이동하여 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>사용자가 Facebook을 사용하여 ONLYOFFICE에 로그인하고 고객의 Facebook 계정을 CRM 모듈에 연결할 수 있도록 하려면 이 앱을 활성화하세요. {0}Facebook 개발자 포털로 이동하여 ONLYOFFICE 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>사용자가 Facebook을 사용하여 {LogoText}에 로그인하고 고객의 Facebook 계정을 CRM 모듈에 연결할 수 있도록 하려면 이 앱을 활성화하세요. {0}Facebook 개발자 포털로 이동하여 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>사용자가 Apple ID를 사용하여 ONLYOFFICE에 로그인할 수 있도록 하려면 이 앱을 활성화하세요. {0}Apple 개발자 포털로 이동하여 ONLYOFFICE 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>사용자가 Apple ID를 사용하여 {LogoText}에 로그인할 수 있도록 하려면 이 앱을 활성화하세요. {0}Apple 개발자 포털로 이동하여 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>사용자가 오프라인 상태에서도 메시지에 대한 알림을 받을 수 있도록 하려면 이 앱을 활성화하세요.{0}Firebase 콘솔로 이동하여 ONLYOFFICE 통합을 위한 새 프로젝트를 추가하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>사용자가 오프라인 상태에서도 메시지에 대한 알림을 받을 수 있도록 하려면 이 앱을 활성화하세요.{0}Firebase 콘솔로 이동하여 {LogoText} 통합을 위한 새 프로젝트를 추가하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersTwilioInstruction" xml:space="preserve">
     <value>사용자가 Twilio를 사용하여 CRM 모듈에서 연락처에 전화할 수 있도록 하려면 이 앱을 활성화하세요. {0}Twilio 콘솔로 이동하여 아래의 데이터를 붙여넣으세요:</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Yahoo 연락처 목록에서 새 포털 사용자를 추가하려면 이 앱을 활성화하세요. {0}Yahoo 개발자 네트워크에서 애플리케이션 생성 페이지로 이동하여 ONLYOFFICE 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>Yahoo 연락처 목록에서 새 포털 사용자를 추가하려면 이 앱을 활성화하세요. {0}Yahoo 개발자 네트워크에서 애플리케이션 생성 페이지로 이동하여 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
     <value>Apple ID 계정을 사용하여 포털에 로그인하도록 하려면 애플리케이션을 활성화하세요.</value>
@@ -965,7 +965,7 @@
     <value>Yahoo 서비스에서 사용자를 가져오려면 애플리케이션을 활성화하세요.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>WordPress 웹사이트에 쉽게 문서를 게시하려면 애플리케이션을 활성화하세요. {0}Wordpress 개발자 페이지에서 ONLYOFFICE 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>WordPress 웹사이트에 쉽게 문서를 게시하려면 애플리케이션을 활성화하세요. {0}Wordpress 개발자 페이지에서 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersDocuSignDescription" xml:space="preserve">
     <value>DocuSign을 이용하여 문서에 디지털 서명하려면 애플리케이션을 활성화하세요.</value>
@@ -992,7 +992,7 @@
     <value>Zoom 계정을 사용하여 포털에 로그인할 수 있도록 애플리케이션을 활성화하세요.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>사용자가 Zoom 계정을 사용하여 ONLYOFFICE에 로그인할 수 있도록 하려면 이 앱을 활성화하세요. {0}Zoom 개발자 웹사이트로 이동하여 새로운 ONLYOFFICE 통합 앱을 만드세요. 아래에 수신한 데이터를 삽입하세요:</value>
+    <value>사용자가 Zoom 계정을 사용하여 {LogoText}에 로그인할 수 있도록 하려면 이 앱을 활성화하세요. {0}Zoom 개발자 웹사이트로 이동하여 새로운 {LogoText} 통합 앱을 만드세요. 아래에 수신한 데이터를 삽입하세요:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>로그인 시도가 너무 많았습니다. 나중에 다시 시도해 주세요</value>
