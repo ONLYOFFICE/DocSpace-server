@@ -64,7 +64,7 @@
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
 
-Καλώς ήρθατε στο DocSpace του ONLYOFFICE! Το προφίλ χρήστη σας προστέθηκε επιτυχώς στο "${__VirtualRootPath}":"${__VirtualRootPath}". Τώρα μπορείτε:
+Καλώς ήρθατε στο DocSpace του ${LetterLogoText}! Το προφίλ χρήστη σας προστέθηκε επιτυχώς στο "${__VirtualRootPath}":"${__VirtualRootPath}". Τώρα μπορείτε:
 
 * Να εργάζεστε με άλλους χρήστες στο δωμάτιο στο οποίο έχετε προσκληθεί*: δωμάτια συνεργασίας για συν-συγγραφή σε πραγματικό χρόνο ή προσαρμοσμένες δωμάτια με ευέλικτες ρυθμίσεις για οποιονδήποτε σκοπό*.
 
