@@ -62,6 +62,10 @@ public class BackupController(
     [HttpGet("getbackupschedule")]
     public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule(DumpDto dto)
     {
+        if (dto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
         return await backupAjaxHandler.GetScheduleAsync(dto.Dump);
     }
 
@@ -359,10 +363,6 @@ public class BackupController(
     [AllowNotPayment]
     public async Task<BackupProgress> GetRestoreProgressAsync(DumpDto dto)
     {
-        if (dto.Dump)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
         return await backupAjaxHandler.GetRestoreProgressAsync(dto.Dump);
     }
 
