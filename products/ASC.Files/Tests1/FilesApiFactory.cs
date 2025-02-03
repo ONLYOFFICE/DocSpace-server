@@ -25,10 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCFiles;
-using System.Data;
-
 using ASC.Core.Common.EF;
-using ASC.Migrations.Core.Models;
 
 using DotNet.Testcontainers.Builders;
 
@@ -72,10 +69,9 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     
     private DbConnection _dbconnection = null!;
     private Respawner _respawner = null!;
-    readonly List<string> _tablesToBackup = ["files_folder", "core_user", "core_usersecurity" ];
+    readonly List<string> _tablesToBackup = ["files_folder", "core_user", "core_usersecurity", "files_bunch_objects" ];
     readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
     
-    public string DbConnectionString => ProviderInfo.Provider == Provider.MySql ? _mySqlContainer.GetConnectionString() : _postgresSqlContainer.GetConnectionString(); 
     public string RedisConnectionString => _redisContainer.GetConnectionString(); 
     public string RabbitMqConnectionString => _rabbitMqContainer.GetConnectionString(); 
     public string OpenSearchConnectionString => $"{_openSearchContainer.Hostname}:{_openSearchContainer.GetMappedPublicPort(9200)}"; 
@@ -111,7 +107,14 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     {
         await _respawner.ResetAsync(_dbconnection);
         
-        await ExecuteScriptAsync("INSERT INTO {0} SELECT * FROM {1};");
+        var script = ProviderInfo.Provider switch
+        {
+            Provider.MySql => "INSERT INTO {0} SELECT * FROM {1};",
+            Provider.PostgreSql => "INSERT INTO {0} SELECT * FROM {1};SELECT setval('{0}_id_seq', (SELECT MAX(id) FROM {0})+1);",
+            _ => ""
+        };
+        
+        await ExecuteScriptAsync(script);
     }
 
     public async Task InitializeAsync()
@@ -147,7 +150,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         var script = ProviderInfo.Provider switch
         {
             Provider.MySql => "CREATE TABLE IF NOT EXISTS {1} LIKE {0}; \nREPLACE INTO {1} SELECT * FROM {0};",
-            Provider.PostgreSql => "CREATE TABLE IF NOT EXISTS {1} (LIKE {0});\n DELETE FROM {1}; \nINSERT INTO {1} SELECT * FROM {0};",
+            Provider.PostgreSql => "CREATE TABLE IF NOT EXISTS {1} (LIKE {0} INCLUDING ALL);\n DELETE FROM {1}; \nINSERT INTO {1} SELECT * FROM {0};",
             _ => ""
         };
 
