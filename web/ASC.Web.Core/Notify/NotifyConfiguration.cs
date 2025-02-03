@@ -125,7 +125,7 @@ public class NotifyConfiguration(NotifyEngine notifyEngine, WorkContext workCont
                      if (!string.IsNullOrEmpty(logoText))
                      {
                          r.CurrentMessage.Body = r.CurrentMessage.Body
-                             .Replace("${{" + CommonTags.LetterLogoText + "}}", logoText);
+                             .Replace("${" + CommonTags.LetterLogoText + "}", logoText);
                      }
                  }
                  catch (Exception error)
