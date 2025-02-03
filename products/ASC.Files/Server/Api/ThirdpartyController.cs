@@ -139,7 +139,7 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/common</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "List of common third-party folderst", typeof(FolderDto<string>))]
+    [SwaggerResponse(200, "List of common third-party folderst", typeof(IAsyncEnumerable<FolderDto<string>>))]
     [HttpGet("thirdparty/common")]
     public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync([FromServices] EntryManager entryManager)
     {
@@ -159,7 +159,7 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "List of connected providers information", typeof(ThirdPartyParams))]
+    [SwaggerResponse(200, "List of connected providers information", typeof(IAsyncEnumerable<ThirdPartyParams>))]
     [HttpGet("thirdparty")]
     public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAccountsAsync()
     {

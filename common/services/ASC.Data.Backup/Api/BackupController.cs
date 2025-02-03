@@ -229,7 +229,7 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackuphistory</path>
     /// <collection>list</collection>
     [Tags("Backup")]
-    [SwaggerResponse(200, "List of backup history records", typeof(BackupHistoryRecord))]
+    [SwaggerResponse(200, "List of backup history records", typeof(List<BackupHistoryRecord>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
@@ -349,7 +349,7 @@ public class BackupController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Backup")]
     [HttpGet("backuptmp")]
-    [SwaggerResponse(200, "Path to the temporary folder with the stored backup")]
+    [SwaggerResponse(200, "Path to the temporary folder with the stored backup", typeof(object))]
     public object GetTempPath()
     {
         return backupAjaxHandler.GetTmpFolder();

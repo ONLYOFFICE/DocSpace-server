@@ -130,26 +130,32 @@ public static class SubscriptionExtension
     {
         modelBuilder.Entity<Subscription>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient, e.Object })
-                .HasName("core_subscription_pkey");
+            entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient, e.Object });
 
-            entity.ToTable("core_subscription", "onlyoffice");
+            entity.ToTable("core_subscription");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Source)
-                .HasColumnName("source");
+                .HasColumnName("source")
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Action)
-                .HasColumnName("action");
+                .HasColumnName("action")
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Recipient)
-                .HasColumnName("recipient");
+                .HasColumnName("recipient")
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Object)
-                .HasColumnName("object");
+                .HasColumnName("object")
+                .HasColumnType("varchar");
 
-            entity.Property(e => e.Unsubscribed).HasColumnName("unsubscribed");
+            entity.Property(e => e.Unsubscribed)
+                .HasColumnName("unsubscribed")
+                .HasColumnType("boolean")
+                .HasDefaultValue(false);
         });
     }
 }

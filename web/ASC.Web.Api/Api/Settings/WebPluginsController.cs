@@ -80,7 +80,7 @@ public class WebPluginsController(ApiContext apiContext,
     /// </summary>
     /// <path>api/2.0/settings/webplugins</path>
     [Tags("Settings / Webplugins")]
-    [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
+    [SwaggerResponse(200, "Web plugin", typeof(IEnumerable<WebPluginDto>))]
     [SwaggerResponse(403, "Plugins disabled")]
     [HttpGet("")]
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(GetWebPluginsRequestDto inDto)
