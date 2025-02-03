@@ -56,7 +56,7 @@ public class GroupController(
     /// <path>api/2.0/groups</path>
     /// <collection>list</collection>
     [Tags("Group")]
-    [SwaggerResponse(200, "List of groups", typeof(GroupDto))]
+    [SwaggerResponse(200, "List of groups", typeof(IAsyncEnumerable<GroupDto>))]
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(GeneralInformationRequestDto inDto)
     {
@@ -114,7 +114,7 @@ public class GroupController(
     /// <path>api/2.0/groups/user/{userid}</path>
     /// <collection>list</collection>
     [Tags("Group")]
-    [SwaggerResponse(200, "List of groups", typeof(GroupSummaryDto))]
+    [SwaggerResponse(200, "List of groups", typeof(IEnumerable<GroupSummaryDto>))]
     [HttpGet("user/{userid:guid}")]
     public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(GetGroupByUserIdRequestDto inDto)
     {
@@ -422,7 +422,7 @@ public class GroupControllerAdditional<T>(
     /// </summary>
     /// <path>api/2.0/group/room/{id}</path>
     [Tags("Group / Rooms")]
-    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<GroupDto> GetGroupsWithSharedAsync(GetGroupsWithSharedRequestDto<T> inDto)
