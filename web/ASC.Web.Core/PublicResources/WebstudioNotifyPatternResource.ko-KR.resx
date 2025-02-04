@@ -574,10 +574,10 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace에 오신 것을 환영합니다!</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>$Date, 포털 새 소식 ${__VirtualRootPath}</value>
+    <value>$Date, 포털 새 소식 ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>${__VirtualRootPath}에 초대받으셨</value>
+    <value>${__VirtualRootHost}에 초대받으셨</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>고객님의 ${LetterLogoText} DocSpace 구독이 곧 만료됩니다</value>
@@ -586,7 +586,7 @@ $TrulyYours</value>
     <value>고객님의 ${LetterLogoText} DocSpace가 삭제될 예정입니다</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath}의 프로필이 변경되었습니다</value>
+    <value>${__VirtualRootHost}의 프로필이 변경되었습니다</value>
   </data>
   <data name="subject_docs_tips" xml:space="preserve">
     <value>효과적인 문서 작업을 위한 5가지 팁</value>
@@ -616,19 +616,19 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace 가입</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>${__VirtualRootPath} 가입</value>
+    <value>${__VirtualRootHost} 가입</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>${__VirtualRootPath} 가입</value>
+    <value>${__VirtualRootHost} 가입</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>${__VirtualRootPath} 가입</value>
+    <value>${__VirtualRootHost} 가입</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>${__VirtualRootPath} 가입</value>
+    <value>${__VirtualRootHost} 가입</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>${__VirtualRootPath}에 초대받으셨습니다</value>
+    <value>${__VirtualRootHost}에 초대받으셨습니다</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace 비즈니스 구독을 확인하세요</value>
@@ -649,7 +649,7 @@ $TrulyYours</value>
     <value>무료 ${LetterLogoText} 앱을 이용하세요</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} 포털에서 프로필 삭제</value>
+    <value>${__VirtualRootHost} 포털에서 프로필 삭제</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>새로운 DocSpace 사용자가 추가되었습니다: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -736,7 +736,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. 이메일 주소를 활성화해주세요</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} 포털 백업이 생성되었습니다</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} 포털 백업이 생성되었습니다</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>이메일 변경 확인</value>
@@ -778,10 +778,10 @@ $TrulyYours</value>
     <value>${LetterLogoText}. 다른 리전 포털 마이그레이션이 성공적으로 완료되었습니다</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>${__VirtualRootPath} 포털 비활성화</value>
+    <value>${__VirtualRootHost} 포털 비활성화</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} 포털 삭제</value>
+    <value>${__VirtualRootHost} 포털 삭제</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace가 비활성화되었습니다</value>
@@ -829,7 +829,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace 유예 기간이 내일 만료됩니다</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} 포털 프로필 변경 알림</value>
+    <value>${__VirtualRootHost} 포털 프로필 변경 알림</value>
   </data>
   <data name="subject_storage_decryption_error" xml:space="preserve">
     <value>${LetterLogoText}. 복호화 프로세스에 실패했습니다</value>
@@ -1646,7 +1646,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace로의 데이터 마이그레이션이 완료되었습니다</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>지난 1시간 동안 ${__VirtualRootPath} 포털에 새로 추가된 내용입니다</value>
+    <value>지난 1시간 동안 ${__VirtualRootHost} 포털에 새로 추가된 내용입니다</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace에 대한 유용한 통합 정보를 확인하세요</value>

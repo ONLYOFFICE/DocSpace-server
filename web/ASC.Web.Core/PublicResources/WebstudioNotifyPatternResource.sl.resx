@@ -628,7 +628,7 @@ $TrulyYours</value>
     <value>Potrdite spremembo emaila</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} ustvarjena varnostna kopija portala</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} ustvarjena varnostna kopija portala</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} asistenca pri geslu</value>
@@ -670,19 +670,19 @@ $TrulyYours</value>
     <value>Odkrijte poslovno naročnino na ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Pridružite se ${__VirtualRootPath}</value>
+    <value>Pridružite se ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Pridružite se ${__VirtualRootPath}</value>
+    <value>Pridružite se ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Pridružite se ${__VirtualRootPath}</value>
+    <value>Pridružite se ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
     <value>Pridružite se ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Pridružite se ${__VirtualRootPath}</value>
+    <value>Pridružite se ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Pridružite se ${LetterLogoText} DocSpace</value>
@@ -721,7 +721,7 @@ $TrulyYours</value>
     <value>Zahteva prodajnega oddelka</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Povabilo za pridružitev na ${__VirtualRootPath} portalu</value>
+    <value>Povabilo za pridružitev na ${__VirtualRootHost} portalu</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Ustvarjanje poštnega predala</value>
@@ -748,10 +748,10 @@ $TrulyYours</value>
     <value>Dobrodošli v ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Deaktivacija portala ${__VirtualRootPath}</value>
+    <value>Deaktivacija portala ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Brisanje portala ${__VirtualRootPath}</value>
+    <value>Brisanje portala ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace je deaktiviran</value>
@@ -760,13 +760,13 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Sprememba naslova portala</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Brisanje vašega profila iz ${__VirtualRootPath} portala</value>
+    <value>Brisanje vašega profila iz ${__VirtualRootHost} portala</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Uporabnik je izbrisal svoj profil</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Vaš profil na ${__VirtualRootPath} je bil izbrisan</value>
+    <value>Vaš profil na ${__VirtualRootHost} je bil izbrisan</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. Prerazporeditev uporabniških podatkov je zaključena</value>
@@ -820,10 +820,10 @@ $TrulyYours</value>
     <value>Dobrodošli v ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} obvestilo o spremembi profila portala</value>
+    <value>${__VirtualRootHost} obvestilo o spremembi profila portala</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Kaj je novega na vašem portalu ${__VirtualRootPath} $Date</value>
+    <value>Kaj je novega na vašem portalu ${__VirtualRootHost} $Date</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP testno sporočilo</value>
@@ -850,7 +850,7 @@ $TrulyYours</value>
     <value>Novi uporabniki dodani na portal ${LetterLogoText}</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Povabljeni, da se pridružite ${__VirtualRootPath}</value>
+    <value>Povabljeni, da se pridružite ${__VirtualRootHost}</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivirajte vaš email za "${__VirtualRootPath}":"$InviteLink" portal.
@@ -1646,7 +1646,7 @@ $TrulyYours</value>
     <value>Selitev podatkov v ${LetterLogoText} DocSpace je bila uspešno zaključena</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Kaj je novega na vašem portalu ${__VirtualRootPath} v zadnji uri</value>
+    <value>Kaj je novega na vašem portalu ${__VirtualRootHost} v zadnji uri</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Raziščite uporabne integracije za ${LetterLogoText} DocSpace</value>

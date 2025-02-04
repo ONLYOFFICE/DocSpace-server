@@ -432,7 +432,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}。请激活您的电邮地址</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath}门户备份已创建</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost}门户备份已创建</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText}密码助手</value>
@@ -459,7 +459,7 @@ $TrulyYours</value>
     <value>向管理员发送的用户消息</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>加入${__VirtualRootPath}门户的邀请函</value>
+    <value>加入${__VirtualRootHost}门户的邀请函</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText} 。另一个地区门户迁移错误</value>
@@ -471,19 +471,19 @@ $TrulyYours</value>
     <value>${LetterLogoText} 。另一个地区门户迁移成功完成</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>禁用${__VirtualRootPath}门户</value>
+    <value>禁用${__VirtualRootHost}门户</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>删除${__VirtualRootPath}门户</value>
+    <value>删除${__VirtualRootHost}门户</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}。门户地址更改</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>禁用 ${__VirtualRootPath} 的帐户</value>
+    <value>禁用 ${__VirtualRootHost} 的帐户</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>您位于${__VirtualRootPath}的档案已被修改</value>
+    <value>您位于${__VirtualRootHost}的档案已被修改</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}。用户数据重新分配已完成</value>
@@ -501,7 +501,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}。恢复已开始</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath}门户档案更改通知</value>
+    <value>${__VirtualRootHost}门户档案更改通知</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP测试消息</value>
@@ -1339,7 +1339,7 @@ $OrangeButton
     <value>了解 ${LetterLogoText} 协作空间的专业订阅计划</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>加入 ${__VirtualRootPath}</value>
+    <value>加入 ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
     <value>加入 ${LetterLogoText} 协作空间</value>
@@ -1372,7 +1372,7 @@ $OrangeButton
     <value>已激活 ${LetterLogoText} 协作空间宽限期</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>加入 ${__VirtualRootPath}</value>
+    <value>加入 ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_admin_modules_v1" xml:space="preserve">
     <value>配置您的 ${LetterLogoText} 协作空间</value>
@@ -1420,10 +1420,10 @@ $OrangeButton
     <value>销售部门请求</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>您已收到加入 ${__VirtualRootPath} 的邀请</value>
+    <value>您已收到加入 ${__VirtualRootHost} 的邀请</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>$Date 您的门户网站 ${__VirtualRootPath} 上的最新消息</value>
+    <value>$Date 您的门户网站 ${__VirtualRootHost} 上的最新消息</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>${LetterLogoText} 协作空间宽限期将于明日到期</value>
@@ -1435,13 +1435,13 @@ $OrangeButton
     <value>${LetterLogoText}。邮箱创建</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>加入 ${__VirtualRootPath}</value>
+    <value>加入 ${__VirtualRootHost}</value>
   </data>
   <data name="subject_mailbox_password_changed" xml:space="preserve">
     <value>${LetterLogoText}。收件箱密码变更</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>加入 ${__VirtualRootPath}</value>
+    <value>加入 ${__VirtualRootHost}</value>
   </data>
   <data name="subject_reassigns_failed" xml:space="preserve">
     <value>${LetterLogoText}。用户数据重新指派失败</value>
@@ -1586,7 +1586,7 @@ $TrulyYours</value>
     <value>升级</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>过去一小时内您的门户 ${__VirtualRootPath} 上的最新消息</value>
+    <value>过去一小时内您的门户 ${__VirtualRootHost} 上的最新消息</value>
   </data>
   <data name="subject_migration_personal_to_docspace" xml:space="preserve">
     <value>数据迁移至 ${LetterLogoText} 协作空间已成功完成</value>

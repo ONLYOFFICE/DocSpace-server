@@ -662,7 +662,7 @@ Questo link è valido 7 giorni dalla ricezione di questo messaggio.</value>
     <value>${LetterLogoText}. Attiva il tuo indirizzo email</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} Backup del portale eseguito</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} Backup del portale eseguito</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>‎Confermare la modifica della dell'indirizzo di posta elettronica‎</value>
@@ -677,7 +677,7 @@ Questo link è valido 7 giorni dalla ricezione di questo messaggio.</value>
     <value>${LetterLogoText}. Cambio del proprietario del portale</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Unirsi su ${__VirtualRootPath}</value>
+    <value>Unirsi su ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Benvenuto in ${LetterLogoText} DocSpace!</value>
@@ -692,13 +692,13 @@ Questo link è valido 7 giorni dalla ricezione di questo messaggio.</value>
     <value>Benvenuto in ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Unirsi su ${__VirtualRootPath}</value>
+    <value>Unirsi su ${__VirtualRootHost}</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Messaggio dell'Utente agli Amministratori</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Invito ad unirsi al portale ${__VirtualRootPath}</value>
+    <value>Invito ad unirsi al portale ${__VirtualRootHost}</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Creazione dell'indirizzo mail</value>
@@ -716,22 +716,22 @@ Questo link è valido 7 giorni dalla ricezione di questo messaggio.</value>
     <value>${LetterLogoText}. Un'altra migrazione regione portale completato con successo</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Disattivazione del portale ${__VirtualRootPath}</value>
+    <value>Disattivazione del portale ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Eliminazione del ${__VirtualRootPath} portale</value>
+    <value>Eliminazione del ${__VirtualRootHost} portale</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Cambio dell'indirizzo del portale</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Disabilitazione dell'account su ${__VirtualRootPath}</value>
+    <value>Disabilitazione dell'account su ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>L'utente ha rimosso il suo profilo</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Il tuo profilo su ${__VirtualRootPath} è cambiato</value>
+    <value>Il tuo profilo su ${__VirtualRootHost} è cambiato</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. La riassegnazione dei dati utente è stata completata</value>
@@ -758,10 +758,10 @@ Questo link è valido 7 giorni dalla ricezione di questo messaggio.</value>
     <value>${LetterLogoText}. Ripristino avviato</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Unisciti a ${__VirtualRootPath}</value>
+    <value>Unisciti a ${__VirtualRootHost}</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} Notifica per il cambio profilo del portale</value>
+    <value>${__VirtualRootHost} Notifica per il cambio profilo del portale</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>messaggio di prova SMTP</value>
@@ -788,7 +788,7 @@ Questo link è valido 7 giorni dalla ricezione di questo messaggio.</value>
     <value>Nuovo utente aggiunto al portale ${LetterLogoText}</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Sei stato invitato ad unirti su ${__VirtualRootPath}</value>
+    <value>Sei stato invitato ad unirti su ${__VirtualRootHost}</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; ha eliminato la stanza: &lt;b&gt;{1}&lt;/b&gt;</value>
@@ -1436,7 +1436,7 @@ Il tuo portale è di nuovo disponibile.</value>
     <value>Scopri l'abbonamento aziendale di ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Novità sul tuo portale ${__VirtualRootPath} per $Date</value>
+    <value>Novità sul tuo portale ${__VirtualRootHost} per $Date</value>
   </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Ottieni le app di ${LetterLogoText} gratuite</value>
@@ -1469,7 +1469,7 @@ Il tuo portale è di nuovo disponibile.</value>
     <value>Il periodo di grazia per il tuo ${LetterLogoText} DocSpace scade domani</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Unisciti a ${__VirtualRootPath}</value>
+    <value>Unisciti a ${__VirtualRootHost}</value>
   </data>
   <data name="pattern_saas_video_guides_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;"&gt;Padroneggia ${LetterLogoText} DocSpace con le &lt;span style="color: #FF6F3D;"&gt;video guide&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
@@ -1577,7 +1577,7 @@ $TrulyYours</value>
     <value>La migrazione dei dati a ${LetterLogoText} DocSpace è stata completata con successo</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Novità dell'ultima ora sul tuo portale ${__VirtualRootPath}</value>
+    <value>Novità dell'ultima ora sul tuo portale ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Esplora utili integrazioni per ${LetterLogoText} DocSpace</value>

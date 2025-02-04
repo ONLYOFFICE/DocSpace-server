@@ -225,12 +225,15 @@ public class NotifyTransferRequest(TenantManager tenantManager,
             logoText = await tenantLogoManager.GetLogoTextAsync();
         }
 
+        var rootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
+
         request.Arguments.AddRange(new List<TagValue>
         {
             new(CommonTags.AuthorID, aid),
             new(CommonTags.AuthorName, aname),
             new(CommonTags.AuthorUrl, commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(aid))),
-            new(CommonTags.VirtualRootPath, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
+            new(CommonTags.VirtualRootPath, rootPath),
+            new(CommonTags.VirtualRootHost, new Uri(rootPath).Host),
             new(CommonTags.ProductID, product?.ID ?? Guid.Empty),
             new(CommonTags.DateTime, tenantUtil.DateTimeNow()),
             new(CommonTags.RecipientID, Context.SysRecipient),

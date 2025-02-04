@@ -1341,7 +1341,7 @@ $OrangeButton
     <value>${LetterLogoText}.メールアドレスを有効にしてください</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} ポータルのバックアップが作成されました</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} ポータルのバックアップが作成されました</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>メールアドレス変更をご確認ください</value>
@@ -1362,13 +1362,13 @@ $OrangeButton
     <value>${LetterLogoText}.ポータル所有者変更</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>${__VirtualRootPath}に参加しましょう</value>
+    <value>${__VirtualRootHost}に参加しましょう</value>
   </data>
   <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpaceに参加しましょう</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>${__VirtualRootPath}に参加しましょう</value>
+    <value>${__VirtualRootHost}に参加しましょう</value>
   </data>
   <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpaceに参加しましょう</value>
@@ -1380,7 +1380,7 @@ $OrangeButton
     <value>営業部へのお問い合わせ</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>${__VirtualRootPath}ポータルへの招待</value>
+    <value>${__VirtualRootHost}ポータルへの招待</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}.メールボックス作成</value>
@@ -1398,28 +1398,28 @@ $OrangeButton
     <value>${LetterLogoText}.他の地域へのポータル移行完了</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>${__VirtualRootPath}に参加しましょう</value>
+    <value>${__VirtualRootHost}に参加しましょう</value>
   </data>
   <data name="subject_opensource_user_activation_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpaceに参加しましょう</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>${__VirtualRootPath}ポータルの停止</value>
+    <value>${__VirtualRootHost}ポータルの停止</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>${__VirtualRootPath}ポータルの削除</value>
+    <value>${__VirtualRootHost}ポータルの削除</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}.ポータルアドレス変更</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>${__VirtualRootPath}のアカウントを無効にします</value>
+    <value>${__VirtualRootHost}のアカウントを無効にします</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>ユーザーが自分のプロフィールを解除しました</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath}のプロフィールが変更されました</value>
+    <value>${__VirtualRootHost}のプロフィールが変更されました</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}.ユーザーデータ割り当て完了</value>
@@ -1449,7 +1449,7 @@ $OrangeButton
     <value>${LetterLogoText} DocSpaceに参加しましょう</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>${__VirtualRootPath}に参加しましょう</value>
+    <value>${__VirtualRootHost}に参加しましょう</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>${LetterLogoText} DocSpaceの猶予期限開始</value>
@@ -1470,10 +1470,10 @@ $OrangeButton
     <value>${LetterLogoText} DocSpaceに参加しましょう</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath}ポータルのプロフィール変更通知</value>
+    <value>${__VirtualRootHost}ポータルのプロフィール変更通知</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>$Date：ポータルの新着情報${__VirtualRootPath}</value>
+    <value>$Date：ポータルの新着情報${__VirtualRootHost}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP テストメッセージ</value>
@@ -1500,7 +1500,7 @@ $OrangeButton
     <value>新しいユーザが ${LetterLogoText} ポータルに追加されました</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>${__VirtualRootPath}への招待が届きました</value>
+    <value>${__VirtualRootHost}への招待が届きました</value>
   </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpaceへようこそ！
@@ -1589,7 +1589,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpaceへのデータ移行が正常に完了しました</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>${__VirtualRootPath}ポータルの直近1時間の新着情報</value>
+    <value>${__VirtualRootHost}ポータルの直近1時間の新着情報</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpaceの便利な連携を見てみましょう</value>

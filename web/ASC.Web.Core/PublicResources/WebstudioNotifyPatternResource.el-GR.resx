@@ -116,7 +116,7 @@
     <value>Μήνυμα χρήστη προς τους διαχειριστές</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Το προφίλ σας στο ${__VirtualRootPath} έχει αλλάξει</value>
+    <value>Το προφίλ σας στο ${__VirtualRootHost} έχει αλλάξει</value>
   </data>
   <data name="subject_remove_user_data_completed" xml:space="preserve">
     <value>${LetterLogoText}. Η αφαίρεση δεδομένων χρήστη ολοκληρώθηκε</value>
@@ -652,7 +652,7 @@ $TrulyYours</value>
     <value>Καλώς ήλθατε στο ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} δημιουργία αντιγράφου ασφαλείας πύλης</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} δημιουργία αντιγράφου ασφαλείας πύλης</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} βοήθεια κωδικού πρόσβασης</value>
@@ -685,16 +685,16 @@ $TrulyYours</value>
     <value>Ανακαλύψτε την επαγγελματική συνδρομή του ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Εγγραφείτε στο ${__VirtualRootPath}</value>
+    <value>Εγγραφείτε στο ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Εγγραφείτε στο ${__VirtualRootPath}</value>
+    <value>Εγγραφείτε στο ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Εγγραφείτε στο ${__VirtualRootPath}</value>
+    <value>Εγγραφείτε στο ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Εγγραφείτε στο ${__VirtualRootPath}</value>
+    <value>Εγγραφείτε στο ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>Καλώς ήρθατε στο ${LetterLogoText} DocSpace!</value>
@@ -739,7 +739,7 @@ $TrulyYours</value>
     <value>Αίτημα τμήματος πωλήσεων</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Πρόσκληση για συμμετοχή στην πύλη ${__VirtualRootPath}</value>
+    <value>Πρόσκληση για συμμετοχή στην πύλη ${__VirtualRootHost}</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Δημιουργία γραμματοκιβωτίου</value>
@@ -757,10 +757,10 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Μια άλλη μετεγκατάσταση πύλης περιοχής ολοκληρώθηκε επιτυχώς</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Απενεργοποίηση της πύλης ${__VirtualRootPath}</value>
+    <value>Απενεργοποίηση της πύλης ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Διαγραφή της πύλης ${__VirtualRootPath}</value>
+    <value>Διαγραφή της πύλης ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>Το ${LetterLogoText} DocSpace έχει απενεργοποιηθεί</value>
@@ -769,7 +769,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Αλλαγή της διεύθυνσης πύλης</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Απενεργοποίηση λογαριασμού στο ${__VirtualRootPath}</value>
+    <value>Απενεργοποίηση λογαριασμού στο ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Ο χρήστης διέγραψε το προφίλ του</value>
@@ -805,10 +805,10 @@ $TrulyYours</value>
     <value>Η περίοδος χάριτος για το ${LetterLogoText} DocSpace λήγει αύριο</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>Ειδοποίησης αλλαγής προφίλ πύλης ${__VirtualRootPath}</value>
+    <value>Ειδοποίησης αλλαγής προφίλ πύλης ${__VirtualRootHost}</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Τι νέο υπάρχει στην πύλη σας ${__VirtualRootPath} για τις $Date</value>
+    <value>Τι νέο υπάρχει στην πύλη σας ${__VirtualRootHost} για τις $Date</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Δοκιμαστικό μήνυμα SMTP</value>
@@ -832,7 +832,7 @@ $TrulyYours</value>
     <value>Νέος χρήστης προστέθηκε στην πύλη ${LetterLogoText}</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Έχετε προσκληθεί να συμμετάσχετε στο ${__VirtualRootPath}</value>
+    <value>Έχετε προσκληθεί να συμμετάσχετε στο ${__VirtualRootHost}</value>
   </data>
   <data name="ButtonAccessControlPanel" xml:space="preserve">
     <value>Πίνακας ελέγχου πρόσβασης</value>
@@ -1587,7 +1587,7 @@ $TrulyYours</value>
     <value>Η μεταφορά δεδομένων στο DocSpace του ${LetterLogoText} ολοκληρώθηκε με επιτυχία</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Τι νέο υπάρχει στην πύλη σας ${__VirtualRootPath} την τελευταία ώρα</value>
+    <value>Τι νέο υπάρχει στην πύλη σας ${__VirtualRootHost} την τελευταία ώρα</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Εξερευνήστε χρήσιμες ενσωματώσεις για το DocSpace του ${LetterLogoText}</value>

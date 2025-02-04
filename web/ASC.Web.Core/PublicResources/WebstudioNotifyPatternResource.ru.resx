@@ -855,7 +855,7 @@ $OrangeButton
     <value>${LetterLogoText}. Пожалуйста, активируйте Ваш адрес электронной почты</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. Создана резервная копия портала ${__VirtualRootPath}</value>
+    <value>${LetterLogoText}. Создана резервная копия портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Подтвердите изменение адреса электронной почты</value>
@@ -870,7 +870,7 @@ $OrangeButton
     <value>${LetterLogoText}. Смена владельца портала</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Стать участником ${__VirtualRootPath}</value>
+    <value>Стать участником ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
@@ -885,13 +885,13 @@ $OrangeButton
     <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Стать участником ${__VirtualRootPath}</value>
+    <value>Стать участником ${__VirtualRootHost}</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Сообщение пользователя для администраторов</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Приглашение на портал ${__VirtualRootPath}</value>
+    <value>Приглашение на портал ${__VirtualRootHost}</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Создание почтового ящика</value>
@@ -909,25 +909,25 @@ $OrangeButton
     <value>${LetterLogoText}. Перенос портала в другой регион успешно завершен</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Приглашение на портал ${__VirtualRootPath}</value>
+    <value>Приглашение на портал ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Отключение портала ${__VirtualRootPath}</value>
+    <value>Отключение портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Удаление портала ${__VirtualRootPath}</value>
+    <value>Удаление портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Изменение адреса портала</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Отключение учетной записи ${__VirtualRootPath}</value>
+    <value>Отключение учетной записи ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Пользователь удалил свой профиль</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Ваш профиль на портале ${__VirtualRootPath} был изменен</value>
+    <value>Ваш профиль на портале ${__VirtualRootHost} был изменен</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. Завершена передача данных пользователя</value>
@@ -954,10 +954,10 @@ $OrangeButton
     <value>${LetterLogoText}. Началось восстановление</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Стать участником ${__VirtualRootPath}</value>
+    <value>Стать участником ${__VirtualRootHost}</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>Оповещение об изменении профиля на портале ${__VirtualRootPath}</value>
+    <value>Оповещение об изменении профиля на портале ${__VirtualRootHost}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Тестовое письмо для проверки настроек SMTP</value>
@@ -984,7 +984,7 @@ $OrangeButton
     <value>Добавлен новый пользователь на портале ${LetterLogoText}</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Вас пригласили стать участником ${__VirtualRootPath}</value>
+    <value>Вас пригласили стать участником ${__VirtualRootHost}</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;"&gt;в &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
@@ -1365,7 +1365,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Новости Вашего портала ${__VirtualRootPath} за $Date</value>
+    <value>Новости Вашего портала ${__VirtualRootHost} за $Date</value>
   </data>
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Подтвердите изменение пароля</value>
@@ -1569,7 +1569,7 @@ $activity
 #end</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Новости Вашего портала ${__VirtualRootPath} за последний час</value>
+    <value>Новости Вашего портала ${__VirtualRootHost} за последний час</value>
   </data>
   <data name="ButtonRegister" xml:space="preserve">
     <value>Зарегистрироваться</value>

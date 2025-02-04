@@ -532,7 +532,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Моля, активирайте имейл адреса си</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} архивът на портала е създаден</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} архивът на портала е създаден</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; създаде нов документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в стаята: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
@@ -604,7 +604,7 @@ $TrulyYours</value>
     <value>Съобщение на потребителя до администраторите</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Покана за присъединяване към портала ${__VirtualRootPath}</value>
+    <value>Покана за присъединяване към портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Създаване на пощенска кутия</value>
@@ -622,19 +622,19 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Друга миграция на портал за региони успешно приключи</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Деактивиране на портала ${__VirtualRootPath}</value>
+    <value>Деактивиране на портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Изтриване на портала ${__VirtualRootPath}</value>
+    <value>Изтриване на портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Промяна на адреса на портала</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Деактивиране профил на ${__VirtualRootPath}</value>
+    <value>Деактивиране профил на ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Потребителският ви профил в ${__VirtualRootPath} е променен</value>
+    <value>Потребителският ви профил в ${__VirtualRootHost} е променен</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. Прехвърлянето на потребителски данни е завършено</value>
@@ -661,7 +661,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Възстановяването започна</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} известие за промяна на профила на портала</value>
+    <value>${__VirtualRootHost} известие за промяна на профила на портала</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP тестово съобщение</value>
@@ -1096,7 +1096,7 @@ $TrulyYours</value>
     <value>Гратисният период за вашия ${LetterLogoText} DocSpace изтече</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Какво е новото във вашия портал ${__VirtualRootPath} за $Date</value>
+    <value>Какво е новото във вашия портал ${__VirtualRootHost} за $Date</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Гратисния период за вашия ${LetterLogoText} DocSpace е активиран</value>
@@ -1432,19 +1432,19 @@ $OrangeButton
     <value>Потвърдете промяната на вашия имейл</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Присъединете се към ${__VirtualRootPath}</value>
+    <value>Присъединете се към ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Присъединете се към ${__VirtualRootPath}</value>
+    <value>Присъединете се към ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Присъединете се към ${__VirtualRootPath}</value>
+    <value>Присъединете се към ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Потребителят е изтрил профила си</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Присъединете се към ${__VirtualRootPath}</value>
+    <value>Присъединете се към ${__VirtualRootHost}</value>
   </data>
   <data name="subject_storage_decryption_error" xml:space="preserve">
     <value>${LetterLogoText}. Процесът на дешифриране е неуспешен</value>
@@ -1465,7 +1465,7 @@ $OrangeButton
     <value>${LetterLogoText}. Процесът на криптиране е завършен</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Поканени сте да се присъедините към ${__VirtualRootPath}</value>
+    <value>Поканени сте да се присъедините към ${__VirtualRootHost}</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Поздрави, Екипът за Поддръжка на ${LetterLogoText}</value>
@@ -1889,6 +1889,6 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Какво ново в портала ви ${__VirtualRootPath} през последния час</value>
+    <value>Какво ново в портала ви ${__VirtualRootHost} през последния час</value>
   </data>
 </root>

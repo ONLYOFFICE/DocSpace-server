@@ -458,7 +458,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Prosím aktivujte svoju e-mailovú adresu</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. Záloha portálu ${__VirtualRootPath} bola vytvorená</value>
+    <value>${LetterLogoText}. Záloha portálu ${__VirtualRootHost} bola vytvorená</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} pomocník k heslu</value>
@@ -485,7 +485,7 @@ $TrulyYours</value>
     <value>Používateľská správa správcom</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Pozvánka na vstup do ${__VirtualRootPath} portálu</value>
+    <value>Pozvánka na vstup do ${__VirtualRootHost} portálu</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Chyba migrácie portálu do iného regiónu</value>
@@ -497,19 +497,19 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Migrácia portálu do iného regiónu bola úspešne dokončená</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Deaktivácia ${__VirtualRootPath} portálu</value>
+    <value>Deaktivácia ${__VirtualRootHost} portálu</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Vymazanie ${__VirtualRootPath} portálu</value>
+    <value>Vymazanie ${__VirtualRootHost} portálu</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Zmena adresy portálu</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Vymazanie Vášho profilu z ${__VirtualRootPath} portálu</value>
+    <value>Vymazanie Vášho profilu z ${__VirtualRootHost} portálu</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Váš profil na ${__VirtualRootPath} bol zmenený</value>
+    <value>Váš profil na ${__VirtualRootHost} bol zmenený</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. Preradenie používateľských údajov je dokončené</value>
@@ -536,7 +536,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Obnovenie začalo</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>Oznámenie o zmene profilu ${__VirtualRootPath} portálu</value>
+    <value>Oznámenie o zmene profilu ${__VirtualRootHost} portálu</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP testovacia správa</value>
@@ -965,7 +965,7 @@ Po kliknutí na odkaz pozvánky nastavte nové heslo pre svoj účet.
 $TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Čo je nové na vašom portáli ${__VirtualRootPath} k $Date</value>
+    <value>Čo je nové na vašom portáli ${__VirtualRootHost} k $Date</value>
   </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Vitajte v službe ${LetterLogoText} DocSpace!</value>
@@ -1052,16 +1052,16 @@ $TrulyYours</value>
     <value>Objavte biznis predplatné ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Pripojte sa k ${__VirtualRootPath}</value>
+    <value>Pripojte sa k ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Pripojte sa k ${__VirtualRootPath}</value>
+    <value>Pripojte sa k ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Pripojte sa k ${__VirtualRootPath}</value>
+    <value>Pripojte sa k ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Pripojte sa k ${__VirtualRootPath}</value>
+    <value>Pripojte sa k ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
     <value>Pripojte sa k ${LetterLogoText} DocSpace</value>
@@ -1133,7 +1133,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Proces šifrovania ukončený</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Ste pozvaní pripojiť sa k ${__VirtualRootPath}</value>
+    <value>Ste pozvaní pripojiť sa k ${__VirtualRootHost}</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) vytvorená záloha portálu
@@ -1538,7 +1538,7 @@ $TrulyYours</value>
     <value>Aktualizovať</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Čo je nové na vašom portáli ${__VirtualRootPath} za poslednú hodinu</value>
+    <value>Čo je nové na vašom portáli ${__VirtualRootHost} za poslednú hodinu</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Pozrite si užitočné integrácie pre ${LetterLogoText} DocSpace</value>

@@ -449,7 +449,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Lūdzu, aktivizējiet savu e-pasta adresi</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText} izveidota portāla ${__VirtualRootPath} rezerves kopija</value>
+    <value>${LetterLogoText} izveidota portāla ${__VirtualRootHost} rezerves kopija</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} palīdzība ar paroli</value>
@@ -464,7 +464,7 @@ $TrulyYours</value>
     <value>Lietotāja ziņa administratoriem</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Uzaicinājums pievienoties portālam ${__VirtualRootPath}</value>
+    <value>Uzaicinājums pievienoties portālam ${__VirtualRootHost}</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Kļūda, pārnesot portālu uz citu apgabalu</value>
@@ -476,19 +476,19 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Portāla pārnese uz citu apgabalu veiksmīgi pabeigta</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Portāla ${__VirtualRootPath} deaktivizācija</value>
+    <value>Portāla ${__VirtualRootHost} deaktivizācija</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} portāla dzēšana</value>
+    <value>${__VirtualRootHost} portāla dzēšana</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Portāla adreses maiņa</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Konta atspējošana šajā datumā: ${__VirtualRootPath}</value>
+    <value>Konta atspējošana šajā datumā: ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Tika mainīts jūsu profils portālā ${__VirtualRootPath}</value>
+    <value>Tika mainīts jūsu profils portālā ${__VirtualRootHost}</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. Lietotāja datu pārnese ir pabeigta</value>
@@ -515,7 +515,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Atjaunošana uzsākta</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} portāla profila izmaiņu paziņojums</value>
+    <value>${__VirtualRootHost} portāla profila izmaiņu paziņojums</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP testa ziņojums</value>
@@ -1067,13 +1067,13 @@ $TrulyYours</value>
     <value>Atklājiet ${LetterLogoText} DocSpace biznesa abonementu</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Pievienoties ${__VirtualRootPath}</value>
+    <value>Pievienoties ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Pievienoties ${__VirtualRootPath}</value>
+    <value>Pievienoties ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Pievienoties ${__VirtualRootPath}</value>
+    <value>Pievienoties ${__VirtualRootHost}</value>
   </data>
   <data name="subject_docs_tips" xml:space="preserve">
     <value>5 padomi efektīvam darbam ar dokumentiem</value>
@@ -1118,7 +1118,7 @@ $TrulyYours</value>
     <value>Jūsu ${LetterLogoText} DocSpace tiks izdzēsts</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Pievienoties ${__VirtualRootPath}</value>
+    <value>Pievienoties ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace ir aktivizēts</value>
@@ -1133,7 +1133,7 @@ $TrulyYours</value>
     <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace beidzas rīt</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Jaunumi jūsu portālā ${__VirtualRootPath} par šo datumu: $Date</value>
+    <value>Jaunumi jūsu portālā ${__VirtualRootHost} par šo datumu: $Date</value>
   </data>
   <data name="subject_storage_decryption_error" xml:space="preserve">
     <value>${LetterLogoText}. Atšifrēšanas process neizdevās</value>
@@ -1154,7 +1154,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Šifrēšanas process ir pabeigts</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Jūs esat uzaicināts (-a) pievienoties ${__VirtualRootPath}</value>
+    <value>Jūs esat uzaicināts (-a) pievienoties ${__VirtualRootHost}</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portāla dublējums ir izveidots
@@ -1587,7 +1587,7 @@ $TrulyYours</value>
     <value>Datu migrācija uz ${LetterLogoText} DocSpace ir veiksmīgi pabeigta</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Jaunumi jūsu portālā pēdējās ${__VirtualRootPath} stundas laikā</value>
+    <value>Jaunumi jūsu portālā pēdējās ${__VirtualRootHost} stundas laikā</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Izpētiet noderīgas ${LetterLogoText} DocSpace integrācijas</value>

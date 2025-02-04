@@ -538,13 +538,13 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt; a modificat documentul: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} notificarea privind modificarea profilului de portal</value>
+    <value>${__VirtualRootHost} notificarea privind modificarea profilului de portal</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} asistență cu parole</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} copia de rezervă a portalului a fost creată</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} copia de rezervă a portalului a fost creată</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Eroare de migrare a portalului la o altă regiune</value>
@@ -702,10 +702,10 @@ Echipă de Asistență ${LetterLogoText}
     <value>Dezactivare portal</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Dezactivarea portalului ${__VirtualRootPath}</value>
+    <value>Dezactivarea portalului ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Dezactivarea contului ${__VirtualRootPath}</value>
+    <value>Dezactivarea contului ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Descoperiți abonamentul ${LetterLogoText} DocSpace business</value>
@@ -741,25 +741,25 @@ Echipă de Asistență ${LetterLogoText}
     <value>Ștergere portal</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Ștergerea portalului ${__VirtualRootPath}</value>
+    <value>Ștergerea portalului ${__VirtualRootHost}</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Invitația să vă alăturați portalului ${__VirtualRootPath}</value>
+    <value>Invitația să vă alăturați portalului ${__VirtualRootHost}</value>
   </data>
   <data name="ButtonInviteRightNow" xml:space="preserve">
     <value>Invitați chiar acum</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Asociere ${__VirtualRootPath}</value>
+    <value>Asociere ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Asociere ${__VirtualRootPath}</value>
+    <value>Asociere ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Asociere ${__VirtualRootPath}</value>
+    <value>Asociere ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Asociere ${__VirtualRootPath}</value>
+    <value>Asociere ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_user_activation_v1" xml:space="preserve">
     <value>Asociați-vă spaţiului ${LetterLogoText} DocSpace</value>
@@ -874,10 +874,10 @@ Echipă de Asistență ${LetterLogoText}
     <value>Bun venit în spaţiul ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Ce este nou pe portalul dvs. ${__VirtualRootPath} for $Date</value>
+    <value>Ce este nou pe portalul dvs. ${__VirtualRootHost} for $Date</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Sunteţi invitat să vă asociaţi ${__VirtualRootPath}</value>
+    <value>Sunteţi invitat să vă asociaţi ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Abonamentul dvs ${LetterLogoText} DocSpace va expira în curînd</value>
@@ -886,7 +886,7 @@ Echipă de Asistență ${LetterLogoText}
     <value>Spațiul dvs ${LetterLogoText} DocSpace va fi șters</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Profilul dvs pe ${__VirtualRootPath} a fost schimbat</value>
+    <value>Profilul dvs pe ${__VirtualRootHost} a fost schimbat</value>
   </data>
   <data name="pattern_saas_video_guides_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;"&gt;Stăpânește spațiul ${LetterLogoText} DocSpace cu &lt;span style="color: #FF6F3D;"&gt;ghidurilor video&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
@@ -1646,7 +1646,7 @@ $TrulyYours</value>
     <value>Migrarea datelor în ${LetterLogoText} DocSpace s-a terminat cu succes</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Ce este nou pe portalul dvs. ${__VirtualRootPath} de ultima oră</value>
+    <value>Ce este nou pe portalul dvs. ${__VirtualRootHost} de ultima oră</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Explorați soluții de integrare utile pentru spațiu ${LetterLogoText} DocSpace</value>

@@ -2125,7 +2125,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText}. ${__VirtualRootPath} portal backup created.
+        ///   Looks up a localized string similar to ${LetterLogoText}. ${__VirtualRootHost} portal backup created.
         /// </summary>
         public static string subject_backup_created {
             get {
@@ -2314,7 +2314,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
         /// </summary>
         public static string subject_enterprise_guest_activation_v10 {
             get {
@@ -2368,7 +2368,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
         /// </summary>
         public static string subject_enterprise_whitelabel_guest_activation_v10 {
             get {
@@ -2422,7 +2422,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invitation to join ${__VirtualRootPath} portal.
+        ///   Looks up a localized string similar to Invitation to join ${__VirtualRootHost} portal.
         /// </summary>
         public static string subject_join {
             get {
@@ -2503,7 +2503,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
         /// </summary>
         public static string subject_opensource_guest_activation_v11 {
             get {
@@ -2539,7 +2539,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deactivation of the ${__VirtualRootPath} portal.
+        ///   Looks up a localized string similar to Deactivation of the ${__VirtualRootHost} portal.
         /// </summary>
         public static string subject_portal_deactivate {
             get {
@@ -2548,7 +2548,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deletion of the ${__VirtualRootPath} portal.
+        ///   Looks up a localized string similar to Deletion of the ${__VirtualRootHost} portal.
         /// </summary>
         public static string subject_portal_delete {
             get {
@@ -2575,7 +2575,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disabling account on ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to Disabling account on ${__VirtualRootHost}.
         /// </summary>
         public static string subject_profile_delete {
             get {
@@ -2593,7 +2593,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your profile at ${__VirtualRootPath} has been changed.
+        ///   Looks up a localized string similar to Your profile at ${__VirtualRootHost} has been changed.
         /// </summary>
         public static string subject_profile_updated {
             get {
@@ -2674,7 +2674,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to What&apos;s new on your portal ${__VirtualRootPath} for the last hour.
+        ///   Looks up a localized string similar to What&apos;s new on your portal ${__VirtualRootHost} for the last hour.
         /// </summary>
         public static string subject_rooms_activity {
             get {
@@ -2764,7 +2764,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
         /// </summary>
         public static string subject_saas_guest_activation_v115 {
             get {
@@ -2863,7 +2863,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${__VirtualRootPath} portal profile change notification.
+        ///   Looks up a localized string similar to ${__VirtualRootHost} portal profile change notification.
         /// </summary>
         public static string subject_self_profile_updated {
             get {
@@ -2872,7 +2872,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to What&apos;s new on your portal ${__VirtualRootPath} for $Date.
+        ///   Looks up a localized string similar to What&apos;s new on your portal ${__VirtualRootHost} for $Date.
         /// </summary>
         public static string subject_send_whats_new {
             get {
@@ -2962,7 +2962,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You’re invited to join ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to You’re invited to join ${__VirtualRootHost}.
         /// </summary>
         public static string subject_user_ldap_activation {
             get {

@@ -96,7 +96,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Ole hyvä ja aktivoi sähköpostiosoitteesi</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} portaalin turvavarmenne luotu</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} portaalin turvavarmenne luotu</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} salasana tuki</value>
@@ -111,7 +111,7 @@ $TrulyYours</value>
     <value>Käyttäjän viesti pääkäyttäjille</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Kutsu liittyä ${__VirtualRootPath} portaaliin</value>
+    <value>Kutsu liittyä ${__VirtualRootHost} portaaliin</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Toisen alueen portaalin migraation virhe</value>
@@ -123,19 +123,19 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Toisen alueen portaalin migraatio on suoritettu onnistuneesti</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>${__VirtualRootPath} portaalin deaktivointi</value>
+    <value>${__VirtualRootHost} portaalin deaktivointi</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} portaalin poisto</value>
+    <value>${__VirtualRootHost} portaalin poisto</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Portaalin osoitteen muutos</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Poistetaan tili käytöstä ${__VirtualRootPath}</value>
+    <value>Poistetaan tili käytöstä ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Profiilisi: ${__VirtualRootPath} on muutettu</value>
+    <value>Profiilisi: ${__VirtualRootHost} on muutettu</value>
   </data>
   <data name="subject_restore_completed" xml:space="preserve">
     <value>${LetterLogoText}. Palautus valmis</value>
@@ -144,7 +144,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Palautus alkoi</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} portaalin profiilin muutoksen tiedonanto</value>
+    <value>${__VirtualRootHost} portaalin profiilin muutoksen tiedonanto</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP testiviesti</value>
@@ -771,10 +771,10 @@ $TrulyYours</value>
     <value>Tervetuloa ${LetterLogoText} DocSpaceen!</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Mitä uutta on portaalissasi ${__VirtualRootPath} $Date</value>
+    <value>Mitä uutta on portaalissasi ${__VirtualRootHost} $Date</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Sinut on kutsuttu liittymään ${__VirtualRootPath}</value>
+    <value>Sinut on kutsuttu liittymään ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>${LetterLogoText} DocSpace- tilauksesi on päättymässä</value>
@@ -837,13 +837,13 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Turvallisuusilmoitus</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Liity ${__VirtualRootPath}</value>
+    <value>Liity ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Liity ${__VirtualRootPath}</value>
+    <value>Liity ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Liity ${__VirtualRootPath}</value>
+    <value>Liity ${__VirtualRootHost}</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Postilaatikon luominen</value>
@@ -873,7 +873,7 @@ $TrulyYours</value>
     <value>SaaS hinnoitteluohjelmapyyntö</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Liity ${__VirtualRootPath}</value>
+    <value>Liity ${__VirtualRootHost}</value>
   </data>
   <data name="subject_storage_decryption_error" xml:space="preserve">
     <value>${LetterLogoText}.. Salauksen purku epäonnistui</value>

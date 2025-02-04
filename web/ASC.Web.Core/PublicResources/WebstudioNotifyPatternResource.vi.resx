@@ -426,7 +426,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Vui lòng kích hoạt địa chỉ email của bạn</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} đã tạo bản sao lưu của cổng</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} đã tạo bản sao lưu của cổng</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} trợ giúp mật khẩu</value>
@@ -453,7 +453,7 @@ $TrulyYours</value>
     <value>Thông báo của người dùng đến các quản trị viên</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Lời mời tham gia cổng ${__VirtualRootPath}</value>
+    <value>Lời mời tham gia cổng ${__VirtualRootHost}</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Lỗi di chuyển cổng sang vùng khác</value>
@@ -465,19 +465,19 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Đã hoàn tất di chuyển cổng sang vùng khác</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Ngưng hoạt động Cổng ${__VirtualRootPath}</value>
+    <value>Ngưng hoạt động Cổng ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Xoá cổng ${__VirtualRootPath}</value>
+    <value>Xoá cổng ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Thay đổi địa chỉ cổng</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Vô hiệu hóa tài khoản trên ${__VirtualRootPath}</value>
+    <value>Vô hiệu hóa tài khoản trên ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Hồ sơ của bạn tại ${__VirtualRootPath} đã được thay đổi</value>
+    <value>Hồ sơ của bạn tại ${__VirtualRootHost} đã được thay đổi</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. Đã hoàn tất phân bổ lại dữ liệu người dùng</value>
@@ -495,7 +495,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Đã bắt đầu khôi phục</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} thông báo thay đổi hồ sơ cổng thông tin</value>
+    <value>${__VirtualRootHost} thông báo thay đổi hồ sơ cổng thông tin</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Tin nhắn SMTP thử nghiệm</value>
@@ -942,7 +942,7 @@ Sau khi nhấp vào liên kết mời, xin vui lòng đặt mật khẩu mới c
 $TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Có gì mới trên cổng thông tin ${__VirtualRootPath} của bạn cho $Date</value>
+    <value>Có gì mới trên cổng thông tin ${__VirtualRootHost} của bạn cho $Date</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Xác nhận thay đổi email của bạn</value>
@@ -1068,7 +1068,7 @@ $TrulyYours</value>
     <value>Thời gian ân hạn cho ${LetterLogoText} DocSpace của bạn sẽ hết hạn vào ngày mai</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Bạn được mời tham gia ${__VirtualRootPath}</value>
+    <value>Bạn được mời tham gia ${__VirtualRootHost}</value>
   </data>
   <data name="subject_storage_encryption_success" xml:space="preserve">
     <value>${LetterLogoText}. Quá trình mã hóa đã hoàn tất</value>
@@ -1089,13 +1089,13 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Quá trình giải mã không thành công</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Tham gia ${__VirtualRootPath}</value>
+    <value>Tham gia ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Tham gia ${__VirtualRootPath}</value>
+    <value>Tham gia ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Tham gia ${__VirtualRootPath}</value>
+    <value>Tham gia ${__VirtualRootHost}</value>
   </data>
   <data name="subject_remove_user_data_failed" xml:space="preserve">
     <value>${LetterLogoText}. Xóa dữ liệu người dùng không thành công</value>
@@ -1113,7 +1113,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Thay đổi mật khẩu hộp thư</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Tham gia ${__VirtualRootPath}</value>
+    <value>Tham gia ${__VirtualRootHost}</value>
   </data>
   <data name="subject_remove_user_data_completed" xml:space="preserve">
     <value>${LetterLogoText}. Đã hoàn thành xóa dữ liệu người dùng</value>
@@ -1588,7 +1588,7 @@ $TrulyYours</value>
     <value>Đã hoàn thành di chuyển dữ liệu sang ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Có gì mới trên cổng thông tin ${__VirtualRootPath} của bạn trong giờ qua</value>
+    <value>Có gì mới trên cổng thông tin ${__VirtualRootHost} của bạn trong giờ qua</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Khám phá các tích hợp hữu ích cho ${LetterLogoText} DocSpace</value>

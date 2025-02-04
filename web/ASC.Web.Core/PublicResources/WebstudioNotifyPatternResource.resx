@@ -941,7 +941,7 @@ The link is only valid for 7 days.</value>
     <value>${LetterLogoText}. Please activate your email address</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} portal backup created</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} portal backup created</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Confirm changing your email</value>
@@ -956,13 +956,13 @@ The link is only valid for 7 days.</value>
     <value>${LetterLogoText}. Change of portal owner</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Join ${__VirtualRootPath}</value>
+    <value>Join ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Join ${__VirtualRootPath}</value>
+    <value>Join ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
@@ -971,7 +971,7 @@ The link is only valid for 7 days.</value>
     <value>User message to administrators</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Invitation to join ${__VirtualRootPath} portal</value>
+    <value>Invitation to join ${__VirtualRootHost} portal</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Mailbox creation</value>
@@ -989,28 +989,28 @@ The link is only valid for 7 days.</value>
     <value>${LetterLogoText}. Another region portal migration successfully completed</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Join ${__VirtualRootPath}</value>
+    <value>Join ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Deactivation of the ${__VirtualRootPath} portal</value>
+    <value>Deactivation of the ${__VirtualRootHost} portal</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Deletion of the ${__VirtualRootPath} portal</value>
+    <value>Deletion of the ${__VirtualRootHost} portal</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Change of portal address</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Disabling account on ${__VirtualRootPath}</value>
+    <value>Disabling account on ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>User has deleted his/her profile</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Your profile at ${__VirtualRootPath} has been changed</value>
+    <value>Your profile at ${__VirtualRootHost} has been changed</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. User data reassignment is completed</value>
@@ -1037,16 +1037,16 @@ The link is only valid for 7 days.</value>
     <value>${LetterLogoText}. Restore started</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Join ${__VirtualRootPath}</value>
+    <value>Join ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} portal profile change notification</value>
+    <value>${__VirtualRootHost} portal profile change notification</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>What's new on your portal ${__VirtualRootPath} for $Date</value>
+    <value>What's new on your portal ${__VirtualRootHost} for $Date</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP test message</value>
@@ -1073,7 +1073,7 @@ The link is only valid for 7 days.</value>
     <value>New user added to ${LetterLogoText} portal</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>You’re invited to join ${__VirtualRootPath}</value>
+    <value>You’re invited to join ${__VirtualRootHost}</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Want to change the password on your ${LetterLogoText} account? Click the button below to confirm.
@@ -2041,7 +2041,7 @@ $activity
 #end</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>What's new on your portal ${__VirtualRootPath} for the last hour</value>
+    <value>What's new on your portal ${__VirtualRootHost} for the last hour</value>
   </data>
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Set up password</value>

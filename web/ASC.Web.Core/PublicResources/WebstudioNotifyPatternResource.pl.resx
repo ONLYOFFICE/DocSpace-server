@@ -424,7 +424,7 @@ Użytkownik "$__AuthorName":"$__AuthorUrl" dołączył do portalu "${__VirtualRo
     <value>${LetterLogoText}. Proszę aktywować swój adres e-mail</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. Utworzono utworzoną kopię zapasową portalu ${__VirtualRootPath}</value>
+    <value>${LetterLogoText}. Utworzono utworzoną kopię zapasową portalu ${__VirtualRootHost}</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>Pomoc w hasłach ${LetterLogoText}</value>
@@ -451,7 +451,7 @@ Użytkownik "$__AuthorName":"$__AuthorUrl" dołączył do portalu "${__VirtualRo
     <value>Komunikat użytkownika dla administratorów</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Zaproszenie na portal ${__VirtualRootPath}</value>
+    <value>Zaproszenie na portal ${__VirtualRootHost}</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Inny błąd migracji portalu obszaru</value>
@@ -463,19 +463,19 @@ Użytkownik "$__AuthorName":"$__AuthorUrl" dołączył do portalu "${__VirtualRo
     <value>${LetterLogoText}. Kolejna migracja portalu regionu zakończona pomyślnie</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Dezaktywacja portalu ${__VirtualRootPath}</value>
+    <value>Dezaktywacja portalu ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Usuwanie portalu ${__VirtualRootPath}</value>
+    <value>Usuwanie portalu ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Zmiana adresu portalu</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Wyłączanie konta na ${__VirtualRootPath}</value>
+    <value>Wyłączanie konta na ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Twój profil na portalu ${__VirtualRootPath} został zmieniony</value>
+    <value>Twój profil na portalu ${__VirtualRootHost} został zmieniony</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. Przenoszenie danych użytkownika jest zakończone</value>
@@ -493,7 +493,7 @@ Użytkownik "$__AuthorName":"$__AuthorUrl" dołączył do portalu "${__VirtualRo
     <value>${LetterLogoText}. Zaczęło się przywracanie</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} powiadomienie o zmianie profilu portalu</value>
+    <value>${__VirtualRootHost} powiadomienie o zmianie profilu portalu</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Wiadomość testowa SMTP</value>
@@ -1051,13 +1051,13 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Powiadomienie dot. bezpieczeństwa</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Dołącz do ${__VirtualRootPath}</value>
+    <value>Dołącz do ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Dołącz do ${__VirtualRootPath}</value>
+    <value>Dołącz do ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Dołącz do ${__VirtualRootPath}</value>
+    <value>Dołącz do ${__VirtualRootHost}</value>
   </data>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Prośba do działu sprzedaży</value>
@@ -1084,13 +1084,13 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Usuwanie danych użytkownika nie powiodło się</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Dołącz do ${__VirtualRootPath}</value>
+    <value>Dołącz do ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Dołącz do ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Co nowego na Twoim portalu ${__VirtualRootPath} $Date</value>
+    <value>Co nowego na Twoim portalu ${__VirtualRootHost} $Date</value>
   </data>
   <data name="subject_storage_decryption_error" xml:space="preserve">
     <value>${LetterLogoText}. Proces odszyfrowywania nie powiódł się</value>
@@ -1111,7 +1111,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Zakończono proces szyfrowania</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Otrzymano zaproszenie do ${__VirtualRootPath}</value>
+    <value>Otrzymano zaproszenie do ${__VirtualRootHost}</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>Utworzono kopię zapasową portalu [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1577,7 +1577,7 @@ $TrulyYours</value>
     <value>Migracja danych do ${LetterLogoText} DocSpace została pomyślnie zakończona</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Co nowego na Twoim portalu ${__VirtualRootPath} w ciągu ostatniej godziny</value>
+    <value>Co nowego na Twoim portalu ${__VirtualRootHost} w ciągu ostatniej godziny</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Poznaj przydatne integracje dla ${LetterLogoText} DocSpace</value>

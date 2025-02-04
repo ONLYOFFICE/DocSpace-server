@@ -424,7 +424,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Будь ласка, активуйте свою адресу електронної пошти</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} створення резервної копії порталу</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} створення резервної копії порталу</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} допомога пароля</value>
@@ -451,7 +451,7 @@ $TrulyYours</value>
     <value>Повідомлення користувача для адміністраторів</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Запрошення приєднатись до порталу ${__VirtualRootPath}</value>
+    <value>Запрошення приєднатись до порталу ${__VirtualRootHost}</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}.Інша помилка переміщення регіонального порталу</value>
@@ -463,19 +463,19 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Інше переміщенні регіонального порталу успішно завершено</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Деактивація  ${__VirtualRootPath} порталу</value>
+    <value>Деактивація ${__VirtualRootHost} порталу</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Видалення порталу ${__VirtualRootPath}</value>
+    <value>Видалення порталу ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Зміна адреси порталу</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Вимкнення облікового запису на "${__VirtualRootPath}":"${__VirtualRootPath}"</value>
+    <value>Вимкнення облікового запису на ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Ваш профіль у ${__VirtualRootPath} змінено</value>
+    <value>Ваш профіль у ${__VirtualRootHost} змінено</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Запит ліцензії підприємства</value>
@@ -490,7 +490,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Відновлення розпочалося</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} повідомлення про зміну профілю порталу</value>
+    <value>${__VirtualRootHost} повідомлення про зміну профілю порталу</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Тестове повідомлення SMTP</value>
@@ -913,7 +913,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Що нового на вашому порталі ${__VirtualRootPath} для $Date</value>
+    <value>Що нового на вашому порталі ${__VirtualRootHost} для $Date</value>
   </data>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Прийняти</value>
@@ -1051,13 +1051,13 @@ $TrulyYours</value>
     <value>Відкрийте для себе бізнес-підписку на ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Приєднайтеся до ${__VirtualRootPath}</value>
+    <value>Приєднайтеся до ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Приєднайтеся до ${__VirtualRootPath}</value>
+    <value>Приєднайтеся до ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Приєднайтеся до ${__VirtualRootPath}</value>
+    <value>Приєднайтеся до ${__VirtualRootHost}</value>
   </data>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Запит відділу продажів</value>
@@ -1099,7 +1099,7 @@ $TrulyYours</value>
     <value>Відкрийте для себе бізнес-підписку на ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Приєднайтеся до ${__VirtualRootPath}</value>
+    <value>Приєднайтеся до ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Пільговий період для вашого ${LetterLogoText} DocSpace активовано</value>
@@ -1132,7 +1132,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Процес шифрування завершено</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Вас запросили приєднатися до ${__VirtualRootPath}</value>
+    <value>Вас запросили приєднатися до ${__VirtualRootHost}</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>Створено резервну копію порталу [${__VirtualRootPath}](${__VirtualRootPath}) 
@@ -1592,7 +1592,7 @@ $TrulyYours</value>
     <value>Перенесення даних до ${LetterLogoText} DocSpace успішно виконано</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Що нового на вашому порталі ${__VirtualRootPath} за останню годину</value>
+    <value>Що нового на вашому порталі ${__VirtualRootHost} за останню годину</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Дізнайтеся про корисні інтеграції для ${LetterLogoText} DocSpace</value>

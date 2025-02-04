@@ -812,7 +812,7 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
     <value>${LetterLogoText}. E-poçt ünvanınızı aktiv edin</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} portal yedəkləməsi yaradıldı</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} portal yedəkləməsi yaradıldı</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>E-poçtunuzun dəyişdirilməsini təsdiq edin</value>
@@ -830,19 +830,19 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
     <value>${LetterLogoText}. Portal sahibinin dəyişdirilməsi</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>${__VirtualRootPath}-a qoşulun</value>
+    <value>${__VirtualRootHost}-a qoşulun</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace-ə xoş gəlmisiniz!</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>${__VirtualRootPath}-a qoşulun</value>
+    <value>${__VirtualRootHost}-a qoşulun</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>İnzibatçılara istifadəçi mesajı</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>${__VirtualRootPath} portalına qoşulmağa dəvət</value>
+    <value>${__VirtualRootHost} portalına qoşulmağa dəvət</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Poçt qutusunun yaradılması</value>
@@ -860,28 +860,28 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
     <value>${LetterLogoText}. Portalın başqa bölgəyə köçürülməsi uğurla tamamlandı</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>${__VirtualRootPath}-a qoşulun</value>
+    <value>${__VirtualRootHost}-a qoşulun</value>
   </data>
   <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace-ə xoş gəlmisiniz!</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>${__VirtualRootPath} portalının deaktiv edilməsi</value>
+    <value>${__VirtualRootHost} portalının deaktiv edilməsi</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} portalının silinməsi</value>
+    <value>${__VirtualRootHost} portalının silinməsi</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Portal ünvanının dəyişdirilməsi</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} portalında profilinizin silinməsi</value>
+    <value>${__VirtualRootHost} portalında profilinizin silinməsi</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>İstifadəçi öz profilini silib</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} ünvanındakı profiliniz dəyişdirilib</value>
+    <value>${__VirtualRootHost} ünvanındakı profiliniz dəyişdirilib</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. İstifadəçi məlumatlarının ötürülməsi tamamlandı</value>
@@ -908,13 +908,13 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
     <value>${LetterLogoText}. Bərpa prosesi başladıldı</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>${__VirtualRootPath}-a qoşulun</value>
+    <value>${__VirtualRootHost}-a qoşulun</value>
   </data>
   <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace-ə xoş gəlmisiniz!</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} portalının profilinin dəyişdirilməsi ilə bağlı bildiriş</value>
+    <value>${__VirtualRootHost} portalının profilinin dəyişdirilməsi ilə bağlı bildiriş</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP test mesajı</value>
@@ -941,7 +941,7 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
     <value>${LetterLogoText} portalına yeni istifadəçi əlavə edildi</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Siz ${__VirtualRootPath} proqramına qoşulmağa dəvət olundunuz</value>
+    <value>Siz ${__VirtualRootHost} proqramına qoşulmağa dəvət olundunuz</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; yeni sənəd yaradıldı: &lt;a href={1}&gt;{2}&lt;/a&gt; otaqda: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
@@ -1583,7 +1583,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace-ə məlumat köçürməsi uğurla tamamlandı</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>${__VirtualRootPath} portalınızda son bir saatda nə yenilik var</value>
+    <value>${__VirtualRootHost} portalınızda son bir saatda nə yenilik var</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace üçün faydalı inteqrasiyaları kəşf edin</value>
@@ -1595,7 +1595,7 @@ $TrulyYours</value>
     <value>Siz ${LetterLogoText} DocSpace otağına dəvətlisiniz</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>$Date üçün ${__VirtualRootPath} portalınızda yeniliklər</value>
+    <value>$Date üçün ${__VirtualRootHost} portalınızda yeniliklər</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>İndi alın</value>

@@ -244,7 +244,7 @@
     <value>${LetterLogoText}: Խնդրում ենք ակտիվացնել ձեր էլ. հասցեն</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}: Ստեղծվել է ${__VirtualRootPath} պորտալի կրկնօրինակում</value>
+    <value>${LetterLogoText}: Ստեղծվել է ${__VirtualRootHost} պորտալի կրկնօրինակում</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Հաստատեք ձեր էլ.փոստի փոփոխությունը</value>
@@ -322,7 +322,7 @@
     <value>Բացահայտեք ${LetterLogoText} DocSpace-ի բիզնես բաժանորդագրությունը</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Միացեք ${__VirtualRootPath}-ին</value>
+    <value>Միացեք ${__VirtualRootHost}-ին</value>
   </data>
   <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
     <value>Միացեք ${LetterLogoText} DocSpace-ին</value>
@@ -343,13 +343,13 @@
     <value>Միացեք ${LetterLogoText} DocSpace-ին</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Միացեք ${__VirtualRootPath}-ին</value>
+    <value>Միացեք ${__VirtualRootHost}-ին</value>
   </data>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Վաճառքի բաժնի հարցում</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>${__VirtualRootPath} պորտալին միանալու հրավեր</value>
+    <value>${__VirtualRootHost} պորտալին միանալու հրավեր</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}: Փոստարկղի ստեղծում</value>
@@ -367,13 +367,13 @@
     <value>${LetterLogoText}: Մեկ այլ տարածաշրջանային պորտալի միգրացիա հաջողությամբ ավարտվեց</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Միացեք ${__VirtualRootPath}-ին</value>
+    <value>Միացեք ${__VirtualRootHost}-ին</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>${__VirtualRootPath} պորտալի ապաակտիվացում</value>
+    <value>${__VirtualRootHost} պորտալի ապաակտիվացում</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} պորտալի ջնջում</value>
+    <value>${__VirtualRootHost} պորտալի ջնջում</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace-ն ապաակտիվացված է</value>
@@ -382,13 +382,13 @@
     <value>${LetterLogoText}: Պորտալի հասցեի փոփոխություն</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Հաշվի անջատումը միացված է ${__VirtualRootPath}</value>
+    <value>Հաշվի անջատումը միացված է ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Օգտատերը ջնջել է իր պրոֆիլը</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Ձեր պրոֆիլը ${__VirtualRootPath}-ում փոխվել է</value>
+    <value>Ձեր պրոֆիլը ${__VirtualRootHost}-ում փոխվել է</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}: Օգտատիրոջ տվյալների վերաբաշխումն ավարտված է</value>
@@ -421,7 +421,7 @@
     <value>Ձեր ${LetterLogoText} DocSpace-ը կջնջվի</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Միացեք ${__VirtualRootPath}-ին</value>
+    <value>Միացեք ${__VirtualRootHost}-ին</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} DocSpace-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
@@ -436,10 +436,10 @@
     <value>Ձեր ${LetterLogoText} DocSpace-ի արտոնյալ ժամկետը լրանում է վաղը</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} պորտալի պրոֆիլի փոփոխության ծանուցում</value>
+    <value>${__VirtualRootHost} պորտալի պրոֆիլի փոփոխության ծանուցում</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Ինչ նորություններ կան ձեր ${__VirtualRootPath} պորտալում $Date-ի համար</value>
+    <value>Ինչ նորություններ կան ձեր ${__VirtualRootHost} պորտալում $Date-ի համար</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP թեստային հաղորդագրություն</value>
@@ -466,7 +466,7 @@
     <value>որ օգտվող է ավելացվել ${LetterLogoText} պորտալում</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Դուք հրավիրված եք միանալու ${__VirtualRootPath}-ին</value>
+    <value>Դուք հրավիրված եք միանալու ${__VirtualRootHost}-ին</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1. Ակտիվացրեք ձեր էլ.փոստը "${__VirtualRootPath}":"$InviteLink" պորտալի համար:
@@ -1646,7 +1646,7 @@ $TrulyYours</value>
     <value>Տվյալների տեղափոխումը ${LetterLogoText} DocSpace հաջողությամբ ավարտվեց</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Ինչ նորություն կա ձեր ${__VirtualRootPath} պորտալում վերջին մեկ ժամվա ընթացքում</value>
+    <value>Ինչ նորություն կա ձեր ${__VirtualRootHost} պորտալում վերջին մեկ ժամվա ընթացքում</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Ուսումնասիրեք օգտակար ինտեգրումները ${LetterLogoText} DocSpace-ի համար</value>

@@ -247,7 +247,7 @@
     <value>${LetterLogoText}. يرجى تفعيل عنوان بريدك الإلكتروني</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} تم إنشاء النسخ الاحتياطي للبوابة الإلكترونية</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} تم إنشاء النسخ الاحتياطي للبوابة الإلكترونية</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>تأكيد تغيير بريدك الإلكتروني</value>
@@ -325,13 +325,13 @@
     <value>اكتشف اشتراك الأعمال في ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>انضم إلى ${__VirtualRootPath}</value>
+    <value>انضم إلى ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>انضم إلى ${__VirtualRootPath}</value>
+    <value>انضم إلى ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>انضم إلى ${__VirtualRootPath}</value>
+    <value>انضم إلى ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
     <value>انضم إلى ${LetterLogoText} DocSpace</value>
@@ -358,7 +358,7 @@
     <value>طلب قسم المبيعات</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>دعوة للانضمام إلى بوابة ${__VirtualRootPath}</value>
+    <value>دعوة للانضمام إلى بوابة ${__VirtualRootHost}</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. إنشاء صندوق البريد</value>
@@ -376,10 +376,10 @@
     <value>${LetterLogoText}. اكتمل ترحيل بوابة منطقة أخرى بنجاح</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>إلغاء تنشيط بوابة ${__VirtualRootPath}</value>
+    <value>إلغاء تنشيط بوابة ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>حذف مدخل ${__VirtualRootPath}</value>
+    <value>حذف مدخل ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>تم إلغاء تنشيط ${LetterLogoText} DocSpace</value>
@@ -388,13 +388,13 @@
     <value>${LetterLogoText}.تغيير عنوان البوابة الإلكترونية</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>حذف ملف التعريف الخاص بك من بوابة ${__VirtualRootPath}</value>
+    <value>حذف ملف التعريف الخاص بك من بوابة ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>قام المستخدم بحذف ملفه الشخصي</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>تم تغيير ملف التعريف الخاص بك في ${__VirtualRootPath}</value>
+    <value>تم تغيير ملف التعريف الخاص بك في ${__VirtualRootHost}</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. اكتملت إعادة تعيين بيانات المستخدم</value>
@@ -427,7 +427,7 @@
     <value>سيتم حذف مساحة DocSpace الخاصة بك</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>انضم إلى ${__VirtualRootPath}</value>
+    <value>انضم إلى ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>فترة السماح ل ${LetterLogoText} DocSpace الخاص بك تنشيط</value>
@@ -442,10 +442,10 @@
     <value>فترة السماح ل ${LetterLogoText} DocSpace الخاص بك تنتهي غدا</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} إشعار تغيير ملف تعريف البوابة الإلكترونية</value>
+    <value>${__VirtualRootHost} إشعار تغيير ملف تعريف البوابة الإلكترونية</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>ما الجديد في بوابة ${__VirtualRootPath} في $Date</value>
+    <value>ما الجديد في بوابة ${__VirtualRootHost} في $Date</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>رسالة اختبار SMTP</value>
@@ -472,7 +472,7 @@
     <value>تمت إضافة مستخدم جديد إلى بوابة ${LetterLogoText}</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>أنت مدعو للانضمام ${__VirtualRootPath}</value>
+    <value>أنت مدعو للانضمام ${__VirtualRootHost}</value>
   </data>
   <data name="pattern_storage_encryption_success" xml:space="preserve">
     <value>مرحبا $UserName!
@@ -1730,7 +1730,7 @@ $TrulyYours</value>
     <value>تم إكمال ترحيل البيانات بنجاح إلى ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>ما الجديد في بوابتك ${__VirtualRootPath} خلال الساعة الأخيرة</value>
+    <value>ما الجديد في بوابتك ${__VirtualRootHost} خلال الساعة الأخيرة</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>اكتشف عمليات التكامل المفيدة لـ ${LetterLogoText} DocSpace</value>

@@ -420,7 +420,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Activeer aub uw email adres</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootPath} Portaal Backup gecreërd</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} Portaal Backup gecreërd</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} wachtwoord assistentie</value>
@@ -447,7 +447,7 @@ $TrulyYours</value>
     <value>Gebruikersbericht aan beheerders</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>Uitnodiging om u aan te sluiten bij het ${__VirtualRootPath} portaal</value>
+    <value>Uitnodiging om u aan te sluiten bij het ${__VirtualRootHost} portaal</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Andere regio Portaal migratiefout</value>
@@ -459,19 +459,19 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Andere regio Portaal migratie succesvol afgerond</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Deactiveren van het ${__VirtualRootPath} portaal</value>
+    <value>Deactiveren van het ${__VirtualRootHost} portaal</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>Verwijdering van het ${__VirtualRootPath} portaal</value>
+    <value>Verwijdering van het ${__VirtualRootHost} portaal</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Verandering van Portaal adres</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Account deactiveren op ${__VirtualRootPath}</value>
+    <value>Account deactiveren op ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>Uw profiel op ${__VirtualRootPath} is gewijzigd</value>
+    <value>Uw profiel op ${__VirtualRootHost} is gewijzigd</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Enterprise licentieverzoek</value>
@@ -486,7 +486,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Herstel gestart</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} portaal profiel wijzigings notificatie</value>
+    <value>${__VirtualRootHost} portaal profiel wijzigings notificatie</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP testbericht</value>
@@ -915,7 +915,7 @@ Nadat u op de uitnodigingslink hebt geklikt, stelt u een nieuw wachtwoord in voo
 $TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Wat is er nieuw op uw portaal ${__VirtualRootPath} voor $Date</value>
+    <value>Wat is er nieuw op uw portaal ${__VirtualRootHost} voor $Date</value>
   </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Welkom bij ${LetterLogoText} DocSpace!</value>
@@ -1419,13 +1419,13 @@ De link is slechts 7 dagen geldig.</value>
     <value>${LetterLogoText}. Beveiligingsmelding</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Aanmelden bij ${__VirtualRootPath}</value>
+    <value>Aanmelden bij ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Aanmelden bij ${__VirtualRootPath}</value>
+    <value>Aanmelden bij ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Aanmelden bij ${__VirtualRootPath}</value>
+    <value>Aanmelden bij ${__VirtualRootHost}</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Mailbox aanmaken</value>
@@ -1449,7 +1449,7 @@ De link is slechts 7 dagen geldig.</value>
     <value>${LetterLogoText}. Verwijdering gebruikersgegevens mislukt</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Aanmelden bij ${__VirtualRootPath}</value>
+    <value>Aanmelden bij ${__VirtualRootHost}</value>
   </data>
   <data name="subject_storage_decryption_error" xml:space="preserve">
     <value>${LetterLogoText}. Decryptieproces is mislukt</value>
@@ -1470,7 +1470,7 @@ De link is slechts 7 dagen geldig.</value>
     <value>${LetterLogoText}. Encryptieproces is afgerond</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>U bent uitgenodigd om lid te worden van ${__VirtualRootPath}</value>
+    <value>U bent uitgenodigd om lid te worden van ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
     <value>Krijg ${LetterLogoText} DocSpace onder de knie met videogidsen</value>
@@ -1587,7 +1587,7 @@ $TrulyYours</value>
     <value>Migratie van gegevens naar ${LetterLogoText} DocSpace succesvol afgerond</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Wat is er nieuw op uw portaal ${__VirtualRootPath} gedurende het laatste uur</value>
+    <value>Wat is er nieuw op uw portaal ${__VirtualRootHost} gedurende het laatste uur</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Ontdek handige integraties voor ${LetterLogoText} DocSpace</value>

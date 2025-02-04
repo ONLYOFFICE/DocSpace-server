@@ -460,7 +460,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Lütfen e-posta adresinizi etkinleştirin</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
-    <value>${LetterLogoText}.${__VirtualRootPath} portal yedeklemesi oluşturuldu</value>
+    <value>${LetterLogoText}. ${__VirtualRootHost} portal yedeklemesi oluşturuldu</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>E-postanızı değiştirmeyi onaylayın</value>
@@ -490,7 +490,7 @@ $TrulyYours</value>
     <value>Yöneticilere kullanıcı mesajı</value>
   </data>
   <data name="subject_join" xml:space="preserve">
-    <value>${__VirtualRootPath} portalına davet edildiniz</value>
+    <value>${__VirtualRootHost} portalına davet edildiniz</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Başka bir bölgeye portal taşıma hatası</value>
@@ -502,19 +502,19 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Başka bir bölgeye portal taşıma başarıyla tamamlandı</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>${__VirtualRootPath} portal deaktivasyonu</value>
+    <value>${__VirtualRootHost} portal deaktivasyonu</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} portalı silinmesi</value>
+    <value>${__VirtualRootHost} portalı silinmesi</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Portal adres değişikliği</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} üzerindeki hesap devre dışı bırakılıyor</value>
+    <value>${__VirtualRootHost} üzerindeki hesap devre dışı bırakılıyor</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} profiliniz değiştirildi</value>
+    <value>${__VirtualRootHost} profiliniz değiştirildi</value>
   </data>
   <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. Kullanıcı verisi yeniden atama tamamlandı</value>
@@ -532,7 +532,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Geri yükleme başlatıldı</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__VirtualRootPath} portal profili değişiklik bildirimi</value>
+    <value>${__VirtualRootHost} portal profili değişiklik bildirimi</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP test mesajı</value>
@@ -961,7 +961,7 @@ Davet bağlantısına tıkladıktan sonra lütfen hesabınız için yeni bir şi
 $TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>${__VirtualRootPath} için $Date tarihinde portalınızda ne yenilikler var?</value>
+    <value>${__VirtualRootHost} için $Date tarihinde portalınızda ne yenilikler var?</value>
   </data>
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Parolanızı değiştirmeyi onaylayın</value>
@@ -1406,13 +1406,13 @@ Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
     <value>${LetterLogoText}. Posta kutusu şifresi değiştirme</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Şimdi katılın ${__VirtualRootPath}</value>
+    <value>Şimdi katılın ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Şimdi katılın ${__VirtualRootPath}</value>
+    <value>Şimdi katılın ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Şimdi katılın ${__VirtualRootPath}</value>
+    <value>Şimdi katılın ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace devre dışı bırakıldı</value>
@@ -1436,7 +1436,7 @@ Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
     <value>${LetterLogoText} DocSpace’iniz silinecektir</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Şimdi katılın ${__VirtualRootPath}</value>
+    <value>Şimdi katılın ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>${LetterLogoText} DocSpace’iniz için ödemesiz süre başlatılmıştır</value>
@@ -1472,7 +1472,7 @@ Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
     <value>Davetlisiniz: ${__VirtualRootPath}</value>
   </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
-    <value>Video kılavuzlarıyla ${LetterLogoText} DocSpace'de ustalaşın</value>
+    <value>Video kılavuzlarıyla ${__VirtualRootHost} DocSpace'de ustalaşın</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Saygılarımızla, ${LetterLogoText} Ekibi</value>
@@ -1523,7 +1523,7 @@ Mevcut tarife planınız STARTUP'tır. Tamamen ücretsizdir ve şunları içerme
 $TrulyYours</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Son bir saat içinde ${__VirtualRootPath} portalınızdaki yenilikler</value>
+    <value>Son bir saat içinde ${__VirtualRootHost} portalınızdaki yenilikler</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace için faydalı entegrasyonları keşfedin</value>
