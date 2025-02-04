@@ -57,6 +57,9 @@ public class FilesSettings : ISettings<FilesSettings>
     [JsonPropertyName("HideConfirmConvertOpen")]
     public bool HideConfirmConvertOpenSetting { get; set; }
 
+    [JsonPropertyName("HideConfirmRoomLifetime")]
+    public bool HideConfirmRoomLifetimeSetting { get; set; }
+
     [JsonPropertyName("Forcesave")]
     public bool ForcesaveSetting { get; set; }
 
@@ -102,6 +105,7 @@ public class FilesSettings : ISettings<FilesSettings>
             DefaultSortedAscSetting = false,
             HideConfirmConvertSaveSetting = false,
             HideConfirmConvertOpenSetting = false,
+            HideConfirmRoomLifetimeSetting = false,
             ForcesaveSetting = true,
             StoreForcesaveSetting = false,
             HideRecentSetting = false,
@@ -290,7 +294,22 @@ public class FilesSettingsHelper(
 
         return true;
     }
-    
+
+    public async Task<bool> GetHideConfirmRoomLifetime() => (await LoadForCurrentUser()).HideConfirmRoomLifetimeSetting;
+
+    public async Task<bool> SetHideConfirmRoomLifetime(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+
+        if (setting.HideConfirmRoomLifetimeSetting != value)
+        {
+            setting.HideConfirmRoomLifetimeSetting = value;
+            await SaveForCurrentUser(setting);
+        }
+
+        return setting.HideConfirmRoomLifetimeSetting;
+    }
+
     public async Task<OrderBy> GetDefaultOrder()
     {
         var setting = await LoadForCurrentUser();

@@ -44,7 +44,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <path>api/2.0/settings/customnavigation/getall</path>
     /// <collection>list</collection>
     [Tags("Settings / Custom Navigation")]
-    [SwaggerResponse(200, "List of the custom navigation items", typeof(CustomNavigationItem))]
+    [SwaggerResponse(200, "List of the custom navigation items", typeof(List<CustomNavigationItem>))]
     [HttpGet("getall")]
     public async Task<List<CustomNavigationItem>> GetCustomNavigationItemsAsync()
     {

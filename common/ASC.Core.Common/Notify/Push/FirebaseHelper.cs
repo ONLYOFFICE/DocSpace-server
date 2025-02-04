@@ -59,17 +59,9 @@ public class FirebaseHelper(AuthContext authContext,
 
         var user = await _userManager.GetUserByUserNameAsync(msg.Reciever);
 
-        if (!Guid.TryParse(msg.ProductID, out var productID))
-        {
-            return;
-        }
-
         var fireBaseUser = new List<FireBaseUser>();
 
-        if (productID == new Guid("{E67BE73D-F9AE-4ce1-8FEC-1880CB518CB4}")) //documents product
-        {
-            fireBaseUser = await firebaseDao.GetUserDeviceTokensAsync(user.Id, msg.TenantId, PushConstants.PushDocAppName);
-        }
+        fireBaseUser = await firebaseDao.GetUserDeviceTokensAsync(user.Id, msg.TenantId, PushConstants.PushDocAppName);
 
         foreach (var fb in fireBaseUser.Where(fb => fb.IsSubscribed is true))
         {

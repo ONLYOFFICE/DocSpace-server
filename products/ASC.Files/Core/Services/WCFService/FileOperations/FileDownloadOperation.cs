@@ -289,7 +289,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         if (convertible && await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
         {
-            _files[file.Id] = (FileUtility.WatermarkedDocumentExt, _files[file.Id].Item2);
+            _files[file.Id] = (FileUtility.WatermarkedDocumentExt, _files.TryGetValue(file.Id, out var value) ? value.Item2 : default);
         }
 
         if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt.Item1))

@@ -178,9 +178,6 @@ $Message</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpace нотификација. Споменуто у документу</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Споменуто у документу</value>
-  </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Документи. Слање је завршено.</value>
   </data>

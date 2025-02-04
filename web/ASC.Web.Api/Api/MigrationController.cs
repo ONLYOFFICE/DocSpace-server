@@ -42,7 +42,7 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/list</path>
     [Tags("Migration")]
-    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(200, "Ok", typeof(string[]))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("list")]
     public async Task<string[]> List()

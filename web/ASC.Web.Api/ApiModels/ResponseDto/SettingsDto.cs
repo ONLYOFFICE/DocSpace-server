@@ -261,4 +261,9 @@ public class SettingsDto
     /// Max image upload size
     /// </summary>
     public long MaxImageUploadSize { get; set; }
+
+    /// <summary>
+    /// White label logo text
+    /// </summary>
+    public string LogoText { get; set; }
 }

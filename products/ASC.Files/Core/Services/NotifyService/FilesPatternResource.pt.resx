@@ -129,9 +129,6 @@ $__AuthorName eliminou a sala: $RoomTitle</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Estado da assinatura alterado</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Mencionado(a) no documento</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>O envio foi concluído.</value>
   </data>
