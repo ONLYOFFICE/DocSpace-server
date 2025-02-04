@@ -569,7 +569,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         result.CanFill = true;
         result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
         result.Draft = formDraft;
-        result.FillingSessionId = $"{file.Id}_{securityContext.CurrentAccount.ID}";
+        result.FillingSessionId = $"{formDraft.Id}_{securityContext.CurrentAccount.ID}";
 
         return result;
     }
@@ -607,7 +607,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, securityContext.CurrentAccount.ID);
         var myRoles = await roles.ToListAsync();
 
-        if (currentStep == 0 || !myRoles.Any())
+        if (currentStep == 0)
+        {
+            return result;
+        }
+        else if(!myRoles.Any())
         {
             result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
             return result;
