@@ -583,7 +583,7 @@ public class DiscDataStore(TempStream tempStream,
         var dir = GetTarget("", "");
         if (!string.IsNullOrEmpty(targetDir) && !targetDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
         {
-            return targetDir[dir.Length..].Trim('\\');
+            return targetDir[dir.Length..].Trim('\\').Trim('/');
         }
         return string.Empty;
     }

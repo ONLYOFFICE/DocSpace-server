@@ -64,7 +64,6 @@ public class BackupPortalTask(
     public override async Task RunJob()
     {
         logger.DebugBeginBackup(TenantId);
-        await tenantManager.SetCurrentTenantAsync(TenantId);
 
         await using (WriteOperator)
         {

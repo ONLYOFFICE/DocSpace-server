@@ -135,25 +135,28 @@ public static class SubscriptionMethodExtension
     {
         modelBuilder.Entity<DbSubscriptionMethod>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient })
-                .HasName("core_subscriptionmethod_pkey");
+            entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient });
 
-            entity.ToTable("core_subscriptionmethod", "onlyoffice");
+            entity.ToTable("core_subscriptionmethod");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Source)
-                .HasColumnName("source");
+                .HasColumnName("source")
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Action)
-                .HasColumnName("action");
+                .HasColumnName("action")
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Recipient)
-                .HasColumnName("recipient");
+                .HasColumnName("recipient")
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Sender)
                 .IsRequired()
-                .HasColumnName("sender");
+                .HasColumnName("sender")
+                .HasColumnType("varchar");
         });
     }
 }

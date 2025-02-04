@@ -108,40 +108,52 @@ public static class WebhooksConfigExtension
     {
         modelBuilder.Entity<WebhooksConfig>(entity =>
         {
-            entity.HasKey(e => new { e.Id })
-                .HasName("PRIMARY");
+            // Defining the primary key.
+            entity.HasKey(e => e.Id)
+                .HasName("webhooks_config_pkey");
 
+            // Index on TenantId for better performance on queries related to tenant IDs.
+            entity.HasIndex(e => e.TenantId)
+                .HasDatabaseName("idx_webhooks_config_tenant_id");
+
+            // Mapping table name for PostgreSQL.
             entity.ToTable("webhooks_config");
 
-            entity.HasIndex(e => e.TenantId)
-                    .HasDatabaseName("tenant_id");
+            // Configuring the properties.
 
             entity.Property(e => e.Id)
-                .HasColumnType("int")
-                .HasColumnName("id");
+                .HasColumnName("id")
+                .HasColumnType("integer");
 
             entity.Property(e => e.TenantId)
-                 .HasColumnName("tenant_id");
+                .HasColumnName("tenant_id")
+                .HasColumnType("integer");
 
             entity.Property(e => e.Uri)
                 .HasColumnName("uri")
-                .HasDefaultValueSql("''");
+                .IsRequired(false) // Uri can be null
+                .HasColumnType("text");
 
             entity.Property(e => e.SecretKey)
                 .HasColumnName("secret_key")
-                .HasDefaultValueSql("''");
+                .HasDefaultValueSql("''") // Empty string as default value
+                .HasColumnType("text");
 
             entity.Property(e => e.Name)
                 .HasColumnName("name")
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasColumnType("character varying");
 
             entity.Property(e => e.Enabled)
                 .HasColumnName("enabled")
-                .HasDefaultValueSql("true");
+                .HasDefaultValueSql("true") // true as the default value
+                .HasColumnType("boolean");
 
             entity.Property(e => e.SSL)
                 .HasColumnName("ssl")
-                .HasDefaultValueSql("true");
+                .HasDefaultValueSql("true") // true as the default value
+                .HasColumnType("boolean");
         });
     }
 }

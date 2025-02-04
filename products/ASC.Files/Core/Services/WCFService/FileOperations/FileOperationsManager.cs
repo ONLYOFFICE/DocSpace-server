@@ -27,13 +27,25 @@
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Singleton]
-public class FileOperationsManagerHolder(
-    IDistributedTaskQueueFactory queueFactory, 
-    IServiceProvider serviceProvider)
+public class FileOperationsManagerHolder
 {
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
-    private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly IDistributedTaskQueueFactory _queueFactory;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly DistributedTaskQueue _tasks;
 
+    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
+
+    public FileOperationsManagerHolder(
+        IDistributedTaskQueueFactory queueFactory,
+        IServiceProvider serviceProvider,
+        NotifyConfiguration notifyConfiguration)
+    {
+        _queueFactory = queueFactory;
+        _serviceProvider = serviceProvider;
+
+        _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+        notifyConfiguration.Configure();
+    }
     public async Task<List<FileOperationResult>> GetOperationResults(Guid userId)
     {
         var operations = (await _tasks
@@ -103,7 +115,7 @@ public class FileOperationsManagerHolder(
     
     internal T GetService<T>() 
     {
-        return serviceProvider.GetService<T>();
+        return _serviceProvider.GetService<T>();
     }
 }
 

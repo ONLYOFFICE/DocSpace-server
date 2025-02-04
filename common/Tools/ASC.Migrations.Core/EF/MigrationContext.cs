@@ -183,6 +183,16 @@ public class MigrationContext : DbContext
             .AddDbRoomSettings()
             .AddFilesAuditReference()
             .AddIdentity()
+            .AddIdentityCert()
+            .AddIIdentityClient()
+            .AddIdentityClientAllowedOrigin()
+            .AddIdentityClientAuthenticationMethod()
+            .AddIdentityClientRedirectUri()
+            .AddIdentityClientScope()
+            .AddIdentityConsent()
+            .AddIdentityConsentScope()
+            .AddIdentityScope()
+            .AddIdentityShedlock()
             .AddUserRelation()
             .AddDbFunctions();
     }

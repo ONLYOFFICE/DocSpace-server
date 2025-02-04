@@ -79,23 +79,26 @@ public static class DbFilesPropertiesExtension
 
         });
     }
+
     public static void PgSqlDbFilesProperties(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesProperties>(entity =>
         {
             entity.HasKey(e => new { e.TenantId, e.EntryId })
-                .HasName("files_properties_pkey");
+                .HasName("pk_files_properties");
 
-            entity.ToTable("files_properties", "onlyoffice");
+            entity.ToTable("files_properties");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
 
             entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id");
+                .HasColumnName("entry_id")
+                .HasColumnType("varchar(32)");
 
             entity.Property(e => e.Data)
-                .IsRequired()
-                .HasColumnName("data");
+                .HasColumnName("data")
+                .HasColumnType("text");
         });
     }
 }
