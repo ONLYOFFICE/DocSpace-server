@@ -291,6 +291,18 @@ internal abstract class SecurityBaseDao<T>(
             .Where(u => u.FirstName.ToLower().Contains(text) || u.LastName.ToLower().Contains(text) || u.Email.ToLower().Contains(text)).CountAsync();
     }
 
+    public async Task<bool> IsPublicAsync(FileEntry<T> entry)
+    {
+        var entryId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = await GetPureSharesQuery(tenantId, entry, ShareFilterType.Group, filesDbContext);
+
+        return q.Any(q => q.Subject == Constants.GroupEveryone.ID);
+    }
+
     public async Task<int> GetPureSharesCountAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text)
     {
         if (entry == null)
@@ -963,7 +975,7 @@ internal abstract class SecurityBaseDao<T>(
 
         await filesDbContext.SaveChangesAsync();
     }
-    
+
     public async IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects)
     {
         if (subjects == null || !subjects.Any())

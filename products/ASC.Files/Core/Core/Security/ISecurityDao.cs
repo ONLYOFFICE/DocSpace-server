@@ -41,6 +41,7 @@ public interface ISecurityDao<T>
     Task<int> GetPureSharesCountAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text);
     IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset = 0, int count = -1);
     IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects);
+    Task<bool> IsPublicAsync(FileEntry<T> entry);
     IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, int offset = 0, int count = -1);
     Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes);
     IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, int offset, int count);

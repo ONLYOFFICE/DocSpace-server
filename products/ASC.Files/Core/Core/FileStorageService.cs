@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AuditTrail.Types;
+
 namespace ASC.Web.Files.Services.WCFService;
 
 [Scope]
@@ -3280,6 +3282,12 @@ public class FileStorageService //: IFileStorageService
         IEnumerable<T> folderIds)
     {
         return await fileSharing.GetSharedInfoAsync(fileIds, folderIds);
+    }
+
+    public async Task<bool> IsPublicAsync<T>(T entryId)
+    {
+        var entry = await GetEntryAsync(entryId, FileEntryType.Folder);
+        return await fileSharing.IsPublicAsync(entry);
     }
 
     public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, string text, int offset, int count)

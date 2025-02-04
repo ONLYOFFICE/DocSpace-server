@@ -484,6 +484,16 @@ public class FileSharing(
         return await fileSharingHelper.CanSetAccessAsync(entry);
     }
 
+    public async Task<bool> IsPublicAsync<T>(FileEntry<T> entry)
+    {
+        if (entry == null)
+        {
+            throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
+        }
+
+        return await fileSecurity.IsPublicAsync(entry);
+    }
+
     public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(FileEntry<T> entry, IEnumerable<Guid> subjects)
     {
         if (entry == null)

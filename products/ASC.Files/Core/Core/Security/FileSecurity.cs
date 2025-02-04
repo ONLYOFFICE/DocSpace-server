@@ -1829,6 +1829,11 @@ public class FileSecurity(IDaoFactory daoFactory,
         return daoFactory.GetSecurityDao<T>().GetPureSharesAsync(entry, subjects);
     }
 
+    public Task<bool> IsPublicAsync<T>(FileEntry<T> entry)
+    {
+        return daoFactory.GetSecurityDao<T>().IsPublicAsync(entry);
+    }
+
     public IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset = 0, int count = -1)
     {
         return daoFactory.GetSecurityDao<T>().GetPureSharesAsync(entry, filterType, status, text, offset, count);
