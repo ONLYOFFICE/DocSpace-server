@@ -250,11 +250,7 @@ public class NotifyTransferRequest(TenantManager tenantManager,
             new(CommonTags.ImagePath, studioNotifyHelper.GetNotificationImageUrl("").TrimEnd('/'))
         });
 
-        var topGifTag = request.Arguments.Find(x => x.Tag == CommonTags.TopGif);
-        if (topGifTag == null || string.IsNullOrEmpty((string)topGifTag.Value))
-        {
-            await AddLetterLogoAsync(request);
-        }
+        await AddLetterLogoAsync(request);
     }
     public void AfterTransferRequest(NotifyRequest request)
     {
@@ -263,9 +259,24 @@ public class NotifyTransferRequest(TenantManager tenantManager,
 
     private async Task AddLetterLogoAsync(NotifyRequest request)
     {
-
         try
         {
+            var topGifTag = request.Arguments.Find(x => x.Tag == CommonTags.TopGif);
+            if (!string.IsNullOrEmpty((string)topGifTag?.Value))
+            {
+                var currentTenantSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+                if (currentTenantSettings.GetIsDefault(WhiteLabelLogoType.Notification))
+                {
+                    var defaultTenantSettings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+                    if (defaultTenantSettings.GetIsDefault(WhiteLabelLogoType.Notification))
+                    {
+                        return;
+                    }
+                }
+
+                request.Arguments.RemoveAll(x => x.Tag == CommonTags.TopGif);
+            }
+
             var culture = await request.GetCulture(tenantManager, userManager);
             var attachment = await tenantLogoManager.GetMailLogoAsAttachmentAsync(culture);
 
