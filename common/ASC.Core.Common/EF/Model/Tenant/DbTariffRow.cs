@@ -84,26 +84,26 @@ public static class DbTariffRowExtension
     {
         modelBuilder.Entity<DbTariffRow>(entity =>
         {
-            entity.ToTable("tenants_tariffrow", "onlyoffice");
+            entity.ToTable("tenants_tariffrow");
 
             entity.HasKey(e => new { e.TenantId, e.TariffId, e.Quota })
-                .HasName("PRIMARY");
+                .HasName("tenants_tariffrow_pkey");
 
             entity.Property(e => e.TariffId)
                 .HasColumnName("tariff_id")
-                .HasColumnType("int");
+                .HasColumnType("integer");
 
             entity.Property(e => e.Quota)
                 .HasColumnName("quota")
-                .HasColumnType("int");
+                .HasColumnType("integer");
 
             entity.Property(e => e.Quantity)
                 .HasColumnName("quantity")
-                .HasColumnType("int");
+                .HasColumnType("integer");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant")
-                .HasColumnType("int");
+                .HasColumnType("integer");
         });
     }
 }

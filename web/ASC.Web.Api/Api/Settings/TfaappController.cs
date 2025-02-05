@@ -59,7 +59,7 @@ public class TfaappController(
     ///<path>api/2.0/settings/tfaapp</path>
     ///<collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "TFA settings", typeof(TfaSettingsDto))]
+    [SwaggerResponse(200, "TFA settings", typeof(IEnumerable<TfaSettingsDto>))]
     [HttpGet("tfaapp")]
     public async Task<IEnumerable<TfaSettingsDto>> GetTfaSettingsAsync()
     {
@@ -319,7 +319,7 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "List of TFA application codes", typeof(object))]
+    [SwaggerResponse(200, "List of TFA application codes", typeof(IEnumerable<object>))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaappcodes")]
     public async Task<IEnumerable<object>> TfaAppGetCodesAsync()
@@ -348,7 +348,7 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappnewcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "New backup codes", typeof(object))]
+    [SwaggerResponse(200, "New backup codes", typeof(IEnumerable<object>))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewcodes")]
     public async Task<IEnumerable<object>> TfaAppRequestNewCodesAsync()
