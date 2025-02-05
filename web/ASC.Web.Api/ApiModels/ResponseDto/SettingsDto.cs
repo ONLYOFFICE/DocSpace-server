@@ -223,6 +223,11 @@ public class SettingsDto
     public long MaxImageUploadSize { get; set; }
 
     /// <summary>
+    /// White label logo text
+    /// </summary>
+    public string LogoText { get; set; }
+
+    /// <summary>
     /// External resources
     /// </summary>
     public CultureSpecificExternalResources ExternalResources { get; set; }

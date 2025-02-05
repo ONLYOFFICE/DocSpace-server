@@ -59,6 +59,7 @@ public partial class SettingsController(MessageService messageService,
         UserInvitationLimitHelper userInvitationLimitHelper,
         QuotaUsageManager quotaUsageManager,
         TenantDomainValidator tenantDomainValidator,
+        TenantLogoManager tenantLogoManager,
         ExternalShare externalShare,
         IMapper mapper,
         UserFormatter userFormatter,
@@ -112,6 +113,7 @@ public partial class SettingsController(MessageService messageService,
                 Url = configuration["deeplink:url"] ?? "",
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
             },
+            LogoText = await tenantLogoManager.GetLogoTextAsync(),
             ExternalResources = externalResourceSettings.GetCultureSpecificExternalResources(whiteLabelSettings: additionalWhiteLabelSettings)
         };
 

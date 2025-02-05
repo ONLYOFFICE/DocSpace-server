@@ -51,6 +51,9 @@ public class FilesSettings : ISettings<FilesSettings>
     [JsonPropertyName("DefaultSortedAsc")]
     public bool DefaultSortedAscSetting { get; set; }
 
+    [JsonPropertyName("HideConfirmCancelOperation")]
+    public bool HideConfirmCancelOperationSetting { get; set; }
+
     [JsonPropertyName("HideConfirmConvertSave")]
     public bool HideConfirmConvertSaveSetting { get; set; }
 
@@ -263,6 +266,21 @@ public class FilesSettingsHelper(
         await SaveForCurrentUser(setting);
     }
 
+    public async Task<bool> GetHideConfirmCancelOperation() => (await LoadForCurrentUser()).HideConfirmCancelOperationSetting;
+
+    public async Task<bool> SetHideConfirmCancelOperation(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+
+        if (setting.HideConfirmCancelOperationSetting != value)
+        {
+            setting.HideConfirmCancelOperationSetting = value;
+            await SaveForCurrentUser(setting);
+        }
+
+        return setting.HideConfirmCancelOperationSetting;
+    }
+    
     public async Task<bool> GetHideConfirmConvertSave() => (await LoadForCurrentUser()).HideConfirmConvertSaveSetting;
 
     private async Task SetHideConfirmConvertSave(bool value)

@@ -24,31 +24,33 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Notify.Senders;
+namespace ASC.Files.Core.Services.NotifyService;
 
-[Singleton]
-public class PushSender(ILogger<PushSender> logger, IServiceProvider serviceProvider) : INotifySender
+[Singleton(GenericArguments = [typeof(int)])]
+[Singleton(GenericArguments = [typeof(string)])]
+public class PushNotificationService<T>(
+    IServiceScopeFactory serviceScopeFactory,
+    ILogger<PushNotificationService<T>> logger)
+    : ActivePassiveBackgroundService<PushNotificationService<T>>(logger, serviceScopeFactory)
 {
-    public void Init(IDictionary<string, string> properties) { }
+    private readonly IServiceScopeFactory _scopeFactory = serviceScopeFactory;
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse("0:0:30");
 
-    public async Task<NoticeSendResult> SendAsync(NotifyMessage m)
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        if (!string.IsNullOrEmpty(m.Content))
-        {
-            m.Content = m.Content.Replace("\r\n", "\n").Trim('\n', '\r', ' ');
-            m.Content = Regex.Replace(m.Content, "\n{3,}", "\n\n");
-        }
         try
         {
-            using var scope = serviceProvider.CreateScope();
-            var firebaseHelper = scope.ServiceProvider.GetService<FirebaseHelper>();
-            await firebaseHelper.SendMessageAsync(m);
-            return NoticeSendResult.OK;
+            using var scope = _scopeFactory.CreateScope();
+            var roomNotifyEventQueue = scope.ServiceProvider.GetRequiredService<INotifyQueueManager<T>>();
+            var queues = roomNotifyEventQueue.GetQueues();
+            foreach (var queue in queues)
+            {
+               await queue.Value.ProcessQueueAsync();
+            }
         }
         catch (Exception e)
         {
-            logger.ErrorUnexpected(e);
-            return NoticeSendResult.SendingImpossible;
+            logger.ErrorWithException(e);
         }
     }
 }
