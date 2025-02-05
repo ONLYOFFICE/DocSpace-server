@@ -32,6 +32,7 @@ namespace ASC.Web.Studio.Core.Notify;
 public class StudioPeriodicNotify(ILoggerProvider log,
         WorkContext workContext,
         TenantManager tenantManager,
+        TenantLogoManager tenantLogoManager,
         UserManager userManager,
         StudioNotifyHelper studioNotifyHelper,
         ITariffService tariffService,
@@ -532,7 +533,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         {
             try
             {
-                var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(settingsManager);
+                var defaultRebranding = await tenantLogoManager.IsDefaultLogoSettingsAsync();
                 await tenantManager.SetCurrentTenantAsync(tenant.Id);
                 var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
