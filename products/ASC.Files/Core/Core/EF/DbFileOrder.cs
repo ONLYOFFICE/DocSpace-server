@@ -79,6 +79,27 @@ public static class DbFileOrderExtension
 
     public static void PgSqlAddDbFileOrder(this ModelBuilder modelBuilder)
     {
-        throw new NotImplementedException();
+        modelBuilder.Entity<DbFileOrder>(entity =>
+        {
+            entity.ToTable("files_order");
+
+            entity.HasKey(e => new { e.TenantId, e.EntryId, e.EntryType })
+                .HasName("primary");
+
+            entity.HasIndex(e => new { e.TenantId, e.ParentFolderId, e.EntryType })
+                .HasDatabaseName("parent_folder_id");
+
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+
+            entity.Property(e => e.EntryId).HasColumnName("entry_id");
+
+            entity.Property(e => e.EntryType)
+                .HasColumnName("entry_type")
+                .HasColumnType("smallint");
+
+            entity.Property(e => e.ParentFolderId).HasColumnName("parent_folder_id");
+
+            entity.Property(e => e.Order).HasColumnName("order");
+        });
     }
 }

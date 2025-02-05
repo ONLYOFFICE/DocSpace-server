@@ -120,9 +120,9 @@ public class BackupService(
         }
     }
 
-    public async Task StartRestoreAsync(StartRestoreRequest request)
+    public async Task<string> StartRestoreAsync(StartRestoreRequest request, bool enqueueTask = true, string taskId = null)
     {
-        if (request.StorageType == BackupStorageType.Local && (string.IsNullOrEmpty(request.FilePathOrId) || !File.Exists(request.FilePathOrId)))
+        if (request.StorageType == BackupStorageType.Local && (string.IsNullOrEmpty(request.FilePathOrId) || !File.Exists(request.FilePathOrId)) && enqueueTask)
         {
             throw new FileNotFoundException();
         }
@@ -140,11 +140,12 @@ public class BackupService(
             request.StorageParams = JsonSerializer.Deserialize<Dictionary<string, string>>(backupRecord.StorageParams);
         }
 
-        var progress = await backupWorker.StartRestoreAsync(request);
+        var progress = await backupWorker.StartRestoreAsync(request, enqueueTask, taskId);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
         }
+        return progress.TaskId;
     }
 
     public async Task<BackupProgress> GetBackupProgress(int tenantId)

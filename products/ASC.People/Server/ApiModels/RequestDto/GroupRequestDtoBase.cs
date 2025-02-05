@@ -36,5 +36,6 @@ public abstract class GroupRequestDtoBase
     /// <summary>
     /// Group name
     /// </summary>
+    [StringLength(128)]
     public string GroupName { get; set; }
 }

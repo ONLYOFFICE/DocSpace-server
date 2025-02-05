@@ -27,7 +27,7 @@
 namespace ASC.Common.Caching;
 
 [Singleton]
-public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T> where T : new()
+public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCacheNotify<T>> logger) : ICacheNotify<T> where T : new()
 {
     private readonly IRedisDatabase _redis = redisCacheClient.GetDefaultDatabase();
     private readonly ConcurrentDictionary<CacheNotifyAction, ConcurrentBag<Action<T>>> _invocationList = new();
@@ -39,7 +39,14 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
         foreach (var handler in GetInvocationList(action))
         {
-            handler(obj);
+            try
+            {
+                handler(obj);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorRedisCacheNotifyPublish(e);
+            }
         }
     }
 
@@ -49,7 +56,14 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
         {
             if (i.Id != _instanceId && (i.Action == action || Enum.IsDefined(typeof(CacheNotifyAction), (i.Action & action))))
             {
-                onChange(i.Object);
+                try
+                {
+                    onChange(i.Object);
+                }
+                catch (Exception e)
+                {
+                    logger.ErrorRedisCacheNotifySubscribe(e);
+                }
             }
 
             return Task.FromResult(true);

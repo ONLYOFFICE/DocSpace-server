@@ -31,7 +31,7 @@ public class MigrationGroup
     public HashSet<string> UserKeys { get; set; }
     public string ManagerKey { get; set; }
     public bool ShouldImport { get; set; }
-    public virtual MigratingApiGroup ToApiInfo()
+    public MigratingApiGroup ToApiInfo()
     {
         return new MigratingApiGroup
         {

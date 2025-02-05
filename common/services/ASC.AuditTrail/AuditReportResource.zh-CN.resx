@@ -656,7 +656,7 @@
     <value>私密房间已启用</value>
   </data>
   <data name="RoomArchived" xml:space="preserve">
-    <value>房间已归档</value>
+    <value>房间已存档</value>
   </data>
   <data name="RoomCreateUser" xml:space="preserve">
     <value>已添加用户：{0}。角色：{1}</value>
@@ -677,7 +677,7 @@
     <value>已重命名房间：{0}</value>
   </data>
   <data name="RoomUnarchived" xml:space="preserve">
-    <value>已取消归档房间</value>
+    <value>已取消存档房间</value>
   </data>
   <data name="RoomUpdateAccessForUser" xml:space="preserve">
     <value>{0}已指定：{1}</value>

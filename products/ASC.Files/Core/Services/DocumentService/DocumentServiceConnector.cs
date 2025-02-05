@@ -127,13 +127,23 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         string scriptUrl = null;
         if (!string.IsNullOrEmpty(inputScript))
         {
-            using (var stream = new MemoryStream())
-            await using (var writer = new StreamWriter(stream))
+            if (System.IO.File.Exists(inputScript))
             {
-                await writer.WriteAsync(inputScript);
-                await writer.FlushAsync();
-                stream.Position = 0;
-                scriptUrl = await pathProvider.GetTempUrlAsync(stream, ".docbuilder");
+                await using (var stream = System.IO.File.OpenRead(inputScript))
+                {
+                    scriptUrl = await pathProvider.GetTempUrlAsync(stream, ".docbuilder");
+                }
+            }
+            else
+            {
+                using (var stream = new MemoryStream())
+                await using (var writer = new StreamWriter(stream))
+                {
+                    await writer.WriteAsync(inputScript);
+                    await writer.FlushAsync();
+                    stream.Position = 0;
+                    scriptUrl = await pathProvider.GetTempUrlAsync(stream, ".docbuilder");
+                }
             }
             scriptUrl = ReplaceCommunityAddress(scriptUrl);
             requestKey = scriptUrl;

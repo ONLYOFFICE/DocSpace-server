@@ -114,12 +114,12 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
         if (root != null)
         {
-            this[Res] += string.Format("folder_{0}{1}", root.Id, SplitChar);
+            this[Res] += $"folder_{root.Id}{SplitChar}";
         }
         if (_isEmptyTrash)
         {
-            await DeleteFilesAsync(Files, serviceScope);
-            await DeleteFoldersAsync(Folders, serviceScope);
+            await DeleteFilesAsync(Files, serviceScope, true);
+            await DeleteFoldersAsync(Folders, serviceScope, true);
             
             var trash = await folderDao.GetFolderAsync(_trashId);
             await filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, _headers);
@@ -229,15 +229,18 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             }
 
                             await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
-                            
-                            if (isRoom)
+
+                            if (isNeedSendActions)
                             {
-                                await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
-                                await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, _headers, folder.Title);
-                            }
-                            else
-                            {
-                                await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
+                                if (isRoom)
+                                {
+                                    await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
+                                    await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, _headers, folder.Title);
+                                }
+                                else
+                                {
+                                    await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
+                                }
                             }
 
                             ProcessedFolder(folderId);

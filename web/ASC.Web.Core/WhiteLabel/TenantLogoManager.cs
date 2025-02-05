@@ -55,7 +55,7 @@ public class TenantLogoManager(
             if (timeParam)
             {
                 var now = DateTime.Now;
-                faviconPath = string.Format("{0}?t={1}", faviconPath, now.Ticks);
+                faviconPath = $"{faviconPath}?t={now.Ticks}";
             }
         }
         else

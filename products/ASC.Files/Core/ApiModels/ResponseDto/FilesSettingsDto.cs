@@ -234,6 +234,11 @@ public class FilesSettingsDto
     public bool ConvertNotify { get; set; }
 
     /// <summary>
+    /// Hide confirm cancel operation
+    /// </summary>
+    public bool HideConfirmCancelOperation { get; set; }
+    
+    /// <summary>
     /// HideC confirm convert save
     /// </summary>
     public bool HideConfirmConvertSave { get; set; }
@@ -242,6 +247,11 @@ public class FilesSettingsDto
     /// Hide confirm convert open
     /// </summary>
     public bool HideConfirmConvertOpen { get; set; }
+
+    /// <summary>
+    /// Hide confirm room lifetime
+    /// </summary>
+    public bool HideConfirmRoomLifetime { get; set; }
 
     /// <summary>
     /// Default order
@@ -362,8 +372,10 @@ public class FilesSettingsDtoConverter(
             StoreOriginalFiles = await filesSettingsHelper.GetStoreOriginalFiles(),
             KeepNewFileName = await filesSettingsHelper.GetKeepNewFileName(),
             DisplayFileExtension = await filesSettingsHelper.GetDisplayFileExtension(),
+            HideConfirmCancelOperation = await filesSettingsHelper.GetHideConfirmCancelOperation(),
             HideConfirmConvertSave = await filesSettingsHelper.GetHideConfirmConvertSave(),
             HideConfirmConvertOpen = await filesSettingsHelper.GetHideConfirmConvertOpen(),
+            HideConfirmRoomLifetime = await filesSettingsHelper.GetHideConfirmRoomLifetime(),
             DefaultOrder = await filesSettingsHelper.GetDefaultOrder(),
             Forcesave = filesSettingsHelper.GetForcesave(),
             StoreForcesave = filesSettingsHelper.GetStoreForcesave(),

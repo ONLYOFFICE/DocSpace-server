@@ -242,7 +242,7 @@ public static class DocumentService
             commandTimeout = 5000;
         }
 
-        var cancellationTokenSource = new CancellationTokenSource(commandTimeout);
+        using var cancellationTokenSource = new CancellationTokenSource(commandTimeout);
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(documentTrackerUrl),

@@ -58,6 +58,7 @@ public static class OpenApiExtension
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
+            c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
             var serverUrls = configuration.GetSection("openApi:servers").Get<List<string>>() ?? [];
             var serverDescription = configuration.GetSection("openApi:serversDescription").Get<List<string>>() ?? [];
