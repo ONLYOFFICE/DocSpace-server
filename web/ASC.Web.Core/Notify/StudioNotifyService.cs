@@ -130,9 +130,9 @@ public class StudioNotifyService(
 
         var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
-        var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonSetPassword", await GetCulture(userInfo));
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonSetPassword", GetCulture(userInfo));
 
         var action = Actions.PasswordReset;
 
@@ -144,7 +144,7 @@ public class StudioNotifyService(
 
         var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
 
-        await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
+        messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
     }
 
     #endregion
