@@ -42,7 +42,7 @@ public class MaxTotalSizeStatistic(IServiceProvider serviceProvider) : ITenantQu
     public async Task<long> GetValueAsync()
     {
         var tenantManager = serviceProvider.GetService<TenantManager>();
-        var tenant = (await tenantManager.GetCurrentTenantAsync()).Id;
+        var tenant = (tenantManager.GetCurrentTenant()).Id;
 
         return (await tenantManager.FindTenantQuotaRowsAsync(tenant))
             .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)

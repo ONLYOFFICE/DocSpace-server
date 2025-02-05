@@ -28,7 +28,6 @@ global using System.ComponentModel.DataAnnotations;
 global using System.Net.Mail;
 global using System.Security;
 global using System.Security.Claims;
-global using System.ServiceModel.Security;
 global using System.Text.Json;
 global using System.Web;
 global using ASC.Api.Core;
@@ -97,9 +96,9 @@ global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.Hosting.WindowsServices;
-global using SixLabors.ImageSharp;
-global using SixLabors.ImageSharp.Formats;
+
 global using Swashbuckle.AspNetCore.Annotations;
+
 global using AllowAnonymousAttribute = Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute;
 global using AuthorizeAttribute = Microsoft.AspNetCore.Authorization.AuthorizeAttribute;
 global using HttpDeleteAttribute = Microsoft.AspNetCore.Mvc.HttpDeleteAttribute;

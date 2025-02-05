@@ -91,7 +91,7 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager, Au
             }
         }
 
-        var newSettings = new RoomsNotificationSettings { DisabledRooms = disabledRooms.Select(r => (object)r).ToList() };
+        var newSettings = new RoomsNotificationSettings { DisabledRooms = disabledRooms.Select(object (r) => r).ToList() };
         
         await settingsManager.SaveForCurrentUserAsync(newSettings);
 

@@ -808,4 +808,67 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Uitnodigingen opnieuw verstuurd: {0}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Activatie van client {0} gewijzigd</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Zichtbaarheid van client {0} gewijzigd</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Client aangemaakt</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Client {0} verwijderd</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Bestand: {0}. Index gewijzigd van {1} in {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Map: {0}. Index gewijzigd van {1} in {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Map: {0}. Indexen opnieuw geordend</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Autorisatiecode voor client {0} gegenereerd</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Persoonlijk toegangstoken voor client {0} gegenereerd</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>{0} client secret opnieuw gegenereerd</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Client {0} toegang ingetrokken</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Kamer: {0}. Download weigeren uitgeschakeld</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Kamer: {0}. Download weigeren ingeschakeld</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Kamer indexering uitgeschakeld</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Kamer indexering ingeschakeld</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Levensduur uitgeschakeld</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Levensduur is ingesteld. Waarde: {0}. Periode: {1}. Definitief Verwijderen: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Kamer: {0}. Watermerk uitgeschakeld</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Kamer: {0}. Watermerk ingeschakeld</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Client {0} bijgewerkt</value>
+  </data>
 </root>

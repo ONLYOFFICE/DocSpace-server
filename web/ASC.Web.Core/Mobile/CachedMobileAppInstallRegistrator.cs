@@ -49,8 +49,8 @@ public class CachedMobileAppInstallRegistrator(
         }
 
         await _registrator.RegisterInstallAsync(userEmail, appType);
-        cache.Insert(await GetCacheKeyAsync(userEmail, null), true, cacheExpiration);
-        cache.Insert(await GetCacheKeyAsync(userEmail, appType), true, cacheExpiration);
+        cache.Insert(GetCacheKey(userEmail, null), true, cacheExpiration);
+        cache.Insert(GetCacheKey(userEmail, appType), true, cacheExpiration);
     }
 
     public async Task<bool> IsInstallRegisteredAsync(string userEmail, MobileAppType? appType)
@@ -60,7 +60,7 @@ public class CachedMobileAppInstallRegistrator(
             return false;
         }
 
-        var fromCache = cache.Get<string>(await GetCacheKeyAsync(userEmail, appType));
+        var fromCache = cache.Get<string>(GetCacheKey(userEmail, appType));
 
 
         if (bool.TryParse(fromCache, out var cachedValue))
@@ -69,14 +69,14 @@ public class CachedMobileAppInstallRegistrator(
         }
 
         var isRegistered = await _registrator.IsInstallRegisteredAsync(userEmail, appType);
-        cache.Insert(await GetCacheKeyAsync(userEmail, appType), isRegistered.ToString(), cacheExpiration);
+        cache.Insert(GetCacheKey(userEmail, appType), isRegistered.ToString(), cacheExpiration);
         return isRegistered;
     }
 
-    private async Task<string> GetCacheKeyAsync(string userEmail, MobileAppType? appType)
+    private string GetCacheKey(string userEmail, MobileAppType? appType)
     {
         var cacheKey = appType.HasValue ? userEmail + "/" + appType : userEmail;
 
-        return string.Format("{0}:mobile:{1}", await tenantManager.GetCurrentTenantIdAsync(), cacheKey);
+        return string.Format("{0}:mobile:{1}", tenantManager.GetCurrentTenantId(), cacheKey);
     }
 }

@@ -86,7 +86,7 @@ internal class ProviderAccountDao(
 
     public virtual async IAsyncEnumerable<IProviderInfo> GetProvidersInfoAsync(Guid userId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var thirdPartyAccounts = filesDbContext.ThirdPartyAccountsAsync(tenantId, userId);
 
@@ -98,7 +98,7 @@ internal class ProviderAccountDao(
 
     private async IAsyncEnumerable<IProviderInfo> GetProvidersInfoInternalAsync(int linkId = -1, FolderType folderType = FolderType.DEFAULT, string searchText = null)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var thirdPartyAccounts = filesDbContext.ThirdPartyAccountsByFilterAsync(tenantId, linkId, folderType, authContext.CurrentAccount.ID, GetSearchText(searchText));
         await foreach (var t in thirdPartyAccounts)
@@ -112,7 +112,7 @@ internal class ProviderAccountDao(
         ProviderTypes prKey;
         try
         {
-            prKey = (ProviderTypes)Enum.Parse(typeof(ProviderTypes), providerKey, true);
+            prKey = Enum.Parse<ProviderTypes>(providerKey, true);
             switch (prKey)
             {
                 case ProviderTypes.NextCloud:
@@ -134,7 +134,7 @@ internal class ProviderAccountDao(
             throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, providerKey));
         }
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var now = tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow());
 
         var dbFilesThirdPartyAccount = new DbFilesThirdpartyAccount
@@ -167,7 +167,7 @@ internal class ProviderAccountDao(
     
     public async Task<IProviderInfo> UpdateRoomProviderInfoAsync(ProviderData data)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var forUpdate = await filesDbContext.ThirdPartyAccountAsync(tenantId, data.Id);
 
@@ -243,7 +243,7 @@ internal class ProviderAccountDao(
 
     public virtual async Task<int> UpdateProviderInfoAsync(int linkId, AuthData authData)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var login = authData.Login ?? "";
         var password = await EncryptPasswordAsync(authData.Password);
@@ -252,12 +252,12 @@ internal class ProviderAccountDao(
 
         var forUpdateCount = await filesDbContext.UpdateThirdPartyAccountsAsync(tenantId, linkId, login, password, token, url);
 
-        return forUpdateCount == 1 ? linkId : default;
+        return forUpdateCount == 1 ? linkId : 0;
     }
 
     public virtual async Task<int> UpdateProviderInfoAsync(int linkId, string customerTitle, AuthData newAuthData, FolderType folderType, Guid? userId = null)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var authData = new AuthData();
@@ -340,12 +340,12 @@ internal class ProviderAccountDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        return toUpdateCount == 1 ? linkId : default;
+        return toUpdateCount == 1 ? linkId : 0;
     }
 
     public virtual async Task<int> UpdateBackupProviderInfoAsync(string providerKey, string customerTitle, AuthData newAuthData)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         DbFilesThirdpartyAccount thirdParty;
@@ -412,7 +412,7 @@ internal class ProviderAccountDao(
 
     public virtual async Task RemoveProviderInfoAsync(int linkId)
     {       
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
@@ -487,7 +487,7 @@ internal class ProviderAccountDao(
             box.ProviderId = id;
             box.CustomerTitle = providerTitle;
             box.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            box.ProviderKey = input.Provider;
+            box.ProviderKey = ProviderTypes.Box.ToStringFast();
             box.RootFolderType = rootFolderType;
             box.CreateOn = createOn;
             box.ModifiedOn = modifiedOn;
@@ -512,7 +512,7 @@ internal class ProviderAccountDao(
             drop.ProviderId = id;
             drop.CustomerTitle = providerTitle;
             drop.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            drop.ProviderKey = input.Provider;
+            drop.ProviderKey = ProviderTypes.DropboxV2.ToStringFast();
             drop.RootFolderType = rootFolderType;
             drop.CreateOn = createOn;
             drop.ModifiedOn = modifiedOn;
@@ -537,7 +537,7 @@ internal class ProviderAccountDao(
             sh.ProviderId = id;
             sh.CustomerTitle = providerTitle;
             sh.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            sh.ProviderKey = input.Provider;
+            sh.ProviderKey = ProviderTypes.SharePoint.ToStringFast();
             sh.RootFolderType = rootFolderType;
             sh.CreateOn = createOn;
             sh.ModifiedOn = modifiedOn;
@@ -562,7 +562,7 @@ internal class ProviderAccountDao(
             gd.ProviderId = id;
             gd.CustomerTitle = providerTitle;
             gd.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            gd.ProviderKey = input.Provider;
+            gd.ProviderKey = ProviderTypes.GoogleDrive.ToStringFast();
             gd.RootFolderType = rootFolderType;
             gd.CreateOn = createOn;
             gd.ModifiedOn = modifiedOn;
@@ -587,7 +587,7 @@ internal class ProviderAccountDao(
             od.ProviderId = id;
             od.CustomerTitle = providerTitle;
             od.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-            od.ProviderKey = input.Provider;
+            od.ProviderKey = ProviderTypes.OneDrive.ToStringFast();
             od.RootFolderType = rootFolderType;
             od.CreateOn = createOn;
             od.ModifiedOn = modifiedOn;
@@ -620,7 +620,7 @@ internal class ProviderAccountDao(
         webDavProviderInfo.ProviderId = id;
         webDavProviderInfo.CustomerTitle = providerTitle;
         webDavProviderInfo.Owner = owner == Guid.Empty ? authContext.CurrentAccount.ID : owner;
-        webDavProviderInfo.ProviderKey = input.Provider;
+        webDavProviderInfo.ProviderKey = key.ToStringFast();
         webDavProviderInfo.RootFolderType = rootFolderType;
         webDavProviderInfo.CreateOn = createOn;
         webDavProviderInfo.ModifiedOn = modifiedOn;

@@ -41,7 +41,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         FileConverter fileConverter,
         PathProvider pathProvider,
         FileChecker fileChecker,
-        IDistributedCache distributedCache,
         FillingFormResultDtoHelper fillingFormResultDtoHelper,
         IDaoFactory daoFactory)
     : FilesHelperBase(filesSettingsHelper,
@@ -50,8 +49,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             fileDtoHelper,
             fileStorageService,
             fileChecker,
-            httpContextAccessor,
-            distributedCache)
+            httpContextAccessor)
     {
     private readonly ILogger _logger = logger;
 
@@ -81,7 +79,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     public async Task<string> GetPresignedUri<T>(T fileId)
     {
         var file = await _fileStorageService.GetFileAsync(fileId, -1);
-        return await pathProvider.GetFileStreamUrlAsync(file);
+        return pathProvider.GetFileStreamUrl(file);
     }
 
     public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync<T>(CheckConversionRequestDto<T> checkConversionRequestDto)

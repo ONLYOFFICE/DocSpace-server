@@ -62,7 +62,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/login/last</path>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
-    [SwaggerResponse(200, "List of login events", typeof(LoginEventDto))]
+    [SwaggerResponse(200, "List of login events", typeof(IEnumerable<LoginEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/last")]
     public async Task<IEnumerable<LoginEventDto>> GetLastLoginEventsAsync()
@@ -83,7 +83,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/events/last</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "List of audit trail data", typeof(AuditEventDto))]
+    [SwaggerResponse(200, "List of audit trail data", typeof(IEnumerable<AuditEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/last")]
     public async Task<IEnumerable<AuditEventDto>> GetLastAuditEventsAsync()
@@ -104,7 +104,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/login/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
-    [SwaggerResponse(200, "List of filtered login events", typeof(LoginEventDto))]
+    [SwaggerResponse(200, "List of filtered login events", typeof(IEnumerable<LoginEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/filter")]
     public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilterAsync(LoginEventRequestDto inDto)
@@ -117,7 +117,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         inDto.Action = inDto.Action == 0 ? MessageAction.None : inDto.Action;
 
-        if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString()))
+        if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
             return await GetLastLoginEventsAsync();
         }
@@ -136,7 +136,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/events/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "List of filtered audit trail data", typeof(AuditEventDto))]
+    [SwaggerResponse(200, "List of filtered audit trail data", typeof(IEnumerable<AuditEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/filter")]
     public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilterAsync(AuditEventRequestDto inDto)
@@ -149,7 +149,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         inDto.Action = inDto.Action == 0 ? MessageAction.None : inDto.Action;
 
-        if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString()))
+        if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
             return await GetLastAuditEventsAsync();
         }
@@ -201,17 +201,17 @@ public class SecurityController(PermissionContext permissionContext,
             .Where(r => !inDto.ProductType.HasValue || r.Product == inDto.ProductType.Value)
             .Select(r => new
             {
-                ProductType = r.Product.ToString(),
+                ProductType = r.Product.ToStringFast(),
                 Modules = r.Mappers
                 .Where(m => !inDto.ModuleType.HasValue || m.Module == inDto.ModuleType.Value)
                 .Select(x => new
                 {
-                    ModuleType = x.Module.ToString(),
+                    ModuleType = x.Module.ToStringFast(),
                     Actions = x.Actions.Select(a => new
                     {
                         MessageAction = a.Key.ToString(),
-                        ActionType = a.Value.ActionType.ToString(),
-                        Entity = a.Value.EntryType1.ToString()
+                        ActionType = a.Value.ActionType.ToStringFast(),
+                        Entity = a.Value.EntryType1.ToStringFast()
                     })
                 })
             });
@@ -234,7 +234,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         await DemandAuditPermissionAsync();
 
-        var settings = await settingsManager.LoadAsync<TenantAuditSettings>(await tenantManager.GetCurrentTenantIdAsync());
+        var settings = await settingsManager.LoadAsync<TenantAuditSettings>(tenantManager.GetCurrentTenantId());
 
         var to = DateTime.UtcNow;
         var from = to.Subtract(TimeSpan.FromDays(settings.LoginHistoryLifeTime));
@@ -245,7 +245,7 @@ public class SecurityController(PermissionContext permissionContext,
         await using var stream = auditReportCreator.CreateCsvReport(events);
         var result = await auditReportSaver.UploadCsvReport(stream, reportName);
 
-        await messageService.SendAsync(MessageAction.LoginHistoryReportDownloaded);
+        messageService.Send(MessageAction.LoginHistoryReportDownloaded);
         return result;
     }
 
@@ -267,7 +267,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         await DemandAuditPermissionAsync();
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         var settings = await settingsManager.LoadAsync<TenantAuditSettings>(tenantId);
 
@@ -281,7 +281,7 @@ public class SecurityController(PermissionContext permissionContext,
         await using var stream = auditReportCreator.CreateCsvReport(events);
         var result = await auditReportSaver.UploadCsvReport(stream, reportName);
 
-        await messageService.SendAsync(MessageAction.AuditTrailReportDownloaded);
+        messageService.Send(MessageAction.AuditTrailReportDownloaded);
         return result;
     }
 
@@ -302,7 +302,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         DemandBaseAuditPermission();
 
-        return await settingsManager.LoadAsync<TenantAuditSettings>(await tenantManager.GetCurrentTenantIdAsync());
+        return await settingsManager.LoadAsync<TenantAuditSettings>(tenantManager.GetCurrentTenantId());
     }
 
     /// <summary>
@@ -333,8 +333,8 @@ public class SecurityController(PermissionContext permissionContext,
             throw new ArgumentException("AuditTrailLifeTime");
         }
 
-        await settingsManager.SaveAsync(inDto.Settings, await tenantManager.GetCurrentTenantIdAsync());
-        await messageService.SendAsync(MessageAction.AuditSettingsUpdated);
+        await settingsManager.SaveAsync(inDto.Settings, tenantManager.GetCurrentTenantId());
+        messageService.Send(MessageAction.AuditSettingsUpdated);
 
         return inDto.Settings;
     }
@@ -406,7 +406,7 @@ public class SecurityController(PermissionContext permissionContext,
     private async Task DemandAuditPermissionAsync()
     {
         if (!coreBaseSettings.Standalone
-            && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString())
+            && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Audit");
@@ -416,7 +416,7 @@ public class SecurityController(PermissionContext permissionContext,
     private void DemandBaseAuditPermission()
     {
         if (!coreBaseSettings.Standalone
-            && !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString()))
+            && !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Audit");
         }

@@ -44,7 +44,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <path>api/2.0/settings/customschemas</path>
     /// <collection>list</collection>
     [Tags("Settings / Team templates")]
-    [SwaggerResponse(200, "List of team templates with the following parameters", typeof(SchemaRequestsDto))]
+    [SwaggerResponse(200, "List of team templates with the following parameters", typeof(List<SchemaRequestsDto>))]
     [HttpGet("")]
     public async Task<List<SchemaRequestsDto>> PeopleSchemasAsync()
     {
@@ -86,9 +86,9 @@ public class CustomSchemasController(MessageService messageService,
 
         await customNamingPeople.SetPeopleNamesAsync(inDto.Id);
 
-        await tenantManager.SaveTenantAsync(await tenantManager.GetCurrentTenantAsync());
+        await tenantManager.SaveTenantAsync(tenantManager.GetCurrentTenant());
 
-        await messageService.SendAsync(MessageAction.TeamTemplateChanged);
+        messageService.Send(MessageAction.TeamTemplateChanged);
 
         var people = new IdRequestDto<string> { Id = inDto.Id };
 
@@ -147,9 +147,9 @@ public class CustomSchemasController(MessageService messageService,
 
         await customNamingPeople.SetPeopleNamesAsync(names);
 
-        await tenantManager.SaveTenantAsync(await tenantManager.GetCurrentTenantAsync());
+        await tenantManager.SaveTenantAsync(tenantManager.GetCurrentTenant());
 
-        await messageService.SendAsync(MessageAction.TeamTemplateChanged);
+        messageService.Send(MessageAction.TeamTemplateChanged);
 
         var people = new IdRequestDto<string> { Id = PeopleNamesItem.CustomID };
         return await PeopleSchemaAsync(people);

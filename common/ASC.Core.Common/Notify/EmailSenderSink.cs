@@ -43,7 +43,7 @@ public class EmailSenderSink(INotifySender sender) : Sink
         var response = new SendResponse(message, _senderName, default(SendResult));
         try
         {
-            var m = await serviceScope.ServiceProvider.GetRequiredService<EmailSenderSinkMessageCreator>().CreateNotifyMessageAsync(message, _senderName);
+            var m = await serviceScope.ServiceProvider.GetRequiredService<EmailSenderSinkMessageCreator>().CreateNotifyMessage(message, _senderName);
             var result = await _sender.SendAsync(m);
 
             response.Result = result switch
@@ -70,7 +70,7 @@ public class EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConf
 {
     private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
 
-    public override async Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName)
+    public override async Task<NotifyMessage> CreateNotifyMessage(INoticeMessage message, string senderName)
     {
         var m = new NotifyMessage
         {
@@ -81,7 +81,7 @@ public class EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConf
             CreationDate = DateTime.UtcNow
         };
 
-        var tenant = await tenantManager.GetCurrentTenantAsync(false);
+        var tenant = tenantManager.GetCurrentTenant(false);
         m.TenantId = tenant?.Id ?? Tenant.DefaultTenant;
 
         var settings = await coreConfiguration.GetDefaultSmtpSettingsAsync();

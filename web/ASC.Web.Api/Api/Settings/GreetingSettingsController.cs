@@ -46,9 +46,9 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "Greeting settings: tenant name", typeof(object))]
     [HttpGet("")]
-    public async Task<object> GetGreetingSettings()
+    public object GetGreetingSettings()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         return tenant.Name == "" ? Resource.PortalName : tenant.Name;
     }
 
@@ -60,9 +60,9 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "Boolean value: true if the greeting settings of the current portal are set to default", typeof(bool))]
     [HttpGet("isdefault")]
-    public async Task<bool> IsDefault()
+    public bool IsDefault()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         return tenant.Name == "";
     }
 
@@ -78,7 +78,7 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         if (!coreBaseSettings.Standalone)
         {
@@ -92,7 +92,7 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
         tenant.Name = inDto.Title;
         await tenantManager.SaveTenantAsync(tenant);
 
-        await messageService.SendAsync(MessageAction.GreetingSettingsUpdated);
+        messageService.Send(MessageAction.GreetingSettingsUpdated);
 
         return Resource.SuccessfullySaveGreetingSettingsMessage;
     }
@@ -111,7 +111,7 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
 
         await tenantInfoSettingsHelper.RestoreDefaultTenantNameAsync();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         return tenant.Name == "" ? Resource.PortalName : tenant.Name;
     }

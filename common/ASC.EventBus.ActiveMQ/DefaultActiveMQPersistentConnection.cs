@@ -130,7 +130,7 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
 
         if (IsConnected)
         {
-            _connection.ExceptionListener += async (e) => { await OnExceptionListenerAsync(e); };
+            _connection.ExceptionListener += async e => { await OnExceptionListenerAsync(e); };
             _connection.ConnectionInterruptedListener += async () => { await OnConnectionInterruptedListenerAsync(); };
             _connection.ConnectionResumedListener += async () => { await OnConnectionResumedListenerAsync(); };
 

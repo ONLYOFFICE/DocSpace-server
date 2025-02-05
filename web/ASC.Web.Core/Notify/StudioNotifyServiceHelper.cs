@@ -52,7 +52,7 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
 
     public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri, params ITagValue[] args)
     {
-        var item = new NotifyItemIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync())
+        var item = new NotifyItemIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             Action = (NotifyAction)action,
             CheckSubsciption = checkSubsciption,

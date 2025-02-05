@@ -31,7 +31,9 @@ public class DbTariff : BaseEntity
     public int Id { get; set; }
     public int TenantId { get; set; }
     public DateTime Stamp { get; set; }
+    [MaxLength(255)]
     public string CustomerId { get; set; }
+    [MaxLength(255)]
     public string Comment { get; set; }
     public DateTime CreateOn { get; set; }
 
@@ -69,7 +71,7 @@ public static class DbTariffExtension
 
             entity.Property(e => e.Comment)
                 .HasColumnName("comment")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -84,7 +86,7 @@ public static class DbTariffExtension
             entity.Property(e => e.CustomerId)
                 .IsRequired()
                 .HasColumnName("customer_id")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -95,31 +97,32 @@ public static class DbTariffExtension
     {
         modelBuilder.Entity<DbTariff>(entity =>
         {
-            entity.ToTable("tenants_tariff", "onlyoffice");
+            entity.ToTable("tenants_tariff");
 
             entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_tenants_tariff");
+                .HasDatabaseName("tenant");
 
             entity.Property(e => e.Id).HasColumnName("id");
 
             entity.Property(e => e.Comment)
                 .HasColumnName("comment")
-                .HasMaxLength(255)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.CreateOn)
                 .HasColumnName("create_on")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Stamp).HasColumnName("stamp");
+            entity.Property(e => e.Stamp)
+                .HasColumnName("stamp")
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.CustomerId)
                 .IsRequired()
                 .HasColumnName("customer_id")
-                .HasMaxLength(255)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });
+        
     }
 }

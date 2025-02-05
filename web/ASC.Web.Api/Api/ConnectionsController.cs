@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Quota;
+
 namespace ASC.Web.Api;
 
 /// <summary>
@@ -52,7 +54,8 @@ public class ConnectionsController(
     UserPhotoManager userPhotoManager,
     DisplayUserSettingsHelper displayUserSettings,
     ConnectionSocket connectionSocketManager,
-    StudioNotifyService studioNotifyService)
+    StudioNotifyService studioNotifyService,
+    QuotaSocketManager quotaSocketManager)
     : ControllerBase
 {
     /// <summary>
@@ -88,7 +91,7 @@ public class ConnectionsController(
         var user = await userManager.GetUsersAsync(userId);
         var connections = await GetAllActiveConnectionsInnerAsync(user);
         var currentType = await userManager.GetUserTypeAsync(userId);
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var cacheKey = Math.Abs(user.LastModified.GetHashCode());
 
         var dto = new ActiveConnectionsForUserDto();
@@ -211,9 +214,9 @@ public class ConnectionsController(
             auditEventDate = auditEventDate.AddTicks(-(auditEventDate.Ticks % TimeSpan.TicksPerSecond));
 
             var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
-            var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
+            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
-            await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
+            messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
 
             return confirmationUrl;
         }
@@ -241,7 +244,7 @@ public class ConnectionsController(
         var currentUser = await userManager.GetUsersAsync(currentUserId);
         if (!await userManager.IsDocSpaceAdminAsync(currentUserId) &&
             !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) ||
-            (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId) && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync())))
+            (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId) && !currentUser.IsOwner(tenantManager.GetCurrentTenant())))
         {
             throw new SecurityException("Method not available");
         }
@@ -269,7 +272,7 @@ public class ConnectionsController(
         {
             if (!await userManager.IsDocSpaceAdminAsync(currentUserId) &&
                 !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) ||
-                (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId) && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync())))
+                (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId) && !currentUser.IsOwner(tenantManager.GetCurrentTenant())))
             {
                 throw new SecurityException("Method not available");
             }
@@ -298,7 +301,7 @@ public class ConnectionsController(
 
             var loginEvents = await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
 
-            await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
+            messageService.Send(MessageAction.UserLogoutActiveConnections, userName);
             await connectionSocketManager.LogoutExceptThisAsync(loginEventFromCookie, user.Id);
             return userName;
         }
@@ -325,12 +328,12 @@ public class ConnectionsController(
     {
         try
         {
-            var userId = await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventId, await tenantManager.GetCurrentTenantIdAsync());
+            var userId = await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventId, tenantManager.GetCurrentTenantId());
 
             var user = await userManager.GetUsersAsync(userId);
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
-            await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
+            messageService.Send(MessageAction.UserLogoutActiveConnections, userName);
             await connectionSocketManager.LogoutExceptThisAsync(loginEventId, userId);
             return userName;
         }
@@ -380,7 +383,7 @@ public class ConnectionsController(
                 await connectionSocketManager.LogoutSessionAsync(loginEvent.UserId.Value, loginEvent.Id);
             }
 
-            await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
+            messageService.Send(MessageAction.UserLogoutActiveConnection, userName);
             return true;
         }
         catch (Exception ex)
@@ -413,12 +416,13 @@ public class ConnectionsController(
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var auditEventDate = DateTime.UtcNow;
 
-        await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
-        await cookiesManager.ResetUserCookieAsync(user.Id, false);
-        await connectionSocketManager.LogoutUserAsync(user.Id);
+        messageService.Send(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
+        await cookiesManager.ResetUserCookieAsync(user.Id);
+        await connectionSocketManager.LogoutSessionAsync(user.Id);
+
         if (changePassword)
         {
-            await messageService.SendAsync(MessageAction.UserResetPassword, MessageTarget.Create(user.Id));
+            messageService.Send(MessageAction.UserResetPassword, MessageTarget.Create(user.Id));
             var password = UserManagerWrapper.GeneratePassword();
             await securityContext.SetUserPasswordHashAsync(user.Id, password);
             await studioNotifyService.UserPasswordResetAsync(user);

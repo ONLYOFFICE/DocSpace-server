@@ -52,7 +52,7 @@ public class ConsentUpdateCommandHandler {
    *
    * @param command the command containing client ID and principal id
    */
-  @Transactional(timeout = 2, isolation = Isolation.REPEATABLE_READ)
+  @Transactional(timeout = 2, isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
   public void revokeConsent(RevokeClientConsentCommand command) {
     log.info("Trying to revoke user consent");
 

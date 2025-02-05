@@ -55,7 +55,7 @@ internal class SharePointFolderDao(
             return folder;
         }
         
-        var tenantId = await _tenantManager1.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager1.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         folder.Shared = await Queries.SharedAsync(filesDbContext, tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
 
@@ -94,7 +94,7 @@ internal class SharePointFolderDao(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            rooms = rooms.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            rooms = rooms.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -120,7 +120,7 @@ internal class SharePointFolderDao(
     }
 
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -139,7 +139,7 @@ internal class SharePointFolderDao(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            folders = folders.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            folders = folders.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
@@ -174,7 +174,7 @@ internal class SharePointFolderDao(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            folders = folders.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            folders = folders.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         return folders;
@@ -234,7 +234,7 @@ internal class SharePointFolderDao(
     public async Task DeleteFolderAsync(string folderId)
     {
         var folder = await SharePointProviderInfo.GetFolderByIdAsync(folderId);
-        var tenantId = await _tenantManager1.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager1.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -345,12 +345,12 @@ internal class SharePointFolderDao(
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)
     {
-        return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
+        return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, int to)
     {
-        return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
+        return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
     public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
     {

@@ -171,17 +171,16 @@ public static class UserExtensions
             {
                 case _extMobPhone:
                     newContacts.Add(_mobPhone);
-                    newContacts.Add(value);
                     break;
                 case _extMail:
                     newContacts.Add(_mail);
-                    newContacts.Add(value);
                     break;
                 default:
                     newContacts.Add(type);
-                    newContacts.Add(value);
                     break;
             }
+
+            newContacts.Add(value);
         }
 
         ui.ContactsList = newContacts;

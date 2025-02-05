@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Common.EF.Context;
-public class FirebaseDbContext(DbContextOptions<FirebaseDbContext> options) : DbContext(options)
+public class FirebaseDbContext(DbContextOptions<FirebaseDbContext> options) : BaseDbContext(options)
 {
     public DbSet<FireBaseUser> Users { get; set; }
 

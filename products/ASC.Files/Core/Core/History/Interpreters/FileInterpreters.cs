@@ -163,6 +163,7 @@ public record FileIndexChangedData : EntryData
     public int NewIndex { get; }
     public IDictionary<Accessibility, bool> Accessibility { get; }
     public string ViewUrl { get; }
+    private readonly string _context;
     
     public FileIndexChangedData(
         int oldIndex,
@@ -173,7 +174,8 @@ public record FileIndexChangedData : EntryData
         string parentTitle = null,
         int? parentType = null,
         IDictionary<Accessibility, bool> accessibility = null,
-        string viewUrl = null) : base(id,
+        string viewUrl = null,
+        string context = null) : base(id,
         title,
         parentId,
         parentTitle,
@@ -183,10 +185,16 @@ public record FileIndexChangedData : EntryData
         NewIndex = newIndex;
         Accessibility = accessibility;
         ViewUrl = viewUrl;
+        _context = context;
     }
 
     public override int GetId()
     {
+        if (!string.IsNullOrEmpty(_context))
+        {
+            return _context.GetHashCode();
+        }
+        
         return ParentId.HasValue ? ParentId.GetHashCode() : 0;
     }
 }
@@ -379,6 +387,12 @@ public class FileIndexChangedInterpreter : FileActionInterpreterBase
         var accessibility = GetAccessibility(serviceProvider, description[0]);
         var viewUrl = GetViewUrl(serviceProvider, target);
         
+        string context = null;
+        if (description.Count >= 4)
+        {
+            context = description[3];
+        }
+        
         return new ValueTask<HistoryData>(new FileIndexChangedData(
             oldIndex,
             newIndex,
@@ -388,7 +402,8 @@ public class FileIndexChangedInterpreter : FileActionInterpreterBase
             desc.ParentTitle,
             desc.ParentType,
             accessibility,
-            viewUrl));
+            viewUrl,
+            context));
     }
 }
 

@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class UrlShortenerDbContext(DbContextOptions<UrlShortenerDbContext> dbContextOptions) : DbContext(dbContextOptions)
+public class UrlShortenerDbContext(DbContextOptions<UrlShortenerDbContext> dbContextOptions) : BaseDbContext(dbContextOptions)
 {
     public DbSet<ShortLink> ShortLinks { get; set; }
 

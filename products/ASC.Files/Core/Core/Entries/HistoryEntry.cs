@@ -52,6 +52,12 @@ public record HistoryEntry
         MessageAction.RoomGroupAdded,
         MessageAction.RoomInviteResend
     ];
+
+    private static readonly HashSet<MessageAction> _mergedActions =
+    [
+        MessageAction.FileIndexChanged,
+        MessageAction.FolderIndexChanged
+    ];
     
     private int _groupId;
 
@@ -60,6 +66,11 @@ public record HistoryEntry
         if (_groupId != 0)
         {
             return _groupId;
+        }
+        
+        if (_mergedActions.Contains(Action.Id))
+        {
+            return _groupId = Data?.GetId() ?? 0;
         }
 
         if (_gropedActions.Contains(Action.Id))

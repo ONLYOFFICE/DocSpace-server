@@ -51,7 +51,7 @@ public class BackupFileUploadHandler
             {
                 throw new ArgumentException("Access denied.");
             }
-            var tenantId = (await tenantManager.GetCurrentTenantAsync()).Id;
+            var tenantId = (tenantManager.GetCurrentTenant()).Id;
             string path;
             try
             {

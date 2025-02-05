@@ -42,39 +42,46 @@ internal class CleanupLifetimeExpiredService(
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        if (stoppingToken.IsCancellationRequested)
+        try
         {
-            return;
-        }
-
-        List<LifetimeEnabledRoom> lifetimeEnabledRooms;
-
-        await using (var scope = _scopeFactory.CreateAsyncScope())
-        {
-            await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<FilesDbContext>>().CreateDbContextAsync(stoppingToken);
-
-            lifetimeEnabledRooms = await GetLifetimeEnabledRoomsAsync(dbContext);
-
-            if (lifetimeEnabledRooms.Count == 0)
+            if (stoppingToken.IsCancellationRequested)
             {
                 return;
             }
 
-            foreach (var room in lifetimeEnabledRooms)
+            List<LifetimeEnabledRoom> lifetimeEnabledRooms;
+
+            await using (var scope = _scopeFactory.CreateAsyncScope())
             {
-                var lifetime = mapper.Map<DbRoomDataLifetime, RoomDataLifetime>(room.Lifetime);
+                await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<FilesDbContext>>().CreateDbContextAsync(stoppingToken);
 
-                var expiration = lifetime.GetExpirationUtc();
+                lifetimeEnabledRooms = await GetLifetimeEnabledRoomsAsync(dbContext);
 
-                room.ExipiredFiles = await GetExpiredFilesAsync(dbContext, room.TenantId, room.RoomId, expiration);
+                if (lifetimeEnabledRooms.Count == 0)
+                {
+                    return;
+                }
 
-                logger.InfoCleanupLifetimeExpiredFound(room.TenantId, room.RoomId, room.ExipiredFiles.Count);
+                foreach (var room in lifetimeEnabledRooms)
+                {
+                    var lifetime = mapper.Map<DbRoomDataLifetime, RoomDataLifetime>(room.Lifetime);
+
+                    var expiration = lifetime.GetExpirationUtc();
+
+                    room.ExipiredFiles = await GetExpiredFilesAsync(dbContext, room.TenantId, room.RoomId, expiration);
+
+                    logger.InfoCleanupLifetimeExpiredFound(room.TenantId, room.RoomId, room.ExipiredFiles.Count);
+                }
             }
-        }
 
-        await Parallel.ForEachAsync(lifetimeEnabledRooms.Where(x => x.ExipiredFiles.Count > 0),
-                                    new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
-                                    DeleteExpiredFiles);
+            await Parallel.ForEachAsync(lifetimeEnabledRooms.Where(x => x.ExipiredFiles.Count > 0),
+                new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
+                DeleteExpiredFiles);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
     }
 
     private async ValueTask DeleteExpiredFiles(LifetimeEnabledRoom data, CancellationToken cancellationToken)

@@ -44,7 +44,7 @@ global using Amazon.S3.Internal;
 global using Amazon.S3.Model;
 global using Amazon.S3.Transfer;
 global using Amazon.Util;
-global using ASC.Api.Core.Extensions;
+
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;

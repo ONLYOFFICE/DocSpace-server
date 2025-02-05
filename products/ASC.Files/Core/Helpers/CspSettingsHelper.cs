@@ -40,7 +40,7 @@ public class CspSettingsHelper(
 {
     public async Task<string> SaveAsync(IEnumerable<string> domains, bool updateInDb = true)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var domain = tenant.GetTenantDomain(coreSettings);
         HashSet<string> headerKeys = [GetKey(domain)];
 

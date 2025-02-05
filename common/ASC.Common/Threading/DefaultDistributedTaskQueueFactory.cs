@@ -40,7 +40,7 @@ public class DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider
         return CreateQueue(type.FullName, timeUntilUnregisterInSeconds);
     }
 
-    public DistributedTaskQueue CreateQueue(string name = default, int timeUntilUnregisterInSeconds = 60)
+    public DistributedTaskQueue CreateQueue(string name = null, int timeUntilUnregisterInSeconds = 60)
     {
         var option = options.Get(name);
         var queue = serviceProvider.GetRequiredService<DistributedTaskQueue>();

@@ -33,8 +33,8 @@ public abstract class FileEntry : ICloneable
     [JsonIgnore]
     public FileHelper FileHelper { get; set; }
 
-    [JsonIgnore]
-    public Global Global { get; set; }
+    [JsonIgnore] 
+    private Global Global { get; }
 
     protected FileEntry() { }
 

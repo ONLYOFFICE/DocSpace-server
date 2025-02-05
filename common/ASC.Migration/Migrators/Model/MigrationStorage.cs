@@ -38,7 +38,7 @@ public class MigrationStorage
     public bool ShouldImportSharedFiles { get; set; }
     public bool ShouldImportSharedFolders { get; set; }
 
-    public virtual MigratingApiFiles ToApiInfo()
+    public MigratingApiFiles ToApiInfo()
     {
         return new MigratingApiFiles
         {

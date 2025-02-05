@@ -67,7 +67,7 @@ public class VersionController(PermissionContext permissionContext,
     [HttpGet("")]
     public async Task<TenantVersionDto> GetVersionsAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         return new TenantVersionDto(tenant.Version, await tenantManager.GetTenantVersionsAsync());
     }
 
@@ -88,7 +88,7 @@ public class VersionController(PermissionContext permissionContext,
 
         (await tenantManager.GetTenantVersionsAsync()).FirstOrDefault(r => r.Id == inDto.VersionId).NotFoundIfNull();
         
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         await tenantManager.SetTenantVersionAsync(tenant, inDto.VersionId);
 
         return await GetVersionsAsync();

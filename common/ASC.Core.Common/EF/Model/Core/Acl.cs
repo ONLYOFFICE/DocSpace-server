@@ -33,6 +33,7 @@ public class Acl : BaseEntity, IMapFrom<AzRecord>
     public int TenantId { get; set; }
     public Guid Subject { get; set; }
     public Guid Action { get; set; }
+    [MaxLength(255)]
     public string Object { get; set; }
     public AceType AceType { get; set; }
 
@@ -153,7 +154,7 @@ public static class AclExtension
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasDefaultValueSql("''")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
@@ -165,27 +166,26 @@ public static class AclExtension
     {
         modelBuilder.Entity<Acl>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.Subject, e.Action, e.Object })
-                .HasName("core_acl_pkey");
+            entity.HasKey(e => new { e.TenantId, e.Subject, e.Action, e.Object });
 
-            entity.ToTable("core_acl", "onlyoffice");
+            entity.ToTable("core_acl");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Subject)
                 .HasColumnName("subject")
-                .HasMaxLength(38);
+                .HasColumnType("uuid");
 
             entity.Property(e => e.Action)
                 .HasColumnName("action")
-                .HasMaxLength(38);
+                .HasColumnType("uuid");
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
-                .HasMaxLength(255)
-                .HasDefaultValueSql("''");
+                .HasColumnType("text");
 
             entity.Property(e => e.AceType).HasColumnName("acetype");
         });
+        
     }
 }

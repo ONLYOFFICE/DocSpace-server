@@ -61,6 +61,11 @@ public class License
     [JsonPropertyName("customer_id")]
     public string CustomerId { get; set; }
 
+    /// <summary>Resource Key</summary>
+    /// <type>System.String, System</type>
+    [JsonPropertyName("resource_key")]
+    public string ResourceKey { get; set; }
+
     /// <summary>Number of document server users</summary>
     /// <type>System.Int32, System</type>
     [JsonPropertyName("users_count")]
@@ -80,6 +85,11 @@ public class License
     /// <type>System.String, System</type>
     [JsonPropertyName("signature")]
     public string Signature { get; set; }
+
+    /// <summary>Indicates whether the license is a developer license or not</summary>
+    /// <type>System.Boolean, System</type>
+    [JsonPropertyName("docspace_dev")] 
+    public bool Developer { get; set; }
 
     public static License Parse(string licenseString)
     {
@@ -116,7 +126,7 @@ public class License
     }
 }
 
-public class LicenseConverter : System.Text.Json.Serialization.JsonConverter<object>
+public class LicenseConverter : JsonConverter<object>
 {
     public override bool CanConvert(Type typeToConvert)
     {

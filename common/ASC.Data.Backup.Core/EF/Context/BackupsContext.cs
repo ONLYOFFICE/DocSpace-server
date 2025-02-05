@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.EF.Context;
 
-public class BackupsContext(DbContextOptions<BackupsContext> options) : DbContext(options)
+public class BackupsContext(DbContextOptions<BackupsContext> options) : BaseDbContext(options)
 {
     public DbSet<BackupRecord> Backups { get; set; }
     public DbSet<BackupSchedule> Schedules { get; set; }

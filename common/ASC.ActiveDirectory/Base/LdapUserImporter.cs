@@ -220,7 +220,7 @@ public class LdapUserImporter(
 
     const string GROUP_MEMBERSHIP = "groupMembership";
 
-    private IEnumerable<LdapObject> GetLdapUserGroups(LdapObject ldapUser)
+    private List<LdapObject> GetLdapUserGroups(LdapObject ldapUser)
     {
         var ldapUserGroups = new List<LdapObject>();
         try
@@ -721,7 +721,7 @@ public class LdapUserImporter(
 
         string email = null;
 
-        if (!string.IsNullOrEmpty(Settings.MailAttribute) && !string.IsNullOrEmpty(ldapLogin.Domain) && login.Contains("@"))
+        if (!string.IsNullOrEmpty(Settings.MailAttribute) && !string.IsNullOrEmpty(ldapLogin.Domain) && login.Contains('@'))
         {
             email = ldapLogin.ToString();
             exps.Add(Expression.Equal(Settings.MailAttribute, email));

@@ -82,15 +82,13 @@ public class CommonChunkedUploadSessionHolder(
         {
             throw new ArgumentException("uploadSize != bytesTotal");
         }
-        else
-        {
-            var path = uploadSession.TempPath;
-            var uploadId = uploadSession.UploadId;
-            var eTags = chunks.ToDictionary(c => c.Key, c => c.Value.ETag);
 
-            await DataStore.FinalizeChunkedUploadAsync(domain, path, uploadId, eTags);
-            return Path.GetFileName(path);
-        }
+        var path = uploadSession.TempPath;
+        var uploadId = uploadSession.UploadId;
+        var eTags = chunks.ToDictionary(c => c.Key, c => c.Value.ETag);
+
+        await DataStore.FinalizeChunkedUploadAsync(domain, path, uploadId, eTags);
+        return Path.GetFileName(path);
     }
 
     public async Task MoveAsync(CommonChunkedUploadSession chunkedUploadSession, string newPath,

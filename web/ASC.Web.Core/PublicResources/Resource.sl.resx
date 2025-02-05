@@ -1069,4 +1069,10 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Število skrbnikov presega omejitev: {0}/{1}.</value>
   </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Neprofitno</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Dodajte vsaj 1 dovoljen naslov IP.</value>
+  </data>
 </root>

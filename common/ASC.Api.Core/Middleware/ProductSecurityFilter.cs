@@ -97,7 +97,7 @@ public class ProductSecurityFilter(ILogger<ProductSecurityFilter> logger,
     {
         if (method == null || string.IsNullOrEmpty(method.ControllerName))
         {
-            return default;
+            return Guid.Empty;
         }
 
         var name = method.ControllerName.ToLower();

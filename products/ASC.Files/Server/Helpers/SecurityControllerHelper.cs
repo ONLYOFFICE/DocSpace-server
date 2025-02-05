@@ -36,8 +36,7 @@ public class SecurityControllerHelper(
     IHttpContextAccessor httpContextAccessor,
     FileShareDtoHelper fileShareDtoHelper,
     FileShareParamsHelper fileShareParamsHelper,
-    FileChecker fileChecker,
-    IDistributedCache distributedCache)
+    FileChecker fileChecker)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -45,17 +44,16 @@ public class SecurityControllerHelper(
         fileDtoHelper,
         fileStorageService,
         fileChecker,
-        httpContextAccessor,
-        distributedCache)
+        httpContextAccessor)
 {
     public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)
     {
-        return GetSecurityInfoAsync(new List<T> { fileId }, new List<T>());
+        return GetSecurityInfoAsync(new List<T> { fileId }, []);
     }
 
     public IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync<T>(T folderId)
     {
-        return GetSecurityInfoAsync(new List<T>(), new List<T> { folderId });
+        return GetSecurityInfoAsync([], new List<T> { folderId });
     }
 
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds)
@@ -73,11 +71,6 @@ public class SecurityControllerHelper(
         await _fileStorageService.RemoveAceAsync(fileIds, folderIds);
 
         return true;
-    }
-
-    public IAsyncEnumerable<FileShareDto> SetFolderSecurityInfoAsync<T>(T folderId, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
-    {
-        return SetSecurityInfoAsync(new List<T>(), new List<T> { folderId }, share, notify, sharingMessage);
     }
 
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)

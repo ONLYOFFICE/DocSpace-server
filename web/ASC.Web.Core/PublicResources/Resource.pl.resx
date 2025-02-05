@@ -1063,4 +1063,16 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Nie udało się skonfigurować limitu na użytkownika. Wprowadzona wartość jest większa niż całkowita pamięć DocSpace.</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Dodaj co najmniej 1 zaufaną domenę.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Przekroczono limit administratorów: {0}/{1}.</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Dodaj co najmniej 1 dozwolony adres IP.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Non-profit</value>
+  </data>
 </root>

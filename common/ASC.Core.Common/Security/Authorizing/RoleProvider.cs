@@ -46,7 +46,7 @@ class RoleProvider(IServiceProvider serviceProvider) : IRoleProvider
             {
                 roles = (await serviceProvider.GetService<UserManager>()
                                    .GetUserGroupsAsync(account.ID, IncludeType.Distinct | IncludeType.InParent))
-                                   .Select(g => (IRole)g)
+                                   .Select(IRole (g) => g)
                                    .ToList();
             }
         }

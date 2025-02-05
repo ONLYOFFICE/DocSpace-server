@@ -28,6 +28,7 @@ namespace ASC.Files.Core.EF;
 public class DbFilesProperties : BaseEntity
 {
     public int TenantId { get; set; }
+    [MaxLength(32)]
     public string EntryId { get; set; }
     public string Data { get; set; }
 
@@ -66,7 +67,7 @@ public static class DbFilesPropertiesExtension
 
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")
-                .HasColumnType("varchar(32)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -78,24 +79,26 @@ public static class DbFilesPropertiesExtension
 
         });
     }
+
     public static void PgSqlDbFilesProperties(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesProperties>(entity =>
         {
             entity.HasKey(e => new { e.TenantId, e.EntryId })
-                .HasName("files_properties_pkey");
+                .HasName("pk_files_properties");
 
-            entity.ToTable("files_properties", "onlyoffice");
+            entity.ToTable("files_properties");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
 
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")
-                .HasMaxLength(50);
+                .HasColumnType("varchar(32)");
 
             entity.Property(e => e.Data)
-                .IsRequired()
-                .HasColumnName("data");
+                .HasColumnName("data")
+                .HasColumnType("text");
         });
     }
 }

@@ -38,16 +38,19 @@ public class DbTenantPartner : BaseEntity
     /// <summary>
     /// Partner id
     /// </summary>
+    [MaxLength(36)]
     public string PartnerId { get; set; }
 
     /// <summary>
     /// Affiliate id
     /// </summary>
+    [MaxLength(50)]
     public string AffiliateId { get; set; }
 
     /// <summary>
     /// Campaign
     /// </summary>
+    [MaxLength(50)]
     public string Campaign { get; set; }
 
     [SwaggerIgnore]
@@ -88,19 +91,19 @@ public static class DbTenantPartnerExtension
 
             entity.Property(e => e.AffiliateId)
                 .HasColumnName("affiliate_id")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Campaign)
                 .HasColumnName("campaign")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.PartnerId)
                 .HasColumnName("partner_id")
-                .HasColumnType("varchar(36)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });
@@ -110,10 +113,10 @@ public static class DbTenantPartnerExtension
     {
         modelBuilder.Entity<DbTenantPartner>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId })
-                .HasName("tenants_partners_pkey");
+            entity.HasKey(e => e.TenantId)
+                .HasName("tenant_partner_pkey");
 
-            entity.ToTable("tenants_partners", "onlyoffice");
+            entity.ToTable("tenants_partners");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id")
@@ -121,18 +124,19 @@ public static class DbTenantPartnerExtension
 
             entity.Property(e => e.AffiliateId)
                 .HasColumnName("affiliate_id")
-                .HasMaxLength(50)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("character varying")
+                .HasMaxLength(50);
 
             entity.Property(e => e.Campaign)
                 .HasColumnName("campaign")
-                .HasMaxLength(50)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("character varying")
+                .HasMaxLength(50);
 
             entity.Property(e => e.PartnerId)
                 .HasColumnName("partner_id")
-                .HasMaxLength(36)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("character varying")
+                .HasMaxLength(36);
         });
+        
     }
 }

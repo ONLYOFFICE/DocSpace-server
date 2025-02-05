@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ImageMagick;
+
 using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
 namespace ASC.People.Api;
@@ -76,7 +78,7 @@ public class PhotoController(
 
             if (inDto.Thumbnails.Width == 0 && inDto.Thumbnails.Height == 0)
             {
-                using var img = Image.Load(data);
+                using var img = new MagickImage(data);
                 settings = new UserPhotoThumbnailSettings(inDto.Thumbnails.X, inDto.Thumbnails.Y, img.Width, img.Height);
             }
             else
@@ -96,7 +98,7 @@ public class PhotoController(
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserUpdatedAvatarThumbnails, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserUpdatedAvatarThumbnails, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
@@ -123,7 +125,7 @@ public class PhotoController(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
@@ -131,7 +133,7 @@ public class PhotoController(
 
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserDeletedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserDeletedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -181,7 +183,7 @@ public class PhotoController(
             throw new SecurityException();
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
@@ -193,7 +195,7 @@ public class PhotoController(
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserAddedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserAddedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -229,7 +231,7 @@ public class PhotoController(
 
                 await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(userId), Constants.Action_EditUser);
 
-                var tenant = await tenantManager.GetCurrentTenantAsync();
+                var tenant = tenantManager.GetCurrentTenant();
                 if (securityContext.CurrentAccount.ID != tenant.OwnerId && await _userManager.IsDocSpaceAdminAsync(userId) && userId != securityContext.CurrentAccount.ID)
                 {
                     throw new Exception(Resource.ErrorAccessDenied);
@@ -316,11 +318,11 @@ public class PhotoController(
 
     private static void CheckImgFormat(byte[] data)
     {
-        IImageFormat imgFormat;
+        MagickFormat imgFormat;
         try
         {
-            using var img = Image.Load(data);
-            imgFormat = img.Metadata.DecodedImageFormat;
+            using var img = new MagickImage(data);
+            imgFormat = img.Format;
         }
         catch (OutOfMemoryException)
         {
@@ -331,7 +333,7 @@ public class PhotoController(
             throw new UnknownImageFormatException(error);
         }
 
-        if (imgFormat.Name != "PNG" && imgFormat.Name != "JPEG")
+        if (imgFormat != MagickFormat.Png && imgFormat != MagickFormat.Jpeg)
         {
             throw new UnknownImageFormatException();
         }

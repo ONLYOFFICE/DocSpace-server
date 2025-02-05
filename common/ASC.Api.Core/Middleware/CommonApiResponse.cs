@@ -120,7 +120,7 @@ public class SuccessApiResponse : CommonApiResponse
 
         Links =
         [
-            new() { Href = httpContext.Request.GetDisplayUrl(), Action = httpContext.Request.Method }
+            new Link { Href = httpContext.Request.GetDisplayUrl(), Action = httpContext.Request.Method }
         ];
     }
 }

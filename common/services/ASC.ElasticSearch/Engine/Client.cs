@@ -30,7 +30,7 @@ namespace ASC.ElasticSearch;
 public class Client(ILogger<Client> logger, Settings settings)
 {
     private volatile OpenSearchClient _client;
-    private static readonly object _locker = new();
+    private static readonly Lock _locker = new();
 
     public OpenSearchClient Instance
     {
@@ -73,12 +73,12 @@ public class Client(ILogger<Client> logger, Settings settings)
                 {
                     connectionSettings.DisableDirectStreaming().PrettyJson().EnableDebugMode(r =>
                     {
-                        // _logger.Debug(r.DebugInformation);
-                        //
-                        // if (r.RequestBodyInBytes != null)
-                        // {
-                        //     _logger.Debug($"Request: {Encoding.UTF8.GetString(r.RequestBodyInBytes)}");
-                        // }
+                        logger.Debug(r.DebugInformation);
+                        
+                        if (r.RequestBodyInBytes != null)
+                        {
+                            logger.Debug($"Request: {Encoding.UTF8.GetString(r.RequestBodyInBytes)}");
+                        }
 
                         if (r.HttpStatusCode is 403 or 500 && r.ResponseBodyInBytes != null)
                         {

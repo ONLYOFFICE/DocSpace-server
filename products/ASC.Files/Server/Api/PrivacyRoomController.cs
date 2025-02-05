@@ -56,7 +56,7 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [SwaggerResponse(200, "List of encryption key pairs", typeof(EncryptionKeyPairDto))]
+    [SwaggerResponse(200, "List of encryption key pairs", typeof(IEnumerable<EncryptionKeyPairDto>))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpGet("access/{fileId}")]
     public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(FileIdRequestDto<T> inDto)
@@ -185,7 +185,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
 
         await PrivacyRoomSettings.SetEnabledAsync(settingsManager, inDto.Enable);
 
-        await messageService.SendAsync(inDto.Enable ? MessageAction.PrivacyRoomEnable : MessageAction.PrivacyRoomDisable);
+        messageService.Send(inDto.Enable ? MessageAction.PrivacyRoomEnable : MessageAction.PrivacyRoomDisable);
 
         return inDto.Enable;
     }

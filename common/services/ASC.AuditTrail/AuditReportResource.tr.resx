@@ -808,4 +808,67 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Davetiyeler yeniden gönderildi: {0}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>İstemcinin {0} etkinleştirmesi değişti</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>İstemcinin {0} görünürlüğü değişti</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>İstemci oluşturuldu</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>İstemci {0} silindi</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Dosya: {0}. Dizin {1}'den {2}'e değiştirildi</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Klasör: {0}. Dizin {1}'den {2}'e değiştirildi</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Klasör: {0}. Dizinler yeniden düzenlendi</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>İstemci {0} için yetkilendirme kodu oluşturuldu</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>İstemci {0} için kişisel erişim belirteci oluşturuldu</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>İstemcinin {0} sırrı yeniden oluşturuldu</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>İstemci {0} erişimi iptal edildi</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Oda: {0}. İndirmeyi reddet devre dışı bırakıldı</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Oda: {0}. İndirmeyi reddet etkinleştirildi</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Oda dizinleme devre dışı bırakıldı</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Oda dizinleme etkinleştirildi</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Kullanım ömrü devre dışı bırakıldı</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Kullanım ömrü ayarlandı. Değer: {0}. Süre: {1}. Kalıcı Olarak Sil: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Oda: {0}. Filigran devre dışı bırakıldı</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Oda: {0}. Filigran etkinleştirildi</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>İstemci {0} güncellendi</value>
+  </data>
 </root>

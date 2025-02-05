@@ -306,6 +306,27 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:update-history", { id, type });
   }
 
+  function logoutSession({ room, loginEventId } = {}) {
+    logger.info(`logout user ${room} session ${loginEventId}`);
+    filesIO.to(room).emit("s:logout-session", loginEventId);
+  }
+
+  function backupProgress({ tenantId, percentage } = {}) {
+    filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", {progress: percentage});
+  }
+
+  function restoreProgress({ tenantId, percentage } = {}) {
+    filesIO.to(`${tenantId}-restore`).emit("s:restore-progress", {progress: percentage});
+  }
+
+  function endBackup({ tenantId, result } = {}) {
+    filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", result);
+  }
+
+  function endRestore({ tenantId, result } = {}) {
+    filesIO.to(`${tenantId}-restore`).emit("s:restore-progress", result);
+  }
+
   return {
     start,
     startEdit,
@@ -323,6 +344,10 @@ module.exports = (io) => {
     markAsNewFiles,
     markAsNewFolders,
     changeInvitationLimitValue,
-    updateHistory
+    updateHistory,
+    backupProgress,
+    restoreProgress,
+    endBackup,
+    endRestore
   };
 };

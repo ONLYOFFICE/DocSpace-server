@@ -213,7 +213,7 @@ public class Consumer() : IDictionary<string, string>
         {
             var tenant = CoreBaseSettings.Standalone
                              ? Tenant.DefaultTenant
-                             : await TenantManager.GetCurrentTenantIdAsync();
+                             : TenantManager.GetCurrentTenantId();
 
             value = await CoreSettings.GetSettingAsync(GetSettingsKey(name), tenant);
         }
@@ -242,7 +242,7 @@ public class Consumer() : IDictionary<string, string>
 
         var tenant = CoreBaseSettings.Standalone
                          ? Tenant.DefaultTenant
-                         : await TenantManager.GetCurrentTenantIdAsync();
+                         : TenantManager.GetCurrentTenantId();
         await CoreSettings.SaveSettingAsync(GetSettingsKey(name), value, tenant);
     }
 
@@ -313,7 +313,7 @@ public class DataStoreConsumer : Consumer, ICloneable
         return base.GetSettingsKey(Name + name);
     }
 
-    private async Task InitAsync(IReadOnlyDictionary<string, string> additional)
+    private async Task InitAsync(Dictionary<string, string> additional)
     {
         if (additional == null || !additional.TryGetValue(HandlerTypeKey, out var handler))
         {

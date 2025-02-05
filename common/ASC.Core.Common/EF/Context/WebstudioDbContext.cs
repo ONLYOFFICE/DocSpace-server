@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public partial class WebstudioDbContext(DbContextOptions<WebstudioDbContext> options) : DbContext(options)
+public partial class WebstudioDbContext(DbContextOptions<WebstudioDbContext> options) : BaseDbContext(options)
 {
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }

@@ -1057,4 +1057,22 @@
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>{0} katram administratoram un iespēja pievienot vietu pēc pieprasījuma</value>
   </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Pievienojiet vismaz 1 atļauto IP adresi.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Pievienojiet vismaz vienu uzticamu domēnu.</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Neizdevās iestatīt kvotu katrai istabai. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Bezpeļņas</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Administratoru skaits pārsniedz ierobežojumu: {0}/{1}.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Neizdevās iestatīt kvotu katram lietotājam. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
+  </data>
 </root>

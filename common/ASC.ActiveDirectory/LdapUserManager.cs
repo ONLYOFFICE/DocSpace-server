@@ -246,8 +246,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                         wrapper.LdapChangeCollection.SetSkipUserChange(ldapUserInfo);
                     }
 
-                    logger.DebugSyncUserLdapFailedWithStatus(ldapUserInfo.Sid, ldapUserInfo.UserName,
-                        Enum.GetName(typeof(EmployeeStatus), ldapUserInfo.Status));
+                    logger.DebugSyncUserLdapFailedWithStatus(ldapUserInfo.Sid, ldapUserInfo.UserName, Enum.GetName(ldapUserInfo.Status));
 
                     return wrapper;
                 }
@@ -273,12 +272,12 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                     using var scope = serviceProvider.CreateScope();
                     var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
                     var source = scope.ServiceProvider.GetRequiredService<LdapNotifySource>();
-                    source.Init(await tenantManager.GetCurrentTenantAsync());
+                    source.Init(tenantManager.GetCurrentTenant());
                     var workContext = scope.ServiceProvider.GetRequiredService<WorkContext>();
                     var client = workContext.RegisterClient(scope.ServiceProvider, source);
                     var urlShortener = scope.ServiceProvider.GetRequiredService<IUrlShortener>();
 
-                    var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(ldapUserInfo.Email, ConfirmType.EmailActivation);
+                    var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation);
                    
                     await client.SendNoticeToAsync(
                         NotifyConstants.ActionLdapActivation,
@@ -358,9 +357,9 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
     private const string EXT_PHONE = "extphone";
     private const string EXT_SKYPE = "extskype";
 
-    private static void UpdateLdapUserContacts(UserInfo ldapUser, IReadOnlyList<string> portalUserContacts)
+    private static void UpdateLdapUserContacts(UserInfo ldapUser, List<string> portalUserContacts)
     {
-        if (portalUserContacts == null || !portalUserContacts.Any())
+        if (portalUserContacts == null || portalUserContacts.Count == 0)
         {
             return;
         }
@@ -567,7 +566,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                 userToUpdate.MobilePhone = updateInfo.MobilePhone;
             }
 
-            if (!userToUpdate.IsOwner(await tenantManager.GetCurrentTenantAsync())) // Owner must never be terminated by LDAP!
+            if (!userToUpdate.IsOwner(tenantManager.GetCurrentTenant())) // Owner must never be terminated by LDAP!
             {
                 userToUpdate.Status = updateInfo.Status;
             }
@@ -638,7 +637,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
             {
                 logger.DebugTryCheckAndSyncToLdapUser(ldapUserInfo.Item1.UserName, ldapUserInfo.Item1.Email, ldapUserInfo.Item2.DistinguishedName);
 
-                var tenant = await tenantManager.GetCurrentTenantAsync();
+                var tenant = tenantManager.GetCurrentTenant();
 
                 _ = Task.Run(Action);
 

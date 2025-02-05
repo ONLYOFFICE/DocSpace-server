@@ -28,8 +28,10 @@ namespace ASC.Api.Core.Extensions;
 
 public static class HostExtension
 {
-    public static async Task RunWithTasksAsync(this WebApplication webHost, CancellationToken cancellationToken = default, bool awaitTasks = true)
+    public static async Task RunWithTasksAsync(this WebApplication webHost, bool awaitTasks = true, CancellationToken cancellationToken = default)
     {
+        CustomSynchronizationContext.CreateContext();
+
         var t = RunTasksAsync(webHost, cancellationToken);
 
         if (awaitTasks)
@@ -44,9 +46,7 @@ public static class HostExtension
     private static async Task RunTasksAsync(this WebApplication webHost, CancellationToken cancellationToken = default)
     {
         await Task.Delay(1, cancellationToken);
-        
-        CustomSynchronizationContext.CreateContext();
-        
+
         // Load all tasks from DI
         var startupTasks = webHost.Services.GetServices<IStartupTask>();
 

@@ -41,6 +41,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
         }
 
         var withStackTrace = true;
+        var criticalException = false;
 
         switch (exception)
         {
@@ -80,9 +81,19 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.UnsupportedMediaType;
                 withStackTrace = false;
                 break;
+            default:
+                criticalException = true;
+                break;
         }
 
-        logger.CriticalError(context.Request.Method, context.Request.Path.Value, exception);
+        if (criticalException)
+        {
+            logger.CriticalError(context.Request.Method, context.Request.Path.Value, exception);
+        }
+        else
+        {
+            logger.InformationError(context.Request.Method, context.Request.Path.Value, exception.Message, exception.InnerException?.Message);
+        }
 
         var result = new ErrorApiResponse(status, exception, message, withStackTrace);
 

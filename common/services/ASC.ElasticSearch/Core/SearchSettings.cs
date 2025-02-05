@@ -114,7 +114,7 @@ public class SearchSettingsHelper(TenantManager tenantManager,
         settings.Data = JsonSerializer.Serialize(items);
         await settingsManager.SaveAsync(settings);
 
-        var action = new ReIndexAction { Tenant = await tenantManager.GetCurrentTenantIdAsync() };
+        var action = new ReIndexAction { Tenant = tenantManager.GetCurrentTenantId() };
         action.Names.AddRange(toReIndex.Select(r => r.ID).ToList());
 
         await cacheNotify.PublishAsync(action, CacheNotifyAction.Any);
@@ -156,7 +156,7 @@ public class SearchSettingsHelper(TenantManager tenantManager,
 
     public async Task<bool> CanSearchByContentAsync(Type t)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         if (!await CanIndexByContentAsync(t))
         {
             return false;

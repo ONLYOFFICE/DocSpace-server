@@ -42,7 +42,7 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/list</path>
     [Tags("Migration")]
-    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(200, "Ok", typeof(string[]))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("list")]
     public async Task<string[]> List()
@@ -162,7 +162,7 @@ public class MigrationController(
             throw new Exception(MigrationResource.MigrationProgressException);
         }
         migrationLogger.Init(status.LogName);
-        using var stream = await migrationLogger.GetStreamAsync();
+        await using var stream = await migrationLogger.GetStreamAsync();
 
         httpContextAccessor.HttpContext.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("migration.log"));
         httpContextAccessor.HttpContext.Response.ContentType = "text/plain; charset=UTF-8";

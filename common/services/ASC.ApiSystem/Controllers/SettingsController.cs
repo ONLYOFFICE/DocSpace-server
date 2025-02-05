@@ -204,7 +204,7 @@ public class SettingsController(CommonMethods commonMethods,
 
     #region private methods
 
-    private async Task<(bool, int, object)> GetTenantAsync(IModel model)
+    private async Task<(bool, int, object)> GetTenantAsync(SettingsModel model)
     {
         object error;
         var tenantId = -1;

@@ -44,7 +44,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <path>api/2.0/settings/customnavigation/getall</path>
     /// <collection>list</collection>
     [Tags("Settings / Custom Navigation")]
-    [SwaggerResponse(200, "List of the custom navigation items", typeof(CustomNavigationItem))]
+    [SwaggerResponse(200, "List of the custom navigation items", typeof(List<CustomNavigationItem>))]
     [HttpGet("getall")]
     public async Task<List<CustomNavigationItem>> GetCustomNavigationItemsAsync()
     {
@@ -132,7 +132,7 @@ public class CustomNavigationController(MessageService messageService,
 
         await settingsManager.SaveAsync(settings);
 
-        await messageService.SendAsync(MessageAction.CustomNavigationSettingsUpdated);
+        messageService.Send(MessageAction.CustomNavigationSettingsUpdated);
 
         return inDto;
     }
@@ -163,6 +163,6 @@ public class CustomNavigationController(MessageService messageService,
         settings.Items.Remove(target);
         await settingsManager.SaveAsync(settings);
 
-        await messageService.SendAsync(MessageAction.CustomNavigationSettingsUpdated);
+        messageService.Send(MessageAction.CustomNavigationSettingsUpdated);
     }
 }

@@ -57,6 +57,7 @@ public partial class SettingsController(MessageService messageService,
         UserInvitationLimitHelper userInvitationLimitHelper,
         QuotaUsageManager quotaUsageManager,
         TenantDomainValidator tenantDomainValidator,
+        TenantLogoManager tenantLogoManager,
         ExternalShare externalShare,
         IMapper mapper,
         UserFormatter userFormatter,
@@ -85,7 +86,7 @@ public partial class SettingsController(MessageService messageService,
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         var settings = new SettingsDto
         {
@@ -104,10 +105,17 @@ public partial class SettingsController(MessageService messageService,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
             ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager),
-            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !(await tenantManager.GetCurrentTenantQuotaAsync()).Branding
+            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !(await tenantManager.GetCurrentTenantQuotaAsync()).Branding,
+            DeepLink = new DeepLinkDto
+            {
+                AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",
+                Url = configuration["deeplink:url"] ?? "",
+                IosPackageId = configuration["deeplink:iospackageid"] ?? ""
+            },
+            LogoText = await tenantLogoManager.GetLogoTextAsync()
         };
 
-        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
+        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
         {
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
         }
@@ -142,14 +150,8 @@ public partial class SettingsController(MessageService messageService,
                 DatabaseURL = configuration["firebase:databaseURL"] ?? ""
             };
 
-            settings.DeepLink = new DeepLinkDto
-            {
-                AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",
-                Url = configuration["deeplink:url"] ?? "",
-                IosPackageId = configuration["deeplink:iospackageid"] ?? ""
-            };
-
             settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
+            settings.FeedbackAndSupportLink = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
             settings.ApiDocsLink = configuration["web:api-docs"];
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
@@ -229,7 +231,7 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         if (inDto.Type == TenantTrustedDomainsType.Custom)
         {
@@ -257,7 +259,7 @@ public partial class SettingsController(MessageService messageService,
 
         await tenantManager.SaveTenantAsync(tenant);
 
-        await messageService.SendAsync(MessageAction.TrustedMailDomainSettingsUpdated);
+        messageService.Send(MessageAction.TrustedMailDomainSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -299,7 +301,7 @@ public partial class SettingsController(MessageService messageService,
             throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
@@ -327,11 +329,11 @@ public partial class SettingsController(MessageService messageService,
         
         if (inDto.EnableQuota)
         {
-            await messageService.SendAsync(MessageAction.QuotaPerUserChanged, quota.ToString());
+            messageService.Send(MessageAction.QuotaPerUserChanged, quota.ToString());
         }
         else
         {
-            await messageService.SendAsync(MessageAction.QuotaPerUserDisabled);
+            messageService.Send(MessageAction.QuotaPerUserDisabled);
         }
         
         return quotaSettings;
@@ -371,7 +373,7 @@ public partial class SettingsController(MessageService messageService,
             throw new Exception(Resource.RoomQuotaGreaterPortalError);
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
@@ -399,11 +401,11 @@ public partial class SettingsController(MessageService messageService,
         
         if (inDto.EnableQuota)
         {
-            await messageService.SendAsync(MessageAction.QuotaPerRoomChanged, quota.ToString());
+            messageService.Send(MessageAction.QuotaPerRoomChanged, quota.ToString());
         }
         else
         {
-            await messageService.SendAsync(MessageAction.QuotaPerRoomDisabled);
+            messageService.Send(MessageAction.QuotaPerRoomDisabled);
         }
 
         return quotaSettings;
@@ -452,11 +454,11 @@ public partial class SettingsController(MessageService messageService,
         
         if (tenantQuotaSetting.EnableQuota)
         {
-            await messageService.SendAsync(MessageAction.QuotaPerPortalChanged, tenantQuotaSetting.Quota.ToString());
+            messageService.Send(MessageAction.QuotaPerPortalChanged, tenantQuotaSetting.Quota.ToString());
         }
         else
         {
-            await messageService.SendAsync(MessageAction.QuotaPerPortalDisabled);
+            messageService.Send(MessageAction.QuotaPerPortalDisabled);
         }
         
         return tenantQuotaSetting;
@@ -470,7 +472,7 @@ public partial class SettingsController(MessageService messageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "List of all the available portal languages", typeof(string))]
+    [SwaggerResponse(200, "List of all the available portal languages", typeof(IEnumerable<string>))]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
@@ -486,7 +488,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/timezones</path>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "List of all the available time zones with their IDs and display names", typeof(TimezonesRequestsDto))]
+    [SwaggerResponse(200, "List of all the available time zones with their IDs and display names", typeof(List<TimezonesRequestsDto>))]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard,Administrators")]
     [HttpGet("timezones")]
     [AllowNotPayment]
@@ -559,7 +561,7 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        await usersQuotaSyncOperation.RecalculateQuota(tenantManager.GetCurrentTenant());
     }
 
     /// <summary>
@@ -577,7 +579,7 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var result = await usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        var result = await usersQuotaSyncOperation.CheckRecalculateQuota(tenantManager.GetCurrentTenant());
         return !result.IsCompleted;
     }
 
@@ -722,7 +724,7 @@ public partial class SettingsController(MessageService messageService,
         {
             settings.Selected = inDto.Selected.Value;
             await settingsManager.SaveAsync(settings);
-            await messageService.SendAsync(MessageAction.ColorThemeChanged);
+            messageService.Send(MessageAction.ColorThemeChanged);
         }
 
         return new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
@@ -752,7 +754,7 @@ public partial class SettingsController(MessageService messageService,
         if (settings.Selected == inDto.Id)
         {
             settings.Selected = settings.Themes.Min(r => r.Id);
-            await messageService.SendAsync(MessageAction.ColorThemeChanged);
+            messageService.Send(MessageAction.ColorThemeChanged);
         }
 
         await settingsManager.SaveAsync(settings);
@@ -795,7 +797,7 @@ public partial class SettingsController(MessageService messageService,
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var culture = CultureInfo.GetCultureInfo(inDto.Lng);
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         var changelng = false;
         if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
@@ -818,11 +820,11 @@ public partial class SettingsController(MessageService messageService,
         {
             if (!tenant.TimeZone.Equals(oldTimeZone))
             {
-                await messageService.SendAsync(MessageAction.TimeZoneSettingsUpdated);
+                messageService.Send(MessageAction.TimeZoneSettingsUpdated);
             }
             if (changelng)
             {
-                await messageService.SendAsync(MessageAction.LanguageSettingsUpdated);
+                messageService.Send(MessageAction.LanguageSettingsUpdated);
             }
         }
 
@@ -844,7 +846,7 @@ public partial class SettingsController(MessageService messageService,
 
         await settingsManager.SaveAsync(new StudioDefaultPageSettings { DefaultProductID = inDto.DefaultProductID });
 
-        await messageService.SendAsync(MessageAction.DefaultStartPageSettingsUpdated);
+        messageService.Send(MessageAction.DefaultStartPageSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -870,7 +872,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
-    [SwaggerResponse(200, "Module space usage statistics", typeof(UsageSpaceStatItemDto))]
+    [SwaggerResponse(200, "Module space usage statistics", typeof(List<UsageSpaceStatItemDto>))]
     [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(IdRequestDto<Guid> inDto)
     {
@@ -942,7 +944,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/authservice</path>
     /// <collection>list</collection>
     [Tags("Settings / Authorization")]
-    [SwaggerResponse(200, "Authorization services", typeof(AuthServiceRequestsDto))]
+    [SwaggerResponse(200, "Authorization services", typeof(IEnumerable<AuthServiceRequestsDto>))]
     [HttpGet("authservice")]
     public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
     {
@@ -970,7 +972,7 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var saveAvailable = coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync())).ThirdParty;
+        var saveAvailable = coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId())).ThirdParty;
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.ThirdPartyAuthorization))
             || !saveAvailable)
         {
@@ -1012,7 +1014,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (changed)
         {
-            await messageService.SendAsync(MessageAction.AuthorizationKeysSetting);
+            messageService.Send(MessageAction.AuthorizationKeysSetting);
         }
 
         return changed;
@@ -1066,7 +1068,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("telegramlink")]
     public async Task<object> TelegramLink()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var currentLink = telegramHelper.CurrentRegistrationLink(authContext.CurrentAccount.ID, tenant.Id);
 
         if (string.IsNullOrEmpty(currentLink))
@@ -1089,7 +1091,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         return (int)await telegramHelper.UserIsConnectedAsync(authContext.CurrentAccount.ID, tenant.Id);
     }
 
@@ -1103,7 +1105,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         await telegramHelper.DisconnectAsync(authContext.CurrentAccount.ID, tenant.Id);
     }
 

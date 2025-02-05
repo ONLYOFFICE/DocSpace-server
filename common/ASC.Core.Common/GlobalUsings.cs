@@ -158,9 +158,9 @@ global using Telegram.Bot;
 global using Textile;
 global using Textile.Blocks;
 global using Textile.States;
-global using static ASC.Security.Cryptography.EmailValidationKeyProvider;
+
 global using AppOptions = FirebaseAdmin.AppOptions;
 global using FirebaseAdminMessaging = FirebaseAdmin.Messaging;
 global using FirebaseApp = FirebaseAdmin.FirebaseApp;
-global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute; 
-global using JsonSerializer = System.Text.Json.JsonSerializer; 
+global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
+global using JsonSerializer = System.Text.Json.JsonSerializer;

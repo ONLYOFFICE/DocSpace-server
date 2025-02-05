@@ -27,13 +27,13 @@
 namespace ASC.MessagingSystem.Core;
 
 [Scope]
-public class MessageFactory(AuthContext authContext,
-        TenantManager tenantManager,
-        ILogger<MessageFactory> logger,
-        IHttpContextAccessor httpContextAccessor)
-    {
-    public async Task<EventMessage> CreateAsync(HttpRequest request, string initiator, DateTime? dateTime, MessageAction action, MessageTarget target,
-        IEnumerable<FilesAuditReference> references = null, params string[] description)
+public class MessageFactory(
+    AuthContext authContext,
+    TenantManager tenantManager,
+    ILogger<MessageFactory> logger,
+    IHttpContextAccessor httpContextAccessor)
+{
+    public EventMessage Create(HttpRequest request, string initiator, DateTime? dateTime, MessageAction action, MessageTarget target, IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         try
         {
@@ -42,7 +42,7 @@ public class MessageFactory(AuthContext authContext,
                 Ip = MessageSettings.GetIP(request),
                 Initiator = initiator,
                 Date = dateTime ?? DateTime.UtcNow,
-                TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+                TenantId = tenantManager.GetCurrentTenantId(),
                 UserId = authContext.CurrentAccount.ID,
                 Page = MessageSettings.GetReferer(request),
                 Action = action,
@@ -60,15 +60,14 @@ public class MessageFactory(AuthContext authContext,
         }
     }
 
-    public async Task<EventMessage> CreateAsync(IDictionary<string, StringValues> headers, MessageAction action, MessageTarget target, 
-        IEnumerable<FilesAuditReference> references = null, params string[] description)
+    public EventMessage Create(IDictionary<string, StringValues> headers, MessageAction action, MessageTarget target, IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         try
         {
             var message = new EventMessage
             {
                 Date = DateTime.UtcNow,
-                TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+                TenantId = tenantManager.GetCurrentTenantId(),
                 UserId = authContext.CurrentAccount.ID,
                 Action = action,
                 Description = description,
@@ -101,36 +100,14 @@ public class MessageFactory(AuthContext authContext,
         }
     }
 
-    public async Task<EventMessage> CreateAsync(string initiator, MessageAction action, MessageTarget target, params string[] description)
-    {
-        try
-        {
-            return new EventMessage
-            {
-                Initiator = initiator,
-                Date = DateTime.UtcNow,
-                TenantId = await tenantManager.GetCurrentTenantIdAsync(),
-                Action = action,
-                Description = description,
-                Target = target,
-            };
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorWhileParseInitiatorMessage(action, ex);
-
-            return null;
-        }
-    }
-
-    public async Task<EventMessage> CreateAsync(HttpRequest request, MessageUserData userData, MessageAction action)
+    public EventMessage Create(HttpRequest request, MessageUserData userData, MessageAction action)
     {
         try
         {
             var message = new EventMessage
             {
                 Date = DateTime.UtcNow,
-                TenantId = userData?.TenantId ?? await tenantManager.GetCurrentTenantIdAsync(),
+                TenantId = userData?.TenantId ?? tenantManager.GetCurrentTenantId(),
                 UserId = userData?.UserId ?? authContext.CurrentAccount.ID,
                 Action = action,
                 Active = true

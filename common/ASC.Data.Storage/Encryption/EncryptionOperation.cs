@@ -171,7 +171,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         return encryptedFiles;
     }
 
-    private async Task<IEnumerable<string>> GetFilesAsync(IEnumerable<string> domains, ICollection<string> progress, DiscDataStore targetStore, string targetDomain)
+    private static async Task<IEnumerable<string>> GetFilesAsync(IEnumerable<string> domains, List<string> progress, DiscDataStore targetStore, string targetDomain)
     {
         IEnumerable<string> files = await targetStore.ListFilesRelativeAsync(targetDomain, "\\", "*.*", true).ToListAsync();
 

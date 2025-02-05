@@ -49,7 +49,7 @@ public static class InstanceRegistrationExtension
 
             entity.Property(e => e.WorkerTypeName)
                   .HasColumnName("worker_type_name")
-                  .HasColumnType("varchar(255)")
+                  .HasColumnType("varchar")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci")
                   .IsRequired();
@@ -61,7 +61,7 @@ public static class InstanceRegistrationExtension
 
             entity.Property(e => e.InstanceRegistrationId)
                   .HasColumnName("instance_registration_id")
-                  .HasColumnType("varchar(255)")
+                  .HasColumnType("varchar")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci")
                   .IsRequired();
@@ -79,33 +79,29 @@ public static class InstanceRegistrationExtension
             entity.ToTable("hosting_instance_registration");
 
             entity.HasKey(e => e.InstanceRegistrationId)
-                  .HasName("PRIMARY");
+                  .HasName("pk_instance_registration");
 
             entity.HasIndex(e => e.WorkerTypeName)
-                  .HasDatabaseName("worker_type_name");
+                  .HasDatabaseName("ix_worker_type_name");
 
             entity.Property(e => e.WorkerTypeName)
                   .HasColumnName("worker_type_name")
-                  .HasColumnType("varchar(255)")
-                  .HasCharSet("utf8")
-                  .UseCollation("utf8_general_ci")
+                  .HasColumnType("varchar")
                   .IsRequired();
 
             entity.Property(e => e.IsActive)
                   .HasColumnName("is_active")
-                  .HasColumnType("tinyint(4)")
+                  .HasColumnType("boolean")
                   .IsRequired();
 
             entity.Property(e => e.InstanceRegistrationId)
                   .HasColumnName("instance_registration_id")
-                  .HasColumnType("varchar(255)")
-                  .HasCharSet("utf8")
-                  .UseCollation("utf8_general_ci")
+                  .HasColumnType("varchar")
                   .IsRequired();
 
             entity.Property(e => e.LastUpdated)
                   .HasColumnName("last_updated")
-                  .HasColumnType("datetime");
+                  .HasColumnType("timestamptz");
         });
     }
 }
