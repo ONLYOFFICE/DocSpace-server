@@ -258,14 +258,10 @@ public class NotifyTransferRequest(TenantManager tenantManager,
             var topGifTag = request.Arguments.Find(x => x.Tag == CommonTags.TopGif);
             if (!string.IsNullOrEmpty((string)topGifTag?.Value))
             {
-                var currentTenantSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-                if (currentTenantSettings.GetIsDefault(WhiteLabelLogoType.Notification))
+                var isDefaultLogoSettings = await tenantLogoManager.IsDefaultLogoSettingsAsync();
+                if (isDefaultLogoSettings)
                 {
-                    var defaultTenantSettings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
-                    if (defaultTenantSettings.GetIsDefault(WhiteLabelLogoType.Notification))
-                    {
-                        return;
-                    }
+                    return;
                 }
 
                 request.Arguments.RemoveAll(x => x.Tag == CommonTags.TopGif);
