@@ -42,6 +42,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -145,6 +146,17 @@ public class AuthorizationMapper {
           refreshToken, metadata -> metadata.putAll(parseMap(entity.getRefreshTokenMetadata())));
     }
 
+    if (entity.getIdTokenValue() != null) {
+      var issuedAt =
+          entity.getIdTokenIssuedAt() != null ? entity.getIdTokenIssuedAt().toInstant() : null;
+      var expiresAt =
+          entity.getIdTokenExpiresAt() != null ? entity.getIdTokenExpiresAt().toInstant() : null;
+      var idToken =
+          new OidcIdToken(
+              entity.getIdTokenValue(), issuedAt, expiresAt, parseMap(entity.getIdTokenClaims()));
+      builder.token(idToken, metadata -> metadata.putAll(parseMap(entity.getIdTokenMetadata())));
+    }
+
     return builder.build();
   }
 
@@ -173,9 +185,15 @@ public class AuthorizationMapper {
       builder
           .authorizationCodeValue(authorizationCode.getToken().getTokenValue())
           .authorizationCodeIssuedAt(
-              ZonedDateTime.ofInstant(authorizationCode.getToken().getIssuedAt(), ZoneId.of(UTC)))
+              authorizationCode.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(
+                      authorizationCode.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
           .authorizationCodeExpiresAt(
-              ZonedDateTime.ofInstant(authorizationCode.getToken().getExpiresAt(), ZoneId.of(UTC)))
+              authorizationCode.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(
+                      authorizationCode.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null)
           .authorizationCodeMetadata(writeMap(authorizationCode.getMetadata()));
     }
 
@@ -184,9 +202,13 @@ public class AuthorizationMapper {
       builder
           .accessTokenValue(accessToken.getToken().getTokenValue())
           .accessTokenIssuedAt(
-              ZonedDateTime.ofInstant(accessToken.getToken().getIssuedAt(), ZoneId.of(UTC)))
+              accessToken.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(accessToken.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
           .accessTokenExpiresAt(
-              ZonedDateTime.ofInstant(accessToken.getToken().getExpiresAt(), ZoneId.of(UTC)))
+              accessToken.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(accessToken.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null)
           .accessTokenMetadata(writeMap(accessToken.getMetadata()))
           .accessTokenType(accessToken.getToken().getTokenType().getValue())
           .accessTokenScopes(
@@ -198,11 +220,30 @@ public class AuthorizationMapper {
       builder
           .refreshTokenValue(refreshToken.getToken().getTokenValue())
           .refreshTokenIssuedAt(
-              ZonedDateTime.ofInstant(refreshToken.getToken().getIssuedAt(), ZoneId.of(UTC)))
+              refreshToken.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(refreshToken.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
           .refreshTokenExpiresAt(
-              ZonedDateTime.ofInstant(refreshToken.getToken().getExpiresAt(), ZoneId.of(UTC)))
+              refreshToken.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(refreshToken.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null)
           .refreshTokenMetadata(writeMap(refreshToken.getMetadata()));
     }
+
+    var idToken = authorization.getToken(OidcIdToken.class);
+    if (idToken != null)
+      builder
+          .idTokenValue(idToken.getToken().getTokenValue())
+          .idTokenClaims(writeMap(idToken.getClaims()))
+          .idTokenMetadata(writeMap(idToken.getMetadata()))
+          .idTokenIssuedAt(
+              idToken.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(idToken.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
+          .idTokenExpiresAt(
+              idToken.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(idToken.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null);
 
     return builder.build();
   }

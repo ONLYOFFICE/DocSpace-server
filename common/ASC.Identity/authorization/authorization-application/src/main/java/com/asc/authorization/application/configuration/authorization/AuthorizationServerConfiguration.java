@@ -100,6 +100,7 @@ public class AuthorizationServerConfiguration {
               authorize.requestMatchers("oauth2/introspect").permitAll();
               authorize.anyRequest().authenticated();
             })
+        .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
         .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
         .apply(authorizationServerConfigurer);
 

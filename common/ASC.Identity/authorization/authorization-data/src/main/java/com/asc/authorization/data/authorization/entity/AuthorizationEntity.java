@@ -147,6 +147,26 @@ public class AuthorizationEntity {
   @Column(name = "refresh_token_expires_at")
   private ZonedDateTime refreshTokenExpiresAt;
 
+  /** The ID token value issued as part of the authorization for openid scope. */
+  @Column(name = "id_token_value")
+  private String idTokenValue;
+
+  /** The claims associated with the ID token, typically represented in JSON format. */
+  @Column(name = "id_token_claims")
+  private String idTokenClaims;
+
+  /** Metadata associated with the ID token. */
+  @Column(name = "id_token_metadata")
+  private String idTokenMetadata;
+
+  /** The timestamp when the ID token was issued. */
+  @Column(name = "id_token_issued_at")
+  private ZonedDateTime idTokenIssuedAt;
+
+  /** The timestamp when the ID token is set to expire. */
+  @Column(name = "id_token_expires_at")
+  private ZonedDateTime idTokenExpiresAt;
+
   /** The modified at timestamp. */
   @Column(name = "modified_at")
   private ZonedDateTime modifiedAt;
