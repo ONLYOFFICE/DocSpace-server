@@ -55,7 +55,8 @@ try
     logger.Info("Configuring web host ({applicationContext})...", AppName);
 
     builder.Host.ConfigureDefault();
-
+    builder.ConfigureOpenTelemetry();
+    
     await builder.Services.AddClearEventsServices(builder.Configuration, Namespace);
 
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>

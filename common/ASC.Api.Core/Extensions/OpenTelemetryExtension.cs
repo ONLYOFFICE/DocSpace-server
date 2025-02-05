@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,40 +24,50 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Core;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
-namespace ASC.Data.Backup.BackgroundTasks;
+namespace ASC.Api.Core.Extensions;
 
-public class Startup : BaseStartup
+public static class OpenTelemetryExtension
 {
-    public Startup(IConfiguration configuration) : base(configuration)
+    public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        builder.Logging.AddOpenTelemetry(logging =>
         {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-        }
+            logging.IncludeFormattedMessage = true;
+            logging.IncludeScopes = true;
+        });
+
+        builder.Services.AddOpenTelemetry()
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddRuntimeInstrumentation();
+            })
+            .WithTracing(tracing =>
+            {
+                tracing.AddSource(builder.Environment.ApplicationName)
+
+                    .AddHttpClientInstrumentation();
+            });
+
+        builder.AddOpenTelemetryExporters();
+
+        return builder;
     }
 
-    public override async Task ConfigureServices(WebApplicationBuilder builder)
+    private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        var services = builder.Services;
-        await base.ConfigureServices(builder);
+        var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
 
-        services.Configure<DistributedTaskQueueFactoryOptions>(BackupWorker.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        if (useOtlpExporter)
         {
-            x.MaxThreadsCount = 5;
-        });
-        
-        services.AddHostedService<BackupListenerService>();
-        services.AddHostedService<BackupCleanerTempFileService>();
+            builder.Services.AddOpenTelemetry().UseOtlpExporter();
+        }
 
-        services.AddHostedService<BackupWorkerService>();
-        services.AddActivePassiveHostedService<BackupCleanerService>(_configuration);
-        services.AddActivePassiveHostedService<BackupSchedulerService>(_configuration);
-
-        services.AddBaseDbContextPool<BackupsContext>();
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.RegisterQuotaFeature();
-
+        return builder;
     }
 }

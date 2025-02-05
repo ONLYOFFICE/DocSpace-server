@@ -61,13 +61,16 @@ public abstract class BaseStartup
         OpenApiEnabled = _configuration.GetValue<bool>("openApi:enable");
     }
 
-    public virtual async Task ConfigureServices(IServiceCollection services)
+    public virtual async Task ConfigureServices(WebApplicationBuilder builder)
     {
+        var services = builder.Services;
+        
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
         }
         
+        builder.ConfigureOpenTelemetry();
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();

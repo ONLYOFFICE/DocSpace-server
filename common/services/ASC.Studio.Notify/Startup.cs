@@ -37,10 +37,11 @@ public class Startup : BaseWorkerStartup
         }        
     }
 
-    public override async Task ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        await base.ConfigureServices(services);
+        await base.ConfigureServices(builder);
 
+        var services = builder.Services;
         services.AddHttpClient();
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());//toDo
         services.AddHostedService<ServiceLauncher>();

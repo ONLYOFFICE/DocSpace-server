@@ -40,13 +40,15 @@ public class Startup : BaseStartup
         }
     }
 
-    public override async Task ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
+        var services = builder.Services;
+        
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         services.AddMemoryCache();
 
-        await base.ConfigureServices(services);
+        await base.ConfigureServices(builder);
 
         services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
         {

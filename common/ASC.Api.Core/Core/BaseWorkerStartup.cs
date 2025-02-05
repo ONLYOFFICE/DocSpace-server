@@ -34,16 +34,18 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
     protected IHostEnvironment HostEnvironment { get; } = hostEnvironment;
     protected DIHelper DIHelper { get; } = new();
 
-    public virtual async Task ConfigureServices(IServiceCollection services)
+    public virtual async Task ConfigureServices(WebApplicationBuilder builder)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
         }
         
+        var services = builder.Services;
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
-
+        builder.ConfigureOpenTelemetry();
+        
         services.AddSingleton<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();

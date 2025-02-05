@@ -65,8 +65,8 @@ try
 
     var startup = new Startup(builder.Configuration);
 
-    await startup.ConfigureServices(builder.Services);
-
+    await startup.ConfigureServices(builder);
+    
     builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
 
     var app = builder.Build();
