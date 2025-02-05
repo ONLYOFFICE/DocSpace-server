@@ -1446,7 +1446,7 @@ internal class FileDao(
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var toDeleteFiles = await filesDbContext.DbFormRolesAsync(tenantId, formId).ToListAsync();
+        var toDeleteFiles = await filesDbContext.DbFilesFormRoleMappingForDeleteAsync(tenantId, formId).ToListAsync();
 
         if (toDeleteFiles.Any())
         {

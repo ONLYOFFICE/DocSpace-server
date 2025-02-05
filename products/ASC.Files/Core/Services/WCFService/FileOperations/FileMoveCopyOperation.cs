@@ -896,7 +896,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                     if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
                     {
                         var room = await folderDao.GetFolderAsync((TTo)Convert.ChangeType(roomId, typeof(TTo)));
-                        if (room.FolderType == FolderType.FillingFormsRoom)
+                        if (room.FolderType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom)
                         {
                             var fileType = FileUtility.GetFileTypeByFileName(file.Title);
                             if (fileType != FileType.Pdf || !await fileChecker.CheckExtendedPDF(file))
@@ -1013,10 +1013,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     }
                                 }
 
-                                if (fileType == FileType.Pdf && !isInSameRoom)
+                                if (file.IsForm && !isInSameRoom)
                                 {
                                     await LinkDao.DeleteAllLinkAsync(file.Id);
                                     await FileDao.SaveProperties(file.Id, null);
+                                    await FileDao.DeleteFormRolesAsync(file.Id);
                                 }
 
                                 await socketManager.CreateFileAsync(newFile);

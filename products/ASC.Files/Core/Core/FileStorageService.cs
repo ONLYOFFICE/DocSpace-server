@@ -2884,6 +2884,10 @@ public class FileStorageService //: IFileStorageService
                 await linkDao.DeleteAllLinkAsync(file.Id);
 
                 await fileDao.SaveProperties(file.Id, null);
+                if (file.IsForm)
+                {
+                    await fileDao.DeleteFormRolesAsync(file.Id);
+                }
             }
         }
 
