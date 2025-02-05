@@ -134,9 +134,6 @@ $__AuthorName hat den Raum gelöscht: $RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpace-Benachrichtigung. Erwähnt im Dokument</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Erwähnt im Dokument</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Mailing ist abgeschlossen.</value>
   </data>

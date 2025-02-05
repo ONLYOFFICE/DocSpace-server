@@ -24,31 +24,33 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Notify.Senders;
+namespace ASC.Files.Core.IntegrationEvents.Events;
 
-[Singleton]
-public class PushSender(ILogger<PushSender> logger, IServiceProvider serviceProvider) : INotifySender
+[ProtoContract]
+public record RoomNotifyIntegrationEvent : IntegrationEvent
 {
-    public void Init(IDictionary<string, string> properties) { }
-
-    public async Task<NoticeSendResult> SendAsync(NotifyMessage m)
+    private RoomNotifyIntegrationEvent() : base()
     {
-        if (!string.IsNullOrEmpty(m.Content))
-        {
-            m.Content = m.Content.Replace("\r\n", "\n").Trim('\n', '\r', ' ');
-            m.Content = Regex.Replace(m.Content, "\n{3,}", "\n\n");
-        }
-        try
-        {
-            using var scope = serviceProvider.CreateScope();
-            var firebaseHelper = scope.ServiceProvider.GetService<FirebaseHelper>();
-            await firebaseHelper.SendMessageAsync(m);
-            return NoticeSendResult.OK;
-        }
-        catch (Exception e)
-        {
-            logger.ErrorUnexpected(e);
-            return NoticeSendResult.SendingImpossible;
-        }
+
     }
+
+    public RoomNotifyIntegrationEvent(Guid createBy, int tenantId)
+        : base(createBy, tenantId)
+    {
+
+    }
+
+    [ProtoMember(1)]
+    public RoomNotifyIntegrationData<int> Data { get; set; }
+
+    [ProtoMember(2)]
+    public RoomNotifyIntegrationData<string> ThirdPartyData { get; set; }
+}
+[ProtoContract]
+public class RoomNotifyIntegrationData<T>
+{
+    [ProtoMember(1)]
+    public T RoomId { get; set; }
+    [ProtoMember(2)]
+    public T FileId { get; set; }
 }
