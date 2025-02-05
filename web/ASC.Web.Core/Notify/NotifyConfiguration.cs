@@ -188,11 +188,9 @@ public class NotifyTransferRequest(TenantManager tenantManager,
         UserManager userManager,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         ILogger<ProductSecurityInterceptor> logger,
-        TenantExtra tenantExtra,
         WebItemManager webItemManager,
         TenantLogoManager tenantLogoManager,
         TenantUtil tenantUtil,
-        CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         SettingsManager settingsManager,
         StudioNotifyHelper studioNotifyHelper)
@@ -219,11 +217,7 @@ public class NotifyTransferRequest(TenantManager tenantManager,
         var productid = CallContext.GetData("asc.web.product_id");
         var product = productid != null ? webItemManager[(Guid)productid] as IProduct : null;
 
-        var logoText = TenantWhiteLabelSettings.DefaultLogoText;
-        if ((tenantExtra.Enterprise || coreBaseSettings.CustomMode) && !await MailWhiteLabelSettings.IsDefaultAsync(settingsManager))
-        {
-            logoText = await tenantLogoManager.GetLogoTextAsync();
-        }
+        var logoText =  await tenantLogoManager.GetLogoTextAsync();
 
         var rootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
@@ -246,7 +240,7 @@ public class NotifyTransferRequest(TenantManager tenantManager,
             new(CommonTags.SupportEmail, commonLinkUtility.GetSupportEmail()),
             new(CommonTags.LetterLogoText, logoText),
             new(CommonTags.MailWhiteLabelSettings, await MailWhiteLabelSettings.InstanceAsync(settingsManager)),
-            new(CommonTags.SendFrom, tenant.Name == "" ? Resource.PortalName : tenant.Name),
+            new(CommonTags.SendFrom, logoText),
             new(CommonTags.ImagePath, studioNotifyHelper.GetNotificationImageUrl("").TrimEnd('/'))
         });
 

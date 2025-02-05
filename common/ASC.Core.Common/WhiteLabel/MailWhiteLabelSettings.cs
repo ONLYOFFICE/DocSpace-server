@@ -29,6 +29,17 @@ namespace ASC.Web.Core.WhiteLabel;
 /// <summary>
 /// Mail white label settings
 /// </summary>
+public class MailWhiteLabelSettingsWrapper
+{
+    /// <summary>
+    /// Mail white label settings
+    /// </summary>
+    public MailWhiteLabelSettings Settings { get; set; }
+}
+
+/// <summary>
+/// Mail white label settings
+/// </summary>
 public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 {
     /// <summary>Specifies if the mail footer is enabled or not</summary>
@@ -37,7 +48,7 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 
     /// <summary>Specifies if the footer with social media contacts is enabled or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool FooterSocialEnabled { get; init; }
+    public bool FooterSocialEnabled { get; set; }
 
 
     [JsonIgnore]
