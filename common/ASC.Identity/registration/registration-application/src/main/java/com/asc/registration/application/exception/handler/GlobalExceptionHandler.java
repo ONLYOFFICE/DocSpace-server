@@ -44,7 +44,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /** The GlobalExceptionHandler class handles exceptions depending on the type. */
 @Slf4j
@@ -63,6 +65,23 @@ public class GlobalExceptionHandler {
       RequestNotPermitted ex, HttpServletRequest request) {
     return new ResponseEntity<>(
         ErrorResponse.builder().reason("too many requests").build(), HttpStatus.TOO_MANY_REQUESTS);
+  }
+
+  /**
+   * Handles the NoResourceFoundException and returns a ResponseEntity with a not found status.
+   *
+   * <p>This method is invoked when a request is made to a non-existing API endpoint. Spring Boot
+   * 3.2+ throws a NoResourceFoundException in such cases, which this handler catches and returns an
+   * appropriate error response.
+   *
+   * @param ex the NoResourceFoundException that was raised when an endpoint was not found
+   * @return an ErrorResponse object containing details of the error and HTTP status code NOT_FOUND
+   */
+  @ExceptionHandler(value = {NoResourceFoundException.class})
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public org.springframework.web.ErrorResponse handleNoResourceFoundException(
+      NoResourceFoundException ex) {
+    return org.springframework.web.ErrorResponse.create(ex, HttpStatus.NOT_FOUND, ex.getMessage());
   }
 
   /**
