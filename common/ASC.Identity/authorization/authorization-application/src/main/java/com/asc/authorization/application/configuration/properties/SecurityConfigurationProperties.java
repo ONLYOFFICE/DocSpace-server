@@ -38,7 +38,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "spring.security.oauth2.authentication")
 public class SecurityConfigurationProperties {
+  /** The name of the signature header. Default value is "X-Signature". */
   private String signatureHeader = "X-Signature";
+
+  /**
+   * The name of the redirect cookie back to the beginning of oauth flow. Default value is
+   * "x-redirect-authorization-uri".
+   */
+  private String redirectAuthorizationCookie = "x-redirect-authorization-uri";
 
   /** The parameter name for the client ID. Default value is "client_id". */
   private String clientIdParameter = "client_id";

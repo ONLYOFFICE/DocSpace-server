@@ -32,8 +32,10 @@ import com.asc.authorization.application.exception.authentication.Authentication
 import com.asc.authorization.application.exception.client.RegisteredClientPermissionException;
 import com.asc.authorization.application.security.SecurityUtils;
 import com.asc.authorization.application.security.oauth.error.AuthenticationError;
+import com.asc.common.utilities.HttpUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -65,6 +67,7 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
   /** Pattern for matching the OAuth2 login endpoint. */
   private static final Pattern LOGIN_PATTERN = Pattern.compile("/oauth2/login");
 
+  private final HttpUtils httpUtils;
   private final SecurityUtils securityUtils;
   private final AuthenticationManager authenticationManager;
   private final SecurityConfigurationProperties securityConfigProperties;
@@ -94,6 +97,14 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
           request, response, clientId, AuthenticationError.MISSING_CLIENT_ID_ERROR.getCode());
       return;
     }
+
+    var cookie =
+        new Cookie(
+            securityConfigProperties.getRedirectAuthorizationCookie(),
+            httpUtils.getFullURL(request));
+    cookie.setPath("/");
+    cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
+    response.addCookie(cookie);
 
     var signature = request.getHeader(securityConfigProperties.getSignatureHeader());
     if (signature == null || signature.isBlank()) {
