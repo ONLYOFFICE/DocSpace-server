@@ -26,27 +26,38 @@
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<Projects.ASC_ApiSystem>("asc-apisystem");
 
-builder.AddProject<Projects.ASC_ClearEvents>("asc-clearevents");
+builder.AddProject<Projects.ASC_ApiSystem>("asc-apisystem")
+    .WithHttpHealthCheck("/health");
 
-builder.AddProject<Projects.ASC_Data_Backup>("asc-data-backup");
+builder.AddProject<Projects.ASC_ClearEvents>("asc-clearevents")
+    .WithHttpHealthCheck("/health");
 
-builder.AddProject<Projects.ASC_Data_Backup_BackgroundTasks>("asc-data-backup-backgroundtasks");
+builder.AddProject<Projects.ASC_Data_Backup>("asc-data-backup")
+    .WithHttpHealthCheck("/health");
+
+builder.AddProject<Projects.ASC_Data_Backup_BackgroundTasks>("asc-data-backup-backgroundtasks")
+    .WithHttpHealthCheck("/health");
 
 builder.AddProject<Projects.ASC_Notify>("asc-notify");
 
-builder.AddProject<Projects.ASC_Web_Api>("asc-web-api");
+builder.AddProject<Projects.ASC_Web_Api>("asc-web-api")
+    .WithHttpHealthCheck("/health");
 
-builder.AddProject<Projects.ASC_People>("asc-people");
+builder.AddProject<Projects.ASC_People>("asc-people")
+    .WithHttpHealthCheck("/health");
 
-builder.AddProject<Projects.ASC_Files>("asc-files");
+builder.AddProject<Projects.ASC_Files>("asc-files")
+    .WithHttpHealthCheck("/health");
 
-builder.AddProject<Projects.ASC_Files_Service>("asc-files-service");
+builder.AddProject<Projects.ASC_Files_Service>("asc-files-service")
+    .WithHttpHealthCheck("/health");
 
-builder.AddProject<Projects.ASC_Studio_Notify>("asc-studio-notify");
+builder.AddProject<Projects.ASC_Studio_Notify>("asc-studio-notify")
+    .WithHttpHealthCheck("/health");
 
-builder.AddProject<Projects.ASC_Web_Studio>("asc-web-studio");
+builder.AddProject<Projects.ASC_Web_Studio>("asc-web-studio")
+    .WithHttpHealthCheck("/health");
 
 builder.AddNodeApp("asc-socketIO", "server.js", "../common/ASC.Socket.IO/");
 
