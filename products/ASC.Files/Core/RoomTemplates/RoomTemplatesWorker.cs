@@ -27,30 +27,37 @@
 using ASC.Files.Core.RoomTemplates.Events;
 using ASC.Files.Core.RoomTemplates.Operations;
 
+using static Dropbox.Api.Team.UsersSelectorArg;
+using static Dropbox.Api.TeamLog.EventCategory;
+using Twilio.TwiML.Voice;
+
 namespace ASC.Files.Core.RoomTemplates;
 
 [Singleton]
 public class RoomTemplatesWorker(
     IDistributedTaskQueueFactory queueFactory,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    IDistributedLockProvider distributedLockProvider)
 {
     private static readonly SemaphoreSlim _semaphoreSlim = new(1);
     private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "room_templates";
+    public const string LockKey = $"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}";
 
-    public async Task StartCreateTemplateAsync(int tenantId,
+    public async Task<string> StartCreateTemplateAsync(int tenantId,
         Guid userId,
         int roomId, 
         string title, 
         IEnumerable<string> emails, 
         LogoSettings logo,
         IEnumerable<string> tags, 
-        IEnumerable<Guid> groups)
+        IEnumerable<Guid> groups,
+        bool enqueueTask = true, 
+        string taskId = null)
     {
-        try
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            await _semaphoreSlim.WaitAsync();
             var item = (await _queue.GetAllTasks<CreateRoomTemplateOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
 
             if (item is { IsCompleted: true })
@@ -58,29 +65,43 @@ public class RoomTemplatesWorker(
                 await _queue.DequeueTask(item.Id);
                 item = null;
             }
-
-            if (item == null)
+            if (item == null || (enqueueTask && item.Id == taskId && item.Status == DistributedTaskStatus.Created))
             {
+
                 item = serviceProvider.GetService<CreateRoomTemplateOperation>();
 
                 item.Init(tenantId, userId, roomId, title, emails, logo, tags, groups);
 
-                await _queue.EnqueueTask(item);
+                if (!string.IsNullOrEmpty(taskId))
+                {
+                    item.Id = taskId;
+                }
+
+                if (enqueueTask)
+                {
+                    await _queue.EnqueueTask(item);
+                }
+                else
+                {
+                    await _queue.PublishTask(item);
+                }
             }
 
-            await item.PublishChanges();
-        }
-        finally
-        {
-            _semaphoreSlim.Release();
+            return item.Id;
         }
     }
 
-    public async Task StartCreateRoomAsync(int tenantId, Guid userId, int templateId, string title, LogoSettings logo, IEnumerable<string> tags)
+    public async Task<string> StartCreateRoomAsync(int tenantId,
+        Guid userId,
+        int templateId, 
+        string title,
+        LogoSettings logo,
+        IEnumerable<string> tags,
+        bool enqueueTask = true,
+        string taskId = null)
     {
-        try
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            await _semaphoreSlim.WaitAsync();
             var item = (await _queue.GetAllTasks<CreateRoomFromTemplateOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
 
             if (item is { IsCompleted: true })
@@ -88,21 +109,28 @@ public class RoomTemplatesWorker(
                 await _queue.DequeueTask(item.Id);
                 item = null;
             }
-
-            if (item == null)
+            if (item == null || (enqueueTask && item.Id == taskId && item.Status == DistributedTaskStatus.Created))
             {
                 item = serviceProvider.GetService<CreateRoomFromTemplateOperation>();
 
                 item.Init(tenantId, userId, templateId, title, logo, tags);
 
-                await _queue.EnqueueTask(item);
+                if (!string.IsNullOrEmpty(taskId))
+                {
+                    item.Id = taskId;
+                }
+
+                if (enqueueTask)
+                {
+                    await _queue.EnqueueTask(item);
+                }
+                else
+                {
+                    await _queue.PublishTask(item);
+                }
             }
 
-            await item.PublishChanges();
-        }
-        finally
-        {
-            _semaphoreSlim.Release();
+            return item.Id;
         }
     }
 

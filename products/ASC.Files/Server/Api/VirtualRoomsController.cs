@@ -102,20 +102,23 @@ public class VirtualRoomsInternalController(
                 Y = dto.Logo.Y
             };
         }
+
+        var taskId = await roomTemplatesWorker.StartCreateRoomAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID,
+          dto.TemplateId,
+          dto.Title,
+          logo,
+          dto.Tags,
+          false);
+
         await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             TemplateId = dto.TemplateId,
             Logo = logo,
             Title = dto.Title,
-            Tags = dto.Tags
+            Tags = dto.Tags,
+            TaskId = taskId
         });
-
-        var status = await Status();
-        if (status == null || status.IsCompleted == true)
-        {
-            return null;
-        }
-        return status;
+        return await Status();
     }
 
     [HttpGet("fromTemplate/status")]

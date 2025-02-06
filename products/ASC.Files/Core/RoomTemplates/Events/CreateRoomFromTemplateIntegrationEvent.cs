@@ -41,6 +41,9 @@ public record CreateRoomFromTemplateIntegrationEvent : IntegrationEvent
     [ProtoMember(9)]
     public IEnumerable<string> Tags { get; set; }
 
+    [ProtoMember(10)]
+    public string TaskId { get; set; }
+
     public CreateRoomFromTemplateIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
     }

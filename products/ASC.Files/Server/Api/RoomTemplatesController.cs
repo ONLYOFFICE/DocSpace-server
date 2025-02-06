@@ -27,6 +27,8 @@
 using ASC.Files.Core.RoomTemplates;
 using ASC.Files.Core.RoomTemplates.Events;
 
+using ImageMagick;
+
 namespace ASC.Files.Api;
 
 [DefaultRoute("roomtemplate")]
@@ -59,6 +61,15 @@ public class RoomTemplatesController(IEventBus eventBus,
             dto.Groups = new List<Guid> { Constants.GroupEveryone.ID };
         }
 
+        var taskId = await roomTemplatesWorker.StartCreateTemplateAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID,
+            dto.RoomId,
+            dto.Title,
+            dto.Share,
+            logo,
+            dto.Tags,
+            dto.Groups,
+            false);
+
         await eventBus.PublishAsync(new CreateRoomTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             RoomId = dto.RoomId,
@@ -66,14 +77,10 @@ public class RoomTemplatesController(IEventBus eventBus,
             Logo = logo,
             Emails = dto.Share,
             Tags = dto.Tags,
-            Groups = dto.Groups
+            Groups = dto.Groups,
+            TaskId = taskId
         });
-        var status = await Status();
-        if (status == null || status.IsCompleted == true)
-        {
-            return null;
-        }
-        return status;
+        return await Status();
     }
 
     [HttpGet("status")]

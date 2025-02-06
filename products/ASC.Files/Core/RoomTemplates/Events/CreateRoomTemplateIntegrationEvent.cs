@@ -45,7 +45,9 @@ public record CreateRoomTemplateIntegrationEvent : IntegrationEvent
     public IEnumerable<string> Emails { get; set; }
 
     [ProtoMember(11)]
-    public IEnumerable<Guid> Groups { get; set; }
+    public IEnumerable<Guid> Groups { get; set; } 
+    [ProtoMember(12)]
+    public string TaskId { get; set; }
 
     public CreateRoomTemplateIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {

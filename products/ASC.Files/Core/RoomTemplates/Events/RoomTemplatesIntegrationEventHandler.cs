@@ -7,11 +7,11 @@ public class RoomTemplatesIntegrationEventHandler(RoomTemplatesWorker worker)
 {
     public async Task Handle(CreateRoomTemplateIntegrationEvent @event)
     {
-        await worker.StartCreateTemplateAsync(@event.TenantId, @event.CreateBy, @event.RoomId, @event.Title, @event.Emails, @event.Logo, @event.Tags, @event.Groups);
+        await worker.StartCreateTemplateAsync(@event.TenantId, @event.CreateBy, @event.RoomId, @event.Title, @event.Emails, @event.Logo, @event.Tags, @event.Groups, true, @event.TaskId);
     }
 
     public async Task Handle(CreateRoomFromTemplateIntegrationEvent @event)
     {
-        await worker.StartCreateRoomAsync(@event.TenantId, @event.CreateBy, @event.TemplateId, @event.Title, @event.Logo, @event.Tags);
+        await worker.StartCreateRoomAsync(@event.TenantId, @event.CreateBy, @event.TemplateId, @event.Title, @event.Logo, @event.Tags, true, @event.TaskId);
     }
 }
