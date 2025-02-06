@@ -346,6 +346,17 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _thirdPartyFeature.Value = value;
     }
 
+    private readonly TenantQuotaFeatureFlag _yearFeature;
+
+    /// <summary>
+    /// Specifies if the tenant quota is yearly subscription or not
+    /// </summary>
+    public bool Year
+    {
+        get => _yearFeature.Value;
+        set => _yearFeature.Value = value;
+    }
+
     public TenantQuota()
     {
         _featuresList = [];
@@ -373,6 +384,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         _contentSearchFeature = new TenantQuotaFeatureFlag(this) { Name = "contentsearch", Visible = false };
         _thirdPartyFeature = new TenantQuotaFeatureFlag(this) { Name = "thirdparty", Order = 9, EmployeeType = EmployeeType.DocSpaceAdmin };
         _statisticFeature = new TenantQuotaFeatureFlag(this) { Name = "statistic", Order = 10 };
+        _yearFeature = new TenantQuotaFeatureFlag(this) { Name = "year", Visible = false };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -398,7 +410,8 @@ public class TenantQuota : IMapFrom<DbQuota>
             _oauthFeature,
             _contentSearchFeature,
             _thirdPartyFeature,
-            _statisticFeature
+            _statisticFeature,
+            _yearFeature
         };
     }
 
