@@ -45,4 +45,3 @@ global using AutoMapper;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Logging;
 global using NetEscapades.EnumGenerators;
-global using Newtonsoft.Json;
