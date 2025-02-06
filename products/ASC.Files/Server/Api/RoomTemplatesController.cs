@@ -68,7 +68,12 @@ public class RoomTemplatesController(IEventBus eventBus,
             Tags = dto.Tags,
             Groups = dto.Groups
         });
-        return await Status();
+        var status = await Status();
+        if (status == null || status.IsCompleted == true)
+        {
+            return null;
+        }
+        return status;
     }
 
     [HttpGet("status")]

@@ -109,7 +109,13 @@ public class VirtualRoomsInternalController(
             Title = dto.Title,
             Tags = dto.Tags
         });
-        return await Status();
+
+        var status = await Status();
+        if (status == null || status.IsCompleted == true)
+        {
+            return null;
+        }
+        return status;
     }
 
     [HttpGet("fromTemplate/status")]
