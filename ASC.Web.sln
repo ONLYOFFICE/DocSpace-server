@@ -83,6 +83,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Migration.Core", "commo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AppHost", "ASC.AppHost\ASC.AppHost.csproj", "{55634A1B-D6D8-452D-AD54-B978E631CC39}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migrations", "migrations", "{5C4C0F61-4FAA-44F3-BB64-25F6D3AB1FA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Migration.Runner", "common\Tools\ASC.Migration.Runner\ASC.Migration.Runner.csproj", "{AB770819-DD95-4A41-8D7D-AE67D1F859DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -233,11 +237,18 @@ Global
 		{55634A1B-D6D8-452D-AD54-B978E631CC39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55634A1B-D6D8-452D-AD54-B978E631CC39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55634A1B-D6D8-452D-AD54-B978E631CC39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB770819-DD95-4A41-8D7D-AE67D1F859DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB770819-DD95-4A41-8D7D-AE67D1F859DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB770819-DD95-4A41-8D7D-AE67D1F859DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB770819-DD95-4A41-8D7D-AE67D1F859DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {62783077-E041-40BA-A406-E7EF12CAFF2D}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AB770819-DD95-4A41-8D7D-AE67D1F859DA} = {5C4C0F61-4FAA-44F3-BB64-25F6D3AB1FA1}
 	EndGlobalSection
 EndGlobal

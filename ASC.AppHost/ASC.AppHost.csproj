@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0"/>
+        <PackageReference Include="Aspire.Hosting.MySql" Version="9.0.0" />
         <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.0.0" />
     </ItemGroup>
 
@@ -23,6 +24,7 @@
       <ProjectReference Include="..\common\services\ASC.Data.Backup\ASC.Data.Backup.csproj" />
       <ProjectReference Include="..\common\services\ASC.Notify\ASC.Notify.csproj" />
       <ProjectReference Include="..\common\services\ASC.Studio.Notify\ASC.Studio.Notify.csproj" />
+      <ProjectReference Include="..\common\Tools\ASC.Migration.Runner\ASC.Migration.Runner.csproj" />
       <ProjectReference Include="..\products\ASC.Files\Server\ASC.Files.csproj" />
       <ProjectReference Include="..\products\ASC.Files\Service\ASC.Files.Service.csproj" />
       <ProjectReference Include="..\products\ASC.People\Server\ASC.People.csproj" />
