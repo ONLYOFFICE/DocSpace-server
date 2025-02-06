@@ -39,17 +39,18 @@ internal class EventTypeConverter(
     : ITypeConverter<LoginEventQuery, LoginEvent>,
       ITypeConverter<AuditEventQuery, AuditEvent>
 {
+    private static readonly JsonSerializerOptions _serializerOptions = new()
+    {
+        Converters = { new UtcDateTimeJsonConverter() }
+    };
+
     public LoginEvent Convert(LoginEventQuery source, LoginEvent destination, ResolutionContext context)
     {
         var result = context.Mapper.Map<LoginEvent>(source.Event);
 
         if (source.Event.DescriptionRaw != null)
         {
-            result.Description = JsonConvert.DeserializeObject<IList<string>>(source.Event.DescriptionRaw,
-                new JsonSerializerSettings
-                {
-                    DateTimeZoneHandling = DateTimeZoneHandling.Utc
-                });
+            result.Description = JsonSerializer.Deserialize<IList<string>>(source.Event.DescriptionRaw, _serializerOptions);
         }
 
         if (!(string.IsNullOrEmpty(source.FirstName) || string.IsNullOrEmpty(source.LastName)))
@@ -95,12 +96,7 @@ internal class EventTypeConverter(
 
         if (source.Event.DescriptionRaw != null)
         {
-            result.Description = JsonConvert.DeserializeObject<IList<string>>(
-               source.Event.DescriptionRaw,
-               new JsonSerializerSettings
-               {
-                   DateTimeZoneHandling = DateTimeZoneHandling.Utc
-               });
+            result.Description = JsonSerializer.Deserialize<IList<string>>(source.Event.DescriptionRaw, _serializerOptions);
         }
 
         if (result.UserId == Constants.CoreSystem.ID)

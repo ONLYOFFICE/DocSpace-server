@@ -24,13 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Newtonsoft.Json;
-
 namespace ASC.MessagingSystem.Mapping;
 
 [Scope]
 public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, ITypeConverter<EventMessage, DbAuditEvent>
 {
+    private static readonly JsonSerializerOptions _serializerOptions = new()
+    {
+        Converters = { new UtcDateTimeJsonConverter() }
+    };
+
     public DbLoginEvent Convert(EventMessage source, DbLoginEvent destination, ResolutionContext context)
     {
         var messageEvent = context.Mapper.Map<EventMessage, MessageEvent>(source);
@@ -41,10 +44,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
 
         if (source.Description is { Count: > 0 })
         {
-            loginEvent.DescriptionRaw = JsonConvert.SerializeObject(source.Description, new JsonSerializerSettings
-                {
-                    DateTimeZoneHandling = DateTimeZoneHandling.Utc
-                });
+            loginEvent.DescriptionRaw = JsonSerializer.Serialize(source.Description, _serializerOptions);
         }
 
         return loginEvent;
@@ -66,11 +66,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
 
         if (source.Description is { Count: > 0 })
         {
-            auditEvent.DescriptionRaw =
-                JsonConvert.SerializeObject(GetSafeDescription(source.Description), new JsonSerializerSettings
-                {
-                    DateTimeZoneHandling = DateTimeZoneHandling.Utc
-                });
+            auditEvent.DescriptionRaw = JsonSerializer.Serialize(GetSafeDescription(source.Description), _serializerOptions);
         }
 
         return auditEvent;
