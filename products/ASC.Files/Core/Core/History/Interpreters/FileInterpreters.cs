@@ -311,8 +311,15 @@ public class FileDeletedInterpreter : ActionInterpreter
 public class FileVersionDeletedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
-    {
-        return new ValueTask<HistoryData>(new FileVersionRemovedData(target, description[0], version: description[1]));
+    {        
+        var desc = GetAdditionalDescription(description);
+        return new ValueTask<HistoryData>(new FileVersionRemovedData(
+            target,
+            description[0],
+            desc.ParentId,
+            desc.ParentTitle,
+            desc.ParentType, 
+            description[1]));
     }
 }
 

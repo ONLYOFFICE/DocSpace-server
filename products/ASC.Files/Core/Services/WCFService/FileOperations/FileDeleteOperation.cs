@@ -474,7 +474,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                         if (_headers is { Count: > 0 })
                         {
-                            await filesMessageService.SendAsync(MessageAction.FileVersionRemoved, file, _headers, file.Title, file.Version.ToString());
+                            await filesMessageService.SendAsync(MessageAction.FileVersionRemoved, file, _headers, file.Title, v.ToString());
                         }
                     }
                     catch (Exception ex)
