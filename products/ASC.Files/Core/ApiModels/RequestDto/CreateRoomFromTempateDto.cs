@@ -27,8 +27,23 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 public class CreateRoomFromTempateDto
 {
+    /// <summary>
+    /// Template id
+    /// </summary>
     public int TemplateId { get; set; }
+
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// Logo
+    /// </summary>
     public LogoRequest Logo { get; set; }
+
+    /// <summary>
+    /// Collection of tags
+    /// </summary>
     public IEnumerable<string> Tags { get; set; }
 }

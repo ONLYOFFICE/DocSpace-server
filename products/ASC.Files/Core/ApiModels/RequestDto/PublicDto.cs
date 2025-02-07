@@ -28,6 +28,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class PublicDto
 {
+    /// <summary>
+    /// Template id
+    /// </summary>
     [FromRoute(Name="id")]
     public int Id { get; set; }
 }
@@ -35,6 +38,13 @@ public class PublicDto
 
 public class SetPublicDto
 {
+    /// <summary>
+    /// Template id
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// Public settings
+    /// </summary>
     public bool Public { get; set; }
 }

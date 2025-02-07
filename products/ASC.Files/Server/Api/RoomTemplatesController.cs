@@ -24,11 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.RoomTemplates;
-using ASC.Files.Core.RoomTemplates.Events;
-
-using ImageMagick;
-
 namespace ASC.Files.Api;
 
 [DefaultRoute("roomtemplate")]
@@ -40,6 +35,14 @@ public class RoomTemplatesController(IEventBus eventBus,
     FileDtoHelper fileDtoHelper,
     RoomTemplatesWorker roomTemplatesWorker) : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
+
+    /// <summary>
+    /// Start create room template
+    /// </summary>
+    /// <short>Start create room template</short>
+    /// <path>api/2.0/files/roomtemplate</path>
+    [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
     [HttpPost("")]
     public async Task<RoomTemplateStatusDto> CreateTemplateAsync(RoomTemplateDto dto)
     {
@@ -83,6 +86,13 @@ public class RoomTemplatesController(IEventBus eventBus,
         return await Status();
     }
 
+    /// <summary>
+    /// Get progress creating room template
+    /// </summary>
+    /// <short>Get progress creating room template</short>
+    /// <path>api/2.0/files/roomtemplate/status</path>
+    [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
     [HttpGet("status")]
     public async Task<RoomTemplateStatusDto> Status()
     {
@@ -108,12 +118,25 @@ public class RoomTemplatesController(IEventBus eventBus,
         return null;
     }
 
+
+    /// <summary>
+    /// Get public settings
+    /// </summary>
+    /// <short>Get public</short>
+    /// <path>api/2.0/files/roomtemplate/{id}/public</path>
+    [Tags("Files / Rooms")]
     [HttpGet("{id}/public")]
     public async Task<bool> IsPublic(PublicDto inDto)
     {
         return await fileStorageService.IsPublicAsync(inDto.Id);
     }
 
+
+    /// <summary>
+    /// Set public settings
+    /// </summary>
+    /// <short>Set public</short>
+    /// <path>api/2.0/files/roomtemplate//public</path>
     [HttpPut("public")]
     public async Task SetPublic(SetPublicDto inDto)
     {

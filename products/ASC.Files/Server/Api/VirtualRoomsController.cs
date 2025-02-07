@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.RoomTemplates;
-using ASC.Files.Core.RoomTemplates.Events;
-
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -87,6 +84,13 @@ public class VirtualRoomsInternalController(
         return await _folderDtoHelper.GetAsync(room);
     }
 
+    /// <summary>
+    /// Start create a room in the "Rooms" section based on a template.
+    /// </summary>
+    /// <short>Start create a room based on a template</short>
+    /// <path>api/2.0/files/rooms/fromTemplate</path>
+    [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Status", typeof(RoomFromTemplateStatusDto))]
     [HttpPost("fromTemplate")]
     public async Task<RoomFromTemplateStatusDto> CreateRoomAsync(CreateRoomFromTempateDto dto)
     {
@@ -121,6 +125,13 @@ public class VirtualRoomsInternalController(
         return await Status();
     }
 
+    /// <summary>
+    /// Get progress creating room based a template
+    /// </summary>
+    /// <short>Get progress creating room</short>
+    /// <path>api/2.0/files/rooms/fromTemplate/status</path>
+    [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Status", typeof(RoomFromTemplateStatusDto))]
     [HttpGet("fromTemplate/status")]
     public async Task<RoomFromTemplateStatusDto> Status()
     {

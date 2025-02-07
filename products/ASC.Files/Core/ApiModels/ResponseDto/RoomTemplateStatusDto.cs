@@ -28,17 +28,34 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class BaseRoomTemplateStatusDto
 {
+    /// <summary>
+    /// Progress
+    /// </summary>
     public double Progress { get; set; }
+
+    /// <summary>
+    /// Error
+    /// </summary>
     public string Error { get; set; }
+
+    /// <summary>
+    /// IsCompleted
+    /// </summary>
     public bool IsCompleted { get; set; }
 }
 
 public class RoomTemplateStatusDto : BaseRoomTemplateStatusDto
 {
+    /// <summary>
+    /// Template id
+    /// </summary>
     public int TemplateId { get; set; }
 }
 
 public class RoomFromTemplateStatusDto : BaseRoomTemplateStatusDto
 {
+    /// <summary>
+    /// Room id
+    /// </summary>
     public int RoomId { get; set; }
 }

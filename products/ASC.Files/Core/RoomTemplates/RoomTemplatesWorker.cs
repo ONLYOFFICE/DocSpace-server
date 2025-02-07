@@ -24,13 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.RoomTemplates.Events;
-using ASC.Files.Core.RoomTemplates.Operations;
-
-using static Dropbox.Api.Team.UsersSelectorArg;
-using static Dropbox.Api.TeamLog.EventCategory;
-using Twilio.TwiML.Voice;
-
 namespace ASC.Files.Core.RoomTemplates;
 
 [Singleton]

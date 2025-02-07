@@ -27,11 +27,38 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 public class RoomTemplateDto
 {
+    /// <summary>
+    /// Room id
+    /// </summary>
     public int RoomId { get; set; }
+
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// Logo
+    /// </summary>
     public LogoRequest Logo { get; set; }
+
+    /// <summary>
+    /// Collection of share user emails
+    /// </summary>
     public IEnumerable<string> Share { get; set; }
+
+    /// <summary>
+    ///  Collection of share groups
+    /// </summary>
     public List<Guid> Groups { get; set; }
+
+    /// <summary>
+    ///  Public 
+    /// </summary>
     public bool Public { get; set; }
+
+    /// <summary>
+    ///  Collection of tags
+    /// </summary>
     public IEnumerable<string> Tags { get; set; }
 }
