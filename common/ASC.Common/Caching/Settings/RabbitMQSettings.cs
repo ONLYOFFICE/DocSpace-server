@@ -41,6 +41,21 @@ public class RabbitMQSettings
     public string ClientProvidedName { get; set; }
     public ushort RequestedChannelMax { get; set; } = DefaultChannelMax;
 
+    public RabbitMQSettings()
+    {
+        
+    }
+
+    public RabbitMQSettings(string connectionString)
+    {
+        var uri = new Uri(connectionString);
+        HostName = uri.Host;
+        Port = uri.Port;
+        VirtualHost = uri.AbsolutePath;
+        UserName = uri.UserInfo.Split(':')[0];
+        Password = uri.UserInfo.Split(':')[1];
+    }
+    
     public ConnectionFactory GetConnectionFactory()
     {
         var factory = new ConnectionFactory
