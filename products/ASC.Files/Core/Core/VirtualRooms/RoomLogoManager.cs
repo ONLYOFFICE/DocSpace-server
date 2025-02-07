@@ -435,7 +435,7 @@ public class RoomLogoManager(
     {
         var rand = new Random();
         var color = fileUtilityConfiguration.LogoColors[rand.Next(fileUtilityConfiguration.LogoColors.Count - 1)];
-        var result = MagickColor.FromRgba(color.R, color.G, color.B, 1).ToHexString();
+        var result = MagickColor.FromRgba(color.R, color.G, color.B, 1).ToHexString().Replace("#", string.Empty);
         return result[..^2];//without opacity
     }
 
