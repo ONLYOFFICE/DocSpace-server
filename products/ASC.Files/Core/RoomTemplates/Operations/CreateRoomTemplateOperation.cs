@@ -31,6 +31,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
 {
     private Guid _userId;
     private LogoSettings _logo;
+    private bool _copyLogo;
     private IEnumerable<string> _tags;
     private IEnumerable<string> _emails;
     private IEnumerable<Guid> _groups;
@@ -67,6 +68,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         string title,
         IEnumerable<string> emails,
         LogoSettings logo,
+        bool copyLogo,
         IEnumerable<string> tags,
         IEnumerable<Guid> groups)
     {
@@ -74,6 +76,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         _userId = userId;
         _roomId = roomId;
         _logo = logo;
+        _copyLogo = copyLogo;
         _tags = tags;
         _emails = emails;
         _title = title;
@@ -138,7 +141,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
                 var warning = await fileStorageService.SetAceObjectAsync(aceCollection, false);
             }
 
-            if (_logo == null)
+            if (_logo == null || _copyLogo)
             {
                 var room = await folderDao.GetFolderAsync(_roomId);
                 if (await roomLogoManager.CopyAsync(room, template))
@@ -150,7 +153,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
 
             _totalCount = await fileDao.GetFilesCountAsync(_roomId, FilterType.None, false, Guid.Empty, string.Empty, null, false, true);
             var files = fileDao.GetFilesAsync(_roomId);
-            var folders = folderDao.GetFoldersAsync(_roomId).Select(r => r.Id);
+            var folders = folderDao.GetFoldersAsync(_roomId).Where(f=> f.FolderType == FolderType.DEFAULT).Select(r => r.Id);
             
             await foreach (var file in files)
             {

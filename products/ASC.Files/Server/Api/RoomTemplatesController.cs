@@ -69,6 +69,7 @@ public class RoomTemplatesController(IEventBus eventBus,
             dto.Title,
             dto.Share,
             logo,
+            dto.CopyLogo,
             dto.Tags,
             dto.Groups,
             false);
@@ -81,7 +82,8 @@ public class RoomTemplatesController(IEventBus eventBus,
             Emails = dto.Share,
             Tags = dto.Tags,
             Groups = dto.Groups,
-            TaskId = taskId
+            TaskId = taskId,
+            CopyLogo = dto.CopyLogo
         });
         return await Status();
     }

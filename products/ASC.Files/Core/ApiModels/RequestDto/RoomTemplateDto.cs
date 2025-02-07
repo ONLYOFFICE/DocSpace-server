@@ -43,6 +43,11 @@ public class RoomTemplateDto
     public LogoRequest Logo { get; set; }
 
     /// <summary>
+    ///  Copy room logo
+    /// </summary>
+    public bool CopyLogo { get; set; }
+
+    /// <summary>
     /// Collection of share user emails
     /// </summary>
     public IEnumerable<string> Share { get; set; }

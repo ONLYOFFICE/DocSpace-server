@@ -32,6 +32,7 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
     private Guid _userId;
     private string _title;
     private LogoSettings _logo;
+    private bool _copyLogo;
     private IEnumerable<string> _tags;
     private int _templateId;
     private int _totalCount;
@@ -64,6 +65,7 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
         int templateId,
         string title,
         LogoSettings logo,
+        bool copyLogo,
         IEnumerable<string> tags)
     {
         TenantId = tenantId;
@@ -71,6 +73,7 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
         _templateId = templateId;
         _title = title;
         _logo = logo;
+        _copyLogo = copyLogo;
         _tags = tags;
         RoomId = -1;
     }
@@ -110,19 +113,19 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
             var room = await fileStorageService.CreateRoomFromTemplateAsync(_templateId, _title, _tags, dtoLogo);
             RoomId = room.Id;
 
-            if (_logo == null)
+            if (_logo == null && _copyLogo)
             {
                 var template = await folderDao.GetFolderAsync(_templateId);
-                if (await roomLogoManager.CopyAsync(room, template))
+                if (await roomLogoManager.CopyAsync(template, room))
                 {
-                    template.SettingsHasLogo = true;
-                    await folderDao.SaveFolderAsync(template);
+                    room.SettingsHasLogo = true;
+                    await folderDao.SaveFolderAsync(room);
                 }
             }
 
             var fileDao = daoFactory.GetFileDao<int>();
             var files = await fileDao.GetFilesAsync(_templateId).ToListAsync();
-            var folders = await folderDao.GetFoldersAsync(_templateId).Select(r => r.Id).ToListAsync();
+            var folders = await folderDao.GetFoldersAsync(_templateId).Where(f => f.FolderType == FolderType.DEFAULT).Select(r => r.Id).ToListAsync();
             _totalCount = await fileDao.GetFilesCountAsync(_templateId, FilterType.None, false, Guid.Empty, string.Empty, null, false, true);
 
             foreach (var file in files)

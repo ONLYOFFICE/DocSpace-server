@@ -44,6 +44,7 @@ public class RoomTemplatesWorker(
         string title, 
         IEnumerable<string> emails, 
         LogoSettings logo,
+        bool CopyLogo,
         IEnumerable<string> tags, 
         IEnumerable<Guid> groups,
         bool enqueueTask = true, 
@@ -63,7 +64,7 @@ public class RoomTemplatesWorker(
 
                 item = serviceProvider.GetService<CreateRoomTemplateOperation>();
 
-                item.Init(tenantId, userId, roomId, title, emails, logo, tags, groups);
+                item.Init(tenantId, userId, roomId, title, emails, logo, CopyLogo, tags, groups);
 
                 if (!string.IsNullOrEmpty(taskId))
                 {
@@ -89,6 +90,7 @@ public class RoomTemplatesWorker(
         int templateId, 
         string title,
         LogoSettings logo,
+        bool copyLogo,
         IEnumerable<string> tags,
         bool enqueueTask = true,
         string taskId = null)
@@ -106,7 +108,7 @@ public class RoomTemplatesWorker(
             {
                 item = serviceProvider.GetService<CreateRoomFromTemplateOperation>();
 
-                item.Init(tenantId, userId, templateId, title, logo, tags);
+                item.Init(tenantId, userId, templateId, title, logo, copyLogo, tags);
 
                 if (!string.IsNullOrEmpty(taskId))
                 {

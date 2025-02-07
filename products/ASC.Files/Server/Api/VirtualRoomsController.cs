@@ -111,6 +111,7 @@ public class VirtualRoomsInternalController(
           dto.TemplateId,
           dto.Title,
           logo,
+          dto.CopyLogo,
           dto.Tags,
           false);
 
@@ -118,6 +119,7 @@ public class VirtualRoomsInternalController(
         {
             TemplateId = dto.TemplateId,
             Logo = logo,
+            CopyLogo = dto.CopyLogo,
             Title = dto.Title,
             Tags = dto.Tags,
             TaskId = taskId

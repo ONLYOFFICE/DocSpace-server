@@ -43,6 +43,11 @@ public class CreateRoomFromTempateDto
     public LogoRequest Logo { get; set; }
 
     /// <summary>
+    /// Copy logo
+    /// </summary>
+    public bool CopyLogo { get; set; }
+
+    /// <summary>
     /// Collection of tags
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
