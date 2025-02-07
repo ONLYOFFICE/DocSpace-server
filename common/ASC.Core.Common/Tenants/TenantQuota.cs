@@ -384,7 +384,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         _contentSearchFeature = new TenantQuotaFeatureFlag(this) { Name = "contentsearch", Visible = false };
         _thirdPartyFeature = new TenantQuotaFeatureFlag(this) { Name = "thirdparty", Order = 9, EmployeeType = EmployeeType.DocSpaceAdmin };
         _statisticFeature = new TenantQuotaFeatureFlag(this) { Name = "statistic", Order = 10 };
-        _yearFeature = new TenantQuotaFeatureFlag(this) { Name = "year", Visible = false };
+        _yearFeature = new TenantQuotaFeatureFlag(this) { Name = "year", Order = 11, EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
