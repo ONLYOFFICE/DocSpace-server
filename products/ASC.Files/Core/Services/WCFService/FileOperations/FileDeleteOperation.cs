@@ -159,7 +159,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             }
             else if (folder.FolderType != FolderType.DEFAULT && folder.FolderType != FolderType.BUNCH
                 && !DocSpaceHelper.IsRoom(folder.FolderType)
-                && (folder.FolderType is FolderType.InProcessFormFolder or FolderType.ReadyFormFolder && folder.RootFolderType != FolderType.Archive))
+                && (folder.FolderType is FolderType.InProcessFormFolder or FolderType.ReadyFormFolder && (folder.RootFolderType != FolderType.Archive && folder.RootFolderType != FolderType.RoomTemplates)))
             {
                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
