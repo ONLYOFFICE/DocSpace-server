@@ -227,7 +227,7 @@ public class FileDtoHelper(
 
         var fileDao = daoFactory.GetFileDao<T>();
 
-        if (fileType == FileType.Pdf)
+        if (file.IsForm)
         {
             var folderDao = daoFactory.GetCacheFolderDao<T>();
 

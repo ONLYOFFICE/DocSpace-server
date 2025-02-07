@@ -1104,13 +1104,39 @@ public class FileSecurity(IDaoFactory daoFactory,
                 
                 if (action == FilesSecurityActions.FillForms && file != null)
                 {
-                    var parentFolders = await GetFileParentFolders(file.ParentId);
-                    if (parentFolders != null)
+                    var folderDao = daoFactory.GetFolderDao<T>();
+                    var fileFolder = await folderDao.GetFolderAsync(file.ParentId);
+                    if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
                     {
-                        var fileFolder = parentFolders.LastOrDefault();
-                        if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
+                        return false;
+                    }
+                }
+                if (file != null && file.IsForm && (action is FilesSecurityActions.FillForms or FilesSecurityActions.Edit))
+                {
+                    var folderDao = daoFactory.GetFolderDao<T>();
+                    var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
+                    if (room?.FolderType == FolderType.VirtualDataRoom)
+                    {
+                        var fileDao = daoFactory.GetFileDao<T>();
+                        var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, userId);
+
+                        var role = await roles.FirstOrDefaultAsync(role => role.Submitted == false);
+
+                        switch (action)
                         {
-                            return false;
+                            case FilesSecurityActions.FillForms:
+                                if ((currentStep == -1) || (role == null || currentStep != role.Sequence))
+                                {
+                                    return false;
+                                }
+                                break;
+
+                            case FilesSecurityActions.Edit:
+                                if (currentStep != -1)
+                                {
+                                    return false;
+                                }
+                                break;
                         }
                     }
                 }

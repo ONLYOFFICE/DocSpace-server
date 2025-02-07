@@ -592,40 +592,37 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded
         };
     }
-    public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, EditorType editorType, bool fill)
+    public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, EditorType editorType)
     {
-        var result = new FormOpenSetup<T>();
-
-        if (!fill)
-        {
-            result.CanEdit = !fill;
-            result.CanFill = fill;
-            return result;
-        }
         var fileDao = daoFactory.GetFileDao<T>();
-
         var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, securityContext.CurrentAccount.ID);
         var myRoles = await roles.ToListAsync();
 
-        if (currentStep == 0)
+        var result = new FormOpenSetup<T>
         {
-            return result;
-        }
-        else if(!myRoles.Any())
-        {
-            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
-            return result;
-        }
+            CanEdit = currentStep == -1,
+            CanFill = false
+        };
 
-        var firstRole = myRoles.FirstOrDefault();
-        if (currentStep == firstRole.Sequence && !firstRole.Submitted)
+        if (currentStep != -1)
         {
-            result.CanFill = true;
-            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
-            return result;
-        }
+            if (!myRoles.Any())
+            {
+                result.CanEdit = false;
+                return result;
+            }
 
-        result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+            var role = myRoles.FirstOrDefault(role => !role.Submitted && currentStep == role.Sequence);
+            if (role != null)
+            {
+                result.CanFill = true;
+            }
+            else
+            {
+                result.CanEdit = false;
+            }
+            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+        }
 
         return result;
     }

@@ -844,9 +844,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
-        var isPdfForm = false;
-        var isInSameRoom = false;
-        var numberRoomMembers = 0;
         foreach (var fileId in fileIds)
         {
             CancellationToken.ThrowIfCancellationRequested();
@@ -891,27 +888,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             else
             {
                 if (toFolder.RootFolderType == FolderType.VirtualRooms) {
-                    var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
-                    var (rId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
-                    if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
+                    if (toParentFolders.Any(folder => folder.FolderType == FolderType.FillingFormsRoom) && !file.IsForm)
                     {
-                        var room = await folderDao.GetFolderAsync((TTo)Convert.ChangeType(roomId, typeof(TTo)));
-                        if (room.FolderType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom)
-                        {
-                            var fileType = FileUtility.GetFileTypeByFileName(file.Title);
-                            if (fileType != FileType.Pdf || !await fileChecker.CheckExtendedPDF(file))
-                            {
-                                this[Err] = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
-                                continue;
-                            }
-
-                            isPdfForm = true;
-                            numberRoomMembers = await fileStorageService.GetPureSharesCountAsync(toFolder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-
-                            var fromFolder = await FolderDao.GetFolderAsync(file.ParentId);
-                            var (fromRId, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
-                            isInSameRoom = int.TryParse(fromRId.ToString(), out var fromRoomId) && fromRoomId != -1 && fromRoomId == roomId;
-                        }
+                        this[Err] = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
+                        continue;
                     }
                 }
                 
@@ -1013,23 +993,44 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     }
                                 }
 
-                                if (file.IsForm && !isInSameRoom)
-                                {
-                                    await LinkDao.DeleteAllLinkAsync(file.Id);
-                                    await FileDao.SaveProperties(file.Id, null);
-                                    await FileDao.DeleteFormRolesAsync(file.Id);
-                                }
-
                                 await socketManager.CreateFileAsync(newFile);
-                                if (isPdfForm)
-                                {
-                                    var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties<TTo> { FormFilling = new FormFillingProperties<TTo>()};
-                                    properties.FormFilling.StartFilling = true;
-                                    properties.FormFilling.CollectFillForm = true;
-                                    properties.FormFilling.OriginalFormId = newFile.Id;
 
-                                    await fileDao.SaveProperties(newFile.Id, properties);
-                                    await socketManager.CreateFormAsync(newFile, securityContext.CurrentAccount.ID, numberRoomMembers <= 1);
+                                if (file.IsForm)
+                                {
+                                    var toRoom = toParentFolders.FirstOrDefault(folder => folder.FolderType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom);
+                                    var fromRoom = await DocSpaceHelper.GetParentRoom(file, FolderDao);
+                                    if (fromRoom?.FolderType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom && (toRoom == null || !toRoom.Id.Equals(fromRoom.Id)))
+                                    {
+                                        var tasks = new List<Task>
+                                        {
+                                            FileDao.SaveProperties(file.Id, null)
+                                        };
+
+                                        if (fromRoom.FolderType is FolderType.FillingFormsRoom)
+                                        {
+                                            tasks.Add(LinkDao.DeleteAllLinkAsync(file.Id));
+                                        }
+                                        else if (fromRoom.FolderType is FolderType.VirtualDataRoom)
+                                        {
+                                            tasks.Add(FileDao.DeleteFormRolesAsync(file.Id));
+                                        }
+
+                                        await Task.WhenAll(tasks);
+                                    }
+                                    if (toRoom?.FolderType == FolderType.FillingFormsRoom)
+                                    {
+                                        var numberRoomMembers = await fileStorageService.GetPureSharesCountAsync(toFolder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                                        var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties<TTo> { FormFilling = new FormFillingProperties<TTo>() };
+                                        properties.FormFilling.StartFilling = true;
+                                        properties.FormFilling.CollectFillForm = true;
+                                        properties.FormFilling.OriginalFormId = newFile.Id;
+
+                                        await Task.WhenAll(
+                                            fileDao.SaveProperties(newFile.Id, properties),
+                                            socketManager.CreateFormAsync(newFile, securityContext.CurrentAccount.ID, numberRoomMembers <= 1)
+                                        );
+                                        
+                                    }
                                 }
 
                                 if (ProcessedFile(fileId))
@@ -1105,10 +1106,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 needToMark.Add(newFile);
 
                                 await socketManager.CreateFileAsync(newFile);
-                                if (isPdfForm)
-                                {
-                                    await socketManager.CreateFormAsync(newFile, securityContext.CurrentAccount.ID, numberRoomMembers <= 1);
-                                }
 
                                 if (copy)
                                 {

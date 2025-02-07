@@ -308,6 +308,11 @@ public partial class FilesDbContext
     {
         return FileQueries.DbFormRoleCurrentStepAsync(this, tenantId, formId);
     }
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<bool> DbFormRoleExistsAsync(int tenantId, int formId)
+    {
+        return FileQueries.DbFormRoleExistsAsync(this, tenantId, formId);
+    }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<FormRole> DbFormRolesAsync(int tenantId, int formId)
@@ -917,6 +922,12 @@ static file class FileQueries
                         Submitted = r.Submitted
                     })
             );
+
+    public static readonly Func<FilesDbContext, int, int, Task<bool>> DbFormRoleExistsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int formId) =>
+                ctx.FilesFormRoleMapping
+                    .Any(r => r.TenantId == tenantId && r.FormId == formId));
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> DbFormRoleCurrentStepAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

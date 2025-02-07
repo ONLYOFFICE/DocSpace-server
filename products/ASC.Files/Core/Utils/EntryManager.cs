@@ -1536,16 +1536,16 @@ public class EntryManager(IDaoFactory daoFactory,
                 var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T))).NotFoundIfNull();
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
-                    var f = await SubmitFillingRoomFormAsync(file, room, fillingSessionId, formsDataUrl, tmpStream, comment, fileDao, folderDao);
-                    return f;
+                    return await SubmitFillingRoomFormAsync(file, room, fillingSessionId, formsDataUrl, tmpStream, comment, fileDao, folderDao);
                 }
                 else if (room.FolderType == FolderType.VirtualDataRoom)
                 {
-                    await SubmitVDRFormAsync(fileDao, file.Id);
+                    return await SubmitVDRFormAsync(fileDao, file);
                 }
             }
             file.ContentLength = tmpStream.Length;
             file.Comment = string.IsNullOrEmpty(comment) ? null : comment;
+            file.Category = (int)FilterType.PdfForm;
             if (replaceVersion)
             {
                 file = await fileDao.ReplaceFileVersionAsync(file, tmpStream);
@@ -2206,19 +2206,20 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
-    private async Task SubmitVDRFormAsync<T>(IFileDao<T> fileDao, T formId)
+    private async Task<File<T>> SubmitVDRFormAsync<T>(IFileDao<T> fileDao, File<T> form)
     {
-        var (currentStep, roles) = await fileDao.GetUserFormRoles(formId, securityContext.CurrentAccount.ID);
+        var (currentStep, roles) = await fileDao.GetUserFormRoles(form.Id, securityContext.CurrentAccount.ID);
         var myRoles = await roles.ToListAsync();
-        if (currentStep != 0 || myRoles.Any())
+        if (currentStep != -1 || myRoles.Any())
         {
             var firstRole = myRoles.FirstOrDefault(fr => fr.Submitted == false);
             if (currentStep == firstRole.Sequence)
             {
                 firstRole.Submitted = true;
-                await fileDao.ChangeUserFormRoleAsync(formId, firstRole);
+                await fileDao.ChangeUserFormRoleAsync(form.Id, firstRole);
             }
         }
+        return form;
     }
     private async Task SetOriginsAsync<T>(Folder<T> parent, IEnumerable<FileEntry> entries)
     {

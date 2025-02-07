@@ -1404,7 +1404,7 @@ internal class FileDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var currentStep = await filesDbContext.DbFormRoleCurrentStepAsync(tenantId, formId);
+        var currentStep = await filesDbContext.DbFormRoleExistsAsync(tenantId, formId) ? await filesDbContext.DbFormRoleCurrentStepAsync(tenantId, formId) : -1;
         return (currentStep, IterateRoles(tenantId, formId, userId));
     }
     private async IAsyncEnumerable<FormRole> IterateRoles(int tenantId, int formId, Guid userId)
