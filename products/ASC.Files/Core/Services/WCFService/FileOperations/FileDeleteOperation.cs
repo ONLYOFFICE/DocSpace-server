@@ -143,8 +143,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         {
             if (_isEmptyTrash)
             {
-                await DeleteFilesAsync(Files, serviceScope);
-                await DeleteFoldersAsync(Folders, serviceScope);
+            await DeleteFilesAsync(Files, serviceScope, true);
+            await DeleteFoldersAsync(Folders, serviceScope, true);
 
                 var trash = await folderDao.GetFolderAsync(_trashId);
                 await filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, _headers);
@@ -256,6 +256,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                             await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
                             
+                            if (isNeedSendActions)
+                            {
                             if (isRoom)
                             {
                                 await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
@@ -264,6 +266,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             else
                             {
                                 await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
+                            }
                             }
 
                             ProcessedFolder(folderId);

@@ -57,7 +57,7 @@ try
 
     var startup = new Startup(builder.Configuration, builder.Environment);
 
-    await startup.ConfigureServices(builder.Services);
+    await startup.ConfigureServices(builder);
 
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {

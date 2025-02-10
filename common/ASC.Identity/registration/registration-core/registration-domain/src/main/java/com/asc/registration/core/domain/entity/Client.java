@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -114,7 +114,6 @@ public class Client extends AggregateRoot<ClientId> {
    */
   public void changeVisibility(ClientVisibility visibility, String modifiedBy) {
     validateStatus();
-    validateStatusInvalidated();
     this.clientVisibility = visibility;
     updateModificationInfo(modifiedBy);
     validate();
@@ -139,25 +138,12 @@ public class Client extends AggregateRoot<ClientId> {
   }
 
   /**
-   * Invalidates the client, marking it for removal and regenerating the secret.
-   *
-   * @param modifiedBy the identifier of the modifier
-   */
-  public void invalidate(String modifiedBy) {
-    validateStatus();
-    changeStatus(ClientStatus.INVALIDATED, modifiedBy);
-    this.secret = new ClientSecret(UUID.randomUUID().toString());
-    validate();
-  }
-
-  /**
    * Regenerates the client's secret.
    *
    * @param modifiedBy the identifier of the modifier
    */
   public void regenerateSecret(String modifiedBy) {
     validateStatus();
-    validateStatusInvalidated();
     this.secret = new ClientSecret(UUID.randomUUID().toString());
     updateModificationInfo(modifiedBy);
     validate();
@@ -170,7 +156,6 @@ public class Client extends AggregateRoot<ClientId> {
    */
   public void encryptSecret(Function<String, String> secretModifier) {
     validateStatus();
-    validateStatusInvalidated();
     this.secret = new ClientSecret(secretModifier.apply(this.secret.value()));
     validate();
   }
@@ -183,7 +168,6 @@ public class Client extends AggregateRoot<ClientId> {
    */
   public void addScope(String scope, String modifiedBy) {
     validateStatus();
-    validateStatusInvalidated();
     validateScope(scope);
     this.scopes.add(scope);
     updateModificationInfo(modifiedBy);
@@ -199,7 +183,6 @@ public class Client extends AggregateRoot<ClientId> {
    */
   public void removeScope(String scope, String modifiedBy) {
     validateStatus();
-    validateStatusInvalidated();
     validateScope(scope);
     if (this.scopes.size() == 1)
       throw new ClientDomainException("Client must have at least one scope");
@@ -216,7 +199,6 @@ public class Client extends AggregateRoot<ClientId> {
    */
   public void updateClientInfo(ClientInfo newClientInfo, String modifiedBy) {
     validateStatus();
-    validateStatusInvalidated();
     if (newClientInfo == null) throw new ClientDomainException("New client info cannot be null");
     this.clientInfo = newClientInfo;
     updateModificationInfo(modifiedBy);
@@ -231,7 +213,6 @@ public class Client extends AggregateRoot<ClientId> {
    */
   public void updateClientWebsiteInfo(ClientWebsiteInfo newClientWebsiteInfo, String modifiedBy) {
     validateStatus();
-    validateStatusInvalidated();
     if (newClientWebsiteInfo == null)
       throw new ClientDomainException("New client website info cannot be null");
     this.clientWebsiteInfo = newClientWebsiteInfo;
@@ -248,7 +229,6 @@ public class Client extends AggregateRoot<ClientId> {
   public void updateClientRedirectInfo(
       ClientRedirectInfo newClientRedirectInfo, String modifiedBy) {
     validateStatus();
-    validateStatusInvalidated();
     if (newClientRedirectInfo == null)
       throw new ClientDomainException("New client redirect info cannot be null");
     this.clientRedirectInfo = newClientRedirectInfo;
@@ -264,7 +244,6 @@ public class Client extends AggregateRoot<ClientId> {
    */
   public void addAuthenticationMethod(AuthenticationMethod method, String modifiedBy) {
     validateStatus();
-    validateStatusInvalidated();
     if (method == null) throw new ClientDomainException("Authentication method cannot be null");
     this.authenticationMethods.add(method);
     updateModificationInfo(modifiedBy);
@@ -280,7 +259,6 @@ public class Client extends AggregateRoot<ClientId> {
    */
   public void removeAuthenticationMethod(AuthenticationMethod method, String modifiedBy) {
     validateStatus();
-    validateStatusInvalidated();
     if (method == null) throw new ClientDomainException("Authentication method cannot be null");
     if (this.authenticationMethods.size() == 1 && this.authenticationMethods.contains(method))
       throw new ClientDomainException(
@@ -298,7 +276,6 @@ public class Client extends AggregateRoot<ClientId> {
    */
   private void changeStatus(ClientStatus newStatus, String modifiedBy) {
     validateStatus();
-    validateStatusInvalidated();
     this.clientStatus = newStatus;
     updateModificationInfo(modifiedBy);
     validate();
@@ -345,16 +322,6 @@ public class Client extends AggregateRoot<ClientId> {
   private void validateStatus() {
     if (this.clientStatus == null)
       throw new ClientDomainException("Client has not been initialized yet");
-  }
-
-  /**
-   * Validates if the client status is invalidated.
-   *
-   * @throws ClientDomainException if the client has been marked for removal
-   */
-  private void validateStatusInvalidated() {
-    if (this.clientStatus == ClientStatus.INVALIDATED)
-      throw new ClientDomainException("Client has been marked for removal");
   }
 
   /**

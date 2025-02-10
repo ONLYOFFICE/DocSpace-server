@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -64,7 +64,7 @@ public class ScopeQueryHandlerTest {
   }
 
   @Test
-  public void testGetScope() {
+  public void whenScopeIsFound_thenReturnScopeResponse() {
     when(queryRepository.findByName(anyString())).thenReturn(Optional.of(scope));
     when(dataMapper.toScopeResponse(any(Scope.class))).thenReturn(scopeResponse);
 
@@ -79,7 +79,7 @@ public class ScopeQueryHandlerTest {
   }
 
   @Test
-  public void testGetScopeNotFound() {
+  public void whenScopeIsNotFound_thenThrowScopeNotFoundException() {
     when(queryRepository.findByName(anyString())).thenReturn(Optional.empty());
 
     assertThrows(ScopeNotFoundException.class, () -> scopeQueryHandler.getScope("test-scope"));
@@ -89,7 +89,7 @@ public class ScopeQueryHandlerTest {
   }
 
   @Test
-  public void testGetScopes() {
+  public void whenScopesAreQueried_thenReturnScopeResponseList() {
     when(queryRepository.findAll()).thenReturn(Collections.singleton(scope));
     when(dataMapper.toScopeResponse(any(Scope.class))).thenReturn(scopeResponse);
 

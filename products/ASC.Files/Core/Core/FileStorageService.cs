@@ -444,6 +444,15 @@ public class FileStorageService //: IFileStorageService
         var folder = await InternalCreateFolderAsync(parentId, title);
 
         await socketManager.CreateFolderAsync(folder);
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
+        {
+            var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
+            await notifyClient.SendFolderCreatedInRoom(room, whoCanRead, folder, authContext.CurrentAccount.ID);
+        }
+
         await filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
 
         return folder;
@@ -1420,6 +1429,13 @@ public class FileStorageService //: IFileStorageService
         await fileMarker.MarkAsNewAsync(file);
 
         await socketManager.CreateFileAsync(file);
+
+        var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
+        {
+            var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
+            await notifyClient.SendDocumentCreatedInRoom(room, whoCanRead, file, authContext.CurrentAccount.ID);
+        }
 
         return file;
     }
@@ -3333,12 +3349,14 @@ public class FileStorageService //: IFileStorageService
                                     {
                                         case EventType.Create:
                                             await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, null, true, name);
+                                            await notifyClient.SendInvitedToRoom(folder, user);
                                             break;
                                         case EventType.Remove:
                                             await filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name);
                                             break;
                                         case EventType.Update:
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, pastRecord.Share, true, name);
+                                            await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
                                             break;
                                     }
                                 }

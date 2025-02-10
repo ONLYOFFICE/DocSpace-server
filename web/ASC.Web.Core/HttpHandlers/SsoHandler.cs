@@ -296,7 +296,7 @@ public class SsoHandlerService
             {
                 if (!_userFormatter.IsValidUserName(userInfo.FirstName, userInfo.LastName))
                 {
-                    throw new Exception(Resource.ErrorIncorrectUserName);
+                    throw new ArgumentException(Resource.ErrorIncorrectUserName);
                 }
 
                 await _userManager.UpdateUserInfoAsync(newUserInfo);
