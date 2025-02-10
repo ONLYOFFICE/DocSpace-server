@@ -38,8 +38,15 @@ public class DeleteExpiredService(
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        var dataStore = await globalStore.GetStoreAsync(false);
+        try
+        {
+            var dataStore = await globalStore.GetStoreAsync(false);
 
-        await dataStore.DeleteExpiredAsync(FileConstant.StorageDomainTmp, CommonChunkedUploadSessionHolder.StoragePath, CommonChunkedUploadSessionHolder.SlidingExpiration);
+            await dataStore.DeleteExpiredAsync(FileConstant.StorageDomainTmp, CommonChunkedUploadSessionHolder.StoragePath, CommonChunkedUploadSessionHolder.SlidingExpiration);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
     }
 }

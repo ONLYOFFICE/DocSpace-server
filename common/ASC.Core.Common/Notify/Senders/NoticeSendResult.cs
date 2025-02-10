@@ -26,6 +26,7 @@
 
 namespace ASC.Core.Notify.Senders;
 
+[EnumExtensions]
 public enum NoticeSendResult
 {
     OK,

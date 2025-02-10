@@ -57,7 +57,7 @@ public abstract class TenantQuotaFeatureChecker<T, T1>(ITenantQuotaFeatureStat<T
 
     protected async Task CheckAddAsync(T1 newValue)
     {
-        await CheckAddAsync(await tenantManager.GetCurrentTenantIdAsync(), newValue);
+        await CheckAddAsync(tenantManager.GetCurrentTenantId(), newValue);
     }
     
     private void Check(TenantQuota quota, T1 newValue)

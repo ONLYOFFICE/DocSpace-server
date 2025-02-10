@@ -66,7 +66,7 @@ public class NotificationController    : ApiControllerBase
         //
         // if (user.IsMe(authContext))
         // {
-        //     return await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneActivation);
+        //     return commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneActivation);
         // }
         //
         // await studioNotifyService.SendMsgMobilePhoneChangeAsync(user);

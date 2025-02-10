@@ -233,16 +233,15 @@ public class CronExpression : ICloneable, IDeserializationCallback
                     break;
                 }
 
-                if (exprOn == DayOfMonth && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(',') >= 0)
+                if (exprOn == DayOfMonth && expr.Contains('L') && expr.Length > 1 && expr.Contains(','))
                 {
                     throw new FormatException(
                         "Support for specifying 'L' and 'LW' with other days of the month is not implemented");
                 }
 
-                if (exprOn == DayOfWeek && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(',') >= 0)
+                if (exprOn == DayOfWeek && expr.Contains('L') && expr.Length > 1 && expr.Contains(','))
                 {
-                    throw new FormatException(
-                        "Support for specifying 'L' with other days of the week is not implemented");
+                    throw new FormatException("Support for specifying 'L' with other days of the week is not implemented");
                 }
                 var vTok = expr.Split(',');
                 foreach (var v in vTok)

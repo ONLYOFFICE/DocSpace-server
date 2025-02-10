@@ -43,7 +43,7 @@ public class MigrationCore(
 
     public async Task StartParseAsync(string migrationName)
     {
-       await eventBus.PublishAsync(new MigrationParseIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync())
+       await eventBus.PublishAsync(new MigrationParseIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             MigratorName = migrationName
         });
@@ -51,7 +51,7 @@ public class MigrationCore(
 
     public async Task StartAsync(MigrationApiInfo info)
     {
-       await  eventBus.PublishAsync(new MigrationIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync())
+       await  eventBus.PublishAsync(new MigrationIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             ApiInfo = info
         });
@@ -59,16 +59,16 @@ public class MigrationCore(
 
     public async Task StopAsync()
     {
-        await eventBus.PublishAsync(new MigrationCancelIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync()));
+        await eventBus.PublishAsync(new MigrationCancelIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()));
     }
 
     public async Task ClearAsync()
     {
-        await eventBus.PublishAsync(new MigrationClearIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync()));
+        await eventBus.PublishAsync(new MigrationClearIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()));
     }
 
     public async Task<MigrationOperation> GetStatusAsync()
     {
-        return await migrationWorker.GetStatusAsync(await tenantManager.GetCurrentTenantIdAsync());
+        return await migrationWorker.GetStatusAsync(tenantManager.GetCurrentTenantId());
     }
 }

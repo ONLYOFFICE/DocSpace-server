@@ -40,19 +40,19 @@ class WizardTest : BaseApiTests
     private UserInfo _newUser;
 
     [OneTimeSetUp]
-    public override void SetUp()
+    public override async Task SetUp()
     {
-        base.SetUp();
+        await base.SetUp();
         _newUser = _userManager.GetUsers(_currentTenant.OwnerId);
     }
 
     [TestCaseSource(typeof(ApiTestsData), nameof(ApiTestsData.WebStudioSettingsData))]
     [Category("Wizard")]
     [Order(1)]
-    public void WizardDataTest(int tenant, Guid userId, string data)
+    public async Task WizardDataTest(int tenant, Guid userId, string data)
     {
         var user = _userManager.GetUsers(Guid.Parse("99223c7b-e3c9-11eb-9063-982cbc0ea1e5"));
-        _securityContext.AuthenticateMe(user.Id);
+        await _securityContext.AuthenticateMeAsync(user.Id);
         var WebStudioData = new DbWebstudioSettings
         {
             TenantId = tenant,
@@ -61,7 +61,7 @@ class WizardTest : BaseApiTests
             Data = data
         };
 
-        var wizard = _settingsManager.Load<WizardSettings>();
+        var wizard = await _settingsManager.LoadAsync<WizardSettings>();
         var WizardSet = new WizardData
         {
             Completed = wizard.Completed
@@ -74,7 +74,7 @@ class WizardTest : BaseApiTests
     [TestCaseSource(typeof(ApiTestsData), nameof(ApiTestsData.UserForWizard))]
     [Category("Wizard")]
     [Order(2)]
-    public void WizardSaveDataTest(string email, string passwordHash, string lng, string timeZone, string promocode, string amiid, bool subscribeFromSite)
+    public async Task WizardSaveDataTest(string email, string passwordHash, string lng, string timeZone, string promocode, string amiid, bool subscribeFromSite)
     {
         var wizardModel = new WizardRequestsDto
         {
@@ -85,10 +85,10 @@ class WizardTest : BaseApiTests
             AmiId = amiid,
             SubscribeFromSite = subscribeFromSite
         };
-        var wizard = _firstTimeTenantSettings.SaveData(wizardModel);
-        _securityContext.AuthenticateMe(_currentTenant.OwnerId);
+        var wizard = await _firstTimeTenantSettings.SaveDataAsync(wizardModel);
+        await _securityContext.AuthenticateMeAsync(_currentTenant.OwnerId);
         Assert.IsTrue(wizard.Completed);
-        Assert.Throws<Exception>(() => _firstTimeTenantSettings.SaveData(wizardModel));
+        Assert.Throws<Exception>(() => _firstTimeTenantSettings.SaveDataAsync(wizardModel).Wait());
     }
 
 }

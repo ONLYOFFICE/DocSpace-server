@@ -34,7 +34,7 @@ public class TelegramServiceClient(IEventBus eventBus,
         ICache cache)
     : ITelegramService
 {
-    public async void SendMessage(NotifyMessage m)
+    public async Task SendMessage(NotifyMessage m)
     {
         await eventBus.PublishAsync(new NotifySendTelegramMessageRequestedIntegrationEvent(Guid.Empty, m.TenantId)
         {

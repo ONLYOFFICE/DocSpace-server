@@ -30,9 +30,11 @@ public class DbGroup : BaseEntity, IMapFrom<Group>
 {
     public int TenantId { get; set; }
     public Guid Id { get; set; }
+    [MaxLength(128)]
     public string Name { get; set; }
     public Guid? CategoryId { get; set; }
     public Guid? ParentId { get; set; }
+    [MaxLength(512)]
     public string Sid { get; set; }
     public bool Removed { get; set; }
     public DateTime LastModified { get; set; }
@@ -90,7 +92,7 @@ public static class DbGroupExtension
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -107,13 +109,14 @@ public static class DbGroupExtension
 
             entity.Property(e => e.Sid)
                 .HasColumnName("sid")
-                .HasColumnType("varchar(512)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });
     }
+    
     private static void PgSqlAddDbGroup(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbGroup>(entity =>
@@ -121,42 +124,44 @@ public static class DbGroupExtension
             entity.ToTable("core_group");
 
             entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("last_modified");
+                .HasDatabaseName("ix_last_modified");
 
             entity.HasIndex(e => new { e.TenantId, e.ParentId })
-                .HasDatabaseName("parentid");
+                .HasDatabaseName("ix_parentid");
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .HasMaxLength(38);
+                .HasColumnType("uuid");
 
             entity.Property(e => e.CategoryId)
                 .HasColumnName("categoryid")
-                .HasMaxLength(38)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("uuid");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
-                .HasMaxLength(128);
+                .HasColumnType("varchar(128)");
 
             entity.Property(e => e.ParentId)
                 .HasColumnName("parentid")
-                .HasMaxLength(38)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("uuid");
 
-            entity.Property(e => e.Removed).HasColumnName("removed");
+            entity.Property(e => e.Removed)
+                .HasColumnName("removed")
+                .HasColumnType("boolean")
+                .HasDefaultValue(false);
 
             entity.Property(e => e.Sid)
                 .HasColumnName("sid")
-                .HasMaxLength(512)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar(512)");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant")
+                .HasColumnType("integer");
         });
     }
 }

@@ -29,6 +29,7 @@
 using ASC.Files.Core.EF;
 using ASC.MessagingSystem.Core;
 using ASC.MessagingSystem.EF.Context;
+using ASC.Migrations.Core;
 using ASC.Web.Core;
 using ASC.Webhooks.Core.EF.Context;
 
@@ -54,19 +55,16 @@ class FilesApplication : WebApplicationFactory<Program>
 
         builder.ConfigureServices(services =>
         {
-            services.AddBaseDbContext<UserDbContext>();
-            services.AddBaseDbContext<FilesDbContext>();
-            services.AddBaseDbContext<MessagesContext>();
-            services.AddBaseDbContext<WebhooksDbContext>();
-            services.AddBaseDbContext<TenantDbContext>();
-            services.AddBaseDbContext<CoreDbContext>();
+            services.AddBaseDbContextPool<UserDbContext>();
+            services.AddBaseDbContextPool<FilesDbContext>();
+            services.AddBaseDbContextPool<MessagesContext>();
+            services.AddBaseDbContextPool<WebhooksDbContext>();
+            services.AddBaseDbContextPool<TenantDbContext>();
+            services.AddBaseDbContextPool<CoreDbContext>();
 
             var DIHelper = new DIHelper();
             DIHelper.Configure(services);
-            foreach (var a in Assembly.Load("ASC.Files").GetTypes().Where(r => r.IsAssignableTo<ControllerBase>() && !r.IsAbstract))
-            {
-                DIHelper.TryAdd(a);
-            }
+            DIHelper.Scan();
         });
 
         base.ConfigureWebHost(builder);
@@ -122,35 +120,20 @@ public class MySetUpClass
         var configuration = scope.ServiceProvider.GetService<IConfiguration>();
         configuration["testAssembly"] = testAssembly;
 
-        using var db = scope.ServiceProvider.GetService<UserDbContext>();
+        using var db = scope.ServiceProvider.GetService<MigrationContext>();
         db.Database.Migrate();
-
-        using var filesDb = scope.ServiceProvider.GetService<FilesDbContext>();
-        filesDb.Database.Migrate();
-
-        using var messagesDb = scope.ServiceProvider.GetService<MessagesContext>();
-        messagesDb.Database.Migrate();
-
-        using var webHookDb = scope.ServiceProvider.GetService<WebhooksDbContext>();
-        webHookDb.Database.Migrate();
-
-        using var tenantDb = scope.ServiceProvider.GetService<TenantDbContext>();
-        tenantDb.Database.Migrate();
-
-        using var coreDb = scope.ServiceProvider.GetService<CoreDbContext>();
-        coreDb.Database.Migrate();
     }
 }
 
 public partial class BaseFilesTests
 {
     private readonly JsonSerializerOptions _options;
-    protected UserManager _userManager;
+    private UserManager _userManager;
     private HttpClient _client;
     private readonly string _baseAddress;
     private string _cookie;
 
-    public static readonly string TestConnection = string.Format("Server=localhost;Database=onlyoffice_test.{0};User ID=root;Password=root;Pooling=true;Character Set=utf8;AutoEnlist=false;SSL Mode=none;AllowPublicKeyRetrieval=True", DateTime.Now.Ticks);
+    public static readonly string TestConnection = $"Server=localhost;Database=onlyoffice_test.{DateTime.Now.Ticks};User ID=root;Password=root;Pooling=true;Character Set=utf8;AutoEnlist=false;SSL Mode=none;AllowPublicKeyRetrieval=True";
 
     public BaseFilesTests()
     {
@@ -161,7 +144,6 @@ public partial class BaseFilesTests
         };
 
         _options.Converters.Add(new ApiDateTimeConverter());
-        _options.Converters.Add(new FileEntryWrapperConverter());
         _options.Converters.Add(new FileShareConverter());
         _baseAddress = @$"http://localhost:{new Random().Next(5000, 6000)}/api/2.0/files/";
     }
@@ -189,12 +171,12 @@ public partial class BaseFilesTests
         _userManager = scope.ServiceProvider.GetService<UserManager>();
 
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-        var tenant = tenantManager.GetTenant(1);
+        var tenant = await tenantManager.GetTenantAsync(1);
         tenantManager.SetCurrentTenant(tenant);
 
-        var _cookiesManager = scope.ServiceProvider.GetService<CookiesManager>();
+        var cookiesManager = scope.ServiceProvider.GetService<CookiesManager>();
         var action = MessageAction.LoginSuccessViaApi;
-        _cookie = _cookiesManager.AuthenticateMeAndSetCookies(tenant.Id, tenant.OwnerId, action);
+        _cookie = await cookiesManager.AuthenticateMeAndSetCookiesAsync(tenant.OwnerId, action);
 
         _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _cookie);
         _client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
@@ -225,34 +207,34 @@ public partial class BaseFilesTests
         return batchModel;
     }
 
-    protected Task<T> GetAsync<T>(string url)
+    private Task<T> GetAsync<T>(string url)
     {
         return SendAsync<T>(HttpMethod.Get, url);
     }
 
-    protected Task<T> PostAsync<T>(string url, object data = null)
+    private Task<T> PostAsync<T>(string url, object data = null)
     {
         return SendAsync<T>(HttpMethod.Post, url, data);
     }
 
-    protected Task<T> PutAsync<T>(string url, object data = null)
+    private Task<T> PutAsync<T>(string url, object data = null)
     {
         return SendAsync<T>(HttpMethod.Put, url, data);
     }
 
-    protected Task<T> DeleteAsync<T>(string url, object data = null)
+    private Task<T> DeleteAsync<T>(string url, object data = null)
     {
         return SendAsync<T>(HttpMethod.Delete, url, data);
     }
 
-    private protected Task<SuccessApiResponse> DeleteAsync(string url, object data = null)
+    internal Task<SuccessApiResponse> DeleteAsync(string url, object data = null)
     {
         return SendAsync(HttpMethod.Delete, url, data);
     }
 
-    protected async Task<List<FileOperationResult>> WaitLongOperation()
+    private async Task<List<FileOperationResult>> WaitLongOperation()
     {
-        List<FileOperationResult> statuses = null;
+        List<FileOperationResult> statuses;
 
         while (true)
         {
@@ -268,13 +250,13 @@ public partial class BaseFilesTests
         return statuses;
     }
 
-    protected void CheckStatuses(List<FileOperationResult> statuses)
+    private void CheckStatuses(List<FileOperationResult> statuses)
     {
         Assert.IsTrue(statuses.Count > 0);
         Assert.IsTrue(statuses.TrueForAll(r => string.IsNullOrEmpty(r.Error)));
     }
 
-    protected async Task<T> SendAsync<T>(HttpMethod method, string url, object data = null)
+    private async Task<T> SendAsync<T>(HttpMethod method, string url, object data = null)
     {
         var result = await SendAsync(method, url, data);
 
@@ -285,7 +267,7 @@ public partial class BaseFilesTests
         throw new Exception("can't parsing result");
     }
 
-    protected async Task<SuccessApiResponse> SendAsync(HttpMethod method, string url, object data = null)
+    private async Task<SuccessApiResponse> SendAsync(HttpMethod method, string url, object data = null)
     {
         _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _cookie);
 

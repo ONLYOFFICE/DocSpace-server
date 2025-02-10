@@ -1063,4 +1063,16 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Quote pro Benutzer konnte nicht festgelegt werden. Der eingegebene Wert ist größer als der gesamte DocSpace-Speicher.</value>
   </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Fügen Sie mindestens 1 zulässige IP-Adresse hinzu.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Fügen Sie mindestens 1 zulässige IP-Adresse hinzu.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Gemeinnützig</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Die Anzahl der Administratoren überschreitet das Limit: {0}/{1}.</value>
+  </data>
 </root>

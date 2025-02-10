@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,47 +24,33 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.ApiSystem.Models;
+namespace ASC.Files.Core.Services.NotifyService;
 
-/// <summary>
-/// Request parameters for tariff
-/// </summary>
-public class TariffModel : IModel
+[Singleton(GenericArguments = [typeof(int)])]
+[Singleton(GenericArguments = [typeof(string)])]
+public class PushNotificationService<T>(
+    IServiceScopeFactory serviceScopeFactory,
+    ILogger<PushNotificationService<T>> logger)
+    : ActivePassiveBackgroundService<PushNotificationService<T>>(logger, serviceScopeFactory)
 {
-    /// <summary>
-    /// Portal name
-    /// </summary>
-    [StringLength(255)]
-    public string PortalName { get; set; }
+    private readonly IServiceScopeFactory _scopeFactory = serviceScopeFactory;
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse("0:0:30");
 
-    /// <summary>
-    /// Tenant id
-    /// </summary>
-    public int? TenantId { get; set; }
-
-    /// <summary>
-    /// Active users
-    /// </summary>
-    public int ActiveUsers { get; set; }
-
-    /// <summary>
-    /// Due date
-    /// </summary>
-    public DateTime DueDate { get; set; }
-
-    /// <summary>
-    /// Features
-    /// </summary>
-    [StringLength(255)]
-    public string Features { get; set; }
-
-    /// <summary>
-    /// Max file size
-    /// </summary>
-    public long MaxFileSize { get; set; }
-
-    /// <summary>
-    /// Max total size
-    /// </summary>
-    public long MaxTotalSize { get; set; }
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var roomNotifyEventQueue = scope.ServiceProvider.GetRequiredService<INotifyQueueManager<T>>();
+            var queues = roomNotifyEventQueue.GetQueues();
+            foreach (var queue in queues)
+            {
+               await queue.Value.ProcessQueueAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
+    }
 }

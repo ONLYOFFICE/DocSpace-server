@@ -133,62 +133,68 @@ public static class WebhooksPayloadExtension
     {
         modelBuilder.Entity<WebhooksLog>(entity =>
         {
-            entity.HasKey(e => new { e.Id })
-                .HasName("PRIMARY");
+            entity.HasKey(e => e.Id)
+                .HasName("pk_webhooks_logs");
 
             entity.ToTable("webhooks_logs");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_id");
-
+            // Specify the columns and their mappings
             entity.Property(e => e.Id)
-                .HasColumnType("int")
                 .HasColumnName("id")
                 .ValueGeneratedOnAdd();
 
             entity.Property(e => e.ConfigId)
-                .HasColumnType("int")
                 .HasColumnName("config_id");
 
             entity.Property(e => e.Uid)
-                .HasColumnType("varchar")
-                .HasColumnName("uid")
-                .HasMaxLength(50);
+                .HasColumnName("uid");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
 
             entity.Property(e => e.RequestPayload)
-                .IsRequired()
-                .HasColumnName("request_payload");
+                .HasColumnName("request_payload")
+                .HasColumnType("text");
 
             entity.Property(e => e.RequestHeaders)
                 .HasColumnName("request_headers")
                 .HasColumnType("json");
 
             entity.Property(e => e.ResponsePayload)
-                .HasColumnName("response_payload");
+                .HasColumnName("response_payload")
+                .HasColumnType("text");
 
             entity.Property(e => e.ResponseHeaders)
                 .HasColumnName("response_headers")
                 .HasColumnType("json");
 
             entity.Property(e => e.WebhookId)
-                .HasColumnType("int")
-                .HasColumnName("webhook_id")
-                .IsRequired();
+                .IsRequired()
+                .HasColumnName("webhook_id");
 
             entity.Property(e => e.CreationTime)
-                .HasColumnType("datetime")
                 .HasColumnName("creation_time");
 
             entity.Property(e => e.Delivery)
-                .HasColumnType("datetime")
                 .HasColumnName("delivery");
 
             entity.Property(e => e.Status)
-                .HasColumnType("int")
                 .HasColumnName("status");
+
+            // Add indexes (PostgreSQL-specific naming)
+            entity.HasIndex(e => e.TenantId)
+                .HasDatabaseName("ix_webhooks_logs_tenant_id");
+
+            // Relationships (optional depending upon requirements)
+            entity.HasOne(e => e.Config)
+                .WithMany()
+                .HasForeignKey(e => e.ConfigId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Tenant)
+                .WithMany()
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

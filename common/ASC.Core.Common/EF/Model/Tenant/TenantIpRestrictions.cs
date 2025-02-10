@@ -30,6 +30,7 @@ public class TenantIpRestrictions
 {
     public int Id { get; set; }
     public int TenantId { get; set; }
+    [MaxLength(50)]
     public string Ip { get; set; }
     public bool ForAdmin { get; set; }
 
@@ -64,7 +65,7 @@ public static class TenantIpRestrictionsExtension
             entity.Property(e => e.Ip)
                 .IsRequired()
                 .HasColumnName("ip")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -81,25 +82,24 @@ public static class TenantIpRestrictionsExtension
     {
         modelBuilder.Entity<TenantIpRestrictions>(entity =>
         {
-            entity.ToTable("tenants_iprestrictions", "onlyoffice");
+            entity.ToTable("tenants_iprestrictions");
 
             entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_tenants_iprestrictions");
+                .HasDatabaseName("tenant");
 
             entity.Property(e => e.Id).HasColumnName("id");
 
             entity.Property(e => e.Ip)
                 .IsRequired()
                 .HasColumnName("ip")
-                .HasMaxLength(50);
+                .HasColumnType("varchar(50)");
 
             entity.Property(e => e.ForAdmin)
                 .IsRequired()
                 .HasColumnName("for_admin")
-                .HasColumnType("TINYINT(1)");
+                .HasColumnType("boolean");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });
-
     }
 }

@@ -28,9 +28,9 @@ namespace ASC.Core.Common.EF;
 
 public class FireBaseUser : BaseEntity
 {
-    /// <summary>
+/// <summary>
     /// ID
-    /// </summary>
+/// </summary>
     public int Id { get; set; }
 
     /// <summary>
@@ -46,11 +46,13 @@ public class FireBaseUser : BaseEntity
     /// <summary>
     /// Firebase device token
     /// </summary>
+    [MaxLength(255)]
     public string FirebaseDeviceToken { get; set; }
 
     /// <summary>
     /// Application
     /// </summary>
+    [MaxLength(20)]
     public string Application { get; set; }
 
     /// <summary>
@@ -106,13 +108,13 @@ public static class FireBaseUserExtension
 
             entity.Property(e => e.FirebaseDeviceToken)
                 .HasColumnName("firebase_device_token")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Application)
                 .HasColumnName("application")
-                .HasColumnType("varchar(20)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -121,15 +123,16 @@ public static class FireBaseUserExtension
 
     public static void PgSqlAddFireBaseUsers(this ModelBuilder modelBuilder)
     {
+
         modelBuilder.Entity<FireBaseUser>(entity =>
         {
-            entity.HasKey(e => e.Id)
-               .HasName("firebase_users_pkey");
+            entity.HasKey(e => new { e.Id })
+                .HasName("PK_FireBaseUser");
 
-            entity.ToTable("firebase_users", "onlyoffice");
+            entity.ToTable("firebase_users");
 
             entity.HasIndex(e => new { e.TenantId, e.UserId })
-                .HasDatabaseName("user_id");
+                .HasDatabaseName("IX_firebase_users_user_id");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
@@ -137,15 +140,15 @@ public static class FireBaseUserExtension
 
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")
-                .HasMaxLength(36);
+                .HasColumnType("uuid");
 
             entity.Property(e => e.FirebaseDeviceToken)
                 .HasColumnName("firebase_device_token")
-                .HasMaxLength(255);
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Application)
                 .HasColumnName("application")
-                .HasMaxLength(20);
+                .HasColumnType("varchar");
         });
     }
 

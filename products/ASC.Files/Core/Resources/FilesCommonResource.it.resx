@@ -485,4 +485,22 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Numero del modulo</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Content creator</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Content creator</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Manager della stanza</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Manager della stanza</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Apri file</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Utente esterno</value>
+  </data>
 </root>

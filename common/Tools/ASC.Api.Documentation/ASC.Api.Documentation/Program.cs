@@ -30,6 +30,7 @@ using System.Text.Json.Nodes;
 
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization;
+using System.Text.Encodings.Web;
 
 public class Programm
 {
@@ -122,7 +123,7 @@ public class Programm
                                 var summaryText = summaryNode.ToString();
 
                                 methodDetails["description"] = methodDetails.TryGetPropertyValue("description", out var existingDescriptionNode)
-                                    ? (JsonNode)$"{summaryText}\n\n**Note**: {existingDescriptionNode}"
+                                    ? (JsonNode)$"{summaryText}\n\n {existingDescriptionNode}"
                                     : (JsonNode)summaryText;
                             }
 
@@ -137,7 +138,13 @@ public class Programm
                 }
             }
         }
-        return jsonObject.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        return jsonObject.ToJsonString(options);
     }
 
     private static string ModifyYamlDocumentation(string yamlData)
@@ -172,7 +179,7 @@ public class Programm
                             if (methodDetails.TryGetValue("summary", out var summary) && summary is string summaryText)
                             {
                                 methodDetails["description"] = methodDetails.TryGetValue("description", out var existingDescription)
-                                    ? $"{summaryText}\n\n**Note**: {existingDescription}"
+                                    ? $"{summaryText}\n\n {existingDescription}"
                                     : (object)summaryText;
                             }
 

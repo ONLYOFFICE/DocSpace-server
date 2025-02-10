@@ -1128,4 +1128,10 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>عدد المسؤولين يتجاوز الحد المسموح به: {0}/{1}.</value>
   </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>قم بإضافة عنوان IP واحد مسموح به على الأقل.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>غير ربحية</value>
+  </data>
 </root>

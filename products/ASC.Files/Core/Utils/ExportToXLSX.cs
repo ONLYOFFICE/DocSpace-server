@@ -24,15 +24,48 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.ApiSystem.Models;
+using ASC.Files.Core.Services.DocumentBuilderService;
 
-/// <summary>
-/// Request parameters for people
-/// </summary>
-public class FindPeopleModel
+namespace ASC.Web.Files.Utils;
+[Transient]
+public class ExportToXLSX(
+    ILogger<AuditReportUploader> logger,
+    IServiceProvider serviceProvider,
+    TenantManager tenantManager,
+    IEventBus eventBus,
+    DocumentBuilderTaskManager documentBuilderTaskManager,
+    IHttpContextAccessor httpContextAccessor,
+    AuthContext authContext)
 {
-    /// <summary>
-    /// User ids
-    /// </summary>
-    public IEnumerable<Guid> UserIds { get; set; }
+
+    public async Task UpdateXlsxReport(int roomId, int originalFormId)
+    {
+        try
+        {
+            var tenantId = tenantManager.GetCurrentTenantId();
+            var userId = authContext.CurrentAccount.ID;
+
+            var task = serviceProvider.GetService<FormFillingReportTask>();
+
+            var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
+            var baseUri = commonLinkUtility.ServerRootPath;
+            task.Init(baseUri, tenantId, userId, null);
+
+            _ = await documentBuilderTaskManager.StartTask(task, false);
+
+            var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
+            var evt = new FormFillingReportIntegrationEvent(userId, tenantId, roomId, originalFormId, baseUri, headers: headers != null
+                ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
+                : []);
+
+            await eventBus.PublishAsync(evt);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWhileUploading(ex);
+            throw;
+        }
+    }
+
+    
 }

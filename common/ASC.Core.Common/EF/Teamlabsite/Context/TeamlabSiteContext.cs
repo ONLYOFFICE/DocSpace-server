@@ -27,7 +27,7 @@
 using ASC.Core.Common.EF.Teamlabsite.Model;
 
 namespace ASC.Core.Common.EF.Teamlabsite.Context;
-public class TeamlabSiteContext(DbContextOptions<TeamlabSiteContext> options) : DbContext(options), ITeamlabsiteDb
+public class TeamlabSiteContext(DbContextOptions<TeamlabSiteContext> options) : BaseDbContext(options), ITeamlabsiteDb
 {
     public DbSet<DbCache> Cache { get; set; }
 

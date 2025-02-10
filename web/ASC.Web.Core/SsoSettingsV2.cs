@@ -135,7 +135,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     /// </summary>
     public bool HideAuthPage { get; set; }
 
-    /// <summary>Users type (RoomAdmin, User, DocSpaceAdmin)</summary>
+    /// <summary>Users type</summary>
     /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
     public int UsersType { get; set; }
 }

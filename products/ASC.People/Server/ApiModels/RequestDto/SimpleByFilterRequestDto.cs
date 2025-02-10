@@ -80,7 +80,7 @@ public class SimpleByFilterRequestDto
     public AccountLoginType? AccountLoginType { get; set; }
 
     /// <summary>
-    /// Filter by quota (Default - 1, Custom - 2)
+    /// Filter by quota (All - 0, Default - 1, Custom - 2)
     /// </summary>
     [FromQuery(Name = "quotaFilter")]
     public QuotaFilter? QuotaFilter { get; set; }

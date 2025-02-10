@@ -33,14 +33,12 @@ public class Token(OAuth20Token oAuth20Token, string app) : OAuth20Token(oAuth20
 }
 
 [Scope]
-public class TokenHelper(IDbContextFactory<FilesDbContext> dbContextFactory,
-    ILogger<TokenHelper> logger,
+public class TokenHelper(
+    IDbContextFactory<FilesDbContext> dbContextFactory,
     InstanceCrypto instanceCrypto,
     AuthContext authContext,
     TenantManager tenantManager)
 {
-    public readonly ILogger<TokenHelper> Logger = logger;
-
     public async Task SaveTokenAsync(Token token)
     {
         var dbFilesThirdpartyApp = new DbFilesThirdpartyApp
@@ -48,7 +46,7 @@ public class TokenHelper(IDbContextFactory<FilesDbContext> dbContextFactory,
             App = token.App,
             Token = await EncryptTokenAsync(token),
             UserId = authContext.CurrentAccount.ID,
-            TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+            TenantId = tenantManager.GetCurrentTenantId(),
             ModifiedOn = DateTime.UtcNow
         };
 
@@ -64,7 +62,7 @@ public class TokenHelper(IDbContextFactory<FilesDbContext> dbContextFactory,
 
     public async Task<Token> GetTokenAsync(string app, Guid userId)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var oAuth20Token = await Queries.TokenAsync(filesDbContext, tenant.Id, userId, app);
 
@@ -78,7 +76,7 @@ public class TokenHelper(IDbContextFactory<FilesDbContext> dbContextFactory,
 
     public async Task DeleteTokenAsync(string app, Guid? userId = null)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         await Queries.DeleteTokenAsync(filesDbContext, tenant.Id, userId ?? authContext.CurrentAccount.ID, app);
     }

@@ -340,7 +340,7 @@ public class FileConverter(
     public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null, bool toForm = false)
     {
         Options options = null;
-        if (file.RootFolderType == FolderType.VirtualRooms || file.RootFolderType == FolderType.Archive)
+        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
@@ -353,8 +353,8 @@ public class FileConverter(
             return await fileDao.GetFileStreamAsync(file);
         }
 
-        var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
-        fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
+        var fileUri = pathProvider.GetFileStreamUrl(file);
+        fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
 
         var docKey = await documentServiceHelper.GetDocKeyAsync(file, options?.GetMD5Hash());
 
@@ -379,9 +379,9 @@ public class FileConverter(
             {
                 throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
             }
-            }
+        }
 
-        var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
+        var fileUri = pathProvider.GetFileStreamUrl(file);
         var fileExtension = file.ConvertedExtension;
         var toExtension = fileUtility.GetInternalExtension(file.Title);
         if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType, false))
@@ -391,7 +391,7 @@ public class FileConverter(
         
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 
-        fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
+        fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
 
         var (_, convertUri, convertType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
 
@@ -404,7 +404,7 @@ public class FileConverter(
             Result = string.Empty,
             Processed = "",
             Id = string.Empty,
-            TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+            TenantId = tenantManager.GetCurrentTenantId(),
             Account = authContext.CurrentAccount.ID,
             Delete = false,
             StartDateTime = DateTime.UtcNow,
@@ -455,7 +455,7 @@ public class FileConverter(
             file, 
             password, 
             outputType,
-            (await tenantManager.GetCurrentTenantAsync()).Id, 
+            (tenantManager.GetCurrentTenant()).Id, 
             authContext.CurrentAccount, 
             deleteAfter, 
             httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),

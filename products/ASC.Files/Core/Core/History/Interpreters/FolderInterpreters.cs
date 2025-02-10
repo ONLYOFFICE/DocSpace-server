@@ -30,6 +30,7 @@ public record FolderIndexChangedData : EntryData
 {
     public int OldIndex { get; }
     public int NewIndex { get; }
+    private readonly string _context;
     
     public FolderIndexChangedData(
         int oldIndex,
@@ -38,7 +39,8 @@ public record FolderIndexChangedData : EntryData
         string title,
         int? parentId = null,
         string parentTitle = null,
-        int? parentType = null) : base(id,
+        int? parentType = null,
+        string context = null) : base(id,
         title,
         parentId,
         parentTitle,
@@ -46,10 +48,16 @@ public record FolderIndexChangedData : EntryData
     {
         NewIndex = newIndex;
         OldIndex = oldIndex;
+        _context = context;
     }
 
     public override int GetId()
     {
+        if (!string.IsNullOrEmpty(_context))
+        {
+            return _context.GetHashCode();
+        }
+        
         return ParentId.HasValue ? ParentId.GetHashCode() : 0;
     }
 }
@@ -145,9 +153,23 @@ public class FolderIndexChangedInterpreter : ActionInterpreter
     {
         var oldIndex = int.Parse(description[1]);
         var newIndex = int.Parse(description[2]);
+
+        string context = null;
+        if (description.Count >= 4)
+        {
+            context = description[3];
+        }
         
         var desc = GetAdditionalDescription(description);
         
-        return new ValueTask<HistoryData>(new FolderIndexChangedData(oldIndex, newIndex, target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType));
+        return new ValueTask<HistoryData>(new FolderIndexChangedData(
+            oldIndex, 
+            newIndex, 
+            target, 
+            description[0], 
+            desc.ParentId, 
+            desc.ParentTitle, 
+            desc.ParentType,
+            context));
     }
 }

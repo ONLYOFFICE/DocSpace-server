@@ -24,11 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult;
+
 namespace ASC.Core.Common.Log;
 internal static partial class EmailValidationKeyProviderLogger
 {
     [LoggerMessage(LogLevel.Debug, "validation result: {result}, source: {email} with key: {key} interval: {interval} tenant: {tenantId}")]
-    public static partial void DebugValidationResult(this ILogger<EmailValidationKeyProvider> logger, EmailValidationKeyProvider.ValidationResult result, string email, string key, TimeSpan interval, int tenantId);
+    public static partial void DebugValidationResult(this ILogger<EmailValidationKeyProvider> logger, ValidationResult result, string email, string key, TimeSpan interval, int tenantId);
 
     [LoggerMessage(LogLevel.Debug, "Failed to format tenant specific email")]
     public static partial void CriticalFormatEmail(this ILogger<EmailValidationKeyProvider> logger, Exception exception);

@@ -51,11 +51,17 @@ public class FilesSettings : ISettings<FilesSettings>
     [JsonPropertyName("DefaultSortedAsc")]
     public bool DefaultSortedAscSetting { get; set; }
 
+    [JsonPropertyName("HideConfirmCancelOperation")]
+    public bool HideConfirmCancelOperationSetting { get; set; }
+
     [JsonPropertyName("HideConfirmConvertSave")]
     public bool HideConfirmConvertSaveSetting { get; set; }
 
     [JsonPropertyName("HideConfirmConvertOpen")]
     public bool HideConfirmConvertOpenSetting { get; set; }
+
+    [JsonPropertyName("HideConfirmRoomLifetime")]
+    public bool HideConfirmRoomLifetimeSetting { get; set; }
 
     [JsonPropertyName("Forcesave")]
     public bool ForcesaveSetting { get; set; }
@@ -102,6 +108,7 @@ public class FilesSettings : ISettings<FilesSettings>
             DefaultSortedAscSetting = false,
             HideConfirmConvertSaveSetting = false,
             HideConfirmConvertOpenSetting = false,
+            HideConfirmRoomLifetimeSetting = false,
             ForcesaveSetting = true,
             StoreForcesaveSetting = false,
             HideRecentSetting = false,
@@ -148,7 +155,7 @@ public class FilesSettingsHelper(
         var setting = await settingsManager.LoadAsync<FilesSettings>();
         setting.EnableThirdpartySetting = value;
         await settingsManager.SaveAsync(setting);
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsThirdPartySettingsUpdated);
+        messageService.SendHeadersMessage(MessageAction.DocumentsThirdPartySettingsUpdated);
     }
 
     public async Task<bool> GetExternalShare()
@@ -190,7 +197,7 @@ public class FilesSettingsHelper(
             await SetExternalShareSocialMedia(false);
         }
 
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsExternalShareSettingsUpdated);
+        messageService.SendHeadersMessage(MessageAction.DocumentsExternalShareSettingsUpdated);
 
         return await GetExternalShare();
     }
@@ -204,7 +211,7 @@ public class FilesSettingsHelper(
 
         await SetExternalShareSocialMedia(await GetExternalShare() && enable);
 
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsExternalShareSettingsUpdated);
+        messageService.SendHeadersMessage(MessageAction.DocumentsExternalShareSettingsUpdated);
 
         return await GetExternalShareSocialMedia();
     }
@@ -217,7 +224,7 @@ public class FilesSettingsHelper(
         setting.StoreOriginalFilesSetting = value;
         await SaveForCurrentUser(setting);
         
-        await messageService.SendHeadersMessageAsync(MessageAction.DocumentsUploadingFormatsSettingsUpdated);
+        messageService.SendHeadersMessage(MessageAction.DocumentsUploadingFormatsSettingsUpdated);
     }
 
     public async Task<bool> GetKeepNewFileName() => (await LoadForCurrentUser()).KeepNewFileName;
@@ -229,7 +236,7 @@ public class FilesSettingsHelper(
         {
             current.KeepNewFileName = value;
             await SaveForCurrentUser(current);
-            await messageService.SendHeadersMessageAsync(MessageAction.DocumentsKeepNewFileNameSettingsUpdated);
+            messageService.SendHeadersMessage(MessageAction.DocumentsKeepNewFileNameSettingsUpdated);
         }
 
         return current.KeepNewFileName;
@@ -244,7 +251,7 @@ public class FilesSettingsHelper(
         {
             current.DisplayFileExtension = value;
             await SaveForCurrentUser(current);
-            await messageService.SendHeadersMessageAsync(MessageAction.DocumentsDisplayFileExtensionUpdated);
+            messageService.SendHeadersMessage(MessageAction.DocumentsDisplayFileExtensionUpdated);
         }
 
         return current.DisplayFileExtension;
@@ -259,6 +266,21 @@ public class FilesSettingsHelper(
         await SaveForCurrentUser(setting);
     }
 
+    public async Task<bool> GetHideConfirmCancelOperation() => (await LoadForCurrentUser()).HideConfirmCancelOperationSetting;
+
+    public async Task<bool> SetHideConfirmCancelOperation(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+
+        if (setting.HideConfirmCancelOperationSetting != value)
+        {
+            setting.HideConfirmCancelOperationSetting = value;
+            await SaveForCurrentUser(setting);
+        }
+
+        return setting.HideConfirmCancelOperationSetting;
+    }
+    
     public async Task<bool> GetHideConfirmConvertSave() => (await LoadForCurrentUser()).HideConfirmConvertSaveSetting;
 
     private async Task SetHideConfirmConvertSave(bool value)
@@ -290,7 +312,22 @@ public class FilesSettingsHelper(
 
         return true;
     }
-    
+
+    public async Task<bool> GetHideConfirmRoomLifetime() => (await LoadForCurrentUser()).HideConfirmRoomLifetimeSetting;
+
+    public async Task<bool> SetHideConfirmRoomLifetime(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+
+        if (setting.HideConfirmRoomLifetimeSetting != value)
+        {
+            setting.HideConfirmRoomLifetimeSetting = value;
+            await SaveForCurrentUser(setting);
+        }
+
+        return setting.HideConfirmRoomLifetimeSetting;
+    }
+
     public async Task<OrderBy> GetDefaultOrder()
     {
         var setting = await LoadForCurrentUser();
@@ -328,7 +365,7 @@ public class FilesSettingsHelper(
         //var setting = await LoadForCurrentUser();
         //setting.ForcesaveSetting = value;
         //await SaveForCurrentUser(setting);
-        //await messageService.SendHeadersMessageAsync(MessageAction.DocumentsForcesave);
+        //messageService.SendHeadersMessageAsync(MessageAction.DocumentsForcesave);
     }
 
     public bool GetStoreForcesave() => false;
@@ -342,7 +379,7 @@ public class FilesSettingsHelper(
         //var setting = _settingsManager.Load<FilesSettings>();
         //setting.StoreForcesaveSetting = value;
         //_settingsManager.Save(setting);
-        //await messageService.SendHeadersMessageAsync(MessageAction.DocumentsStoreForcesave);
+        //messageService.SendHeadersMessageAsync(MessageAction.DocumentsStoreForcesave);
     }
 
     public async Task<bool> GetRecentSection() => !(await LoadForCurrentUser()).HideRecentSetting;

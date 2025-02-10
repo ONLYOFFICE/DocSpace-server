@@ -45,7 +45,6 @@ global using ASC.ElasticSearch.Service;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
 global using ASC.Files.Core;
-global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
@@ -75,8 +74,5 @@ global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Logging;
-
-global using SixLabors.ImageSharp;
-global using SixLabors.ImageSharp.Processing;
 
 global using static ASC.Files.Core.Helpers.DocumentService;

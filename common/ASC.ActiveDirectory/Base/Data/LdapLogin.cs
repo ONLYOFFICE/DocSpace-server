@@ -45,7 +45,7 @@ public class LdapLogin(string username, string domain)
         string username;
         string domain = null;
 
-        if (login.Contains("\\"))
+        if (login.Contains('\\'))
         {
             var splited = login.Split('\\');
 
@@ -58,7 +58,7 @@ public class LdapLogin(string username, string domain)
             username = splited[1];
 
         }
-        else if (login.Contains("@"))
+        else if (login.Contains('@'))
         {
             var splited = login.Split('@');
 

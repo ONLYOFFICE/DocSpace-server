@@ -29,7 +29,7 @@ namespace ASC.Data.Storage.Configuration;
 [Singleton]
 public class BaseStorageSettingsListener(IServiceProvider serviceProvider, ICacheNotify<ConsumerCacheItem> cacheNotify)
 {
-    private readonly object _locker = new();
+    private readonly Lock _locker = new();
     private volatile bool _subscribed;
 
     public void Subscribe()
@@ -205,12 +205,12 @@ public class StorageSettingsHelper
         }
 
         return _dataStore = ((IDataStore)_serviceProvider.GetService(handlerType))
-            .Configure((await _tenantManager.GetCurrentTenantIdAsync()).ToString(), null, null, dataStoreConsumer, null);
+            .Configure((_tenantManager.GetCurrentTenantId()).ToString(), null, null, dataStoreConsumer, null);
     }
 
     internal async Task ClearDataStoreCacheAsync()
     {
-        var path = TenantPath.CreatePath(await _tenantManager.GetCurrentTenantIdAsync());
+        var path = TenantPath.CreatePath(_tenantManager.GetCurrentTenantId());
 
         foreach (var module in _storageFactoryConfig.GetModuleList("", true))
         {

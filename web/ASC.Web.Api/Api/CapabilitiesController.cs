@@ -59,7 +59,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     [AllowNotPayment]
     public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()
     {
-        var quota = await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync());
+        var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
         var result = new CapabilitiesDto
         {
             LdapEnabled = false,
@@ -73,7 +73,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         try
         {
             if (coreBaseSettings.Standalone
-                    || SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString())
+                    || SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToStringFast())
                         && quota.Ldap)
             {
                 var settings = await settingsManager.LoadAsync<LdapSettings>();
@@ -112,7 +112,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         try
         {
             if (coreBaseSettings.Standalone
-                    || SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString())
+                    || SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToStringFast())
                         && quota.Sso)
             {
                 var settings = await settingsManager.LoadAsync<SsoSettingsV2>();
@@ -129,7 +129,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
             _log.ErrorWithException(ex);
         }
 
-        if (SetupInfo.IsVisibleSettings(ManagementType.IdentityServer.ToString()))
+        if (SetupInfo.IsVisibleSettings(ManagementType.IdentityServer.ToStringFast()))
         {
             result.IdentityServerEnabled = true;
         }

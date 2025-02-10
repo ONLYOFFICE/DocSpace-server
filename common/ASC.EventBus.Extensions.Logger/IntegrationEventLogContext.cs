@@ -27,7 +27,7 @@
 namespace ASC.EventBus.Extensions.Logger;
 
 public class IntegrationEventLogContext(DbContextOptions<IntegrationEventLogContext> dbContextOptions)
-    : DbContext(dbContextOptions)
+    : BaseDbContext(dbContextOptions)
 {
     public DbSet<IntegrationEventLogEntry> IntegrationEventLogs { get; set; }
 

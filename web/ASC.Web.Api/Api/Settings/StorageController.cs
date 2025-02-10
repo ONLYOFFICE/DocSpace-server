@@ -65,7 +65,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "List of storages with the following parameters", typeof(StorageDto))]
+    [SwaggerResponse(200, "List of storages with the following parameters", typeof(List<StorageDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("storage")]
     public async Task<List<StorageDto>> GetAllStoragesAsync()
@@ -102,7 +102,7 @@ public class StorageController(ILoggerProvider option,
             return -1;
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         return serviceClient.GetProgress(tenant.Id);
     }
 
@@ -197,7 +197,7 @@ public class StorageController(ILoggerProvider option,
             settings.Status = EncryprtionStatus.DecryptionStarted;
         }
 
-        await messageService.SendAsync(settings.Status == EncryprtionStatus.EncryptionStarted ? MessageAction.StartStorageEncryption : MessageAction.StartStorageDecryption);
+        messageService.Send(settings.Status == EncryprtionStatus.EncryptionStarted ? MessageAction.StartStorageEncryption : MessageAction.StartStorageDecryption);
 
         var serverRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
@@ -233,7 +233,7 @@ public class StorageController(ILoggerProvider option,
               },
               serverRootPath: serverRootPath,
               createBy: securityContext.CurrentAccount.ID,
-              tenantId: await tenantManager.GetCurrentTenantIdAsync()
+              tenantId: tenantManager.GetCurrentTenantId()
 
         ));
     }
@@ -391,7 +391,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/cdn</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "List of the CDN storages with the following parameters", typeof(StorageDto))]
+    [SwaggerResponse(200, "List of the CDN storages with the following parameters", typeof(List<StorageDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("storage/cdn")]
     public async Task<List<StorageDto>> GetAllCdnStoragesAsync()
@@ -443,7 +443,7 @@ public class StorageController(ILoggerProvider option,
 
         try
         {
-            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var tenant = tenantManager.GetCurrentTenant();
             await serviceClient.UploadCdnAsync(tenant.Id, "/", webHostEnvironment.ContentRootPath, settings);
         }
         catch (Exception e)
@@ -480,7 +480,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/backup</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(StorageDto))]
+    [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(List<StorageDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("storage/backup")]
     public async Task<List<StorageDto>> GetAllBackupStorages()
@@ -510,7 +510,7 @@ public class StorageController(ILoggerProvider option,
 
     private async Task StartMigrateAsync(StorageSettings settings)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         await serviceClient.MigrateAsync(tenant.Id, settings);
 
         tenant.SetStatus(TenantStatus.Migrating);

@@ -24,24 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-public class HideRouteDocumentFilter : IDocumentFilter
+namespace ASC.Api.Core.Extensions;
+
+public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
 {
-    private readonly string _routeToHide;
-
-    public HideRouteDocumentFilter(string RouteToHide)
-    {
-        _routeToHide = RouteToHide;
-    }
-
     public void Apply(OpenApiDocument document, DocumentFilterContext context)
     {
-        if (document.Paths.ContainsKey(_routeToHide))
-        {
-            document.Paths.Remove(_routeToHide);
-        }
+        document.Paths.Remove(routeToHide);
     }
 }
 
@@ -52,7 +45,17 @@ public class LowercaseDocumentFilter : IDocumentFilter
         var paths = new OpenApiPaths();
         foreach (var (key, value) in swaggerDoc.Paths)
         {
-            var lowerCaseKey = key.ToLowerInvariant();
+            var segments = key.Split('/');
+
+            for (var i = 0; i < segments.Length; i++)
+            {
+                if (!segments[i].StartsWith("{") && !segments[i].EndsWith("}"))
+                {
+                    segments[i] = segments[i].ToLowerInvariant();
+                }
+            }
+
+            var lowerCaseKey = string.Join("/", segments);
             paths.Add(lowerCaseKey, value);
         }
 
@@ -62,7 +65,7 @@ public class LowercaseDocumentFilter : IDocumentFilter
 
 public class TagDescriptionsDocumentFilter : IDocumentFilter
 {
-    private readonly Dictionary<string, string> _tagDescriptions = new Dictionary<string, string>
+    private readonly Dictionary<string, string> _tagDescriptions = new()
     {
         { "People", "Operations for working with people" },
         { "Portal", "Operations for working with portal" },
@@ -145,11 +148,42 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
 
         swaggerDoc.Tags = customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
-            .Select(tag => new OpenApiTag
+            .Select(tag => 
+            {
+                var tagParts = tag.Split(" / ");
+                var displayName = tagParts.Length > 1 ? tagParts[1] : tagParts[0];
+
+                var openApiTag = new OpenApiTag
+                {
+                    Name = tag,
+                    Description = _tagDescriptions[tag]
+                };
+                openApiTag.Extensions.Add("x-displayName", new OpenApiString(displayName));
+
+                return openApiTag;
+            }).ToList();
+
+        var groupTag = customTags
+            .Where(tag => _tagDescriptions.ContainsKey(tag))
+            .GroupBy(tag => tag.Split(" / ")[0])
+            .ToDictionary(group => group.Key, group => group.ToList());
+
+        var tagGroups = new OpenApiArray();
+        foreach (var group in groupTag)
         {
-            Name = tag,
-            Description = _tagDescriptions[tag]
-        }).ToList();
-        
+            var groupObject = new OpenApiObject();
+            var tagsArray = new OpenApiArray();
+
+            foreach(var tag in group.Value)
+            {
+                tagsArray.Add(new OpenApiString(tag));
+            }
+
+            groupObject["name"] = new OpenApiString(group.Key);
+            groupObject["tags"] = tagsArray;
+            tagGroups.Add(groupObject);
+        }
+
+        swaggerDoc.Extensions["x-tagGroups"] = tagGroups;
     }
 }

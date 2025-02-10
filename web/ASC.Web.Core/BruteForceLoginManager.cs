@@ -154,7 +154,7 @@ public class BruteForceLoginManager(
 
             if (user == null || !userManager.UserExists(user))
             {
-                throw new Exception("user not found");
+                throw new AuthenticationException("user not found");
             }
 
             if (recaptchaPassed)

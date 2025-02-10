@@ -53,7 +53,7 @@ public class RoomContentRequestDto
     public bool? WithSubfolders { get; set; }
 
     /// <summary>
-    /// Room search area (Active, Archive, Any)
+    /// Room search area (Active, Archive, Any, Recent by links)
     /// </summary>
     [FromQuery(Name = "searchArea")]
     public SearchArea? SearchArea { get; set; }
@@ -77,25 +77,25 @@ public class RoomContentRequestDto
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
-    /// Filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, WebDav)
+    /// Filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, SharePoint, WebDav, Yandex, Storage)
     /// </summary>
     [FromQuery(Name = "provider")]
     public ProviderFilter? Provider { get; set; }
 
     /// <summary>
-    /// Filter by subject (Owner - 1, Member - 1)
+    /// Filter by subject (Owner - 0, Member - 1)
     /// </summary>
     [FromQuery(Name = "subjectFilter")]
     public SubjectFilter? SubjectFilter { get; set; }
 
     /// <summary>
-    /// Filter by quota (Default - 1, Custom - 2)
+    /// Filter by quota (All - 0, Default - 1, Custom - 2)
     /// </summary>
     [FromQuery(Name = "quotaFilter")]
     public QuotaFilter? QuotaFilter { get; set; }
 
     /// <summary>
-    /// Filter by storage (Internal - 1, ThirdParty - 2)
+    /// Filter by storage (None - 0, Internal - 1, ThirdParty - 2)
     /// </summary>
     [FromQuery(Name = "storageFilter")]
     public StorageFilter? StorageFilter { get; set; }

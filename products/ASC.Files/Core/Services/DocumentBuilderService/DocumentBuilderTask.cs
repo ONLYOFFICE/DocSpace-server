@@ -72,25 +72,25 @@ public abstract class DocumentBuilderTask<TId, TData>(IServiceScopeFactory servi
             var documentBuilderTask = scope.ServiceProvider.GetService<DocumentBuilderTask>();
 
             CancellationToken.ThrowIfCancellationRequested();
-            
+
             var inputData = await GetDocumentBuilderInputDataAsync(scope.ServiceProvider);
 
             Percentage = 30;
 
             await PublishChanges();
-            
+
             CancellationToken.ThrowIfCancellationRequested();
 
-            var fileUri = await documentBuilderTask.BuildFileAsync(inputData.Script, inputData.TempFileName, CancellationToken);
+            var fileUri = await documentBuilderTask.BuildFileAsync(inputData, CancellationToken);
 
             Percentage = 60;
 
             await PublishChanges();
 
             CancellationToken.ThrowIfCancellationRequested();
-            
-            var file = await ProcessSourceFileAsync(scope.ServiceProvider, new Uri(fileUri), inputData.OutputFileName);
-            
+
+            var file = await ProcessSourceFileAsync(scope.ServiceProvider, new Uri(fileUri), inputData);
+
             this["ResultFileId"] = file.Id;
             this["ResultFileName"] = file.Title;
             this["ResultFileUrl"] = filesLinkUtility.GetFileWebEditorUrl(file.Id);
@@ -118,7 +118,7 @@ public abstract class DocumentBuilderTask<TId, TData>(IServiceScopeFactory servi
     }
     
     protected abstract Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider);
-    protected abstract Task<File<TId>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, string fileName);
+    protected abstract Task<File<TId>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData);
 }
 
 public record DocumentBuilderInputData(string Script, string TempFileName, string OutputFileName);
@@ -126,9 +126,9 @@ public record DocumentBuilderInputData(string Script, string TempFileName, strin
 [Scope]
 public class DocumentBuilderTask(DocumentServiceConnector documentServiceConnector)
 {
-    internal async Task<string> BuildFileAsync(string script, string fileName, CancellationToken cancellationToken)
+    internal async Task<string> BuildFileAsync(DocumentBuilderInputData inputData, CancellationToken cancellationToken)
     {
-        var resultTuple = await documentServiceConnector.DocbuilderRequestAsync(null, script, true);
+        var resultTuple = await documentServiceConnector.DocbuilderRequestAsync(null, inputData.Script, true);
 
         if (string.IsNullOrEmpty(resultTuple.BuilderKey))
         {
@@ -158,12 +158,12 @@ public class DocumentBuilderTask(DocumentServiceConnector documentServiceConnect
                 throw new Exception("DocbuilderRequest: empty Urls");
             }
 
-            if (resultTuple.Urls.ContainsKey(fileName))
+            if (resultTuple.Urls.ContainsKey(inputData.TempFileName))
             {
                 break;
             }
         }
 
-        return resultTuple.Urls[fileName];
+        return resultTuple.Urls[inputData.TempFileName];
     }
 }

@@ -54,7 +54,10 @@ public class BackupRestoreRequestedIntegrationEventHandler(
                                             @event.StorageType,
                                             @event.StorageParams,
                                             @event.Notify,
-                                            @event.ServerBaseUri);
+                                            @event.ServerBaseUri,
+                                            @event.Dump,
+                                            true,
+                                            @event.TaskId);
 
             await Task.CompletedTask;
         }

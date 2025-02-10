@@ -39,12 +39,12 @@ public class MigrationWorker(
 
     public async Task StartParse(int tenantId, Guid userId, string migratorName)
     {
-        await Start(tenantId, (item) => item.InitParse(tenantId, userId, migratorName));
+        await Start(tenantId, item => item.InitParse(tenantId, userId, migratorName));
     }
 
     public async Task StartMigrate(int tenantId, Guid userId, MigrationApiInfo migrationApiInfo)
     {
-        await Start(tenantId, (item) => item.InitMigrate(tenantId, userId, migrationApiInfo));
+        await Start(tenantId, item => item.InitMigrate(tenantId, userId, migrationApiInfo));
     }
 
     private async Task Start(int tenantId, Action<MigrationOperation> init)

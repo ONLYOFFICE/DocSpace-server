@@ -500,4 +500,7 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="RoleEnum_ContentCreator" xml:space="preserve">
     <value>Creator de conținut</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Deschidere fișier</value>
+  </data>
 </root>

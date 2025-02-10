@@ -41,7 +41,7 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
 {
     public override async ValueTask<List<UsageSpaceStatItem>> GetStatDataAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var myFiles = filesDbContext.Files
             .Join(filesDbContext.Tree, a => a.ParentId, b => b.FolderId, (file, tree) => new { file, tree })
@@ -92,13 +92,13 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
 
     public async Task<long> GetPortalSpaceUsageAsync()
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.SumPortalContentLengthAsync(filesDbContext, tenantId);
     }
     public async Task<long> GetUserSpaceUsageAsync(Guid userId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var my = await globalFolder.GetFolderMyAsync(daoFactory);
         var trash = await globalFolder.GetFolderTrashAsync(daoFactory);
 

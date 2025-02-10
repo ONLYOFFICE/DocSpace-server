@@ -1069,4 +1069,10 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Het aantal beheerders overschrijdt de limiet: {0}/{1}.</value>
   </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Voeg minstens 1 toegestaan IP-adres toe.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Non-profit</value>
+  </data>
 </root>

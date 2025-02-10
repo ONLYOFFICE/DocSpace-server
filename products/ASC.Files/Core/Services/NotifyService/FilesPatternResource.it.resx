@@ -134,9 +134,6 @@ $__AuthorName ha eliminato una stanza: $RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>Notifica di DocSpace. Menzionato nel documento</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Menzionato nel documento</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>L'invio è completato.</value>
   </data>

@@ -64,7 +64,7 @@ public class PaymentController(UserManager userManager,
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
             !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
@@ -97,7 +97,7 @@ public class PaymentController(UserManager userManager,
     [HttpPut("update")]
     public async Task<bool> PaymentUpdateAsync(QuantityRequestDto inDto)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
@@ -127,7 +127,7 @@ public class PaymentController(UserManager userManager,
             return null;
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
@@ -169,7 +169,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/currencies</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available portal currencies", typeof(CurrenciesDto))]
+    [SwaggerResponse(200, "List of available portal currencies", typeof(IAsyncEnumerable<CurrenciesDto>))]
     [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetCurrenciesAsync()
     {
@@ -193,7 +193,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/quotas</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available portal quotas", typeof(QuotaDto))]
+    [SwaggerResponse(200, "List of available portal quotas", typeof(IEnumerable<QuotaDto>))]
     [HttpGet("quotas")]
     public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
     {
@@ -256,7 +256,7 @@ public class PaymentController(UserManager userManager,
         CheckCache("salesrequest");
 
         await studioNotifyService.SendMsgToSalesAsync(inDto.Email, inDto.UserName, inDto.Message);
-        await messageService.SendAsync(MessageAction.ContactSalesMailSent);
+        messageService.Send(MessageAction.ContactSalesMailSent);
     }
 
     private void CheckCache(string baseKey)

@@ -64,7 +64,6 @@ public class BackupPortalTask(
     public override async Task RunJob()
     {
         logger.DebugBeginBackup(TenantId);
-        await tenantManager.SetCurrentTenantAsync(TenantId);
 
         await using (WriteOperator)
         {
@@ -237,7 +236,6 @@ public class BackupPortalTask(
                     creates.Append(createScheme
                         .Select(r => Convert.ToString(r[1]).Replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS "))
                         .FirstOrDefault());
-                    creates.Append(';');
                 }
                 else
                 {
@@ -246,14 +244,15 @@ public class BackupPortalTask(
                     creates.Append(createScheme
                         .Select(r => Convert.ToString(r[1]))
                         .FirstOrDefault());
-                    creates.Append(';');
                 }
+
+                creates.Append(';');
 
                 var path = CrossPlatform.PathCombine(dir, t);
                 await using (var stream = File.OpenWrite(path))
                 {
                     var bytes = Encoding.UTF8.GetBytes(creates.ToString());
-                    stream.Write(bytes, 0, bytes.Length);
+                    await stream.WriteAsync(bytes);
                 }
 
                 await SetStepCompleted();
@@ -614,7 +613,7 @@ public class BackupPortalTask(
             var path = file.GetZipKey();
             if (dump) 
             {
-                path = Path.Combine("\\storage", path);
+                path = Path.Combine("storage", path);
             }
             await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
 

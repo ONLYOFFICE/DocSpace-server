@@ -61,6 +61,7 @@ public class TransferProgressItem : BaseBackupProgressItem
         bool notify)
     {
         Init();
+        BackupProgressItemType = BackupProgressItemType.Transfer;
         TenantId = tenantId;
         TargetRegion = targetRegion;
         Notify = notify;
@@ -84,7 +85,7 @@ public class TransferProgressItem : BaseBackupProgressItem
 
             await _notifyHelper.SendAboutTransferStartAsync(tenant, TargetRegion, Notify);
             transferProgressItem.Init(TenantId, TargetRegion, Limit, TempFolder);
-            transferProgressItem.ProgressChanged = async (args) =>
+            transferProgressItem.ProgressChanged = async args =>
             {
                 Percentage = args.Progress;
                 await PublishChanges();

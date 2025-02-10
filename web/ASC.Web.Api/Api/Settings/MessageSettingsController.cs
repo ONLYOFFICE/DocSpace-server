@@ -60,7 +60,7 @@ public class MessageSettingsController(MessageService messageService,
 
         await settingsManager.SaveAsync(new StudioAdminMessageSettings { Enable = inDto.TurnOn });
 
-        await messageService.SendAsync(MessageAction.AdministratorMessageSettingsUpdated);
+        messageService.Send(MessageAction.AdministratorMessageSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -108,7 +108,7 @@ public class MessageSettingsController(MessageService messageService,
 
         await cookiesManager.SetLifeTimeAsync(inDto.LifeTime, inDto.Enabled);
 
-        await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+        messageService.Send(MessageAction.CookieSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -152,7 +152,7 @@ public class MessageSettingsController(MessageService messageService,
         CheckCache("sendadmmail");
 
         await studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message, inDto.Culture);
-        await messageService.SendAsync(MessageAction.ContactAdminMailSent);
+        messageService.Send(MessageAction.ContactAdminMailSent);
 
         return Resource.AdminMessageSent;
     }
@@ -176,7 +176,7 @@ public class MessageSettingsController(MessageService messageService,
     {
         try
         {
-            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var tenant = tenantManager.GetCurrentTenant();
             var email = inDto.Email;
             if (!(
                 (tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
@@ -224,7 +224,7 @@ public class MessageSettingsController(MessageService messageService,
                         if (tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
                         {
                             await studioNotifyService.SendJoinMsgAsync(email, employeeType, inDto.Culture, true);
-                            await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
+                            messageService.Send(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                             return Resource.FinishInviteJoinEmailMessage;
                         }
 
@@ -233,7 +233,7 @@ public class MessageSettingsController(MessageService messageService,
                 case TenantTrustedDomainsType.All:
                     {
                         await studioNotifyService.SendJoinMsgAsync(email, employeeType, inDto.Culture, true);
-                        await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
+                        messageService.Send(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                         return Resource.FinishInviteJoinEmailMessage;
                     }
                 default:

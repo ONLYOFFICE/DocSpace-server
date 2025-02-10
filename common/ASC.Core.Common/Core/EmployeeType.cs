@@ -27,7 +27,7 @@
 namespace ASC.Core.Users;
 
 [Flags]
-[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter<EmployeeType>))]
+[JsonConverter(typeof(JsonStringEnumConverter<EmployeeType>))]
 [EnumExtensions]
 public enum EmployeeType
 {

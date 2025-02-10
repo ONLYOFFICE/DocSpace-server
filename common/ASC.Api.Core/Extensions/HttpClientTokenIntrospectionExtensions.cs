@@ -44,7 +44,8 @@ public static class HttpClientTokenIntrospectionExtensions
             { "token", request.Token }
         };
      
-        using var req = new HttpRequestMessage(HttpMethod.Post, request.Address) { Content = new FormUrlEncodedContent(dict) };
+        using var req = new HttpRequestMessage(HttpMethod.Post, request.Address);
+        req.Content = new FormUrlEncodedContent(dict);
         using var response = await client.SendAsync(req, cancellationToken);
         
         response.EnsureSuccessStatusCode();
@@ -61,7 +62,7 @@ public class TokenIntrospectionRequest
     /// <value>
     /// The token.
     /// </value>
-    public string Token { get; set; } = default!;
+    public string Token { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the endpoint address

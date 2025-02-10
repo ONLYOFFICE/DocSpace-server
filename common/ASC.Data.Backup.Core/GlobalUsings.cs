@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.ComponentModel.DataAnnotations;
 global using System.Configuration;
 global using System.Data;
 global using System.Data.Common;

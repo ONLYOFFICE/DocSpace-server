@@ -28,6 +28,7 @@ namespace ASC.Core.Common.EF.Model;
 
 public class DbWebstudioIndex : BaseEntity
 {
+    [MaxLength(50)]
     public string IndexName { get; set; }
     public DateTime LastModified { get; set; }
     public override object[] GetKeys()
@@ -59,7 +60,7 @@ public static class DbWebstudioIndexExtension
 
             entity.Property(e => e.IndexName)
                 .HasColumnName("index_name")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -73,17 +74,18 @@ public static class DbWebstudioIndexExtension
         modelBuilder.Entity<DbWebstudioIndex>(entity =>
         {
             entity.HasKey(e => e.IndexName)
-                .HasName("webstudio_index_pkey");
+                .HasName("pk_webstudio_index");
 
-            entity.ToTable("webstudio_index", "onlyoffice");
+            entity.ToTable("webstudio_index");
 
             entity.Property(e => e.IndexName)
                 .HasColumnName("index_name")
-                .HasMaxLength(50);
+                .HasColumnType("varchar(50)");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasColumnType("timestamptz");
         });
+        
     }
 }

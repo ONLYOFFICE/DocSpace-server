@@ -123,7 +123,7 @@ public class HistoryService(
         DateTime? toDate)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         var events = needFiltering 
             ? messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate) 
@@ -145,7 +145,7 @@ public class HistoryService(
         DateTime? toDate)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         if (needFiltering)
         {

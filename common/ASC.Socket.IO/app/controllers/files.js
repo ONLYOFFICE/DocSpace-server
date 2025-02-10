@@ -154,6 +154,26 @@ module.exports = (files) => {
 
   router.post("/delete-guest", (req, res) => {
     files.deleteGuest(req.body);
+
+  });
+
+  router.post("/backup-progress", (req, res) => {
+    files.backupProgress(req.body);
+    res.end();
+  });
+
+  router.post("/restore-progress", (req, res) => {
+    files.restoreProgress(req.body);
+    res.end();
+  });
+
+  router.post("/end-backup", (req, res) => {
+    files.endBackup(req.body);
+    res.end();
+  });
+
+  router.post("/end-restore", (req, res) => {
+    files.endRestore(req.body);
     res.end();
   });
 

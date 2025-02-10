@@ -158,7 +158,7 @@ public class FactoryIndexerFile(
 
             var count = Queries.FilesCount(filesDbContext, lastIndexed);
 
-            return new(count, maxId, minId);
+            return new ValueTuple<int, int, int>(count, maxId, minId);
         }
     }
 

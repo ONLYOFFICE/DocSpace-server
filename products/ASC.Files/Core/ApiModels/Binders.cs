@@ -81,23 +81,25 @@ public static class ModelBindingContextExtension
         return ParseQuery(bindingContext, $"{modelName}[]");
     }
 
-    internal static IEnumerable<ItemKeyValuePair<JsonElement, string>> ParseDictionary(this ModelBindingContext bindingContext, string modelName)
+    internal static IEnumerable<DownloadRequestItemDto> ParseDictionary(this ModelBindingContext bindingContext, string modelName)
     {
-        var result = new List<ItemKeyValuePair<JsonElement, string>>();
+        var result = new List<DownloadRequestItemDto>();
 
         for (var i = 0; ; i++)
         {
             var keyProviderResult = bindingContext.ValueProvider.GetValue($"{modelName}[{i}][key]");
             var valueProviderResult = bindingContext.ValueProvider.GetValue($"{modelName}[{i}][value]");
+            var passwordProviderResult = bindingContext.ValueProvider.GetValue($"{modelName}[{i}][password]");
 
             if (keyProviderResult != ValueProviderResult.None && valueProviderResult != ValueProviderResult.None)
             {
                 bindingContext.ModelState.SetModelValue(modelName, keyProviderResult);
                 bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
+                bindingContext.ModelState.SetModelValue(modelName, passwordProviderResult);
 
                 if (!string.IsNullOrEmpty(keyProviderResult.FirstValue) && !string.IsNullOrEmpty(valueProviderResult.FirstValue))
                 {
-                    result.Add(new ItemKeyValuePair<JsonElement, string> { Key = ParseQueryParam(keyProviderResult.FirstValue), Value = valueProviderResult.FirstValue });
+                    result.Add(new DownloadRequestItemDto { Key = ParseQueryParam(keyProviderResult.FirstValue), Value = valueProviderResult.FirstValue, Password = passwordProviderResult.FirstValue });
                 }
             }
             else

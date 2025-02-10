@@ -802,4 +802,73 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Benutzer [{0}]. Formular abgeschickt: {1}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Datei: {0}. Index geändert von {1} nach {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Ordner: {0}. Index geändert von {1} nach {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Ordner: {0}. Indizes neu geordnet</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Raum: {0}. Download-Einschränkung deaktiviert</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Raum: {0}. Download-Einschränkung aktiviert</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Export des in Dokumente gespeicherten Raumverzeichnisses</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Raumindizierung deaktiviert</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Raumindizierung aktiviert</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Lebensdauer deaktiviert</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Lebensdauer aktiviert. Wert: {0}. Zeitraum: {1}. Dauerhaft löschen: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Raum: {0}. Wasserzeichen deaktiviert</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Raum: {0}. Wasserzeichen aktiviert</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Einladung erneut verschickt: {0}</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Aktivierung des Clients {0} geändert</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Sichtbarkeit des Clients {0} geändert</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Client erstellt</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Client {0} gelöscht</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Autorisierungscode für Client {0} generiert</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Persönlicher Zugriffstoken für Client {0} generiert</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Geheimnis des Clients {0} neu generiert</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Zugriff für Client {0} widerrufen</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Client {0} aktualisiert</value>
+  </data>
 </root>

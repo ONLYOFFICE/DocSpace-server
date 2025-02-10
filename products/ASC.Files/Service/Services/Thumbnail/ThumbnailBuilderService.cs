@@ -91,14 +91,21 @@ public class ThumbnailBuilderService(IServiceScopeFactory serviceScopeFactory,
             {
                 await foreach (var fileData in reader.ReadAllAsync(stoppingToken))
                 {
-                    await using var scope = serviceScopeFactory.CreateAsyncScope();
+                    try
+                    {
+                        await using var scope = serviceScopeFactory.CreateAsyncScope();
 
-                    var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
-                    commonLinkUtility.ServerUri = fileData.BaseUri;
+                        var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
+                        commonLinkUtility.ServerUri = fileData.BaseUri;
 
-                    var builder = scope.ServiceProvider.GetService<Builder<int>>();
+                        var builder = scope.ServiceProvider.GetService<Builder<int>>();
 
-                    await builder.BuildThumbnail(fileData);
+                        await builder.BuildThumbnail(fileData);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.ErrorWithException(e);
+                    }
                 }
             }, stoppingToken));
         }

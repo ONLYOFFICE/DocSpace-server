@@ -808,4 +808,67 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Kutsut on jälleen lähetetty: {0}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Asiakasohjelman {0} aktivointi muutettu</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Asiakasohjelman {0} näkyvyys muutettu</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Asiakasohjelma luotu</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Asiakasohjelma {0} poistettu</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Tiedosto: {0}. Hakemisto muutettu {1} :sta {2} :een</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Kansio: {0}. Hakemisto muutettu {1} :sta {2} :een</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Kansio: {0}. Hakemistot tilattu uudelleen</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Valtuutuskoodi luotu asiakasohjelmalle {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Henkilökohtainen pääsytunnus luotu asiakasohjelmalle {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Asiakasohjelman {0} salaisuus luotu uudelleen</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Asiakasohjelman {0} pääsy kumottu</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Huone: {0}. Latauksen estäminen poistettu käytöstä</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Huone: {0}. Latauksen estäminen otettu käyttöön</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Huoneen indeksointi poistettu käytöstä</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Huoneen indeksointi otettu käyttöön</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Elinikä otetu pois käytöstä</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Elinikä on asetettu. Arvo: {0}. Jakso: {1}. Poista lopullisesti: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Huone: {0}. Vesileima poistettu käytöstä</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Huone: {0}. Vesileima otettu käyttöön</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Asiakasohjelma {0} päivitetty</value>
+  </data>
 </root>

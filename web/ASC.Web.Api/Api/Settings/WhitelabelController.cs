@@ -79,7 +79,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await SaveWhiteLabelSettingsForTenantAsync(settings, null, tenant.Id, inDto);
     }
@@ -155,7 +155,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await SaveWhiteLabelSettingsFromFilesForTenantAsync(settings, null, tenant.Id);
     }
@@ -207,7 +207,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "White label logos", typeof(WhiteLabelItemDto))]
+    [SwaggerResponse(200, "White label logos", typeof(IAsyncEnumerable<WhiteLabelItemDto>))]
     [AllowNotPayment, AllowAnonymous, AllowSuspended]
     [HttpGet("whitelabel/logos")]
     public async IAsyncEnumerable<WhiteLabelItemDto> GetWhiteLabelLogosAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
@@ -216,7 +216,7 @@ public class WhitelabelController(ApiContext apiContext,
 
         var tenantWhiteLabelSettings = isDefault ? null : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        foreach (var logoType in (WhiteLabelLogoType[])Enum.GetValues(typeof(WhiteLabelLogoType)))
+        foreach (var logoType in Enum.GetValues<WhiteLabelLogoType>())
         {
             if (logoType == WhiteLabelLogoType.Notification)
             {
@@ -225,7 +225,7 @@ public class WhitelabelController(ApiContext apiContext,
 
             var result = new WhiteLabelItemDto
             {
-                Name = logoType.ToString(),
+                Name = logoType.ToStringFast(),
                 Size = TenantWhiteLabelSettings.GetSize(logoType)
             };
 
@@ -285,7 +285,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/whitelabel/logos/isdefault</path>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Request properties of white label logos", typeof(IsDefaultWhiteLabelLogosDto))]
+    [SwaggerResponse(200, "Request properties of white label logos", typeof(IAsyncEnumerable<IsDefaultWhiteLabelLogosDto>))]
     [HttpGet("whitelabel/logos/isdefault")]
     public async IAsyncEnumerable<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogos([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -300,11 +300,11 @@ public class WhitelabelController(ApiContext apiContext,
             Name = "logotext",
             Default = tenantWhiteLabelSettings.LogoText.IsNullOrEmpty() || tenantWhiteLabelSettings.LogoText.Equals(TenantWhiteLabelSettings.DefaultLogoText)
         };
-        foreach (var logoType in (WhiteLabelLogoType[])Enum.GetValues(typeof(WhiteLabelLogoType)))
+        foreach (var logoType in Enum.GetValues<WhiteLabelLogoType>())
         {
             var result = new IsDefaultWhiteLabelLogosDto
             {
-                Name = logoType.ToString(),
+                Name = logoType.ToStringFast(),
                 Default = tenantWhiteLabelSettings.GetIsDefault(logoType)
             };
 
@@ -367,7 +367,7 @@ public class WhitelabelController(ApiContext apiContext,
     private async Task RestoreWhiteLabelOptionsForCurrentTenantAsync()
     {
         var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
 
         await RestoreWhiteLabelOptionsForTenantAsync(settings, null, tenant.Id);
@@ -397,7 +397,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/companywhitelabel</path>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "List of company white label settings", typeof(CompanyWhiteLabelSettings))]
+    [SwaggerResponse(200, "List of company white label settings", typeof(List<CompanyWhiteLabelSettings>))]
     [HttpGet("companywhitelabel")]
     public async Task<List<CompanyWhiteLabelSettings>> GetLicensorDataAsync()
     {

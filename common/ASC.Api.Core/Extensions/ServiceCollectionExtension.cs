@@ -285,7 +285,7 @@ public static class ServiceCollectionExtension
 
 
     private static readonly List<string> _registeredActivePassiveHostedService = [];
-    private static readonly object _locker = new();
+    private static readonly Lock _locker = new();
 
     /// <remarks>
     /// Add a IHostedService for given type. 
@@ -347,7 +347,7 @@ public static class ServiceCollectionExtension
         }
 
         var configurationOption = redisConfiguration.ConfigurationOptions;
-
+        configurationOption.DefaultDatabase = redisConfiguration.Database;
         configurationOption.ClientName = clientName;
 
         var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);

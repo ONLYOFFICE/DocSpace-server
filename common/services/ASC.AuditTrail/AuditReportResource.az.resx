@@ -808,4 +808,67 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Dəvətlər yenidən göndərildi: {0}</value>
   </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Müştərinin {0} aktivləşdirilməsi dəyişdirildi</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Müştərinin {0} görünürlüyü dəyişdi</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Müştəri yaradıldı</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Müştəri {0} silindi</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Fayl: {0}. İndeks {1}-dən {2}-ə dəyişdirildi</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Qovluq: {0}. İndeks {1}-dən {2}-ə dəyişdirildi</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Qovluq: {0}. Kataloqlar yenidən sıralandı</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>{0} müştəri üçün avtorizasiya kodu yaradıldı</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>{0} müştərisi üçün şəxsi giriş nişanı yaradıldı</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Müştəri {0} sirri yenidən yaradıldı</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Müştəri {0} girişi ləğv edildi</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Otaq: {0}. Endirmədən imtina deaktivdir</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Otaq: {0}. Endirmədən imtina aktivdir</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Otağın indeksləşdirilməsi deaktiv edilib</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Otağın indeksləşdirilməsi aktivləşdirilib</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>İstifadə müddəti deaktiv edilib</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>İstifadə müddəti müəyyən edilmişdir. Dəyər: {0}. Dövr: {1}. Həmişəlik Silin: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Otaq: {0}. Su nişanı deaktiv edilib</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Otaq: {0}. Su nişanı aktiv edilib</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>{0} müştəri yeniləndi</value>
+  </data>
 </root>

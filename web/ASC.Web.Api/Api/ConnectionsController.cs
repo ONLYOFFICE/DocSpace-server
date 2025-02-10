@@ -165,9 +165,9 @@ public class ConnectionsController(
             auditEventDate = auditEventDate.AddTicks(-(auditEventDate.Ticks % TimeSpan.TicksPerSecond));
 
             var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
-            var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
+            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
-            await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
+            messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
 
             return confirmationUrl;
         }
@@ -227,7 +227,7 @@ public class ConnectionsController(
                 await quotaSocketManager.LogoutSession(user.Id, loginEvent.Id);
             }
 
-            await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
+            messageService.Send(MessageAction.UserLogoutActiveConnections, userName);
             return userName;
         }
         catch (Exception ex)
@@ -276,7 +276,7 @@ public class ConnectionsController(
                 await quotaSocketManager.LogoutSession(loginEvent.UserId.Value, loginEvent.Id);
             }
 
-            await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
+            messageService.Send(MessageAction.UserLogoutActiveConnection, userName);
             return true;
         }
         catch (Exception ex)
@@ -293,7 +293,7 @@ public class ConnectionsController(
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var auditEventDate = DateTime.UtcNow;
 
-        await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
+        messageService.Send(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
         await cookiesManager.ResetUserCookieAsync(user.Id);
 
         await quotaSocketManager.LogoutSession(user.Id);

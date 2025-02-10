@@ -5877,7 +5877,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Options")
-                        .HasColumnType("text")
+                        .HasColumnType("json")
                         .HasColumnName("options")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");

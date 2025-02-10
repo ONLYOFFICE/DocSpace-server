@@ -34,4 +34,6 @@ public interface IRabbitMQPersistentConnection
     Task<bool> TryConnectAsync();
 
     Task<IChannel> CreateModelAsync();
+
+    Task<IConnection> GetConnection();
 }

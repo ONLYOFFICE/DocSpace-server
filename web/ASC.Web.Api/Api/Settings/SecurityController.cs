@@ -59,7 +59,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
+    [SwaggerResponse(200, "Security settings", typeof(IAsyncEnumerable<SecurityDto>))]
     [HttpGet("")]
     public async IAsyncEnumerable<SecurityDto> GetWebItemSettingsSecurityInfo(SecuritySettingsRequestDto inDto)
     {
@@ -180,7 +180,7 @@ public class SecurityController(
 
         await settingsManager.SaveAsync(userPasswordSettings);
 
-        await messageService.SendAsync(MessageAction.PasswordStrengthSettingsUpdated);
+        messageService.Send(MessageAction.PasswordStrengthSettingsUpdated);
 
         return passwordSettingsConverter.Convert(userPasswordSettings);
     }
@@ -194,7 +194,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
+    [SwaggerResponse(200, "Security settings", typeof(IEnumerable<SecurityDto>))]
     [SwaggerResponse(403, "Security settings are disabled for an open portal")]
     [HttpPut("")]
     public async Task<IEnumerable<SecurityDto>> SetWebItemSecurity(WebItemSecurityRequestsDto inDto)
@@ -213,7 +213,7 @@ public class SecurityController(
 
         if (!inDto.Subjects.Any())
         {
-            await messageService.SendAsync(MessageAction.ProductAccessOpened, productName);
+            messageService.Send(MessageAction.ProductAccessOpened, productName);
         }
         else
         {
@@ -221,13 +221,13 @@ public class SecurityController(
             {
                 if (info.Groups.Count != 0)
                 {
-                    await messageService.SendAsync(MessageAction.GroupsOpenedProductAccess, productName,
+                    messageService.Send(MessageAction.GroupsOpenedProductAccess, productName,
                         info.Groups.Select(x => x.Name));
                 }
 
                 if (info.Users.Count != 0)
                 {
-                    await messageService.SendAsync(MessageAction.UsersOpenedProductAccess, productName,
+                    messageService.Send(MessageAction.UsersOpenedProductAccess, productName,
                         info.Users.Select(x => HttpUtility.HtmlDecode(x.DisplayName)));
                 }
             }
@@ -245,7 +245,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/access</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
+    [SwaggerResponse(200, "Security settings", typeof(IEnumerable<SecurityDto>))]
     [SwaggerResponse(403, "Security settings are disabled for an open portal")]
     [HttpPut("access")]
     public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemsSecurityRequestsDto inDto)
@@ -288,7 +288,7 @@ public class SecurityController(
             await webItemSecurity.SetSecurityAsync(item.Key, item.Value, subjects);
         }
 
-        await messageService.SendAsync(MessageAction.ProductsListUpdated);
+        messageService.Send(MessageAction.ProductsListUpdated);
 
         return await GetWebItemSettingsSecurityInfo(new SecuritySettingsRequestDto { Ids = itemList.Keys.ToList() }).ToListAsync();
     }
@@ -302,7 +302,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "List of product administrators with the following parameters", typeof(EmployeeDto))]
+    [SwaggerResponse(200, "List of product administrators with the following parameters", typeof(IAsyncEnumerable<EmployeeDto>))]
     [HttpGet("administrator/{productid:guid}")]
     public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(ProductIdRequestDto inDto)
     {
@@ -327,7 +327,7 @@ public class SecurityController(
     public async Task<object> IsProductAdministratorAsync(UserProductIdsRequestDto inDto)
     {
         var result = await webItemSecurity.IsProductAdministratorAsync(inDto.ProductId, inDto.UserId);
-        return new { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = result };
+        return new { inDto.ProductId, inDto.UserId, Administrator = result };
     }
 
     /// <summary>
@@ -361,7 +361,7 @@ public class SecurityController(
             var messageAction = inDto.Administrator
                 ? MessageAction.AdministratorOpenedFullAccess
                 : MessageAction.AdministratorDeleted;
-            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
+            messageService.Send(messageAction, MessageTarget.Create(admin.Id),
                 admin.DisplayUserName(false, displayUserSettingsHelper));
         }
         else
@@ -369,7 +369,7 @@ public class SecurityController(
             var messageAction = inDto.Administrator
                 ? MessageAction.ProductAddedAdministrator
                 : MessageAction.ProductDeletedAdministrator;
-            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
+            messageService.Send(messageAction, MessageTarget.Create(admin.Id),
                 GetProductName(inDto.ProductId), admin.DisplayUserName(false, displayUserSettingsHelper));
         }
 

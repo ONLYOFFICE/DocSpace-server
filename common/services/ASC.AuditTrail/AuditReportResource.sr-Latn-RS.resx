@@ -867,4 +867,67 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Pozivnice ponovo poslate: {0}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Datoteka: {0}. Indeks promenjen iz {1} u {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Folder: {0}. Indeks promenjen iz {1} u {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Folder: {0}. Indeksi su preuređeni</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Soba: {0}. Zabrani preuzimanje onemogućeno</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Soba: {0}. Zabrani preuzimanje omogućeno</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indeksiranje soba onemogućeno</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indeksiranje soba omogućeno</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>LifeTime onemogućen</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Životno vreme je postavljeno. vrednost: {0}. Period: {1}. Trajno izbriši: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Soba: {0}. Vodeni žig onemogućen</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Soba: {0}. Vodeni žig omogućen</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Aktivacija {0} klijenta je promenjena</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Promenjena {0} vidljivost klijenta</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Klijent je kreiran</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Klijent {0} izbrisan</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Generisani autorizacioni kod za klijenta {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Generisani lični pristupni token za klijenta {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Klijentova {0} tajna regenerisana</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Oduzet klijentu {0} pristup</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Klijent {0} ažuriran</value>
+  </data>
 </root>

@@ -36,11 +36,11 @@ public class QuotaSocketManager(
     : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
-
-    public async Task ChangeQuotaUsedValueAsync(string featureId, object value)
+    
+    public async Task ChangeQuotaUsedValueAsync<T>(string featureId, T value)
     {
-        var room = await GetQuotaRoom();
-
+        var room = GetQuotaRoom();
+        
         await MakeRequest("change-quota-used-value", new { room, featureId, value });
     }
 
@@ -51,30 +51,30 @@ public class QuotaSocketManager(
         await MakeRequest("change-user-quota-used-value", new { room, customQuotaFeature, enableQuota, usedSpace, quotaLimit, userIds });
     }
 
-    public async Task ChangeQuotaFeatureValue(string featureId, object value)
+    public async Task ChangeQuotaFeatureValueAsync<T>(string featureId, T value)
     {
-        var room = await GetQuotaRoom();
+        var room = GetQuotaRoom();
 
         await MakeRequest("change-quota-feature-value", new { room, featureId, value });
     }
 
     public async Task ChangeInvitationLimitValue(int value)
     {
-        var room = await GetQuotaRoom();
+        var room = GetQuotaRoom();
 
         await MakeRequest("change-invitation-limit-value", new { room, value });
     }
 
     public async Task LogoutSession(Guid userId, int loginEventId = 0)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await MakeRequest("logout-session", new { room = $"{tenantId}-{userId}", loginEventId });
     }
 
-    private async Task<string> GetQuotaRoom()
+    private string GetQuotaRoom()
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         return $"{tenantId}-quota";
     }

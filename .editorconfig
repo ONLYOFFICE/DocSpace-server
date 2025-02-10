@@ -7,12 +7,9 @@ root = true
 #### Core EditorConfig Options ####
 
 # Indentation and spacing
-indent_size = 4
 indent_style = space
-tab_width = 4
 
 # New line preferences
-end_of_line = crlf
 insert_final_newline = false
 
 #### .NET Coding Conventions ####
@@ -20,52 +17,24 @@ insert_final_newline = false
 # Organize usings
 dotnet_separate_import_directive_groups = true
 dotnet_sort_system_directives_first = true
-file_header_template = unset
 
 # this. and Me. preferences
-dotnet_style_qualification_for_event = false:silent
-dotnet_style_qualification_for_field = false:silent
-dotnet_style_qualification_for_method = false:silent
-dotnet_style_qualification_for_property = false:silent
 
 # Language keywords vs BCL types preferences
-dotnet_style_predefined_type_for_locals_parameters_members = true:silent
-dotnet_style_predefined_type_for_member_access = true:silent
 
 # Parentheses preferences
-dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:silent
-dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:silent
-dotnet_style_parentheses_in_other_operators = always_for_clarity:silent
-dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:silent
 
 # Modifier preferences
-dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent
 
 # Expression-level preferences
-dotnet_style_object_initializer = true:suggestion
-dotnet_style_collection_initializer = true:suggestion
-dotnet_style_explicit_tuple_names = true:suggestion
-dotnet_style_null_propagation = true:suggestion
-dotnet_style_coalesce_expression = true:suggestion
-dotnet_style_prefer_is_null_check_over_reference_equality_method = true:silent
-dotnet_style_prefer_inferred_tuple_names = true:suggestion
-dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
-dotnet_style_prefer_auto_properties = true:silent
-dotnet_style_prefer_conditional_expression_over_assignment = true:suggestion
-dotnet_style_prefer_conditional_expression_over_return = true:suggestion
 
 # Field preferences
-dotnet_style_readonly_field = true:warning
 
 # Parameter preferences
-dotnet_code_quality_unused_parameters = all:warning
 
 # Suppression preferences
-dotnet_remove_unnecessary_suppression_exclusions = none
 
 # New line preferences
-dotnet_style_allow_multiple_blank_lines_experimental = false
-dotnet_style_allow_statement_immediately_after_block_experimental = false
 
 #### C# Coding Conventions ####
 
@@ -95,16 +64,13 @@ csharp_preferred_modifier_order = public,private,protected,internal,static,exter
 # Code-block preferences
 csharp_prefer_braces = true:warning
 csharp_prefer_simple_using_statement = false:silent
-csharp_style_namespace_declarations = file_scoped:warning
 
 # Expression-level preferences
 csharp_prefer_simple_default_expression = false:silent
 csharp_style_deconstructed_variable_declaration = true:suggestion
-csharp_style_implicit_object_creation_when_type_is_apparent = false:suggestion
 csharp_style_inlined_variable_declaration = true:suggestion
 csharp_style_pattern_local_over_anonymous_function = true:suggestion
 csharp_style_prefer_index_operator = false:suggestion
-csharp_style_prefer_null_check_over_type_check = true:suggestion
 csharp_style_prefer_range_operator = false:suggestion
 csharp_style_throw_expression = true:suggestion
 csharp_style_unused_value_assignment_preference = discard_variable:suggestion
@@ -114,9 +80,6 @@ csharp_style_unused_value_expression_statement_preference = discard_variable:sug
 csharp_using_directive_placement = outside_namespace:warning
 
 # New line preferences
-csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = false:silent
-csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false:silent
-csharp_style_allow_embedded_statements_on_same_line_experimental = true:silent
 
 #### C# Formatting Rules ####
 
@@ -175,7 +138,7 @@ dotnet_naming_rule.private_field_should_be_begin_with_underscore.style = begin_w
 
 dotnet_naming_rule.public_field_should_be_begin_without_underscore.severity = warning
 dotnet_naming_rule.public_field_should_be_begin_without_underscore.symbols = public_field
-dotnet_naming_rule.public_field_should_be_begin_without_underscore.style = begin_without_underscore
+dotnet_naming_rule.public_field_should_be_begin_without_underscore.style = pascal_case
 
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = warning
 dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
@@ -227,20 +190,12 @@ dotnet_naming_style.begin_with_underscore.required_suffix =
 dotnet_naming_style.begin_with_underscore.word_separator = 
 dotnet_naming_style.begin_with_underscore.capitalization = camel_case
 
-dotnet_naming_style.begin_without_underscore.required_prefix = 
-dotnet_naming_style.begin_without_underscore.required_suffix = 
-dotnet_naming_style.begin_without_underscore.word_separator = 
-dotnet_naming_style.begin_without_underscore.capitalization = pascal_case
-
 csharp_style_expression_bodied_lambdas = true:silent
 csharp_style_expression_bodied_local_functions = false:silent
-csharp_style_prefer_local_over_anonymous_function = true:suggestion
-csharp_style_prefer_tuple_swap = true:suggestion
 csharp_prefer_static_local_function = true:suggestion
 csharp_style_prefer_switch_expression = true:suggestion
 csharp_style_prefer_pattern_matching = true:silent
 csharp_style_prefer_not_pattern = true:suggestion
-csharp_style_prefer_extended_property_pattern = true:suggestion
 dotnet_diagnostic.CA1001.severity = warning
 dotnet_diagnostic.CA1805.severity = warning
 dotnet_diagnostic.CA1841.severity = warning
@@ -266,13 +221,10 @@ dotnet_style_prefer_inferred_tuple_names = true:suggestion
 dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
 dotnet_style_prefer_compound_assignment = true:suggestion
 dotnet_style_prefer_simplified_interpolation = true:suggestion
-dotnet_style_namespace_match_folder = true:suggestion
 dotnet_style_readonly_field = true:warning
 dotnet_style_predefined_type_for_locals_parameters_members = true:silent
 dotnet_style_predefined_type_for_member_access = true:silent
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent
-dotnet_style_allow_multiple_blank_lines_experimental = false:silent
-dotnet_style_allow_statement_immediately_after_block_experimental = false:silent
 dotnet_code_quality_unused_parameters = all:warning
 dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:silent
 dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:silent
@@ -282,10 +234,6 @@ dotnet_style_qualification_for_field = false:silent
 dotnet_style_qualification_for_property = false:silent
 dotnet_style_qualification_for_method = false:silent
 dotnet_style_qualification_for_event = false:silent
-dotnet_diagnostic.CA1715.severity = warning
-dotnet_diagnostic.CA1716.severity = silent
-dotnet_diagnostic.CA5397.severity = warning
-dotnet_diagnostic.ASP0023.severity = none
 
 
 file_header_template = (c) Copyright Ascensio System SIA 2009-2024\n\nThis program is a free software product.\nYou can redistribute it and/or modify it under the terms\nof the GNU Affero General Public License (AGPL) version 3 as published by the Free Software\nFoundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended\nto the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of\nany third-party rights.\n\nThis program is distributed WITHOUT ANY WARRANTY, without even the implied warranty\nof MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see\nthe GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html\n\nYou can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.\n\nThe  interactive user interfaces in modified source and object code versions of the Program must\ndisplay Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.\n\nPursuant to Section 7(b) of the License you must retain the original Product logo when\ndistributing the program. Pursuant to Section 7(e) we decline to grant you any rights under\ntrademark law for use of our trademarks.\n\nAll the Product's GUI elements, including illustrations and icon sets, as well as technical writing\ncontent are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0\nInternational. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode

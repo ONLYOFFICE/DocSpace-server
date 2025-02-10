@@ -1069,4 +1069,10 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Số lượng quản trị viên vượt quá giới hạn: {0}/{1}.</value>
   </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Phi lợi nhuận</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Thêm ít nhất 1 địa chỉ IP được phép.</value>
+  </data>
 </root>

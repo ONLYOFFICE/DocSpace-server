@@ -85,6 +85,7 @@ public class EditHistory(ILogger<EditHistory> logger,
                         _date = tenantUtil.DateTimeFromUtc(_date);
                     }
                     result.Date = _date;
+                    result.DocumentSha256 = r.DocumentSha256;
 
                     return result;
                 })
@@ -113,6 +114,7 @@ class ChangesData
 {
     public string Created { get; set; }
     public ChangesUserData User { get; set; }
+    public string DocumentSha256 { get; set; }
 }
 
 class ChangesUserData
@@ -163,6 +165,7 @@ public class EditHistoryChanges
 {
     public EditHistoryAuthor Author { get; init; }
     public DateTime Date { get; set; }
+    public string DocumentSha256 { get; set; }
 }
 
 [DebuggerDisplay("{Version}")]

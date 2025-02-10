@@ -370,9 +370,9 @@ public class EFUserService(
                     var q2 = from user in q
                              join quota in userDbContext.QuotaRow.Where(qr => qr.UserId != Guid.Empty && qr.Tag != Guid.Empty.ToString() && qr.Tag != "")
                                 on user.Id equals quota.UserId into quotaRow
-                             from @quota in quotaRow.DefaultIfEmpty()
+                             from quota in quotaRow.DefaultIfEmpty()
 
-                             select new { user, @quota };
+                             select new { user, quota };
 
                     var q3 = q2.GroupBy(q => q.user, q => q.quota.Counter, (user, g) => new
                     {

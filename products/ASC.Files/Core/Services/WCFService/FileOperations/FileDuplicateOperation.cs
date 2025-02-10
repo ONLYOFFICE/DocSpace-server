@@ -53,7 +53,7 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
         return base.RunJob(distributedTask, cancellationToken);
     }
 
-    protected override async Task DoJob(IServiceScope serviceScope)
+    protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
         foreach (var file in Files)
         {
@@ -65,7 +65,7 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
         }
     }
 
-    private async Task DoFileAsync(IServiceScope scope, T id)
+    private async Task DoFileAsync(AsyncServiceScope scope, T id)
     {
         var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
         var file = await fileDao.GetFilesAsync([id]).FirstOrDefaultAsync(cancellationToken: _cancellationToken);
@@ -77,7 +77,7 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
         await copyOperation.RunJob(_distributedTask, _cancellationToken);
     }
 
-    private async Task DoFolderAsync(IServiceScope scope, T id)
+    private async Task DoFolderAsync(AsyncServiceScope scope, T id)
     {             
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<T>>();   
         var folder = await folderDao.GetFolderAsync(id);

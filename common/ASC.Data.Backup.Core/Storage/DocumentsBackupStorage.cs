@@ -141,6 +141,11 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
             file = await fileDao.UploadChunkAsync(chunkedUploadSession, theMemStream, bytesRead);
         }
 
+        if (file.Id == null)
+        {
+            file = await fileDao.FinalizeUploadSessionAsync(chunkedUploadSession);
+        }
+
         return file.Id;
     }
 

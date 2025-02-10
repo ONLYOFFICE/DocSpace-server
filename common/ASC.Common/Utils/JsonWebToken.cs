@@ -71,7 +71,7 @@ public static class JsonWebToken
     }
 }
 
-public class DictionaryStringObjectJsonConverter : System.Text.Json.Serialization.JsonConverter<Dictionary<string, object>>
+public class DictionaryStringObjectJsonConverter : JsonConverter<Dictionary<string, object>>
 {
     public override Dictionary<string, object> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

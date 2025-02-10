@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Threading.Channels;
-
 namespace ASC.MessagingSystem.Core;
 
 public class HistorySocketManager(
@@ -59,11 +57,6 @@ public class HistorySocketManager(
                 tenantId
                 );
         }
-    }
-    
-    public void UpdateHistory(int tenantId, IEnumerable<DbFilesAuditReference> auditReference)
-    {
-        UpdateHistoryAsync(tenantId, auditReference).GetAwaiter().GetResult();
     }
 
     private static string GetRoom(int tenantId, int entryId, int entryType)
