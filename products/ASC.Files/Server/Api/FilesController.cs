@@ -531,12 +531,12 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     }
 
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Updated information about form role mappings", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "Updated information about form role mappings", typeof(FormRole))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPost("file/{fileId}/formrolemapping")]
-    public async Task SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
+    public async Task<IEnumerable<FormRole>> SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
     {
-        await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
+        return await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
     }
 
     [Tags("Files / Files")]

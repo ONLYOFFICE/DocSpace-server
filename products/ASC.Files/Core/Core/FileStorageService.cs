@@ -4320,7 +4320,7 @@ public class FileStorageService //: IFileStorageService
         return [..users];
     }
 
-    public async Task SaveFormRoleMapping<T>(T formId, IEnumerable<FormRole> roles)
+    public async Task<IEnumerable<FormRole>> SaveFormRoleMapping<T>(T formId, IEnumerable<FormRole> roles)
     {
         var fileDao = daoFactory.GetFileDao<T>();
 
@@ -4354,6 +4354,8 @@ public class FileStorageService //: IFileStorageService
         var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
         properties.FormFilling.CollectFillForm = true;
         await fileDao.SaveProperties(formId, properties);
+
+        return roles;
 
     }
 
