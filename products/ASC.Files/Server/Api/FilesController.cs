@@ -538,6 +538,15 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
     }
+
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Successfully reassigned the form role to another user", typeof(FormRole))]
+    [SwaggerResponse(403, "You do not have enough permissions to reassign the role")]
+    [HttpPut("file/{fileId}/formroleassignment")]
+    public async Task<FormRole> ReassignFormRoleToUser(ReassignFormRoleToUserDto<T> inDto)
+    {
+        return await fileStorageService.ReassignFormRoleToUser(inDto.FormId, inDto.RoleId, inDto.UserId, inDto.ToUserId);
+    }
 }
 
 public class FilesControllerCommon(

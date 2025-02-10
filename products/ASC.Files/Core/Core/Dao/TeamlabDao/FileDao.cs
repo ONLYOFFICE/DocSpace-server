@@ -1399,6 +1399,35 @@ internal class FileDao(
 
         await filesDbContext.SaveChangesAsync();
     }
+    public async Task<FormRole> ReassignFormRoleToUser(int formId, int roleId, Guid userId, Guid toUserId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var role = await filesDbContext.FilesFormRoleAsync(tenantId, formId, roleId, userId);
+
+        if (role != null)
+        {
+            filesDbContext.Remove(role);
+            var roleDb = new DbFilesFormRoleMapping
+            {
+                TenantId = tenantId,
+                FormId = formId,
+                RoleId = roleId,
+                UserId = toUserId,
+                RoleName = role.RoleName,
+                Sequence = role.Sequence,
+                Submitted = role.Submitted
+
+            };
+            await filesDbContext.FilesFormRoleMapping.AddAsync(roleDb);
+            await filesDbContext.SaveChangesAsync();
+
+            return mapper.Map<FormRole>(roleDb);
+        }
+        return null;
+    }
     public async Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(int formId, Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

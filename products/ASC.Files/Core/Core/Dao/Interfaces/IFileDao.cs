@@ -282,6 +282,16 @@ public interface IFileDao<T>
     Task SaveFormRoleMapping(T formId, IEnumerable<FormRole> formRoles);
 
     /// <summary>
+    /// Update form role mappings
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <param name="roleId"></param>
+    /// <param name="userId"></param>
+    /// <param name="toUserId"></param>
+    /// <returns></returns>
+    Task<FormRole> ReassignFormRoleToUser(T formId, int roleId, Guid userId, Guid toUserId);
+
+    /// <summary>
     /// Get form role mappings
     /// </summary>
     /// <param name="formId"></param>
