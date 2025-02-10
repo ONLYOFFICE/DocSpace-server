@@ -58,13 +58,11 @@ public static class OpenTelemetryExtension
         });
         
         builder.Services.AddOpenTelemetry()
-            .ConfigureResource(resource => resource.AddService(telemetrySettings.ServiceName))
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation();
                 metrics.AddHttpClientInstrumentation();
                 metrics.AddRuntimeInstrumentation();
-                metrics.AddProcessInstrumentation();
 
                 if (telemetrySettings.InfluxDB != null)
                 {
