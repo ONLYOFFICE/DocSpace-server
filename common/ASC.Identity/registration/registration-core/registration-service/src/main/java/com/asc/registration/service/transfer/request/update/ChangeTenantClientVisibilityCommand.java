@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,7 +48,7 @@ public class ChangeTenantClientVisibilityCommand {
   /** The ID of the tenant. Must be greater than or equal to 1. */
   @Min(value = 1, message = "tenant id must be greater than or equal to 1")
   @JsonProperty("tenant_id")
-  private int tenantId;
+  private long tenantId;
 
   /** The ID of the client. Must not be blank. */
   @NotBlank(message = "client id must not be blank")

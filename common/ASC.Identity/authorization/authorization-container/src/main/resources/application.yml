@@ -1,0 +1,82 @@
+server:
+  servlet:
+    session:
+      tracking-modes: cookie
+  host: ${SERVER_HOST:127.0.0.1}
+  port: ${SERVER_PORT:9090}
+  shutdown: graceful
+springdoc:
+  api-docs:
+    path: /docs
+  use-management-port: false
+spring:
+  main:
+    banner-mode: off
+  application:
+    name: ${SPRING_APPLICATION_NAME:ASC.Identity.Authorization}
+    region: ${SPRING_APPLICATION_REGION:local} # eu/us/local
+    encryption:
+      type: ${SPRING_APPLICATION_ENCRYPTION_TYPE:aes} # aes/noop
+      secret: ${SPRING_APPLICATION_ENCRYPTION_SECRET:secret}
+    signature:
+      jwks: ${SPRING_APPLICATION_SIGNATURE_JWKS_TYPE:ec} # ec/rsa
+      secret: ${SPRING_APPLICATION_SIGNATURE_SECRET:4788a8f8ca95f5a35a76051f9da9671f3165c9a601337ab8a764d2b64e4d28ad1a5f3d76b5729bc23518f49244c673f51f1bcf3e43b6dae76fed24ef5d5142bbd79cc7eacadfef8f63d370a7780ba37d91658c9897465cce5a1a0b7976e89e9c98aefd7573a552dea914ca5ca2be6662834a1f47fdab6727d12b1ac8b69ad3ddc5b1be666b27ee99dd3e5b88b2eb523448eb911d5303b6882590016557d62343ef6e4c7065300b8b13682a4e4941873e77a6eb16ddd562aeca1dc26dfcba28e7bb0a97870e1f3a57f935b487e38d0c1c65b3c6124a01a60af00b0b7911b567b3565c70cd61eb6912429d1b6cbf606c4ae599700d09450063d2b208fe24152b8a}
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  cache:
+    type: caffeine
+  config:
+    import:
+      - "classpath:application-datasource.yml"
+      - "classpath:application-resilience.yml"
+      - "classpath:application-rabbitmq.yml"
+      - "classpath:application-security.yml"
+      - "classpath:application-service.yml"
+  threads:
+    virtual:
+      enabled: true
+management:
+  endpoint:
+    env:
+      post:
+        enabled: true
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      base-path: null
+      exposure:
+        include: health
+      path-mapping:
+        health: /health
+  health:
+    diskspace:
+      enabled: false
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+    refresh:
+      enabled: false
+---
+logging:
+  level:
+    com:
+      asc: DEBUG
+    org:
+      hibernate:
+        SQL: DEBUG
+        stat: DEBUG
+    root: INFO
+spring:
+  config:
+    activate:
+      on-profile:
+        - development
+        - dev
+        - d
+  output:
+    ansi:
+      enabled: always
