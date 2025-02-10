@@ -211,7 +211,7 @@ public enum SexEnum
     Female = 0,
 
     [SwaggerEnum("Male")]
-    Male = 1,
+    Male = 1
 }
 
 /// <summary>

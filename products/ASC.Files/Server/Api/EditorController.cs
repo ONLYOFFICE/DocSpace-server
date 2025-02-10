@@ -228,7 +228,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                                 inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
 
                                 file = formDraft;
-                                fillingSessionId = string.Format("{0}_{1}", formDraft.Id, securityContext.CurrentAccount.ID);
+                                fillingSessionId = $"{formDraft.Id}_{securityContext.CurrentAccount.ID}";
                             }
                             else
                             {
@@ -289,7 +289,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         {
             var linkId = await externalShare.GetLinkIdAsync();
 
-            if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
+            if (linkId != Guid.Empty && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
             {
                 await entryManager.MarkFileAsRecentByLink(file, linkId);
             }

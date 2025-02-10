@@ -294,7 +294,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             try
             {
-                file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenantId());
+                file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant());
             }
             catch (Exception e)
             {

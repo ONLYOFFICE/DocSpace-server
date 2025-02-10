@@ -114,14 +114,7 @@ public class File<T> : FileEntry<T>
                 case FileType.Video:
                     return FilterType.MediaOnly;
                 case FileType.Pdf:
-                    if (this.IsForm)
-                    {
-                        return FilterType.PdfForm;
-                    }
-                    else
-                    {
-                        return FilterType.Pdf;
-                    }
+                    return this.IsForm ? FilterType.PdfForm : FilterType.Pdf;
                    
             }
 

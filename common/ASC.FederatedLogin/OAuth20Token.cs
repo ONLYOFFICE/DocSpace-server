@@ -87,7 +87,7 @@ public class OAuth20Token
     {
         get
         {
-            if (!ExpiresIn.Equals(default))
+            if (!ExpiresIn.Equals(0))
             {
                 return DateTime.UtcNow > Timestamp + TimeSpan.FromSeconds(ExpiresIn);
             }

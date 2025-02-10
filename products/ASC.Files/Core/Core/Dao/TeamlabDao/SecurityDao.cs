@@ -929,7 +929,7 @@ internal abstract class SecurityBaseDao<T>(
     {
         var result = mapper.Map<SecurityTreeRecord, FileShareRecord<T>>(r);
 
-        if (r.FolderId != default)
+        if (r.FolderId != 0)
         {
             result.EntryId = (T)Convert.ChangeType(r.FolderId, typeof(T));
         }

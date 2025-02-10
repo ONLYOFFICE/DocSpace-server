@@ -829,4 +829,46 @@
   <data name="FileIndexChanged" xml:space="preserve">
     <value>Archivo: {0}. Índice cambiado de {1} a {2}</value>
   </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Sala: {0}. La opción Denegar descarga está activada</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>La indización de sala está desactivada</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>La indización de sala está activada</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Vida útil desactivada</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>La vida útil está establecida. Valor: {0}. Periodo: {1}. Eliminar permanentemente: {2}</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>La activación del cliente {0} ha cambiado</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Visibilidad del cliente {0} cambiada</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Cliente creado</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Cliente {0} eliminado</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Código de autorización generado para el cliente {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Token de acceso personal generado para el cliente {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Secreto del cliente {0} regenerado</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Acceso revocado del cliente {0}</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Cliente {0} actualizado</value>
+  </data>
 </root>

@@ -49,9 +49,9 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
         return GetLink(token);
     }
 
-    public void SendMessage(NotifyMessage msg)
+    public async Task SendMessageAsync(NotifyMessage msg)
     {
-        telegramServiceClient.SendMessage(msg);
+        await telegramServiceClient.SendMessage(msg);
     }
 
     public async Task<bool> CreateClientAsync(int tenantId, string token, int tokenLifespan, string proxy)

@@ -177,7 +177,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var locatedInPrivateRoom = false;
         Options options = null;
-        if (file.RootFolderType == FolderType.VirtualRooms || file.RootFolderType == FolderType.Archive)
+        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);

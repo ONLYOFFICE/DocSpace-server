@@ -74,7 +74,7 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
                 {
                     var dn = capability.FirstOrDefault(dc =>
                         !string.IsNullOrEmpty(dc) &&
-                        dc.IndexOf("dc=", StringComparison.InvariantCultureIgnoreCase) != -1);
+                        dc.Contains("dc=", StringComparison.InvariantCultureIgnoreCase));
 
                     var domain = LdapUtils.DistinguishedNameToDomain(dn);
 
@@ -88,7 +88,7 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
                 {
                     var dn = capability1.FirstOrDefault(dc =>
                         !string.IsNullOrEmpty(dc) &&
-                        dc.IndexOf("dc=", StringComparison.InvariantCultureIgnoreCase) != -1);
+                        dc.Contains("dc=", StringComparison.InvariantCultureIgnoreCase));
 
                     var domain = LdapUtils.DistinguishedNameToDomain(dn);
 
@@ -102,7 +102,7 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
                 {
                     var dn = dnList.FirstOrDefault(dc =>
                         !string.IsNullOrEmpty(dc) &&
-                        dc.IndexOf("dc=", StringComparison.InvariantCultureIgnoreCase) != -1);
+                        dc.Contains("dc=", StringComparison.InvariantCultureIgnoreCase));
 
                     var domain = LdapUtils.DistinguishedNameToDomain(dn);
 

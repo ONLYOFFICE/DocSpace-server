@@ -26,6 +26,7 @@
 
 namespace ASC.Core.Tenants;
 
+[EnumExtensions]
 public enum TenantStatus
 {
     [SwaggerEnum("Active")]

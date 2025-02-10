@@ -428,7 +428,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
             return new List<Folder>();
         }
 
-        return folder.Folders.ToList().Where(r => r.ServerRelativeUrl != SpRootFolderId + "/" + "Forms");
+        return (await folder.Folders.ToListAsync()).Where(r => r.ServerRelativeUrl != SpRootFolderId + "/" + "Forms");
     }
 
     public async Task<object> RenameFolderAsync(object id, string newTitle)

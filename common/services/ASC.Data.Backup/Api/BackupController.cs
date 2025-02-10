@@ -189,7 +189,7 @@ public class BackupController(
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
-            : default;
+            : null;
         
         var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -229,7 +229,7 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackuphistory</path>
     /// <collection>list</collection>
     [Tags("Backup")]
-    [SwaggerResponse(200, "List of backup history records", typeof(BackupHistoryRecord))]
+    [SwaggerResponse(200, "List of backup history records", typeof(List<BackupHistoryRecord>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
@@ -287,7 +287,7 @@ public class BackupController(
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
-            : default;
+            : null;
         
         var tenantId = tenantManager.GetCurrentTenantId();
 
@@ -308,6 +308,7 @@ public class BackupController(
             storageParams.TryAdd("subdir", "backup");
         }
 
+        var taskId = await backupAjaxHandler.StartRestoreAsync(inDto.BackupId, storageType, storageParams, inDto.Notify, serverBaseUri, inDto.Dump, false);
         await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
                              createBy: CurrentUserId,
@@ -315,7 +316,9 @@ public class BackupController(
                              storageType: storageType,
                              notify: inDto.Notify,
                              backupId: inDto.BackupId,
-                             serverBaseUri: serverBaseUri
+                             dump: inDto.Dump,
+                             serverBaseUri: serverBaseUri,
+                             taskId: taskId
                         ));
 
 
@@ -346,7 +349,7 @@ public class BackupController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Backup")]
     [HttpGet("backuptmp")]
-    [SwaggerResponse(200, "Path to the temporary folder with the stored backup")]
+    [SwaggerResponse(200, "Path to the temporary folder with the stored backup", typeof(object))]
     public object GetTempPath()
     {
         return backupAjaxHandler.GetTmpFolder();

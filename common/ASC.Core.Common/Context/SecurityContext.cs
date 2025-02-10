@@ -188,7 +188,7 @@ public class SecurityContext(
     {
         if (account == null || account.Equals(Constants.Guest))
         {
-            if (session == default || session == Constants.Guest.ID)
+            if (session == Guid.Empty || session == Constants.Guest.ID)
             {
                 throw new InvalidCredentialException(nameof(account));
             }
@@ -322,7 +322,7 @@ public class PermissionContext(IPermissionResolver permissionResolver, AuthConte
 public class AuthContext(IHttpContextAccessor httpContextAccessor)
 {
     private IHttpContextAccessor HttpContextAccessor { get; } = httpContextAccessor;
-    private static readonly List<string> _typesCheck = [ConfirmType.LinkInvite.ToString(), ConfirmType.EmpInvite.ToString()];
+    private static readonly List<string> _typesCheck = [ConfirmType.LinkInvite.ToStringFast(), ConfirmType.EmpInvite.ToStringFast()];
     
     public IAccount CurrentAccount => Principal?.Identity as IAccount ?? Constants.Guest;
 

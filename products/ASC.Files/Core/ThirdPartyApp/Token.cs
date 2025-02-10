@@ -33,14 +33,12 @@ public class Token(OAuth20Token oAuth20Token, string app) : OAuth20Token(oAuth20
 }
 
 [Scope]
-public class TokenHelper(IDbContextFactory<FilesDbContext> dbContextFactory,
-    ILogger<TokenHelper> logger,
+public class TokenHelper(
+    IDbContextFactory<FilesDbContext> dbContextFactory,
     InstanceCrypto instanceCrypto,
     AuthContext authContext,
     TenantManager tenantManager)
 {
-    public readonly ILogger<TokenHelper> Logger = logger;
-
     public async Task SaveTokenAsync(Token token)
     {
         var dbFilesThirdpartyApp = new DbFilesThirdpartyApp

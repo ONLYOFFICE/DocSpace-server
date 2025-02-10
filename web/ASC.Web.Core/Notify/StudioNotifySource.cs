@@ -115,6 +115,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.EnterpriseAdminUserDocsTipsV1,
 
                 Actions.SaasAdminTrialWarningAfterHalfYearV1,
+                Actions.SaasAdminStartupWarningAfterYearV1,
 
                 Actions.PortalDeleteSuccessV1,
 

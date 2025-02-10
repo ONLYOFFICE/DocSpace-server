@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ImageMagick;
+
 using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
 namespace ASC.People.Api;
@@ -76,7 +78,7 @@ public class PhotoController(
 
             if (inDto.Thumbnails.Width == 0 && inDto.Thumbnails.Height == 0)
             {
-                using var img = Image.Load(data);
+                using var img = new MagickImage(data);
                 settings = new UserPhotoThumbnailSettings(inDto.Thumbnails.X, inDto.Thumbnails.Y, img.Width, img.Height);
             }
             else
@@ -316,11 +318,11 @@ public class PhotoController(
 
     private static void CheckImgFormat(byte[] data)
     {
-        IImageFormat imgFormat;
+        MagickFormat imgFormat;
         try
         {
-            using var img = Image.Load(data);
-            imgFormat = img.Metadata.DecodedImageFormat;
+            using var img = new MagickImage(data);
+            imgFormat = img.Format;
         }
         catch (OutOfMemoryException)
         {
@@ -331,7 +333,7 @@ public class PhotoController(
             throw new UnknownImageFormatException(error);
         }
 
-        if (imgFormat.Name != "PNG" && imgFormat.Name != "JPEG")
+        if (imgFormat != MagickFormat.Png && imgFormat != MagickFormat.Jpeg)
         {
             throw new UnknownImageFormatException();
         }

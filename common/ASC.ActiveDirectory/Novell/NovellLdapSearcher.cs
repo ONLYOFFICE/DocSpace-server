@@ -34,7 +34,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
 {
     protected readonly ILogger<NovellLdapSearcher> _logger = logger;
     private LdapCertificateConfirmRequest _certificateConfirmRequest;
-    private static readonly object _rootSync = new();
+    private static readonly Lock _rootSync = new();
     private LdapConnection _ldapConnection;
 
     public string Login { get; private set; }

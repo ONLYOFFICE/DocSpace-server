@@ -59,7 +59,7 @@ public class CommonMethods(
             ownerId = t.OwnerId,
             paymentId = t.PaymentId,
             portalName = t.Alias,
-            status = t.Status.ToString(),
+            status = t.Status.ToStringFast(),
             tenantId = t.Id,
             timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
             quotaUsage,
@@ -97,7 +97,7 @@ public class CommonMethods(
                             tenant.GetTenantDomain(coreSettings),
                             commonConstants.WebApiBaseUrl,
                             apiMethod,
-                            tenant.OwnerId,
+                            tenant.OwnerId.ToString(),
                             validationKey);
 
         if (skipAndReturnUrl)

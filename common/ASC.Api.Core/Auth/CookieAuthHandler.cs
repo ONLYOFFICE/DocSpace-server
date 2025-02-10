@@ -41,7 +41,7 @@ public class CookieAuthHandler(
     {
         try
         {
-            var authorization = httpContextAccessor.HttpContext.Request.Cookies[cookiesManager.GetAscCookiesName()] ?? httpContextAccessor.HttpContext.Request.Headers["Authorization"].ToString();
+            var authorization = httpContextAccessor.HttpContext.Request.Cookies[cookiesManager.GetAscCookiesName()] ?? httpContextAccessor.HttpContext.Request.Headers.Authorization.ToString();
 
             if (string.IsNullOrEmpty(authorization))
             {
@@ -50,7 +50,7 @@ public class CookieAuthHandler(
 
             authorization = authorization.Trim();
 
-            if (0 <= authorization.IndexOf("Bearer", 0))
+            if (0 <= authorization.IndexOf("Bearer", 0, StringComparison.Ordinal))
             {
                 authorization = authorization["Bearer ".Length..];
             }

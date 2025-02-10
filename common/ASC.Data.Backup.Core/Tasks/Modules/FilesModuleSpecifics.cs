@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core.Thirdparty;
+
 namespace ASC.Data.Backup.Tasks.Modules;
 
 public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helpers) : ModuleSpecificsBase(helpers)
@@ -160,16 +162,14 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
     {
-        switch (table.Name)
+        return table.Name switch
         {
-            case "files_folder_tree":
-                return "inner join files_folder as t1 on t1.id = t.folder_id where t1.tenant_id = " + tenantId;
-            case "files_file":
+            "files_folder_tree" => "inner join files_folder as t1 on t1.id = t.folder_id where t1.tenant_id = " + tenantId,
+            "files_file" =>
                 // do not backup previus backup files
-                return "where not exists(select 1 from backup_backup b where b.tenant_id = t.tenant_id and b.storage_path = t.id) and t.tenant_id = " + tenantId;
-            default:
-                return base.GetSelectCommandConditionText(tenantId, table);
-        }
+                "where not exists(select 1 from backup_backup b where b.tenant_id = t.tenant_id and b.storage_path = t.id) and t.tenant_id = " + tenantId,
+            _ => base.GetSelectCommandConditionText(tenantId, table)
+        };
     }
 
     protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,

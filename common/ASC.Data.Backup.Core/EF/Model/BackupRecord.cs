@@ -177,75 +177,66 @@ public static class BackupRecordExtension
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .HasColumnType("char")
-                .HasMaxLength(38)
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasColumnType("uuid");
 
             entity.Property(e => e.TenantId)
                 .IsRequired()
                 .HasColumnName("tenant_id")
-                .HasColumnType("int")
-                .HasMaxLength(10);
+                .HasColumnType("integer");
 
             entity.Property(e => e.IsScheduled)
                 .IsRequired()
                 .HasColumnName("is_scheduled")
-                .HasColumnType("int")
-                .HasMaxLength(10);
+                .HasColumnType("boolean");
 
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasColumnType("character varying")
+                .HasMaxLength(255);
 
             entity.Property(e => e.StorageType)
                 .IsRequired()
                 .HasColumnName("storage_type")
-                .HasColumnType("int")
-                .HasMaxLength(10);
+                .HasColumnType("integer");
 
             entity.Property(e => e.StorageBasePath)
                 .HasColumnName("storage_base_path")
-                .HasDefaultValueSql("NULL")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasColumnType("character varying")
+                .HasMaxLength(255)
+                .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.StoragePath)
                 .IsRequired()
                 .HasColumnName("storage_path")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasColumnType("character varying")
+                .HasMaxLength(255);
 
             entity.Property(e => e.CreatedOn)
                 .IsRequired()
                 .HasColumnName("created_on")
-                .HasColumnType("datetime");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.ExpiresOn)
                 .HasColumnName("expires_on")
-                .HasColumnType("datetime")
+                .HasColumnType("timestamptz")
                 .HasDefaultValueSql("'0001-01-01 00:00:00'");
 
             entity.Property(e => e.StorageParams)
                 .HasColumnName("storage_params")
                 .HasColumnType("text")
-                .HasDefaultValueSql("NULL")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.Hash)
-                 .IsRequired()
+                .IsRequired()
                 .HasColumnName("hash")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasColumnType("character varying")
+                .HasMaxLength(64);
 
             entity.Property(e => e.Removed)
                 .HasColumnName("removed")
-                .HasColumnType("int")
-                .HasMaxLength(10)
-                .IsRequired();
+                .IsRequired()
+                .HasColumnType("boolean");
         });
     }
 }

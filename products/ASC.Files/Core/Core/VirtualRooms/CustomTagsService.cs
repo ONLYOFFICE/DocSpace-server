@@ -37,7 +37,8 @@ public class CustomTagsService(
 {
     public async Task<TagInfo> CreateTagAsync(string name)
     {
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not EmployeeType.RoomAdmin and not EmployeeType.DocSpaceAdmin)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }

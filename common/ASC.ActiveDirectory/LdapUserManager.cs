@@ -246,8 +246,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                         wrapper.LdapChangeCollection.SetSkipUserChange(ldapUserInfo);
                     }
 
-                    logger.DebugSyncUserLdapFailedWithStatus(ldapUserInfo.Sid, ldapUserInfo.UserName,
-                        Enum.GetName(typeof(EmployeeStatus), ldapUserInfo.Status));
+                    logger.DebugSyncUserLdapFailedWithStatus(ldapUserInfo.Sid, ldapUserInfo.UserName, Enum.GetName(ldapUserInfo.Status));
 
                     return wrapper;
                 }
@@ -358,9 +357,9 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
     private const string EXT_PHONE = "extphone";
     private const string EXT_SKYPE = "extskype";
 
-    private static void UpdateLdapUserContacts(UserInfo ldapUser, IReadOnlyList<string> portalUserContacts)
+    private static void UpdateLdapUserContacts(UserInfo ldapUser, List<string> portalUserContacts)
     {
-        if (portalUserContacts == null || !portalUserContacts.Any())
+        if (portalUserContacts == null || portalUserContacts.Count == 0)
         {
             return;
         }

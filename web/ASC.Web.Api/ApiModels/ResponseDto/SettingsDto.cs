@@ -166,6 +166,11 @@ public class SettingsDto
     /// Link to the help
     /// </summary>
     public string HelpLink { get; set; }
+    
+    /// <summary>
+    /// Link to the feedback and support
+    /// </summary>
+    public string FeedbackAndSupportLink { get; set; }
 
     /// <summary>
     /// Link to the forum
@@ -256,4 +261,9 @@ public class SettingsDto
     /// Max image upload size
     /// </summary>
     public long MaxImageUploadSize { get; set; }
+
+    /// <summary>
+    /// White label logo text
+    /// </summary>
+    public string LogoText { get; set; }
 }

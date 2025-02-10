@@ -203,7 +203,7 @@ public abstract class BaseStartup
                     {
                         permitLimit = _configuration.GetSection("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests").Get<int>();
 
-                        if (permitLimit == default)
+                        if (permitLimit == 0)
                         {
                             permitLimit = 15;
                         }
@@ -433,7 +433,7 @@ public abstract class BaseStartup
             {
                 options.ForwardDefaultSelector = context =>
                 {
-                    var authorizationHeader = context.Request.Headers[HeaderNames.Authorization].FirstOrDefault();
+                    string authorizationHeader = context.Request.Headers[HeaderNames.Authorization];
 
                     if (string.IsNullOrEmpty(authorizationHeader))
                     {

@@ -71,9 +71,9 @@ public class DynamicCorsPolicyResolver(
 
     private async Task<IEnumerable<string>> GetOriginsFromOAuth2App()
     {        
-        var accessToken = _context.Request.Headers["Authorization"].ToString();
+        var accessToken = _context.Request.Headers.Authorization.ToString();
 
-        if (accessToken == null || accessToken.IndexOf("Bearer", 0) == -1)
+        if (string.IsNullOrEmpty(accessToken) || accessToken.IndexOf("Bearer", 0, StringComparison.Ordinal) == -1)
         {
             return new List<string>();
         }

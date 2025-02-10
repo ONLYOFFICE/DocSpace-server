@@ -89,12 +89,12 @@ public class AuthorizationManager(IAzService service, TenantManager tenantManage
         }
     }
 
-    private IEnumerable<AzRecord> DistinctAces(IEnumerable<AzRecord> inheritAces)
+    private static IEnumerable<AzRecord> DistinctAces(IEnumerable<AzRecord> inheritAces)
     {
         var aces = new Dictionary<string, AzRecord>();
         foreach (var a in inheritAces)
         {
-            aces[string.Format("{0}{1}{2:D}", a.Subject, a.Action, a.AceType)] = a;
+            aces[$"{a.Subject}{a.Action}{a.AceType:D}"] = a;
         }
 
         return aces.Values;

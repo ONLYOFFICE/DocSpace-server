@@ -9,6 +9,8 @@ var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
 
 var inputData = ${inputData};
 
+var inputDataItems = [${inputDataItems}];
+
 var oWorksheet = Api.GetActiveSheet();
 
 var currentRowIndex = 1;
@@ -101,7 +103,7 @@ function prepareData(startColIndex, startRowIndex) {
         }
     ];
 
-    var sortedData = inputData.data.sort(function(a, b) {
+    var sortedDataItems = inputDataItems.sort(function(a, b) {
         var i, diff;
         var segmentsA = (a.index ?? "").split('.');
         var segmentsB = (b.index ?? "").split('.');
@@ -116,8 +118,8 @@ function prepareData(startColIndex, startRowIndex) {
         return segmentsA.length - segmentsB.length;
     });
 
-    for (var i = 0; i < sortedData.length; i++) {
-        var item = sortedData[i];
+    for (var i = 0; i < sortedDataItems.length; i++) {
+        var item = sortedDataItems[i];
         var indexBgColor = i > 0 ? defaultBgColorGray : null;
         var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
         dataTable.push({
@@ -134,7 +136,7 @@ function prepareData(startColIndex, startRowIndex) {
         });
     }
 
-    var sizeSum = "=SUM(" + toColumnName(currentColIndex + 3) + (currentRowIndex + 1) + ":" + toColumnName(currentColIndex + 3) + (currentRowIndex + sortedData.length) + ")";
+    var sizeSum = "=SUM(" + toColumnName(currentColIndex + 3) + (currentRowIndex + 1) + ":" + toColumnName(currentColIndex + 3) + (currentRowIndex + sortedDataItems.length) + ")";
 
     dataTable.push({ height: 19.5, dataArray: [] });
 

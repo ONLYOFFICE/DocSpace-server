@@ -120,7 +120,7 @@ public class StudioNotifyWorker(TenantManager tenantManager,
             item.SenderNames is { Count: > 0 } ? item.SenderNames.ToArray() : null,
             item.CheckSubsciption,
             item.Tags?
-                .Select(r => (ITagValue)new TagValue(r.Key, r.Value))
+                .Select(ITagValue (r) => new TagValue(r.Key, r.Value))
                 .ToArray());
     }
 }

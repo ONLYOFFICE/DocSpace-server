@@ -114,12 +114,12 @@ public abstract class BaseStorage(TempStream tempStream,
             }
 
             var auth = emailValidationKeyProvider.GetEmailKey(currentTenantId, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + "." + headerAttr + "." + expireString);
-            query = $"{(path.IndexOf('?') >= 0 ? "&" : "?")}{Constants.QueryExpire}={expireString}&{Constants.QueryAuth}={auth}";
+            query = $"{(path.Contains('?') ? "&" : "?")}{Constants.QueryExpire}={expireString}&{Constants.QueryAuth}={auth}";
         }
 
         if (!string.IsNullOrEmpty(headerAttr))
         {
-            query += $"{(query.IndexOf('?') >= 0 ? "&" : "?")}{Constants.QueryHeader}={HttpUtility.UrlEncode(headerAttr)}";
+            query += $"{(query.Contains('?') ? "&" : "?")}{Constants.QueryHeader}={HttpUtility.UrlEncode(headerAttr)}";
         }
 
         var tenant = Tenant.Trim('/');

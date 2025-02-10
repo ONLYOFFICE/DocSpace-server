@@ -24,9 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using SixLabors.ImageSharp.Processing;
+using ImageMagick;
 
-using Image = SixLabors.ImageSharp.Image;
 using JsonException = System.Text.Json.JsonException;
 using Status = ASC.Files.Core.Security.Status;
 
@@ -293,7 +292,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             //TODO
             //context.Response.Headers.Charset = "utf-8";
 
-            var range = (context.Request.Headers["Range"].FirstOrDefault() ?? "").Split('=', '-');
+            var range = (context.Request.Headers.Range.FirstOrDefault() ?? "").Split('=', '-');
             var isNeedSendAction = range.Length < 2 || Convert.ToInt64(range[1]) == 0;
 
             if (isNeedSendAction)
@@ -315,7 +314,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 }
             }
 
-            if (string.Equals(context.Request.Headers["If-None-Match"], GetEtag(file)))
+            if (string.Equals(context.Request.Headers.IfNoneMatch, GetEtag(file)))
             {
                 //Its cached. Reply 304
                 context.Response.StatusCode = (int)HttpStatusCode.NotModified;
@@ -497,7 +496,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     {
         ArgumentNullException.ThrowIfNull(context);
         
-        var rangeHeader = context.Request.Headers["Range"].FirstOrDefault();
+        var rangeHeader = context.Request.Headers.Range.FirstOrDefault();
         if (rangeHeader == null)
         {
             return fullLength;
@@ -1009,8 +1008,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var sizes = size.Split('x');
             if (sizes.Length == 2)
             {
-                _ = int.TryParse(sizes[0], out width);
-                _ = int.TryParse(sizes[1], out height);
+                _ = uint.TryParse(sizes[0], out width);
+                _ = uint.TryParse(sizes[1], out height);
             }
 
             fileDao = daoFactory.GetFileDao<int>();
@@ -1059,16 +1058,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(".jpeg", true));
 
                 await using var stream = await fileDao.GetFileStreamAsync(file);
-                var processedImage = await Image.LoadAsync(stream);
-
-                processedImage.Mutate(x => x.Resize(new ResizeOptions
-                {
-                    Size = new Size(width, height),
-                    Mode = ResizeMode.Crop
-                }));
-
-                // save as jpeg more fast, then webp
-                await processedImage.SaveAsJpegAsync(context.Response.Body);
+                var processedImage = new MagickImage(stream);
+                processedImage.Crop(width, height);
+                
+                await processedImage.WriteAsync(context.Response.Body, MagickFormat.Jpeg);
             }
             else
             {
@@ -1143,8 +1136,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var sizes = size.Split('x');
             if (sizes.Length == 2)
             {
-                _ = int.TryParse(sizes[0], out width);
-                _ = int.TryParse(sizes[1], out height);
+                _ = uint.TryParse(sizes[0], out width);
+                _ = uint.TryParse(sizes[1], out height);
             }
 
             context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("." + global.ThumbnailExtension));

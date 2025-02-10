@@ -266,7 +266,7 @@ public class PortalController(
 
                 var tariff = new Tariff
                 {
-                    Quotas = [new(trialQuotaId, 1)],
+                    Quotas = [new Quota(trialQuotaId, 1)],
                     DueDate = dueDate
                 };
                 await hostedSolution.SetTariffAsync(t.Id, tariff);
@@ -395,7 +395,7 @@ public class PortalController(
         return Ok(new
         {
             tenant = commonMethods.ToTenantWrapper(tenant),
-            removed = !wizardSettings.Completed,
+            removed = !wizardSettings.Completed
         });
     }
 
@@ -494,7 +494,7 @@ public class PortalController(
     /// <summary>
     /// Gets a list of portals
     /// </summary>
-    /// <path>apisystem/portal</path>
+    /// <path>apisystem/portal/get</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpGet("get")]
@@ -589,14 +589,12 @@ public class PortalController(
                         message = "Too much attempts already"
                     });
                 }
-                else
-                {
-                    var error = await GetRecaptchaError(model, clientIP, sw);
 
-                    if (error != null)
-                    {
-                        return StatusCode(StatusCodes.Status401Unauthorized, error);
-                    }
+                var error = await GetRecaptchaError(model, clientIP, sw);
+
+                if (error != null)
+                {
+                    return StatusCode(StatusCodes.Status401Unauthorized, error);
                 }
             }
 

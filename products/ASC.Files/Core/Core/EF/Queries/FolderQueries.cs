@@ -420,7 +420,7 @@ static file class FolderQueries
                                         ).Skip(1).FirstOrDefault()
                                     select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
                                 select f.Order
-                            ).FirstOrDefault(),
+                            ).FirstOrDefault()
                         }
                     ).SingleOrDefault());
 

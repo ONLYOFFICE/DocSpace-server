@@ -28,39 +28,64 @@ namespace ASC.Files.Core.Helpers;
 
 [Scope]
 public class FormFillingReportCreator(
-    ExportToCSV exportToCSV,
+    ExportToXLSX exportToXLSX,
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
-    TenantUtil tenantUtil,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    FactoryIndexerForm factoryIndexerForm,
+    CommonLinkUtility commonLinkUtility,
+    FilesLinkUtility filesLinkUtility,
+    FileUtility fileUtility)
 {
 
     private static readonly JsonSerializerOptions _options = new() {
+        Converters = { new BoolToStringConverter() },
         AllowTrailingCommas = true,
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task UpdateFormFillingReport<T>(T resultsFileId, int resultFormNumber, string formsDataUrl, string resultUrl)
+    public async Task UpdateFormFillingReport<T>(int originalFormId, int roomId, int resultFormNumber,string formsDataUrl, File<T> formsDataFile)
     {
-
-        if (formsDataUrl != null)
-        {
-            var fileDao = daoFactory.GetFileDao<T>();
-            var submitFormsData = await GetSubmitFormsData(resultFormNumber, formsDataUrl, resultUrl);
-
-            if (resultsFileId != null)
-            {
-                var resultsFile = await fileDao.GetFileAsync(resultsFileId);
-
-                var updateDt = exportToCSV.CreateDataTable(submitFormsData.FormsData);
-                await exportToCSV.UpdateCsvReport(resultsFile, updateDt);
-
-            }
-        }
+        await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
+        await exportToXLSX.UpdateXlsxReport(roomId, originalFormId);
     }
 
-    private async Task<SubmitFormsData> GetSubmitFormsData(int resultFormNumber, string url, string resultUrl)
+    public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
     {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var folder = await folderDao.GetFolderAsync(folderId);
+        if (folder?.FolderType != FolderType.FormFillingFolderDone)
+        {
+            return [];
+        }
+        
+        var fileDao = daoFactory.GetFileDao<int>();
+        var file = await fileDao.GetFilesAsync([folderId], FilterType.Pdf, false, Guid.Empty, null, null, false).FirstOrDefaultAsync();
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.Id, file.Id));
+
+        if (success)
+        {
+            return result.SelectMany(r => r.FormsData);
+        }
+
+        return [];
+    }
+
+    public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId)
+    {
+        factoryIndexerForm.Refresh();
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId));
+
+        if (success)
+        {
+            return result;
+        }
+        return [];
+    }
+
+    private async Task GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int roomId, int resultFormNumber, string url)
+    {
+        var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(url),
@@ -75,28 +100,51 @@ public class FormFillingReportCreator(
         {
             new()
             {
-                Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture),
-                Value = resultFormNumber
-            },
+                Key = "FormNumber",
+                Value = resultFormNumber.ToString()
+            }
         };
+        
+        var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+        fromData.FormsData = fromData.FormsData.Where(f => f.Type != "picture").ToList();
 
-        var formLink = new FormsItemData
+        var now = DateTime.UtcNow;
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        if (formsDataFile.Id is int id && formsDataFile.ParentId is int parentId)
         {
-            Key = FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture),
-            Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture)}\")"
-        };
-        var date = new FormsItemData
+            var searchItems = new DbFormsItemDataSearch
+            {
+                Id = id,
+                TenantId = tenantId,
+                ParentId = parentId,
+                OriginalFormId = originalFormId,
+                RoomId = roomId,
+                CreateOn = now,
+                FormsData = formNumber.Concat(fromData.FormsData)
+            };
+
+            _ = factoryIndexerForm.IndexAsync(searchItems);
+        }
+    }
+
+    public class BoolToStringConverter : System.Text.Json.Serialization.JsonConverter<string>
+    {
+        public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            Key = FilesCommonResource.ResourceManager.GetString("Date", tenantCulture),
-            Value = $"=\"{tenantUtil.DateTimeNow().ToString("G", tenantCulture)}\""
-        };
-        var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+            return reader.TokenType switch
+            {
+                JsonTokenType.True => "true",
+                JsonTokenType.False => "false",
+                JsonTokenType.String => reader.GetString(),
+                _ => throw new System.Text.Json.JsonException("Unexpected token type")
+            };
+        }
 
-        result.FormsData = formNumber.Concat(result.FormsData);
-        result.FormsData = result.FormsData.Append(date);
-        result.FormsData = result.FormsData.Append(formLink);
-
-        return result;
+        public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value);
+        }
     }
 
 }

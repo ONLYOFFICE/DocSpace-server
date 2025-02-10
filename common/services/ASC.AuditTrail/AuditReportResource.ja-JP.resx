@@ -811,4 +811,28 @@
   <data name="OAuthModule" xml:space="preserve">
     <value>OAuth</value>
   </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>クライアントの{0}アクティベーションが変更されました</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>クライアントの{0}表示設定が変更されました</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>クライアントが作成されました</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>クライアント{0}が削除されました</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>クライアント{0}の認証コードが生成されました</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>クライアント{0}の個人アクセストークンを生成しました</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>クライアント{0}のシークレットが再生成されました</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>クライアント{0}のアクセスが取り消されました</value>
+  </data>
 </root>

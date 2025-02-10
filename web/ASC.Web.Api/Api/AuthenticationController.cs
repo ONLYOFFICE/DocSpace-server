@@ -36,7 +36,6 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
-[AllowAnonymous]
 [WebhookDisable]
 [ControllerName("authentication")]
 public class AuthenticationController(
@@ -83,7 +82,7 @@ public class AuthenticationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
     [SwaggerResponse(200, "Boolean value: true if the current user is authenticated", typeof(bool))]
-    [AllowNotPayment]
+    [AllowNotPayment, AllowAnonymous]
     [HttpGet]
     public bool GetIsAuthentificated()
     {
@@ -104,7 +103,7 @@ public class AuthenticationController(
     [SwaggerResponse(401, "User authentication failed")]
     [SwaggerResponse(403, "Auth code is not available")]
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
-    [AllowNotPayment]
+    [AllowNotPayment, AllowAnonymous]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
     {
@@ -180,7 +179,7 @@ public class AuthenticationController(
     [SwaggerResponse(401, "User authentication failed")]
     [SwaggerResponse(404, "The user could not be found")]
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
-    [AllowNotPayment]
+    [AllowNotPayment, AllowAnonymous]
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
     {
@@ -291,7 +290,7 @@ public class AuthenticationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
     [SwaggerResponse(200, "Ok", typeof(object))]
-    [AllowNotPayment]
+    [AllowNotPayment, AllowAnonymous]
     [HttpPost("logout")]
     public async Task<object> LogoutAsync()
     {
@@ -340,7 +339,7 @@ public class AuthenticationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
     [SwaggerResponse(200, "Validation result: Ok, Invalid, or Expired", typeof(ConfirmDto))]
-    [AllowNotPayment, AllowSuspended]
+    [AllowNotPayment, AllowSuspended, AllowAnonymous]
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
     {
@@ -399,7 +398,7 @@ public class AuthenticationController(
     [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
     [SwaggerResponse(400, "userName, password or passworHash is empty")]
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
-    [AllowNotPayment]
+    [AllowNotPayment, AllowAnonymous]
     [HttpPost("sendsms")]
     public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)
     {
@@ -413,7 +412,7 @@ public class AuthenticationController(
             Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
         };
     }
-
+    
     private async Task<UserInfoWrapper> GetUserAsync(AuthRequestsDto inDto)
     {
         var wrapper = new UserInfoWrapper
@@ -521,7 +520,7 @@ public class AuthenticationController(
         wrapper.UserInfo = user;
         return wrapper;
     }
-
+    
     private async Task<UserInfo> GetUserByThirdParty(LoginProfile loginProfile)
     {
         try
@@ -584,8 +583,8 @@ public class AuthenticationController(
             throw;
         }
     }
-
-        private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
+    
+    private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
     {
         if (string.IsNullOrEmpty(loginProfile.EMail))
         {
@@ -612,7 +611,7 @@ public class AuthenticationController(
 
         return userInfo;
     }
-
+    
     private UserInfo ProfileToUserInfo(LoginProfile loginProfile)
     {
         if (string.IsNullOrEmpty(loginProfile.EMail))
@@ -645,6 +644,7 @@ public class AuthenticationController(
 
         return userInfo;
     }
+    
     private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)
     {
         var userId = Guid.Empty;

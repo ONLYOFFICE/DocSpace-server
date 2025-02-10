@@ -70,7 +70,7 @@ public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFact
 {
     public async Task<string> GetShortenLinkAsync(string shareLink)
     {
-        if (!shareLink.StartsWith(commonLinkUtility.ServerRootPath))
+        if (!shareLink.StartsWith(commonLinkUtility.ServerRootPath) || new Uri(shareLink).Host != new Uri(commonLinkUtility.ServerRootPath).Host)
         {
             throw new ArgumentException("the link should be to this portal");
         }

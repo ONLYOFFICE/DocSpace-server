@@ -28,7 +28,7 @@ namespace ASC.Api.Core.Extensions;
 
 public static class HostExtension
 {
-    public static async Task RunWithTasksAsync(this WebApplication webHost, CancellationToken cancellationToken = default, bool awaitTasks = true)
+    public static async Task RunWithTasksAsync(this WebApplication webHost, bool awaitTasks = true, CancellationToken cancellationToken = default)
     {
         CustomSynchronizationContext.CreateContext();
 

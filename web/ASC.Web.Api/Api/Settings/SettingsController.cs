@@ -57,6 +57,7 @@ public partial class SettingsController(MessageService messageService,
         UserInvitationLimitHelper userInvitationLimitHelper,
         QuotaUsageManager quotaUsageManager,
         TenantDomainValidator tenantDomainValidator,
+        TenantLogoManager tenantLogoManager,
         ExternalShare externalShare,
         IMapper mapper,
         UserFormatter userFormatter,
@@ -110,10 +111,11 @@ public partial class SettingsController(MessageService messageService,
                 AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",
                 Url = configuration["deeplink:url"] ?? "",
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
-            }
+            },
+            LogoText = await tenantLogoManager.GetLogoTextAsync()
         };
 
-        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
+        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
         {
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
         }
@@ -149,6 +151,7 @@ public partial class SettingsController(MessageService messageService,
             };
 
             settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
+            settings.FeedbackAndSupportLink = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
             settings.ApiDocsLink = configuration["web:api-docs"];
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
@@ -469,7 +472,7 @@ public partial class SettingsController(MessageService messageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "List of all the available portal languages", typeof(string))]
+    [SwaggerResponse(200, "List of all the available portal languages", typeof(IEnumerable<string>))]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
@@ -485,7 +488,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/timezones</path>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "List of all the available time zones with their IDs and display names", typeof(TimezonesRequestsDto))]
+    [SwaggerResponse(200, "List of all the available time zones with their IDs and display names", typeof(List<TimezonesRequestsDto>))]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard,Administrators")]
     [HttpGet("timezones")]
     [AllowNotPayment]
@@ -869,7 +872,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
-    [SwaggerResponse(200, "Module space usage statistics", typeof(UsageSpaceStatItemDto))]
+    [SwaggerResponse(200, "Module space usage statistics", typeof(List<UsageSpaceStatItemDto>))]
     [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(IdRequestDto<Guid> inDto)
     {
@@ -941,7 +944,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/authservice</path>
     /// <collection>list</collection>
     [Tags("Settings / Authorization")]
-    [SwaggerResponse(200, "Authorization services", typeof(AuthServiceRequestsDto))]
+    [SwaggerResponse(200, "Authorization services", typeof(IEnumerable<AuthServiceRequestsDto>))]
     [HttpGet("authservice")]
     public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
     {

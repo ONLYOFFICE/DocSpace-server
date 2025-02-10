@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Constants = ASC.Core.Users.Constants;
-
 namespace ASC.Migration.Core.Migrators;
 
 public abstract class Migrator(
@@ -73,7 +71,7 @@ public abstract class Migrator(
 
     public Func<double, string, Task> OnProgressUpdateAsync { get; set; }
 
-    public abstract Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation);
+    public abstract Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken);
     public abstract Task<MigrationApiInfo> ParseAsync(bool reportProgress = true);
 
     protected async Task ReportProgressAsync(double value, string status)
