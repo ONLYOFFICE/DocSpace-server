@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,11 +27,11 @@
 
 package com.asc.authorization.container;
 
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -47,8 +47,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EntityScan(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
 @EnableJpaRepositories(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
-@SpringBootApplication(scanBasePackages = {"com.asc.authorization", "com.asc.common"})
-@EnableFeignClients(basePackages = "com.asc.common.application.client")
+@SpringBootApplication(
+    scanBasePackages = {"com.asc.authorization", "com.asc.common"},
+    exclude = {GrpcServerSecurityAutoConfiguration.class})
 public class AuthorizationServiceApplication {
 
   /**

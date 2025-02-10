@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,7 +55,7 @@ class CoreScopeDomainServiceTest {
   }
 
   @Test
-  void testCreateScope() {
+  void whenScopeIsCreated_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
     var event = service.createScope(audit, scope);
 
@@ -69,7 +69,7 @@ class CoreScopeDomainServiceTest {
   }
 
   @Test
-  void testUpdateScopeGroup() {
+  void whenScopeGroupIsUpdated_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
 
     when(scope.getGroup()).thenReturn("admin");
@@ -85,7 +85,7 @@ class CoreScopeDomainServiceTest {
   }
 
   @Test
-  void testUpdateScopeType() {
+  void whenScopeTypeIsUpdated_thenEventIsGenerated() {
     var captor = ArgumentCaptor.forClass(String.class);
 
     when(scope.getType()).thenReturn("role");
@@ -101,7 +101,7 @@ class CoreScopeDomainServiceTest {
   }
 
   @Test
-  void testDeleteScope() {
+  void whenScopeIsDeleted_thenEventIsGenerated() {
     var event = service.deleteScope(audit, scope);
 
     assertNotNull(event);

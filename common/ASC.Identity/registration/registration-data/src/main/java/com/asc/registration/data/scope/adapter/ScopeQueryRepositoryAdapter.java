@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,9 +27,9 @@
 
 package com.asc.registration.data.scope.adapter;
 
-import com.asc.common.data.scope.repository.JpaScopeRepository;
 import com.asc.registration.core.domain.entity.Scope;
 import com.asc.registration.data.scope.mapper.ScopeDataAccessMapper;
+import com.asc.registration.data.scope.repository.JpaScopeRepository;
 import com.asc.registration.service.ports.output.repository.ScopeQueryRepository;
 import java.util.Optional;
 import java.util.Set;
