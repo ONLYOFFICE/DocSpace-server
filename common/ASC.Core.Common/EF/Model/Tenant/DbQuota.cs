@@ -150,6 +150,16 @@ public static class DbQuotaExtension
                     Price = 20,
                     ProductId = "1006",
                     Visible = true
+                },
+                new DbQuota
+                {
+                    TenantId = -10,
+                    Name = "adminyear",
+                    Description = "since 10.02.2025",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
+                    Price = 200,
+                    ProductId = "1009",
+                    Visible = false
                 }
                 );
         return modelBuilder;
