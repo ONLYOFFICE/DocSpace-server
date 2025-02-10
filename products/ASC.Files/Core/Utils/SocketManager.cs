@@ -101,45 +101,45 @@ public class SocketManager(
 
     public async Task AddUserAsync(UserInfo userInfo)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
         await MakeRequest("add-user", new { tenantId, user = dto });
     }
 
     public async Task UpdateUserAsync(UserInfo userInfo)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
         await MakeRequest("update-user", new { tenantId, user = dto });
     }
 
     public async Task DeleteUserAsync(Guid userId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await MakeRequest("delete-user", new { tenantId, userId });
     }
 
     public async Task AddGroupAsync(GroupDto dto)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await MakeRequest("add-group", new { tenantId, group = dto });
     }
 
     public async Task UpdateGroupAsync(GroupDto dto)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await MakeRequest("update-group", new { tenantId, group = dto });
     }
 
     public async Task DeleteGroupAsync(Guid groupId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await MakeRequest("delete-group", new { tenantId, groupId });
     }
 
     public async Task AddGuestAsync(UserInfo userInfo, bool notifyAdmins = true)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
         var currentUser = securityContext.CurrentAccount.ID;
         await MakeRequest("add-guest", new { tenantId, room = currentUser, guest = dto });
@@ -155,7 +155,7 @@ public class SocketManager(
 
     public async Task UpdateGuestAsync(UserInfo userInfo)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
         var relations = await userManager.GetUserRelationsByTargetAsync(userInfo.Id);
         var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
@@ -171,7 +171,7 @@ public class SocketManager(
 
     public async Task DeleteGuestAsync(Guid userId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var relations = await userManager.GetUserRelationsByTargetAsync(userId);
         var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
         foreach (var relation in relations)
