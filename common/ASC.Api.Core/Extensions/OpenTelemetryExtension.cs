@@ -24,13 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Diagnostics;
+using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
-using InfluxDB.Client;
-using InfluxDB.Client.Writes;
-using InfluxDB.Client.Api.Domain;
-using System.Reflection.PortableExecutable;
+using OpenTelemetry.Trace;
 
 namespace ASC.Api.Core.Extensions;
 public static class OpenTelemetryExtension
@@ -50,12 +47,17 @@ public static class OpenTelemetryExtension
         public string Bucket { get; set; }
     }
 
-    public static IServiceCollection AddOpenTelemetry(this IServiceCollection services, IConfiguration configuration)
+    public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        var telemetrySettings = configuration.GetSection("openTelemetry").Get<OpenTelemetrySettings>();
-        var influxClient = new InfluxDBClient(telemetrySettings.InfluxDB.Endpoint, telemetrySettings.InfluxDB.Token);
-
-        services.AddOpenTelemetry()
+        var telemetrySettings = builder.Configuration.GetSection("openTelemetry").Get<OpenTelemetrySettings>();
+        
+        builder.Logging.AddOpenTelemetry(logging =>
+        {
+            logging.IncludeFormattedMessage = true;
+            logging.IncludeScopes = true;
+        });
+        
+        builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(telemetrySettings.ServiceName))
             .WithMetrics(metrics =>
             {
@@ -63,15 +65,38 @@ public static class OpenTelemetryExtension
                 metrics.AddHttpClientInstrumentation();
                 metrics.AddRuntimeInstrumentation();
                 metrics.AddProcessInstrumentation();
-                metrics.AddInfluxDBMetricsExporter(options =>
-                {
-                    options.Endpoint = new Uri(telemetrySettings.InfluxDB.Endpoint);
-                    options.Token = telemetrySettings.InfluxDB.Token;
-                    options.Bucket = telemetrySettings.InfluxDB.Bucket;
-                    options.Org = telemetrySettings.InfluxDB.Org;
-                });
-            });
 
-        return services;
+                if (telemetrySettings.InfluxDB != null)
+                {
+                    metrics.AddInfluxDBMetricsExporter(options =>
+                    {
+                        options.Endpoint = new Uri(telemetrySettings.InfluxDB.Endpoint);
+                        options.Token = telemetrySettings.InfluxDB.Token;
+                        options.Bucket = telemetrySettings.InfluxDB.Bucket;
+                        options.Org = telemetrySettings.InfluxDB.Org;
+                    });
+                }
+            })
+            .WithTracing(tracing =>
+            {
+                tracing.AddSource(builder.Environment.ApplicationName)
+                    .AddHttpClientInstrumentation();
+            });
+        
+        builder.AddOpenTelemetryExporters();
+        
+        return builder;
+    }
+
+    private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    {
+        var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
+
+        if (useOtlpExporter)
+        {
+            builder.Services.AddOpenTelemetry().UseOtlpExporter();
+        }
+
+        return builder;
     }
 }
