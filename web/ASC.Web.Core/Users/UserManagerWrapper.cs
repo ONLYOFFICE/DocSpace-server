@@ -158,12 +158,12 @@ public sealed class UserManagerWrapper(
 
         if (!userFormatter.IsValidUserName(userInfo.FirstName, userInfo.LastName))
         {
-            throw new Exception(Resource.ErrorIncorrectUserName);
+            throw new ArgumentException(Resource.ErrorIncorrectUserName);
         }
 
         if (!updateExising && !await CheckUniqueEmailAsync(userInfo.Id, userInfo.Email))
         {
-            throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+            throw new ArgumentException(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
         if (makeUniqueName && !updateExising)

@@ -56,6 +56,11 @@ try
 
     builder.Host.ConfigureDefault();
 
+    if (builder.Configuration.GetValue<bool>("openTelemetry:enable"))
+    {
+        builder.ConfigureOpenTelemetry();
+    }
+    
     await builder.Services.AddClearEventsServices(builder.Configuration, Namespace);
 
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>

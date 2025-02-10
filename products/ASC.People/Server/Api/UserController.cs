@@ -1448,7 +1448,7 @@ public class UserController(
 
                 if (!userFormatter.IsValidUserName(firstName, lastName))
                 {
-                    throw new Exception(Resource.ErrorIncorrectUserName);
+                    throw new ArgumentException(Resource.ErrorIncorrectUserName);
                 }
 
                 user.FirstName = firstName;
