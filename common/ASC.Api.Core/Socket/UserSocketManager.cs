@@ -116,11 +116,11 @@ public class UserSocketManager(ITariffService tariffService,
         var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
         foreach (var relation in relations)
         {
-            await MakeRequest("delete-guest", new { tenantId, room = relation.Key, userId });
+            await MakeRequest("delete-guest", new { tenantId, room = relation.Key, guestId = userId });
         }
         foreach (var admin in admins.Where(a => !relations.ContainsKey(a.Id)))
         {
-            await MakeRequest("delete-guest", new { tenantId, room = admin.Id, userId });
+            await MakeRequest("delete-guest", new { tenantId, room = admin.Id, guestId = userId });
         }
     }
 }

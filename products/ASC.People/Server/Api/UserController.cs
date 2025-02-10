@@ -1307,7 +1307,14 @@ public class UserController(
             messageService.Send(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
 
-        await socketManager.UpdateUserAsync(user);
+        if (await _userManager.IsGuestAsync(user))
+        {
+            await socketManager.UpdateGuestAsync(user);
+        }
+        else
+        {
+            await socketManager.UpdateUserAsync(user);
+        }
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
 
@@ -1578,8 +1585,15 @@ public class UserController(
 
         if (changed)
         {
-            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-            await socketManager.UpdateUserAsync(user);
+            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user); 
+            if (await _userManager.IsGuestAsync(user))
+            {
+                await socketManager.UpdateGuestAsync(user);
+            }
+            else
+            {
+                await socketManager.UpdateUserAsync(user);
+            }
 
             messageService.Send(MessageAction.UserUpdated, MessageTarget.Create(user.Id),
                 user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
@@ -1682,8 +1696,15 @@ public class UserController(
                     await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
                     await cookiesManager.ResetUserCookieAsync(user.Id);
-                    messageService.Send(MessageAction.CookieSettingsUpdated);
-                    await socketManager.UpdateUserAsync(user);
+                    messageService.Send(MessageAction.CookieSettingsUpdated); 
+                    if (await _userManager.IsGuestAsync(user))
+                    {
+                        await socketManager.UpdateGuestAsync(user);
+                    }
+                    else
+                    {
+                        await socketManager.UpdateUserAsync(user);
+                    }
 
                     break;
             }
