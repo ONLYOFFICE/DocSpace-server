@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,36 +26,65 @@
 
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace ASC.Api.Core.Extensions;
-
 public static class OpenTelemetryExtension
 {
+    public class OpenTelemetrySettings
+    {
+        public string ServiceName { get; set; }
+
+        public InfluxDBSettings InfluxDB { get; set; }
+    }
+
+    public class InfluxDBSettings
+    {
+        public string Endpoint { get; set; }
+        public string Token { get; set; }
+        public string Org { get; set; }
+        public string Bucket { get; set; }
+    }
+
     public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
+        var telemetrySettings = builder.Configuration.GetSection("openTelemetry").Get<OpenTelemetrySettings>();
+        
         builder.Logging.AddOpenTelemetry(logging =>
         {
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
         });
-
+        
         builder.Services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource.AddService(telemetrySettings.ServiceName))
             .WithMetrics(metrics =>
             {
-                metrics.AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                metrics.AddAspNetCoreInstrumentation();
+                metrics.AddHttpClientInstrumentation();
+                metrics.AddRuntimeInstrumentation();
+                metrics.AddProcessInstrumentation();
+
+                if (telemetrySettings.InfluxDB != null)
+                {
+                    metrics.AddInfluxDBMetricsExporter(options =>
+                    {
+                        options.Endpoint = new Uri(telemetrySettings.InfluxDB.Endpoint);
+                        options.Token = telemetrySettings.InfluxDB.Token;
+                        options.Bucket = telemetrySettings.InfluxDB.Bucket;
+                        options.Org = telemetrySettings.InfluxDB.Org;
+                    });
+                }
             })
             .WithTracing(tracing =>
             {
                 tracing.AddSource(builder.Environment.ApplicationName)
-
                     .AddHttpClientInstrumentation();
             });
-
+        
         builder.AddOpenTelemetryExporters();
-
+        
         return builder;
     }
 

@@ -55,7 +55,11 @@ try
     logger.Info("Configuring web host ({applicationContext})...", AppName);
 
     builder.Host.ConfigureDefault();
-    builder.ConfigureOpenTelemetry();
+    
+    if (builder.Configuration.GetValue<bool>("openTelemetry:enable"))
+    {
+        builder.ConfigureOpenTelemetry();
+    }
     
     await builder.Services.AddClearEventsServices(builder.Configuration, Namespace);
 

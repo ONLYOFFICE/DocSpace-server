@@ -34,6 +34,8 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
     protected IHostEnvironment HostEnvironment { get; } = hostEnvironment;
     protected DIHelper DIHelper { get; } = new();
 
+    private bool OpenTelemetryEnabled { get; } = configuration.GetValue<bool>("openTelemetry:enable");
+    
     public virtual async Task ConfigureServices(WebApplicationBuilder builder)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -44,8 +46,10 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         var services = builder.Services;
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
-        builder.ConfigureOpenTelemetry();
-        
+        if (OpenTelemetryEnabled)
+        {
+            builder.ConfigureOpenTelemetry();
+        }
         services.AddSingleton<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();

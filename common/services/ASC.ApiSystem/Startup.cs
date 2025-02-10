@@ -52,7 +52,10 @@ public class Startup
 
     public async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        builder.ConfigureOpenTelemetry();
+        if (_configuration.GetValue<bool>("openTelemetry:enable"))
+        {
+            builder.ConfigureOpenTelemetry();
+        }
         
         var services = builder.Services;
         services.AddCustomHealthCheck(_configuration);
