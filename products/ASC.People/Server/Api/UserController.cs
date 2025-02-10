@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Utils;
-
 namespace ASC.People.Api;
 
 public class UserController(
@@ -75,7 +73,7 @@ public class UserController(
     AuditEventsRepository auditEventsRepository,
     EmailValidationKeyModelHelper emailValidationKeyModelHelper,
     CountPaidUserStatistic countPaidUserStatistic,
-    SocketManager socketManager)
+    UserSocketManager socketManager)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -155,6 +153,14 @@ public class UserController(
         cache.Insert("REWRITE_URL" + tenantManager.GetCurrentTenantId(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
         user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, false, false, inDto.Type,
             false, true, true);
+        if (inDto.Type is EmployeeType.Guest)
+        {
+            await socketManager.AddGuestAsync(user);
+        }
+        else
+        {
+            await socketManager.AddUserAsync(user);
+        }
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
@@ -280,12 +286,21 @@ public class UserController(
         {
             user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
                 inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
+            if(inDto.Type is EmployeeType.Guest)
+            {
+                await socketManager.AddGuestAsync(user);
+            }
+            else
+            {
+                await socketManager.AddUserAsync(user);
+            }
         }
         catch (TenantQuotaException)
         {
             quotaLimit = true;
             user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, EmployeeType.User,
                 inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
+            await socketManager.AddUserAsync(user);
         }
 
         await UpdateDepartmentsAsync(inDto.Department, user);
@@ -1292,7 +1307,7 @@ public class UserController(
             messageService.Send(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
 
-        await socketManager.AddUserAsync(user);
+        await socketManager.UpdateUserAsync(user);
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
 

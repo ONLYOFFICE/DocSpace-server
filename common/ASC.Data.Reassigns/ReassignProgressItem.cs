@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Utils;
-
 namespace ASC.Data.Reassigns;
 
 /// <summary>
@@ -187,7 +185,7 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
         await studioNotifyService.SendMsgReassignsFailedAsync(_currentUserId, fromUser, toUser, errorMessage);
     }
 
-    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper, SocketManager socketManager)
+    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper, UserSocketManager socketManager)
     {
         var user = await userManager.GetUsersAsync(FromUser);
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -218,4 +216,4 @@ public record ReassignProgressItemScope(
     UserPhotoManager UserPhotoManager,
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
     ILoggerProvider Options,
-    SocketManager SocketManager);
+    UserSocketManager SocketManager);

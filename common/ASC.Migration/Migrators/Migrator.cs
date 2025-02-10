@@ -40,11 +40,11 @@ public abstract class Migrator(
     AuthContext authContext,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserManagerWrapper userManagerWrapper,
-    SocketManager socketManager)
+    UserSocketManager socketManager)
     : IAsyncDisposable
 {
     protected SecurityContext SecurityContext { get; } = securityContext;
-    protected SocketManager SocketManager { get; } = socketManager;
+    protected UserSocketManager SocketManager { get; } = socketManager;
     protected UserManager UserManager { get; } = userManager;
     private TenantQuotaFeatureStatHelper TenantQuotaFeatureStatHelper { get; } = tenantQuotaFeatureStatHelper;
     private QuotaSocketManager QuotaSocketManager { get; } = quotaSocketManager;

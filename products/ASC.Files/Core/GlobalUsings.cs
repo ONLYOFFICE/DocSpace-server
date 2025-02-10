@@ -95,6 +95,7 @@ global using ASC.Data.Storage.S3;
 global using ASC.ElasticSearch;
 global using ASC.ElasticSearch.Core;
 global using ASC.ElasticSearch.Service;
+global using ASC.Api.Core.Socket;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
 global using ASC.FederatedLogin;

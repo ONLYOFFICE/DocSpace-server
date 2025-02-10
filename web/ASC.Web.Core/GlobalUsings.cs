@@ -38,13 +38,13 @@ global using System.Runtime.Serialization;
 global using System.Security;
 global using System.Security.Authentication;
 global using System.Security.Cryptography;
-global using System.Security.Principal;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Web;
 global using System.Xml;
+
 global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Repositories;
 global using ASC.Common;
@@ -52,7 +52,6 @@ global using ASC.Common.Caching;
 global using ASC.Common.Log;
 global using ASC.Common.Notify.Engine;
 global using ASC.Common.Security;
-global using ASC.Common.Security.Authentication;
 global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
@@ -91,7 +90,6 @@ global using ASC.Notify.Recipients;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core;
 global using ASC.Web.Core.Helpers;
-global using ASC.Web.Core.HttpHandlers;
 global using ASC.Web.Core.Log;
 global using ASC.Web.Core.ModuleManagement.Common;
 global using ASC.Web.Core.Notify;
@@ -109,9 +107,10 @@ global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.UserControls.Management;
-global using ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;
 global using ASC.Web.Studio.Utility;
+
 global using Google.Authenticator;
+
 global using ICSharpCode.SharpZipLib.Zip;
 
 global using ImageMagick;
@@ -125,13 +124,18 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Net.Http.Headers;
+
 global using MimeKit.Utils;
+
 global using ProtoBuf;
 
 global using SkiaSharp;
+
 global using TMResourceData;
+
 global using Twilio.Clients;
 global using Twilio.Rest.Api.V2010.Account;
 global using Twilio.Types;
+
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 global using SecurityContext = ASC.Core.SecurityContext;

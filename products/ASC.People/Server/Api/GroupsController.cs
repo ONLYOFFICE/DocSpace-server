@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Utils;
-
 namespace ASC.People.Api;
 
 ///<summary>
@@ -44,7 +42,7 @@ public class GroupController(
     MessageService messageService,
     PermissionContext permissionContext,
     FileSecurity fileSecurity,
-    SocketManager socketManager)
+    UserSocketManager socketManager)
     : ControllerBase
 {
     /// <summary>

@@ -25,9 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Threading.Channels;
+
 using ASC.Core.Billing;
-using ASC.People.ApiModels.ResponseDto;
-using ASC.Web.Api.Models;
 
 namespace ASC.Web.Files.Utils;
 
@@ -40,9 +39,7 @@ public class SocketManager(
         FileDtoHelper filesWrapperHelper,
         FolderDtoHelper folderDtoHelper,
         FileSecurity fileSecurity,
-        UserManager userManager,
-        EmployeeFullDtoHelper employeeFullDtoHelper,
-        SecurityContext securityContext)
+        UserManager userManager)
     : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
@@ -97,91 +94,6 @@ public class SocketManager(
     public async Task RestoreProgressAsync(int tenantId, double percentage)
     {
         await MakeRequest("restore-progress", new { tenantId, percentage });
-    }
-
-    public async Task AddUserAsync(UserInfo userInfo)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
-        await MakeRequest("add-user", new { tenantId, user = dto });
-    }
-
-    public async Task UpdateUserAsync(UserInfo userInfo)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
-        await MakeRequest("update-user", new { tenantId, user = dto });
-    }
-
-    public async Task DeleteUserAsync(Guid userId)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        await MakeRequest("delete-user", new { tenantId, userId });
-    }
-
-    public async Task AddGroupAsync(GroupDto dto)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        await MakeRequest("add-group", new { tenantId, group = dto });
-    }
-
-    public async Task UpdateGroupAsync(GroupDto dto)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        await MakeRequest("update-group", new { tenantId, group = dto });
-    }
-
-    public async Task DeleteGroupAsync(Guid groupId)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        await MakeRequest("delete-group", new { tenantId, groupId });
-    }
-
-    public async Task AddGuestAsync(UserInfo userInfo, bool notifyAdmins = true)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
-        var currentUser = securityContext.CurrentAccount.ID;
-        await MakeRequest("add-guest", new { tenantId, room = currentUser, guest = dto });
-        if (notifyAdmins)
-        {
-            var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
-            foreach (var admin in admins.Where(a => currentUser != a.Id))
-            {
-                await MakeRequest("add-guest", new { tenantId, room = admin.Id, guest = dto });
-            }
-        }
-    }
-
-    public async Task UpdateGuestAsync(UserInfo userInfo)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
-        var relations = await userManager.GetUserRelationsByTargetAsync(userInfo.Id);
-        var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
-        foreach (var relation in relations)
-        {
-            await MakeRequest("update-guest", new { tenantId, room = relation.Key, guest = dto });
-        }
-        foreach (var admin in admins.Where(a => !relations.ContainsKey(a.Id)))
-        {
-            await MakeRequest("update-guest", new { tenantId, room = admin.Id, guest = dto });
-        }
-    }
-
-    public async Task DeleteGuestAsync(Guid userId)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        var relations = await userManager.GetUserRelationsByTargetAsync(userId);
-        var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
-        foreach (var relation in relations)
-        {
-            await MakeRequest("delete-guest", new { tenantId, room = relation.Key, userId });
-        }
-        foreach (var admin in admins.Where(a=> !relations.ContainsKey(a.Id)))
-        {
-            await MakeRequest("delete-guest", new { tenantId, room = admin.Id, userId });
-        }
     }
 
     public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)

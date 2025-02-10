@@ -70,6 +70,7 @@ public class AuthenticationController(
     BruteForceLoginManager bruteForceLoginManager,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
     InvitationService invitationService,
+    UserSocketManager socketManager,
     LoginProfileTransport loginProfileTransport,
     IMapper mapper)
     : ControllerBase
@@ -600,6 +601,7 @@ public class AuthenticationController(
             {
                 await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
                 userInfo = await userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword());
+                await socketManager.AddGuestAsync(userInfo);
             }
             finally
             {

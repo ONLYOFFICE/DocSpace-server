@@ -45,6 +45,7 @@ public class FileSharingAceHelper(
     IUrlShortener urlShortener,
     IDistributedLockProvider distributedLockProvider,
     SocketManager socketManager,
+    UserSocketManager usersocketManager,
     IDaoFactory daoFactory,
     ExternalShare externalShare,
     SettingsManager settingsManager,
@@ -196,7 +197,7 @@ public class FileSharingAceHelper(
                         try
                         {
                             user = await userManagerWrapper.AddInvitedUserAsync(w.Email, EmployeeType.Guest, culture, false);
-                            await socketManager.AddGuestAsync(user);
+                            await usersocketManager.AddGuestAsync(user);
                             w.Id = user.Id;
                         }
                         catch (Exception e)
@@ -215,7 +216,7 @@ public class FileSharingAceHelper(
                             && !(await userManager.IsUserInGroupAsync(user.Id, currentUser.Id))
                             && !(await userManager.IsDocSpaceAdminAsync(user)))
                         {
-                            await socketManager.AddGuestAsync(user, false);
+                            await usersocketManager.AddGuestAsync(user, false);
                         }
                     }
                 }
