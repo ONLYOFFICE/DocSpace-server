@@ -4395,6 +4395,43 @@ public class FileStorageService //: IFileStorageService
         return await fileDao.ReassignFormRoleToUser(formId, roleId, userId, toUserId);
 
     }
+
+    public async Task ReopenFormForUser<T>(T formId, int roleId, Guid userId, bool resetSubsequentRoles)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+
+        var form = await fileDao.GetFileAsync(formId);
+        if (form == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!form.IsForm)
+        {
+            throw new InvalidOperationException();
+        }
+        if (!await fileSecurity.CanEditRoomAsync(form))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
+
+        if (currentRoom == null)
+        {
+            throw new InvalidOperationException();
+        }
+        if (!await fileSecurity.CanEditRoomAsync(currentRoom))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
+        }
+        if (userId == Guid.Empty)
+        {
+            throw new InvalidOperationException();
+        }
+        await fileDao.ReopenFormForUser(formId, roleId, userId, resetSubsequentRoles);
+
+    }
     private Exception GenerateException(Exception error, bool warning = false)
     {
         if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)

@@ -547,6 +547,15 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         return await fileStorageService.ReassignFormRoleToUser(inDto.FormId, inDto.RoleId, inDto.UserId, inDto.ToUserId);
     }
+
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Successfully reopened the form for the user", typeof(FormRole))]
+    [SwaggerResponse(403, "You do not have enough permissions to reopen the form")]
+    [HttpPut("file/{fileId}/formrolereopen")]
+    public async Task ReopenFormForUser(ReopenFormRoleForUserDto<T> inDto)
+    {
+        await fileStorageService.ReopenFormForUser(inDto.FormId, inDto.RoleId, inDto.UserId, inDto.ResetSubsequentRoles);
+    }
 }
 
 public class FilesControllerCommon(

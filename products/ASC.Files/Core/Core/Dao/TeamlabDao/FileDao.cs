@@ -1428,6 +1428,36 @@ internal class FileDao(
         }
         return null;
     }
+
+    public async Task ReopenFormForUser(int formId, int roleId, Guid userId, bool resetSubsequentRoles)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () => {
+
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            var role = await context.FilesFormRoleAsync(tenantId, formId, roleId, userId);
+
+            if (role != null)
+            {
+                await using (var tx = await context.Database.BeginTransactionAsync())
+                {
+                    var query = context.FilesFormRoleMapping.Where(g =>
+                    g.TenantId == tenantId &&
+                    g.FormId == formId &&
+                    resetSubsequentRoles ? g.Sequence >= role.Sequence : g.Sequence == role.Sequence);
+
+                    await query.ExecuteUpdateAsync(r => r.SetProperty(x => x.Submitted, false));
+
+                    await tx.CommitAsync();
+                }
+            }
+        });
+    }
+
     public async Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(int formId, Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

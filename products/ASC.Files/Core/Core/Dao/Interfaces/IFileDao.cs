@@ -292,6 +292,16 @@ public interface IFileDao<T>
     Task<FormRole> ReassignFormRoleToUser(T formId, int roleId, Guid userId, Guid toUserId);
 
     /// <summary>
+    /// Update form role mappings
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <param name="roleId"></param>
+    /// <param name="userId"></param>
+    /// <param name="resetSubsequentRoles"></param>
+    /// <returns></returns>
+    Task ReopenFormForUser(T formId, int roleId, Guid userId, bool resetSubsequentRoles);
+
+    /// <summary>
     /// Get form role mappings
     /// </summary>
     /// <param name="formId"></param>

@@ -792,6 +792,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         throw new NotImplementedException();
     }
+    public Task ReopenFormForUser(string formId, int roleId, Guid userId, bool resetSubsequentRoles)
+    {
+        throw new NotImplementedException();
+    }
     public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
     {
         throw new NotImplementedException();
