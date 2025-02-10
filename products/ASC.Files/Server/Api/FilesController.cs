@@ -556,6 +556,15 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         await fileStorageService.ReopenFormForUser(inDto.FormId, inDto.RoleId, inDto.UserId, inDto.ResetSubsequentRoles);
     }
+
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRole>))]
+    [SwaggerResponse(403, "You do not have enough permissions to view the form roles")]
+    [HttpGet("file/{fileId}/formroles")]
+    public IAsyncEnumerable<FormRole> GetAllFormRoles(FileIdRequestDto<T> inDto)
+    {
+        return fileStorageService.GetAllFormRoles(inDto.FileId);
+    }
 }
 
 public class FilesControllerCommon(

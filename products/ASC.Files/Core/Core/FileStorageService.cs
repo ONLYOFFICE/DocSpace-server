@@ -4323,32 +4323,8 @@ public class FileStorageService //: IFileStorageService
     public async Task<IEnumerable<FormRole>> SaveFormRoleMapping<T>(T formId, IEnumerable<FormRole> roles)
     {
         var fileDao = daoFactory.GetFileDao<T>();
+        await ValidateChangeRolesPermission(formId, fileDao);
 
-        var form = await fileDao.GetFileAsync(formId);
-        if (form == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-        if (!form.IsForm)
-        {
-            throw new InvalidOperationException();
-        }
-        if (!await fileSecurity.CanEditRoomAsync(form))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-        }
-
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
-
-        if (currentRoom == null)
-        {
-            throw new InvalidOperationException();
-        }
-        if (!await fileSecurity.CanEditRoomAsync(currentRoom))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
-        }
         await fileDao.SaveFormRoleMapping(formId, roles);
 
         var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
@@ -4356,51 +4332,57 @@ public class FileStorageService //: IFileStorageService
         await fileDao.SaveProperties(formId, properties);
 
         return roles;
-
     }
 
     public async Task<FormRole> ReassignFormRoleToUser<T>(T formId, int roleId, Guid userId, Guid toUserId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
+        await ValidateChangeRolesPermission(formId, fileDao);
 
-        var form = await fileDao.GetFileAsync(formId);
-        if (form == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-        if (!form.IsForm)
-        {
-            throw new InvalidOperationException();
-        }
-        if (!await fileSecurity.CanEditRoomAsync(form))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-        }
-
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
-
-        if (currentRoom == null)
-        {
-            throw new InvalidOperationException();
-        }
-        if (!await fileSecurity.CanEditRoomAsync(currentRoom))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
-        }
         if (userId == Guid.Empty)
         {
             throw new InvalidOperationException();
         }
         return await fileDao.ReassignFormRoleToUser(formId, roleId, userId, toUserId);
-
     }
 
     public async Task ReopenFormForUser<T>(T formId, int roleId, Guid userId, bool resetSubsequentRoles)
     {
         var fileDao = daoFactory.GetFileDao<T>();
+        await ValidateChangeRolesPermission(formId, fileDao);
+
+        if (userId == Guid.Empty)
+        {
+            throw new InvalidOperationException();
+        }
+        await fileDao.ReopenFormForUser(formId, roleId, userId, resetSubsequentRoles);
+    }
+    public async IAsyncEnumerable<FormRole> GetAllFormRoles<T>(T formId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        await ValidateChangeRolesPermission(formId, fileDao);
 
         var form = await fileDao.GetFileAsync(formId);
+
+        if (form == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!form.IsForm)
+        {
+            throw new InvalidOperationException();
+        }
+        
+        await foreach (var f in fileDao.GetFormRoles(formId))
+        {
+            yield return f;
+        }
+    }
+    
+    private async Task ValidateChangeRolesPermission<T>(T formId, IFileDao<T> fileDao)
+    {
+        var form = await fileDao.GetFileAsync(formId);
+
         if (form == null)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
@@ -4425,12 +4407,6 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
-        if (userId == Guid.Empty)
-        {
-            throw new InvalidOperationException();
-        }
-        await fileDao.ReopenFormForUser(formId, roleId, userId, resetSubsequentRoles);
-
     }
     private Exception GenerateException(Exception error, bool warning = false)
     {
