@@ -26,6 +26,9 @@
 
 namespace ASC.Common.Utils;
 
+/// <summary>
+/// use as a replacement for Newtonsoft.Json.JsonSerializerSettings { DateTimeZoneHandling = DateTimeZoneHandling.Utc }
+/// </summary>
 public class UtcDateTimeJsonConverter : JsonConverter<DateTime>
 {
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -39,6 +42,10 @@ public class UtcDateTimeJsonConverter : JsonConverter<DateTime>
     }
 }
 
+/// <summary>
+/// use to work with dates in formats other than ISO 8601
+/// </summary>
+/// <param name="format">format</param>
 public class CustomFormatDateTimeJsonConverter(string format) : JsonConverter<DateTime>
 {
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
