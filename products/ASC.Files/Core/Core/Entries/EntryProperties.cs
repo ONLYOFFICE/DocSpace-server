@@ -80,5 +80,6 @@ public class FormFillingProperties<T>
     public T ResultsFolderId { get; set; }
     public T ResultsFileID { get; set; }
     public int ResultFormNumber { get; set; }
+    public bool IsFillingPaused { get; set; }
 
 }

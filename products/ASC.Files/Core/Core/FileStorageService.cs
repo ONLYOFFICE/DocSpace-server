@@ -4378,7 +4378,30 @@ public class FileStorageService //: IFileStorageService
             yield return f;
         }
     }
-    
+    public async Task ManageFormFilling<T>(T formId, FormFillingManageAction action)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        await ValidateChangeRolesPermission(formId, fileDao);
+
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
+        switch (action)
+        {
+            case FormFillingManageAction.Stop:
+                properties.FormFilling.IsFillingPaused = true;
+                break;
+
+            case FormFillingManageAction.Resume:
+                properties.FormFilling.IsFillingPaused = false;
+                break;
+
+            default:
+                throw new InvalidOperationException();
+        }
+
+        await fileDao.SaveProperties(formId, properties);
+    }
+
+
     private async Task ValidateChangeRolesPermission<T>(T formId, IFileDao<T> fileDao)
     {
         var form = await fileDao.GetFileAsync(formId);

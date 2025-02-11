@@ -565,6 +565,15 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         return fileStorageService.GetAllFormRoles(inDto.FileId);
     }
+
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Successfully processed the form filling action"]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [HttpPut("file/{fileId}/manageformfilling")]
+    public async Task ManageFormFilling(ManageFormFillingDto<T> inDto)
+    {
+        await fileStorageService.ManageFormFilling(inDto.FormId, inDto.Action);
+    }
 }
 
 public class FilesControllerCommon(
