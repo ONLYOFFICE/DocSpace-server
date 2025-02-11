@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.Caching.Distributed;
+
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -50,64 +52,6 @@ public class TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderC
     }
 }
 
-[Singleton]
-public class TariffServiceStorage
-{
-    private static readonly TimeSpan _defaultCacheExpiration = TimeSpan.FromMinutes(5);
-    private static readonly TimeSpan _standaloneCacheExpiration = TimeSpan.FromMinutes(15);
-    private readonly ICache _cache;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private TimeSpan _cacheExpiration;
-
-    public TariffServiceStorage(ICacheNotify<TariffCacheItem> notify, ICache cache, CoreBaseSettings coreBaseSettings, IServiceProvider serviceProvider)
-    {
-        _cacheExpiration = _defaultCacheExpiration;
-
-        _cache = cache;
-        _coreBaseSettings = coreBaseSettings;
-        notify.Subscribe(i =>
-        {
-            _cache.Insert(TariffService.GetTariffNeedToUpdateCacheKey(i.TenantId), "update", _cacheExpiration);
-
-            _cache.Remove(TariffService.GetTariffCacheKey(i.TenantId));
-            _cache.Remove(TariffService.GetBillingUrlCacheKey(i.TenantId));
-            _cache.Remove(TariffService.GetBillingPaymentCacheKey(i.TenantId)); // clear all payments
-        }, CacheNotifyAction.Remove);
-
-        notify.Subscribe(i =>
-        {
-            using var scope = serviceProvider.CreateScope();
-            var tariffService = scope.ServiceProvider.GetService<ITariffService>();
-            var tariff = tariffService.GetBillingInfoAsync(i.TenantId, i.TariffId).Result;
-            if (tariff != null)
-            {
-                InsertToCache(i.TenantId, tariff);
-            }
-        }, CacheNotifyAction.Insert);
-    }
-
-    private TimeSpan GetCacheExpiration()
-    {
-        if (_coreBaseSettings.Standalone && _cacheExpiration < _standaloneCacheExpiration)
-        {
-            _cacheExpiration = _cacheExpiration.Add(TimeSpan.FromSeconds(30));
-        }
-        return _cacheExpiration;
-    }
-
-    public void InsertToCache(int tenantId, Tariff tariff)
-    {
-        _cache.Insert(TariffService.GetTariffCacheKey(tenantId), tariff, DateTime.UtcNow.Add(GetCacheExpiration()));
-    }
-
-    public void ResetCacheExpiration()
-    {
-        if (_coreBaseSettings.Standalone)
-        {
-            _cacheExpiration = _defaultCacheExpiration;
-        }
-    }
-}
 
 [Scope(typeof(ITariffService))]
 public class TariffService(
@@ -118,14 +62,18 @@ public class TariffService(
     IConfiguration configuration,
     IDbContextFactory<CoreDbContext> coreDbContextManager,
     ICache cache,
-    ICacheNotify<TariffCacheItem> notify,
-    TariffServiceStorage tariffServiceStorage,
+    IDistributedCache distributedCache,
+    IDistributedLockProvider distributedLockProvider,
     ILogger<TariffService> logger,
     BillingClient billingClient,
     IServiceProvider serviceProvider,
     TenantExtraConfig tenantExtraConfig)
     : ITariffService
 {
+    private static readonly TimeSpan _defaultCacheExpiration = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan _standaloneCacheExpiration = TimeSpan.FromMinutes(15);
+    private TimeSpan _cacheExpiration = _defaultCacheExpiration;
+    
     private const int DefaultTrialPeriod = 30;
 
     //private readonly int _activeUsersMin;
@@ -145,132 +93,134 @@ public class TariffService(
             tenantId = -1;
         }
 
-        var tariff = refresh ? null : cache.Get<Tariff>(GetTariffCacheKey(tenantId));
+        var key = GetTariffCacheKey(tenantId);
+        var tariff = refresh ? null : await GetFromCache<Tariff>(key);
 
         if (tariff == null)
         {
-            tariff = await GetBillingInfoAsync(tenantId) ?? await CreateDefaultAsync();
-            tariff = await CalculateTariffAsync(tenantId, tariff);
-            tariffServiceStorage.InsertToCache(tenantId, tariff);
-
-            if (billingClient.Configured && withRequestToPaymentSystem)
+            await using (await distributedLockProvider.TryAcquireLockAsync($"{key}_lock"))
             {
-                try
+                tariff = refresh ? null : await GetFromCache<Tariff>(key);
+                if (tariff != null)
                 {
-                    var currentPayments = await billingClient.GetCurrentPaymentsAsync(await coreSettings.GetKeyAsync(tenantId), refresh);
-                    if (currentPayments.Length == 0)
-                    {
-                        throw new BillingNotFoundException("Empty PaymentLast");
-                    }
+                    tariff = await CalculateTariffAsync(tenantId, tariff);
+                    return tariff;
+                }
+                
+                tariff = await GetBillingInfoAsync(tenantId) ?? await CreateDefaultAsync();
+                tariff = await CalculateTariffAsync(tenantId, tariff);
+                await InsertToCache(tenantId, tariff);
 
-                    var asynctariff = await CreateDefaultAsync(true);
-                    string email = null;
-                    var tenantQuotas = await quotaService.GetTenantQuotasAsync();
-
-                    foreach (var currentPayment in currentPayments.OrderBy(r => r.EndDate))
+                if (billingClient.Configured && withRequestToPaymentSystem)
+                {
+                    try
                     {
-                        var quota = tenantQuotas.SingleOrDefault(q => q.ProductId == currentPayment.ProductId.ToString());
-                        if (quota == null)
+                        var currentPayments = await billingClient.GetCurrentPaymentsAsync(await coreSettings.GetKeyAsync(tenantId), refresh);
+                        if (currentPayments.Length == 0)
                         {
-                            throw new InvalidOperationException($"Quota with id {currentPayment.ProductId} not found for portal {await coreSettings.GetKeyAsync(tenantId)}.");
+                            throw new BillingNotFoundException("Empty PaymentLast");
                         }
 
-                        asynctariff.Id = currentPayment.PaymentId;
+                        var asynctariff = await CreateDefaultAsync(true);
+                        string email = null;
+                        var tenantQuotas = await quotaService.GetTenantQuotasAsync();
 
-                        var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
-                        asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+                        foreach (var currentPayment in currentPayments.OrderBy(r => r.EndDate))
+                        {
+                            var quota = tenantQuotas.SingleOrDefault(q => q.ProductId == currentPayment.ProductId.ToString());
+                            if (quota == null)
+                            {
+                                throw new InvalidOperationException($"Quota with id {currentPayment.ProductId} not found for portal {await coreSettings.GetKeyAsync(tenantId)}.");
+                            }
 
-                        asynctariff.Quotas = asynctariff.Quotas.Where(r => r.Id != quota.TenantId).ToList();
-                        asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity));
-                        email = currentPayment.PaymentEmail;
+                            asynctariff.Id = currentPayment.PaymentId;
+
+                            var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
+                            asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+
+                            asynctariff.Quotas = asynctariff.Quotas.Where(r => r.Id != quota.TenantId).ToList();
+                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity));
+                            email = currentPayment.PaymentEmail;
+                        }
+
+                        TenantQuota updatedQuota = null;
+
+                        foreach (var quota in asynctariff.Quotas)
+                        {
+                            var tenantQuota = tenantQuotas.SingleOrDefault(q => q.TenantId == quota.Id);
+
+                            tenantQuota *= quota.Quantity;
+                            updatedQuota += tenantQuota;
+                        }
+
+                        if (updatedQuota != null)
+                        {
+                            await updatedQuota.CheckAsync(serviceProvider);
+                        }
+
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            asynctariff.CustomerId = email;
+                        }
+
+                        if (await SaveBillingInfoAsync(tenantId, asynctariff))
+                        {
+                            asynctariff = await CalculateTariffAsync(tenantId, asynctariff);
+                            tariff = asynctariff;
+                        }
+
+                        await InsertToCache(tenantId, tariff);
                     }
-
-                    TenantQuota updatedQuota = null;
-
-                    foreach (var quota in asynctariff.Quotas)
+                    catch (Exception error)
                     {
-                        var tenantQuota = tenantQuotas.SingleOrDefault(q => q.TenantId == quota.Id);
-
-                        tenantQuota *= quota.Quantity;
-                        updatedQuota += tenantQuota;
+                        if (error is not BillingNotFoundException)
+                        {
+                            LogError(error, tenantId.ToString());
+                        }
                     }
 
-                    if (updatedQuota != null)
+                    if (tariff.Id == 0)
                     {
-                        await updatedQuota.CheckAsync(serviceProvider);
-                    }
+                        var freeTariff = await tariff.Quotas.ToAsyncEnumerable().FirstOrDefaultAwaitAsync(async tariffRow =>
+                        {
+                            var q = await quotaService.GetTenantQuotaAsync(tariffRow.Id);
+                            return q == null
+                                   || (TrialEnabled && q.Trial)
+                                   || q.Free
+                                   || q.NonProfit
+                                   || q.Custom;
+                        });
 
-                    if (!string.IsNullOrEmpty(email))
-                    {
-                        asynctariff.CustomerId = email;
-                    }
+                        var asynctariff = await CreateDefaultAsync();
 
-                    if (await SaveBillingInfoAsync(tenantId, asynctariff))
-                    {
-                        asynctariff = await CalculateTariffAsync(tenantId, asynctariff);
-                        tariff = asynctariff;
-                    }
+                        if (freeTariff == null)
+                        {
+                            asynctariff.DueDate = DateTime.Today.AddDays(-1);
+                            asynctariff.State = TariffState.NotPaid;
+                        }
 
-                    await UpdateCacheAsync(tariff.Id);
+                        if (await SaveBillingInfoAsync(tenantId, asynctariff))
+                        {
+                            asynctariff = await CalculateTariffAsync(tenantId, asynctariff);
+                            tariff = asynctariff;
+                        }
+
+                        await InsertToCache(tenantId, tariff);
+                    }
                 }
-                catch (Exception error)
+                else if (tenantExtraConfig.Enterprise && tariff.Id == 0 && tariff.LicenseDate == DateTime.MaxValue)
                 {
-                    if (error is not BillingNotFoundException)
-                    {
-                        LogError(error, tenantId.ToString());
-                    }
+                    var defaultQuota = await quotaService.GetTenantQuotaAsync(Tenant.DefaultTenant);
+
+                    var quota = new TenantQuota(defaultQuota) { Name = "start_trial", Trial = true, TenantId = -1000 };
+
+                    await quotaService.SaveTenantQuotaAsync(quota);
+
+                    tariff = new Tariff { Quotas = [new(quota.TenantId, 1)], DueDate = DateTime.UtcNow.AddDays(DefaultTrialPeriod) };
+
+                    await SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
+                    await InsertToCache(tenantId, tariff);
                 }
-
-                if (tariff.Id == 0)
-                {
-                    var freeTariff = await tariff.Quotas.ToAsyncEnumerable().FirstOrDefaultAwaitAsync(async tariffRow =>
-                    {
-                        var q = await quotaService.GetTenantQuotaAsync(tariffRow.Id);
-                        return q == null
-                            || (TrialEnabled && q.Trial)
-                            || q.Free
-                            || q.NonProfit
-                            || q.Custom;
-                    });
-
-                    var asynctariff = await CreateDefaultAsync();
-
-                    if (freeTariff == null)
-                    {
-                        asynctariff.DueDate = DateTime.Today.AddDays(-1);
-                        asynctariff.State = TariffState.NotPaid;
-                    }
-
-                    if (await SaveBillingInfoAsync(tenantId, asynctariff))
-                    {
-                        asynctariff = await CalculateTariffAsync(tenantId, asynctariff);
-                        tariff = asynctariff;
-                    }
-
-                    await UpdateCacheAsync(tariff.Id);
-                }
-            }
-            else if (tenantExtraConfig.Enterprise && tariff.Id == 0 && tariff.LicenseDate == DateTime.MaxValue)
-            {
-                var defaultQuota = await quotaService.GetTenantQuotaAsync(Tenant.DefaultTenant);
-
-                var quota = new TenantQuota(defaultQuota)
-                {
-                    Name = "start_trial",
-                    Trial = true,
-                    TenantId = -1000
-                };
-
-                await quotaService.SaveTenantQuotaAsync(quota);
-
-                tariff = new Tariff
-                {
-                    Quotas = [new(quota.TenantId, 1)],
-                    DueDate = DateTime.UtcNow.AddDays(DefaultTrialPeriod)
-                };
-
-                await SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
-                await UpdateCacheAsync(tariff.Id);
             }
         }
         else
@@ -279,11 +229,6 @@ public class TariffService(
         }
 
         return tariff;
-
-        async Task UpdateCacheAsync(int tariffId)
-        {
-            await notify.PublishAsync(new TariffCacheItem { TenantId = tenantId, TariffId = tariffId }, CacheNotifyAction.Insert);
-        }
     }
 
     public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity)
@@ -385,16 +330,7 @@ public class TariffService(
     {
         return $"{tenantId}:tariff";
     }
-
-    internal static string GetTariffNeedToUpdateCacheKey(int tenantId)
-    {
-        return $"{tenantId}:update";
-    }
-
-    internal static string GetBillingUrlCacheKey(int tenantId)
-    {
-        return $"{tenantId}:billing:urls";
-    }
+    
 
     internal static string GetBillingPaymentCacheKey(int tenantId)
     {
@@ -404,38 +340,50 @@ public class TariffService(
 
     private async Task ClearCacheAsync(int tenantId)
     {
-        await notify.PublishAsync(new TariffCacheItem { TenantId = tenantId, TariffId = -1 }, CacheNotifyAction.Remove);
+        await distributedCache.RemoveAsync(GetTariffCacheKey(tenantId));
     }
 
     public async Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId)
     {
         var key = GetBillingPaymentCacheKey(tenantId);
-        var payments = cache.Get<List<PaymentInfo>>(key);
+        var payments = await GetFromCache<List<PaymentInfo>>(key);
         if (payments == null)
         {
-            payments = [];
-            if (billingClient.Configured)
+            await using (await distributedLockProvider.TryAcquireLockAsync($"{key}_lock"))
             {
-                try
+                payments = await GetFromCache<List<PaymentInfo>>(key);
+                if (payments != null)
                 {
-                    var quotas = await quotaService.GetTenantQuotasAsync();
-                    foreach (var pi in await billingClient.GetPaymentsAsync(await coreSettings.GetKeyAsync(tenantId)))
+                    return payments;
+                }
+                
+                payments = [];
+                if (billingClient.Configured)
+                {
+                    try
                     {
-                        var quota = quotas.SingleOrDefault(q => q.ProductId == pi.ProductRef.ToString());
-                        if (quota != null)
+                        var quotas = await quotaService.GetTenantQuotasAsync();
+                        foreach (var pi in await billingClient.GetPaymentsAsync(await coreSettings.GetKeyAsync(tenantId)))
                         {
-                            pi.QuotaId = quota.TenantId;
+                            var quota = quotas.SingleOrDefault(q => q.ProductId == pi.ProductRef.ToString());
+                            if (quota != null)
+                            {
+                                pi.QuotaId = quota.TenantId;
+                            }
+
+                            payments.Add(pi);
                         }
-                        payments.Add(pi);
+                    }
+                    catch (Exception error)
+                    {
+                        LogError(error, tenantId.ToString());
                     }
                 }
-                catch (Exception error)
-                {
-                    LogError(error, tenantId.ToString());
-                }
-            }
 
-            cache.Insert(key, payments, DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)));
+                using var ms = new MemoryStream();
+                Serializer.Serialize(ms, payments);
+                await distributedCache.SetAsync(key, ms.ToArray(), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) });
+            }
         }
 
         return payments;
@@ -512,7 +460,7 @@ public class TariffService(
             cache.Insert(key, url, DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)));
         }
 
-        tariffServiceStorage.ResetCacheExpiration();
+        ResetCacheExpiration();
 
         if (string.IsNullOrEmpty(url))
         {
@@ -886,5 +834,43 @@ public class TariffService(
     public bool IsConfigured()
     {
         return billingClient.Configured;
+    }
+    
+    private TimeSpan GetCacheExpiration()
+    {
+        if (coreBaseSettings.Standalone && _cacheExpiration < _standaloneCacheExpiration)
+        {
+            _cacheExpiration = _cacheExpiration.Add(TimeSpan.FromSeconds(30));
+        }
+        return _cacheExpiration;
+    }
+
+    private async Task InsertToCache(int tenantId, Tariff tariff)
+    { 
+        using var ms = new MemoryStream();
+        Serializer.Serialize(ms, tariff);
+        await distributedCache.SetAsync(GetTariffCacheKey(tenantId), ms.ToArray(), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = GetCacheExpiration()});
+    }
+
+    private async Task<T> GetFromCache<T>(string key)
+    {
+        var serializedObject = await distributedCache.GetAsync(key);
+
+        if (serializedObject == null)
+        {
+            return default;
+        }
+
+        using var ms = new MemoryStream(serializedObject);
+
+        return Serializer.Deserialize<T>(ms);
+    }
+    
+    private void ResetCacheExpiration()
+    {
+        if (coreBaseSettings.Standalone)
+        {
+            _cacheExpiration = _defaultCacheExpiration;
+        }
     }
 }
