@@ -36,6 +36,8 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
     private IEnumerable<string> _emails;
     private IEnumerable<Guid> _groups;
     private string _title;
+    private string _cover;
+    private string _color;
 
     private int _roomId;
     private int? _templateId;
@@ -70,7 +72,9 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         LogoSettings logo,
         bool copyLogo,
         IEnumerable<string> tags,
-        IEnumerable<Guid> groups)
+        IEnumerable<Guid> groups,
+        string cover,
+        string color)
     {
         TenantId = tenantId;
         _userId = userId;
@@ -81,6 +85,8 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
         _emails = emails;
         _title = title;
         _groups = groups;
+        _cover = cover;
+        _color = color;
         TemplateId = -1;
     }
 
@@ -114,7 +120,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
                 };
             }
 
-            var template = await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, new List<FileShareParams>(), _tags, dtoLogo);
+            var template = await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, new List<FileShareParams>(), _tags, dtoLogo, _cover, _color);
             TemplateId = template.Id;
 
             List<AceWrapper> wrappers = null;

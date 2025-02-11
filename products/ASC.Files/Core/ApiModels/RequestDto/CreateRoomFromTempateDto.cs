@@ -51,4 +51,16 @@ public class CreateRoomFromTempateDto
     /// Collection of tags
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
+
+    /// <summary>
+    /// Color
+    /// </summary>
+    [StringLength(6)]
+    public string Color { get; set; }
+
+    /// <summary>
+    /// Cover
+    /// </summary>
+    [StringLength(50)]
+    public string Cover { get; set; }
 }

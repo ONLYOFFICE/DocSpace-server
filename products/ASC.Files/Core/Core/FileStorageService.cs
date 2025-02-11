@@ -543,7 +543,7 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
-    public async Task<Folder<int>> CreateRoomTemplateAsync(int roomId, string title, IEnumerable<FileShareParams> share, IEnumerable<string> tags, LogoRequest logo)
+    public async Task<Folder<int>> CreateRoomTemplateAsync(int roomId, string title, IEnumerable<FileShareParams> share, IEnumerable<string> tags, LogoRequest logo, string cover, string color)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.FolderRoomTemplatesAsync;
@@ -575,12 +575,12 @@ public class FileStorageService //: IFileStorageService
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, room.FolderType, room.SettingsPrivate, room.SettingsIndexing, room.SettingsQuota, room.SettingsLifetime, room.SettingsDenyDownload, watermarkRequestDto, room.SettingsColor, room.SettingsCover, tags, logo);
+                return await InternalCreateFolderAsync(parentId, title, room.FolderType, room.SettingsPrivate, room.SettingsIndexing, room.SettingsQuota, room.SettingsLifetime, room.SettingsDenyDownload, watermarkRequestDto, color, cover, tags, logo);
             }
         }, room.SettingsPrivate, share);
     }
 
-    public async Task<Folder<int>> CreateRoomFromTemplateAsync(int templateId, string title, IEnumerable<string> tags, LogoRequest logo)
+    public async Task<Folder<int>> CreateRoomFromTemplateAsync(int templateId, string title, IEnumerable<string> tags, LogoRequest logo, string cover, string color)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.FolderVirtualRoomsAsync;
@@ -612,7 +612,7 @@ public class FileStorageService //: IFileStorageService
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, template.FolderType, template.SettingsPrivate, template.SettingsIndexing, template.SettingsQuota, template.SettingsLifetime, template.SettingsDenyDownload, watermarkRequestDto, template.SettingsColor, template.SettingsCover, tags, logo);
+                return await InternalCreateFolderAsync(parentId, title, template.FolderType, template.SettingsPrivate, template.SettingsIndexing, template.SettingsQuota, template.SettingsLifetime, template.SettingsDenyDownload, watermarkRequestDto, color, cover, tags, logo);
             }
         }, template.SettingsPrivate, []);
     }

@@ -31,6 +31,8 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
 {
     private Guid _userId;
     private string _title;
+    private string _cover;
+    private string _color;
     private LogoSettings _logo;
     private bool _copyLogo;
     private IEnumerable<string> _tags;
@@ -66,7 +68,9 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
         string title,
         LogoSettings logo,
         bool copyLogo,
-        IEnumerable<string> tags)
+        IEnumerable<string> tags,
+        string cover,
+        string color)
     {
         TenantId = tenantId;
         _userId = userId;
@@ -75,6 +79,8 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
         _logo = logo;
         _copyLogo = copyLogo;
         _tags = tags;
+        _cover = cover;
+        _color = color;
         RoomId = -1;
     }
 
@@ -110,7 +116,7 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
                 };
             }
 
-            var room = await fileStorageService.CreateRoomFromTemplateAsync(_templateId, _title, _tags, dtoLogo);
+            var room = await fileStorageService.CreateRoomFromTemplateAsync(_templateId, _title, _tags, dtoLogo, _cover, _color);
             RoomId = room.Id;
 
             if (_logo == null && _copyLogo)

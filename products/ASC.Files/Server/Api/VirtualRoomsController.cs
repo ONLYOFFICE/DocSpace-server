@@ -113,6 +113,8 @@ public class VirtualRoomsInternalController(
           logo,
           dto.CopyLogo,
           dto.Tags,
+          dto.Cover,
+          dto.Color,
           false);
 
         await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
@@ -122,6 +124,8 @@ public class VirtualRoomsInternalController(
             CopyLogo = dto.CopyLogo,
             Title = dto.Title,
             Tags = dto.Tags,
+            Cover = dto.Cover,
+            Color = dto.Color,
             TaskId = taskId
         });
         return await Status();

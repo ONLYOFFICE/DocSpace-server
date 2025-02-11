@@ -47,6 +47,12 @@ public record CreateRoomFromTemplateIntegrationEvent : IntegrationEvent
     [ProtoMember(11)]
     public bool CopyLogo { get; set; }
 
+    [ProtoMember(12)]
+    public string Cover { get; set; }
+
+    [ProtoMember(13)]
+    public string Color { get; set; }
+
     public CreateRoomFromTemplateIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
     }
