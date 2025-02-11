@@ -76,7 +76,7 @@ public static class IdentityConsentScopeExtension
             // Define indexes
             entity.HasIndex(e => e.PrincipalId, "ix_identity_consent_scopes_principal_id");
             entity.HasIndex(e => e.RegisteredClientId, "ix_identity_consent_scopes_registered_client_id");
-            entity.HasIndex(e => e.Scopes, "ix_identity_consent_scopes_scope_name");
+            entity.HasIndex(e => e.Scopes, "ix_identity_consent_scopes_scopes");
 
             // Define columns
             entity.Property(e => e.PrincipalId)
@@ -88,7 +88,7 @@ public static class IdentityConsentScopeExtension
                 .HasColumnName("registered_client_id");
 
             entity.Property(e => e.Scopes)
-                .HasColumnName("scope_name");
+                .HasColumnName("scopes");
 
             // Define foreign key relations
             entity.HasOne(d => d.Consent)
@@ -99,7 +99,7 @@ public static class IdentityConsentScopeExtension
             entity.HasOne(d => d.ScopeNameNavigation)
                 .WithMany(p => p.IdentityConsentScopes)
                 .HasForeignKey(d => d.Scopes)
-                .HasConstraintName("fk_identity_consent_scopes_scope_name");
+                .HasConstraintName("fk_identity_consent_scopes_scopes");
         });
     }
 }
