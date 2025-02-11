@@ -108,7 +108,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
             await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
 
             LogoRequest dtoLogo = null;
-            if (_logo != null)
+            if (_logo != null && !_copyLogo)
             {
                 dtoLogo = new LogoRequest
                 {
@@ -147,7 +147,7 @@ public class CreateRoomTemplateOperation(IServiceProvider serviceProvider) : Dis
                 var warning = await fileStorageService.SetAceObjectAsync(aceCollection, false);
             }
 
-            if (_logo == null || _copyLogo)
+            if (_copyLogo)
             {
                 var room = await folderDao.GetFolderAsync(_roomId);
                 if (await roomLogoManager.CopyAsync(room, template))
