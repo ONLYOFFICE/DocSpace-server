@@ -1501,7 +1501,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace-ə xoş gəlmisiniz!
 
 
 Salam, $İstifadəçiAdı!

@@ -127,7 +127,7 @@ Povezava je veljavna 7 dni.
 Ne želite spremeniti gesla? Prezrite to sporočilo</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -142,7 +142,7 @@ Ne želite spremeniti gesla? Prezrite to sporočilo</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -157,7 +157,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -296,7 +296,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -317,7 +317,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -338,7 +338,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -359,7 +359,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -953,7 +953,7 @@ Povezava velja le 7 dni.
 Dobili boste več nasvetov glede uporabe vaše spletne pisarne. Naročnine lahko kadar koli prekličete na strani svojega profila ali jih znova omogočite.</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -988,7 +988,7 @@ Povezava velja le 7 dni.
 Dobili boste več nasvetov glede uporabe vaše spletne pisarne. Naročnine lahko kadar koli prekličete na strani svojega profila in jih znova omogočite.</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -1135,7 +1135,7 @@ Povezava velja le 7 dni.
 Dobili boste več nasvetov o uporabi vaše spletne pisarne. Naročnine lahko kadar koli prekličete na strani svojega profila ali jih znova omogočite.</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -1417,7 +1417,7 @@ Občasno vam bomo pošiljali tudi uporabne nasvete in zadnje novice ${LetterLogo
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -1566,7 +1566,7 @@ $TrulyYours</value>
     <value>Dobrodošli v ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!
+    <value>h1. Dobrodošli v &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!
 
 
 Pozdravljeni, $UserName!
@@ -1840,7 +1840,7 @@ Za vprašanja glede plačila nas kontaktirajte na "${__SalesEmail}":"mailto:${__
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -1935,7 +1935,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v3" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Dobrodošli v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Pozdravljeni, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
