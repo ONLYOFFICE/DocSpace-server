@@ -874,7 +874,7 @@ public class CustomizationConfig<T>(
     {
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-        return file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormsAsync(file) && properties is { FormFilling.CollectFillForm: true };
+        return file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormsAsync(file) && properties is { FormFilling.StartFilling: true };
     }
 
     private FileSharing FileSharing { get; } = fileSharing;

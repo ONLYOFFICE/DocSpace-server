@@ -1022,7 +1022,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         var numberRoomMembers = await fileStorageService.GetPureSharesCountAsync(toFolder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
                                         var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties<TTo> { FormFilling = new FormFillingProperties<TTo>() };
                                         properties.FormFilling.StartFilling = true;
-                                        properties.FormFilling.CollectFillForm = true;
                                         properties.FormFilling.OriginalFormId = newFile.Id;
 
                                         await Task.WhenAll(

@@ -1537,7 +1537,6 @@ public class FileStorageService //: IFileStorageService
 
             var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
             properties.FormFilling.StartFilling = true;
-            properties.FormFilling.CollectFillForm = true;
             properties.FormFilling.OriginalFormId = fileId;
 
             await fileDao.SaveProperties(fileId, properties);
@@ -4328,7 +4327,7 @@ public class FileStorageService //: IFileStorageService
         await fileDao.SaveFormRoleMapping(formId, roles);
 
         var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
-        properties.FormFilling.CollectFillForm = true;
+        properties.FormFilling.StartFilling = true;
         await fileDao.SaveProperties(formId, properties);
 
         return roles;

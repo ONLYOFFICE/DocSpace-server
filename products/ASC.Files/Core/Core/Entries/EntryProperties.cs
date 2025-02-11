@@ -71,7 +71,6 @@ public class EntryProperties<T>
 [Transient]
 public class FormFillingProperties<T>
 {
-    public bool CollectFillForm { get; set; }
     public bool StartFilling { get; set; }
     public string Title { get; set; }
     public T RoomId { get; set; }
