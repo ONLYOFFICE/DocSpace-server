@@ -53,6 +53,11 @@ public class IdentityAuthorization
     public bool? IsInvalidated { get; set; }
 
     public DateTime? ModifiedAt { get; set; }
+    public string? IdTokenValue { get; set; }
+    public string? IdTokenClaims { get; set; }
+    public string? IdTokenMetadata { get; set; }
+    public DateTime? IdTokenIssuedAt { get; set; }
+    public DateTime? IdTokenExpiresAt { get; set; }
 
     public DbTenant Tenant { get; set; }
 }
@@ -155,6 +160,26 @@ public static class IdentityExtension
             entity.Property(e => e.TenantId)
             .HasColumnName("tenant_id")
             .IsRequired();
+
+            entity.Property(e => e.IdTokenValue)
+                .HasColumnType("text")
+                .HasColumnName("id_token_value");
+
+            entity.Property(e => e.IdTokenClaims)
+                .HasColumnType("text")
+                .HasColumnName("id_token_claims");
+            
+            entity.Property(e => e.IdTokenMetadata)
+                .HasColumnType("text")
+                .HasColumnName("id_token_metadata");
+
+            entity.Property(e => e.IdTokenIssuedAt)
+                .HasMaxLength(6)
+                .HasColumnName("id_token_issued_at");
+
+            entity.Property(e => e.IdTokenExpiresAt)
+               .HasMaxLength(6)
+               .HasColumnName("id_token_expires_at");
 
             entity.HasOne(e => e.Tenant)
                    .WithMany()
