@@ -103,7 +103,6 @@ public class OperationController(
     
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
-    [SwaggerResponse(403, "You don't have enough permission to delete")]
     [HttpPut("deleteversion")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteVersionBatchRequestDto inDto)
     {

@@ -831,9 +831,10 @@ internal class FileDao(
     
     public async Task DeleteFileVersionAsync(File<int> file, int version = 0)
     {
-        if (file == null
-            || file.Id == 0
-            || file.Version <= 1)
+        if (file == null || 
+            file.Id == 0 || 
+            file.Version <= 1 ||
+            version < 0)
         {
             return;
         }
