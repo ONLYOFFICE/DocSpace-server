@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,6 +29,7 @@ package com.asc.registration.service.transfer.request.fetch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
+import java.time.ZonedDateTime;
 import lombok.*;
 
 /**
@@ -44,11 +45,14 @@ public class ClientInfoPaginationQuery {
   /** The tenant ID to fetch private applications for. Does not affect public apps */
   @Min(value = 1, message = "tenant id must be greater than or equal to 1")
   @JsonProperty("tenant_id")
-  private int tenantId;
+  private long tenantId;
 
   /** The page number to fetch, starting from 0. */
-  @Min(value = 0, message = "page must be greater than or equal to 0")
-  private int page;
+  @JsonProperty("last_client_id")
+  private String lastClientId;
+
+  @JsonProperty("last_created_on")
+  private ZonedDateTime lastCreatedOn;
 
   /** The number of items per page. */
   @Min(value = 1, message = "limit must be greater than or equal to 1")

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,7 @@ class ScopeTest {
   }
 
   @Test
-  void testCreateScope() {
+  void whenScopeIsCreated_thenFieldsAreSetCorrectly() {
     assertNotNull(scope);
     assertEquals("read", scope.getName());
     assertEquals("user", scope.getGroup());
@@ -50,19 +50,19 @@ class ScopeTest {
   }
 
   @Test
-  void testUpdateGroup() {
+  void whenGroupIsUpdated_thenGroupIsUpdatedCorrectly() {
     scope.updateGroup("admin");
     assertEquals("admin", scope.getGroup());
   }
 
   @Test
-  void testUpdateType() {
+  void whenTypeIsUpdated_thenTypeIsUpdatedCorrectly() {
     scope.updateType("role");
     assertEquals("role", scope.getType());
   }
 
   @Test
-  void testValidate() {
+  void whenScopeIsInvalid_thenValidationThrowsException() {
     var exception =
         assertThrows(
             ScopeDomainException.class,

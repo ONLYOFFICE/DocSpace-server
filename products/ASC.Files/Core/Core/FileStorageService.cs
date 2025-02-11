@@ -1897,15 +1897,11 @@ public class FileStorageService //: IFileStorageService
             string previousKey;
             string sourceFileUrl;
             string sourceExt;
-
-            if (file.Version > 1)
+            
+            var history = await fileDao.GetFileHistoryAsync(file.Id).ToListAsync();
+            var previousFileStable = history.OrderByDescending(r => r.Version).FirstOrDefault(r => r.Version < file.Version);
+            if (previousFileStable != null)
             {
-                var previousFileStable = await fileDao.GetFileStableAsync(file.Id, file.Version - 1);
-                if (previousFileStable == null)
-                {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-                }
-
                 sourceFileUrl = pathProvider.GetFileStreamUrl(previousFileStable);
                 sourceExt = previousFileStable.ConvertedExtension;
 
