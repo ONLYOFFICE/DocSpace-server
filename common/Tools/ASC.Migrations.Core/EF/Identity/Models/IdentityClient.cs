@@ -38,10 +38,6 @@ public class IdentityClient
 
     public int Version { get; set; }
 
-    public virtual ICollection<IdentityAuthorization> IdentityAuthorizations { get; set; } = new List<IdentityAuthorization>();
-
-    public virtual ICollection<IdentityConsent> IdentityConsents { get; set; } = new List<IdentityConsent>();
-
     public DbTenant Tenant { get; set; }
 }
 
@@ -67,7 +63,7 @@ public static class IdentityClientExtension
 
             entity.HasIndex(e => e.ClientId, "UK_client_id").IsUnique();
 
-            entity.HasIndex(e => e.IsInvalidated, "idx_identity_clients_is_invalidated");
+            entity.HasIndex(e => e.ClientSecret, "UK_client_secret").IsUnique();
 
             entity.HasIndex(e => e.TenantId, "idx_identity_clients_tenant_id");
 
