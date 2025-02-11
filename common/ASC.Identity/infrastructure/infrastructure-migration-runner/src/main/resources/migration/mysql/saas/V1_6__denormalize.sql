@@ -25,12 +25,9 @@ ALTER TABLE identity_consents
     DROP INDEX idx_identity_consents_is_invalidated;
 
 ALTER TABLE identity_consent_scopes
-    DROP FOREIGN KEY FK_identity_consent_scopes_scope_name;
-
-ALTER TABLE identity_consent_scopes
-    DROP FOREIGN KEY FK_identity_consent_scopes_consents;
-
-ALTER TABLE identity_consent_scopes
+    DROP FOREIGN KEY FK_identity_consent_scopes_scope_name,
+    DROP FOREIGN KEY FK_identity_consent_scopes_consents,
+    DROP INDEX idx_identity_consent_scopes_scope_name,
     DROP PRIMARY KEY;
 
 ALTER TABLE identity_consent_scopes

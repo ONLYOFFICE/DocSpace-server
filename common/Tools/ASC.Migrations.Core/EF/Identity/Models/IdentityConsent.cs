@@ -10,8 +10,6 @@ public class IdentityConsent
 
     public DateTime? ModifiedAt { get; set; }
 
-    public virtual IdentityClient RegisteredClient { get; set; } = null!;
-
     public virtual ICollection<IdentityConsentScope> IdentityConsentScopes { get; set; } = new List<IdentityConsentScope>();
 }
 
@@ -21,8 +19,7 @@ public static class IdentityConsentExtension
     {
         modelBuilder
             .Add(MySqlAddIdentityConsent, Provider.MySql)
-            .Add(PgSqlAddIdentityConsent, Provider.PostgreSql)
-            ;
+            .Add(PgSqlAddIdentityConsent, Provider.PostgreSql);
 
         return modelBuilder;
     }
@@ -34,12 +31,6 @@ public static class IdentityConsentExtension
             entity.HasKey(e => new { e.PrincipalId, e.RegisteredClientId }).HasName("PRIMARY");
 
             entity.ToTable("identity_consents");
-
-            entity.HasIndex(e => e.IsInvalidated, "idx_identity_consents_is_invalidated");
-
-            entity.HasIndex(e => e.PrincipalId, "idx_identity_consents_principal_id");
-
-            entity.HasIndex(e => e.RegisteredClientId, "idx_identity_consents_registered_client_id");
 
             entity.Property(e => e.PrincipalId)
             .HasMaxLength(255)
@@ -53,10 +44,6 @@ public static class IdentityConsentExtension
             entity.Property(e => e.ModifiedAt)
                 .HasMaxLength(6)
                 .HasColumnName("modified_at");
-
-            entity.HasOne(d => d.RegisteredClient).WithMany(p => p.IdentityConsents)
-                .HasForeignKey(d => d.RegisteredClientId)
-                .HasConstraintName("identity_consents_ibfk_1");
         });
     }
 
@@ -68,15 +55,6 @@ public static class IdentityConsentExtension
                 .HasName("pk_identity_consents"); // PostgreSQL prefers prefix "pk" for primary keys instead of "PRIMARY"
 
             entity.ToTable("identity_consents");
-
-            entity.HasIndex(e => e.IsInvalidated)
-                .HasDatabaseName("idx_identity_consents_is_invalidated");
-
-            entity.HasIndex(e => e.PrincipalId)
-                .HasDatabaseName("idx_identity_consents_principal_id");
-
-            entity.HasIndex(e => e.RegisteredClientId)
-                .HasDatabaseName("idx_identity_consents_registered_client_id");
 
             entity.Property(e => e.PrincipalId)
                 .HasMaxLength(255)
@@ -93,11 +71,6 @@ public static class IdentityConsentExtension
             entity.Property(e => e.ModifiedAt)
                 .HasColumnType("timestamp with time zone") // PostgreSQL equivalent for a timestamp column
                 .HasColumnName("modified_at");
-
-            entity.HasOne(d => d.RegisteredClient)
-                .WithMany(p => p.IdentityConsents)
-                .HasForeignKey(d => d.RegisteredClientId)
-                .HasConstraintName("fk_identity_consents_registered_client");
         });
     }
 }
