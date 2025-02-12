@@ -142,7 +142,8 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// Set public settings
     /// </summary>
     /// <short>Set public</short>
-    /// <path>api/2.0/files/roomtemplate//public</path>
+    /// <path>api/2.0/files/roomtemplate/public</path>
+    [Tags("Files / Rooms")]
     [HttpPut("public")]
     public async Task SetPublic(SetPublicDto inDto)
     {
