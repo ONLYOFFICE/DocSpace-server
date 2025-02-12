@@ -63,6 +63,9 @@ public class FilesMappingAction(TenantUtil tenantUtil) :
             case FolderType.VirtualRooms:
                 destination.Title = FilesUCResource.VirtualRooms;
                 break;
+            case FolderType.RoomTemplates:
+                destination.Title = FilesUCResource.RoomTemplates;
+                break;
             case FolderType.Archive:
                 destination.Title = FilesUCResource.Archive;
                 break;

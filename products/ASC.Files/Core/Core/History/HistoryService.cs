@@ -45,6 +45,7 @@ public class HistoryService(
         MessageAction.FileMovedToTrash, 
         MessageAction.FileCopied, 
         MessageAction.FileCopiedWithOverwriting, 
+        MessageAction.FileVersionRemoved, 
         MessageAction.FileDeleted, 
         MessageAction.FileConverted, 
         MessageAction.FileRestoreVersion,

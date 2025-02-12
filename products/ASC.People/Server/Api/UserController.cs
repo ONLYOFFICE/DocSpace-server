@@ -2230,7 +2230,8 @@ public class UserControllerAdditional<T>(
             includeStrangers,
             inDto.Area,
             inDto.InvitedByMe,
-            inDto.InviterId);
+            inDto.InviterId,
+            inDto.EmployeeTypes);
 
         apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
 
@@ -2244,6 +2245,7 @@ public class UserControllerAdditional<T>(
                            inDto.Area,
                            inDto.InvitedByMe,
                            inDto.InviterId,
+                           inDto.EmployeeTypes,
                            offset,
                            count))
         {

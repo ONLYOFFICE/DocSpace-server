@@ -902,9 +902,17 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         if (room.FolderType == FolderType.FillingFormsRoom)
                         {
                             var fileType = FileUtility.GetFileTypeByFileName(file.Title);
-                            if (fileType != FileType.Pdf || !await fileChecker.CheckExtendedPDF(file))
+                            try
                             {
-                                this[Err] = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
+                                if (fileType != FileType.Pdf || !await fileChecker.CheckExtendedPDF(file))
+                                {
+                                    this[Err] = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
+                                    continue;
+                                }
+                            }
+                            catch
+                            {
+                                this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
                                 continue;
                             }
 
