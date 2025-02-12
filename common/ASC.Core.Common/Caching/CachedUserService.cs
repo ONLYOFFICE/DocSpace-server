@@ -33,6 +33,7 @@ public class UserServiceCache
     private const string Refs = "refs";
     private const string Groups = "groups";
     private const string Relations = "relations";
+    private const string RelationsByTarget = "relationsByTarget";
 
     internal readonly ICache Cache;
     internal readonly ICacheNotify<UserInfoCacheItem> CacheUserInfoItem;
@@ -148,6 +149,11 @@ public class UserServiceCache
     public static string GetRelationCacheKey(int tenant, string sourceUserId)
     {
         return tenant + Relations + sourceUserId;
+    }
+    
+    public static string GetRelationByTargetCacheKey(int tenant, string sourceUserId)
+    {
+        return tenant + RelationsByTarget + sourceUserId;
     }
 }
 
@@ -305,7 +311,7 @@ public class CachedUserService : IUserService, ICachedService
 
     public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsByTargetAsync(int tenantId, Guid targetUserId)
     {
-        var key = UserServiceCache.GetRelationCacheKey(tenantId, targetUserId.ToString());
+        var key = UserServiceCache.GetRelationByTargetCacheKey(tenantId, targetUserId.ToString());
         var relations = _cache.Get<Dictionary<Guid, UserRelation>>(key);
 
         if (relations != null)
