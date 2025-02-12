@@ -71,7 +71,7 @@ public static class StringExtension
 
         try
         {
-            var punyCode = idn.GetAscii(data);
+            var punyCode = idn.GetAscii(data.TrimStart('.'));
             var domain2 = idn.GetUnicode(punyCode);
 
             if (!string.Equals(punyCode, domain2))
