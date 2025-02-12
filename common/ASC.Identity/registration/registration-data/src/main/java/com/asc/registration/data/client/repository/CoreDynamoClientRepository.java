@@ -31,6 +31,8 @@ import com.asc.registration.core.domain.exception.ClientNotFoundException;
 import com.asc.registration.data.client.entity.ClientDynamoEntity;
 import java.time.ZonedDateTime;
 import java.util.*;
+import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -56,13 +58,19 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   private final DynamoDbTable<ClientDynamoEntity> clientTable;
 
   /**
-   * Constructs a new instance of the repository with the given DynamoDB enhanced client.
+   * Constructs a new instance of the repository with the given table name and DynamoDB enhanced
+   * client.
    *
    * @param dynamoDbEnhancedClient the DynamoDB enhanced client.
    */
-  public CoreDynamoClientRepository(DynamoDbEnhancedClient dynamoDbEnhancedClient) {
+  public CoreDynamoClientRepository(
+      @Value("${spring.cloud.aws.dynamodb.tables.registeredClient}") String tableName,
+      DynamoDbEnhancedClient dynamoDbEnhancedClient) {
+    if (tableName == null || tableName.isBlank())
+      throw new BeanInitializationException(
+          "DynamoDB registered client table name is not provided");
     this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
-    clientTable = dynamoDbEnhancedClient.table("RegisteredClient", CLIENT_SCHEMA);
+    clientTable = dynamoDbEnhancedClient.table(tableName, CLIENT_SCHEMA);
   }
 
   /**
