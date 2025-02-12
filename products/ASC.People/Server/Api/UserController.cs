@@ -610,6 +610,7 @@ public class UserController(
         user.Status = EmployeeStatus.Terminated;
 
         await _userManager.UpdateUserInfoAsync(user);
+        await socketManager.UpdateUserAsync(user);
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         messageService.Send(MessageAction.UsersUpdatedStatus, MessageTarget.Create(user.Id), userName);
 
