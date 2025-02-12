@@ -6222,8 +6222,20 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("AuthorizedScopes")
                         .HasColumnType("text");
 
-                    b.Property<string>("IdentityClientClientId")
-                        .HasColumnType("character varying(255)");
+                    b.Property<string>("IdTokenClaims")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("IdTokenExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("IdTokenIssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("IdTokenMetadata")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IdTokenValue")
+                        .HasColumnType("text");
 
                     b.Property<bool?>("IsInvalidated")
                         .HasColumnType("boolean");
@@ -6261,10 +6273,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("IdentityClientClientId");
-
-                    b.HasIndex("RegisteredClientId");
 
                     b.HasIndex("TenantId");
 
@@ -6500,15 +6508,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.HasKey("PrincipalId", "RegisteredClientId")
                         .HasName("pk_identity_consents");
 
-                    b.HasIndex("IsInvalidated")
-                        .HasDatabaseName("idx_identity_consents_is_invalidated");
-
-                    b.HasIndex("PrincipalId")
-                        .HasDatabaseName("idx_identity_consents_principal_id");
-
-                    b.HasIndex("RegisteredClientId")
-                        .HasDatabaseName("idx_identity_consents_registered_client_id");
-
                     b.ToTable("identity_consents", (string)null);
                 });
 
@@ -6524,18 +6523,18 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("character varying(36)")
                         .HasColumnName("registered_client_id");
 
-                    b.Property<string>("ScopeName")
+                    b.Property<string>("Scopes")
                         .HasColumnType("text")
-                        .HasColumnName("scope_name");
+                        .HasColumnName("scopes");
 
-                    b.HasKey("PrincipalId", "RegisteredClientId", "ScopeName")
+                    b.HasKey("PrincipalId", "RegisteredClientId", "Scopes")
                         .HasName("pk_identity_consent_scopes");
 
                     b.HasIndex(new[] { "PrincipalId" }, "ix_identity_consent_scopes_principal_id");
 
                     b.HasIndex(new[] { "RegisteredClientId" }, "ix_identity_consent_scopes_registered_client_id");
 
-                    b.HasIndex(new[] { "ScopeName" }, "ix_identity_consent_scopes_scope_name");
+                    b.HasIndex(new[] { "Scopes" }, "ix_identity_consent_scopes_scopes");
 
                     b.ToTable("identity_consent_scopes", (string)null);
                 });
@@ -7249,23 +7248,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityAuthorization", b =>
                 {
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", null)
-                        .WithMany("IdentityAuthorizations")
-                        .HasForeignKey("IdentityClientClientId");
-
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
-                        .WithMany()
-                        .HasForeignKey("RegisteredClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("RegisteredClient");
 
                     b.Navigation("Tenant");
                 });
@@ -7339,26 +7326,14 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Navigation("ScopeNameNavigation");
                 });
 
-            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsent", b =>
-                {
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
-                        .WithMany("IdentityConsents")
-                        .HasForeignKey("RegisteredClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_identity_consents_registered_client");
-
-                    b.Navigation("RegisteredClient");
-                });
-
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsentScope", b =>
                 {
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityScope", "ScopeNameNavigation")
                         .WithMany("IdentityConsentScopes")
-                        .HasForeignKey("ScopeName")
+                        .HasForeignKey("Scopes")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_identity_consent_scopes_scope_name");
+                        .HasConstraintName("fk_identity_consent_scopes_scopes");
 
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityConsent", "Consent")
                         .WithMany("IdentityConsentScopes")
@@ -7415,13 +7390,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
             modelBuilder.Entity("ASC.MessagingSystem.EF.Model.DbAuditEvent", b =>
                 {
                     b.Navigation("FilesReferences");
-                });
-
-            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClient", b =>
-                {
-                    b.Navigation("IdentityAuthorizations");
-
-                    b.Navigation("IdentityConsents");
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsent", b =>

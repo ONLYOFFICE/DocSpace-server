@@ -444,6 +444,15 @@ public class FileStorageService //: IFileStorageService
         var folder = await InternalCreateFolderAsync(parentId, title);
 
         await socketManager.CreateFolderAsync(folder);
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
+        {
+            var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
+            await notifyClient.SendFolderCreatedInRoom(room, whoCanRead, folder, authContext.CurrentAccount.ID);
+        }
+
         await filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
 
         return folder;
@@ -1421,6 +1430,13 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.CreateFileAsync(file);
 
+        var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
+        {
+            var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
+            await notifyClient.SendDocumentCreatedInRoom(room, whoCanRead, file, authContext.CurrentAccount.ID);
+        }
+
         return file;
     }
 
@@ -1881,15 +1897,11 @@ public class FileStorageService //: IFileStorageService
             string previousKey;
             string sourceFileUrl;
             string sourceExt;
-
-            if (file.Version > 1)
+            
+            var history = await fileDao.GetFileHistoryAsync(file.Id).ToListAsync();
+            var previousFileStable = history.OrderByDescending(r => r.Version).FirstOrDefault(r => r.Version < file.Version);
+            if (previousFileStable != null)
             {
-                var previousFileStable = await fileDao.GetFileStableAsync(file.Id, file.Version - 1);
-                if (previousFileStable == null)
-                {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-                }
-
                 sourceFileUrl = pathProvider.GetFileStreamUrl(previousFileStable);
                 sourceExt = previousFileStable.ConvertedExtension;
 
@@ -3337,12 +3349,14 @@ public class FileStorageService //: IFileStorageService
                                     {
                                         case EventType.Create:
                                             await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, null, true, name);
+                                            await notifyClient.SendInvitedToRoom(folder, user);
                                             break;
                                         case EventType.Remove:
                                             await filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name);
                                             break;
                                         case EventType.Update:
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, pastRecord.Share, true, name);
+                                            await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
                                             break;
                                     }
                                 }

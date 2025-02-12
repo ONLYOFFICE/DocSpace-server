@@ -53,8 +53,11 @@ public class IdentityAuthorization
     public bool? IsInvalidated { get; set; }
 
     public DateTime? ModifiedAt { get; set; }
-
-    public virtual IdentityClient RegisteredClient { get; set; } = null!;
+    public string? IdTokenValue { get; set; }
+    public string? IdTokenClaims { get; set; }
+    public string? IdTokenMetadata { get; set; }
+    public DateTime? IdTokenIssuedAt { get; set; }
+    public DateTime? IdTokenExpiresAt { get; set; }
 
     public DbTenant Tenant { get; set; }
 }
@@ -82,13 +85,7 @@ public static class IdentityExtension
 
             entity.HasIndex(e => e.Id, "UK_id").IsUnique();
 
-            entity.HasIndex(e => e.IsInvalidated, "idx_identity_authorizations_is_invalidated");
-
-            entity.HasIndex(e => e.PrincipalId, "idx_identity_authorizations_principal_id");
-
-            entity.HasIndex(e => e.AuthorizationGrantType, "idx_identity_authorizations_grant_type");
-
-            entity.HasIndex(e => e.RegisteredClientId, "idx_identity_authorizations_registered_client_id");
+            entity.HasIndex(e => e.Id, "idx_identity_authorizations_id");
 
             entity.Property(e => e.PrincipalId).HasColumnName("principal_id");
             entity.Property(e => e.RegisteredClientId)
@@ -164,9 +161,25 @@ public static class IdentityExtension
             .HasColumnName("tenant_id")
             .IsRequired();
 
-            entity.HasOne(d => d.RegisteredClient).WithMany(p => p.IdentityAuthorizations)
-                .HasForeignKey(d => d.RegisteredClientId)
-                .HasConstraintName("FK_authorization_client_id");
+            entity.Property(e => e.IdTokenValue)
+                .HasColumnType("text")
+                .HasColumnName("id_token_value");
+
+            entity.Property(e => e.IdTokenClaims)
+                .HasColumnType("text")
+                .HasColumnName("id_token_claims");
+            
+            entity.Property(e => e.IdTokenMetadata)
+                .HasColumnType("text")
+                .HasColumnName("id_token_metadata");
+
+            entity.Property(e => e.IdTokenIssuedAt)
+                .HasMaxLength(6)
+                .HasColumnName("id_token_issued_at");
+
+            entity.Property(e => e.IdTokenExpiresAt)
+               .HasMaxLength(6)
+               .HasColumnName("id_token_expires_at");
 
             entity.HasOne(e => e.Tenant)
                    .WithMany()
@@ -266,12 +279,6 @@ public static class IdentityExtension
 
             entity.Property(e => e.ModifiedAt)
                 .HasColumnType("timestamptz");
-
-            // Configure relationships and navigation properties.
-            entity.HasOne(e => e.RegisteredClient)
-                .WithMany()
-                .HasForeignKey(e => e.RegisteredClientId)
-                .OnDelete(DeleteBehavior.Cascade); // Example setting, adjust as per requirements.
 
             entity.HasOne(e => e.Tenant)
                 .WithMany()

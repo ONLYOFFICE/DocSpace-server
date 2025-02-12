@@ -117,6 +117,8 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
 
     public static readonly int MaxEmailLength = 10000;
 
+    private static readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
+
     public async Task<bool> ValidateTokenAsync(OAuth20Token token)
     {
         await GetDocuSignAccountAsync(token);
@@ -150,7 +152,7 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
 
         logger.DebugDocuSingUserInfo(userInfoString);
 
-        var userInfo = JsonConvert.DeserializeObject<DocuSignUserInfo>(userInfoString);
+        var userInfo = JsonSerializer.Deserialize<DocuSignUserInfo>(userInfoString, _serializerOptions);
 
         if (userInfo.Accounts == null || userInfo.Accounts.Count == 0)
         {

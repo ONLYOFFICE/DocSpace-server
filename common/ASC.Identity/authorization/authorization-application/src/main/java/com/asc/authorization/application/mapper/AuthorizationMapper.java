@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,13 +27,13 @@
 
 package com.asc.authorization.application.mapper;
 
-import com.asc.authorization.application.security.service.AscAuthorizationService;
+import com.asc.authorization.application.security.oauth.service.AuthorizationService;
 import com.asc.authorization.data.authorization.entity.AuthorizationEntity;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.annotation.PostConstruct;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -42,6 +42,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -51,29 +52,41 @@ import org.springframework.util.StringUtils;
 
 /**
  * Mapper class for converting between {@link AuthorizationEntity} and {@link OAuth2Authorization}.
+ *
+ * <p>This class provides methods to map data between the entity model used for persistence ({@link
+ * AuthorizationEntity}) and the OAuth2 authorization model ({@link OAuth2Authorization}). It also
+ * handles token metadata and attributes serialization and deserialization using Jackson.
  */
 @Component
 public class AuthorizationMapper {
   private final String UTC = "UTC";
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper;
 
-  /** Initializes the {@link ObjectMapper} with required modules. */
-  @PostConstruct
-  public void init() {
-    var classLoader = AscAuthorizationService.class.getClassLoader();
+  /**
+   * Constructs an {@link AuthorizationMapper} and configures the {@link ObjectMapper} used for
+   * serializing and deserializing attributes and metadata.
+   */
+  public AuthorizationMapper() {
+    var classLoader = AuthorizationService.class.getClassLoader();
     var securityModules = SecurityJackson2Modules.getModules(classLoader);
+    objectMapper = new ObjectMapper();
     objectMapper.registerModules(securityModules);
     objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
     objectMapper.registerModule(new JavaTimeModule());
     objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    objectMapper.activateDefaultTyping(
+        objectMapper.getPolymorphicTypeValidator(),
+        ObjectMapper.DefaultTyping.NON_FINAL,
+        JsonTypeInfo.As.PROPERTY);
   }
 
   /**
    * Converts an {@link AuthorizationEntity} to an {@link OAuth2Authorization}.
    *
-   * @param entity the AuthorizationEntity to convert
-   * @param client the RegisteredClient associated with the authorization
-   * @return the OAuth2Authorization
+   * @param entity the {@link AuthorizationEntity} to convert.
+   * @param client the {@link RegisteredClient} associated with the authorization.
+   * @return the converted {@link OAuth2Authorization} or {@code null} if the client is {@code
+   *     null}.
    */
   public OAuth2Authorization fromEntity(AuthorizationEntity entity, RegisteredClient client) {
     if (client == null) return null;
@@ -133,14 +146,25 @@ public class AuthorizationMapper {
           refreshToken, metadata -> metadata.putAll(parseMap(entity.getRefreshTokenMetadata())));
     }
 
+    if (entity.getIdTokenValue() != null) {
+      var issuedAt =
+          entity.getIdTokenIssuedAt() != null ? entity.getIdTokenIssuedAt().toInstant() : null;
+      var expiresAt =
+          entity.getIdTokenExpiresAt() != null ? entity.getIdTokenExpiresAt().toInstant() : null;
+      var idToken =
+          new OidcIdToken(
+              entity.getIdTokenValue(), issuedAt, expiresAt, parseMap(entity.getIdTokenClaims()));
+      builder.token(idToken, metadata -> metadata.putAll(parseMap(entity.getIdTokenMetadata())));
+    }
+
     return builder.build();
   }
 
   /**
    * Converts an {@link OAuth2Authorization} to an {@link AuthorizationEntity}.
    *
-   * @param authorization the OAuth2Authorization to convert
-   * @return the AuthorizationEntity
+   * @param authorization the {@link OAuth2Authorization} to convert.
+   * @return the converted {@link AuthorizationEntity}.
    */
   public AuthorizationEntity toEntity(OAuth2Authorization authorization) {
     var builder =
@@ -161,9 +185,15 @@ public class AuthorizationMapper {
       builder
           .authorizationCodeValue(authorizationCode.getToken().getTokenValue())
           .authorizationCodeIssuedAt(
-              ZonedDateTime.ofInstant(authorizationCode.getToken().getIssuedAt(), ZoneId.of(UTC)))
+              authorizationCode.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(
+                      authorizationCode.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
           .authorizationCodeExpiresAt(
-              ZonedDateTime.ofInstant(authorizationCode.getToken().getExpiresAt(), ZoneId.of(UTC)))
+              authorizationCode.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(
+                      authorizationCode.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null)
           .authorizationCodeMetadata(writeMap(authorizationCode.getMetadata()));
     }
 
@@ -172,9 +202,13 @@ public class AuthorizationMapper {
       builder
           .accessTokenValue(accessToken.getToken().getTokenValue())
           .accessTokenIssuedAt(
-              ZonedDateTime.ofInstant(accessToken.getToken().getIssuedAt(), ZoneId.of(UTC)))
+              accessToken.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(accessToken.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
           .accessTokenExpiresAt(
-              ZonedDateTime.ofInstant(accessToken.getToken().getExpiresAt(), ZoneId.of(UTC)))
+              accessToken.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(accessToken.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null)
           .accessTokenMetadata(writeMap(accessToken.getMetadata()))
           .accessTokenType(accessToken.getToken().getTokenType().getValue())
           .accessTokenScopes(
@@ -186,34 +220,52 @@ public class AuthorizationMapper {
       builder
           .refreshTokenValue(refreshToken.getToken().getTokenValue())
           .refreshTokenIssuedAt(
-              ZonedDateTime.ofInstant(refreshToken.getToken().getIssuedAt(), ZoneId.of(UTC)))
+              refreshToken.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(refreshToken.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
           .refreshTokenExpiresAt(
-              ZonedDateTime.ofInstant(refreshToken.getToken().getExpiresAt(), ZoneId.of(UTC)))
+              refreshToken.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(refreshToken.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null)
           .refreshTokenMetadata(writeMap(refreshToken.getMetadata()));
     }
+
+    var idToken = authorization.getToken(OidcIdToken.class);
+    if (idToken != null)
+      builder
+          .idTokenValue(idToken.getToken().getTokenValue())
+          .idTokenClaims(writeMap(idToken.getClaims()))
+          .idTokenMetadata(writeMap(idToken.getMetadata()))
+          .idTokenIssuedAt(
+              idToken.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(idToken.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
+          .idTokenExpiresAt(
+              idToken.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(idToken.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null);
 
     return builder.build();
   }
 
   /**
-   * Merges the fields of the update {@link AuthorizationEntity} into the existing {@link
-   * AuthorizationEntity}.
+   * Merges the fields of the updated {@link AuthorizationEntity} into the existing one.
    *
-   * @param existing the existing AuthorizationEntity to merge into
-   * @param update the AuthorizationEntity with updated fields
-   * @return the merged AuthorizationEntity
+   * @param existing the existing {@link AuthorizationEntity}.
+   * @param update the updated {@link AuthorizationEntity}.
+   * @return the merged {@link AuthorizationEntity}.
    */
   public AuthorizationEntity merge(AuthorizationEntity existing, AuthorizationEntity update) {
-    if (update.getTenantId() == null) update.setTenantId(existing.getTenantId());
+    if (update.getTenantId() < 1) update.setTenantId(existing.getTenantId());
 
     return update;
   }
 
   /**
-   * Parses a JSON string to a Map.
+   * Parses a JSON string into a {@link Map}.
    *
-   * @param data the JSON string
-   * @return the parsed Map
+   * @param data the JSON string to parse.
+   * @return the parsed {@link Map}.
    */
   private Map<String, Object> parseMap(String data) {
     if (data == null || data.isBlank()) {
@@ -227,10 +279,10 @@ public class AuthorizationMapper {
   }
 
   /**
-   * Converts a Map to a JSON string.
+   * Serializes a {@link Map} into a JSON string.
    *
-   * @param metadata the Map
-   * @return the JSON string
+   * @param metadata the {@link Map} to serialize.
+   * @return the serialized JSON string.
    */
   private String writeMap(Map<String, Object> metadata) {
     try {
@@ -241,10 +293,10 @@ public class AuthorizationMapper {
   }
 
   /**
-   * Resolves an {@link AuthorizationGrantType} from a string.
+   * Resolves an {@link AuthorizationGrantType} from its string representation.
    *
-   * @param authorizationGrantType the string representation
-   * @return the AuthorizationGrantType
+   * @param authorizationGrantType the string representation of the grant type.
+   * @return the resolved {@link AuthorizationGrantType}.
    */
   private static AuthorizationGrantType resolveAuthorizationGrantType(
       String authorizationGrantType) {
