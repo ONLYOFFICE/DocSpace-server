@@ -394,17 +394,17 @@ module.exports = (io) => {
   }
 
   function addGuest({ tenantId, room, guest } = {}) {
-    var room = `${tenantId}-${room}-guests`;
+    var room = `${tenantId}-guests-${room}`;
     filesIO.to(room).emit("s:add-guest",  {id: guest.id, data: guest});
   }
 
   function updateGuest({ tenantId, room, guest } = {}) {
-    var room = `${tenantId}-${room}-guests`;
+    var room = `${tenantId}-guests-${room}`;
     filesIO.to(room).emit("s:update-guest", {id: guest.id, data: guest});
   }
 
   function deleteGuest({ tenantId, room, guestId } = {}) {
-    var room = `${tenantId}-${room}-guests`;
+    var room = `${tenantId}-guests-${room}`;
     filesIO.to(room).emit("s:delete-guest", guestId);
   }
 
