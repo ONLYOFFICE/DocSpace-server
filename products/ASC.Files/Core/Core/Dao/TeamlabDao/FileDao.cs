@@ -269,7 +269,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -279,7 +279,8 @@ internal class FileDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
-
+        
+        var tenantId = _tenantManager.GetCurrentTenantId();
         if (containingMyFiles)
         {
             switch (parentType)
@@ -287,7 +288,6 @@ internal class FileDao(
                 case FolderType.FillingFormsRoom:
                 case FolderType.InProcessFormFolder:
                 case FolderType.ReadyFormFolder:
-                    var tenantId = _tenantManager.GetCurrentTenantId();
 
                     var folderIds = filesDbContext.Folders
                         .Join(filesDbContext.Tree, r => r.Id, b => b.FolderId, (folder, tree) => new { folder, tree })
@@ -317,6 +317,33 @@ internal class FileDao(
                     q = q.Where(r => r.CreateBy == securityContext.CurrentAccount.ID);
                     break;
             }
+        }
+        if (applyFormStepFilter)
+        {
+            q = q.Where(f => f.Category != (int)FilterType.PdfForm ||
+            (f.Category == (int)FilterType.PdfForm &&
+                (filesDbContext.FilesFormRoleMapping
+                    .Any(r => r.TenantId == tenantId
+                           && r.FormId == f.Id
+                           && r.Submitted == false)
+                 &&
+                 filesDbContext.FilesFormRoleMapping
+                    .Where(r => r.TenantId == tenantId
+                             && r.FormId == f.Id
+                             && r.Submitted == false)
+                    .OrderBy(r => r.Sequence)
+                    .Select(r => r.Sequence)
+                    .FirstOrDefault()
+                    ==
+                    filesDbContext.FilesFormRoleMapping
+                        .Where(r => r.TenantId == tenantId
+                                 && r.FormId == f.Id
+                                 && r.UserId == securityContext.CurrentAccount.ID)
+                        .Select(r => r.Sequence)
+                        .FirstOrDefault()
+                    )
+                )
+            );
         }
 
         q = q.Skip(offset);
