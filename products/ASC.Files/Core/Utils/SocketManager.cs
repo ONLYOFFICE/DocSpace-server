@@ -91,11 +91,6 @@ public class SocketManager(
         await MakeRequest("delete-folder", folder, users: users, action: action);
     }
 
-    public async Task RestoreProgressAsync(int tenantId, double percentage)
-    {
-        await MakeRequest("restore-progress", new { tenantId, percentage });
-    }
-
     public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)
     {
         var result = new List<object>();
