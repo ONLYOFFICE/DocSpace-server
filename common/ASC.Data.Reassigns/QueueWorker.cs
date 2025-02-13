@@ -102,6 +102,25 @@ public class QueueWorkerReassign(IHttpContextAccessor httpContextAccessor,
 }
 
 [Scope]
+public class QueueWorkerUpdateUserType(IHttpContextAccessor httpContextAccessor,
+        IServiceProvider serviceProvider,
+        IDistributedTaskQueueFactory queueFactory,
+        IDistributedLockProvider distributedLockProvider)
+    : QueueWorker<UpdateUserTypeProgressItem>(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, distributedLockProvider)
+{
+    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "change_user_type";
+
+    public async Task<UpdateUserTypeProgressItem> StartAsync(int tenantId, Guid userId, Guid toUserId, Guid currentUserId, EmployeeType employeeType)
+    {
+        var result = _serviceProvider.GetService<UpdateUserTypeProgressItem>();
+
+        result.Init(tenantId, userId, toUserId, currentUserId, employeeType);
+
+        return await StartAsync(tenantId, userId, result);
+    }
+}
+
+[Scope]
 public class QueueWorkerRemove(IHttpContextAccessor httpContextAccessor,
         IServiceProvider serviceProvider,
         IDistributedTaskQueueFactory queueFactory,

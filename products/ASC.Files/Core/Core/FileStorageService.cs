@@ -2832,6 +2832,85 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<int>();
         return await folderDao.GetFilesUsedSpace();
     }
+
+    public async Task ReassignRoomsAsync(Guid user, Guid? reassign)
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+        var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var initiatorType = await userManager.GetUserTypeAsync(initiator.Id);
+        var currentType = await userManager.GetUserTypeAsync(user);
+
+        if (!initiator.IsOwner(tenant) && currentType is EmployeeType.DocSpaceAdmin)
+        {
+            return;
+        }
+
+        var rooms = (await GetFolderItemsAsync(
+                    await globalFolderHelper.GetFolderVirtualRooms(),
+                    0,
+                    0,
+                    new List<FilterType>() { FilterType.FoldersOnly },
+                    false,
+                    user.ToString(),
+                    "",
+                    [],
+                    false,
+                    false,
+                    null,
+                    SearchArea.Active)).Entries;
+
+        var ids = rooms.Where(r => r is Folder<int>).Select(e => ((Folder<int>)e).Id);
+        var thirdIds = rooms.Where(r => r is Folder<string>).Select(e => ((Folder<string>)e).Id);
+
+        await ChangeOwnerAsync(ids, [], reassign.HasValue ? reassign.Value : securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+        await ChangeOwnerAsync(thirdIds, [], reassign.HasValue ? reassign.Value : securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+    }
+
+    public async Task CopySharedFilesAsync(Guid user, Guid toUser)
+    {
+        var initUser = securityContext.CurrentAccount.ID;
+        try
+        {
+
+            await securityContext.AuthenticateMeWithoutCookieAsync(user);
+
+            var shared = (await GetFolderItemsAsync(
+                await globalFolderHelper.FolderMyAsync,
+                0,
+                0,
+                new List<FilterType>() { FilterType.FilesOnly },
+                false,
+                user.ToString(),
+                "",
+                [],
+                false,
+                false,
+                null,
+                SearchArea.Any)).Entries.Where(e => e.Shared).Select(e => ((File<int>)e).Id).ToList();
+
+
+            await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
+            if (shared.Count > 0)
+            {
+                var fileDao = daoFactory.GetFileDao<int>();
+                var userInfo = await userManager.GetUsersAsync(user);
+                var folder = await CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
+                foreach (var file in shared)
+                {
+                    await fileDao.CopyFileAsync(file, folder.Id);
+                }
+            }
+        }
+        catch
+        {
+
+        }
+        finally
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
+        }
+    }
+
     public async Task DeletePersonalDataAsync<T>(Guid userFromId, bool checkPermission = false)
     {
         if (checkPermission)
@@ -3996,7 +4075,7 @@ public class FileStorageService //: IFileStorageService
         return [..fileKeyPair];
     }
 
-    public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId)
+    public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)
     {
         var userInfo = await userManager.GetUsersAsync(userId);
         if (Equals(userInfo, Constants.LostUser) ||
@@ -4041,7 +4120,7 @@ public class FileStorageService //: IFileStorageService
                     Aces =
                     [
                         new AceWrapper { Access = FileShare.None, Id = userInfo.Id },
-                        new AceWrapper { Access = FileShare.RoomManager, Id = createBy }
+                        new AceWrapper { Access = newShare, Id = createBy }
                     ]
                 }, false, socket: false, beforeOwnerChange: true);
 
