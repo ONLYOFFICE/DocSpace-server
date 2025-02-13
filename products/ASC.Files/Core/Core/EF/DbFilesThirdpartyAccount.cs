@@ -171,7 +171,7 @@ public static class DbFilesThirdpartyAccountExtension
         {
             entity.ToTable("files_thirdparty_account");
 
-            entity.HasIndex(e => e.TenantId).HasDatabaseName("tenant_id");
+            entity.HasIndex(e => e.TenantId).HasDatabaseName("IX_files_thirdparty_account_tenant_id");
 
             entity.Property(e => e.Id).HasColumnName("id");
 
