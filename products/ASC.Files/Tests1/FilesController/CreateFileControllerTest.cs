@@ -60,7 +60,7 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
     [MemberData(nameof(Data))]
     public async Task CreateFile_FolderMy_RoomAdmin_ReturnsOk(string? fileName)
     {
-        var roomAdmin = await Initializer.InviteContact(filesFactory, EmployeeType.RoomAdmin);
+        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         
         await CreateFile(fileName, FolderType.USER, roomAdmin);
     }
@@ -69,15 +69,15 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
     [MemberData(nameof(Data))]
     public async Task CreateFile_FolderMy_User_ReturnsOk(string? fileName)
     {
-        var user = await Initializer.InviteContact(filesFactory, EmployeeType.User);
+        var user = await Initializer.InviteContact(EmployeeType.User);
         
         await CreateFile(fileName, FolderType.USER, user);
     }
     
     [Fact]
-    public async Task Create_FolderDoesNotExist_ReturnsFail()
+    public async Task CreateFile_FolderDoesNotExist_ReturnsFail()
     {
-        await Initializer.Authenticate(filesFactory, _filesClient, Initializer.Owner);
+        await _filesClient.Authenticate(Initializer.Owner);
         
         //Arrange
         var file = new CreateFile<JsonElement> { Title = "test.docx" };
@@ -101,7 +101,7 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
     [Fact]
     public async Task CreateFile_FolderRecent_Owner_ReturnsOk()
     {
-        await Initializer.Authenticate(filesFactory, _filesClient, Initializer.Owner);
+        await _filesClient.Authenticate(Initializer.Owner);
         
         var response = await _filesClient.GetAsync("recent");
         var recentFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
@@ -122,7 +122,7 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
     
     private async Task<FileDto<int>> CreateFile(string? fileName, FolderType folderType, User user)
     {
-        await Initializer.Authenticate(filesFactory, _filesClient, user);
+        await _filesClient.Authenticate(user);
         
         var response = await _filesClient.GetAsync("@root");
         var rootFolder = await HttpClientHelper.ReadFromJson<IEnumerable<FolderContentDto>>(response);

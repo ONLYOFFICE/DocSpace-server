@@ -37,6 +37,7 @@ public static class Initializer
     private static bool _initialized;
     private static HttpClient? _apiClient;
     private static HttpClient? _peopleClient;
+    private static PasswordHasher? _passwordHasher;
     
     private static readonly List<KeyValuePair<string, string?>> _settings =
     [
@@ -50,6 +51,8 @@ public static class Initializer
         .RuleFor(x => x.LastName, f => f.Person.LastName)
         .RuleFor(x => x.Email, f => f.Person.Email)
         .RuleFor(x => x.Password, f => f.Internet.Password(8, 10));
+    
+    private static JsonSerializerOptions JsonRequestSerializerOptions { get; } = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
     
     public static List<KeyValuePair<string, string?>> GetSettings(CustomProviderInfo providerInfo, string redisConnectionString, string rabbitMqConnectionString, string openSearchConnectionString)
     {
@@ -87,7 +90,7 @@ public static class Initializer
     
     public static async Task InitializeAsync(FilesApiFactory filesFactory, WebApplicationFactory<WebApiProgram> apiFactory, WebApplicationFactory<PeopleProgram> peopleFactory)
     {
-        var passwordHasher = filesFactory.Services.GetRequiredService<PasswordHasher>();
+        _passwordHasher = filesFactory.Services.GetRequiredService<PasswordHasher>();
         
         if (!_initialized)
         {
@@ -112,7 +115,11 @@ public static class Initializer
             {
                 _apiClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", settings.WizardToken);
 
-                response = await _apiClient.PutAsJsonAsync("settings/wizard/complete", new WizardRequestsDto { Email = Owner.Email, PasswordHash = passwordHasher.GetClientPassword(Owner.Password) });
+                response = await _apiClient.PutAsJsonAsync("settings/wizard/complete", new WizardRequestsDto
+                {
+                    Email = Owner.Email, 
+                    PasswordHash = _passwordHasher.GetClientPassword(Owner.Password)
+                });
                 
                 _apiClient.DefaultRequestHeaders.Remove("confirm");
                 
@@ -120,7 +127,7 @@ public static class Initializer
             }
         }
         
-        await Authenticate(filesFactory, filesFactory.HttpClient, Owner);
+        await filesFactory.HttpClient.Authenticate(Owner);
         
         _ = await filesFactory.HttpClient.GetAsync("@root");
 
@@ -141,9 +148,9 @@ public static class Initializer
         }
     }
     
-    internal static async Task<User> InviteContact(FilesApiFactory filesFactory, EmployeeType employeeType)
+    internal static async Task<User> InviteContact(EmployeeType employeeType)
     {
-        await Authenticate(filesFactory, _apiClient, Owner);
+        await _apiClient.Authenticate(Owner);
 
         var inviteResponse = await _apiClient.GetAsync($"portal/users/invite/{employeeType}");
         var shortLink = await HttpClientHelper.ReadFromJson<string>(inviteResponse);
@@ -155,7 +162,7 @@ public static class Initializer
 
         }
         
-        await Authenticate(filesFactory, _peopleClient, Owner);
+        await _peopleClient.Authenticate(Owner);
         _peopleClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
         
         var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
@@ -179,7 +186,8 @@ public static class Initializer
             
             Type = parsedEmployeeType,
             Key = parsedQuery["key"],
-        }, filesFactory.JsonRequestSerializerOptions);
+        }, JsonRequestSerializerOptions);
+        
         _peopleClient.DefaultRequestHeaders.Remove("confirm");
         
         if (!createMemberResponse.IsSuccessStatusCode)
@@ -190,16 +198,15 @@ public static class Initializer
         return new User(fakeMember.Email, fakeMember.Password);
     }
 
-    public static async Task Authenticate(FilesApiFactory filesFactory, HttpClient client, User user)
+    public static async Task Authenticate(this HttpClient client, User user)
     {        
-        var passwordHasher = filesFactory.Services.GetRequiredService<PasswordHasher>();
         if (_apiClient != null)
         {
             var authenticationResponse = await _apiClient.PostAsJsonAsync("authentication", new AuthRequestsDto
             {
                 UserName = user.Email, 
-                PasswordHash = passwordHasher.GetClientPassword(user.Password)
-            }, filesFactory.JsonRequestSerializerOptions);
+                PasswordHash = _passwordHasher.GetClientPassword(user.Password)
+            }, JsonRequestSerializerOptions);
             var authenticationTokenDto = await HttpClientHelper.ReadFromJson<AuthenticationTokenDto>(authenticationResponse);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationTokenDto?.Token);
         }
