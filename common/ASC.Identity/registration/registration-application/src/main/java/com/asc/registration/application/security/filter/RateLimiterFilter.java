@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,16 +27,15 @@
 
 package com.asc.registration.application.security.filter;
 
-import com.asc.common.application.transfer.response.AscPersonResponse;
-import com.asc.common.utilities.HttpUtils;
-import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;
+import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -46,23 +45,35 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Filter for enforcing rate limiting on incoming requests based on client IP address.
+ *
+ * <p>This filter uses the Bucket4j library to manage rate limiting rules and ensure fair usage.
+ * Requests exceeding the allowed rate limit are rejected with a 429 Too Many Requests status code,
+ * and headers are included in the response to indicate the remaining tokens and reset time.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class RateLimiterFilter extends OncePerRequestFilter {
-  private final String X_RATE_REMAINING = "X-Ratelimit-Remaining";
-  private final String X_RATE_RESET = "X-Ratelimit-Reset";
+  /** HTTP response header for remaining rate limit tokens. */
+  private static final String X_RATE_REMAINING = "X-Ratelimit-Remaining";
 
-  private final HttpUtils httpUtils;
+  /** HTTP response header for rate limit reset time. */
+  private static final String X_RATE_RESET = "X-Ratelimit-Reset";
+
   private final Function<HttpMethod, Supplier<BucketConfiguration>> bucketFactory;
   private final ProxyManager<String> proxyManager;
 
   /**
-   * Filters requests to enforce rate limiting based on client id or IP address.
+   * Filters incoming requests and enforces rate limiting based on client IP.
    *
-   * @param request the HttpServletRequest.
-   * @param response the HttpServletResponse.
-   * @param chain the FilterChain.
+   * <p>If the client exceeds the allowed rate limit, the response includes headers indicating the
+   * remaining tokens and reset time, and returns a 429 Too Many Requests status code.
+   *
+   * @param request the {@link HttpServletRequest}.
+   * @param response the {@link HttpServletResponse}.
+   * @param chain the {@link FilterChain}.
    * @throws ServletException if an error occurs during the filter process.
    * @throws IOException if an I/O error occurs during the filter process.
    */
@@ -71,39 +82,74 @@ public class RateLimiterFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     var method = request.getMethod();
     var bucketConfiguration = bucketFactory.apply(HttpMethod.valueOf(method));
-    if (request.getAttribute("person") instanceof AscPersonResponse person) {
+    var clientIp = getClientIp(request);
+    if (clientIp != null) {
       var bucket =
           proxyManager
               .builder()
-              .build(
-                  String.format("registration:%s:%s", method, person.getId()), bucketConfiguration);
-      handleRequest(bucket, request, response, chain);
-    } else {
-      var clientIp = httpUtils.getRequestClientAddress(request).orElse(request.getRemoteAddr());
-      if (clientIp.isEmpty()) {
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        return;
+              .build(String.format("authorization:%s:%s", method, clientIp), bucketConfiguration);
+      var probe = bucket.tryConsumeAndReturnRemaining(1);
+      if (probe.isConsumed()) {
+        addRateLimitHeaders(response, probe);
+        chain.doFilter(request, response);
+      } else {
+        handleRateLimitExceeded(response, probe);
       }
-
-      var bucket =
-          proxyManager
-              .builder()
-              .build(String.format("%s:%s", method, clientIp), bucketConfiguration);
-      handleRequest(bucket, request, response, chain);
+    } else {
+      chain.doFilter(request, response);
     }
   }
 
-  private void handleRequest(
-      Bucket bucket, HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-      throws IOException, ServletException {
-    var probe = bucket.tryConsumeAndReturnRemaining(1);
+  /**
+   * Adds rate limit headers to the response.
+   *
+   * <p>This method sets the headers {@code X-Ratelimit-Remaining} and {@code X-Ratelimit-Reset} to
+   * provide feedback about the remaining tokens and the reset time.
+   *
+   * @param response the {@link HttpServletResponse} to set the headers on.
+   * @param probe the {@link ConsumptionProbe} containing rate limit information.
+   */
+  private void addRateLimitHeaders(HttpServletResponse response, ConsumptionProbe probe) {
+    response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
+    response.setHeader(
+        X_RATE_RESET,
+        String.valueOf(TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill())));
+  }
+
+  /**
+   * Handles the response when the rate limit is exceeded.
+   *
+   * <p>This method returns a 429 Too Many Requests response with headers indicating the remaining
+   * tokens and reset time, along with a JSON content type.
+   *
+   * @param response the {@link HttpServletResponse}.
+   * @param probe the {@link ConsumptionProbe} containing rate limit information.
+   * @throws IOException if an I/O error occurs during the response handling.
+   */
+  private void handleRateLimitExceeded(HttpServletResponse response, ConsumptionProbe probe)
+      throws IOException {
+    response.setContentType("application/json");
     response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
     response.setHeader(X_RATE_RESET, String.valueOf(probe.getNanosToWaitForReset()));
-    if (!probe.isConsumed()) {
-      response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-      return;
-    }
+    response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+  }
 
-    chain.doFilter(request, response);
+  /**
+   * Retrieves the client IP address from the request.
+   *
+   * <p>If the {@code X-Forwarded-For} header is present, the first IP address is used. Otherwise,
+   * the remote address from the request is used.
+   *
+   * @param request the {@link HttpServletRequest}.
+   * @return the client IP address.
+   */
+  private String getClientIp(HttpServletRequest request) {
+    var ipAddress = request.getHeader("X-Forwarded-For");
+    if (ipAddress == null || ipAddress.isBlank()) {
+      ipAddress = request.getRemoteAddr();
+    } else {
+      ipAddress = ipAddress.split(",")[0];
+    }
+    return ipAddress;
   }
 }

@@ -26,87 +26,70 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-public class LoginEventDto
+public class LoginEventDto(LoginEvent loginEvent, ApiDateTimeHelper apiDateTimeHelper)
 {
     /// <summary>
     /// ID
     /// </summary>
-    public int Id { get; set; }
+    public int Id { get; set; } = loginEvent.Id;
 
     /// <summary>
     /// Date
     /// </summary>
-    public ApiDateTime Date { get; set; }
+    public ApiDateTime Date { get; set; } = apiDateTimeHelper.Get(loginEvent.Date);
 
     /// <summary>
     /// User
     /// </summary>
-    public string User { get; set; }
+    public string User { get; set; } = loginEvent.UserName;
 
     /// <summary>
     /// User ID
     /// </summary>
-    public Guid UserId { get; set; }
+    public Guid UserId { get; set; } = loginEvent.UserId;
 
     /// <summary>
     /// Login
     /// </summary>
-    public string Login { get; set; }
+    public string Login { get; set; } = loginEvent.Login;
 
     /// <summary>
     /// Action
     /// </summary>
-    public string Action { get; set; }
+    public string Action { get; set; } = loginEvent.ActionText;
 
     /// <summary>
     /// Action ID
     /// </summary>
-    public MessageAction ActionId { get; set; }
+    public MessageAction ActionId { get; set; } = (MessageAction)loginEvent.Action;
 
     /// <summary>
     /// IP
     /// </summary>
-    public string IP { get; set; }
+    public string IP { get; set; } = loginEvent.IP;
 
     /// <summary>
     /// Country
     /// </summary>
-    public string Country { get; set; }
+    public string Country { get; set; } = loginEvent.Country;
 
     /// <summary>
     /// City
     /// </summary>
-    public string City { get; set; }
+    public string City { get; set; } = loginEvent.City;
 
     /// <summary>
     /// Browser
     /// </summary>
-    public string Browser { get; set; }
+    public string Browser { get; set; } = loginEvent.Browser;
 
     /// <summary>
     /// Platform
     /// </summary>
-    public string Platform { get; set; }
+    public string Platform { get; set; } = loginEvent.Platform;
 
     /// <summary>
     /// Page
     /// </summary>
-    public string Page { get; set; }
-    
-    public LoginEventDto(LoginEvent loginEvent, ApiDateTimeHelper apiDateTimeHelper)
-    {
-        Id = loginEvent.Id;
-        Date = apiDateTimeHelper.Get(loginEvent.Date);
-        User = loginEvent.UserName;
-        UserId = loginEvent.UserId;
-        Login = loginEvent.Login;
-        Action = loginEvent.ActionText;
-        ActionId = (MessageAction)loginEvent.Action;
-        IP = loginEvent.IP;
-        Country = loginEvent.Country;
-        City = loginEvent.City;
-        Browser = loginEvent.Browser;
-        Platform = loginEvent.Platform;
-        Page = loginEvent.Page;
-    }
+    public string Page { get; set; } = loginEvent.Page;
 }

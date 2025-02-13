@@ -314,7 +314,7 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         using var response = await httpClient.SendAsync(request);
     }
 
-    public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         var thumbnails = await OnedriveClient.Drive.Items[fileId].Thumbnails.Request().GetAsync();
         if (thumbnails.Count <= 0)

@@ -50,7 +50,7 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "List of tenant webhooks with their config parameters", typeof(WebhooksConfigWithStatusDto))]
+    [SwaggerResponse(200, "List of tenant webhooks with their config parameters", typeof(IAsyncEnumerable<WebhooksConfigWithStatusDto>))]
     [HttpGet("webhook")]
     public async IAsyncEnumerable<WebhooksConfigWithStatusDto> GetTenantWebhooks()
     {
@@ -150,7 +150,7 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhooks/log</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
+    [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
     [HttpGet("webhooks/log")]
     public async IAsyncEnumerable<WebhooksLogDto> GetJournal(WebhookLogsRequestDto inDto)
     {
@@ -210,7 +210,7 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook/retry</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
+    [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
     [HttpPut("webhook/retry")]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
@@ -240,7 +240,7 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhooks</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "List of webhook settings", typeof(Webhook))]
+    [SwaggerResponse(200, "List of webhook settings", typeof(IAsyncEnumerable<Webhook>))]
     [HttpGet("webhooks")]
     public async IAsyncEnumerable<Webhook> Settings()
     {

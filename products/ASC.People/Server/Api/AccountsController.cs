@@ -65,7 +65,7 @@ public class AccountsController<T>(
     /// </summary>
     /// <path>api/2.0/accounts/room/{id}/search</path>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}/search")]
     public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(AccountsEntriesRequestDto<T> inDto)
@@ -102,7 +102,8 @@ public class AccountsController<T>(
             includeStrangers,
             inDto.Area,
             inDto.InvitedByMe,
-            inDto.InviterId);
+            inDto.InviterId,
+            inDto.EmployeeTypes);
         
         var total = totalGroups + totalUsers;
         
@@ -129,6 +130,7 @@ public class AccountsController<T>(
                            inDto.Area,
                            inDto.InvitedByMe,
                            inDto.InviterId,
+                           inDto.EmployeeTypes,
                            usersOffset,
                            usersCount))
         {

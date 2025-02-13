@@ -205,7 +205,7 @@ internal class GoogleDriveStorage(
         return response;
     }
 
-    public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         try
         {
@@ -411,15 +411,14 @@ internal class GoogleDriveStorage(
         if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
         {
             googleDriveSession.BytesTransferred += chunkLength;
+            
+            var locationHeader = response.Headers.Location;
 
+            if (locationHeader != null)
             {
-                var locationHeader = response.Headers.Location;
-
-                if (locationHeader != null)
-                {
-                    googleDriveSession.Location = locationHeader.ToString();
-                }
+                googleDriveSession.Location = locationHeader.ToString();
             }
+            
         }
         else
         {
@@ -604,7 +603,7 @@ internal class GoogleDriveStorage(
         return request.ResponseBody;
     }
 
-    private class CachedHttpClientFactory : Google.Apis.Http.HttpClientFactory
+    private sealed class CachedHttpClientFactory : Google.Apis.Http.HttpClientFactory
     {
         private static HttpMessageHandler _handler;
         

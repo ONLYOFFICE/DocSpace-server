@@ -587,6 +587,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult<string>(null);
     }
 
+    public Task<string> GetFolderIDRoomTemplatesAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
     public Task<string> GetFolderIDArchive(bool createIfNotExists)
     {
         return Task.FromResult<string>(null);
@@ -636,7 +641,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     
     public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
-        return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive) 
+        return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates) 
             ? (string.Empty, string.Empty) 
             : (_providerInfo.FolderId, _providerInfo.CustomerTitle));
     }

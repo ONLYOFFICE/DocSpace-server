@@ -134,9 +134,6 @@ $__AuthorName a supprimé la salle : $RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>Notification DocSpace. Mentionné dans le document</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Mentionné dans le document</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>L'envoi est terminé.</value>
   </data>

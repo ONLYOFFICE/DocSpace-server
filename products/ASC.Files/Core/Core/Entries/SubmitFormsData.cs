@@ -46,6 +46,8 @@ public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
     public int Id { get; set; }
     public int TenantId { get; set; }
     public int ParentId { get; set; }
+    public int OriginalFormId { get; set; }
+    public int RoomId { get; set; }
     public DateTime CreateOn { get; set; }
 
     [OpenSearch.Client.Ignore] 
@@ -112,7 +114,7 @@ public class FactoryIndexerForm(
 
         (int, int, int) GetCount(DateTime lastIndexed)
         {
-            return new(0, 0, 0);
+            return new ValueTuple<int, int, int>(0, 0, 0);
         }
     }
 }

@@ -96,7 +96,7 @@ public class LicenseReader(
         await tariffService.DeleteDefaultBillingInfoAsync();
     }
 
-    public async Task RefreshLicenseAsync(Func<Task<bool>> validateFunc)
+    public async Task RefreshLicenseAsync(Func<License, Task<bool>> validateFunc)
     {
         if (string.IsNullOrEmpty(LicensePath))
         {
@@ -122,10 +122,9 @@ public class LicenseReader(
                 if (temp)
                 {
                     await SaveLicenseAsync(licenseStream, LicensePath);
-                    await Task.Delay(100);
                 }
 
-                if (!await validateFunc())
+                if (!await validateFunc(license))
                 {
                     throw new BillingNotConfiguredException("License not correct");
                 }
@@ -250,7 +249,7 @@ public class LicenseReader(
 
         var tariff = new Tariff
         {
-            Quotas = [new(quota.TenantId, 1)],
+            Quotas = [new Quota(quota.TenantId, 1)],
             DueDate = license.DueDate
         };
 

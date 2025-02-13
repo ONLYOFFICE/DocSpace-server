@@ -112,9 +112,9 @@ public class StaticUploader(IServiceProvider serviceProvider,
                 return;
             }
 
-            var uploadOperation = new UploadOperationProgress(serviceProvider, key, tenant.Id, relativePath, mappedPath);
+            var uploadOperationProgress = new UploadOperationProgress(serviceProvider, key, tenant.Id, relativePath, mappedPath);
 
-            await _queue.EnqueueTask(uploadOperation);
+            await _queue.EnqueueTask(uploadOperationProgress);
         }
     }
 

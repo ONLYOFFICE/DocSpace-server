@@ -237,7 +237,7 @@ public class GoogleWorkspaceMigrator : Migrator
 
     private MigrationUser ParseUser(string tmpFolder)
     {
-        var user = new MigrationUser(DisplayUserSettingsHelper) { Info = new() };
+        var user = new MigrationUser(DisplayUserSettingsHelper) { Info = new UserInfo() };
 
         ParseRootHtml(tmpFolder, user);
         ParseProfile(tmpFolder, user);

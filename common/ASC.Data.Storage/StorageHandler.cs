@@ -76,7 +76,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
             return;
         }
 
-        var headers = header != null && header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode).ToList() : [];
+        var headers = header is { Length: > 0 } ? header.Split('&').Select(HttpUtility.UrlDecode).ToList() : [];
 
         if (storage.ContentAsAttachment)
         {

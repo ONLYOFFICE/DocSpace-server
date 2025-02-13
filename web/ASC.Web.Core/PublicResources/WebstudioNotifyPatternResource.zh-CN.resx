@@ -537,7 +537,7 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt;  已被加入房间：&lt;a href={1}&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 把房间： &lt;a href={1}&gt;{2}&lt;/a&gt; 已移动至归档 - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 把房间： &lt;a href={1}&gt;{2}&lt;/a&gt; 已移动至存档 - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; 被任命为 &lt;b&gt;{1}&lt;/b&gt; ，房间： &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
