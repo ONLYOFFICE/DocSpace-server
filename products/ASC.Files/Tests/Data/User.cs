@@ -24,48 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Tests1;
+namespace ASC.Files.Tests.Data;
 
-public class HttpClientHelper
-{
-    private static JsonSerializerOptions JsonResponseSerializerOptions { get; } = new()
-    {
-        AllowTrailingCommas = true, 
-        PropertyNameCaseInsensitive = true,
-        Converters = { new ApiDateTimeConverter(), new FileShareConverter() }
-    };
-    
-    public static async Task<T?> ReadFromJson<T>(HttpResponseMessage? response)
-    {
-        if (response == null)
-        {
-            return default;
-        }
-        
-        var data = await response.Content.ReadAsStringAsync();
-        
-        try
-        {
-            var successApiResponse = JsonSerializer.Deserialize<SuccessApiResponse>(data, JsonSerializerOptions.Web);
-            T? parsed = default!;
-        
-            if (successApiResponse is { Response: JsonElement jsonElement })
-            {
-                parsed = jsonElement.Deserialize<T>(JsonResponseSerializerOptions);
-            }
-        
-            return parsed;
-        }
-        catch (Exception e)
-        {
-            var errorApiResponse = JsonSerializer.Deserialize<ErrorApiResponse>(data, JsonSerializerOptions.Web);
-
-            if (errorApiResponse != null)
-            {
-                throw new Exception(errorApiResponse.Error.Message, e);
-            }
-
-            throw;
-        }
-    }
-}
+public record User(string Email, string Password);

@@ -28,7 +28,7 @@ extern alias ASCWebApi;
 extern alias ASCPeople;
 using ASC.Migrations.Core.Models;
 
-namespace ASC.Files.Tests1.Data;
+namespace ASC.Files.Tests.Data;
 
 public static class Initializer
 {

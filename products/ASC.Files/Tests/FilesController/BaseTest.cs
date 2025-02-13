@@ -24,9 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Tests.Data;
+using ASC.Files.Tests.Models;
 using ASC.Web.Files.Services.WCFService.FileOperations;
 
-namespace ASC.Files.Tests1.FilesController;
+namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
 public class BaseTest(

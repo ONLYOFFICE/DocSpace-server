@@ -26,6 +26,7 @@
 
 extern alias ASCFiles;
 using ASC.Core.Common.EF;
+using ASC.Files.Tests.Data;
 
 using DotNet.Testcontainers.Builders;
 
@@ -33,7 +34,7 @@ using Npgsql;
 
 using Testcontainers.PostgreSql;
 
-namespace ASC.Files.Tests1;
+namespace ASC.Files.Tests;
 
 public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetime
 {

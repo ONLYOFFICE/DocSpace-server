@@ -26,8 +26,10 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
+using ASC.Files.Tests.Data;
+using ASC.Files.Tests.Models;
 
-namespace ASC.Files.Tests1.FilesController;
+namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
 public class CreateFileTest(
