@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20250211133904_MigrationContext_Upgrade42")]
-    partial class MigrationContext_Upgrade42
+    [Migration("20250213094044_MigrationContext_Upgrade44")]
+    partial class MigrationContext_Upgrade44
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -6669,7 +6669,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("principal_id");
 
                     b.Property<string>("RegisteredClientId")
-                        .HasColumnType("varchar(36)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("registered_client_id");
 
                     b.Property<string>("AuthorizationGrantType")
@@ -6739,6 +6739,28 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("id");
 
+                    b.Property<string>("IdTokenClaims")
+                        .HasColumnType("text")
+                        .HasColumnName("id_token_claims");
+
+                    b.Property<DateTime?>("IdTokenExpiresAt")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("id_token_expires_at");
+
+                    b.Property<DateTime?>("IdTokenIssuedAt")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("id_token_issued_at");
+
+                    b.Property<string>("IdTokenMetadata")
+                        .HasColumnType("text")
+                        .HasColumnName("id_token_metadata");
+
+                    b.Property<string>("IdTokenValue")
+                        .HasColumnType("text")
+                        .HasColumnName("id_token_value");
+
                     b.Property<bool?>("IsInvalidated")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
@@ -6789,13 +6811,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "Id" }, "UK_id")
                         .IsUnique();
 
-                    b.HasIndex(new[] { "AuthorizationGrantType" }, "idx_identity_authorizations_grant_type");
-
-                    b.HasIndex(new[] { "IsInvalidated" }, "idx_identity_authorizations_is_invalidated");
-
-                    b.HasIndex(new[] { "PrincipalId" }, "idx_identity_authorizations_principal_id");
-
-                    b.HasIndex(new[] { "RegisteredClientId" }, "idx_identity_authorizations_registered_client_id");
+                    b.HasIndex(new[] { "Id" }, "idx_identity_authorizations_id");
 
                     b.ToTable("identity_authorizations", (string)null);
                 });
@@ -6928,7 +6944,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "ClientId" }, "UK_client_id")
                         .IsUnique();
 
-                    b.HasIndex(new[] { "IsInvalidated" }, "idx_identity_clients_is_invalidated");
+                    b.HasIndex(new[] { "ClientSecret" }, "UK_client_secret")
+                        .IsUnique();
 
                     b.HasIndex(new[] { "TenantId" }, "idx_identity_clients_tenant_id");
 
@@ -7035,12 +7052,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("PrincipalId", "RegisteredClientId")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "IsInvalidated" }, "idx_identity_consents_is_invalidated");
-
-                    b.HasIndex(new[] { "PrincipalId" }, "idx_identity_consents_principal_id");
-
-                    b.HasIndex(new[] { "RegisteredClientId" }, "idx_identity_consents_registered_client_id");
-
                     b.ToTable("identity_consents", (string)null);
                 });
 
@@ -7056,18 +7067,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("registered_client_id");
 
-                    b.Property<string>("ScopeName")
+                    b.Property<string>("Scopes")
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("scope_name");
+                        .HasColumnName("scopes");
 
-                    b.HasKey("PrincipalId", "RegisteredClientId", "ScopeName")
+                    b.HasKey("PrincipalId", "RegisteredClientId", "Scopes")
                         .HasName("PRIMARY");
 
                     b.HasIndex(new[] { "PrincipalId" }, "idx_identity_consent_scopes_principal_id");
 
                     b.HasIndex(new[] { "RegisteredClientId" }, "idx_identity_consent_scopes_registered_client_id");
 
-                    b.HasIndex(new[] { "ScopeName" }, "idx_identity_consent_scopes_scope_name");
+                    b.HasIndex(new[] { "Scopes" }, "idx_identity_consent_scopes_scopes");
 
                     b.ToTable("identity_consent_scopes", (string)null);
                 });
@@ -7799,20 +7810,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityAuthorization", b =>
                 {
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
-                        .WithMany("IdentityAuthorizations")
-                        .HasForeignKey("RegisteredClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_authorization_client_id");
-
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("RegisteredClient");
 
                     b.Navigation("Tenant");
                 });
@@ -7885,23 +7887,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("ScopeNameNavigation");
                 });
 
-            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsent", b =>
-                {
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
-                        .WithMany("IdentityConsents")
-                        .HasForeignKey("RegisteredClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("identity_consents_ibfk_1");
-
-                    b.Navigation("RegisteredClient");
-                });
-
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsentScope", b =>
                 {
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityScope", "ScopeNameNavigation")
                         .WithMany("IdentityConsentScopes")
-                        .HasForeignKey("ScopeName")
+                        .HasForeignKey("Scopes")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("identity_consent_scopes_ibfk_2");
@@ -7961,13 +7951,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.MessagingSystem.EF.Model.DbAuditEvent", b =>
                 {
                     b.Navigation("FilesReferences");
-                });
-
-            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClient", b =>
-                {
-                    b.Navigation("IdentityAuthorizations");
-
-                    b.Navigation("IdentityConsents");
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsent", b =>
