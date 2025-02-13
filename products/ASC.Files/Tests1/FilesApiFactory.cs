@@ -81,7 +81,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     public CustomProviderInfo ProviderInfo;
     
     protected override IHost CreateHost(IHostBuilder builder)
-    {             
+    {
         builder.ConfigureHostConfiguration(configBuilder =>
         {
             configBuilder.AddInMemoryCollection(Initializer.GetSettings(ProviderInfo, RedisConnectionString, RabbitMqConnectionString, OpenSearchConnectionString)); 
@@ -119,7 +119,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
 
     public async Task InitializeAsync()
     {
-        ProviderInfo = GetProviderInfo("postgres");
+        ProviderInfo = GetProviderInfo("mysql");
         
         await StartAllContainersAsync(ProviderInfo.Provider == Provider.MySql ? _mySqlContainer : _postgresSqlContainer, _redisContainer, _rabbitMqContainer, _openSearchContainer);
         

@@ -42,7 +42,6 @@ public static class Initializer
     [
         new("log:dir", Path.Combine("..", "..", "..", "..", "Logs", "Test")),
         new("$STORAGE_ROOT", Path.Combine("..", "..", "..", "..", "Data", "Test")),
-
         new("web:hub:internal", "")
     ];
 
@@ -121,7 +120,7 @@ public static class Initializer
             }
         }
         
-        await Authenticate(filesFactory, filesFactory.HttpClient, Owner.Email, Owner.Password);
+        await Authenticate(filesFactory, filesFactory.HttpClient, Owner);
         
         _ = await filesFactory.HttpClient.GetAsync("@root");
 
@@ -144,7 +143,7 @@ public static class Initializer
     
     internal static async Task<User> InviteContact(FilesApiFactory filesFactory, EmployeeType employeeType)
     {
-        await Authenticate(filesFactory, _apiClient, Owner.Email, Owner.Password);
+        await Authenticate(filesFactory, _apiClient, Owner);
 
         var inviteResponse = await _apiClient.GetAsync($"portal/users/invite/{employeeType}");
         var shortLink = await HttpClientHelper.ReadFromJson<string>(inviteResponse);
@@ -156,7 +155,7 @@ public static class Initializer
 
         }
         
-        await Authenticate(filesFactory, _peopleClient, Owner.Email, Owner.Password);
+        await Authenticate(filesFactory, _peopleClient, Owner);
         _peopleClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
         
         var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
@@ -191,12 +190,16 @@ public static class Initializer
         return new User(fakeMember.Email, fakeMember.Password);
     }
 
-    public static async Task Authenticate(FilesApiFactory filesFactory, HttpClient client, string email, string password)
+    public static async Task Authenticate(FilesApiFactory filesFactory, HttpClient client, User user)
     {        
         var passwordHasher = filesFactory.Services.GetRequiredService<PasswordHasher>();
         if (_apiClient != null)
         {
-            var authenticationResponse = await _apiClient.PostAsJsonAsync("authentication", new AuthRequestsDto { UserName = email, PasswordHash = passwordHasher.GetClientPassword(password) }, filesFactory.JsonRequestSerializerOptions);
+            var authenticationResponse = await _apiClient.PostAsJsonAsync("authentication", new AuthRequestsDto
+            {
+                UserName = user.Email, 
+                PasswordHash = passwordHasher.GetClientPassword(user.Password)
+            }, filesFactory.JsonRequestSerializerOptions);
             var authenticationTokenDto = await HttpClientHelper.ReadFromJson<AuthenticationTokenDto>(authenticationResponse);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationTokenDto?.Token);
         }
