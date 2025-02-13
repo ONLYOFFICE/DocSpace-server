@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,23 @@
 
 package com.asc.common.messaging.publisher;
 
-import com.asc.common.messaging.configuration.RabbitMQConfiguration;
 import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
 import com.asc.common.service.transfer.message.AuditMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class RabbitAuthorizationAuditMessagePublisher implements AuditMessagePublisher {
-  private final RabbitMQConfiguration configuration;
+  @Value("${spring.application.region}")
+  private String region;
+
   private final AmqpTemplate amqpClient;
 
   /**
@@ -56,10 +59,9 @@ public class RabbitAuthorizationAuditMessagePublisher implements AuditMessagePub
   public void publish(AuditMessage message) {
     log.debug("Sending an audit message: {}", message);
 
-    var queue = configuration.getQueues().get("audit");
-
     try {
-      amqpClient.convertAndSend(queue.getExchange(), queue.getRouting(), message);
+      amqpClient.convertAndSend(
+          String.format("asc_identity_audit_%s_exchange", region), Strings.EMPTY, message);
     } catch (Exception e) {
       MDC.put("action", String.valueOf(message.getAction()));
       MDC.put("tenant_id", String.valueOf(message.getTenantId()));

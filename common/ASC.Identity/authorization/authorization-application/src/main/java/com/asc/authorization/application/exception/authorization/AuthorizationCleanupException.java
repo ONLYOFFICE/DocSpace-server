@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 
 package com.asc.authorization.application.exception.authorization;
 
-import static com.asc.authorization.application.security.error.AuthorizationError.ASC_IDENTITY_CLEANUP_ERROR;
+import static com.asc.authorization.application.security.oauth.error.AuthorizationError.ASC_IDENTITY_CLEANUP_ERROR;
 
 import org.springframework.security.oauth2.core.OAuth2Error;
 

@@ -526,6 +526,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         {
             SearchArea.Active => q.Where(a => a.FolderType == FolderType.VirtualRooms),
             SearchArea.Archive => q.Where(a => a.FolderType == FolderType.Archive),
+            SearchArea.Templates => q.Where(a => a.FolderType == FolderType.RoomTemplates),
             SearchArea.Any => q.Where(a => a.FolderType == FolderType.VirtualRooms || a.FolderType == FolderType.Archive),
             _ => q
         };
@@ -668,6 +669,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         {
             FolderType.VirtualRooms => IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync),
             FolderType.Archive => IdConverter.Convert<T>(await globalFolderHelper.FolderArchiveAsync),
+            FolderType.Templates => IdConverter.Convert<T>(await globalFolderHelper.FolderRoomTemplatesAsync),
             _ => folder.FolderIdDisplay
         };
 
