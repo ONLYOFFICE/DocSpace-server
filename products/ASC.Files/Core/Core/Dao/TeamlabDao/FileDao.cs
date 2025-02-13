@@ -321,27 +321,17 @@ internal class FileDao(
         if (applyFormStepFilter)
         {
             q = q.Where(f => f.Category != (int)FilterType.PdfForm ||
-            (f.Category == (int)FilterType.PdfForm &&
-                (filesDbContext.FilesFormRoleMapping
-                    .Any(r => r.TenantId == tenantId
-                           && r.FormId == f.Id
-                           && r.Submitted == false)
-                 &&
-                 filesDbContext.FilesFormRoleMapping
-                    .Where(r => r.TenantId == tenantId
-                             && r.FormId == f.Id
-                             && r.Submitted == false)
-                    .OrderBy(r => r.Sequence)
-                    .Select(r => r.Sequence)
-                    .FirstOrDefault()
-                    ==
+                (f.Category == (int)FilterType.PdfForm &&
+                    filesDbContext.FilesFormRoleMapping.Any(r =>
+                        r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID) &&
                     filesDbContext.FilesFormRoleMapping
-                        .Where(r => r.TenantId == tenantId
-                                 && r.FormId == f.Id
-                                 && r.UserId == securityContext.CurrentAccount.ID)
-                        .Select(r => r.Sequence)
+                        .Where(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted)
+                        .Min(r => (int?)r.Sequence)
+                    >=
+                    filesDbContext.FilesFormRoleMapping
+                        .Where(r => r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
+                        .Select(r => (int?)r.Sequence)
                         .FirstOrDefault()
-                    )
                 )
             );
         }
