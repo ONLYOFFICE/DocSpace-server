@@ -88,7 +88,11 @@ public static class Initializer
         return result;
     }
     
-    public static async Task InitializeAsync(FilesApiFactory filesFactory, WebApplicationFactory<WebApiProgram> apiFactory, WebApplicationFactory<PeopleProgram> peopleFactory)
+    public static async Task InitializeAsync(
+        FilesApiFactory filesFactory,
+        WebApplicationFactory<WebApiProgram> apiFactory,
+        WebApplicationFactory<PeopleProgram> peopleFactory,
+        WebApplicationFactory<FilesServiceProgram> filesServiceFactory)
     {
         _passwordHasher = filesFactory.Services.GetRequiredService<PasswordHasher>();
         
@@ -105,8 +109,13 @@ public static class Initializer
                 _peopleClient = peopleFactory.WithWebHostBuilder(Build).CreateClient();
                 _peopleClient.BaseAddress = new Uri(_peopleClient.BaseAddress, "api/2.0/");
             });
+
+            var filesServiceStartTask = Task.Run(() =>
+            {
+                _ = filesServiceFactory.WithWebHostBuilder(Build).CreateClient();
+            });
             
-            await Task.WhenAll(apiClientStartTask, peopleClientStartTask);
+            await Task.WhenAll(apiClientStartTask, peopleClientStartTask, filesServiceStartTask);
             
             var response = await _apiClient.GetAsync("settings");
             var settings = await HttpClientHelper.ReadFromJson<SettingsDto>(response);

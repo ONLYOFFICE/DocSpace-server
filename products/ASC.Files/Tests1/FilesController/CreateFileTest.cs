@@ -30,10 +30,14 @@ extern alias ASCPeople;
 namespace ASC.Files.Tests1.FilesController;
 
 [Collection("Test Collection")]
-public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicationFactory<WebApiProgram> apiFactory, WebApplicationFactory<PeopleProgram> peopleFactory) : IAsyncLifetime
+public class CreateFileTest(
+    FilesApiFactory filesFactory, 
+    WebApplicationFactory<WebApiProgram> apiFactory, 
+    WebApplicationFactory<PeopleProgram> peopleFactory,
+    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
-    private readonly HttpClient _filesClient = filesFactory.HttpClient;
-    private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
+
     public static TheoryData<string> Data =>
     [
         "test.docx",
@@ -53,7 +57,10 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
     [MemberData(nameof(Data))]
     public async Task CreateFile_FolderMy_Owner_ReturnsOk(string? fileName)
     {
-        await CreateFile(fileName, FolderType.USER, Initializer.Owner);
+        var createdFile = await CreateFile(fileName, FolderType.USER, Initializer.Owner);
+        
+        createdFile.Should().NotBeNull();
+        createdFile.Title.Should().Be(fileName);
     }
     
     [Theory]
@@ -62,7 +69,10 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
     {
         var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         
-        await CreateFile(fileName, FolderType.USER, roomAdmin);
+        var createdFile = await CreateFile(fileName, FolderType.USER, roomAdmin);
+        
+        createdFile.Should().NotBeNull();
+        createdFile.Title.Should().Be(fileName);
     }
     
     [Theory]
@@ -71,7 +81,10 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
     {
         var user = await Initializer.InviteContact(EmployeeType.User);
         
-        await CreateFile(fileName, FolderType.USER, user);
+        var createdFile = await CreateFile(fileName, FolderType.USER, user);
+
+        createdFile.Should().NotBeNull();
+        createdFile.Title.Should().Be(fileName);
     }
     
     [Fact]
@@ -83,7 +96,7 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
         var file = new CreateFile<JsonElement> { Title = "test.docx" };
         
         //Act
-        var response = await _filesClient.PostAsJsonAsync($"{Random.Shared.Next(10000, 20000)}/file", file, filesFactory.JsonRequestSerializerOptions);
+        var response = await _filesClient.PostAsJsonAsync($"{Random.Shared.Next(10000, 20000)}/file", file, _filesFactory.JsonRequestSerializerOptions);
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
@@ -107,45 +120,8 @@ public class CreateFileControllerTest(FilesApiFactory filesFactory, WebApplicati
         var recentFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
         var createdFile = await CreateFile("test.docx", recentFolder.Current.Id);
 
-        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
-    }
-    
-    public async Task InitializeAsync()
-    {
-        await Initializer.InitializeAsync(filesFactory, apiFactory, peopleFactory);
-    }
-
-    public async Task DisposeAsync()
-    {
-        await _resetDatabase();
-    }
-    
-    private async Task<FileDto<int>> CreateFile(string? fileName, FolderType folderType, User user)
-    {
-        await _filesClient.Authenticate(user);
-        
-        var response = await _filesClient.GetAsync("@root");
-        var rootFolder = await HttpClientHelper.ReadFromJson<IEnumerable<FolderContentDto>>(response);
-        var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType == folderType).Current.Id;
-        
-        return await CreateFile(fileName, folderId);
-    }
-    
-    private async Task<FileDto<int>> CreateFile(string? fileName, int folderId)
-    {
-        //Arrange
-        var file = new CreateFile<JsonElement> { Title = fileName };
-        
-        //Act
-        var response = await _filesClient.PostAsJsonAsync($"{folderId}/file", file, filesFactory.JsonRequestSerializerOptions);
-        var createdFile = await HttpClientHelper.ReadFromJson<FileDto<int>>(response);
-        
-        //Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
         createdFile.Should().NotBeNull();
-        createdFile.Title.Should().Be(fileName);
-        
-        return createdFile;
+        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
     }
 }
 

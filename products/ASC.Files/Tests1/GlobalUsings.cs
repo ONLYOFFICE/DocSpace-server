@@ -1,6 +1,7 @@
 ﻿extern alias ASCWebApi;
 extern alias ASCFiles;
 extern alias ASCPeople;
+extern alias ASCFilesService;
 global using System.Data.Common;
 global using System.Net;
 global using System.Net.Http.Headers;
@@ -58,3 +59,4 @@ global using Xunit;
 global using FilesProgram = ASCFiles::Program;
 global using WebApiProgram = ASCWebApi::Program;
 global using PeopleProgram = ASCPeople::Program;
+global using FilesServiceProgram = ASCFilesService::Program;

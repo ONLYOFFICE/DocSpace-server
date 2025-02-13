@@ -24,16 +24,37 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-extern alias ASCWebApi;
-extern alias ASCPeople;
-extern alias ASCFilesService;
+using ASC.Web.Files.Services.WCFService.FileOperations;
 
-namespace ASC.Files.Tests1;
+namespace ASC.Files.Tests1.FilesController;
 
-[CollectionDefinition("Test Collection")]
-public class SharedTestCollection : 
-    ICollectionFixture<FilesApiFactory>, 
-    ICollectionFixture<WebApplicationFactory<WebApiProgram>>, 
-    ICollectionFixture<WebApplicationFactory<PeopleProgram>>,
-    ICollectionFixture<WebApplicationFactory<FilesServiceProgram>>
-    ;
+[Collection("Test Collection")]
+public class DeleteFileTest(
+    FilesApiFactory filesFactory, 
+    WebApplicationFactory<WebApiProgram> apiFactory, 
+    WebApplicationFactory<PeopleProgram> peopleFactory,
+    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+{
+    [Fact]
+    public async Task DeleteFile_FolderMy_Owner_ReturnsOk()
+    {
+        var createdFile = await CreateFile("test.docx", FolderType.USER, Initializer.Owner);
+        var jsonData = JsonSerializer.Serialize(new Delete { Immediately = true}, JsonSerializerOptions.Web);
+        
+        var responseMessage = await _filesClient.SendAsync(new HttpRequestMessage
+        {
+            RequestUri = new Uri($"{_filesClient.BaseAddress}file/{createdFile.Id}"),
+            Method = HttpMethod.Delete,
+            Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
+        });
+        
+        var results = await HttpClientHelper.ReadFromJson<List<FileOperationResult>>(responseMessage);
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation();
+        }
+        
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+    }
+}
