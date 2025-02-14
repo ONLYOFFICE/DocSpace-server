@@ -75,7 +75,7 @@ public class VirtualRoomsInternalController(
     {
         var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
         if (lifetime != null)
-        { 
+        {
             lifetime.StartDate = DateTime.UtcNow;
         }
 
