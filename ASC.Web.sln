@@ -81,7 +81,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.ApiSystem", "common\ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Migration.Core", "common\ASC.Migration\ASC.Migration.Core.csproj", "{D488CAAB-EAEC-4059-9780-B82C4B9E767F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AppHost", "ASC.AppHost\ASC.AppHost.csproj", "{55634A1B-D6D8-452D-AD54-B978E631CC39}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AppHost", "common\ASC.AppHost\ASC.AppHost.csproj", "{55634A1B-D6D8-452D-AD54-B978E631CC39}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migrations", "migrations", "{5C4C0F61-4FAA-44F3-BB64-25F6D3AB1FA1}"
 EndProject

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Projects;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var mySql = builder
@@ -31,7 +33,7 @@ var mySql = builder
     .WithLifetime(ContainerLifetime.Persistent)
     .AddDatabase("docspace");
 
-var path = Path.GetFullPath(Path.Combine("..", "common", "Tools", "ASC.Migration.Runner", "bin", "Debug", "ASC.Migration.Runner.exe"));
+var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", "ASC.Migration.Runner.exe"));
 
 var rabbitMq = builder
     .AddRabbitMQ("messaging")
@@ -46,31 +48,31 @@ var migrate = builder
     .WithReference(mySql)
     .WaitFor(mySql);
 
-AddProjectWithDefaultConfiguration<Projects.ASC_ApiSystem>("asc-apisystem");
-AddProjectWithDefaultConfiguration<Projects.ASC_ClearEvents>("asc-clearevents");
-AddProjectWithDefaultConfiguration<Projects.ASC_Data_Backup>("asc-data-backup");
-AddProjectWithDefaultConfiguration<Projects.ASC_Data_Backup_BackgroundTasks>("asc-data-backup-backgroundtasks");
-AddProjectWithDefaultConfiguration<Projects.ASC_Notify>("asc-notify", false);
-AddProjectWithDefaultConfiguration<Projects.ASC_Web_Api>("asc-web-api");
-AddProjectWithDefaultConfiguration<Projects.ASC_People>( "asc-people");
-AddProjectWithDefaultConfiguration<Projects.ASC_Files>("asc-files");
-AddProjectWithDefaultConfiguration<Projects.ASC_Files_Service>("asc-files-service");
-AddProjectWithDefaultConfiguration<Projects.ASC_Studio_Notify>("asc-studio-notify");
-AddProjectWithDefaultConfiguration<Projects.ASC_Web_Studio>("asc-web-studio");
+AddProjectWithDefaultConfiguration<ASC_ApiSystem>();
+AddProjectWithDefaultConfiguration<ASC_ClearEvents>();
+AddProjectWithDefaultConfiguration<ASC_Data_Backup>();
+AddProjectWithDefaultConfiguration<ASC_Data_Backup_BackgroundTasks>();
+AddProjectWithDefaultConfiguration<ASC_Notify>(false);
+AddProjectWithDefaultConfiguration<ASC_Web_Api>();
+AddProjectWithDefaultConfiguration<ASC_People>( );
+AddProjectWithDefaultConfiguration<ASC_Files>();
+AddProjectWithDefaultConfiguration<ASC_Files_Service>();
+AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
+AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
 
-builder.AddNodeApp("asc-socketIO", "server.js", "../common/ASC.Socket.IO/");
+builder.AddNodeApp("asc-socketIO", "server.js", "../ASC.Socket.IO/");
 
-builder.AddNodeApp("asc-ssoAuth", "app.js", "../common/ASC.SSoAuth/");
+builder.AddNodeApp("asc-ssoAuth", "app.js", "../ASC.SSoAuth/");
 
-builder.AddNodeApp("asc-webDav", "webDavServer.js", "../common/ASC.WebDav/server/");
+builder.AddNodeApp("asc-webDav", "webDavServer.js", "../ASC.WebDav/server/");
 
 await builder.Build().RunAsync();
 
 return;
 
-void AddProjectWithDefaultConfiguration<TProject>(string projectName, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
 {
-    var project = builder.AddProject<TProject>(projectName);
+    var project = builder.AddProject<TProject>(typeof(TProject).Name.ToLower().Replace('_', '-'));
     
     if (includeHealthCheck)
     {
