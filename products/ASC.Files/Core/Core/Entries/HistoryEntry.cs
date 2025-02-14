@@ -96,6 +96,7 @@ public record HistoryEntry
 [JsonDerivedType(typeof(LifeTimeHistoryData))]
 [JsonDerivedType(typeof(FolderIndexChangedData))]
 [JsonDerivedType(typeof(FileIndexChangedData))]
+[JsonDerivedType(typeof(FileVersionRemovedData))]
 public abstract record HistoryData
 {
     public virtual int GetId() => 0;

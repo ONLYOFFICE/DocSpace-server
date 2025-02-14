@@ -930,4 +930,7 @@
   <data name="OAuthModule" xml:space="preserve">
     <value>OAuth</value>
   </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Files [{0}]. Version Deleted: {1}</value>
+  </data>
 </root>
