@@ -155,6 +155,25 @@ public class OperationController(
     }
 
     /// <summary>
+    /// Retrieves the statuses of operations filtered by the specified operation type.
+    /// </summary>
+    /// <param name="inDto">The data transfer object containing the operation type for which statuses are retrieved.</param>
+    /// <path>api/2.0/files/fileops/{operationType}</path>
+    /// <collection>list</collection>
+    /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [AllowAnonymous]
+    [HttpGet("{operationType}")]
+    public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses(FileOperationResultRequestDto inDto)
+    {
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r=> r.OperationType == inDto.OperationType))
+        {
+            yield return await fileOperationDtoHelper.GetAsync(e);
+        }
+    }
+
+    /// <summary>
     /// Marks the files and folders with the IDs specified in the request as read.
     /// </summary>
     /// <short>Mark as read</short>
