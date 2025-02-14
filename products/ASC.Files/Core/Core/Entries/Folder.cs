@@ -94,7 +94,10 @@ public enum FolderType
     FormFillingFolderInProgress = 28,
 
     [SwaggerEnum(Description = "Virtual Data Room")]
-    VirtualDataRoom = 29
+    VirtualDataRoom = 29,
+        
+    [SwaggerEnum(Description = "Room templates folder")]
+    RoomTemplates = 30
 }
 
 public interface IFolder

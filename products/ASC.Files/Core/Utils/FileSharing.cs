@@ -139,10 +139,20 @@ public class FileSharingAceHelper(
 
             if (room != null)
             {
-                if (!FileSecurity.AvailableRoomAccesses.TryGetValue(room.FolderType, out var subjectAccesses)
-                    || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
+                if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
                 {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                    if (w.Access != FileShare.Read && w.Access != FileShare.None || w.SubjectType != SubjectType.User && w.SubjectType != SubjectType.Group)
+                    {
+                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                    }
+                }
+                else
+                {
+                    if (!FileSecurity.AvailableRoomAccesses.TryGetValue(room.FolderType, out var subjectAccesses)
+                    || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
+                    {
+                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                    }
                 }
 
                 if (w.FileShareOptions != null)
@@ -172,8 +182,8 @@ public class FileSharingAceHelper(
 
             if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
-                if (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) || 
-                    !userAccesses.Contains(w.Access))
+                if (room.RootId is int root && root != await globalFolderHelper.FolderRoomTemplatesAsync && (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) || 
+                    !userAccesses.Contains(w.Access)))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
@@ -472,6 +482,16 @@ public class FileSharing(
     public async Task<bool> CanSetAccessAsync<T>(FileEntry<T> entry)
     {
         return await fileSharingHelper.CanSetAccessAsync(entry);
+    }
+
+    public async Task<bool> IsPublicAsync<T>(FileEntry<T> entry)
+    {
+        if (entry == null)
+        {
+            throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
+        }
+
+        return await fileSecurity.IsPublicAsync(entry);
     }
 
     public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(FileEntry<T> entry, IEnumerable<Guid> subjects)

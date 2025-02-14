@@ -383,6 +383,8 @@ public interface IFolderDao<T>
     /// <returns></returns>
     Task<T> GetFolderIDVirtualRooms(bool createIfNotExists);
 
+    Task<T> GetFolderIDRoomTemplatesAsync(bool createIfNotExists);
+
     /// <summary>
     /// Returns id folder "Archive"
     /// Only in TMFolderDao
