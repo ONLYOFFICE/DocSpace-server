@@ -147,6 +147,21 @@ public partial class Global(
             return fromConfig;
         }
     }
+    
+    private List<string> _imageThumbnailExtension;
+    public List<string> ImageThumbnailExtension
+    {
+        get
+        {
+            if (_imageThumbnailExtension != null)
+            {
+                return _imageThumbnailExtension;
+            }
+            
+            _imageThumbnailExtension = configuration.GetSection("files:thumbnail:img-exts").Get<List<string>>() ?? [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tif", ".tga", ".webp", ".heic"];
+            return _imageThumbnailExtension;
+        }
+    }
 
     private const int MaxTitle = 170;
 
@@ -399,6 +414,25 @@ public class GlobalFolder(
         result = await daoFactory.GetFolderDao<int>().GetFolderIDVirtualRooms(createIfNotExist);
 
         if (result != 0)
+        {
+            DocSpaceFolderCache[key] = result;
+        }
+
+        return result;
+    }
+
+    public async ValueTask<int> GetFolderRoomTemplatesAsync(IDaoFactory daoFactory, bool createIfNotExist = true)
+    {
+        var key = $"roomTemplates/{tenantManager.GetCurrentTenantId()}";
+
+        if (DocSpaceFolderCache.TryGetValue(key, out var result))
+        {
+            return result;
+        }
+
+        result = await daoFactory.GetFolderDao<int>().GetFolderIDRoomTemplatesAsync(createIfNotExist);
+
+        if (result != default)
         {
             DocSpaceFolderCache[key] = result;
         }
@@ -800,6 +834,7 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     public ValueTask<int> FolderFavoritesAsync => globalFolder.GetFolderFavoritesAsync(daoFactory);
     public ValueTask<int> FolderTemplatesAsync => globalFolder.GetFolderTemplatesAsync(daoFactory);
     public ValueTask<int> FolderVirtualRoomsAsync => globalFolder.GetFolderVirtualRoomsAsync(daoFactory);
+    public ValueTask<int> FolderRoomTemplatesAsync => globalFolder.GetFolderRoomTemplatesAsync(daoFactory);
     public ValueTask<int> FolderArchiveAsync => globalFolder.GetFolderArchiveAsync(daoFactory);
 
     public async Task<T> GetFolderMyAsync<T>()
@@ -825,6 +860,11 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     public async ValueTask<int> GetFolderArchive()
     {
         return await FolderArchiveAsync;
+    }
+
+    public async ValueTask<int> GetFolderRoomTemplatesAsync()
+    {
+        return await FolderRoomTemplatesAsync;
     }
 
     public async ValueTask<T> GetFolderShareAsync<T>()

@@ -28,10 +28,9 @@ namespace ASC.Files.Core.Helpers;
 
 [Scope]
 public class FormFillingReportCreator(
-    ExportToCSV exportToCSV,
+    ExportToXLSX exportToXLSX,
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
-    TenantUtil tenantUtil,
     TenantManager tenantManager,
     FactoryIndexerForm factoryIndexerForm,
     CommonLinkUtility commonLinkUtility,
@@ -40,24 +39,15 @@ public class FormFillingReportCreator(
 {
 
     private static readonly JsonSerializerOptions _options = new() {
+        Converters = { new BoolToStringConverter() },
         AllowTrailingCommas = true,
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task UpdateFormFillingReport<T>(T resultsFileId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile)
+    public async Task UpdateFormFillingReport<T>(int originalFormId, int roomId, int resultFormNumber,string formsDataUrl, File<T> formsDataFile)
     {
-        if (formsDataUrl != null)
-        {
-            var fileDao = daoFactory.GetFileDao<T>();
-            var submitFormsData = await GetSubmitFormsData(formsDataFile, resultFormNumber, formsDataUrl);
-
-            if (resultsFileId != null)
-            {
-                var resultsFile = await fileDao.GetFileAsync(resultsFileId);
-                
-                await exportToCSV.UpdateCsvReport(resultsFile, submitFormsData.FormsData);
-            }
-        }
+        await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
+        await exportToXLSX.UpdateXlsxReport(roomId, originalFormId);
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
@@ -80,8 +70,20 @@ public class FormFillingReportCreator(
 
         return [];
     }
-    
-    private async Task<SubmitFormsData> GetSubmitFormsData<T>(File<T> formsDataFile, int resultFormNumber, string url)
+
+    public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId)
+    {
+        factoryIndexerForm.Refresh();
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId));
+
+        if (success)
+        {
+            return result;
+        }
+        return [];
+    }
+
+    private async Task GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int roomId, int resultFormNumber, string url)
     {
         var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
         var request = new HttpRequestMessage
@@ -98,41 +100,51 @@ public class FormFillingReportCreator(
         {
             new()
             {
-                Key = FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture),
+                Key = "FormNumber",
                 Value = resultFormNumber.ToString()
             }
         };
-        List<FormsItemData> formInfo = 
-        [
-                new() { Key = FilesCommonResource.ResourceManager.GetString("Date", tenantCulture), Value = $"=\"{tenantUtil.DateTimeNow().ToString("G", tenantCulture)}\"" },
-                new() { Key = FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture), Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture)}\")" }
-        ];
         
         var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
-        var result = new SubmitFormsData
-        {
-            FormsData =  formNumber.Concat(fromData.FormsData).ToList()
-        };
-        result.FormsData = result.FormsData.Concat(formInfo).ToList();
+        fromData.FormsData = fromData.FormsData.Where(f => f.Type != "picture").ToList();
 
         var now = DateTime.UtcNow;
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        if (formsDataFile.Id is int id &&  formsDataFile.ParentId is int parentId)
+        if (formsDataFile.Id is int id && formsDataFile.ParentId is int parentId)
         {
             var searchItems = new DbFormsItemDataSearch
             {
                 Id = id,
                 TenantId = tenantId,
                 ParentId = parentId,
+                OriginalFormId = originalFormId,
+                RoomId = roomId,
                 CreateOn = now,
-                FormsData = fromData.FormsData
+                FormsData = formNumber.Concat(fromData.FormsData)
             };
 
-            await factoryIndexerForm.IndexAsync(searchItems);
+            _ = factoryIndexerForm.IndexAsync(searchItems);
+        }
+    }
+
+    public class BoolToStringConverter : System.Text.Json.Serialization.JsonConverter<string>
+    {
+        public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return reader.TokenType switch
+            {
+                JsonTokenType.True => "true",
+                JsonTokenType.False => "false",
+                JsonTokenType.String => reader.GetString(),
+                _ => throw new System.Text.Json.JsonException("Unexpected token type")
+            };
         }
 
-        return result;
+        public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value);
+        }
     }
 
 }

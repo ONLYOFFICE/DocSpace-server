@@ -92,7 +92,10 @@ public class CoEditingConfig
 [EnumExtensions]
 public enum CoEditingConfigMode
 {
+    [SwaggerEnum("Fast")]
     Fast,
+
+    [SwaggerEnum("Strict")]
     Strict
 }
 

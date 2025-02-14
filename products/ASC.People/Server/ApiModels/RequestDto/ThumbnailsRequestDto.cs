@@ -49,12 +49,12 @@ public class ThumbnailsRequest
     /// <summary>
     /// Thumbnail width
     /// </summary>
-    public int Width { get; set; }
+    public uint Width { get; set; }
 
     /// <summary>
     /// Thumbnail height
     /// </summary>
-    public int Height { get; set; }
+    public uint Height { get; set; }
 }
 
 /// <summary>

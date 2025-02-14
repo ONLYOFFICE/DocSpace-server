@@ -387,10 +387,17 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return SaveFileAsync(file, fileStream);
     }
+
+    public async Task DeleteFileVersionAsync(File<string> file, int version)
+    {
+        await DeleteFileAsync(file.Id);
+    }
+
     public async Task DeleteFileAsync(string fileId, Guid ownerId)
     {
         await DeleteFileAsync(fileId);
     }
+    
     public async Task DeleteFileAsync(string fileId)
     {
         var file = await Dao.GetFileAsync(fileId);
@@ -582,7 +589,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return false;
     }
 
-    public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         var thirdFileId = Dao.MakeThirdId(fileId);
 
@@ -699,7 +706,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.FromResult(false);
     }
 
-    public string GetUniqThumbnailPath(File<string> file, int width, int height)
+    public string GetUniqThumbnailPath(File<string> file, uint width, uint height)
     {
         //Do nothing
         return null;
@@ -710,7 +717,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
 
-    public Task<Stream> GetThumbnailAsync(File<string> file, int width, int height)
+    public Task<Stream> GetThumbnailAsync(File<string> file, uint width, uint height)
     {
         return GetThumbnailAsync(file.Id, width, height);
     }

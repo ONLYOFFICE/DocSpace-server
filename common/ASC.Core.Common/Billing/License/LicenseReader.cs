@@ -96,7 +96,7 @@ public class LicenseReader(
         await tariffService.DeleteDefaultBillingInfoAsync();
     }
 
-    public async Task RefreshLicenseAsync(Func<string, Task<bool>> validateFunc)
+    public async Task RefreshLicenseAsync(Func<License, Task<bool>> validateFunc)
     {
         if (string.IsNullOrEmpty(LicensePath))
         {
@@ -124,7 +124,7 @@ public class LicenseReader(
                     await SaveLicenseAsync(licenseStream, LicensePath);
                 }
 
-                if (!await validateFunc(license.ResourceKey))
+                if (!await validateFunc(license))
                 {
                     throw new BillingNotConfiguredException("License not correct");
                 }

@@ -333,6 +333,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var roomLogoManager = scope.ServiceProvider.GetRequiredService<RoomLogoManager>();
         var global = scope.ServiceProvider.GetRequiredService<Global>();
         var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
+        var notifyClient = scope.ServiceProvider.GetRequiredService<NotifyClient>();
+        var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
 
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
@@ -731,12 +733,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         }
                                         else if (toFolder.FolderType == FolderType.Archive)
                                         {
-
+                                            var whoCanRead = await fileSecurity.WhoCanReadAsync(folder, true);
                                             await socketManager.DeleteFolder(folder, action: async () =>
                                             {
                                                 newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                             });
-                                        
+
+                                            await notifyClient.SendRoomMovedArchiveAsync(folder, whoCanRead, securityContext.CurrentAccount.ID);
                                             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
                                             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
                                         }
@@ -899,9 +902,17 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         if (room.FolderType == FolderType.FillingFormsRoom)
                         {
                             var fileType = FileUtility.GetFileTypeByFileName(file.Title);
-                            if (fileType != FileType.Pdf || !await fileChecker.CheckExtendedPDF(file))
+                            try
                             {
-                                this[Err] = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
+                                if (fileType != FileType.Pdf || !await fileChecker.CheckExtendedPDF(file))
+                                {
+                                    this[Err] = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
+                                    continue;
+                                }
+                            }
+                            catch
+                            {
+                                this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
                                 continue;
                             }
 

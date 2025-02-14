@@ -78,27 +78,31 @@ public static class UserPhotoExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });
     }
+    
     public static void PgSqlAddUserPhoto(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserPhoto>(entity =>
         {
             entity.HasKey(e => e.UserId)
-                .HasName("core_userphoto_pkey");
+                .HasName("pk_userphoto"); // Define the primary key with a descriptive name
 
-            entity.ToTable("core_userphoto", "onlyoffice");
+            entity.ToTable("core_userphoto");
 
             entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_core_userphoto");
+                .HasDatabaseName("idx_userphoto_tenant");
 
             entity.Property(e => e.UserId)
                 .HasColumnName("userid")
-                .HasMaxLength(38);
+                .HasColumnType("uuid"); // Using UUID for the UserId (PostgreSQL-specific)
 
             entity.Property(e => e.Photo)
                 .IsRequired()
-                .HasColumnName("photo");
+                .HasColumnName("photo")
+                .HasColumnType("bytea"); // Use 'bytea' for binary data in PostgreSQL
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant")
+                .HasColumnType("integer");
         });
     }
 }

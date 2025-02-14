@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using SixLabors.ImageSharp.Processing;
-
 namespace ASC.Files.ThumbnailBuilder;
 
 [Singleton]
@@ -135,7 +133,6 @@ public class ThumbnailSettings
 
 public class ThumbnailSize
 {
-    public int Height { get; set; }
-    public int Width { get; set; }
-    public ResizeMode ResizeMode { get; set; } = ResizeMode.Crop;
+    public uint Height { get; set; }
+    public uint Width { get; set; }
 }

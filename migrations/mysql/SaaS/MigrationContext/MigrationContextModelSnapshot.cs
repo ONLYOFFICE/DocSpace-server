@@ -1376,21 +1376,21 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -1,
                             Id = "CompanyWhiteLabelSettings",
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Value = new byte[] { 245, 71, 4, 138, 72, 101, 23, 21, 135, 217, 206, 188, 138, 73, 108, 96, 29, 150, 3, 31, 44, 28, 62, 145, 96, 53, 57, 66, 238, 118, 93, 172, 211, 22, 244, 181, 244, 40, 146, 67, 111, 196, 162, 27, 154, 109, 248, 255, 181, 17, 253, 127, 42, 65, 19, 90, 26, 206, 203, 145, 159, 159, 243, 105, 24, 71, 188, 165, 53, 85, 57, 37, 186, 251, 57, 96, 18, 162, 218, 80, 0, 101, 250, 100, 66, 97, 24, 51, 240, 215, 216, 169, 105, 100, 15, 253, 29, 83, 182, 236, 203, 53, 68, 251, 2, 150, 149, 148, 58, 136, 84, 37, 151, 82, 92, 227, 30, 52, 111, 40, 154, 155, 7, 126, 149, 100, 169, 87, 10, 129, 228, 138, 177, 101, 77, 67, 177, 216, 189, 201, 1, 213, 136, 216, 107, 198, 253, 221, 106, 255, 198, 17, 68, 14, 110, 90, 174, 182, 68, 222, 188, 77, 157, 19, 26, 68, 86, 97, 15, 81, 24, 171, 214, 114, 191, 175, 56, 56, 48, 52, 125, 82, 253, 113, 71, 41, 201, 5, 8, 118, 162, 191, 99, 196, 48, 198, 223, 79, 204, 174, 31, 97, 236, 20, 213, 218, 85, 34, 16, 74, 196, 209, 235, 14, 71, 209, 32, 131, 195, 84, 11, 66, 74, 19, 115, 255, 99, 69, 235, 210, 204, 15, 13, 4, 143, 127, 152, 125, 212, 91 }
                         },
                         new
                         {
                             TenantId = -1,
                             Id = "FullTextSearchSettings",
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Value = new byte[] { 8, 120, 207, 5, 153, 181, 23, 202, 162, 211, 218, 237, 157, 6, 76, 62, 220, 238, 175, 67, 31, 53, 166, 246, 66, 220, 173, 160, 72, 23, 227, 81, 50, 39, 187, 177, 222, 110, 43, 171, 235, 158, 16, 119, 178, 207, 49, 140, 72, 152, 20, 84, 94, 135, 117, 1, 246, 51, 251, 190, 148, 2, 44, 252, 221, 2, 91, 83, 149, 151, 58, 245, 16, 148, 52, 8, 187, 86, 150, 46, 227, 93, 163, 95, 47, 131, 116, 207, 95, 209, 38, 149, 53, 148, 73, 215, 206, 251, 194, 199, 189, 17, 42, 229, 135, 82, 23, 154, 162, 165, 158, 94, 23, 128, 30, 88, 12, 204, 96, 250, 236, 142, 189, 211, 214, 18, 196, 136, 102, 102, 217, 109, 108, 240, 96, 96, 94, 100, 201, 10, 31, 170, 128, 192 }
                         },
                         new
                         {
                             TenantId = -1,
                             Id = "SmtpSettings",
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Value = new byte[] { 240, 82, 224, 144, 161, 163, 117, 13, 173, 205, 78, 153, 97, 218, 4, 170, 81, 239, 1, 151, 226, 192, 98, 60, 241, 44, 88, 56, 191, 164, 10, 155, 72, 186, 239, 203, 227, 113, 88, 119, 49, 215, 227, 220, 158, 124, 96, 9, 116, 47, 158, 65, 93, 86, 219, 15, 10, 224, 142, 50, 248, 144, 75, 44, 68, 28, 198, 87, 198, 69, 67, 234, 238, 38, 32, 68, 162, 139, 67, 53, 220, 176, 240, 196, 233, 64, 29, 137, 31, 160, 99, 105, 249, 132, 202, 45, 71, 92, 134, 194, 55, 145, 121, 97, 197, 130, 119, 105, 131, 21, 133, 35, 10, 102, 172, 119, 135, 230, 251, 86, 253, 62, 55, 56, 146, 103, 164, 106 }
                         });
                 });
@@ -1648,7 +1648,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Calls = false,
                             CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
                             Industry = 0,
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Web Office",
                             OwnerId = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
                             Status = 0,
@@ -1662,7 +1662,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Calls = false,
                             CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
                             Industry = 0,
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Web Office",
                             OwnerId = "00000000-0000-0000-0000-000000000000",
                             Status = 1,
@@ -5265,7 +5265,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             Id = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
                             ActivationStatus = 0,
-                            CreateDate = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreateDate = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "",
                             FirstName = "Administrator",
                             LastModified = new DateTime(2021, 3, 9, 9, 52, 55, 765, DateTimeKind.Utc).AddTicks(1420),
@@ -5346,7 +5346,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Userid = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
                             UserGroupId = "cd84e66b-b803-40fc-99f9-b2969a54a1de",
                             RefType = 0,
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Removed = false
                         });
                 });
@@ -5421,7 +5421,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             UserId = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             PwdHash = "jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=",
                             TenantId = 1
                         });
@@ -6649,7 +6649,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("principal_id");
 
                     b.Property<string>("RegisteredClientId")
-                        .HasColumnType("varchar(36)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("registered_client_id");
 
                     b.Property<string>("AuthorizationGrantType")
@@ -6719,6 +6719,28 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("id");
 
+                    b.Property<string>("IdTokenClaims")
+                        .HasColumnType("text")
+                        .HasColumnName("id_token_claims");
+
+                    b.Property<DateTime?>("IdTokenExpiresAt")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("id_token_expires_at");
+
+                    b.Property<DateTime?>("IdTokenIssuedAt")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("id_token_issued_at");
+
+                    b.Property<string>("IdTokenMetadata")
+                        .HasColumnType("text")
+                        .HasColumnName("id_token_metadata");
+
+                    b.Property<string>("IdTokenValue")
+                        .HasColumnType("text")
+                        .HasColumnName("id_token_value");
+
                     b.Property<bool?>("IsInvalidated")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
@@ -6769,13 +6791,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "Id" }, "UK_id")
                         .IsUnique();
 
-                    b.HasIndex(new[] { "AuthorizationGrantType" }, "idx_identity_authorizations_grant_type");
-
-                    b.HasIndex(new[] { "IsInvalidated" }, "idx_identity_authorizations_is_invalidated");
-
-                    b.HasIndex(new[] { "PrincipalId" }, "idx_identity_authorizations_principal_id");
-
-                    b.HasIndex(new[] { "RegisteredClientId" }, "idx_identity_authorizations_registered_client_id");
+                    b.HasIndex(new[] { "Id" }, "idx_identity_authorizations_id");
 
                     b.ToTable("identity_authorizations", (string)null);
                 });
@@ -6908,7 +6924,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "ClientId" }, "UK_client_id")
                         .IsUnique();
 
-                    b.HasIndex(new[] { "IsInvalidated" }, "idx_identity_clients_is_invalidated");
+                    b.HasIndex(new[] { "ClientSecret" }, "UK_client_secret")
+                        .IsUnique();
 
                     b.HasIndex(new[] { "TenantId" }, "idx_identity_clients_tenant_id");
 
@@ -7015,12 +7032,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("PrincipalId", "RegisteredClientId")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "IsInvalidated" }, "idx_identity_consents_is_invalidated");
-
-                    b.HasIndex(new[] { "PrincipalId" }, "idx_identity_consents_principal_id");
-
-                    b.HasIndex(new[] { "RegisteredClientId" }, "idx_identity_consents_registered_client_id");
-
                     b.ToTable("identity_consents", (string)null);
                 });
 
@@ -7036,18 +7047,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("registered_client_id");
 
-                    b.Property<string>("ScopeName")
+                    b.Property<string>("Scopes")
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("scope_name");
+                        .HasColumnName("scopes");
 
-                    b.HasKey("PrincipalId", "RegisteredClientId", "ScopeName")
+                    b.HasKey("PrincipalId", "RegisteredClientId", "Scopes")
                         .HasName("PRIMARY");
 
                     b.HasIndex(new[] { "PrincipalId" }, "idx_identity_consent_scopes_principal_id");
 
                     b.HasIndex(new[] { "RegisteredClientId" }, "idx_identity_consent_scopes_registered_client_id");
 
-                    b.HasIndex(new[] { "ScopeName" }, "idx_identity_consent_scopes_scope_name");
+                    b.HasIndex(new[] { "Scopes" }, "idx_identity_consent_scopes_scopes");
 
                     b.ToTable("identity_consent_scopes", (string)null);
                 });
@@ -7779,20 +7790,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityAuthorization", b =>
                 {
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
-                        .WithMany("IdentityAuthorizations")
-                        .HasForeignKey("RegisteredClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_authorization_client_id");
-
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("RegisteredClient");
 
                     b.Navigation("Tenant");
                 });
@@ -7865,23 +7867,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("ScopeNameNavigation");
                 });
 
-            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsent", b =>
-                {
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
-                        .WithMany("IdentityConsents")
-                        .HasForeignKey("RegisteredClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("identity_consents_ibfk_1");
-
-                    b.Navigation("RegisteredClient");
-                });
-
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsentScope", b =>
                 {
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityScope", "ScopeNameNavigation")
                         .WithMany("IdentityConsentScopes")
-                        .HasForeignKey("ScopeName")
+                        .HasForeignKey("Scopes")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("identity_consent_scopes_ibfk_2");
@@ -7941,13 +7931,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.MessagingSystem.EF.Model.DbAuditEvent", b =>
                 {
                     b.Navigation("FilesReferences");
-                });
-
-            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClient", b =>
-                {
-                    b.Navigation("IdentityAuthorizations");
-
-                    b.Navigation("IdentityConsents");
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsent", b =>

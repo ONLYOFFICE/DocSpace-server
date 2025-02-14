@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,13 +30,17 @@ package com.asc.registration.data.client.mapper;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientStatus;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
-import com.asc.common.data.client.entity.ClientEntity;
-import com.asc.common.data.scope.entity.ScopeEntity;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.value.*;
+import com.asc.registration.data.client.entity.ClientDynamoEntity;
+import com.asc.registration.data.client.entity.ClientEntity;
+import com.asc.registration.data.scope.entity.ScopeEntity;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -73,7 +77,6 @@ public class ClientDataAccessMapper {
         .logoutRedirectUri(String.join(",", client.getClientRedirectInfo().logoutRedirectUris()))
         .accessible(client.getVisibility().equals(ClientVisibility.PUBLIC))
         .enabled(client.getStatus().equals(ClientStatus.ENABLED))
-        .invalidated(client.getStatus().equals(ClientStatus.INVALIDATED))
         .scopes(
             client.getScopes().stream()
                 .map(s -> ScopeEntity.builder().name(s).build())
@@ -114,8 +117,8 @@ public class ClientDataAccessMapper {
                 .build())
         .clientRedirectInfo(
             new ClientRedirectInfo(
-                entity.getRedirectUris(),
-                entity.getAllowedOrigins(),
+                new HashSet<>(entity.getRedirectUris()),
+                new HashSet<>(entity.getAllowedOrigins()),
                 Arrays.stream(entity.getLogoutRedirectUri().split(","))
                     .collect(Collectors.toSet())))
         .clientCreationInfo(
@@ -128,10 +131,7 @@ public class ClientDataAccessMapper {
                 .modifiedBy(entity.getModifiedBy())
                 .modifiedOn(entity.getModifiedOn())
                 .build())
-        .clientStatus(
-            entity.isInvalidated()
-                ? ClientStatus.INVALIDATED
-                : entity.isEnabled() ? ClientStatus.ENABLED : ClientStatus.DISABLED)
+        .clientStatus(entity.isEnabled() ? ClientStatus.ENABLED : ClientStatus.DISABLED)
         .clientVisibility(
             entity.isAccessible() ? ClientVisibility.PUBLIC : ClientVisibility.PRIVATE)
         .clientVersion(entity.getVersion() != null ? entity.getVersion() : 0)
@@ -193,5 +193,93 @@ public class ClientDataAccessMapper {
     destination.setVersion(
         origin.getVersion() != null ? origin.getVersion() : destination.getVersion());
     return destination;
+  }
+
+  /**
+   * Converts a {@link Client} domain object to a {@link ClientDynamoEntity}.
+   *
+   * @param client the domain object to convert
+   * @return the converted DynamoDB entity
+   */
+  public ClientDynamoEntity toDynamoEntity(Client client) {
+    var modified = client.getClientModificationInfo();
+    var websiteInfo = client.getClientWebsiteInfo();
+    ClientDynamoEntity dynamoEntity = new ClientDynamoEntity();
+    dynamoEntity.setClientId(client.getId().getValue().toString());
+    dynamoEntity.setName(client.getClientInfo().name());
+    dynamoEntity.setDescription(client.getClientInfo().description());
+    dynamoEntity.setClientSecret(client.getSecret().value());
+    dynamoEntity.setLogo(client.getClientInfo().logo());
+    dynamoEntity.setAuthenticationMethods(
+        client.getAuthenticationMethods().stream().map(Enum::name).collect(Collectors.toSet()));
+    dynamoEntity.setTenantId(client.getClientTenantInfo().tenantId().getValue());
+    dynamoEntity.setWebsiteUrl(websiteInfo != null ? websiteInfo.getWebsiteUrl() : null);
+    dynamoEntity.setTermsUrl(websiteInfo != null ? websiteInfo.getTermsUrl() : null);
+    dynamoEntity.setPolicyUrl(websiteInfo != null ? websiteInfo.getPolicyUrl() : null);
+    dynamoEntity.setRedirectUris(client.getClientRedirectInfo().redirectUris());
+    dynamoEntity.setAllowedOrigins(client.getClientRedirectInfo().allowedOrigins());
+    dynamoEntity.setLogoutRedirectUri(
+        String.join(",", client.getClientRedirectInfo().logoutRedirectUris()));
+    dynamoEntity.setAccessible(client.getVisibility().equals(ClientVisibility.PUBLIC));
+    dynamoEntity.setEnabled(client.getStatus().equals(ClientStatus.ENABLED));
+    dynamoEntity.setScopes(client.getScopes());
+    dynamoEntity.setCreatedOn(client.getClientCreationInfo().getCreatedOn().toString());
+    dynamoEntity.setCreatedBy(client.getClientCreationInfo().getCreatedBy());
+    dynamoEntity.setModifiedOn(
+        modified != null
+            ? modified.getModifiedOn().toString()
+            : client.getClientCreationInfo().getCreatedOn().toString());
+    dynamoEntity.setModifiedBy(
+        modified != null
+            ? modified.getModifiedBy()
+            : client.getClientCreationInfo().getCreatedBy());
+    return dynamoEntity;
+  }
+
+  /**
+   * Converts a {@link ClientDynamoEntity} DynamoDB entity to a {@link Client} domain object.
+   *
+   * @param dynamoEntity the DynamoDB entity to convert
+   * @return the converted domain object
+   */
+  public Client toDomain(ClientDynamoEntity dynamoEntity) {
+    return Client.Builder.builder()
+        .id(new ClientId(UUID.fromString(dynamoEntity.getClientId())))
+        .secret(new ClientSecret(dynamoEntity.getClientSecret()))
+        .authenticationMethods(
+            dynamoEntity.getAuthenticationMethods().stream()
+                .map(authMethod -> Enum.valueOf(AuthenticationMethod.class, authMethod))
+                .collect(Collectors.toSet()))
+        .scopes(dynamoEntity.getScopes())
+        .clientInfo(
+            new ClientInfo(
+                dynamoEntity.getName(), dynamoEntity.getDescription(), dynamoEntity.getLogo()))
+        .clientTenantInfo(new ClientTenantInfo(new TenantId(dynamoEntity.getTenantId())))
+        .clientWebsiteInfo(
+            ClientWebsiteInfo.Builder.builder()
+                .websiteUrl(dynamoEntity.getWebsiteUrl())
+                .termsUrl(dynamoEntity.getTermsUrl())
+                .policyUrl(dynamoEntity.getPolicyUrl())
+                .build())
+        .clientRedirectInfo(
+            new ClientRedirectInfo(
+                dynamoEntity.getRedirectUris(),
+                dynamoEntity.getAllowedOrigins(),
+                Arrays.stream(dynamoEntity.getLogoutRedirectUri().split(","))
+                    .collect(Collectors.toSet())))
+        .clientCreationInfo(
+            ClientCreationInfo.Builder.builder()
+                .createdBy(dynamoEntity.getCreatedBy())
+                .createdOn(ZonedDateTime.parse(dynamoEntity.getCreatedOn()))
+                .build())
+        .clientModificationInfo(
+            ClientModificationInfo.Builder.builder()
+                .modifiedBy(dynamoEntity.getModifiedBy())
+                .modifiedOn(ZonedDateTime.parse(dynamoEntity.getModifiedOn()))
+                .build())
+        .clientStatus(dynamoEntity.isEnabled() ? ClientStatus.ENABLED : ClientStatus.DISABLED)
+        .clientVisibility(
+            dynamoEntity.isAccessible() ? ClientVisibility.PUBLIC : ClientVisibility.PRIVATE)
+        .build();
   }
 }
