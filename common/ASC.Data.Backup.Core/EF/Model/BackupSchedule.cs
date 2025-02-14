@@ -127,7 +127,7 @@ public static class BackupScheduleExtension
         modelBuilder.Entity<BackupSchedule>(entity =>
         {
             entity.HasKey(e => e.TenantId)
-                .HasName("PRIMARY");
+                .HasName("PK_backup_schedule");
 
             entity.ToTable("backup_schedule");
 

@@ -3,7 +3,7 @@ spring:
     aws:
       region:
         auto: false
-        static: us-east-1
+        static: ${SPRING_CLOUD_AWS_REGION_STATIC:us-east-1}
       dynamodb:
         enabled: false
   datasource:
@@ -35,7 +35,9 @@ spring:
         auto: true
       dynamodb:
         enabled: true
-        endpoint: ${SPRING_CLOUD_AWS_DYNAMODB_ENDPOINT:http://localhost:8000}
+        endpoint: ${SPRING_CLOUD_AWS_DYNAMODB_ENDPOINT:}
+        tables:
+          registeredClient: ${SPRING_CLOUD_AWS_DYNAMODB_TABLES_REGISTERED_CLIENT:RegisteredClient}
       credentials:
         access-key: ${SPRING_CLOUD_AWS_DYNAMODB_ACCESS_KEY:dummy}
         secret-key: ${SPRING_CLOUD_AWS_DYNAMODB_SECRET_KEY:dummy}

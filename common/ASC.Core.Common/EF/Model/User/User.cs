@@ -279,7 +279,9 @@ public static class DbUserExtension
     private static void PgSqlAddUser(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(entity =>
-        {
+        {            
+            entity.ToTable("core_user");
+            
             // Setting the primary key
             entity.HasKey(e => e.Id);
 
