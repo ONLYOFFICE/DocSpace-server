@@ -759,6 +759,9 @@ public enum MessageAction
     [SwaggerEnum("Start storage decryption")]
     StartStorageDecryption = 5053,
 
+    [SwaggerEnum("DevTools access settings changed")]
+    DevToolsAccessSettingsChanged = 6054,
+
     #endregion
 
     #region others

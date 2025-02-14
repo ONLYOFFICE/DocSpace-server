@@ -933,4 +933,7 @@
   <data name="FileVersionRemoved" xml:space="preserve">
     <value>Files [{0}]. Version Deleted: {1}</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Developer Tools access settings changed</value>
+  </data>
 </root>
