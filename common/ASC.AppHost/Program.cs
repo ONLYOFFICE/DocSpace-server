@@ -60,11 +60,9 @@ AddProjectWithDefaultConfiguration<ASC_Files_Service>();
 AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
 AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
 
-builder.AddNodeApp("asc-socketIO", "server.js", "../ASC.Socket.IO/");
-
-builder.AddNodeApp("asc-ssoAuth", "app.js", "../ASC.SSoAuth/");
-
-builder.AddNodeApp("asc-webDav", "webDavServer.js", "../ASC.WebDav/server/");
+builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build");
+builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build");
+builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build");
 
 await builder.Build().RunAsync();
 

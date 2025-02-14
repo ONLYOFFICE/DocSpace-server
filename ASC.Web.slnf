@@ -2,9 +2,9 @@
   "solution": {
     "path": "ASC.Web.sln",
     "projects": [
-      "common\\ASC.AppHost\\ASC.AppHost.csproj",
       "common\\ASC.ActiveDirectory\\ASC.ActiveDirectory.csproj",
       "common\\ASC.Api.Core\\ASC.Api.Core.csproj",
+      "common\\ASC.AppHost\\ASC.AppHost.csproj",
       "common\\ASC.Common\\ASC.Common.csproj",
       "common\\ASC.Core.Common\\ASC.Core.Common.csproj",
       "common\\ASC.Data.Backup.Core\\ASC.Data.Backup.Core.csproj",
@@ -18,6 +18,7 @@
       "common\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj",
       "common\\ASC.IPSecurity\\ASC.IPSecurity.csproj",
       "common\\ASC.MessagingSystem\\ASC.MessagingSystem.csproj",
+      "common\\ASC.Migration\\ASC.Migration.Core.csproj",
       "common\\ASC.Webhooks.Core\\ASC.Webhooks.Core.csproj",
       "common\\services\\ASC.ApiSystem\\ASC.ApiSystem.csproj",
       "common\\services\\ASC.AuditTrail\\ASC.AuditTrail.csproj",
