@@ -130,6 +130,12 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? HasDraft { get; set; }
 
     /// <summary>
+    /// Status of the form filling process
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
+    public FormFillingStatus FormFillingStatus { get; set; } = FormFillingStatus.None;
+
+    /// <summary>
     /// Is there a form or not
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
@@ -294,6 +300,40 @@ public class FileDtoHelper(
             }
 
             result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
+
+            if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
+            {
+                var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
+                var roleList = await roles.ToListAsync();
+
+                if (currentStep == -1 && result.Security[FileSecurity.FilesSecurityActions.Edit])
+                {
+                    result.FormFillingStatus = FormFillingStatus.Draft;
+                }
+
+                if (currentStep != -1)
+                {
+                    var role = roleList.FirstOrDefault(r => !r.Submitted);
+
+                    if (properties.FormFilling.IsFillingPaused)
+                    {
+                        result.FormFillingStatus = FormFillingStatus.Stoped;
+                    }
+                    else if (currentStep == 0)
+                    {
+                        result.FormFillingStatus = FormFillingStatus.Complete;
+                    }
+                    else if (role != null)
+                    {
+                        result.FormFillingStatus = currentStep == role.Sequence
+                            ? FormFillingStatus.YouTurn
+                            : FormFillingStatus.InProgress;
+                    }else if (roleList.Any())
+                    {
+                        result.FormFillingStatus = FormFillingStatus.InProgress;
+                    }
+                }
+            }
 
             var formFilling = properties?.FormFilling;
             if (formFilling != null)
