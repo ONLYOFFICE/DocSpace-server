@@ -1142,7 +1142,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("TenantId")
-                        .HasDatabaseName("tenant");
+                        .HasDatabaseName("IX_tenants_tariff_tenant");
 
                     b.ToTable("tenants_tariff", (string)null);
                 });
@@ -1529,7 +1529,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDatabaseName("alias");
 
                     b.HasIndex("LastModified")
-                        .HasDatabaseName("last_modified");
+                        .HasDatabaseName("IX_tenants_tenants_last_modified");
 
                     b.HasIndex("MappedDomain")
                         .HasDatabaseName("mappeddomain");
@@ -4587,13 +4587,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.HasKey("Id")
-                        .HasName("PRIMARY");
+                        .HasName("PK_short_links");
 
                     b.HasIndex("Short")
                         .IsUnique();
 
                     b.HasIndex("TenantId")
-                        .HasDatabaseName("tenant_id");
+                        .HasDatabaseName("IX_short_links_tenant_id");
 
                     b.ToTable("short_links", (string)null);
                 });
@@ -5001,7 +5001,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("Users");
+                    b.ToTable("core_user", (string)null);
 
                     b.HasData(
                         new
@@ -5247,7 +5247,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.HasKey("Id")
-                        .HasName("PRIMARY");
+                        .HasName("PK_backup_backup");
 
                     b.HasIndex("ExpiresOn")
                         .HasDatabaseName("expires_on");
@@ -5299,7 +5299,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("storage_type");
 
                     b.HasKey("TenantId")
-                        .HasName("PRIMARY");
+                        .HasName("PK_backup_schedule");
 
                     b.ToTable("backup_schedule", (string)null);
                 });
@@ -5504,7 +5504,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("parent_folder_id");
 
                     b.HasKey("TenantId", "EntryId", "EntryType")
-                        .HasName("primary");
+                        .HasName("PK_files_order");
 
                     b.HasIndex("TenantId", "ParentFolderId", "EntryType")
                         .HasDatabaseName("parent_folder_id");
@@ -5559,7 +5559,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("linked_for");
 
                     b.HasKey("TenantId", "SourceId", "LinkedId")
-                        .HasName("PRIMARY");
+                        .HasName("PK_files_link");
 
                     b.HasIndex("TenantId", "SourceId", "LinkedId", "LinkedFor")
                         .HasDatabaseName("linked_for");
@@ -5806,7 +5806,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("TenantId")
-                        .HasDatabaseName("tenant_id");
+                        .HasDatabaseName("IX_files_thirdparty_account_tenant_id");
 
                     b.ToTable("files_thirdparty_account", (string)null);
                 });
@@ -5931,10 +5931,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("character varying")
                         .HasColumnName("title");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("PK_files_folder");
 
                     b.HasIndex("ModifiedOn")
-                        .HasDatabaseName("modified_on");
+                        .HasDatabaseName("IX_files_folder_modified_on");
 
                     b.HasIndex("TenantId", "ParentId")
                         .HasDatabaseName("parent_id");
@@ -6275,7 +6276,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("IdentityAuthorizations", (string)null);
+                    b.ToTable("identity_authorizations", (string)null);
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityCert", b =>
@@ -6304,7 +6305,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("public_key");
 
                     b.HasKey("Id")
-                        .HasName("PRIMARY");
+                        .HasName("PK_identity_certs");
 
                     b.ToTable("identity_certs", (string)null);
                 });
