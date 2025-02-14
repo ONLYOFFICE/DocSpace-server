@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.Log;
+namespace ASC.Api.Core.Log;
 internal static partial class SsoHandlerLogger
 {
     [LoggerMessage(LogLevel.Debug, "User {identity} already authenticated")]
