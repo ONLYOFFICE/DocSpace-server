@@ -24,12 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.Log;
-internal static partial class SsoHandlerLogger
-{
-    [LoggerMessage(LogLevel.Debug, "User {identity} already authenticated")]
-    public static partial void DebugUserAlreadyAuthenticated(this ILogger<SsoHandlerService> logger, IIdentity identity);
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-    [LoggerMessage(LogLevel.Debug, "Adding or updating user in database, userId={id}")]
-    public static partial void DebugAddingOrUpdatingUser(this ILogger<SsoHandlerService> logger, Guid id);
+public class MailWhiteLabelSettingsDto : IMapFrom<MailWhiteLabelSettings>
+{
+    /// <summary>Specifies if the mail footer is enabled or not</summary>
+    public bool FooterEnabled { get; set; }
+
+    /// <summary>Specifies if the footer with social media contacts is enabled or not</summary>
+    public bool FooterSocialEnabled { get; set; }
+
+    /// <summary>Specifies if these settings are default or not</summary>
+    public bool IsDefault { get; set; }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<MailWhiteLabelSettings, MailWhiteLabelSettingsDto>()
+            .ConvertUsing<MailWhiteLabelSettingsConverter>();
+    }
 }

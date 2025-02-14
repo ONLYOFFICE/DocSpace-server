@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace TMResourceData;
+namespace ASC.Web.Api.Mapping;
 
-[Singleton]
-public class WhiteLabelHelper(ILoggerProvider option)
+
+[Scope]
+public class MailWhiteLabelSettingsConverter()
+    : ITypeConverter<MailWhiteLabelSettings, MailWhiteLabelSettingsDto>
 {
-    private readonly ILogger _logger = option.CreateLogger("ASC.Resources");
-    private readonly ConcurrentDictionary<int, string> _whiteLabelDictionary = new();
-    public string DefaultLogoText { get; set; } = string.Empty;
-
-    public void SetNewText(int tenantId, string newText)
+    public MailWhiteLabelSettingsDto Convert(MailWhiteLabelSettings source, MailWhiteLabelSettingsDto destination, ResolutionContext context)
     {
-        try
+        var result = new MailWhiteLabelSettingsDto
         {
-            _whiteLabelDictionary.AddOrUpdate(tenantId, _ => newText, (_, _) => newText);
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorSetNewText(e);
-        }
-    }
+            FooterEnabled = source.FooterEnabled,
+            FooterSocialEnabled = source.FooterSocialEnabled,
+            IsDefault = source.IsDefault()
+        };
 
-    public void RestoreOldText(int tenantId)
-    {
-        try
-        {
-            _whiteLabelDictionary.TryRemove(tenantId, out _);
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorRestoreOldText(e);
-        }
+        return result;
     }
 }
+
