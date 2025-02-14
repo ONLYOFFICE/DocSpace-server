@@ -55,7 +55,7 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
     {
         await using var scope = serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
 
@@ -107,7 +107,7 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
         }
     }
 
-    private async Task UpdateUserTypeAsync(UserManager userManager, WebItemSecurityCache webItemSecurityCache, IDistributedLockProvider distributedLockProvider)
+    private async Task UpdateUserTypeAsync(UserManager userManager, WebItemSecurityCache webItemSecurityCache, IDistributedLockProvider distributedLockProvider, UserSocketManager socketManager)
     {
         var userInfo = await userManager.GetUsersAsync(User);
         var currentType = await userManager.GetUserTypeAsync(userInfo);
@@ -121,18 +121,22 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupGuest.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupUser.ID);
                     webItemSecurityCache.ClearCache(_tenantId);
+                    await socketManager.DeleteGuestAsync(User);
+                    await socketManager.AddUserAsync(userInfo);
                 }
                 else if (currentType is EmployeeType.RoomAdmin)
                 {
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupRoomAdmin.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupUser.ID);
                     webItemSecurityCache.ClearCache(_tenantId);
+                    await socketManager.UpdateUserAsync(userInfo);
                 }
                 else if (currentType is EmployeeType.DocSpaceAdmin)
                 {
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupAdmin.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupUser.ID);
                     webItemSecurityCache.ClearCache(_tenantId);
+                    await socketManager.UpdateUserAsync(userInfo);
                 }
             }
             else if (_employeeType is EmployeeType.Guest)
@@ -142,18 +146,24 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupUser.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupGuest.ID);
                     webItemSecurityCache.ClearCache(_tenantId);
+                    await socketManager.DeleteUserAsync(User);
+                    await socketManager.AddGuestAsync(userInfo);
                 }
                 else if (currentType is EmployeeType.RoomAdmin)
                 {
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupRoomAdmin.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupGuest.ID);
                     webItemSecurityCache.ClearCache(_tenantId);
+                    await socketManager.DeleteUserAsync(User);
+                    await socketManager.AddGuestAsync(userInfo);
                 }
                 else if (currentType is EmployeeType.DocSpaceAdmin)
                 {
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupAdmin.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupGuest.ID);
                     webItemSecurityCache.ClearCache(_tenantId);
+                    await socketManager.DeleteUserAsync(User);
+                    await socketManager.AddGuestAsync(userInfo);
                 }
             }
         }
@@ -191,4 +201,5 @@ public record ChangeUserTypeProgressItemScope(
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
     ILoggerProvider Options,
     WebItemSecurityCache WebItemSecurityCache,
-    IDistributedLockProvider DistributedLockProvider);
+    IDistributedLockProvider DistributedLockProvider,
+    UserSocketManager SocketManager);
