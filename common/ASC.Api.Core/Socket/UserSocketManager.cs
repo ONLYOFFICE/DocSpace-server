@@ -51,11 +51,14 @@ public class UserSocketManager(ITariffService tariffService,
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
-        foreach (var group in dto.Groups)
+        if (dto.Groups != null) 
         {
-            var groupInfo = await userManager.GetGroupInfoAsync(group.Id);
-            var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
-            await UpdateGroupAsync(groupDto);
+            foreach (var group in dto.Groups)
+            {
+                var groupInfo = await userManager.GetGroupInfoAsync(group.Id);
+                var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
+                await UpdateGroupAsync(groupDto);
+            }
         }
         await MakeRequest("update-user", new { tenantId, user = dto });
     }
