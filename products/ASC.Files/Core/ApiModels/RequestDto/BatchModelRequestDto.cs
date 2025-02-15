@@ -150,3 +150,15 @@ public class BatchRequestDto : BaseBatchRequestDto
     /// </summary>
     public bool Content { get; set; }
 }
+
+/// <summary>
+/// The data transfer object containing the operation type for which statuses are retrieved.
+/// </summary>
+public class FileOperationResultRequestDto
+{
+    /// <summary>
+    /// Specifies the type of file operation to be retrieved.
+    /// </summary>
+    [FromRoute(Name = "operationType")]
+    public FileOperationType OperationType { get; set; }
+}

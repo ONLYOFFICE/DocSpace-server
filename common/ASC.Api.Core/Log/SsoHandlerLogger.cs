@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace TMResourceData;
-
-[Singleton]
-public class WhiteLabelHelper(ILoggerProvider option)
+namespace ASC.Api.Core.Log;
+internal static partial class SsoHandlerLogger
 {
-    private readonly ILogger _logger = option.CreateLogger("ASC.Resources");
-    private readonly ConcurrentDictionary<int, string> _whiteLabelDictionary = new();
-    public string DefaultLogoText { get; set; } = string.Empty;
+    [LoggerMessage(LogLevel.Debug, "User {identity} already authenticated")]
+    public static partial void DebugUserAlreadyAuthenticated(this ILogger<SsoHandlerService> logger, IIdentity identity);
 
-    public void SetNewText(int tenantId, string newText)
-    {
-        try
-        {
-            _whiteLabelDictionary.AddOrUpdate(tenantId, _ => newText, (_, _) => newText);
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorSetNewText(e);
-        }
-    }
-
-    public void RestoreOldText(int tenantId)
-    {
-        try
-        {
-            _whiteLabelDictionary.TryRemove(tenantId, out _);
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorRestoreOldText(e);
-        }
-    }
+    [LoggerMessage(LogLevel.Debug, "Adding or updating user in database, userId={id}")]
+    public static partial void DebugAddingOrUpdatingUser(this ILogger<SsoHandlerService> logger, Guid id);
 }
