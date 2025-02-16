@@ -35,6 +35,9 @@ public class DbFilesFormRoleMapping : BaseEntity, IDbFile
     [MaxLength(255)]
     public string RoleName { get; set; }
     public int Sequence { get; set; }
+    public DateTime OpenedAt { get; set; }
+    public DateTime SubmissionDate { get; set; }
+
     public bool Submitted { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -91,6 +94,14 @@ public static class DbFilesFormRoleMappingExtension
 
             entity.Property(e => e.Sequence).HasColumnName("sequence");
 
+            entity.Property(e => e.OpenedAt)
+                .HasColumnName("opened_at")
+                .HasColumnType("datetime");
+
+            entity.Property(e => e.SubmissionDate)
+                .HasColumnName("submission_date")
+                .HasColumnType("datetime");
+
             entity.Property(e => e.Submitted)
                 .HasColumnName("submitted")
                 .HasColumnType("tinyint(1)");
@@ -122,6 +133,15 @@ public static class DbFilesFormRoleMappingExtension
 
             entity.Property(e => e.RoleName).HasColumnName("role_name");
             entity.Property(e => e.Sequence).HasColumnName("sequence");
+
+            entity.Property(e => e.OpenedAt)
+                .HasColumnName("opened_at")
+                .HasColumnType("timestamptz");
+
+            entity.Property(e => e.SubmissionDate)
+                .HasColumnName("submission_date")
+                .HasColumnType("timestamptz");
+
             entity.Property(e => e.Submitted).HasColumnName("submitted");
 
         });

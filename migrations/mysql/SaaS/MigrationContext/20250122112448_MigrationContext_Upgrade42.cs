@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -22,6 +23,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     role_name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     sequence = table.Column<int>(type: "int", nullable: false),
+                    opened_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    submission_date = table.Column<DateTime>(type: "datetime", nullable: false),
                     submitted = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>

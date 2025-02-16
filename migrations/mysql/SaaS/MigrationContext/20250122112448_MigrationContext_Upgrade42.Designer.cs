@@ -5817,6 +5817,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<DateTime>("OpenedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("opened_at");
+
                     b.Property<string>("RoleName")
                         .IsRequired()
                         .HasColumnType("varchar(255)")
@@ -5827,6 +5831,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<int>("Sequence")
                         .HasColumnType("int")
                         .HasColumnName("sequence");
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .HasColumnType("datetime")
+                        .HasColumnName("submission_date");
 
                     b.Property<bool>("Submitted")
                         .HasColumnType("tinyint(1)")
