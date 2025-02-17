@@ -37,8 +37,9 @@ public class DbWebhooksConfig : BaseEntity
     public string Uri { get; set; }
     public bool Enabled { get; set; }
     public bool SSL { get; set; }
+    public Guid? TargetUserId { get; set; }
     public DateTime? LastFailureOn { get; set; }
-    public string? LastFailureContent { get; set; }
+    public string LastFailureContent { get; set; }
     public DateTime? LastSuccessOn { get; set; }
     public DbTenant Tenant { get; set; }
     public override object[] GetKeys()
@@ -76,16 +77,19 @@ public static class WebhooksConfigExtension
                 .HasColumnName("id");
 
             entity.Property(e => e.LastFailureOn)
+                  .IsRequired(false)
                   .HasColumnName("last_failure_on")
                   .HasColumnType("datetime");
 
             entity.Property(e => e.LastFailureContent)
+                  .IsRequired(false)
                   .HasColumnName("last_failure_content")
                   .HasColumnType("varchar(200)")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.LastSuccessOn)
+                  .IsRequired(false)
                   .HasColumnName("last_success_on")
                   .HasColumnType("datetime");
 
@@ -116,6 +120,13 @@ public static class WebhooksConfigExtension
                 .HasColumnName("ssl")
                 .HasDefaultValueSql("'1'")
                 .HasColumnType("tinyint(1)");
+
+            entity.Property(e => e.TargetUserId)
+                .IsRequired(false)
+                .HasColumnName("target_user_id")
+                .HasColumnType("varchar(38)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
         });
     }
 
@@ -142,12 +153,15 @@ public static class WebhooksConfigExtension
 
 
             entity.Property(e => e.LastFailureOn)
+                  .IsRequired(false)
                   .HasColumnName("last_failure_on");
 
             entity.Property(e => e.LastFailureContent)
+                  .IsRequired(false)
                   .HasColumnName("last_failure_content");
 
             entity.Property(e => e.LastSuccessOn)
+                  .IsRequired(false)
                   .HasColumnName("last_success_on");
 
             entity.Property(e => e.TenantId)
@@ -179,6 +193,12 @@ public static class WebhooksConfigExtension
                 .HasColumnName("ssl")
                 .HasDefaultValueSql("true") // true as the default value
                 .HasColumnType("boolean");
+
+            entity.Property(e => e.TargetUserId)
+                .IsRequired(false)
+                .HasColumnName("target_user_id")
+                .HasColumnType("uuid");
+                
         });
     }
 }

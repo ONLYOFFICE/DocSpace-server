@@ -49,9 +49,9 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<WebhooksConfigWithStatus> WebhooksConfigWithStatusAsync(int tenantId)
+    public IAsyncEnumerable<WebhooksConfigWithStatus> WebhooksConfigWithStatusAsync(int tenantId, Guid? targetUserId)
     {
-        return Queries.WebhooksConfigWithStatusAsync(this, tenantId);
+        return Queries.WebhooksConfigWithStatusAsync(this, tenantId, targetUserId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
@@ -98,10 +98,10 @@ static file class Queries
             (WebhooksDbContext ctx, int tenantId, string uri, string name) =>
                 ctx.WebhooksConfigs.FirstOrDefault(r => r.TenantId == tenantId && r.Uri == uri && r.Name == name));
 
-    public static readonly Func<WebhooksDbContext, int, IAsyncEnumerable<WebhooksConfigWithStatus>> WebhooksConfigWithStatusAsync =
+    public static readonly Func<WebhooksDbContext, int, Guid?, IAsyncEnumerable<WebhooksConfigWithStatus>> WebhooksConfigWithStatusAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx, int tenantId) =>
-                ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId)
+            (WebhooksDbContext ctx, int tenantId, Guid? targetUserId) =>
+                ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId && (targetUserId == null || it.TargetUserId == targetUserId))
              .GroupJoin(ctx.WebhooksLogs, c => c.Id, l => l.ConfigId, (configs, logs) => new { configs, logs })
             .Select(it =>
                 new WebhooksConfigWithStatus
