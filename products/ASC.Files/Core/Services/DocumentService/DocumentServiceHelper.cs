@@ -616,6 +616,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             if (role != null)
             {
                 result.CanFill = true;
+                if (role.OpenedAt.Equals(DateTime.MinValue))
+                {
+                    role.OpenedAt = DateTime.UtcNow;
+                    await fileDao.ChangeUserFormRoleAsync(file.Id, role);
+                }
             }
             else
             {

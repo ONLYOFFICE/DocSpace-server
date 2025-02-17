@@ -1498,6 +1498,8 @@ internal class FileDao(
 
         await foreach (var e in filesDbContext.DbFormRolesAsync(tenantId, formId))
         {
+            e.OpenedAt = _tenantUtil.DateTimeFromUtc(e.OpenedAt);
+            e.SubmissionDate = _tenantUtil.DateTimeFromUtc(e.SubmissionDate);
             yield return e;
         }
     }
@@ -1511,6 +1513,8 @@ internal class FileDao(
         toUpdate.RoleName = formRole.RoleName;
         toUpdate.Sequence = formRole.Sequence;
         toUpdate.Submitted = formRole.Submitted;
+        toUpdate.OpenedAt = formRole.OpenedAt;
+        toUpdate.SubmissionDate = formRole.SubmissionDate;
 
         filesDbContext.Update(toUpdate);
         await filesDbContext.SaveChangesAsync();

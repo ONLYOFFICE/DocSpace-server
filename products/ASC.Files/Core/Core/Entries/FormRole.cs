@@ -28,7 +28,6 @@ namespace ASC.Files.Core.Core.Entries;
 
 public class FormRole
 {
-
     public int RoleId { get; set; }
 
     public Guid UserId { get; set; }
@@ -38,5 +37,8 @@ public class FormRole
     public int Sequence { get; set; }
 
     public bool Submitted { get; set; }
+    public DateTime OpenedAt { get; set; }
+
+    public DateTime SubmissionDate { get; set; }
 
 }

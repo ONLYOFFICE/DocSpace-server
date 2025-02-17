@@ -919,7 +919,9 @@ static file class FileQueries
                         UserId = r.UserId,
                         RoleName = r.RoleName,
                         Sequence = r.Sequence,
-                        Submitted = r.Submitted
+                        Submitted = r.Submitted,
+                        OpenedAt = r.OpenedAt,
+                        SubmissionDate = r.SubmissionDate
                     })
             );
 
@@ -953,7 +955,9 @@ static file class FileQueries
                         UserId = r.UserId,
                         RoleName = r.RoleName,
                         Sequence = r.Sequence,
-                        Submitted = r.Submitted
+                        Submitted = r.Submitted,
+                        OpenedAt = r.OpenedAt,
+                        SubmissionDate = r.SubmissionDate
                     }));
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFilesFormRoleMapping>> DbFilesFormRoleMappingForDeleteAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

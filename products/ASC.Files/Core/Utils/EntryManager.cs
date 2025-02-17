@@ -2197,6 +2197,7 @@ public class EntryManager(IDaoFactory daoFactory,
             if (currentStep == firstRole.Sequence)
             {
                 firstRole.Submitted = true;
+                firstRole.SubmissionDate = DateTime.UtcNow;
                 await fileDao.ChangeUserFormRoleAsync(form.Id, firstRole);
             }
         }
