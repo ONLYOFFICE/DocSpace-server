@@ -43,7 +43,7 @@ public class WebhookPublisher(
     TenantUtil tenantUtil)
     : IWebhookPublisher
 {
-    public async Task PublishAsync(Webhook webhook, Type accessCheckerType, Type returnType, string requestPayload, Dictionary<string, object> routeData)
+    public async Task PublishAsync(Webhook webhook, string requestPayload, WebhookData webhookData)
     {
         if (string.IsNullOrEmpty(requestPayload))
         {
@@ -58,13 +58,16 @@ public class WebhookPublisher(
             {
                 if (securityContext.CurrentAccount.ID != config.TargetUserId.Value)
                 {
-                    if (accessCheckerType == null)
+                    if (webhookData?.AccessCheckerType == null)
                     {
                         continue;
                     }
 
-                    var accessChecker = (IWebhookAccessChecker)serviceProvider.GetRequiredService(accessCheckerType);
-                    if (!await accessChecker.CheckAccessAsync(config.TargetUserId.Value, returnType, requestPayload, routeData))
+                    webhookData.TargetUserId = config.TargetUserId.Value;
+                    webhookData.ResponseString = requestPayload;
+
+                    var accessChecker = (IWebhookAccessChecker)serviceProvider.GetRequiredService(webhookData.AccessCheckerType);
+                    if (!await accessChecker.CheckAccessAsync(webhookData))
                     {
                         continue;
                     }
