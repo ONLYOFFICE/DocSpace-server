@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node server/webDavServer.js",
-	"start:build": "yarn install && node server/webDavServer.js"
+	"start:build": "yarn install && node server/webDavServer.js",
     "postinstall": "patch-package"
   },
   "dependencies": {
