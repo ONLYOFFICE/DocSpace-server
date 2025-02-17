@@ -582,7 +582,7 @@ internal class FolderDao(
         {
             roomSettings.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermarkSettings);
             filesDbContext.Update(roomSettings);
-            await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesAsync();
         }
 
         return room.Id;
@@ -599,9 +599,9 @@ internal class FolderDao(
 
         if (roomSettings != null)
         {
-            roomSettings.Watermark = null;
-            filesDbContext.Update(roomSettings);
-            await filesDbContext.SaveChangesAsync();
+        roomSettings.Watermark = null;
+        filesDbContext.Update(roomSettings);
+        await filesDbContext.SaveChangesAsync();
         }
 
         return room;
@@ -940,8 +940,8 @@ internal class FolderDao(
             if (conflict != 0)
             {
                 result[folderId] = "";
-            }
-        }
+                }
+                }
 
         return result;
     }
@@ -1824,16 +1824,18 @@ internal class FolderDao(
 
         var q = GetFolderQuery(filesDbContext, r => r.ParentId == parentId);
 
-        if (withSubfolders)
-        {
-            q = GetFolderQuery(filesDbContext)
-                .Join(filesDbContext.Tree, r => r.Id, a => a.FolderId, (folder, tree) => new { folder, tree })
-                .Where(r => r.tree.ParentId == parentId && r.tree.Level != 0)
-                .Select(r => r.folder);
-        }
+
 
         if (!string.IsNullOrEmpty(searchText))
-        {
+        {        
+            if (withSubfolders)
+            {
+            q = GetFolderQuery(filesDbContext)
+                    .Join(filesDbContext.Tree, r => r.Id, a => a.FolderId, (folder, tree) => new { folder, tree })
+                    .Where(r => r.tree.ParentId == parentId && r.tree.Level != 0)
+                    .Select(r => r.folder);
+            }
+            
             var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(searchText));
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
         }
@@ -1978,10 +1980,10 @@ internal class CacheFolderDao(
     public override async Task<Folder<int>> GetFolderAsync(int folderId)
                         {
         if (!_cache.TryGetValue(folderId, out var result))
-        {
+                        {
             result = await base.GetFolderAsync(folderId);
             _cache.TryAdd(folderId, result);
-        }
+                        }
 
         return result;
                         }
