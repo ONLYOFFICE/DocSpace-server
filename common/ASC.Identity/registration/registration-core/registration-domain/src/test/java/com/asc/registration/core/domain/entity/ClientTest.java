@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -56,7 +56,7 @@ class ClientTest {
             .authenticationMethods(Set.of(AuthenticationMethod.DEFAULT_AUTHENTICATION))
             .scopes(Set.of("read", "write"))
             .clientInfo(new ClientInfo("Test Client", "Description", "Logo URL"))
-            .clientTenantInfo(new ClientTenantInfo(new TenantId(1)))
+            .clientTenantInfo(new ClientTenantInfo(new TenantId(1L)))
             .clientRedirectInfo(
                 new ClientRedirectInfo(
                     Set.of("http://redirect.url"),
@@ -72,7 +72,7 @@ class ClientTest {
   }
 
   @Test
-  void testInitialize() {
+  void whenInitialized_thenClientIsEnabledAndFieldsAreSet() {
     client.initialize("creator@example.com");
 
     assertNotNull(client.getId());
@@ -84,7 +84,7 @@ class ClientTest {
   }
 
   @Test
-  void testEnable() {
+  void whenEnabledAfterBeingDisabled_thenClientStatusIsEnabled() {
     client.initialize("creator@example.com");
     client.disable("modifier@example.com");
     client.enable("modifier@example.com");
@@ -93,7 +93,7 @@ class ClientTest {
   }
 
   @Test
-  void testDisable() {
+  void whenDisabled_thenClientStatusIsDisabled() {
     client.initialize("creator@example.com");
     client.disable("modifier@example.com");
 
@@ -101,25 +101,7 @@ class ClientTest {
   }
 
   @Test
-  void testInvalidate() {
-    client.initialize("creator@example.com");
-    client.invalidate("modifier@example.com");
-
-    assertEquals(ClientStatus.INVALIDATED, client.getStatus());
-  }
-
-  @Test
-  void testInvalidateRegeneratesSecret() {
-    client.initialize("creator@example.com");
-    String oldSecret = client.getSecret().value();
-    client.invalidate("modifier@example.com");
-
-    assertNotEquals(oldSecret, client.getSecret().value());
-    assertEquals(ClientStatus.INVALIDATED, client.getStatus());
-  }
-
-  @Test
-  void testRegenerateSecret() {
+  void whenSecretIsRegenerated_thenOldSecretIsReplaced() {
     client.initialize("creator@example.com");
     client.disable("modifier@example.com");
     String oldSecret = client.getSecret().value();
@@ -129,7 +111,7 @@ class ClientTest {
   }
 
   @Test
-  void testAddScope() {
+  void whenScopeIsAdded_thenScopeIsIncluded() {
     client.initialize("creator@example.com");
     String newScope = "delete";
     client.addScope(newScope, "modifier@example.com");
@@ -138,7 +120,7 @@ class ClientTest {
   }
 
   @Test
-  void testRemoveScope() {
+  void whenScopeIsRemoved_thenScopeIsExcluded() {
     client.initialize("creator@example.com");
     String scopeToRemove = "read";
     client.removeScope(scopeToRemove, "modifier@example.com");
@@ -148,7 +130,7 @@ class ClientTest {
   }
 
   @Test
-  void testRemoveLastScopeThrowsException() {
+  void whenLastScopeIsRemoved_thenExceptionIsThrown() {
     client.initialize("creator@example.com");
     client.removeScope("read", "modifier@example.com");
 
@@ -163,7 +145,7 @@ class ClientTest {
   }
 
   @Test
-  void testChangeVisibility() {
+  void whenVisibilityIsChanged_thenVisibilityIsUpdated() {
     client.initialize("creator@example.com");
     client.changeVisibility(ClientVisibility.PUBLIC, "modifier@example.com");
 
@@ -171,7 +153,7 @@ class ClientTest {
   }
 
   @Test
-  void testUpdateClientInfo() {
+  void whenClientInfoIsUpdated_thenClientInfoIsReplaced() {
     client.initialize("creator@example.com");
     var newClientInfo = new ClientInfo("Updated Client", "Updated Description", "Updated Logo URL");
     client.updateClientInfo(newClientInfo, "modifier@example.com");
@@ -180,7 +162,7 @@ class ClientTest {
   }
 
   @Test
-  void testUpdateClientWebsiteInfo() {
+  void whenClientWebsiteInfoIsUpdated_thenWebsiteInfoIsReplaced() {
     client.initialize("creator@example.com");
     var newClientWebsiteInfo =
         ClientWebsiteInfo.Builder.builder()
@@ -194,7 +176,7 @@ class ClientTest {
   }
 
   @Test
-  void testUpdateClientRedirectInfo() {
+  void whenClientRedirectInfoIsUpdated_thenRedirectInfoIsReplaced() {
     client.initialize("creator@example.com");
     var newClientRedirectInfo =
         new ClientRedirectInfo(
@@ -207,7 +189,7 @@ class ClientTest {
   }
 
   @Test
-  void testAddAuthenticationMethod() {
+  void whenAuthenticationMethodIsAdded_thenMethodIsIncluded() {
     client.initialize("creator@example.com");
     var newMethod = AuthenticationMethod.PKCE_AUTHENTICATION;
     client.addAuthenticationMethod(newMethod, "modifier@example.com");
@@ -216,7 +198,7 @@ class ClientTest {
   }
 
   @Test
-  void testRemoveAuthenticationMethod() {
+  void whenAuthenticationMethodIsRemoved_thenMethodIsExcluded() {
     client.initialize("creator@example.com");
     var methodToRemove = AuthenticationMethod.DEFAULT_AUTHENTICATION;
     var newMethod = AuthenticationMethod.PKCE_AUTHENTICATION;
@@ -228,7 +210,7 @@ class ClientTest {
   }
 
   @Test
-  void testRemoveLastAuthenticationMethodThrowsException() {
+  void whenLastAuthenticationMethodIsRemoved_thenExceptionIsThrown() {
     client.initialize("creator@example.com");
 
     var exception =

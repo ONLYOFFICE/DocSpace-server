@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,33 +28,26 @@
 package com.asc.registration.data.client.adapter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.eq;
 
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
-import com.asc.common.data.client.entity.ClientEntity;
-import com.asc.common.data.client.repository.JpaClientRepository;
 import com.asc.registration.core.domain.entity.Client;
+import com.asc.registration.data.client.entity.ClientEntity;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import com.asc.registration.data.client.repository.JpaClientRepository;
+import java.time.ZonedDateTime;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 class ClientQueryRepositoryDomainAdapterTest {
-  @InjectMocks private ClientQueryRepositoryDomainAdapter adapter;
+  @InjectMocks private ClientQueryRepositoryDomainAdapter clientQueryRepositoryDomainAdapter;
   @Mock private JpaClientRepository jpaClientRepository;
   @Mock private ClientDataAccessMapper clientDataAccessMapper;
 
@@ -66,83 +59,96 @@ class ClientQueryRepositoryDomainAdapterTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
+
     clientId = new ClientId(UUID.randomUUID());
-    tenantId = new TenantId(1);
+    tenantId = new TenantId(1L);
     clientEntity = mock(ClientEntity.class);
     client = mock(Client.class);
+
+    when(clientEntity.getClientId()).thenReturn(clientId.getValue().toString());
+    when(clientDataAccessMapper.toDomain(clientEntity)).thenReturn(client);
   }
 
   @Test
-  void findByIdAndVisibility() {
-    when(jpaClientRepository.findByIdAndVisibility(anyString(), anyBoolean()))
+  void whenClientIsFoundByIdAndVisibility_thenReturnClient() {
+    when(jpaClientRepository.findByIdAndVisibility(anyString(), eq(true)))
         .thenReturn(Optional.of(clientEntity));
-    when(clientDataAccessMapper.toDomain(any(ClientEntity.class))).thenReturn(client);
 
-    var result = adapter.findByIdAndVisibility(clientId, ClientVisibility.PUBLIC);
+    var result =
+        clientQueryRepositoryDomainAdapter.findByIdAndVisibility(clientId, ClientVisibility.PUBLIC);
 
-    assertTrue(result.isPresent());
-    assertEquals(client, result.get());
+    assertEquals(Optional.of(client), result);
     verify(jpaClientRepository).findByIdAndVisibility(clientId.getValue().toString(), true);
     verify(clientDataAccessMapper).toDomain(clientEntity);
   }
 
   @Test
-  void findById() {
+  void whenClientIsFoundById_thenReturnClient() {
     when(jpaClientRepository.findById(anyString())).thenReturn(Optional.of(clientEntity));
-    when(clientDataAccessMapper.toDomain(any(ClientEntity.class))).thenReturn(client);
 
-    var result = adapter.findById(clientId);
+    var result = clientQueryRepositoryDomainAdapter.findById(clientId);
 
-    assertTrue(result.isPresent());
-    assertEquals(client, result.get());
+    assertEquals(Optional.of(client), result);
     verify(jpaClientRepository).findById(clientId.getValue().toString());
     verify(clientDataAccessMapper).toDomain(clientEntity);
   }
 
   @Test
-  void findAllPublicAndPrivateByTenantId() {
-    var page = new PageImpl<>(new ArrayList<>(Set.of(clientEntity)));
+  void whenClientsAreQueriedForPublicAndPrivateByTenantId_thenReturnPaginatedResponse() {
+    List<ClientEntity> entities = List.of(clientEntity);
+    when(jpaClientRepository.findAllPublicAndPrivateByTenantWithCursor(anyLong(), any(), anyInt()))
+        .thenReturn(entities);
 
-    when(jpaClientRepository.findAllPublicAndPrivateByTenant(anyInt(), any(PageRequest.class)))
-        .thenReturn(page);
-    when(clientDataAccessMapper.toDomain(any(ClientEntity.class))).thenReturn(client);
+    var result =
+        clientQueryRepositoryDomainAdapter.findAllPublicAndPrivateByTenantId(
+            tenantId, 10, null, ZonedDateTime.now());
 
-    var response = adapter.findAllPublicAndPrivateByTenantId(tenantId, 0, 10);
-
-    assertTrue(response.getData().iterator().hasNext());
-    assertEquals(response.getData().iterator().next(), client);
+    assertEquals(client, result.getData().iterator().next());
     verify(jpaClientRepository)
-        .findAllPublicAndPrivateByTenant(eq(tenantId.getValue()), any(PageRequest.class));
+        .findAllPublicAndPrivateByTenantWithCursor(eq(tenantId.getValue()), any(), eq(11));
     verify(clientDataAccessMapper).toDomain(clientEntity);
   }
 
   @Test
-  void findAllByTenantId() {
-    var page = new PageImpl<>(new ArrayList<>(Set.of(clientEntity)));
+  void whenClientsAreQueriedByTenantId_thenReturnPaginatedResponse() {
+    List<ClientEntity> entities = List.of(clientEntity);
+    when(jpaClientRepository.findAllByTenantIdWithCursor(anyLong(), any(), anyInt()))
+        .thenReturn(entities);
 
-    when(jpaClientRepository.findAllByTenantId(anyInt(), any(PageRequest.class))).thenReturn(page);
-    when(clientDataAccessMapper.toDomain(any(ClientEntity.class))).thenReturn(client);
+    var result =
+        clientQueryRepositoryDomainAdapter.findAllByTenantId(
+            tenantId, 10, null, ZonedDateTime.now());
 
-    var response = adapter.findAllByTenantId(tenantId, 0, 10);
-
-    assertTrue(response.getData().iterator().hasNext());
-    assertEquals(response.getData().iterator().next(), client);
-    verify(jpaClientRepository).findAllByTenantId(eq(tenantId.getValue()), any(PageRequest.class));
+    assertEquals(client, result.getData().iterator().next());
+    verify(jpaClientRepository).findAllByTenantIdWithCursor(eq(tenantId.getValue()), any(), eq(11));
     verify(clientDataAccessMapper).toDomain(clientEntity);
   }
 
   @Test
-  void findByClientIdAndTenantId() {
-    when(jpaClientRepository.findClientByClientIdAndTenantId(anyString(), anyInt()))
+  void whenClientIsFoundByClientIdAndTenantId_thenReturnClient() {
+    when(jpaClientRepository.findByClientIdAndTenantId(anyString(), anyLong()))
         .thenReturn(Optional.of(clientEntity));
-    when(clientDataAccessMapper.toDomain(any(ClientEntity.class))).thenReturn(client);
 
-    var result = adapter.findByClientIdAndTenantId(clientId, tenantId);
+    var result = clientQueryRepositoryDomainAdapter.findByClientIdAndTenantId(clientId, tenantId);
 
-    assertTrue(result.isPresent());
-    assertEquals(client, result.get());
+    assertEquals(Optional.of(client), result);
     verify(jpaClientRepository)
-        .findClientByClientIdAndTenantId(clientId.getValue().toString(), tenantId.getValue());
+        .findByClientIdAndTenantId(clientId.getValue().toString(), tenantId.getValue());
+    verify(clientDataAccessMapper).toDomain(clientEntity);
+  }
+
+  @Test
+  void whenClientsAreFoundByClientIds_thenReturnClients() {
+    List<ClientEntity> entities = List.of(clientEntity);
+    List<ClientId> clientIds = List.of(clientId);
+
+    when(jpaClientRepository.findAllByClientIds(anyList())).thenReturn(entities);
+
+    var result = clientQueryRepositoryDomainAdapter.findAllByClientIds(clientIds);
+
+    assertEquals(1, result.size());
+    assertEquals(client, result.get(0));
+    verify(jpaClientRepository).findAllByClientIds(List.of(clientId.getValue().toString()));
     verify(clientDataAccessMapper).toDomain(clientEntity);
   }
 }

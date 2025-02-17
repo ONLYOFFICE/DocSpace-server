@@ -61,7 +61,7 @@ try
 
     var startup = new Startup(builder.Configuration, builder.Environment);
 
-    await startup.ConfigureServices(builder.Services);
+    await startup.ConfigureServices(builder);
 
     var app = builder.Build();
 
@@ -81,7 +81,9 @@ try
     await eventBus.SubscribeAsync<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>();
     await eventBus.SubscribeAsync<FormFillingReportIntegrationEvent, FormFillingReportIntegrationEventHandler>();
     await eventBus.SubscribeAsync<RoomNotifyIntegrationEvent, RoomNotifyIntegrationEventHandler>();
-
+    await eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
+    
     sp.GetRequiredService<FileTrackerHelper>().Subscribe();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
