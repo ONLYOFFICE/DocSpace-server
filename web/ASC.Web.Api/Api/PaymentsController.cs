@@ -77,7 +77,7 @@ public class PaymentController(UserManager userManager,
             .Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Year)
             .ToList();
 
-        // TODO: artificial limitation
+        // TODO: Temporary restriction. Only monthly tariff available for purchase
         if (inDto.Quantity.Count != 1 || !monthQuotas.Any(q => q.Name == inDto.Quantity.First().Key))
         {
             return null;
@@ -120,7 +120,7 @@ public class PaymentController(UserManager userManager,
 
         var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
-        // TODO: artificial limitation
+        // TODO: Temporary restriction. Only changing the quota for the current tariff is available
         if (inDto.Quantity.Count != 1 || quota.Name != inDto.Quantity.First().Key)
         {
             return false;
