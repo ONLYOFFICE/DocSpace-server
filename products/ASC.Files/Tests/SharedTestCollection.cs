@@ -24,12 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.Log;
-internal static partial class SsoHandlerLogger
-{
-    [LoggerMessage(LogLevel.Debug, "User {identity} already authenticated")]
-    public static partial void DebugUserAlreadyAuthenticated(this ILogger<SsoHandlerService> logger, IIdentity identity);
+extern alias ASCWebApi;
+extern alias ASCPeople;
+extern alias ASCFilesService;
 
-    [LoggerMessage(LogLevel.Debug, "Adding or updating user in database, userId={id}")]
-    public static partial void DebugAddingOrUpdatingUser(this ILogger<SsoHandlerService> logger, Guid id);
-}
+namespace ASC.Files.Tests;
+
+[CollectionDefinition("Test Collection")]
+public class SharedTestCollection : 
+    ICollectionFixture<FilesApiFactory>, 
+    ICollectionFixture<WebApplicationFactory<WebApiProgram>>, 
+    ICollectionFixture<WebApplicationFactory<PeopleProgram>>,
+    ICollectionFixture<WebApplicationFactory<FilesServiceProgram>>
+    ;

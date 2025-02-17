@@ -173,7 +173,7 @@ public static class BackupRecordExtension
                 .HasDatabaseName("is_scheduled");
 
             entity.HasKey(e => new { e.Id })
-                .HasName("PRIMARY");
+                .HasName("PK_backup_backup");
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")

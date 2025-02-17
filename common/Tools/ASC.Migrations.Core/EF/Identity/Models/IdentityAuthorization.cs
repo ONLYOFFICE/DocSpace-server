@@ -193,7 +193,7 @@ public static class IdentityExtension
         modelBuilder.Entity<IdentityAuthorization>(entity =>
         {
             // Define table name and schema if needed (PostgreSQL supports schemas).
-            entity.ToTable("IdentityAuthorizations");
+            entity.ToTable("identity_authorizations");
 
             // Define primary key.
             entity.HasKey(e => e.Id);

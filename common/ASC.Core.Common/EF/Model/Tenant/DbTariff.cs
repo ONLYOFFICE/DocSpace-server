@@ -100,7 +100,7 @@ public static class DbTariffExtension
             entity.ToTable("tenants_tariff");
 
             entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant");
+                .HasDatabaseName("IX_tenants_tariff_tenant");
 
             entity.Property(e => e.Id).HasColumnName("id");
 

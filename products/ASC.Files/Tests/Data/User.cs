@@ -24,15 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModel.RequestsDto;
+namespace ASC.Files.Tests.Data;
 
-/// <summary>
-/// Request parameters for mail white label settings
-/// </summary>
-public class MailWhiteLabelSettingsRequestsDto
-{
-    /// <summary>
-    /// Specifies if the mail footer will be enabled or note
-    /// </summary>
-    public bool FooterEnabled { get; set; }
-}
+public record User(string Email, string Password);
