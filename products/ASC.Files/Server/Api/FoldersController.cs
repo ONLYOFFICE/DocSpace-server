@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Webhooks.Core;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -123,6 +125,7 @@ public abstract class FoldersController<T>(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "New folder parameters", typeof(FolderDto<int>))]
     [HttpPost("folder/{folderId}")]
+    [WebhookAccessChecker(typeof(WebhookFolderAccessChecker))]
     public async Task<FolderDto<T>> CreateFolderAsync(CreateFolderRequestDto<T> inDto)
     {
         var folder = await fileStorageService.CreateFolderAsync(inDto.FolderId, inDto.Folder.Title);
@@ -273,8 +276,9 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to rename the folder")]
     [HttpPut("folder/{folderId}")]
+    [WebhookAccessChecker(typeof(WebhookFolderAccessChecker))]
     public async Task<FolderDto<T>> RenameFolderAsync(CreateFolderRequestDto<T> inDto)
-    {        
+    {
         var folder = await fileStorageService.FolderRenameAsync(inDto.FolderId, inDto.Folder.Title);
 
         return await _folderDtoHelper.GetAsync(folder);
@@ -521,5 +525,33 @@ public class FoldersControllerCommon(
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
         yield return await globalFolderHelper.FolderArchiveAsync;
+    }
+}
+
+
+[Scope]
+public class WebhookFolderAccessChecker(SecurityContext securityContext, FileSecurity fileSecurity, IDaoFactory daoFactory) : IWebhookAccessChecker
+{
+    private readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true };
+
+    public async Task<bool> CheckAccessAsync(Guid targetUserId, Type responseType, string responseString, Dictionary<string, object> routeData)
+    {
+        if (securityContext.CurrentAccount.ID == targetUserId)
+        {
+            return true;
+        }
+
+        var response = System.Text.Json.Nodes.JsonNode.Parse(responseString)["response"].ToString();
+
+        var obj = JsonSerializer.Deserialize(response, responseType, _options);
+
+        if (obj is FolderDto<int> folderDtoInt)
+        {
+            var fileEntryInt = await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(folderDtoInt.Id);
+
+            return await fileSecurity.CanReadAsync(fileEntryInt, targetUserId);
+        }
+
+        return false;
     }
 }
