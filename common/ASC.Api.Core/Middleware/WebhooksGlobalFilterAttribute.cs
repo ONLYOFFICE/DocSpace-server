@@ -26,10 +26,6 @@
 
 using System.Collections.Concurrent;
 
-using ASC.Web.Webhooks;
-using ASC.Webhooks.Core.EF.Model;
-using net.openstack.Providers.Rackspace.Objects.Monitoring;
-
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
@@ -46,7 +42,7 @@ public class WebhooksGlobalFilterAttribute(
 
     public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
-        var webhook = await GetWebhookAsync(context.HttpContext);
+        var (webhook, accessCheckerType, returnType, routeData) = await GetWebhookAsync(context.HttpContext);
         var skip = webhook == null;
 
         if (!skip)
@@ -73,7 +69,7 @@ public class WebhooksGlobalFilterAttribute(
             {
                 var requestPayload = Encoding.UTF8.GetString(_stream.ToArray());
 
-                await webhookPublisher.PublishAsync(webhook.Id, requestPayload);
+                await webhookPublisher.PublishAsync(webhook, accessCheckerType, returnType, requestPayload, routeData);
             }
             catch (Exception e)
             {
@@ -88,7 +84,7 @@ public class WebhooksGlobalFilterAttribute(
         _stream?.Dispose();
     }
 
-    private async Task<Webhook> GetWebhookAsync(HttpContext context)
+    private async Task<(Webhook webhook, Type accessCheckerType, Type returnType, Dictionary<string, object> routeData)> GetWebhookAsync(HttpContext context)
     {
         var method = context.Request.Method;
         var endpoint = (RouteEndpoint)context.GetEndpoint();
@@ -97,17 +93,17 @@ public class WebhooksGlobalFilterAttribute(
 
         if (routePattern == null)
         {
-            return null;
+            return (null, null, null, null);
         }
-        
+
         if (disabled != null)
         {
-            return null;
+            return (null, null, null, null);
         }
-        
+
         if (!DbWorker.MethodList.Contains(method))
         {
-            return null;
+            return (null, null, null, null);
         }
 
         var key = $"{method}{routePattern}";
@@ -119,12 +115,44 @@ public class WebhooksGlobalFilterAttribute(
                 _webhooks.TryAdd(key, webhook);
             }
         }
-        
+
         if (webhook == null || (await settingsManager.LoadAsync<WebHooksSettings>()).Ids.Contains(webhook.Id))
         {
-            return null;
+            return (null, null, null, null);
         }
 
-        return webhook;
+        var (accessCheckerType, returnType) = GetAccessCheckerTypeFromRouteEndpoint(endpoint);
+
+        var routeData = context.GetRouteData().Values.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        return (webhook, accessCheckerType, returnType, routeData);
+    }
+
+    private (Type accessCheckerType, Type returnType) GetAccessCheckerTypeFromRouteEndpoint(RouteEndpoint endpoint)
+    {
+        var accessCheckerAttribute = endpoint?.Metadata.GetMetadata<WebhookAccessCheckerAttribute>();
+
+        if (accessCheckerAttribute == null)
+        {
+            return (null, null);
+        }
+
+        var returnType = GetReturnTypeFromRouteEndpoint(endpoint);
+
+        return (accessCheckerAttribute.WebhookAccessCheckerType, returnType);
+    }
+
+    private Type GetReturnTypeFromRouteEndpoint(RouteEndpoint endpoint)
+    {
+        var actionDescriptor = endpoint?.Metadata.GetMetadata<ControllerActionDescriptor>();
+
+        if (actionDescriptor == null)
+        {
+             return null;
+        }
+
+        var returnType = actionDescriptor.MethodInfo.ReturnType;
+
+        return returnType.IsGenericType ? returnType.GetGenericArguments().First() : returnType;
     }
 }

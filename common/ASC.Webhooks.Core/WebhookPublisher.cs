@@ -24,16 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Tenants;
-using Microsoft.AspNetCore.Http;
-
 using System.Text.Json;
 using System.Text.Json.Nodes;
+
+using ASC.Core.Tenants;
+
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ASC.Webhooks.Core;
 
 [Scope(typeof(IWebhookPublisher))]
 public class WebhookPublisher(
+    IServiceProvider serviceProvider,
     DbWorker dbWorker,
     IEventBus eventBus,
     SecurityContext securityContext,
@@ -41,7 +43,7 @@ public class WebhookPublisher(
     TenantUtil tenantUtil)
     : IWebhookPublisher
 {
-    public async Task PublishAsync(int webhookId, string requestPayload)
+    public async Task PublishAsync(Webhook webhook, Type accessCheckerType, Type returnType, string requestPayload, Dictionary<string, object> routeData)
     {
         if (string.IsNullOrEmpty(requestPayload))
         {
@@ -52,7 +54,24 @@ public class WebhookPublisher(
 
         foreach (var config in webhookConfigs)
         {
-            await PublishAsync(webhookId, requestPayload, config.Id);
+            if (config.TargetUserId.HasValue)
+            {
+                if (securityContext.CurrentAccount.ID != config.TargetUserId.Value)
+                {
+                    if (accessCheckerType == null)
+                    {
+                        continue;
+                    }
+
+                    var accessChecker = (IWebhookAccessChecker)serviceProvider.GetRequiredService(accessCheckerType);
+                    if (!await accessChecker.CheckAccessAsync(config.TargetUserId.Value, returnType, requestPayload, routeData))
+                    {
+                        continue;
+                    }
+                }
+            }
+
+            await PublishAsync(webhook.Id, requestPayload, config.Id);
         }
     }
 
@@ -74,7 +93,7 @@ public class WebhookPublisher(
             TenantId = tenantId
         };
 
-        webhooksLog = await PreProcessWebHookLog(webhooksLog);        
+        webhooksLog = await PreProcessWebHookLog(webhooksLog);
         var webhook = await dbWorker.WriteToJournal(webhooksLog);
 
         var @event = new WebhookRequestIntegrationEvent(securityContext.CurrentAccount.ID, tenantId)
