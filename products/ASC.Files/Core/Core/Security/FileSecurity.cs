@@ -200,7 +200,12 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Convert,
                     FilesSecurityActions.CreateRoomFrom,
                     FilesSecurityActions.CopyLink,
-                    FilesSecurityActions.Embed
+                    FilesSecurityActions.Embed,
+                    FilesSecurityActions.StartFilling,
+                    FilesSecurityActions.FillingStatus,
+                    FilesSecurityActions.ResetFilling,
+                    FilesSecurityActions.StopFilling
+
                 }
             },
             {
@@ -1104,43 +1109,57 @@ public class FileSecurity(IDaoFactory daoFactory,
                 
                 if (action == FilesSecurityActions.FillForms && file != null)
                 {
-                    var folderDao = daoFactory.GetFolderDao<T>();
-                    var fileFolder = await folderDao.GetFolderAsync(file.ParentId);
-                    if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
+                    var parentFolders = await GetFileParentFolders(e.ParentId);
+                    var fileFolder = parentFolders.FirstOrDefault(r => !DocSpaceHelper.IsRoom(r.FolderType));
+
+                    if (fileFolder != null && ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone))
                     {
                         return false;
                     }
                 }
-                if (file != null && file.IsForm && (action is FilesSecurityActions.FillForms or FilesSecurityActions.Edit))
+                if (file != null && file.IsForm && (action is 
+                    FilesSecurityActions.FillForms or 
+                    FilesSecurityActions.Edit or
+                    FilesSecurityActions.StartFilling or
+                    FilesSecurityActions.FillingStatus or
+                    FilesSecurityActions.ResetFilling or
+                    FilesSecurityActions.StopFilling))
                 {
-                    var folderDao = daoFactory.GetFolderDao<T>();
-                    var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
-                    if (room?.FolderType == FolderType.VirtualDataRoom)
+                    var fileDao = daoFactory.GetFileDao<T>();
+                    var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, userId);
+                    var role = await roles.FirstOrDefaultAsync(r => !r.Submitted);
+                    var properties = await fileDao.GetProperties(file.Id);
+                    var formFilling = properties.FormFilling;
+
+                    var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
+                    var hasFullAccessToForm = userHasFullAccess || e.Access is FileShare.RoomManager or FileShare.ContentCreator;
+
+                    return action switch
                     {
-                        var fileDao = daoFactory.GetFileDao<T>();
-                        var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, userId);
+                        FilesSecurityActions.ResetFilling =>
+                            hasFullAccessToForm && formFilling.StartFilling && formFilling.IsFillingPaused,
 
-                        var role = await roles.FirstOrDefaultAsync(role => role.Submitted == false);
+                        FilesSecurityActions.StopFilling =>
+                            hasFullAccessToForm && formFilling.StartFilling && !formFilling.IsFillingPaused && currentStep > 0,
 
-                        switch (action)
-                        {
-                            case FilesSecurityActions.FillForms:
-                                if ((currentStep == -1) || (role == null || currentStep != role.Sequence))
-                                {
-                                    return false;
-                                }
-                                break;
+                        FilesSecurityActions.StartFilling =>
+                            hasFullAccessToForm && !formFilling.StartFilling,
 
-                            case FilesSecurityActions.Edit:
-                                if (currentStep != -1)
-                                {
-                                    return false;
-                                }
-                                break;
-                        }
-                    }
+                        FilesSecurityActions.FillForms =>
+                            !formFilling.IsFillingPaused &&
+                            currentStep != -1 &&
+                            role?.Sequence == currentStep,
+
+                        FilesSecurityActions.Edit =>
+                            currentStep == -1 && (hasFullAccessToForm || e.Access is FileShare.Editing),
+
+                        FilesSecurityActions.FillingStatus =>
+                            formFilling.StartFilling,
+
+                        _ => false
+                    };
                 }
-                
+
                 if (action is 
                        FilesSecurityActions.Rename or 
                        FilesSecurityActions.Lock or 
@@ -2713,6 +2732,18 @@ public class FileSecurity(IDaoFactory daoFactory,
         [SwaggerEnum("Change owner")]        ChangeOwner,
 
         [SwaggerEnum("Index export")]
-        IndexExport
+        IndexExport,
+
+        [SwaggerEnum("Start filling")]
+        StartFilling,
+
+        [SwaggerEnum("Filling status")]
+        FillingStatus,
+
+        [SwaggerEnum("Reset filling")]
+        ResetFilling,
+
+        [SwaggerEnum("Start filling")]
+        StopFilling
     }
 }
