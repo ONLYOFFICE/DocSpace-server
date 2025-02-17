@@ -2815,6 +2815,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Business.
+        /// </summary>
+        public static string Tariffs_adminyear {
+            get {
+                return ResourceManager.GetString("Tariffs_adminyear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Non-profit.
         /// </summary>
         public static string Tariffs_nonprofit {
