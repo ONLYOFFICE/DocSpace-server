@@ -55,7 +55,7 @@ public class OperationController(
 
         await fileOperationsManager.PublishDownload(inDto.FolderIds, files, commonLinkUtility.ServerRootPath);
 
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r=> r.OperationType == FileOperationType.Download))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -75,7 +75,7 @@ public class OperationController(
     {
         await fileOperationsManager.PublishMoveOrCopyAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, true, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
         
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r=> r.OperationType == FileOperationType.Copy))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -95,7 +95,7 @@ public class OperationController(
     {
         await fileOperationsManager.PublishDelete(inDto.FolderIds, inDto.FileIds, false, !inDto.DeleteAfter, inDto.Immediately);
         
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.Delete))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -108,7 +108,7 @@ public class OperationController(
     {
         await fileOperationsManager.PublishDelete([], [inDto.FileId], false, !inDto.DeleteAfter, true, versions: inDto.Versions);
         
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.Delete))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -129,7 +129,7 @@ public class OperationController(
         
         await fileOperationsManager.PublishDelete(foldersId, filesId, false, true, false, true);
 
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.Delete))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -155,6 +155,25 @@ public class OperationController(
     }
 
     /// <summary>
+    /// Retrieves the statuses of operations filtered by the specified operation type.
+    /// </summary>
+    /// <param name="inDto">The data transfer object containing the operation type for which statuses are retrieved.</param>
+    /// <path>api/2.0/files/fileops/{operationType}</path>
+    /// <collection>list</collection>
+    /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [AllowAnonymous]
+    [HttpGet("{operationType}")]
+    public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses(FileOperationResultRequestDto inDto)
+    {
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == inDto.OperationType))
+        {
+            yield return await fileOperationDtoHelper.GetAsync(e);
+        }
+    }
+
+    /// <summary>
     /// Marks the files and folders with the IDs specified in the request as read.
     /// </summary>
     /// <short>Mark as read</short>
@@ -167,7 +186,7 @@ public class OperationController(
     {
         await fileOperationsManager.PublishMarkAsRead(inDto.FolderIds, inDto.FileIds);
         
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.MarkAsRead))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -187,7 +206,7 @@ public class OperationController(
     {
         await fileOperationsManager.PublishMoveOrCopyAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, false, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
         
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.Move))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -205,7 +224,7 @@ public class OperationController(
     {
         await fileOperationsManager.DuplicateAsync(inDto.FolderIds, inDto.FileIds);
         
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.Duplicate))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }

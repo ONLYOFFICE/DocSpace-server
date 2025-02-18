@@ -90,6 +90,7 @@ public class TenantExtra(
         var quotas = await GetTenantQuotasAsync();
 
         return quotas.OrderBy(q => q.CountUser)
+                     .ThenBy(q => q.Year)
                      .FirstOrDefault(q =>
                                      q.CountUser > needUsersCount
                                      && q.MaxTotalSize > usedSpace

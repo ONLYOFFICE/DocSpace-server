@@ -400,6 +400,6 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     
     public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
     {
-        return null;
+        return new ChunkZipWriteOperator(tempStream, chunkedUploadSession, sessionHolder);
     }
 }

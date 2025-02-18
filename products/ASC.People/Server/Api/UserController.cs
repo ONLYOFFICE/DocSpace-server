@@ -1744,9 +1744,9 @@ public class UserController(
 
         foreach (var user in users)
         {
-            var isGuest = await userManager.IsGuestAsync(user);
+            var isGuest = await _userManager.IsGuestAsync(user);
             await userManagerWrapper.UpdateUserTypeAsync(user, inDto.Type);
-            if (isGuest && !await userManager.IsGuestAsync(user)) 
+            if (isGuest && !await _userManager.IsGuestAsync(user)) 
             {
                 await socketManager.AddUserAsync(user);
                 await socketManager.DeleteGuestAsync(user.Id);
