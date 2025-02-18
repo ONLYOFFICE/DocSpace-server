@@ -545,7 +545,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpPut("file/{fileId}/formroleassignment")]
     public async Task<FormRole> ReassignFormRoleToUser(ReassignFormRoleToUserDto<T> inDto)
     {
-        return await fileStorageService.ReassignFormRoleToUser(inDto.FormId, inDto.RoleId, inDto.UserId, inDto.ToUserId);
+        return await fileStorageService.ReassignFormRoleToUser(inDto.FormId, inDto.RoleName, inDto.UserId, inDto.ToUserId);
     }
 
     [Tags("Files / Files")]
@@ -554,7 +554,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpPut("file/{fileId}/formrolereopen")]
     public async Task ReopenFormForUser(ReopenFormRoleForUserDto<T> inDto)
     {
-        await fileStorageService.ReopenFormForUser(inDto.FormId, inDto.RoleId, inDto.UserId, inDto.ResetSubsequentRoles);
+        await fileStorageService.ReopenFormForUser(inDto.FormId, inDto.RoleName, inDto.UserId, inDto.ResetSubsequentRoles);
     }
 
     [Tags("Files / Files")]

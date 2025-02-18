@@ -17,10 +17,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 {
                     tenant_id = table.Column<int>(type: "int", nullable: false),
                     form_id = table.Column<int>(type: "int", nullable: false),
-                    role_id = table.Column<int>(type: "int", nullable: false),
                     user_id = table.Column<string>(type: "varchar(38)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     role_name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    role_color = table.Column<string>(type: "char(6)", maxLength: 6, nullable: true, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     sequence = table.Column<int>(type: "int", nullable: false),
                     opened_at = table.Column<DateTime>(type: "datetime", nullable: false),
@@ -29,7 +30,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.form_id, x.role_id, x.user_id });
+                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.form_id, x.role_name, x.user_id });
                     table.ForeignKey(
                         name: "FK_files_form_role_mapping_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,

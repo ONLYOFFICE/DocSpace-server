@@ -327,9 +327,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public Task<DbFilesFormRoleMapping> FilesFormRoleAsync(int tenantId, int formId, int roleId, Guid userId)
+    public Task<DbFilesFormRoleMapping> FilesFormRoleAsync(int tenantId, int formId, string roleName, Guid userId)
     {
-        return FileQueries.FilesFormRoleAsyncAsync(this, tenantId, formId, roleId, userId);
+        return FileQueries.FilesFormRoleAsyncAsync(this, tenantId, formId, roleName, userId);
     }
 
 }
@@ -915,9 +915,9 @@ static file class FileQueries
                     .OrderBy(r => r.Sequence)
                     .Select(r => new FormRole
                     {
-                        RoleId = r.RoleId,
                         UserId = r.UserId,
                         RoleName = r.RoleName,
+                        RoleColor = r.RoleColor,
                         Sequence = r.Sequence,
                         Submitted = r.Submitted,
                         OpenedAt = r.OpenedAt,
@@ -951,9 +951,9 @@ static file class FileQueries
                     .OrderBy(r => r.Sequence)
                     .Select(r => new FormRole
                     {
-                        RoleId = r.RoleId,
                         UserId = r.UserId,
                         RoleName = r.RoleName,
+                        RoleColor = r.RoleColor,
                         Sequence = r.Sequence,
                         Submitted = r.Submitted,
                         OpenedAt = r.OpenedAt,
@@ -966,8 +966,8 @@ static file class FileQueries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.FormId == formId));
 
-    public static readonly Func<FilesDbContext, int, int, int, Guid, Task<DbFilesFormRoleMapping>> FilesFormRoleAsyncAsync =
+    public static readonly Func<FilesDbContext, int, int, string, Guid, Task<DbFilesFormRoleMapping>> FilesFormRoleAsyncAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int formId, int roleId, Guid userId) =>
-                ctx.FilesFormRoleMapping.FirstOrDefault(r => r.TenantId == tenantId && r.FormId == formId && r.RoleId == roleId && r.UserId == userId));
+            (FilesDbContext ctx, int tenantId, int formId, string roleName, Guid userId) =>
+                ctx.FilesFormRoleMapping.FirstOrDefault(r => r.TenantId == tenantId && r.FormId == formId && r.RoleName == roleName && r.UserId == userId));
 }

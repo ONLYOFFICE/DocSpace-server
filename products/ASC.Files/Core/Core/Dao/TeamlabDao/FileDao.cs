@@ -1403,9 +1403,9 @@ internal class FileDao(
             {
                 TenantId = tenantId,
                 FormId = formId,
-                RoleId = formRole.RoleId,
                 UserId = formRole.UserId,
                 RoleName = formRole.RoleName,
+                RoleColor = formRole.RoleColor,
                 Sequence = formRole.Sequence,
                 Submitted = formRole.Submitted
 
@@ -1415,13 +1415,13 @@ internal class FileDao(
 
         await filesDbContext.SaveChangesAsync();
     }
-    public async Task<FormRole> ReassignFormRoleToUser(int formId, int roleId, Guid userId, Guid toUserId)
+    public async Task<FormRole> ReassignFormRoleToUser(int formId, string roleName, Guid userId, Guid toUserId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var role = await filesDbContext.FilesFormRoleAsync(tenantId, formId, roleId, userId);
+        var role = await filesDbContext.FilesFormRoleAsync(tenantId, formId, roleName, userId);
 
         if (role != null)
         {
@@ -1430,7 +1430,6 @@ internal class FileDao(
             {
                 TenantId = tenantId,
                 FormId = formId,
-                RoleId = roleId,
                 UserId = toUserId,
                 RoleName = role.RoleName,
                 Sequence = role.Sequence,
@@ -1445,7 +1444,7 @@ internal class FileDao(
         return null;
     }
 
-    public async Task ReopenFormForUser(int formId, int roleId, Guid userId, bool resetSubsequentRoles)
+    public async Task ReopenFormForUser(int formId, string roleName, Guid userId, bool resetSubsequentRoles)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -1455,7 +1454,7 @@ internal class FileDao(
         await strategy.ExecuteAsync(async () => {
 
             await using var context = await _dbContextFactory.CreateDbContextAsync();
-            var role = await context.FilesFormRoleAsync(tenantId, formId, roleId, userId);
+            var role = await context.FilesFormRoleAsync(tenantId, formId, roleName, userId);
 
             if (role != null)
             {
@@ -1508,10 +1507,8 @@ internal class FileDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var toUpdate = await filesDbContext.FilesFormRoleAsync(tenantId, formId, formRole.RoleId, formRole.UserId);
+        var toUpdate = await filesDbContext.FilesFormRoleAsync(tenantId, formId, formRole.RoleName, formRole.UserId);
 
-        toUpdate.RoleName = formRole.RoleName;
-        toUpdate.Sequence = formRole.Sequence;
         toUpdate.Submitted = formRole.Submitted;
         toUpdate.OpenedAt = formRole.OpenedAt;
         toUpdate.SubmissionDate = formRole.SubmissionDate;

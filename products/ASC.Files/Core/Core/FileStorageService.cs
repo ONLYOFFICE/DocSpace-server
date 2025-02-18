@@ -4333,7 +4333,7 @@ public class FileStorageService //: IFileStorageService
         return roles;
     }
 
-    public async Task<FormRole> ReassignFormRoleToUser<T>(T formId, int roleId, Guid userId, Guid toUserId)
+    public async Task<FormRole> ReassignFormRoleToUser<T>(T formId, string roleName, Guid userId, Guid toUserId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         await ValidateChangeRolesPermission(formId, fileDao);
@@ -4342,10 +4342,10 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException();
         }
-        return await fileDao.ReassignFormRoleToUser(formId, roleId, userId, toUserId);
+        return await fileDao.ReassignFormRoleToUser(formId, roleName, userId, toUserId);
     }
 
-    public async Task ReopenFormForUser<T>(T formId, int roleId, Guid userId, bool resetSubsequentRoles)
+    public async Task ReopenFormForUser<T>(T formId, string roleName, Guid userId, bool resetSubsequentRoles)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         await ValidateChangeRolesPermission(formId, fileDao);
@@ -4354,7 +4354,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException();
         }
-        await fileDao.ReopenFormForUser(formId, roleId, userId, resetSubsequentRoles);
+        await fileDao.ReopenFormForUser(formId, roleName, userId, resetSubsequentRoles);
     }
     public async IAsyncEnumerable<FormRole> GetAllFormRoles<T>(T formId)
     {

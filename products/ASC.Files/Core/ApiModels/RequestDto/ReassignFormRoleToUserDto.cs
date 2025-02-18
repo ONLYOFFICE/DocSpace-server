@@ -36,7 +36,7 @@ public class ReassignFormRoleToUserDto<T>
     /// <summary>
     /// Role ID
     /// </summary>
-    public int RoleId { get; set; }
+    public string RoleName { get; set; }
 
     /// <summary>
     /// User ID

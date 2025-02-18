@@ -5807,9 +5807,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("form_id");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int")
-                        .HasColumnName("role_id");
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("role_name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("UserId")
                         .HasColumnType("varchar(38)")
@@ -5821,10 +5824,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("opened_at");
 
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("role_name")
+                    b.Property<string>("RoleColor")
+                        .HasColumnType("char(6)")
+                        .HasColumnName("role_color")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
@@ -5840,7 +5842,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("submitted");
 
-                    b.HasKey("TenantId", "FormId", "RoleId", "UserId")
+                    b.HasKey("TenantId", "FormId", "RoleName", "UserId")
                         .HasName("PRIMARY");
 
                     b.HasIndex("TenantId", "FormId")
