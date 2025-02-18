@@ -81,7 +81,7 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
 
             await SetPercentageAndCheckCancellationAsync(80, true);
 
-            await UpdateUserTypeAsync(userManager, webItemSecurityCache, distributedLockProvider);
+            await UpdateUserTypeAsync(userManager, webItemSecurityCache, distributedLockProvider, socketManager);
             messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create([User]));
 
             await SetPercentageAndCheckCancellationAsync(100, false);
