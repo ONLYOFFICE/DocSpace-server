@@ -42,8 +42,8 @@ var rabbitMq = builder
 
 var redis = builder
     .AddRedis("cache")
-    .WithLifetime(ContainerLifetime.Persistent)
-    .WithRedisInsight();
+    .WithLifetime(ContainerLifetime.Persistent);
+    //.WithRedisInsight();
 
 var migrate = builder
     .AddExecutable("migrate",path, Path.GetDirectoryName(path) ?? "")
