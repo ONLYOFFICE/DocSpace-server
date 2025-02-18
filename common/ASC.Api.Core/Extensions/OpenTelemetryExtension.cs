@@ -26,7 +26,6 @@
 
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace ASC.Api.Core.Extensions;
@@ -77,8 +76,9 @@ public static class OpenTelemetryExtension
             })
             .WithTracing(tracing =>
             {
-                tracing.AddSource(builder.Environment.ApplicationName)
-                    .AddHttpClientInstrumentation();
+                tracing
+                    .AddHttpClientInstrumentation()
+                    .AddAspNetCoreInstrumentation();
             });
         
         builder.AddOpenTelemetryExporters();
