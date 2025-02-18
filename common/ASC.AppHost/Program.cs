@@ -37,11 +37,13 @@ var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", 
 
 var rabbitMq = builder
     .AddRabbitMQ("messaging")
-    .WithLifetime(ContainerLifetime.Persistent);
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithManagementPlugin();
 
 var redis = builder
     .AddRedis("cache")
-    .WithLifetime(ContainerLifetime.Persistent);
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithRedisInsight();
 
 var migrate = builder
     .AddExecutable("migrate",path, Path.GetDirectoryName(path) ?? "")
@@ -60,9 +62,10 @@ AddProjectWithDefaultConfiguration<ASC_Files_Service>();
 AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
 AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
 
-builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build");
-builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build");
-builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build");
+
+builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithHttpEndpoint(targetPort: 9899).WithHttpHealthCheck("/health");
+builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
+builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
 
 await builder.Build().RunAsync();
 
