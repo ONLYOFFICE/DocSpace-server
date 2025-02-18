@@ -28,6 +28,7 @@ namespace ASC.Data.Storage.DataOperators;
 public abstract class BaseReadOperator: IDataReadOperator
 {
     internal string _tmpdir;
+    internal CancellationToken _cancellationToken;
 
     public string GetFolder()
     {
@@ -41,12 +42,20 @@ public abstract class BaseReadOperator: IDataReadOperator
 
     public Stream GetEntry(string key)
     {
+        if (_cancellationToken.IsCancellationRequested)
+        {
+            throw new OperationCanceledException();
+        }
         var filePath = Path.Combine(_tmpdir, key);
         return File.Exists(filePath) ? File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read) : null;
     }
 
     public IEnumerable<string> GetEntries(string key)
     {
+        if (_cancellationToken.IsCancellationRequested)
+        {
+            throw new OperationCanceledException();
+        }
         var path = Path.Combine(_tmpdir, key);
         var files = Directory.EnumerateFiles(path);
         return files;
@@ -54,6 +63,10 @@ public abstract class BaseReadOperator: IDataReadOperator
 
     public IEnumerable<string> GetDirectories(string key)
     {
+        if (_cancellationToken.IsCancellationRequested)
+        {
+            throw new OperationCanceledException();
+        }
         var path = Path.Combine(_tmpdir, key);
         var files = Directory.EnumerateDirectories(path);
         return files;

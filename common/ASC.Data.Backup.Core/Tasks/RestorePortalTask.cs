@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Threading;
+
 namespace ASC.Data.Backup.Tasks;
 
 [Scope]
@@ -49,8 +51,9 @@ public class RestorePortalTask(DbFactory dbFactory,
 
     private ColumnMapper _columnMapper;
     private string _region;
+    private CancellationToken _cancellationToken;
 
-    public void Init(string region, string fromFilePath, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
+    public void Init(string region, string fromFilePath, CancellationToken cancellationToken, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(fromFilePath);
 
@@ -63,6 +66,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         UpgradesPath = upgradesPath;
         _columnMapper = columnMapper ?? new ColumnMapper();
         _region = region;
+        _cancellationToken = cancellationToken;
         Init(tenantId);
     }
 
@@ -72,7 +76,7 @@ public class RestorePortalTask(DbFactory dbFactory,
 
         options.DebugBeginRestoreData();
 
-        using (var dataReader = DataOperatorFactory.GetReadOperator(BackupFilePath))
+        using (var dataReader = DataOperatorFactory.GetReadOperator(BackupFilePath, _cancellationToken))
         {
             await using (var entry = dataReader.GetEntry(KeyHelper.GetDumpKey()))
             {

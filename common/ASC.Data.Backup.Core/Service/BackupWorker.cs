@@ -142,6 +142,16 @@ public class BackupWorker(
         }
     }
 
+    public async Task CancelRestoreAsync(int tenantId)
+    {
+        var tasks = (await _progressQueue.GetAllTasks<RestoreProgressItem>()).Where(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Restore);
+
+        foreach (var t in tasks)
+        {
+            await _progressQueue.DequeueTask(t.Id);
+        }
+    }
+
     public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))

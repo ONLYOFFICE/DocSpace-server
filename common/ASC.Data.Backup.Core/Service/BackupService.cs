@@ -157,6 +157,11 @@ public class BackupService(
         await backupWorker.StopBackupAsync(tenantId);
     }
 
+    public async Task CancelRestoreAsync(int tenantId)
+    {
+        await backupWorker.CancelRestoreAsync(tenantId);
+    }
+
     public async Task<BackupProgress> GetTransferProgress(int tenantId)
     {
         return await backupWorker.GetTransferProgressAsync(tenantId);

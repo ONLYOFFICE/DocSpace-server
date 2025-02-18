@@ -133,13 +133,23 @@ public class RestoreProgressItem : BaseBackupProgressItem
             columnMapper.SetMapping("tenants_tenants", "alias", tenant.Alias, Guid.Parse(Id).ToString("N"));
             columnMapper.Commit();
 
-            restoreTask.Init(_region, tempFile, TenantId, columnMapper, _upgradesPath);
+            restoreTask.Init(_region, tempFile, CancellationToken, TenantId, columnMapper, _upgradesPath);
             restoreTask.ProgressChanged = async args =>
             {
+                if (CancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
                 Percentage = Percentage = 10d + 0.65 * args.Progress;
                 await PublishChanges();
             };
-            await restoreTask.RunJob(); 
+
+            await restoreTask.RunJob();
+            if (CancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException();
+            }
+
             NewTenantId = columnMapper.GetTenantMapping();
             await PublishChanges();
 
@@ -175,6 +185,10 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 await _tenantManager.GetCurrentTenantQuotaAsync(true);
                 await _notifyHelper.SendAboutRestoreCompletedAsync(restoredTenant, Notify);
             }
+            if (CancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException();
+            }
 
             Percentage = 75;
 
@@ -187,7 +201,10 @@ public class RestoreProgressItem : BaseBackupProgressItem
         }
         catch (Exception error)
         {
-            _logger.ErrorRestoreProgressItem(error);
+            if(!CancellationToken.IsCancellationRequested)
+            {
+                _logger.ErrorRestoreProgressItem(error);
+            }
             Exception = error; 
             IsCompleted = true;
 
@@ -199,13 +216,16 @@ public class RestoreProgressItem : BaseBackupProgressItem
         }
         finally
         {
-            try
+            if (!CancellationToken.IsCancellationRequested)
             {
-                await PublishChanges();
-            }
-            catch (Exception error)
-            {
-                _logger.ErrorPublish(error);
+                try
+                {
+                    await PublishChanges();
+                }
+                catch (Exception error)
+                {
+                    _logger.ErrorPublish(error);
+                }
             }
 
             if (File.Exists(tempFile))

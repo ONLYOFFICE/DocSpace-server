@@ -30,6 +30,7 @@ public class TarReadOperator: BaseReadOperator
     public TarReadOperator(string targetFile, bool removeTarget = true)
     {
         _tmpdir = Path.Combine(Path.GetDirectoryName(targetFile), Path.GetFileNameWithoutExtension(targetFile).Replace('>', '_').Replace(':', '_').Replace('?', '_'));
+        _cancellationToken = CancellationToken.None;
 
         using (var stream = File.OpenRead(targetFile))
         using (var tarOutputStream = TarArchive.CreateInputTarArchive(stream, Encoding.UTF8))
@@ -46,6 +47,7 @@ public class TarReadOperator: BaseReadOperator
     public TarReadOperator(string targetFile, CancellationToken token, bool removeTarget = true)
     {
         _tmpdir = Path.Combine(Path.GetDirectoryName(targetFile), Path.GetFileNameWithoutExtension(targetFile).Replace('>', '_').Replace(':', '_').Replace('?', '_'));
+        _cancellationToken = token;
 
         using (var stream = File.OpenRead(targetFile))
         using (var tarOutputStream = TarArchive.CreateInputTarArchive(stream, Encoding.UTF8))

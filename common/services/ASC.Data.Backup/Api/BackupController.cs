@@ -213,11 +213,26 @@ public class BackupController(
     /// <short>Stop current backup</short>
     /// <path>api/2.0/backup/stopbackup</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
+    [SwaggerResponse(200)]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpPost("stopbackup")]
     public async Task StopBackupAsync()
+    {
+        await backupAjaxHandler.StopBackupAsync();
+    }
+
+    /// <summary>
+    /// Cancel current restore.(Only from saas backup)
+    /// </summary>
+    /// <short>Cancel current restore</short>
+    /// <path>api/2.0/backup/cancelrestore</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200)]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [AllowNotPayment]
+    [HttpPost("cancelrestore")]
+    public async Task CancelRestoreAsync()
     {
         await backupAjaxHandler.StopBackupAsync();
     }
