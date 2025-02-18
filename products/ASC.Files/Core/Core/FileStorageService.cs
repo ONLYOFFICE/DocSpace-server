@@ -3016,7 +3016,7 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task DeletePersonalDataAsync<T>(Guid userFromId, bool checkPermission = false)
+    public async Task DeletePersonalDataAsync<T>(Guid userFromId, bool checkPermission = false, bool withTrash = true)
     {
         if (checkPermission)
         {
@@ -3048,7 +3048,7 @@ public class FileStorageService //: IFileStorageService
             await folderDao.DeleteFolderAsync(folderIdMy);
         }
 
-        if (!Equals(folderIdTrash, 0))
+        if (!Equals(folderIdTrash, 0) && withTrash)
         {
             var fileIdsFromTrash = await fileDao.GetFilesAsync(folderIdTrash).ToListAsync();
             var folderIdsFromTrash = await folderDao.GetFoldersAsync(folderIdTrash).ToListAsync();
