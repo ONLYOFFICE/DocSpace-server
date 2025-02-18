@@ -1821,7 +1821,7 @@ public class UserController(
     /// Returns the progress of the started update user type.
     /// </summary>
     /// <short>Get the update progress</short>
-    /// <path>api/2.0/people/type/{userid}</path>
+    /// <path>api/2.0/people/type/progress/{userid}</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [HttpGet("type/progress/{userid:guid}")]
