@@ -105,6 +105,7 @@ public class FoldersControllerThirdparty(
         permissionContext,
         fileShareDtoHelper);
 
+[WebhookAccessChecker(typeof(WebhookFolderControllerAccessChecker))]
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
@@ -125,7 +126,6 @@ public abstract class FoldersController<T>(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "New folder parameters", typeof(FolderDto<int>))]
     [HttpPost("folder/{folderId}")]
-    [WebhookAccessChecker(typeof(WebhookFolderDtoAccessChecker))]
     public async Task<FolderDto<T>> CreateFolderAsync(CreateFolderRequestDto<T> inDto)
     {
         var folder = await fileStorageService.CreateFolderAsync(inDto.FolderId, inDto.Folder.Title);
@@ -158,10 +158,11 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}/order</path>
     [Tags("Files / Folders")]
     [HttpPut("folder/{folderId}/order")]
-    [WebhookAccessChecker(typeof(WebhookFolderRouteAccessChecker))]
-    public async Task SetFileOrder(OrderFolderRequestDto<T> inDto)
+    public async Task<FolderDto<T>> SetFileOrder(OrderFolderRequestDto<T> inDto)
     {
-        await fileStorageService.SetFolderOrder(inDto.FolderId, inDto.Order.Order);
+        var folder = await fileStorageService.SetFolderOrder(inDto.FolderId, inDto.Order.Order);
+
+        return await _folderDtoHelper.GetAsync(folder);
     }
 
     /// <summary>
@@ -277,7 +278,6 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to rename the folder")]
     [HttpPut("folder/{folderId}")]
-    [WebhookAccessChecker(typeof(WebhookFolderDtoAccessChecker))]
     public async Task<FolderDto<T>> RenameFolderAsync(CreateFolderRequestDto<T> inDto)
     {
         var folder = await fileStorageService.FolderRenameAsync(inDto.FolderId, inDto.Folder.Title);
@@ -531,7 +531,10 @@ public class FoldersControllerCommon(
 
 
 [Scope]
-public class WebhookFolderDtoAccessChecker(SecurityContext securityContext, FileSecurity fileSecurity, IDaoFactory daoFactory) : IWebhookAccessChecker
+public class WebhookFolderControllerAccessChecker(
+    SecurityContext securityContext,
+    FileSecurity fileSecurity,
+    IDaoFactory daoFactory) : IWebhookAccessChecker
 {
     private readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true };
 
@@ -542,56 +545,48 @@ public class WebhookFolderDtoAccessChecker(SecurityContext securityContext, File
             return true;
         }
 
-        var response = System.Text.Json.Nodes.JsonNode.Parse(webhookData.ResponseString)["response"].ToString();
-
-        var obj = JsonSerializer.Deserialize(response, webhookData.ResponseType, _options);
-
-        if (obj is FolderDto<int> folderDtoInt)
-        {
-            var folderInt = await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(folderDtoInt.Id);
-
-            return await fileSecurity.CanReadAsync(folderInt, webhookData.TargetUserId);
-        }
-
-        if (obj is FolderDto<string> folderDtoString)
-        {
-            var folderString = await daoFactory.GetCacheFolderDao<string>().GetFolderAsync(folderDtoString.Id);
-
-            return await fileSecurity.CanReadAsync(folderString, webhookData.TargetUserId);
-        }
-
-        return false;
-    }
-}
-
-[Scope]
-public class WebhookFolderRouteAccessChecker(SecurityContext securityContext, FileSecurity fileSecurity, IDaoFactory daoFactory) : IWebhookAccessChecker
-{
-    public async Task<bool> CheckAccessAsync(WebhookData webhookData)
-    {
-        if (securityContext.CurrentAccount.ID == webhookData.TargetUserId)
-        {
-            return true;
-        }
-
-        var folderId = webhookData.RouteData["folderId"]?.ToString();
-
-        if (string.IsNullOrEmpty(folderId))
+        if (webhookData.ResponseType == typeof(FileOperationDto))
         {
             return false;
         }
 
-        if (int.TryParse(folderId, out var folderIdInt))
+        if (webhookData.RouteData.TryGetValue("folderId", out var folderId) && !string.IsNullOrEmpty(folderId))
         {
-            var folderInt = await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(folderIdInt);
+            if (int.TryParse(folderId, out var folderIdInt))
+            {
+                var folderInt = await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(folderIdInt);
 
-            return await fileSecurity.CanReadAsync(folderInt, webhookData.TargetUserId);
+                return await fileSecurity.CanReadAsync(folderInt, webhookData.TargetUserId);
+            }
+            else
+            {
+                var folderString = await daoFactory.GetCacheFolderDao<string>().GetFolderAsync(folderId);
+
+                return await fileSecurity.CanReadAsync(folderString, webhookData.TargetUserId);
+            }
         }
-        else
+
+        var responseNode = System.Text.Json.Nodes.JsonNode.Parse(webhookData.ResponseString)["response"];
+
+        var obj = JsonSerializer.Deserialize(responseNode, webhookData.ResponseType, _options);
+
+        if (obj != null)
         {
-            var folderString = await daoFactory.GetCacheFolderDao<string>().GetFolderAsync(folderId);
+            if (obj is FolderDto<int> folderDtoInt)
+            {
+                var folderInt = await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(folderDtoInt.Id);
 
-            return await fileSecurity.CanReadAsync(folderString, webhookData.TargetUserId);
+                return await fileSecurity.CanReadAsync(folderInt, webhookData.TargetUserId);
+            }
+
+            if (obj is FolderDto<string> folderDtoString)
+            {
+                var folderString = await daoFactory.GetCacheFolderDao<string>().GetFolderAsync(folderDtoString.Id);
+
+                return await fileSecurity.CanReadAsync(folderString, webhookData.TargetUserId);
+            }
         }
+
+        return false;
     }
 }
