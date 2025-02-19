@@ -55,7 +55,7 @@ public static class OpenTelemetryExtension
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
         });
-        
+
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {
@@ -73,6 +73,8 @@ public static class OpenTelemetryExtension
                         options.Org = telemetrySettings.InfluxDB.Org;
                     });
                 }
+                
+                metrics.AddMeter("MySqlConnector");
             })
             .WithTracing(tracing =>
             {
