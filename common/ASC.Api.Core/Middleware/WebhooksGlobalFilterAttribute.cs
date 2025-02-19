@@ -152,16 +152,16 @@ public class WebhooksGlobalFilterAttribute(
 
     private static Type GetReturnTypeFromRouteEndpoint(RouteEndpoint endpoint)
     {
-        var actionDescriptor = endpoint?.Metadata.GetMetadata<ControllerActionDescriptor>();
+        var returnType = endpoint?.Metadata?.GetMetadata<ControllerActionDescriptor>()?.MethodInfo?.ReturnType;
 
-        if (actionDescriptor == null)
+        if (returnType == null)
         {
              return null;
         }
 
-        var returnType = actionDescriptor.MethodInfo.ReturnType;
-
-        return returnType.IsGenericType ? returnType.GetGenericArguments().First() : returnType;
+        return returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>)
+            ? returnType.GetGenericArguments().First()
+            : returnType;
     }
 
     private static async Task<Dictionary<string, (Type, object)>> GetPostedDataAsync(HttpContext context, RouteEndpoint endpoint)
