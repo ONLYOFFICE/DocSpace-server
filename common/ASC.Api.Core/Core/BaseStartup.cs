@@ -51,6 +51,8 @@ public abstract class BaseStartup
 
     protected bool OpenApiEnabled { get; init; }
 
+    private bool OpenTelemetryEnabled { get; }
+
     protected BaseStartup(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -59,10 +61,12 @@ public abstract class BaseStartup
 
         DIHelper = new DIHelper();
         OpenApiEnabled = _configuration.GetValue<bool>("openApi:enable");
+        OpenTelemetryEnabled = _configuration.GetValue<bool>("openTelemetry:enable");
     }
 
-    public virtual async Task ConfigureServices(IServiceCollection services)
+    public virtual async Task ConfigureServices(WebApplicationBuilder builder)
     {
+        var services = builder.Services;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
@@ -410,7 +414,10 @@ public abstract class BaseStartup
             mvcBuilder.AddApiExplorer();
             services.AddWebOpenApi(_configuration);
         }
-
+        if (OpenTelemetryEnabled)
+        {
+            builder.ConfigureOpenTelemetry();
+        }
         services.AddScoped<CookieAuthHandler>();
         services.AddScoped<BasicAuthHandler>();
         services.AddScoped<ConfirmAuthHandler>();

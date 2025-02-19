@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,15 +36,27 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 /**
- * Repository interface for performing CRUD operations on {@link KeyPair} entities.
- *
- * <p>This interface extends {@link CrudRepository} and provides methods for interacting with the
- * KeyPair entities stored in the database.
+ * Repository interface for managing {@link KeyPair} entities. This interface extends {@link
+ * CrudRepository} to provide basic CRUD operations, and it defines custom queries for managing and
+ * retrieving key pairs.
  */
 public interface JpaKeyPairRepository extends CrudRepository<KeyPair, String> {
+
+  /**
+   * Retrieves all key pairs created after the specified cutoff timestamp.
+   *
+   * @param cutoff The cutoff timestamp. Only key pairs created after this timestamp are included.
+   * @return A {@link Set} of {@link KeyPair} objects that are considered active.
+   */
   @Query("SELECT kp FROM KeyPair kp WHERE kp.createdAt > :cutoff")
   Set<KeyPair> findActiveKeyPairs(@Param("cutoff") ZonedDateTime cutoff);
 
+  /**
+   * Deletes all key pairs created before the specified cutoff timestamp. This method is used to
+   * invalidate or remove outdated key pairs.
+   *
+   * @param cutoff The cutoff timestamp. Key pairs created before this timestamp are deleted.
+   */
   @Modifying
   @Query("DELETE FROM KeyPair kp WHERE kp.createdAt < :cutoff")
   void invalidateKeyPairs(@Param("cutoff") ZonedDateTime cutoff);

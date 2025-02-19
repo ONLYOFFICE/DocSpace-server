@@ -94,7 +94,10 @@ public enum FolderType
     FormFillingFolderInProgress = 28,
 
     [OpenApiEnum(Description = "Virtual Data Room")]
-    VirtualDataRoom = 29
+    VirtualDataRoom = 29,
+        
+    [OpenApiEnum(Description = "Room Templates")]
+    RoomTemplates = 30
 }
 
 public interface IFolder

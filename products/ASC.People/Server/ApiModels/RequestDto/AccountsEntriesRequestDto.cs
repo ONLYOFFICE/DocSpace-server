@@ -78,4 +78,10 @@ public class AccountsEntriesRequestDto<T>
     [FromQuery(Name = "area")]
     [OpenApiDescription("Area")]
     public Area Area { get; set; } = Area.All;
+
+    /// <summary>
+    /// Employee Types
+    /// </summary>
+    [FromQuery(Name = "employeeTypes")]
+    public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();
 }

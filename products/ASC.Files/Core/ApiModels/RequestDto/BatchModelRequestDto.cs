@@ -29,18 +29,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// Base batch request parameters
 /// </summary>
-public class FileBaseBatchRequestDto
-{
-    /// <summary>
-    /// List of file IDs
-    /// </summary>
-    [OpenApiDescription("List of file IDs")]
-    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
-}
-
-/// <summary>
-/// Base batch request parameters
-/// </summary>
 public class BaseBatchRequestDto
 {
     /// <summary>
@@ -105,6 +93,24 @@ public class DeleteBatchRequestDto : BaseBatchRequestDto
     /// </summary>
     [OpenApiDescription("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
     public bool Immediately { get; set; }
+}
+
+/// <summary>
+/// Request parameters for deleting file's version
+/// </summary>
+public class DeleteVersionBatchRequestDto
+{
+    /// <summary>
+    /// Specifies whether to delete a file after the editing session is finished or not
+    /// </summary>
+    [OpenApiDescription("Specifies whether to delete a file after the editing session is finished or not")]
+    public bool DeleteAfter { get; set; }
+    
+    [OpenApiDescription("FileId")]
+    public int FileId { get; set; }
+    
+    [OpenApiDescription("Versions")]
+    public IEnumerable<int> Versions { get; set; } = new List<int>();
 }
 
 /// <summary>
@@ -176,13 +182,14 @@ public class BatchRequestDto : BaseBatchRequestDto
 }
 
 /// <summary>
-/// Request parameters for checking files and folders for conflicts
+/// The data transfer object containing the operation type for which statuses are retrieved.
 /// </summary>
-public class BatchSimpleRequestDto : BaseBatchRequestDto
+public class FileOperationResultRequestDto
 {
     /// <summary>
-    /// Destination folder ID
+    /// Specifies the type of file operation to be retrieved.
     /// </summary>
-    [OpenApiDescription("Destination folder ID")]
-    public JsonElement DestFolderId { get; set; }
+    [OpenApiDescription("Specifies the type of file operation to be retrieved.")]
+    [FromRoute(Name = "operationType")]
+    public FileOperationType OperationType { get; set; }
 }

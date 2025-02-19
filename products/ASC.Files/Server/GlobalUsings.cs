@@ -57,9 +57,10 @@ global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;
 global using ASC.Files.Core.Resources;
+global using ASC.Files.Core.RoomTemplates;
+global using ASC.Files.Core.RoomTemplates.Events;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.DocumentBuilderService;
-global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Extension;
 global using ASC.Files.Helpers;
@@ -86,15 +87,19 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
+
 global using Autofac;
+
 global using AutoMapper;
+
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Hosting.WindowsServices;
+
 global using Newtonsoft.Json.Linq;
-global using Swashbuckle.AspNetCore.Annotations;
+
 global using FileShare = ASC.Files.Core.Security.FileShare;
 global using SecurityContext = ASC.Core.SecurityContext;

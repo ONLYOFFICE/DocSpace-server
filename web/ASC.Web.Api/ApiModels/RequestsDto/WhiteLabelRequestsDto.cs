@@ -34,7 +34,7 @@ public class WhiteLabelRequestsDto
     /// <summary>
     /// Logo text
     /// </summary>
-    [StringLength(30)]
+    [StringLength(40)]
     [OpenApiDescription("Logo text")]
     public string LogoText { get; set; }
 

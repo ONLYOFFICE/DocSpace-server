@@ -26,8 +26,6 @@
 
 using ASC.Api.Core.Convention;
 
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace ASC.Data.Backup.Controllers;
 
 /// <summary>

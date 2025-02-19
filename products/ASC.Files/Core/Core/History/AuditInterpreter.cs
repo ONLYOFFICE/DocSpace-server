@@ -33,6 +33,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     private static readonly FolderMovedInterpreter _folderMovedInterpreter = new();
     private static readonly FileMovedInterpreter _fileMovedInterpreter = new();
     private static readonly FileDeletedInterpreter _fileDeletedInterpreter = new();
+    private static readonly FileVersionDeletedInterpreter _fileVersionDeletedInterpreter = new();
     private static readonly FolderDeletedInterpreter _folderDeletedInterpreter = new();
     private static readonly FileCopiedInterpreter _fileCopiedInterpreter = new();
     private static readonly RoomLogoChangedInterpreter _roomLogoChangedInterpreter = new();
@@ -57,6 +58,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.FileCopied, _fileCopiedInterpreter },
         { (int)MessageAction.FileCopiedWithOverwriting, _fileCopiedInterpreter },
         { (int)MessageAction.FileDeleted, _fileDeletedInterpreter },
+        { (int)MessageAction.FileVersionRemoved, _fileVersionDeletedInterpreter },
         { (int)MessageAction.FileConverted, new FileConvertedInterpreter() },
         { (int)MessageAction.FileRestoreVersion, _fileUpdatedInterpreter },
         { (int)MessageAction.FolderCreated, new FolderCreatedInterpreter() },

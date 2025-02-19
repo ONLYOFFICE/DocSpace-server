@@ -47,6 +47,11 @@ public class PasswordHasher
     [OpenApiDescription("Salt")]
     public string Salt { get; private set; }
 
+    public PasswordHasher()
+    {
+        
+    }
+    
     public PasswordHasher(IConfiguration configuration, MachinePseudoKeys machinePseudoKeys)
     {
         if (!int.TryParse(configuration["core:password:size"], out var size))

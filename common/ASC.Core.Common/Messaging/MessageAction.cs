@@ -322,6 +322,9 @@ public enum MessageAction
 
     [OpenApiEnum("File deleted")]
     FileDeleted = 5018,
+    
+    [OpenApiEnum("File version deleted")]
+    FileVersionRemoved = 5119,
 
     [OpenApiEnum("File index changed")]
     FileIndexChanged = 5111,

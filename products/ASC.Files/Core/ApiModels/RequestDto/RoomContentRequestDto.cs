@@ -43,20 +43,6 @@ public class RoomContentRequestDto
     public string SubjectId { get; set; }
 
     /// <summary>
-    /// Specifies whether to search within the section contents or not
-    /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    [OpenApiDescription("Specifies whether to search within the section contents or not")]
-    public bool? SearchInContent { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "withSubfolders")]
-    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
-    public bool? WithSubfolders { get; set; }
-
-    /// <summary>
     /// Room search area (Active, Archive, Any, Recent by links)
     /// </summary>
     [FromQuery(Name = "searchArea")]

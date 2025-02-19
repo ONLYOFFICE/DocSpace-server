@@ -38,5 +38,8 @@ public enum SearchArea
     Any,
 
     [OpenApiEnum("Recent by links")]
-    RecentByLinks
+    RecentByLinks,
+
+    [OpenApiEnum("Templates")]
+    Templates
 }

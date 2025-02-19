@@ -67,6 +67,7 @@ internal class FolderDao(
     private const string Trash = "trash";
     private const string Projects = "projects";
     private const string VirtualRooms = "virtualrooms";
+    private const string RoomTemplates = "roomtemplates";
     private const string Archive = "archive";
 
     public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
@@ -311,7 +312,7 @@ internal class FolderDao(
     }
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
-        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms };
+        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates };
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = _tenantManager.GetCurrentTenantId();
         var result = new FilesStatisticsResultDto();
@@ -581,7 +582,7 @@ internal class FolderDao(
         {
             roomSettings.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermarkSettings);
             filesDbContext.Update(roomSettings);
-            await filesDbContext.SaveChangesAsync();
+        await filesDbContext.SaveChangesAsync();
         }
 
         return room.Id;
@@ -598,9 +599,9 @@ internal class FolderDao(
 
         if (roomSettings != null)
         {
-            roomSettings.Watermark = null;
-            filesDbContext.Update(roomSettings);
-            await filesDbContext.SaveChangesAsync();
+        roomSettings.Watermark = null;
+        filesDbContext.Update(roomSettings);
+        await filesDbContext.SaveChangesAsync();
         }
 
         return room;
@@ -939,8 +940,8 @@ internal class FolderDao(
             if (conflict != 0)
             {
                 result[folderId] = "";
-            }
-        }
+                }
+                }
 
         return result;
     }
@@ -1296,6 +1297,10 @@ internal class FolderDao(
                         folder.FolderType = FolderType.VirtualRooms;
                         folder.Title = VirtualRooms;
                         break;
+                    case RoomTemplates:
+                        folder.FolderType = FolderType.RoomTemplates;
+                        folder.Title = RoomTemplates;
+                        break;
                     case Archive:
                         folder.FolderType = FolderType.Archive;
                         folder.Title = Archive;
@@ -1409,6 +1414,10 @@ internal class FolderDao(
                     folder.FolderType = FolderType.VirtualRooms;
                     folder.Title = VirtualRooms;
                     break;
+                case RoomTemplates:
+                    folder.FolderType = FolderType.RoomTemplates;
+                    folder.Title = RoomTemplates;
+                    break;
                 case Archive:
                     folder.FolderType = FolderType.Archive;
                     folder.Title = Archive;
@@ -1500,6 +1509,11 @@ internal class FolderDao(
     public async Task<int> GetFolderIDVirtualRooms(bool createIfNotExists)
     {
         return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, VirtualRooms, null, createIfNotExists);
+    }
+
+    public async Task<int> GetFolderIDRoomTemplatesAsync(bool createIfNotExists)
+    {
+        return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, RoomTemplates, null, createIfNotExists);
     }
 
     public async Task<int> GetFolderIDArchive(bool createIfNotExists)
@@ -1638,7 +1652,7 @@ internal class FolderDao(
     {
         var rootFolderType = entry.RootFolderType;
 
-        if (rootFolderType != FolderType.VirtualRooms && rootFolderType != FolderType.Archive)
+        if (rootFolderType != FolderType.VirtualRooms && rootFolderType != FolderType.RoomTemplates && rootFolderType != FolderType.Archive)
         {
             return Task.FromResult((-1, ""));
         }
@@ -1810,16 +1824,18 @@ internal class FolderDao(
 
         var q = GetFolderQuery(filesDbContext, r => r.ParentId == parentId);
 
-        if (withSubfolders)
-        {
-            q = GetFolderQuery(filesDbContext)
-                .Join(filesDbContext.Tree, r => r.Id, a => a.FolderId, (folder, tree) => new { folder, tree })
-                .Where(r => r.tree.ParentId == parentId && r.tree.Level != 0)
-                .Select(r => r.folder);
-        }
+
 
         if (!string.IsNullOrEmpty(searchText))
-        {
+        {        
+            if (withSubfolders)
+            {
+            q = GetFolderQuery(filesDbContext)
+                    .Join(filesDbContext.Tree, r => r.Id, a => a.FolderId, (folder, tree) => new { folder, tree })
+                    .Where(r => r.tree.ParentId == parentId && r.tree.Level != 0)
+                    .Select(r => r.folder);
+            }
+            
             var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(searchText));
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
         }
@@ -1964,10 +1980,10 @@ internal class CacheFolderDao(
     public override async Task<Folder<int>> GetFolderAsync(int folderId)
                         {
         if (!_cache.TryGetValue(folderId, out var result))
-        {
+                        {
             result = await base.GetFolderAsync(folderId);
             _cache.TryAdd(folderId, result);
-        }
+                        }
 
         return result;
                         }

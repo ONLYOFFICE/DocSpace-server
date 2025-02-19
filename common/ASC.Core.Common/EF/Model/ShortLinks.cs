@@ -96,13 +96,13 @@ public static class ShortLinksExtension
             entity.ToTable("short_links");
 
             entity.HasKey(e => e.Id)
-                .HasName("PRIMARY");
+                .HasName("PK_short_links");
 
             entity.HasIndex(e => e.Short)
                 .IsUnique();
 
             entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_id");
+                .HasDatabaseName("IX_short_links_tenant_id");
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")

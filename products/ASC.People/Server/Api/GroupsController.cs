@@ -41,7 +41,8 @@ public class GroupController(
     GroupFullDtoHelper groupFullDtoHelper,
     MessageService messageService,
     PermissionContext permissionContext,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    UserSocketManager socketManager)
     : ControllerBase
 {
     /// <summary>
@@ -170,7 +171,10 @@ public class GroupController(
 
         messageService.Send(MessageAction.GroupCreated, MessageTarget.Create(group.ID), group.Name);
 
-        return await groupFullDtoHelper.Get(group, true);
+        var dto = await groupFullDtoHelper.Get(group, true);
+
+        await socketManager.AddGroupAsync(dto);
+        return dto;
     }
 
     /// <summary>
@@ -216,7 +220,9 @@ public class GroupController(
 
         messageService.Send(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
 
-        return await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
+        var dto = await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
+        await socketManager.UpdateGroupAsync(dto);
+        return dto;
     }
 
     /// <summary>
@@ -243,7 +249,8 @@ public class GroupController(
         await fileSecurity.RemoveSubjectAsync(inDto.Id, false);
 
         messageService.Send(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
-
+        await socketManager.DeleteGroupAsync(inDto.Id);
+        
         return NoContent();
     }
 

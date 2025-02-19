@@ -55,21 +55,7 @@ public class GetFolderRequestDto<T>
     [FromQuery(Name = "roomId")]
     [OpenApiDescription("Room ID")]
     public T RoomId { get; set; }
-
-    /// <summary>
-    /// Specifies whether to search within the section contents or not
-    /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    [OpenApiDescription("Specifies whether to search within the section contents or not")]
-    public bool? SearchInContent { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "withsubfolders")]
-    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
-    public bool? Withsubfolders { get; set; }
-
+    
     /// <summary>
     /// Specifies whether to exclude a subject or not
     /// </summary>
@@ -130,20 +116,6 @@ public class GetCommonFolderRequestDto
     [FromQuery(Name = "filterType")]
     [OpenApiDescription("Filter type")]
     public FilterType? FilterType { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
-    public bool? SearchInContent { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "withsubfolders")]
-    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
-    public bool? Withsubfolders { get; set; }
 }
 
 /// <summary>
@@ -164,21 +136,7 @@ public class GetMyTrashFolderRequestDto
     [FromQuery(Name = "filterType")]
     [OpenApiDescription("Filter type")]
     public FilterType? FilterType { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
-    public bool? SearchInContent { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "withsubfolders")]
-    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
-    public bool? Withsubfolders { get; set; }
-
+    
     /// <summary>
     /// Specifies whether to return only files, only folders or all elements from the specified folder
     /// </summary>
@@ -205,27 +163,13 @@ public class GetRootFolderRequestDto
     [FromQuery(Name = "filterType")]
     [OpenApiDescription("Filter type")]
     public FilterType? FilterType { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "withsubfolders")]
-    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
-    public bool? Withsubfolders { get; set; }
-
+    
     /// <summary>
     /// Specifies whether to return the "Trash" section or not
     /// </summary>
     [FromQuery(Name = "withoutTrash")]
     [OpenApiDescription("Specifies whether to return the \"Trash\" section or not")]
     public bool? WithoutTrash { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
-    public bool? SearchInContent { get; set; }
 }
 
 /// <summary>
@@ -246,20 +190,6 @@ public class GetRecentFolderRequestDto
     [FromQuery(Name = "filterType")]
     [OpenApiDescription("Filter type")]
     public FilterType? FilterType { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "searchInContent")]
-    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
-    public bool? SearchInContent { get; set; }
-
-    /// <summary>
-    /// Specifies whether to return sections with or without subfolders
-    /// </summary>
-    [FromQuery(Name = "withsubfolders")]
-    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
-    public bool? Withsubfolders { get; set; }
 
     /// <summary>
     /// Exclude a subject from the search
