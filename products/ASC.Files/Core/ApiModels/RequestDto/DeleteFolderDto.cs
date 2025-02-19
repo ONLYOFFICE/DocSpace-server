@@ -34,11 +34,13 @@ public class DeleteFolder
     /// <summary>
     /// Specifies whether to delete a folder after the editing session is finished or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to delete a folder after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
     /// <summary>
     /// Specifies whether to move a folder to the \"Trash\" folder or delete it immediately
     /// </summary>
+    [OpenApiDescription("Specifies whether to move a folder to the \"Trash\" folder or delete it immediately")]
     public bool Immediately { get; set; }
 }
 
@@ -51,11 +53,13 @@ public class DeleteFolder<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// Parameters for deleting a folder
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Parameters for deleting a folder")]
     public DeleteFolder Delete { get; set; }
 }

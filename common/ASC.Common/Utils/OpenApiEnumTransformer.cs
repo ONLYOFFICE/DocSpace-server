@@ -27,7 +27,7 @@
 namespace ASC.Api.Core.Extensions;
 
 [AttributeUsage(AttributeTargets.All)]
-public class SwaggerEnumAttribute(string description = null) : Attribute
+public class OpenApiEnumAttribute(string description = null) : Attribute
 {
     public bool Ignore { get; set; }
     public string Description { get; set; } = description;

@@ -32,66 +32,82 @@ public class GetFolderRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// User or group ID
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
+    [OpenApiDescription("User or group ID")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
     /// Filter type
     /// </summary>
     [FromQuery(Name = "filterType")]
+    [OpenApiDescription("Filter type")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
     /// Room ID
     /// </summary>
     [FromQuery(Name = "roomId")]
+    [OpenApiDescription("Room ID")]
     public T RoomId { get; set; }
 
     /// <summary>
     /// Specifies whether to search within the section contents or not
     /// </summary>
     [FromQuery(Name = "searchInContent")]
+    [OpenApiDescription("Specifies whether to search within the section contents or not")]
     public bool? SearchInContent { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "withsubfolders")]
+    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
     public bool? Withsubfolders { get; set; }
 
     /// <summary>
     /// Specifies whether to exclude a subject or not
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
+    [OpenApiDescription("Specifies whether to exclude a subject or not")]
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
     /// Specifies whether to return only files, only folders or all elements from the specified folder
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
+    [OpenApiDescription("Specifies whether to return only files, only folders or all elements from the specified folder")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 
     /// <summary>
     /// Specifies whether to search for a specific file extension
     /// </summary>
     [FromQuery(Name = "extension")]
+    [OpenApiDescription("Specifies whether to search for a specific file extension")]
     public string Extension { get; set; }
 
     /// <summary>
     /// Search area
     /// </summary>
     [FromQuery(Name = "searchArea")]
+    [OpenApiDescription("Search area")]
     public SearchArea SearchArea { get; set; }
 
-
+    /// <summary>
+    /// Forms item key
+    /// </summary>
     [FromQuery(Name = "formsItemKey")]
+    [OpenApiDescription("Forms item key")]
     public string FormsItemKey { get; set; }
     
+    /// <summary>
+    /// Forms item type
+    /// </summary>
     [FromQuery(Name = "formsItemType")]
     public string FormsItemType{ get; set; }
 }
@@ -105,24 +121,28 @@ public class GetCommonFolderRequestDto
     /// User or group ID
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
+    [OpenApiDescription("User or group ID")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
     /// Filter type
     /// </summary>
     [FromQuery(Name = "filterType")]
+    [OpenApiDescription("Filter type")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "searchInContent")]
+    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
     public bool? SearchInContent { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "withsubfolders")]
+    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
     public bool? Withsubfolders { get; set; }
 }
 
@@ -135,30 +155,35 @@ public class GetMyTrashFolderRequestDto
     /// User or group ID
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
+    [OpenApiDescription("User or group ID")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
     /// Filter type
     /// </summary>
     [FromQuery(Name = "filterType")]
+    [OpenApiDescription("Filter type")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "searchInContent")]
+    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
     public bool? SearchInContent { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "withsubfolders")]
+    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
     public bool? Withsubfolders { get; set; }
 
     /// <summary>
     /// Specifies whether to return only files, only folders or all elements from the specified folder
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
+    [OpenApiDescription("Specifies whether to return only files, only folders or all elements from the specified folder")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 }
 
@@ -171,30 +196,35 @@ public class GetRootFolderRequestDto
     /// User or group ID
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
+    [OpenApiDescription("User or group ID")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
     /// Filter type
     /// </summary>
     [FromQuery(Name = "filterType")]
+    [OpenApiDescription("Filter type")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "withsubfolders")]
+    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
     public bool? Withsubfolders { get; set; }
 
     /// <summary>
     /// Specifies whether to return the "Trash" section or not
     /// </summary>
     [FromQuery(Name = "withoutTrash")]
+    [OpenApiDescription("Specifies whether to return the \"Trash\" section or not")]
     public bool? WithoutTrash { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "searchInContent")]
+    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
     public bool? SearchInContent { get; set; }
 }
 
@@ -207,47 +237,55 @@ public class GetRecentFolderRequestDto
     /// User or group ID
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
+    [OpenApiDescription("User or group ID")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
     /// Filter type
     /// </summary>
     [FromQuery(Name = "filterType")]
+    [OpenApiDescription("Filter type")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "searchInContent")]
+    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
     public bool? SearchInContent { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "withsubfolders")]
+    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
     public bool? Withsubfolders { get; set; }
 
     /// <summary>
     /// Exclude a subject from the search
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
+    [OpenApiDescription("Exclude a subject from the search")]
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
     /// Scope of filters
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
+    [OpenApiDescription("Scope of filters")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 
     /// <summary>
     /// Search area
     /// </summary>
     [FromQuery(Name = "searchArea")]
+    [OpenApiDescription("Search area")]
     public SearchArea? SearchArea { get; set; }
 
     /// <summary>
     /// Specifies whether to search for a specific file extension
     /// </summary>
     [FromQuery(Name = "extension")]
+    [OpenApiDescription("Specifies whether to search for a specific file extension")]
     public string[] Extension { get; set; }
 }

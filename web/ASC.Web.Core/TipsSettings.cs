@@ -33,6 +33,7 @@ public class TipsSettings : ISettings<TipsSettings>
     /// <summary>Specifies if the tips will be shown or not</summary>
     /// <type>System.Boolean, System</type>
     [DataMember(Name = "Show")]
+    [OpenApiDescription("Specifies if the tips will be shown or not")]
     public bool Show { get; set; }
 
     [JsonIgnore]

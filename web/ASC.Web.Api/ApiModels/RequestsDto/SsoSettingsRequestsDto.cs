@@ -34,5 +34,6 @@ public class SsoSettingsRequestsDto
     /// <summary>
     /// Serialized SSO settings
     /// </summary>
+    [OpenApiDescription("Serialized SSO settings")]
     public string SerializeSettings { get; set; }
 }

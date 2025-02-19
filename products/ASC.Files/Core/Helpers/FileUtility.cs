@@ -97,37 +97,37 @@ public class LogoColor
 
 public enum Accessibility
 {
-    [SwaggerEnum("Image view")]
+    [OpenApiEnum("Image view")]
     ImageView,
 
-    [SwaggerEnum("Media view")]
+    [OpenApiEnum("Media view")]
     MediaView,
 
-    [SwaggerEnum("Web view")]
+    [OpenApiEnum("Web view")]
     WebView,
 
-    [SwaggerEnum("Web edit")]
+    [OpenApiEnum("Web edit")]
     WebEdit,
 
-    [SwaggerEnum("Web review")]
+    [OpenApiEnum("Web review")]
     WebReview,
 
-    [SwaggerEnum("Web custom filter editing")]
+    [OpenApiEnum("Web custom filter editing")]
     WebCustomFilterEditing,
 
-    [SwaggerEnum("Web restricted editing")]
+    [OpenApiEnum("Web restricted editing")]
     WebRestrictedEditing,
 
-    [SwaggerEnum("Web comment")]
+    [OpenApiEnum("Web comment")]
     WebComment,
 
-    [SwaggerEnum("CoAuhtoring")]
+    [OpenApiEnum("CoAuhtoring")]
     CoAuhtoring,
 
-    [SwaggerEnum("Can convert")]
+    [OpenApiEnum("Can convert")]
     CanConvert,
 
-    [SwaggerEnum("Must convert")]
+    [OpenApiEnum("Must convert")]
     MustConvert
 }
 

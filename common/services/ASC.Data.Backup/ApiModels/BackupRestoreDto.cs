@@ -34,26 +34,31 @@ public class BackupRestoreDto
     /// <summary>
     /// Backup ID
     /// </summary>
+    [OpenApiDescription("Backup ID")]
     public string BackupId { get; set; }
 
     /// <summary>
     /// Storage type
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
+    [OpenApiDescription("Storage type")]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
     /// Storage parameters
     /// </summary>
+    [OpenApiDescription("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
     /// Notifies users about portal restoring process or not
     /// </summary>
+    [OpenApiDescription("Notifies users about portal restoring process or not")]
     public bool Notify { get; set; }
 
     /// <summary>
-    /// Expect  dump or not
+    /// Expect dump or not
     /// </summary>
+    [OpenApiDescription("Expect dump or not")]
     public bool Dump { get; set; }
 }

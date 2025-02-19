@@ -35,31 +35,35 @@ public class SaveEditingRequestDto<T> : IModelWithFile
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// File extension
     /// </summary>
     [FromForm(Name = "FileExtension")]
-    [SwaggerSchemaCustom(Example = ".txt")]
+    [OpenApiDescription("File extension", Example = ".txt")]
     public string FileExtension { get; set; }
 
     /// <summary>
     /// URI to download a file
     /// </summary>
     [FromForm(Name = "DownloadUri")]
+    [OpenApiDescription("URI to download a file")]
     public string DownloadUri { get; set; }
 
     /// <summary>
     /// Request file stream
     /// </summary>
     [FromForm(Name = "File")]
+    [OpenApiDescription("Request file stream")]
     public IFormFile File { get; set; }
 
     /// <summary>
     /// Specifies whether to force save a file or not
     /// </summary>
     [FromForm(Name = "Forcesave")]
+    [OpenApiDescription("Specifies whether to force save a file or not")]
     public bool Forcesave { get; set; }
 }
 

@@ -33,19 +33,19 @@ public class GroupSummaryDto
     /// <summary>
     /// ID
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
+    [OpenApiDescription("ID", Example = "{00000000-0000-0000-0000-000000000000}")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Name
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Group Name")]
+    [OpenApiDescription("Name", Example = "Group Name")]
     public string Name { get; init; }
 
     /// <summary>
     /// Manager
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Jake.Zazhitski")]
+    [OpenApiDescription("Manager", Example = "Jake.Zazhitski")]
     public string Manager { get; set; }
 }
 

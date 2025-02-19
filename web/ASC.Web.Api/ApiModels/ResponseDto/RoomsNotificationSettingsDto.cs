@@ -31,5 +31,6 @@ public class RoomsNotificationSettingsDto : IMapFrom<RoomsNotificationSettings>
     /// <summary>
     /// List of rooms with the disabled notifications
     /// </summary>
+    [OpenApiDescription("List of rooms with the disabled notifications")]
     public List<object> DisabledRooms { get; set; }
 }

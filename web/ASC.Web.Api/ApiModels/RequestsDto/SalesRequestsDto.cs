@@ -34,15 +34,18 @@ public class SalesRequestsDto
     /// <summary>
     /// User name
     /// </summary>
+    [OpenApiDescription("User name")]
     public string UserName { get; set; }
 
     /// <summary>
     /// Email address
     /// </summary>
+    [OpenApiDescription("Email address")]
     public string Email { get; set; }
 
     /// <summary>
     /// Message
     /// </summary>
+    [OpenApiDescription("Message")]
     public string Message { get; set; }
 }

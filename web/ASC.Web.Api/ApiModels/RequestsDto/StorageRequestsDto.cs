@@ -34,10 +34,12 @@ public class StorageRequestsDto
     /// <summary>
     /// Storage name
     /// </summary>
+    [OpenApiDescription("Storage name")]
     public string Module { get; set; }
 
     /// <summary>
     /// Storage properties
     /// </summary>
+    [OpenApiDescription("Storage properties")]
     public IEnumerable<ItemKeyValuePair<string, string>> Props { get; set; }
 }

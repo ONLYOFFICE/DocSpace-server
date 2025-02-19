@@ -32,5 +32,6 @@ public class DocServiceUrlRequestDto
     /// Specifies the editor version or not
     /// </summary>
     [FromQuery(Name = "version")]
+    [OpenApiDescription("Specifies the editor version or not")]
     public bool Version { get; set; }
 }

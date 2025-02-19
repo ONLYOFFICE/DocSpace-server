@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,7 +59,10 @@ public class SecurityController(
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Security settings", typeof(IAsyncEnumerable<SecurityDto>))]
+    [EndpointName("getWebItemSettingsSecurity")]
+    [EndpointSummary("Get the security settings")]
+    [EndpointDescription("Returns the security settings for the modules specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<SecurityDto>), 200, "Security settings")]
     [HttpGet("")]
     public async IAsyncEnumerable<SecurityDto> GetWebItemSettingsSecurityInfo(SecuritySettingsRequestDto inDto)
     {
@@ -105,7 +108,10 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/{id}</path>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Boolean value: true - module is enabled, false - module is disabled", typeof(bool))]
+    [EndpointName("getWebItemSecurity")]
+    [EndpointSummary("Get the module availability")]
+    [EndpointDescription("Returns the availability of the module with the ID specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true - module is enabled, false - module is disabled")]
     [HttpGet("{id:guid}")]
     public async Task<bool> GetWebItemSecurityInfoAsync(IdRequestDto<Guid> inDto)
     {
@@ -122,7 +128,10 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/modules</path>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "List of enabled modules", typeof(object))]
+    [EndpointName("getEnabledModules")]
+    [EndpointSummary("Get the enabled modules")]
+    [EndpointDescription("Returns a list of all the enabled modules.")]
+    [OpenApiResponse(typeof(object), 200, "List of enabled modules")]
     [HttpGet("modules")]
     public object GetEnabledModules()
     {
@@ -141,7 +150,10 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
+    [EndpointName("getPasswordSettings")]
+    [EndpointSummary("Get the password settings")]
+    [EndpointDescription("Returns the portal password settings.")]
+    [OpenApiResponse(typeof(PasswordSettingsDto), 200, "Password settings")]
     [HttpGet("password")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
@@ -159,8 +171,11 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
-    [SwaggerResponse(400, "MinLength")]
+    [EndpointName("updatePasswordSettings")]
+    [EndpointSummary("Set the password settings")]
+    [EndpointDescription("Sets the portal password settings.")]
+    [OpenApiResponse(typeof(PasswordSettingsDto), 200, "Password settings")]
+    [OpenApiResponse(400, "MinLength")]
     [HttpPut("password")]
     public async Task<PasswordSettingsDto> UpdatePasswordSettingsAsync(PasswordSettingsRequestsDto inDto)
     {
@@ -194,8 +209,11 @@ public class SecurityController(
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Security settings", typeof(IEnumerable<SecurityDto>))]
-    [SwaggerResponse(403, "Security settings are disabled for an open portal")]
+    [EndpointName("setWebItemSecurity")]
+    [EndpointSummary("Set the module security settings")]
+    [EndpointDescription("Sets the security settings to the module with the ID specified in the request.")]
+    [OpenApiResponse(typeof(IEnumerable<SecurityDto>), 200, "Security settings")]
+    [OpenApiResponse(403, "Security settings are disabled for an open portal")]
     [HttpPut("")]
     public async Task<IEnumerable<SecurityDto>> SetWebItemSecurity(WebItemSecurityRequestsDto inDto)
     {
@@ -245,8 +263,11 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/access</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Security settings", typeof(IEnumerable<SecurityDto>))]
-    [SwaggerResponse(403, "Security settings are disabled for an open portal")]
+    [EndpointName("setAccessToWebItems")]
+    [EndpointSummary("Set the access settings to products")]
+    [EndpointDescription("Sets the access settings to the products with the IDs specified in the request.")]
+    [OpenApiResponse(typeof(IEnumerable<SecurityDto>), 200, "Security settings")]
+    [OpenApiResponse(403, "Security settings are disabled for an open portal")]
     [HttpPut("access")]
     public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemsSecurityRequestsDto inDto)
     {
@@ -302,7 +323,10 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "List of product administrators with the following parameters", typeof(IAsyncEnumerable<EmployeeDto>))]
+    [EndpointName("getProductAdministrators")]
+    [EndpointSummary("Get the product administrators")]
+    [EndpointDescription("Returns a list of all the product administrators with the ID specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeDto>), 200, "List of product administrators with the following parameters")]
     [HttpGet("administrator/{productid:guid}")]
     public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(ProductIdRequestDto inDto)
     {
@@ -322,7 +346,10 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(object))]
+    [EndpointName("isProductAdministrator")]
+    [EndpointSummary("Check a product administrator")]
+    [EndpointDescription("Checks if the selected user is a product administrator with the ID specified in the request.")]
+    [OpenApiResponse(typeof(object), 200, "Object with the user security information: product ID, user ID, administrator or not")]
     [HttpGet("administrator")]
     public async Task<object> IsProductAdministratorAsync(UserProductIdsRequestDto inDto)
     {
@@ -338,8 +365,11 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(object))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("setProductAdministrator")]
+    [EndpointSummary("Set a product administrator")]
+    [EndpointDescription("Sets the selected user as a product administrator with the ID specified in the request.")]
+    [OpenApiResponse(typeof(object), 200, "Object with the user security information: product ID, user ID, administrator or not")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("administrator")]
     public async Task<object> SetProductAdministrator(SecurityRequestsDto inDto)
     {
@@ -384,7 +414,10 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
-    [SwaggerResponse(200, "Updated login settings", typeof(LoginSettingsDto))]
+    [EndpointName("updateLoginSettings")]
+    [EndpointSummary("Update login settings")]
+    [EndpointDescription("Updates the login settings with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(LoginSettingsDto), 200, "Updated login settings")]
     [HttpPut("loginSettings")]
     public async Task<LoginSettingsDto> UpdateLoginSettingsAsync(LoginSettingsRequestDto inDto)
     {
@@ -410,7 +443,10 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
-    [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
+    [EndpointName("getLoginSettings")]
+    [EndpointSummary("Get login settings")]
+    [EndpointDescription("Returns the portal login settings.")]
+    [OpenApiResponse(typeof(LoginSettingsDto), 200, "Login settings")]
     [HttpGet("loginSettings")]
     public async Task<LoginSettingsDto> GetLoginSettingsAsync()
     {
@@ -426,7 +462,10 @@ public class SecurityController(
     /// </summary>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
-    [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
+    [EndpointName("setDefaultLoginSettings")]
+    [EndpointSummary("Set default login settings")]
+    [EndpointDescription("Returns the portal login settings.")]
+    [OpenApiResponse(typeof(LoginSettingsDto), 200, "Login settings")]
     [HttpDelete("loginSettings")]
     public async Task<LoginSettingsDto> SetDefaultLoginSettingsAsync()
     {

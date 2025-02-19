@@ -34,35 +34,42 @@ public class ThirdPartyRequestDto
     /// <summary>
     /// Connection URL for the sharepoint
     /// </summary>
+    [OpenApiDescription("Connection URL for the sharepoint")]
     public string Url { get; set; }
 
     /// <summary>
     /// Login
-    /// </summary>
+    /// </summary> 
+    [OpenApiDescription("Login")]
     public string Login { get; set; }
 
     /// <summary>
     /// Password
     /// </summary>
+    [OpenApiDescription("Password")]
     public string Password { get; set; }
 
     /// <summary>
     /// Authentication token
     /// </summary>
+    [OpenApiDescription("Authentication token")]
     public string Token { get; set; }
 
     /// <summary>
     /// Customer title
     /// </summary>
+    [OpenApiDescription("Customer title")]
     public string CustomerTitle { get; set; }
 
     /// <summary>
     /// Provider key
     /// </summary>
+    [OpenApiDescription("Provider key")]
     public string ProviderKey { get; set; }
 
     /// <summary>
     /// Provider ID
     /// </summary>
+    [OpenApiDescription("Provider ID")]
     public int? ProviderId { get; set; }
 }

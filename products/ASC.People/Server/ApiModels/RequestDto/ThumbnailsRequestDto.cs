@@ -34,26 +34,31 @@ public class ThumbnailsRequest
     /// <summary>
     /// Path to the temporary file
     /// </summary>
+    [OpenApiDescription("Path to the temporary file")]
     public string TmpFile { get; set; }
 
     /// <summary>
     /// Horizontal coordinate
     /// </summary>
+    [OpenApiDescription("Horizontal coordinate")]
     public int X { get; set; }
 
     /// <summary>
     /// Vertical coordinate
     /// </summary>
+    [OpenApiDescription("Vertical coordinate")]
     public int Y { get; set; }
 
     /// <summary>
     /// Thumbnail width
     /// </summary>
+    [OpenApiDescription("Thumbnail width")]
     public uint Width { get; set; }
 
     /// <summary>
     /// Thumbnail height
     /// </summary>
+    [OpenApiDescription("Thumbnail height")]
     public uint Height { get; set; }
 }
 
@@ -66,11 +71,13 @@ public class ThumbnailsRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
+    [OpenApiDescription("User ID")]
     public string UserId { get; set; }
 
     /// <summary>
     /// Thumbnails
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Thumbnails")]
     public ThumbnailsRequest Thumbnails { get; set; }
 }

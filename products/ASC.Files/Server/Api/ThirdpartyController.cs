@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,7 +49,10 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/capabilities</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "List of provider keys", typeof(List<List<string>>))]
+    [EndpointName("capabilities")]
+    [EndpointSummary("Get providers")]
+    [EndpointDescription("Returns a list of the available providers.\n\n **Note**: Available provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.")]
+    [OpenApiResponse(typeof(List<List<string>>), 200, "List of provider keys")]
     [HttpGet("thirdparty/capabilities")]
     public async Task<List<List<string>>> CapabilitiesAsync()
     {
@@ -68,7 +71,10 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [EndpointName("createWordpressPost")]
+    [EndpointSummary("Create a WordPress post")]
+    [EndpointDescription("Creates a WordPress post with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
     [HttpPost("wordpress")]
     public async Task<bool> CreateWordpressPostAsync(CreateWordpressPostRequestDto inDto)
     {
@@ -99,8 +105,11 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/{providerId}</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "Third-party folder ID", typeof(object))]
-    [HttpDelete("thirdparty/{providerId:int}")]
+    [EndpointName("deleteThirdParty")]
+    [EndpointSummary("Remove a third-party account")]
+    [EndpointDescription("Removes the third-party storage service account with the ID specified in the request.")]
+    [OpenApiResponse(typeof(object), 200, "Third-party folder ID")]
+    [HttpDelete("thirdparty/{providerId}")]
     public async Task<object> DeleteThirdPartyAsync(ProviderIdRequestDto inDto)
     {
         return await fileStorageService.DeleteThirdPartyAsync(inDto.ProviderId.ToString(CultureInfo.InvariantCulture));
@@ -113,7 +122,10 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-delete</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [SwaggerResponse(200, "Object with the \"success\" field: true if the operation is successful", typeof(object))]
+    [EndpointName("deleteWordpressInfo")]
+    [EndpointSummary("Delete the WordPress information")]
+    [EndpointDescription("Deletes the WordPress plugin information.")]
+    [OpenApiResponse(typeof(object), 200, "Object with the \"success\" field: true if the operation is successful")]
     [HttpGet("wordpress-delete")]
     public async Task<object> DeleteWordpressInfoAsync()
     {
@@ -139,7 +151,10 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/common</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "List of common third-party folderst", typeof(IAsyncEnumerable<FolderDto<string>>))]
+    [EndpointName("getCommonThirdPartyFolders")]
+    [EndpointSummary("Get common third-party services")]
+    [EndpointDescription("Returns a list of the third-party services connected to the \"Common\" section.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<FolderDto<string>>), 200, "List of common third-party folders")]
     [HttpGet("thirdparty/common")]
     public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync([FromServices] EntryManager entryManager)
     {
@@ -159,7 +174,10 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "List of connected providers information", typeof(IAsyncEnumerable<ThirdPartyParams>))]
+    [EndpointName("getThirdPartyAccounts")]
+    [EndpointSummary("Get third-party accounts")]
+    [EndpointDescription("Returns a list of all the connected third-party accounts.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<ThirdPartyParams>), 200, "List of connected providers information")]
     [HttpGet("thirdparty")]
     public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAccountsAsync()
     {
@@ -172,7 +190,10 @@ public class ThirdpartyController(
     /// <short>Get a third-party account backup</short>
     /// <path>api/2.0/files/thirdparty/backup</path>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "Folder for the third-party account backup", typeof(FolderDto<string>))]
+    [EndpointName("getBackupThirdPartyAccount")]
+    [EndpointSummary("Get a third-party account backup")]
+    [EndpointDescription("Return a backup of the connected third-party account.")]
+    [OpenApiResponse(typeof(FolderDto<string>), 200, "Folder for the third-party account backup")]
     [HttpGet("thirdparty/backup")]
     public async Task<FolderDto<string>> GetBackupThirdPartyAccountAsync()
     {
@@ -193,7 +214,10 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-info</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(object))]
+    [EndpointName("getWordpressInfo")]
+    [EndpointSummary("Get the WordPress information")]
+    [EndpointDescription("Returns the WordPress plugin information.")]
+    [OpenApiResponse(typeof(object), 200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information")]
     [HttpGet("wordpress-info")]
     public async Task<object> GetWordpressInfoAsync()
     {
@@ -229,7 +253,10 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "Connected provider folder", typeof(FolderDto<string>))]
+    [EndpointName("saveThirdParty")]
+    [EndpointSummary("Save a third-party account")]
+    [EndpointDescription("Saves the third-party storage service account. For WebDav, Yandex, kDrive and SharePoint, the login and password are used for authentication. For other providers, the authentication is performed using a token received via OAuth 2.0.\n\n **Note**: List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.")]
+    [OpenApiResponse(typeof(FolderDto<string>), 200, "Connected provider folder")]
     [HttpPost("thirdparty")]
     public async Task<FolderDto<string>> SaveThirdPartyAsync(ThirdPartyRequestDto inDto)
     {
@@ -255,7 +282,10 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/backup</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "Folder for the third-party account backup", typeof(FolderDto<string>))]
+    [EndpointName("saveThirdPartyBackup")]
+    [EndpointSummary("Save a third-party account backup")]
+    [EndpointDescription("Saves a backup of the connected third-party account.\n\n **Note**: List of provider key: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive")]
+    [OpenApiResponse(typeof(FolderDto<string>), 200, "Folder for the third-party account backup")]
     [HttpPost("thirdparty/backup")]
     public async Task<FolderDto<string>> SaveThirdPartyBackupAsync(ThirdPartyBackupRequestDto inDto)
     {
@@ -283,7 +313,10 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-save</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(object))]
+    [EndpointName("wordpressSave")]
+    [EndpointSummary("Save the user WordPress information")]
+    [EndpointDescription("Saves the user WordPress information when logging in.")]
+    [OpenApiResponse(typeof(object), 200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information")]
     [HttpPost("wordpress-save")]
     public async Task<object> WordpressSaveAsync(WordpressSaveRequestDto inDto)
     {
@@ -330,7 +363,10 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/providers</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "List of provider", typeof(List<ProviderDto>))]
+    [EndpointName("getAllProviders")]
+    [EndpointSummary("Get all providers")]
+    [EndpointDescription("Returns a list of the all providers.\n\n **Note**: Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud")]
+    [OpenApiResponse(typeof(List<ProviderDto>), 200, "List of provider")]
     [HttpGet("thirdparty/providers")]
     public async Task<List<ProviderDto>> GetAllProvidersAsync()
     {

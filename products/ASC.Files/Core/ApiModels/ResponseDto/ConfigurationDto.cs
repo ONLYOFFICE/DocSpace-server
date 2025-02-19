@@ -31,57 +31,68 @@ public class ConfigurationDto<T>
     /// <summary>
     /// Document config
     /// </summary>
+    [OpenApiDescription("Document config")]
     public DocumentConfigDto Document { get; set; }
 
     /// <summary>
     /// Document type
     /// </summary>
+    [OpenApiDescription("Document type")]
     public string DocumentType { get; set; }
 
     /// <summary>
     /// Editor config
     /// </summary>
+    [OpenApiDescription("Editor config")]
     public EditorConfigurationDto EditorConfig { get; set; }
 
     /// <summary>
     /// Editor type
     /// </summary>
+    [OpenApiDescription("Editor type")]
     public EditorType EditorType { get; set; }
 
     /// <summary>
     /// Editor URL
     /// </summary>
     [Url]
+    [OpenApiDescription("Editor URL")]
     public string EditorUrl { get; set; }
 
     /// <summary>
     /// Token
     /// </summary>
+    [OpenApiDescription("Token")]
     public string Token { get; set; }
 
     /// <summary>
     /// Platform type
     /// </summary>
+    [OpenApiDescription("Platform type")]
     public string Type { get; set; }
 
     /// <summary>
     /// File parameters
     /// </summary>
+    [OpenApiDescription("File parameters")]
     public FileDto<T> File { get; set; }
 
     /// <summary>
     /// Error message
     /// </summary>
+    [OpenApiDescription("Error message")]
     public string ErrorMessage { get; set; }
 
     /// <summary>
     /// Specifies if the filling has started or not
     /// </summary>
+    [OpenApiDescription("Specifies if the filling has started or not")]
     public bool? StartFilling { get; set; }
 
     /// <summary>
     /// Filling session Id
     /// </summary>
+    [OpenApiDescription("Filling session Id")]
     public string FillingSessionId { get; set; }
 }
 
@@ -91,66 +102,79 @@ public class EditorConfigurationDto
     /// Callback url
     /// </summary>
     [Url]
+    [OpenApiDescription("Callback url")]
     public string CallbackUrl { get; set; }
 
     /// <summary>
     /// Co editing
     /// </summary>
+    [OpenApiDescription("Co editing")]
     public CoEditingConfig CoEditing { get; set; }
 
     /// <summary>
     /// Create url
     /// </summary>
+    [OpenApiDescription("Create url")]
     public string CreateUrl { get; set; }
 
     /// <summary>
     /// Customization
     /// </summary>
+    [OpenApiDescription("Customization")]
     public CustomizationConfigDto Customization { get; set; }
 
     /// <summary>
     /// Embedded
     /// </summary>
+    [OpenApiDescription("Embedded")]
     public EmbeddedConfig Embedded { get; set; }
 
     /// <summary>
     /// Encryption keys
     /// </summary>
+    [OpenApiDescription("Encryption keys")]
     public EncryptionKeysConfig EncryptionKeys { get; set; }
 
     /// <summary>
     /// Lang
     /// </summary>
+    [OpenApiDescription("Lang")]
     public string Lang { get; set; }
 
     /// <summary>
     /// Mode
     /// </summary>
+    [OpenApiDescription("Mode")]
     public string Mode { get; set; }
 
     /// <summary>
     /// Mode write
     /// </summary>
+    [OpenApiDescription("Mode write")]
     public bool ModeWrite { get; set; }
 
     /// <summary>
     /// Plugins
     /// </summary>
+    [OpenApiDescription("Plugins")]
     public PluginsConfig Plugins { get; set; }
 
     /// <summary>
     /// Recent
     /// </summary>
+    [OpenApiDescription("Recent")]
     public List<RecentConfig> Recent { get; set; }
 
     /// <summary>
     /// Templates
     /// </summary>
+    [OpenApiDescription("Templates")]
     public List<TemplatesConfig> Templates { get; set; }
 
     /// <summary>
     /// User
     /// </summary>
+    [OpenApiDescription("User")]
     public UserConfig User { get; set; }
 }
 public class CustomizationConfigDto
@@ -158,51 +182,61 @@ public class CustomizationConfigDto
     /// <summary>
     /// About
     /// </summary>
+    [OpenApiDescription("About")]
     public bool About { get; set; }
 
     /// <summary>
     /// Customer
     /// </summary>
+    [OpenApiDescription("Customer")]
     public CustomerConfigDto Customer { get; set; }
 
     /// <summary>
     /// Anonymous
     /// </summary>
+    [OpenApiDescription("Anonymous")]
     public AnonymousConfigDto Anonymous { get; set; }
 
     /// <summary>
     /// Feedback
     /// </summary>
+    [OpenApiDescription("Feedback")]
     public FeedbackConfig Feedback  { get; set; }
 
     /// <summary>
     /// Forcesave
     /// </summary>
+    [OpenApiDescription("Forcesave")]
     public bool? Forcesave { get; set; }
 
     /// <summary>
     /// Go back
     /// </summary>
+    [OpenApiDescription("Go back")]
     public GobackConfig Goback { get; set; }
 
     /// <summary>
     /// Logo
     /// </summary>
+    [OpenApiDescription("Logo")]
     public LogoConfigDto Logo { get; set; }
 
     /// <summary>
     /// MentionShare
     /// </summary>
+    [OpenApiDescription("MentionShare")]
     public bool MentionShare { get; set; }
 
     /// <summary>
     /// Review display
     /// </summary>
+    [OpenApiDescription("Review display")]
     public string ReviewDisplay { get; set; }
 
     /// <summary>
     /// Submit form
     /// </summary>
+    [OpenApiDescription("Submit form")]
     public bool SubmitForm { get; set; }
 }
 
@@ -211,26 +245,31 @@ public class LogoConfigDto
     /// <summary>
     /// Image
     /// </summary>
+    [OpenApiDescription("Image")]
     public string Image { get; set; }
 
     /// <summary>
     /// Image dark
     /// </summary>
+    [OpenApiDescription("Image dark")]
     public string ImageDark { get; set; }
 
     /// <summary>
     /// Image embedded
     /// </summary>
+    [OpenApiDescription("Image embedded")]
     public string ImageEmbedded { get; set; }
 
     /// <summary>
     /// Url
     /// </summary>
+    [OpenApiDescription("Url")]
     public string Url { get; set; }
 
     /// <summary>
     /// Visible
     /// </summary>
+    [OpenApiDescription("Visible")]
     public bool Visible { get; set; }
 }
 
@@ -239,6 +278,7 @@ public class AnonymousConfigDto
     /// <summary>
     /// Request
     /// </summary>
+    [OpenApiDescription("Request")]
     public bool Request { get; set; }
 }
 
@@ -247,31 +287,37 @@ public class CustomerConfigDto
     /// <summary>
     /// Address
     /// </summary>
+    [OpenApiDescription("Address")]
     public string Address { get; set; }
 
     /// <summary>
     /// Logo
     /// </summary>
+    [OpenApiDescription("Logo")]
     public string Logo { get; set; }
 
     /// <summary>
     /// Dark logo
     /// </summary>
+    [OpenApiDescription("Dark logo")]
     public string LogoDark { get; set; }
 
     /// <summary>
     /// Mail
     /// </summary>
+    [OpenApiDescription("Mail")]
     public string Mail { get; set; }
 
     /// <summary>
     /// Name
     /// </summary>
+    [OpenApiDescription("Name")]
     public string Name  { get; set; }
 
     /// <summary>
     /// Site
     /// </summary>
+    [OpenApiDescription("Site")]
     public string Www  { get; set; }
 }
 
@@ -280,57 +326,68 @@ public class DocumentConfigDto
     /// <summary>
     /// File type
     /// </summary>
+    [OpenApiDescription("File type")]
     public string FileType  { get; set; }
 
     /// <summary>
     /// Info
     /// </summary>
+    [OpenApiDescription("Info")]
     public InfoConfigDto Info { get; set; }
 
     /// <summary>
     /// Is linked for me
     /// </summary>
+    [OpenApiDescription("Is linked for me")]
     public bool IsLinkedForMe { get; set; }
 
     /// <summary>
     /// Key
     /// </summary>
+    [OpenApiDescription("Key")]
     public string Key { get; set; }
 
     /// <summary>
     /// Permissions
     /// </summary>
+    [OpenApiDescription("Permissions")]
     public PermissionsConfig Permissions { get; set; }
 
     /// <summary>
     /// Shared link param
     /// </summary>
+    [OpenApiDescription("Shared link param")]
     public string SharedLinkParam { get; set; }
 
     /// <summary>
     /// Shared link key
     /// </summary>
+    [OpenApiDescription("Shared link key")]
     public string SharedLinkKey { get; set; }
 
     /// <summary>
     /// Reference data
     /// </summary>
+    [OpenApiDescription("Reference data")]
     public FileReferenceData ReferenceData { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Url
     /// </summary>
     [Url]
+    [OpenApiDescription("Url")]
     public string Url { get; set; }
 
     /// <summary>
     /// Options
     /// </summary>
+    [OpenApiDescription("Options")]
     public Options Options { get; set; }
 }
 
@@ -338,32 +395,38 @@ public class InfoConfigDto
 {
     /// <summary>
     /// Favorite
-    /// </summary>
+    /// </summary>  
+    [OpenApiDescription("Favorite")]
     public bool? Favorite { get; set; }
 
     /// <summary>
     /// Folder
-    /// </summary>
+    /// </summary>  
+    [OpenApiDescription("Folder")]
     public string Folder { get; set; }
 
     /// <summary>
     /// Owner
-    /// </summary>
+    /// </summary>  
+    [OpenApiDescription("Owner")]
     public string Owner { get; set; }
 
     /// <summary>
     /// Sharing settings
     /// </summary>
+    [OpenApiDescription("Sharing settings")]
     public List<AceShortWrapper> SharingSettings{ get; set; }
 
     /// <summary>
     /// Type
     /// </summary>
+    [OpenApiDescription("Type")]
     public EditorType Type { get; set; }
 
     /// <summary>
     /// Uploaded
     /// </summary>
+    [OpenApiDescription("Uploaded")]
     public string Uploaded { get; set; }
 }
 

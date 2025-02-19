@@ -31,17 +31,20 @@ public class FileShareParams
     /// <summary>
     /// ID of the user with whom we want to share a file
     /// </summary>
+    [OpenApiDescription("ID of the user with whom we want to share a file")]
     public Guid ShareTo { get; set; }
 
     /// <summary>
     /// User email address
     /// </summary>
     [EmailAddress]
+    [OpenApiDescription("User email address")]
     public string Email { get; set; }
 
     /// <summary>
     /// Sharing rights
     /// </summary>
+    [OpenApiDescription("Sharing rights")]
     public FileShare Access { get; set; }
 }
 

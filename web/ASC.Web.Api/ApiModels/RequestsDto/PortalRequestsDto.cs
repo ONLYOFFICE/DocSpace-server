@@ -35,6 +35,7 @@ public class PortalExtraTenantRequestDto
     /// Specifies whether the tariff will be refreshed
     /// </summary>
     [FromQuery(Name = "refresh")]
+    [OpenApiDescription("Specifies whether the tariff will be refreshed")]
     public bool Refresh { get; set; }
 }
 
@@ -47,6 +48,7 @@ public class PortalPathRequestDto
     /// Portal virtual path
     /// </summary>
     [FromQuery(Name = "virtualPath")]
+    [OpenApiDescription("Portal virtual path")]
     public string VirtualPath { get; set; }
 }
 
@@ -59,6 +61,7 @@ public class PortalThumbnailRequestDto
     /// Bookmark URL
     /// </summary>
     [FromQuery(Name = "url")]
+    [OpenApiDescription("Bookmark URL")]
     public string Url { get; set; }
 }
 
@@ -71,6 +74,7 @@ public class PortalMobileAppRequestDto
     /// Mobile app type (IosProjects, AndroidProjects, IosDocuments, AndroidDocuments, or DesktopEditor)
     /// </summary>
     [FromQuery(Name = "type")]
+    [OpenApiDescription("Mobile app type (IosProjects, AndroidProjects, IosDocuments, AndroidDocuments, or DesktopEditor)")]
     public MobileAppType Type { get; set; }
 }
 
@@ -80,5 +84,6 @@ public class PortalSettingsrequestDto
     /// Specifies if the password hasher settings will be returned or not
     /// </summary>
     [FromQuery(Name = "withpassword")]
+    [OpenApiDescription("Specifies if the password hasher settings will be returned or not")]
     public bool? WithPassword { get; set; }
 }

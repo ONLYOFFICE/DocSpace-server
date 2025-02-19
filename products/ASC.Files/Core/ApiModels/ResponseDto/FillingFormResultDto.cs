@@ -32,31 +32,37 @@ public class FillingFormResultDto<T>
     /// <summary>
     /// Form number
     /// </summary>
+    [OpenApiDescription("Form number")]
     public int FormNumber { get; set; }
 
     /// <summary>
     /// Completed form
     /// </summary>
+    [OpenApiDescription("Completed form")]
     public FileDto<T> CompletedForm { get; set; }
 
     /// <summary>
     /// Original form
     /// </summary>
+    [OpenApiDescription("Original form")]
     public FileDto<T> OriginalForm { get; set; }
 
     /// <summary>
     /// Manager
     /// </summary>
+    [OpenApiDescription("Manager")]
     public EmployeeFullDto Manager { get; set; }
 
     /// <summary>
     /// Room Id
     /// </summary>
+    [OpenApiDescription("Room Id")]
     public T RoomId { get; set; }
 
     /// <summary>
     /// Is room member
     /// </summary>
+    [OpenApiDescription("Is room member")]
     public bool isRoomMember { get; set; }
 
 }

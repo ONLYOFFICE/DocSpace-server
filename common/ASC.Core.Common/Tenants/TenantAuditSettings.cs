@@ -33,11 +33,13 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
     /// <summary>
     /// Login history lifetime
     /// </summary>
+    [OpenApiDescription("Login history lifetime")]
     public int LoginHistoryLifeTime { get; init; }
 
     /// <summary>
     /// Audit trail lifetime
     /// </summary>
+    [OpenApiDescription("Audit trail lifetime")]
     public int AuditTrailLifeTime { get; init; }
 
     public static readonly Guid Guid = new("{8337D0FB-AD67-4552-8297-802312E7F503}");
@@ -63,5 +65,6 @@ public class TenantAuditSettingsWrapper
     /// <summary>
     /// Audit trail settingse
     /// </summary>
+    [OpenApiDescription("Audit trail settingse")]
     public TenantAuditSettings Settings { get; set; }
 }

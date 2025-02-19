@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,7 +48,10 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "List of tenant webhooks with their config parameters", typeof(IAsyncEnumerable<WebhooksConfigWithStatusDto>))]
+    [EndpointName("getTenantWebhooks")]
+    [EndpointSummary("Get webhooks")]
+    [EndpointDescription("Returns a list of the tenant webhooks.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<WebhooksConfigWithStatusDto>), 200, "List of tenant webhooks with their config parameters")]
     [HttpGet("webhook")]
     public async IAsyncEnumerable<WebhooksConfigWithStatusDto> GetTenantWebhooks()
     {
@@ -68,7 +71,10 @@ public class WebhooksController(ApiContext context,
     /// </short>
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
+    [EndpointName("createWebhook")]
+    [EndpointSummary("Create a webhook")]
+    [EndpointDescription("Creates a new tenant webhook with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(WebhooksConfigDto), 200, "Tenant webhook with its config parameters")]
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(WebhooksConfigRequestsDto inDto)
     {
@@ -93,7 +99,10 @@ public class WebhooksController(ApiContext context,
     /// </short>
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "Updated tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
+    [EndpointName("updateWebhook")]
+    [EndpointSummary("Update a webhook")]
+    [EndpointDescription("Updates the tenant webhook with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(WebhooksConfigDto), 200, "Updated tenant webhook with its config parameters")]
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
     {
@@ -112,7 +121,10 @@ public class WebhooksController(ApiContext context,
     /// </short>
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
+    [EndpointName("removeWebhook")]
+    [EndpointSummary("Remove a webhook")]
+    [EndpointDescription("Removes the tenant webhook with the ID specified in the request.")]
+    [OpenApiResponse(typeof(WebhooksConfigDto), 200, "Tenant webhook with its config parameters")]
     [HttpDelete("webhook/{id:int}")]
     public async Task<WebhooksConfigDto> RemoveWebhook(IdRequestDto<int> inDto)
     {
@@ -132,7 +144,10 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhooks/log</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
+    [EndpointName("getWebhookLogs")]
+    [EndpointSummary("Get webhook logs")]
+    [EndpointDescription("Returns the logs of the webhook activities.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<WebhooksLogDto>), 200, "Logs of the webhook activities")]
     [HttpGet("webhooks/log")]
     public async IAsyncEnumerable<WebhooksLogDto> GetJournal(WebhookLogsRequestDto inDto)
     {
@@ -158,9 +173,12 @@ public class WebhooksController(ApiContext context,
     /// </short>
     /// <path>api/2.0/settings/webhook/{id}/retry</path>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
-    [SwaggerResponse(400, "Id incorrect")]
-    [SwaggerResponse(404, "Item not found")]
+    [EndpointName("retryWebhook")]
+    [EndpointSummary("Retry a webhook")]
+    [EndpointDescription("Retries a webhook with the ID specified in the request.")]
+    [OpenApiResponse(typeof(WebhooksLogDto), 200, "Logs of the webhook activities")]
+    [OpenApiResponse(400, "Id incorrect")]
+    [OpenApiResponse(404, "Item not found")]
     [HttpPut("webhook/{id:int}/retry")]
     public async Task<WebhooksLogDto> RetryWebhook(IdRequestDto<int> inDto)
     {
@@ -192,7 +210,10 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook/retry</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
+    [EndpointName("retryWebhooks")]
+    [EndpointSummary("Retry webhooks")]
+    [EndpointDescription("Retries all the webhooks with the IDs specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<WebhooksLogDto>), 200, "Logs of the webhook activities")]
     [HttpPut("webhook/retry")]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
@@ -222,7 +243,10 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhooks</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "List of webhook settings", typeof(IAsyncEnumerable<Webhook>))]
+    [EndpointName("getWebhookSettings")]
+    [EndpointSummary("Get webhook settings")]
+    [EndpointDescription("Returns settings of all webhooks.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<Webhook>), 200, "List of webhook settings")]
     [HttpGet("webhooks")]
     public async IAsyncEnumerable<Webhook> Settings()
     {
@@ -243,7 +267,10 @@ public class WebhooksController(ApiContext context,
     /// </short>
     /// <path>api/2.0/settings/webhook/{id}</path>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "Webhook settings", typeof(Webhook))]
+    [EndpointName("disableWebhook")]
+    [EndpointSummary("Disable a webhook")]
+    [EndpointDescription("Disables a webhook with the ID specified in the request.")]
+    [OpenApiResponse(typeof(Webhook), 200, "Webhook settings")]
     [HttpPut("webhook/{id:int}")]
     public async Task<Webhook> DisableWebHook(IdRequestDto<int> inDto)
     {

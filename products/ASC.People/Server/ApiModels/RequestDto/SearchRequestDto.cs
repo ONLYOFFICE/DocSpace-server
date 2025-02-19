@@ -35,18 +35,21 @@ public class SearchDto
     /// Employee status
     /// </summary>
     [FromQuery(Name = "employeeStatus")]
+    [OpenApiDescription("Employee status")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
     /// Activation status
     /// </summary>
     [FromQuery(Name = "activationStatus")]
+    [OpenApiDescription("Activation status")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
     /// Exclude shared
     /// </summary>
     [FromQuery(Name = "excludeShared")]
+    [OpenApiDescription("Exclude shared")]
     public bool? ExcludeShared { get; set; }
 }
 
@@ -59,6 +62,7 @@ public class SearchIdDto<T>
     /// Id
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Id")]
     public T Id { get; set; }
 }
 
@@ -72,11 +76,13 @@ public class AdvancedSearchDto
     /// User status
     /// </summary>
     [FromRoute(Name = "status")]
+    [OpenApiDescription("User status")]
     public EmployeeStatus Status { get; set; }
 
     /// <summary>
     /// Search query
     /// </summary>
     [FromQuery(Name = "query")]
+    [OpenApiDescription("Search query")]
     public string Query { get; set; }
 }

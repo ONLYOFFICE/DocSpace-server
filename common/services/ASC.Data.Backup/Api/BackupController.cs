@@ -57,8 +57,11 @@ public class BackupController(
     /// <short>Get the backup schedule</short>
     /// <path>api/2.0/backup/getbackupschedule</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Backup schedule", typeof(BackupAjaxHandler.Schedule))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("getBackupSchedule")]
+    [EndpointSummary("Get the backup schedule")]
+    [EndpointDescription("Returns the backup schedule of the current portal.")]
+    [OpenApiResponse(typeof(BackupAjaxHandler.Schedule), 200, "Backup schedule")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackupschedule")]
     public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule()
     {
@@ -71,11 +74,14 @@ public class BackupController(
     /// <short>Create the backup schedule</short>
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(400, "BackupStored must be 1 - 30 or backup can not start as dump")]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [SwaggerResponse(404, "The required folder was not found")]
+    [EndpointName("createBackupSchedule")]
+    [EndpointSummary("Create the backup schedule")]
+    [EndpointDescription("Creates the backup schedule of the current portal with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(400, "BackupStored must be 1 - 30 or backup can not start as dump")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
+    [OpenApiResponse(404, "The required folder was not found")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupScheduleAsync(BackupScheduleDto inDto)
     {
@@ -120,8 +126,11 @@ public class BackupController(
     /// <short>Delete the backup schedule</short>
     /// <path>api/2.0/backup/deletebackupschedule</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("deleteBackupSchedule")]
+    [EndpointSummary("Delete the backup schedule")]
+    [EndpointDescription("Deletes the backup schedule of the current portal.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule()
     {
@@ -136,11 +145,14 @@ public class BackupController(
     /// <short>Start the backup</short>
     /// <path>api/2.0/backup/startbackup</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
-    [SwaggerResponse(400, "Wrong folder type or backup can`t start as dump")]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [SwaggerResponse(404, "The required folder was not found")]
+    [EndpointName("startBackup")]
+    [EndpointSummary("Start the backup")]
+    [EndpointDescription("Starts the backup of the current portal with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(BackupProgress), 200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link")]
+    [OpenApiResponse(400, "Wrong folder type or backup can`t start as dump")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
+    [OpenApiResponse(404, "The required folder was not found")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
     public async Task<BackupProgress> StartBackupAsync(BackupDto inDto)
@@ -213,8 +225,11 @@ public class BackupController(
     /// <short>Get the backup progress</short>
     /// <path>api/2.0/backup/getbackupprogress</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("getBackupProgress")]
+    [EndpointSummary("Get the backup progress")]
+    [EndpointDescription("Returns the progress of the started backup.")]
+    [OpenApiResponse(typeof(BackupProgress), 200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
     public async Task<BackupProgress> GetBackupProgressAsync()
@@ -229,8 +244,11 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackuphistory</path>
     /// <collection>list</collection>
     [Tags("Backup")]
-    [SwaggerResponse(200, "List of backup history records", typeof(List<BackupHistoryRecord>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("getBackupHistory")]
+    [EndpointSummary("Get the backup history")]
+    [EndpointDescription("Returns the history of the started backup.")]
+    [OpenApiResponse(typeof(List<BackupHistoryRecord>), 200, "List of backup history records")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
     {
@@ -243,8 +261,11 @@ public class BackupController(
     /// <short>Delete the backup</short>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("deleteBackup")]
+    [EndpointSummary("Delete the backup")]
+    [EndpointDescription("Deletes the backup with the ID specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup([FromRoute] DeleteBackupDto inDto)
     {
@@ -258,8 +279,11 @@ public class BackupController(
     /// <short>Delete the backup history</short>
     /// <path>api/2.0/backup/deletebackuphistory</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful")]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("deleteBackupHistory")]
+    [EndpointSummary("Delete the backup history")]
+    [EndpointDescription("Deletes the backup history of the current portal.")]
+    [OpenApiResponse(200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory()
     {
@@ -273,11 +297,14 @@ public class BackupController(
     /// <short>Start the restoring process</short>
     /// <path>api/2.0/backup/startrestore</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
-    [SwaggerResponse(400, "Backup can not start as dump")]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [SwaggerResponse(404, "The required file or folder was not found")]
+    [EndpointName("startBackupRestore")]
+    [EndpointSummary("Start the restoring process")]
+    [EndpointDescription("Starts the data restoring process of the current portal with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(BackupProgress), 200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link")]
+    [OpenApiResponse(400, "Backup can not start as dump")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
+    [OpenApiResponse(404, "The required file or folder was not found")]
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
     {
@@ -332,7 +359,10 @@ public class BackupController(
     /// <path>api/2.0/backup/getrestoreprogress</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
+    [EndpointName("getRestoreProgress")]
+    [EndpointSummary("Get the restoring progress")]
+    [EndpointDescription("Returns the progress of the started restoring process.")]
+    [OpenApiResponse(typeof(BackupProgress), 200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link")]
     [HttpGet("getrestoreprogress")]  //NOTE: this method doesn't check payment!!!
     [AllowAnonymous]
     [AllowNotPayment]
@@ -348,8 +378,11 @@ public class BackupController(
     /// <path>api/2.0/backup/backuptmp</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Backup")]
+    [EndpointName("getTempPath")]
+    [EndpointSummary("Get the temporary backup folder")]
+    [EndpointDescription("Returns a path to the temporary folder with the stored backup.")]
     [HttpGet("backuptmp")]
-    [SwaggerResponse(200, "Path to the temporary folder with the stored backup", typeof(object))]
+    [OpenApiResponse(typeof(object), 200, "Path to the temporary folder with the stored backup")]
     public object GetTempPath()
     {
         return backupAjaxHandler.GetTmpFolder();

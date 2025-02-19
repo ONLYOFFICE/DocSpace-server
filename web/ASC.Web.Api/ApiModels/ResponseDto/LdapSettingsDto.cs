@@ -31,114 +31,136 @@ public class LdapSettingsDto : IMapFrom<LdapSettings>
     /// <summary>
     /// Specifies if the LDAP authentication is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the LDAP authentication is enabled or not")]
     public bool EnableLdapAuthentication { get; set; }
 
     /// <summary>
     /// Specifies if the StartTLS is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the StartTLS is enabled or not")]
     public bool StartTls { get; set; }
 
     /// <summary>
     /// Specifies if the SSL is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the SSL is enabled or not")]
     public bool Ssl { get; set; }
 
     /// <summary>
     /// Specifies if the welcome email is sent or not
     /// </summary>
+    [OpenApiDescription("Specifies if the welcome email is sent or not")]
     public bool SendWelcomeEmail { get; set; }
 
     /// <summary>
     /// LDAP server URL address
     /// </summary>
+    [OpenApiDescription("LDAP server URL address")]
     public string Server { get; set; }
 
     /// <summary>
     /// Absolute path to the top level directory containing users for the import
     /// </summary>
     // ReSharper disable once InconsistentNaming
+    [OpenApiDescription("Absolute path to the top level directory containing users for the import")]
     public string UserDN { get; set; }
 
     /// <summary>
     /// Port number
     /// </summary>
+    [OpenApiDescription("Port number")]
     public int PortNumber { get; set; }
 
     /// <summary>
     /// User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users
     /// </summary>
+    [OpenApiDescription("User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users")]
     public string UserFilter { get; set; }
 
     /// <summary>
     /// Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE
     /// </summary>
+    [OpenApiDescription("Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE")]
     public string LoginAttribute { get; set; }
 
     /// <summary>
     /// Correspondence between the user data fields on the portal and the attributes in the LDAP server user record
     /// </summary>
+    [OpenApiDescription("Correspondence between the user data fields on the portal and the attributes in the LDAP server user record")]
     public Dictionary<MappingFields, string> LdapMapping { get; set; }
 
     /// <summary>
     /// Group access rights
     /// </summary>
     //ToDo: use SId instead of group name
+    [OpenApiDescription("Group access rights")]
     public Dictionary<AccessRight, string> AccessRights { get; set; }
 
     /// <summary>
     /// Specifies if the groups from the LDAP server are added to the portal or not
     /// </summary>
+    [OpenApiDescription("Specifies if the groups from the LDAP server are added to the portal or not")]
     public bool GroupMembership { get; set; }
 
     /// <summary>
     /// The absolute path to the top level directory containing groups for the import
     /// </summary>
     // ReSharper disable once InconsistentNaming
+    [OpenApiDescription("The absolute path to the top level directory containing groups for the import")]
     public string GroupDN { get; set; }
 
     /// <summary>
     /// Attribute that determines whether this user is a member of the groups
     /// </summary>
+    [OpenApiDescription("Attribute that determines whether this user is a member of the groups")]
     public string UserAttribute { get; set; }
 
     /// <summary>
     /// Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users
     /// </summary>
+    [OpenApiDescription("Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users")]
     public string GroupFilter { get; set; }
 
     /// <summary>
     /// Attribute that specifies the users that the group includes
     /// </summary>
+    [OpenApiDescription("Attribute that specifies the users that the group includes")]
     public string GroupAttribute { get; set; }
 
     /// <summary>
     /// Attribute that corresponds to a name of the group where the user is included
     /// </summary>
+    [OpenApiDescription("Attribute that corresponds to a name of the group where the user is included")]
     public string GroupNameAttribute { get; set; }
 
     /// <summary>
     /// Specifies if the user has rights to read data from LDAP server or not
     /// </summary>
+    [OpenApiDescription("Specifies if the user has rights to read data from LDAP server or not")]
     public bool Authentication { get; set; }
 
     /// <summary>
     /// Login
     /// </summary>
+    [OpenApiDescription("Login")]
     public string Login { get; set; }
 
     /// <summary>
     /// Password
     /// </summary>
+    [OpenApiDescription("Password")]
     public string Password { get; set; }
 
     /// <summary>
     /// Specifies if the certificate is accepted or not
     /// </summary>
+    [OpenApiDescription("Specifies if the certificate is accepted or not")]
     public bool AcceptCertificate { get; set; }
 
     /// <summary>
     /// Specifies if the default LDAP settings are used or not
     /// </summary>
+    [OpenApiDescription("Specifies if the default LDAP settings are used or not")]
     public bool IsDefault { get; set; }
 
     public void Mapping(Profile profile)

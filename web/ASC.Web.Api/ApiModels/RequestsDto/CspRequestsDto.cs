@@ -31,5 +31,6 @@ public class CspRequestsDto
     /// <summary>
     /// Domains
     /// </summary>
+    [OpenApiDescription("Domains")]
     public IEnumerable<string> Domains { get; set; }
 }

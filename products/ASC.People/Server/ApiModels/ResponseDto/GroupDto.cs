@@ -31,46 +31,55 @@ public class GroupDto
     /// <summary>
     /// Name
     /// </summary>
+    [OpenApiDescription("Name")]
     public string Name { get; set; }
 
     /// <summary>
     /// Parent
     /// </summary>
+    [OpenApiDescription("Parent")]
     public Guid? Parent { get; set; }
 
     /// <summary>
     /// Category
     /// </summary>
+    [OpenApiDescription("Category")]
     public Guid Category { get; set; }
 
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Specifies if the LDAP settings are enabled for the group or not
     /// </summary>
+    [OpenApiDescription("Specifies if the LDAP settings are enabled for the group or not")]
     public bool IsLDAP { get; set; }
 
     /// <summary>
     /// Manager
     /// </summary>
+    [OpenApiDescription("Manager")]
     public EmployeeFullDto Manager { get; set; }
 
     /// <summary>
     /// List of members
     /// </summary>
+    [OpenApiDescription("List of members")]
     public List<EmployeeFullDto> Members { get; set; }
 
     /// <summary>
     /// Shared
     /// </summary>
+    [OpenApiDescription("Shared")]
     public bool? Shared { get; set; }
 
     /// <summary>
     /// Members count
     /// </summary>
+    [OpenApiDescription("Members count")]
     public int MembersCount { get; set; }
 }
 

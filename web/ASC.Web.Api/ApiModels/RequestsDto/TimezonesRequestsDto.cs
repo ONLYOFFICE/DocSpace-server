@@ -31,10 +31,12 @@ public class TimezonesRequestsDto
     /// <summary>
     /// Time zone ID
     /// </summary>
+    [OpenApiDescription("Time zone ID")]
     public string Id { get; set; }
 
     /// <summary>
     /// Time zone display name
     /// </summary>
+    [OpenApiDescription("Time zone display name")]
     public string DisplayName { get; set; }
 }

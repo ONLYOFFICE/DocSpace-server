@@ -34,34 +34,40 @@ public class TenantModel : IModel
     /// <summary>
     /// Portal name
     /// </summary>
+    [OpenApiDescription("Portal name")]
     public string PortalName { get; set; }
 
     /// <summary>
     /// Tenant id
     /// </summary>
+    [OpenApiDescription("Tenant id")]
     public int? TenantId { get; set; }
 
     /// <summary>
     /// Affiliate id
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Affiliate id")]
     public string AffiliateId { get; set; }
 
     /// <summary>
     /// Partner id
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Partner id")]
     public string PartnerId { get; set; }
 
     /// <summary>
     /// Campaign
     /// </summary>
+    [OpenApiDescription("Campaign")]
     public string Campaign { get; set; }
 
     /// <summary>
     /// First name
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("First name")]
     public string FirstName { get; set; }
 
     /// <summary>
@@ -69,30 +75,34 @@ public class TenantModel : IModel
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
+    [OpenApiDescription("Email")]
     public string Email { get; set; }
 
     /// <summary>
     /// Industry
     /// </summary>
+    [OpenApiDescription("Industry")]
     public int Industry { get; set; }
 
     /// <summary>
     /// Language
     /// </summary>
     [StringLength(7)]
+    [OpenApiDescription("Language")]
     public string Language { get; set; }
-
 
     /// <summary>
     /// Last name
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Last name")]
     public string LastName { get; set; }
 
     /// <summary>
     /// Module
     /// </summary>
     [StringLength(38)]
+    [OpenApiDescription("Module")]
     public string Module { get; set; }
 
     /// <summary>
@@ -100,74 +110,88 @@ public class TenantModel : IModel
     /// </summary>
     //todo: delete after www update
     [StringLength(PasswordSettingsManager.MaxLength)]
+    [OpenApiDescription("Password")]
     public string Password { get; set; }
 
     /// <summary>
     /// Password hash
     /// </summary>
+    [OpenApiDescription("Password hash")]
     public string PasswordHash { get; set; }
 
     /// <summary>
     /// Phone
     /// </summary>
     [StringLength(32)]
+    [OpenApiDescription("Phone")]
     public string Phone { get; set; }
 
     /// <summary>
     /// Recaptcha response
     /// </summary>
+    [OpenApiDescription("Recaptcha response")]
     public string RecaptchaResponse { get; set; }
 
     /// <summary>
     /// Recaptcha type
     /// </summary>
+    [OpenApiDescription("Recaptcha type")]
     public RecaptchaType RecaptchaType { get; set; }
 
     /// <summary>
     /// Region
     /// </summary>
     [StringLength(20)]
+    [OpenApiDescription("Region")]
     public string Region { get; set; }
 
     /// <summary>
     /// AWS region
     /// </summary>
     [JsonPropertyName("awsRegion")]
+    [OpenApiDescription("AWS region")]
     public string AWSRegion { get; set; }
 
     /// <summary>
     /// Status
     /// </summary>
+    [OpenApiDescription("Status")]
     public TenantStatus Status { get; set; }
 
     /// <summary>
     /// Skip welcome
     /// </summary>
+    [OpenApiDescription("Skip welcome")]
     public bool SkipWelcome { get; set; }
 
     /// <summary>
     /// TimeZone name
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Time zone name")]
     public string TimeZoneName { get; set; }
 
     /// <summary>
     /// Spam
     /// </summary>
+    [OpenApiDescription("Spam")]
     public bool Spam { get; set; }
 
     /// <summary>
     /// Calls
     /// </summary>
+    [OpenApiDescription("Calls")]
     public bool Calls { get; set; }
 
     /// <summary>
     /// App key
     /// </summary>
+    [OpenApiDescription("App key")]
     public string AppKey { get; set; }
 
     /// <summary>
     /// Limited access space
     /// </summary>
+    [OpenApiDescription("Limited access space")]
     public bool LimitedAccessSpace { get; set; }
 }

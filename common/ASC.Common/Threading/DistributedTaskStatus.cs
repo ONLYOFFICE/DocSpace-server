@@ -28,18 +28,18 @@ namespace ASC.Common.Threading;
 
 public enum DistributedTaskStatus
 {
-    [SwaggerEnum("Created")]
+    [OpenApiEnum("Created")]
     Created,
 
-    [SwaggerEnum("Running")]
+    [OpenApiEnum("Running")]
     Running,
 
-    [SwaggerEnum("Completed")]
+    [OpenApiEnum("Completed")]
     Completed,
 
-    [SwaggerEnum("Canceled")]
+    [OpenApiEnum("Canceled")]
     Canceled,
 
-    [SwaggerEnum("Failted")]
+    [OpenApiEnum("Failted")]
     Failted
 }

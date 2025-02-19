@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,10 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <path>api/2.0/settings/iprestrictions</path>
     /// <collection>list</collection>
     [Tags("Settings / IP restrictions")]
-    [SwaggerResponse(200, "List of IP restrictions parameters", typeof(IEnumerable<IPRestriction>))]
+    [EndpointName("getIpRestrictions")]
+    [EndpointSummary("Get the IP portal restrictions")]
+    [EndpointDescription("Returns the IP portal restrictions.")]
+    [OpenApiResponse(typeof(IEnumerable<IPRestriction>), 200, "List of IP restrictions parameters")]
     [HttpGet("")]
     public async Task<IEnumerable<IPRestriction>> GetIpRestrictionsAsync()
     {
@@ -59,7 +62,10 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <short>Save the IP restriction settings</short>
     /// <path>api/2.0/settings/iprestrictions</path>
     [Tags("Settings / IP restrictions")]
-    [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]
+    [EndpointName("saveIpRestrictions")]
+    [EndpointSummary("Save the IP restriction settings")]
+    [EndpointDescription("Updates the IP restriction settings with a parameter specified in the request.")]
+    [OpenApiResponse(typeof(IpRestrictionsDto), 200, "Updated IP restriction settings")]
     [HttpPut("")]
     public async Task<IpRestrictionsDto> SaveIpRestrictionsAsync(IpRestrictionsDto inDto)
     {
@@ -103,7 +109,10 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <short>Get the IP restriction settings</short>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     [Tags("Settings / IP restrictions")]
-    [SwaggerResponse(200, "IP restriction settings", typeof(IPRestrictionsSettings))]
+    [EndpointName("readIpRestrictionsSettings")]
+    [EndpointSummary("Get the IP restriction settings")]
+    [EndpointDescription("Returns the IP restriction settings.")]
+    [OpenApiResponse(typeof(IPRestrictionsSettings), 200, "IP restriction settings")]
     [HttpGet("settings")]
     public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettingsAsync()
     {
@@ -118,7 +127,10 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <short>Save the IP restriction settings</short>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     [Tags("Settings / IP restrictions")]
-    [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]
+    [EndpointName("updateIpRestrictionsSettings")]
+    [EndpointSummary("Save the IP restriction settings")]
+    [EndpointDescription("Updates the IP restriction settings with a parameter specified in the request.")]
+    [OpenApiResponse(typeof(IpRestrictionsDto), 200, "Updated IP restriction settings")]
     [HttpPut("settings")]
     public async Task<IpRestrictionsDto> UpdateIpRestrictionsSettingsAsync(IpRestrictionsDto inDto)
     {

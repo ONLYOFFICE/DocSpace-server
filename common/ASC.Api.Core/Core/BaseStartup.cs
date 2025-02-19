@@ -408,7 +408,7 @@ public abstract class BaseStartup
         if (OpenApiEnabled)
         {
             mvcBuilder.AddApiExplorer();
-            services.AddOpenApi(_configuration);
+            services.AddWebOpenApi(_configuration);
         }
 
         services.AddScoped<CookieAuthHandler>();

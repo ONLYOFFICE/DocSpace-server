@@ -34,25 +34,30 @@ public class CopyAs<T>
     /// <summary>
     /// Destination file title
     /// </summary>
+    [OpenApiDescription("Destination file title")]
     public string DestTitle { get; set; }
 
     /// <summary>
     /// Destination folder ID
     /// </summary>
+    [OpenApiDescription("Destination folder ID")]
     public T DestFolderId { get; set; }
 
     /// <summary>
     /// Specifies whether to allow the creation of external extension files or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to allow the creation of external extension files or not")]
     public bool EnableExternalExt { get; set; }
 
     /// <summary>
     /// Password
     /// </summary>
+    [OpenApiDescription("Password")]
     public string Password { get; set; }
 
     /// <summary>Convert to form</summary>
     /// <type>System.Boolean, System</type>
+    [OpenApiDescription("Convert to form")]
     public bool ToForm { get; set; }
 }
 
@@ -65,11 +70,13 @@ public class CopyAsRequestDto<T>
     /// File id
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File id")]
     public T FileId { get; set; }
 
     /// <summary>
     /// File
     /// </summary>
     [FromBody]
+    [OpenApiDescription("File")]
     public CopyAs<JsonElement> File { get; set; }
 }

@@ -35,22 +35,26 @@ public class SettingsModel : IModel
     /// Portal name
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Portal name")]
     public string PortalName { get; set; }
 
     /// <summary>
     /// Tenant id
     /// </summary>
+    [OpenApiDescription("Tenant id")]
     public int? TenantId { get; set; }
 
     /// <summary>
     /// Key
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Key")]
     public string Key { get; set; }
 
     /// <summary>
     /// Value
     /// </summary>
+    [OpenApiDescription("Value")]
     public string Value { get; set; }
 }
 
@@ -63,5 +67,6 @@ public class DomainModel
     /// Host name
     /// </summary>
     [StringLength (255)]
+    [OpenApiDescription("Host name")]
     public string HostName { get; set; }
 }

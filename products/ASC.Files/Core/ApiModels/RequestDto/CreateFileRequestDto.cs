@@ -35,21 +35,25 @@ public class CreateFile<T>
     /// File title
     /// </summary>
     [StringLength(165)]
+    [OpenApiDescription("File title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Template file ID
     /// </summary>
+    [OpenApiDescription("Template file ID")]
     public T TemplateId { get; set; }
 
     /// <summary>
     /// Specifies whether to allow the creation of external extension files or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to allow the creation of external extension files or not")]
     public bool EnableExternalExt { get; set; }
 
     /// <summary>
     /// Form ID
     /// </summary>
+    [OpenApiDescription("Form ID")]
     public int FormId { get; set; }
 }
 
@@ -62,11 +66,13 @@ public class CreateFileRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// File
     /// </summary>
     [FromBody]
+    [OpenApiDescription("File")]
     public CreateFile<JsonElement> File { get; set; }
 }

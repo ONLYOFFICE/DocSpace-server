@@ -32,71 +32,83 @@ public class RoomContentRequestDto
     /// Filter by room type
     /// </summary>
     [FromQuery(Name = "type")]
+    [OpenApiDescription("Filter by room type")]
     public IEnumerable<RoomType> Type { get; set; }
 
     /// <summary>
     /// Filter by user ID
     /// </summary>
     [FromQuery(Name = "subjectId")]
+    [OpenApiDescription("Filter by user ID")]
     public string SubjectId { get; set; }
 
     /// <summary>
     /// Specifies whether to search within the section contents or not
     /// </summary>
     [FromQuery(Name = "searchInContent")]
+    [OpenApiDescription("Specifies whether to search within the section contents or not")]
     public bool? SearchInContent { get; set; }
 
     /// <summary>
     /// Specifies whether to return sections with or without subfolders
     /// </summary>
     [FromQuery(Name = "withSubfolders")]
+    [OpenApiDescription("Specifies whether to return sections with or without subfolders")]
     public bool? WithSubfolders { get; set; }
 
     /// <summary>
     /// Room search area (Active, Archive, Any, Recent by links)
     /// </summary>
     [FromQuery(Name = "searchArea")]
+    [OpenApiDescription("Room search area (Active, Archive, Any, Recent by links)")]
     public SearchArea? SearchArea { get; set; }
 
     /// <summary>
     /// Specifies whether to search by tags or not
     /// </summary>
     [FromQuery(Name = "withoutTags")]
+    [OpenApiDescription("Specifies whether to search by tags or not")]
     public bool? WithoutTags { get; set; }
 
     /// <summary>
     /// Tags in the serialized format
     /// </summary>
     [FromQuery(Name = "tags")]
+    [OpenApiDescription("Tags in the serialized format")]
     public string Tags { get; set; }
 
     /// <summary>
     /// Specifies whether to exclude a subject or not
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
+    [OpenApiDescription("Specifies whether to exclude a subject or not")]
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
     /// Filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, SharePoint, WebDav, Yandex, Storage)
     /// </summary>
     [FromQuery(Name = "provider")]
+    [OpenApiDescription("Filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, SharePoint, WebDav, Yandex, Storage)")]
     public ProviderFilter? Provider { get; set; }
 
     /// <summary>
     /// Filter by subject (Owner - 0, Member - 1)
     /// </summary>
     [FromQuery(Name = "subjectFilter")]
+    [OpenApiDescription("Filter by subject (Owner - 0, Member - 1)")]
     public SubjectFilter? SubjectFilter { get; set; }
 
     /// <summary>
     /// Filter by quota (All - 0, Default - 1, Custom - 2)
     /// </summary>
     [FromQuery(Name = "quotaFilter")]
+    [OpenApiDescription("Filter by quota (All - 0, Default - 1, Custom - 2)")]
     public QuotaFilter? QuotaFilter { get; set; }
 
     /// <summary>
     /// Filter by storage (None - 0, Internal - 1, ThirdParty - 2)
     /// </summary>
     [FromQuery(Name = "storageFilter")]
+    [OpenApiDescription("Filter by storage (None - 0, Internal - 1, ThirdParty - 2)")]
     public StorageFilter? StorageFilter { get; set; }
 }

@@ -34,11 +34,13 @@ public class FileLinkRequest : LinkRequestDtoBase
     /// <summary>
     /// Link scope
     /// </summary>
+    [OpenApiDescription("Link scope")]
     public bool Internal { get; set; }
 
     /// <summary>
     /// Primary link flag
     /// </summary>
+    [OpenApiDescription("Primary link flag")]
     public bool Primary { get; set; }
 }
 
@@ -52,11 +54,13 @@ public class FileLinkRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("File ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// External link parameters
     /// </summary>
     [FromBody]
+    [OpenApiDescription("External link parameters")]
     public FileLinkRequest File { get; set; }
 }

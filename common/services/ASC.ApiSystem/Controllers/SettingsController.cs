@@ -45,7 +45,7 @@ public class SettingsController(CommonMethods commonMethods,
     /// </summary>
     /// <path>apisystem/settings/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
-    [SwaggerResponse(200, "Settings api works")]
+    [OpenApiResponse(200, "Settings api works")]
     [HttpGet("test")]
     public IActionResult Check()
     {
@@ -64,7 +64,10 @@ public class SettingsController(CommonMethods commonMethods,
     /// </summary>
     /// <path>apisystem/settings</path>
     [Tags("Settings")]
-    [SwaggerResponse(200, "Settings", typeof(IActionResult))]
+    [EndpointName("getSettings")]
+    [EndpointSummary("Gets settings")]
+    [EndpointDescription("Gets settings")]
+    [OpenApiResponse(typeof(IActionResult), 200, "Settings")]
     [HttpGet("get")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> GetSettingsAsync([FromQuery] SettingsModel model)
@@ -97,7 +100,10 @@ public class SettingsController(CommonMethods commonMethods,
     /// </summary>
     /// <path>apisystem/settings/save</path>
     [Tags("Settings")]
-    [SwaggerResponse(200, "Settings", typeof(IActionResult))]
+    [EndpointName("saveSettings")]
+    [EndpointSummary("Saves settings")]
+    [EndpointDescription("Saves settings")]
+    [OpenApiResponse(typeof(IActionResult), 200, "Settings")]
     [HttpPost("save")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> SaveSettingsAsync([FromBody] SettingsModel model)
@@ -155,7 +161,10 @@ public class SettingsController(CommonMethods commonMethods,
     /// </summary>
     /// <path>apisystem/settings/checkdomain</path>
     [Tags("Settings")]
-    [SwaggerResponse(200, "True if success", typeof(IActionResult))]
+    [EndpointName("checkDomain")]
+    [EndpointSummary("Checks domain")]
+    [EndpointDescription("Checks domain")]
+    [OpenApiResponse(typeof(IActionResult), 200, "True if success")]
     [HttpPost("checkdomain")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> CheckDomain([FromBody] DomainModel model)

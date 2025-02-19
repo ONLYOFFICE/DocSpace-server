@@ -36,11 +36,13 @@ public class GetGroupsWithSharedRequestDto<T>
     /// ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// Exclude shared
     /// </summary>
     [FromQuery(Name = "excludeShared")]
+    [OpenApiDescription("Exclude shared")]
     public bool? ExcludeShared { get; set; }
 }

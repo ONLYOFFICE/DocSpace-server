@@ -34,11 +34,13 @@ public class SaveAsPdf<T>
     /// <summary>
     /// Folder ID
     /// </summary>
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// File title
     /// </summary>
+    [OpenApiDescription("File title")]
     public string Title { get; set; }
 }
 
@@ -52,11 +54,13 @@ public class SaveAsPdfRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("File ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// Parameters for saving file as pdf
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Parameters for saving file as pdf")]
     public SaveAsPdf<T> File { get; set; }
 }

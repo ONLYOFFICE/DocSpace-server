@@ -35,17 +35,20 @@ public class RestoreVersionRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// File version
     /// </summary>
     [FromQuery(Name = "version")]
+    [OpenApiDescription("File version")]
     public int Version { get; set; } = 0;
 
     /// <summary>
     /// File version URL
     /// </summary>
     [FromQuery(Name = "url")]
+    [OpenApiDescription("File version URL")]
     public string Url { get; set; } = null;
 }

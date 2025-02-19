@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -70,8 +70,11 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// ]]>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session", typeof(object))]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [EndpointName("createUploadSession")]
+    [EndpointSummary("Chunked upload")]
+    [EndpointDescription("Creates a session to upload large files in multiple chunks to the folder with the ID specified in the request.\n\n **Note**: Each chunk can have different length but the length should be multiple of <b>512</b> and greater or equal to <b>10 mb</b>. Last chunk can have any size.\n After the initial response to the request with the <b>200 OK</b> status, you must get the <em>location</em> field value from the response. Send all your chunks to this location.\n Each chunk must be sent in the exact order the chunks appear in the file.\n After receiving each chunk, the server will respond with the current information about the upload session if no errors occurred.\n    /// When the number of bytes uploaded is equal to the number of bytes you sent in the initial request, the server responds with the <b>201 Created</b> status and sends you information about the uploaded file.")]
+    [OpenApiResponse(typeof(object), 200, "Information about created session")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
     [HttpPost("{folderId}/upload/create_session")]
     public async Task<object> CreateUploadSessionAsync(SessionRequestDto<T> inDto)
     {
@@ -95,8 +98,11 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// ]]>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Information about created session", typeof(object))]
-    [SwaggerResponse(403, "You don't have enough permission to edit the file")]
+    [EndpointName("createEditSession")]
+    [EndpointSummary("Create the editing session")]
+    [EndpointDescription("Creates a session to edit the existing file with multiple chunks (needed for WebDAV).")]
+    [OpenApiResponse(typeof(object), 200, "Information about created session")]
+    [OpenApiResponse(403, "You don't have enough permission to edit the file")]
     [HttpPost("file/{fileId}/edit_session")]
     public async Task<object> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
     {
@@ -108,7 +114,10 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </summary>
     /// <path>api/2.0/files/{folderId}/upload/check</path>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Inserted file", typeof(List<string>))]
+    [EndpointName("checkUpload")]
+    [EndpointSummary("Check upload")]
+    [EndpointDescription("Checks upload")]
+    [OpenApiResponse(typeof(List<string>), 200, "Inserted file")]
     [HttpPost("{folderId}/upload/check")]
     public Task<List<string>> CheckUploadAsync(CheckUploadRequestDto<T> model)
     {
@@ -121,9 +130,12 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <short>Insert a file</short>
     /// <path>api/2.0/files/{folderId}/insert</path>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [SwaggerResponse(404, "Folder not found")]
+    [EndpointName("insertFile")]
+    [EndpointSummary("Insert a file")]
+    [EndpointDescription("Inserts a file specified in the request to the selected folder by single file uploading.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "Inserted file")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
+    [OpenApiResponse(404, "Folder not found")]
     [HttpPost("{folderId}/insert", Order = 1)]
     public async Task<FileDto<T>> InsertFileAsync(InsertWithFileRequestDto<T> inDto)
     {
@@ -145,9 +157,12 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </remarks>
     /// <path>api/2.0/files/{folderId}/upload</path>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Inserted file", typeof(object))]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [SwaggerResponse(404, "Folder not found")]
+    [EndpointName("uploadFile")]
+    [EndpointSummary("Upload a file")]
+    [EndpointDescription("Uploads a file specified in the request to the selected folder by single file uploading or standart multipart/form-data method.\n\n **Note**: You can upload files in two different ways: <ol><li>Using single file upload. You should set the Content-Type and Content-Disposition headers to specify a file name and content type, and send the file to the request body.</li><li>Using standart multipart/form-data method.</li></ol>")]
+    [OpenApiResponse(typeof(object), 200, "Inserted file")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
+    [OpenApiResponse(404, "Folder not found")]
     [HttpPost("{folderId}/upload", Order = 1)]
     public async Task<object> UploadFileAsync(UploadWithFolderRequestDto<T> inDto)
     {
@@ -168,9 +183,12 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <path>api/2.0/files/@common/insert</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [SwaggerResponse(404, "Folder not found")]
+    [EndpointName("insertFileToCommonFromBody")]
+    [EndpointSummary("Insert a file to the \"Common\" section")]
+    [EndpointDescription("Inserts a file specified in the request to the \"Common\" section by single file uploading.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "Inserted file")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
+    [OpenApiResponse(404, "Folder not found")]
     [HttpPost("@common/insert")]
     public async Task<FileDto<int>> InsertFileToCommonFromBodyAsync([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -183,9 +201,12 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <short>Insert a file to the "My documents" section</short>
     /// <path>api/2.0/files/@my/insert</path>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [SwaggerResponse(404, "Folder not found")]
+    [EndpointName("insertFileToMyFromBody")]
+    [EndpointSummary("Insert a file to the \"My documents\" section")]
+    [EndpointDescription("Inserts a file specified in the request to the \"My documents\" section by single file uploading.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "Inserted file")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
+    [OpenApiResponse(404, "Folder not found")]
     [HttpPost("@my/insert")]
     public async Task<FileDto<int>> InsertFileToMyFromBodyAsync([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -207,11 +228,14 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <path>api/2.0/files/@common/upload</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Uploaded file(s)", typeof(object))]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [SwaggerResponse(404, "File not found")]
+    [EndpointName("uploadFileToCommon")]
+    [EndpointSummary("Upload a file to the \"Common\" section")]
+    [EndpointDescription("Uploads a file specified in the request to the \"Common\" section by single file uploading or standart multipart/form-data method.\n\n **Note**: You can upload files in two different ways: <ol><li>Using single file upload. You should set the Content-Type and Content-Disposition headers to specify a file name and content type, and send the file to the request body.</li><li>Using standart multipart/form-data method.</li></ol>")]
+    [OpenApiResponse(typeof(object), 200, "Uploaded file(s)")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
+    [OpenApiResponse(404, "File not found")]
     [HttpPost("@common/upload")]
-    public async Task<object> UploadFileToCommonAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
+    public async Task<object> UploadFileToCommonAsync([FromQuery, ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
         inDto.CreateNewIfExist = false;
 
@@ -232,11 +256,14 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// </remarks>
     /// <path>api/2.0/files/@my/upload</path>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Uploaded file(s)", typeof(object))]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [SwaggerResponse(404, "File not found")]
+    [EndpointName("uploadFileToMy")]
+    [EndpointSummary("Upload a file to the \"My documents\" section")]
+    [EndpointDescription("Uploads a file specified in the request to the \"My documents\" section by single file uploading or standart multipart/form-data method.\n\n **Note**: You can upload files in two different ways: <ol><li>Using single file upload. You should set the Content-Type and Content-Disposition headers to specify a file name and content type, and send the file to the request body.</li><li>Using standart multipart/form-data method.</li></ol>")]
+    [OpenApiResponse(typeof(object), 200, "Uploaded file(s)")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
+    [OpenApiResponse(404, "File not found")]
     [HttpPost("@my/upload")]
-    public async Task<object> UploadFileToMyAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
+    public async Task<object> UploadFileToMyAsync([FromQuery, ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
         inDto.CreateNewIfExist = false;
 

@@ -31,76 +31,91 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     /// <summary>
     /// Name
     /// </summary>
+    [OpenApiDescription("Name")]
     public string Name { get; set; }
 
     /// <summary>
     /// Version
     /// </summary>
+    [OpenApiDescription("Version")]
     public string Version { get; set; }
 
     /// <summary>
     /// Description
     /// </summary>
+    [OpenApiDescription("Description")]
     public string Description { get; set; }
 
     /// <summary>
     /// License
     /// </summary>
+    [OpenApiDescription("License")]
     public string License { get; set; }
 
     /// <summary>
     /// Author
     /// </summary>
+    [OpenApiDescription("Author")]
     public string Author { get; set; }
 
     /// <summary>
     /// Home page
     /// </summary>
+    [OpenApiDescription("Home page")]
     public string HomePage { get; set; }
 
     /// <summary>
     /// PluginName
     /// </summary>
+    [OpenApiDescription("PluginName")]
     public string PluginName { get; set; }
 
     /// <summary>
     /// Scopes
     /// </summary>
+    [OpenApiDescription("Scopes")]
     public string Scopes { get; set; }
 
     /// <summary>
     /// Image
     /// </summary>
+    [OpenApiDescription("Image")]
     public string Image { get; set; }
 
     /// <summary>
     /// Create by
     /// </summary>
+    [OpenApiDescription("Create by")]
     public EmployeeDto CreateBy { get; set; }
 
     /// <summary>
     /// Create on
     /// </summary>
+    [OpenApiDescription("Create on")]
     public DateTime CreateOn { get; set; }
 
     /// <summary>
     /// Enabled
     /// </summary>
+    [OpenApiDescription("Enabled")]
     public bool Enabled { get; set; }
 
     /// <summary>
     /// System
     /// </summary>
+    [OpenApiDescription("System")]
     public bool System { get; set; }
 
     /// <summary>
     /// Url
     /// </summary>
+    [OpenApiDescription("Url")]
     public string Url { get; set; }
 
     /// <summary>
     /// Settings
     /// </summary>
+    [OpenApiDescription("Settings")]
     public string Settings { get; set; }
 
     public void Mapping(Profile profile)

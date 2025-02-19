@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,6 +32,7 @@ public class IdRequestDto<T>
     /// Id
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Id")]
     public T Id { get; set; }
 }
 
@@ -41,6 +42,7 @@ public class LoginEvenrIdRequestDto
     /// Login event ID
     /// </summary>
     [FromRoute(Name = "loginEventId")]
+    [OpenApiDescription("Login event ID")]
     public int Id { get; set; }
 }
 
@@ -50,6 +52,7 @@ public class UserIdRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userId")]
+    [OpenApiDescription("User ID")]
     public Guid Id { get; set; }
 }
 
@@ -59,6 +62,7 @@ public class UserIDRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userID")]
+    [OpenApiDescription("User ID")]
     public Guid Id { get; set; }
 }
 
@@ -68,6 +72,7 @@ public class ProductIdRequestDto
     /// Product ID
     /// </summary>
     [FromRoute(Name = "productid")]
+    [OpenApiDescription("Product ID")]
     public Guid ProductId { get; set; }
 }
 
@@ -77,12 +82,14 @@ public class UserProductIdsRequestDto
     /// Product ID
     /// </summary>
     [FromQuery(Name = "productid")]
+    [OpenApiDescription("Product ID")]
     public Guid ProductId { get; set; }
 
     /// <summary>
     /// User ID
     /// </summary>
     [FromQuery(Name = "userid")]
+    [OpenApiDescription("User ID")]
     public Guid UserId { get; set; }
 }
 
@@ -93,5 +100,6 @@ public class MigratorNameRequestDto
     /// Migrator name
     /// </summary>
     [FromRoute(Name = "migratorName")]
+    [OpenApiDescription("Migrator name")]
     public string MigratorName { get; set; }
 }

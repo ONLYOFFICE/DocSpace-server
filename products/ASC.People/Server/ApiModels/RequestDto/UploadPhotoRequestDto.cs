@@ -28,6 +28,15 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class UploadPhotoRequestDto
 {
+    /// <summary>
+    /// List of files to upload
+    /// </summary>
+    [OpenApiDescription("List of files to upload")]
     public List<IFormFile> Files { get; set; }
+
+    /// <summary>
+    /// Specifies whether to save the uploaded files immediately or not
+    /// </summary>
+    [OpenApiDescription("Specifies whether to save the uploaded files immediately or not")]
     public bool Autosave { get; set; }
 }

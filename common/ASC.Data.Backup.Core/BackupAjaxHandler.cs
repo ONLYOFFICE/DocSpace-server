@@ -440,32 +440,37 @@ public class BackupAjaxHandler(
         /// <summary>
         /// Storage type
         /// </summary>
+        [OpenApiDescription("Storage type")]
         public BackupStorageType StorageType { get; set; }
 
         /// <summary>
         /// Storage parameters
         /// </summary>
+        [OpenApiDescription("Storage parameters")]
         public Dictionary<string, string> StorageParams { get; set; }
 
         /// <summary>
         /// Cron parameters
         /// </summary>
+        [OpenApiDescription("Cron parameters")]
         public CronParams CronParams { get; init; }
 
         /// <summary>
         /// Maximum number of the stored backup copies
         /// </summary>
+        [OpenApiDescription("Maximum number of the stored backup copies")]
         public int? BackupsStored { get; init; }
 
         /// <summary>
         /// Last backup creation time
         /// </summary>
+        [OpenApiDescription("Last backup creation time")]
         public DateTime LastBackupTime { get; set; }
 
         /// <summary>
         /// Dump
         /// </summary>
-        [SwaggerSchemaCustom(Example = false)]
+        [OpenApiDescription("Dump", Example = false)]
         public bool Dump { get; set; }
     }
 
@@ -474,16 +479,19 @@ public class BackupAjaxHandler(
         /// <summary>
         /// Period
         /// </summary>
+        [OpenApiDescription("Period")]
         public BackupPeriod Period { get; init; }
 
         /// <summary>
         /// Hour
         /// </summary>
+        [OpenApiDescription("Hour")]
         public int Hour { get; init; }
 
         /// <summary>
         /// Day
         /// </summary>
+        [OpenApiDescription("Day")]
         public int Day { get; init; }
 
         public CronParams() { }
@@ -522,13 +530,13 @@ public class BackupAjaxHandler(
 
     public enum BackupPeriod
     {
-        [SwaggerEnum(Description = "Every day")]
+        [OpenApiEnum(Description = "Every day")]
         EveryDay = 0,
 
-        [SwaggerEnum(Description = "Every week")]
+        [OpenApiEnum(Description = "Every week")]
         EveryWeek = 1,
 
-        [SwaggerEnum(Description = "Every month")]
+        [OpenApiEnum(Description = "Every month")]
         EveryMonth = 2
     }
 }

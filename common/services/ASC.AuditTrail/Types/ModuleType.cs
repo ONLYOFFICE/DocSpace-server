@@ -29,90 +29,90 @@ namespace ASC.AuditTrail.Types;
 [EnumExtensions]
 public enum ModuleType
 {
-    [SwaggerEnum("None")]
+    [OpenApiEnum("None")]
     None,
 
-    [SwaggerEnum("Files")]
+    [OpenApiEnum("Files")]
     Files,
 
-    [SwaggerEnum("Folders")]
+    [OpenApiEnum("Folders")]
     Folders,
 
-    [SwaggerEnum("Documents settings")]
+    [OpenApiEnum("Documents settings")]
     DocumentsSettings,
 
-    [SwaggerEnum("Companies")]
+    [OpenApiEnum("Companies")]
     Companies,
 
-    [SwaggerEnum("Persons")]
+    [OpenApiEnum("Persons")]
     Persons,
 
-    [SwaggerEnum("Contacts")]
+    [OpenApiEnum("Contacts")]
     Contacts,
 
-    [SwaggerEnum("Crm tasks")]
+    [OpenApiEnum("Crm tasks")]
     CrmTasks,
 
-    [SwaggerEnum("Opportunities")]
+    [OpenApiEnum("Opportunities")]
     Opportunities,
 
-    [SwaggerEnum("Invoices")]
+    [OpenApiEnum("Invoices")]
     Invoices,
 
-    [SwaggerEnum("Cases")]
+    [OpenApiEnum("Cases")]
     Cases,
 
-    [SwaggerEnum("Common crm settings")]
+    [OpenApiEnum("Common crm settings")]
     CommonCrmSettings,
 
-    [SwaggerEnum("Contacts settings")]
+    [OpenApiEnum("Contacts settings")]
     ContactsSettings,
 
-    [SwaggerEnum("Contact types")]
+    [OpenApiEnum("Contact types")]
     ContactTypes,
 
-    [SwaggerEnum("Invoice settings")]
+    [OpenApiEnum("Invoice settings")]
     InvoiceSettings,
 
-    [SwaggerEnum("Other crm settings")]
+    [OpenApiEnum("Other crm settings")]
     OtherCrmSettings,
 
-    [SwaggerEnum("Users")]
+    [OpenApiEnum("Users")]
     Users,
 
-    [SwaggerEnum("Groups")]
+    [OpenApiEnum("Groups")]
     Groups,
 
-    [SwaggerEnum("Projects")]
+    [OpenApiEnum("Projects")]
     Projects,
 
-    [SwaggerEnum("Milestones")]
+    [OpenApiEnum("Milestones")]
     Milestones,
 
-    [SwaggerEnum("Tasks")]
+    [OpenApiEnum("Tasks")]
     Tasks,
 
-    [SwaggerEnum("Discussions")]
+    [OpenApiEnum("Discussions")]
     Discussions,
 
-    [SwaggerEnum("Time tracking")]
+    [OpenApiEnum("Time tracking")]
     TimeTracking,
 
-    [SwaggerEnum("Reports")]
+    [OpenApiEnum("Reports")]
     Reports,
 
-    [SwaggerEnum("Projects settings")]
+    [OpenApiEnum("Projects settings")]
     ProjectsSettings,
 
-    [SwaggerEnum("General")]
+    [OpenApiEnum("General")]
     General,
 
-    [SwaggerEnum("Products")]
+    [OpenApiEnum("Products")]
     Products,
 
-    [SwaggerEnum("Rooms")]
+    [OpenApiEnum("Rooms")]
     Rooms,
     
-    [SwaggerEnum("OAuth")]
+    [OpenApiEnum("OAuth")]
     OAuth
 }

@@ -35,11 +35,13 @@ public class ToggleFileFavoriteRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// Specifies if this file is marked as favorite or not
     /// </summary>
     [FromQuery(Name = "favorite")]
+    [OpenApiDescription("Specifies if this file is marked as favorite or not")]
     public bool Favorite { get; set; }
 }

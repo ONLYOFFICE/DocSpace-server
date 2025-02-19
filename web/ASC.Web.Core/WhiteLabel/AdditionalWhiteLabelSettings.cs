@@ -34,6 +34,7 @@ public class AdditionalWhiteLabelSettingsWrapper
     /// <summary>
     /// Additional white label settings
     /// </summary>
+    [OpenApiDescription("Additional white label settings")]
     public AdditionalWhiteLabelSettings Settings { get; set; }
 }
 
@@ -44,61 +45,73 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     /// <summary>
     /// Specifies if the start document is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the start document is enabled or not")]
     public bool StartDocsEnabled { get; init; }
 
     /// <summary>
     /// Specifies if the help center is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the help center is enabled or not")]
     public bool HelpCenterEnabled { get; init; }
 
     /// <summary>
     /// Specifies if feedback and support are available or not
     /// </summary>
+    [OpenApiDescription("Specifies if feedback and support are available or not")]
     public bool FeedbackAndSupportEnabled { get; init; }
 
     /// <summary>
     /// Feedback and support URL
     /// </summary>
+    [OpenApiDescription("Feedback and support URL")]
     public string FeedbackAndSupportUrl { get; init; }
 
     /// <summary>
     /// Specifies if the user forum is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the user forum is enabled or not")]
     public bool UserForumEnabled { get; init; }
 
     /// <summary>
     /// User forum URL
     /// </summary>
+    [OpenApiDescription("User forum URL")]
     public string UserForumUrl { get; init; }
 
     /// <summary>
     /// Specifies if the video guides are enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the video guides are enabled or not")]
     public bool VideoGuidesEnabled { get; init; }
 
     /// <summary>
     /// Video guides URL
     /// </summary>
+    [OpenApiDescription("Video guides URL")]
     public string VideoGuidesUrl { get; init; }
 
     /// <summary>
     /// Sales email
     /// </summary>
+    [OpenApiDescription("Sales email")]
     public string SalesEmail { get; init; }
 
     /// <summary>
     /// URL to pay for the portal
     /// </summary>
+    [OpenApiDescription("URL to pay for the portal")]
     public string BuyUrl { get; init; }
 
     /// <summary>
     /// Specifies if the license agreements are enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the license agreements are enabled or not")]
     public bool LicenseAgreementsEnabled { get; init; }
 
     /// <summary>
     /// License agreements URL
     /// </summary>
+    [OpenApiDescription("License agreements URL")]
     public string LicenseAgreementsUrl { get; init; }
 
     [JsonIgnore]

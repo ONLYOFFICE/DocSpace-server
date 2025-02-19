@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,9 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// <remarks>List of providers: Google, Dropbox, Docusign, Box, OneDrive, Wordpress.</remarks>
     /// <path>api/2.0/thirdparty/{provider}</path>
     [Tags("ThirdParty")]
-    [SwaggerResponse(200, "Code request", typeof(object))]
+    [EndpointSummary("Get the code request")]
+    [EndpointDescription("Returns a request to get the confirmation code from URL.\n\n **Note**: List of providers: Google, Dropbox, Docusign, Box, OneDrive, Wordpress.")]
+    [OpenApiResponse(typeof(object), 200, "Code request")]
     [HttpGet("{provider}")]
     public object Get(ConfirmationCodeUrlRequestDto inDto)
     {
@@ -85,8 +87,10 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// <short>Get the confirmation code</short>
     /// <path>api/2.0/thirdparty/{provider}/code</path>
     [Tags("ThirdParty")]
-    [SwaggerResponse(200, "Confirmation code", typeof(object))]
-    [SwaggerResponse(400, "Error")]
+    [EndpointSummary("Get the confirmation code")]
+    [EndpointDescription("Returns the confirmation code for requesting an OAuth token.")]
+    [OpenApiResponse(typeof(object), 200, "Confirmation code")]
+    [OpenApiResponse(400, "Error")]
     [HttpGet("{provider}/code")]
     public object GetCode(ConfirmationCodeRequestDto inDto)
     {

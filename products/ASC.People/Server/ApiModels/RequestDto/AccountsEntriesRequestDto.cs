@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,41 +34,48 @@ public class AccountsEntriesRequestDto<T>
     /// ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// Employee status
     /// </summary>
     [FromQuery(Name = "employeeStatus")]
+    [OpenApiDescription("Employee status")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
     /// Activation status
     /// </summary>
     [FromQuery(Name = "activationStatus")]
+    [OpenApiDescription("Activation status")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
     /// Exclude shared
     /// </summary>
     [FromQuery(Name = "excludeShared")]
+    [OpenApiDescription("Exclude shared")]
     public bool? ExcludeShared {  get; set; }
 
     /// <summary>
     /// Invited by me
     /// </summary>
     [FromQuery(Name = "invitedByMe")]
+    [OpenApiDescription("Invited by me")]
     public bool? InvitedByMe { get; set; }
 
     /// <summary>
     /// Inviter Id
     /// </summary>
     [FromQuery(Name = "inviterId")]
+    [OpenApiDescription("Inviter Id")]
     public Guid? InviterId { get; set; }
 
     /// <summary>
     /// Area
     /// </summary>
     [FromQuery(Name = "area")]
+    [OpenApiDescription("Area")]
     public Area Area { get; set; } = Area.All;
 }

@@ -34,6 +34,7 @@ public class IpRestrictionsBaseRequestsDto
     /// <summary>
     /// List of IP addresses
     /// </summary>
+    [OpenApiDescription("List of IP addresses")]
     public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
 }
 
@@ -44,9 +45,11 @@ public class IpRestrictionsDto
 {
     /// <summary>List of IP addresses</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.IPSecurity.IpRestrictionBase}, System.Collections.Generic</type>
+    [OpenApiDescription("List of IP addresses")]
     public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
 
     /// <summary>Enables IP restrictions or not</summary>
     /// <type>System.Boolean, System</type>
+    [OpenApiDescription("Enables IP restrictions or not")]
     public bool? Enable { get; set; }
 }

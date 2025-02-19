@@ -31,12 +31,13 @@ public class SettingsRoom
     /// <summary>
     /// Indexing
     /// </summary>
+    [OpenApiDescription("Indexing")]
     public bool? Indexing { get; set; }
 
     /// <summary>
     /// Deny download
     /// </summary>
-
+    [OpenApiDescription("Deny download")]
     public bool? DenyDownload { get; set; }
 }
 
@@ -46,11 +47,13 @@ public class SettingsRoomRequestDto<T>
     /// Room Id
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room Id")]
     public T Id { get; set; }
 
     /// <summary>
     /// Room settings
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Room settings")]
     public SettingsRoom SettingsRoom { get; set; }
 }

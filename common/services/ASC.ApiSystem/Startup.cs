@@ -128,7 +128,7 @@ public class Startup
         
         if (_configuration.GetValue<bool>("openApi:enable"))
         {
-            services.AddOpenApi(_configuration);
+            services.AddWebOpenApi(_configuration);
         }
         if (!_hostEnvironment.IsDevelopment())
         {
@@ -166,6 +166,10 @@ public class Startup
         if (_configuration.GetValue<bool>("openApi:enable"))
         {
             app.UseOpenApi();
+        }
+        if (_configuration.GetValue<bool>("openApi:enableUI"))
+        {
+            app.UseOpenApiUI();
         }
         app.UseSynchronizationContextMiddleware();
 

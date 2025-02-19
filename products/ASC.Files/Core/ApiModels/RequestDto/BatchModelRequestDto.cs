@@ -34,6 +34,7 @@ public class FileBaseBatchRequestDto
     /// <summary>
     /// List of file IDs
     /// </summary>
+    [OpenApiDescription("List of file IDs")]
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 
@@ -45,11 +46,13 @@ public class BaseBatchRequestDto
     /// <summary>
     /// List of folder IDs
     /// </summary>
+    [OpenApiDescription("List of folder IDs")]
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
     /// <summary>
     /// List of file IDs
     /// </summary>
+    [OpenApiDescription("List of file IDs")]
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 
@@ -61,13 +64,28 @@ public class DownloadRequestDto : BaseBatchRequestDto
     /// <summary>
     /// List of file IDs which will be converted
     /// </summary>
+    [OpenApiDescription("List of file IDs which will be converted")]
     public IEnumerable<DownloadRequestItemDto> FileConvertIds { get; set; } = new List<DownloadRequestItemDto>();
 }
 
 public class DownloadRequestItemDto
 {
+    /// <summary>
+    /// Key
+    /// </summary>
+    [OpenApiDescription("Key")]
     public JsonElement Key { get; init; }
+
+    /// <summary>
+    /// Value
+    /// </summary>
+    [OpenApiDescription("Value")]
     public string Value { get; init; }
+
+    /// <summary>
+    /// Password
+    /// </summary>
+    [OpenApiDescription("Password")]
     public string Password { get; init; }
 }
 
@@ -79,11 +97,13 @@ public class DeleteBatchRequestDto : BaseBatchRequestDto
     /// <summary>
     /// Specifies whether to delete a file after the editing session is finished or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to delete a file after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
     /// <summary>
     /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
     /// </summary>
+    [OpenApiDescription("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
     public bool Immediately { get; set; }
 }
 
@@ -95,11 +115,13 @@ public class Delete
     /// <summary>
     /// Specifies whether to delete a file after the editing session is finished or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to delete a file after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
     /// <summary>
     /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
     /// </summary>
+    [OpenApiDescription("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
     public bool Immediately { get; set; }
 }
 
@@ -112,13 +134,15 @@ public class DeleteRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// File
     /// </summary>
     [FromBody]
-    public Delete File {  get; set; }
+    [OpenApiDescription("File")]
+    public Delete File { get; set; }
 }
 
 /// <summary>
@@ -129,21 +153,25 @@ public class BatchRequestDto : BaseBatchRequestDto
     /// <summary>
     /// Destination folder ID
     /// </summary>
+    [OpenApiDescription("Destination folder ID")]
     public JsonElement DestFolderId { get; set; }
 
     /// <summary>
     /// Overwriting behavior
     /// </summary>
+    [OpenApiDescription("Overwriting behavior")]
     public FileConflictResolveType ConflictResolveType { get; set; }
 
     /// <summary>
     /// Specifies whether to delete a folder after the editing session is finished or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to delete a folder after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
     /// <summary>
     /// Content
     /// </summary>
+    [OpenApiDescription("Content")]
     public bool Content { get; set; }
 }
 
@@ -155,5 +183,6 @@ public class BatchSimpleRequestDto : BaseBatchRequestDto
     /// <summary>
     /// Destination folder ID
     /// </summary>
+    [OpenApiDescription("Destination folder ID")]
     public JsonElement DestFolderId { get; set; }
 }

@@ -33,36 +33,43 @@ public class WatermarkDto
     /// <summary>
     /// Specifies whether to display: username, user email, user ip-adress, current date and room name 
     /// </summary>
+    [OpenApiDescription("Specifies whether to display: username, user email, user ip-adress, current date and room name ")]
     public WatermarkAdditions Additions { get; set; }
 
     /// <summary>
     /// Watermark Text
     /// </summary>
+    [OpenApiDescription("Watermark Text")]
     public string Text { get; set; }
 
     /// <summary>
     /// Watermark text and image rotate
     /// </summary>
+    [OpenApiDescription("Watermark text and image rotate")]
     public int Rotate { get; set; }
 
     /// <summary>
     /// Watermark image scale
     /// </summary>
+    [OpenApiDescription("Watermark image scale")]
     public int ImageScale { get; set; }
 
     /// <summary>
     /// Watermark image url
     /// </summary>
+    [OpenApiDescription("Watermark image url")]
     public string ImageUrl { get; set; }
 
     /// <summary>
     /// Watermark image height
     /// </summary>
+    [OpenApiDescription("Watermark image height")]
     public double ImageHeight { get; set; }
 
     /// <summary>
     /// Watermark image width
     /// </summary>
+    [OpenApiDescription("Watermark image width")]
     public double ImageWidth { get; set; }
 }
 [Scope]

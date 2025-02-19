@@ -32,11 +32,13 @@ public class EditDiffUrlRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// File version
     /// </summary>
     [FromQuery(Name = "version")]
+    [OpenApiDescription("File version")]
     public int Version { get; set; } = 0;
 }

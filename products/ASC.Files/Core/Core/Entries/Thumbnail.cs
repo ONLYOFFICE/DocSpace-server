@@ -29,19 +29,19 @@ namespace ASC.Files.Core;
 [DataContract(Namespace = "")]
 public enum Thumbnail
 {
-    [SwaggerEnum(Description = "Waiting")]
+    [OpenApiEnum(Description = "Waiting")]
     [EnumMember(Value = "0")] Waiting = 0,
 
-    [SwaggerEnum(Description = "Created")]
+    [OpenApiEnum(Description = "Created")]
     [EnumMember(Value = "1")] Created = 1,
 
-    [SwaggerEnum(Description = "Error")]
+    [OpenApiEnum(Description = "Error")]
     [EnumMember(Value = "2")] Error = 2,
 
-    [SwaggerEnum(Description = "Not required")]
+    [OpenApiEnum(Description = "Not required")]
     [EnumMember(Value = "3")] NotRequired = 3,
 
-    [SwaggerEnum(Description = "Creating")]
+    [OpenApiEnum(Description = "Creating")]
     [EnumMember(Value = "4")] Creating = 4
 
 }

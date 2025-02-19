@@ -32,5 +32,6 @@ public class RoomIdRequestDto<T>
     /// Room Id
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room Id")]
     public T Id { get; set; }
 }

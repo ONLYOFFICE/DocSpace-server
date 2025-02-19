@@ -31,10 +31,12 @@ public class CookieSettingsDto
     /// <summary>
     /// Lifetime value in minutes
     /// </summary>
+    [OpenApiDescription("Lifetime value in minutes")]
     public int LifeTime { get; set; }
 
     /// <summary>
     /// Specifies if the cookie settings are enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the cookie settings are enabled or not")]
     public bool Enabled { get; set; }
 }

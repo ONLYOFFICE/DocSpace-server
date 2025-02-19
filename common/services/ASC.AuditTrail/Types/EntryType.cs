@@ -29,24 +29,24 @@ namespace ASC.AuditTrail.Types;
 [EnumExtensions]
 public enum EntryType
 {
-    [SwaggerEnum("None")]
+    [OpenApiEnum("None")]
     None = 0,
 
-    [SwaggerEnum("File")]
+    [OpenApiEnum("File")]
     File = 1,
 
-    [SwaggerEnum("Folder")]
+    [OpenApiEnum("Folder")]
     Folder = 2,
 
-    [SwaggerEnum("User")]
+    [OpenApiEnum("User")]
     User = 23,
 
-    [SwaggerEnum("Group")]
+    [OpenApiEnum("Group")]
     Group = 24,
 
-    [SwaggerEnum("Room")]
+    [OpenApiEnum("Room")]
     Room = 25,
 
-    [SwaggerEnum("Tag")]
+    [OpenApiEnum("Tag")]
     Tag = 26
 }

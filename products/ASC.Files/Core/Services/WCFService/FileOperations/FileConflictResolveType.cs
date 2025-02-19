@@ -30,12 +30,12 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 [EnumExtensions]
 public enum FileConflictResolveType
 {
-    [SwaggerEnum(Description = "Skip")]
+    [OpenApiEnum(Description = "Skip")]
     Skip = 0,
 
-    [SwaggerEnum(Description = "Overwrite")]
+    [OpenApiEnum(Description = "Overwrite")]
     Overwrite = 1,
 
-    [SwaggerEnum(Description = "Duplicate")]
+    [OpenApiEnum(Description = "Duplicate")]
     Duplicate = 2
 }

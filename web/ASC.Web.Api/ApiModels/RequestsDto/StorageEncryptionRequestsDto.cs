@@ -34,5 +34,6 @@ public class StorageEncryptionRequestsDto
     /// <summary>
     /// Specifies if the users will be notified about the encryption process or note
     /// </summary>
+    [OpenApiDescription("Specifies if the users will be notified about the encryption process or note")]
     public bool NotifyUsers { get; set; }
 }

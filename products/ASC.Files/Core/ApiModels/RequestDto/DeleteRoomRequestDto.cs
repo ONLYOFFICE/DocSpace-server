@@ -34,6 +34,7 @@ public class DeleteRoomRequest
     /// <summary>
     /// Specifies whether to delete a room after the editing session is finished or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to delete a room after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 }
 
@@ -46,11 +47,13 @@ public class DeleteRoomRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// Parameters for deleting a room
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Parameters for deleting a room")]
     public DeleteRoomRequest DeleteRoom { get; set; }
 }

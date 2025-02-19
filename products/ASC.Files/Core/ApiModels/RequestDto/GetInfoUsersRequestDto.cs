@@ -34,5 +34,6 @@ public class GetInfoUsersRequestDto
     /// <summary>
     /// List of user ids
     /// </summary>
+    [OpenApiDescription("List of user ids")]
     public List<Guid> UserIds { get; set; }
 }

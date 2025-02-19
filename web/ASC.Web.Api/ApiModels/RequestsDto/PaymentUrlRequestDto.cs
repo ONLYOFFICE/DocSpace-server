@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,6 +35,7 @@ public class PaymentUrlRequestDto
     /// Back URL
     /// </summary>
     [FromQuery(Name = "backUrl")]
+    [OpenApiDescription("Back URL")]
     public string BackUrl { get; set; }
 }
 
@@ -48,5 +49,6 @@ public class PaymentInformationRequestDto
     /// Refresh
     /// </summary>
     [FromQuery(Name = "refresh")]
+    [OpenApiDescription("Refresh")]
     public bool Refresh { get; set; }
 }

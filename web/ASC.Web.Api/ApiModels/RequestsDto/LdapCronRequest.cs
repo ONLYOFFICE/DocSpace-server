@@ -34,5 +34,6 @@ public class LdapCronRequestDto
     /// <summary>
     /// Cron expression
     /// </summary>
+    [OpenApiDescription("Cron expression")]
     public string Cron { get; set; }
 }

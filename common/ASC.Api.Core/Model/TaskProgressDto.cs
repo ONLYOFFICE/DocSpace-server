@@ -30,12 +30,13 @@ public class TaskProgressDto
     /// <summary>
     /// Specifies if the operation is completed or not
     /// </summary>
+    [OpenApiDescription("Specifies if the operation is completed or not")]
     public bool IsCompleted { get; set; }
 
     /// <summary>
     /// Progress percentage
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    [OpenApiDescription("Progress percentage", Example = 0)]
     public int Progress { get; set; }
 }
 

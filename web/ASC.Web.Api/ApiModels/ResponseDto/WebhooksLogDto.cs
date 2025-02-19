@@ -31,55 +31,66 @@ public class WebhooksLogDto : IMapFrom<WebhooksLog>
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public int Id { get; set; }
 
     /// <summary>
     /// Config name
     /// </summary>
+    [OpenApiDescription("Config name")]
     public string ConfigName { get; set; }
 
     /// <summary>
     /// Creation time
     /// </summary>
+    [OpenApiDescription("Creation time")]
     public DateTime CreationTime { get; set; }
 
     /// <summary>
     /// Method
     /// </summary>
+    [OpenApiDescription("Method")]
     public string Method { get; set; }
 
     /// <summary>
     /// Route
     /// </summary>
+    [OpenApiDescription("Route")]
     public string Route { get; set; }
 
     /// <summary>
     /// Request headers
     /// </summary>
+    [OpenApiDescription("Request headers")]
     public string RequestHeaders { get; set; }
 
     /// <summary>
     /// Request payload
     /// </summary>
+    [OpenApiDescription("Request payload")]
     public string RequestPayload { get; set; }
 
     /// <summary>
     /// Response headers
     /// </summary>
+    [OpenApiDescription("Response headers")]
     public string ResponseHeaders { get; set; }
 
     /// <summary>
     /// Response payload
     /// </summary>
+    [OpenApiDescription("Response payload")]
     public string ResponsePayload { get; set; }
 
     /// <summary>
     /// Status
     /// </summary>
+    [OpenApiDescription("Status")]
     public int Status { get; set; }
 
     /// <summary>
     /// Delivery time
     /// </summary>
+    [OpenApiDescription("Delivery time")]
     public DateTime? Delivery { get; set; }
 }

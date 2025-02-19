@@ -34,6 +34,7 @@ public class SetManagerRequest
     /// <summary>
     /// User ID
     /// </summary>
+    [OpenApiDescription("User ID")]
     public Guid UserId { get; set; }
 }
 
@@ -46,11 +47,13 @@ public class SetManagerRequestDto
     /// Group ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Group ID")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Set manager
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Set manager")]
     public SetManagerRequest SetManager { get; set; }
 }

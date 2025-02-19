@@ -415,22 +415,22 @@ public class ExternalSessionSnapshot
 
 public enum Status
 {
-    [SwaggerEnum(Description = "Ok")]
+    [OpenApiEnum(Description = "Ok")]
     Ok,
 
-    [SwaggerEnum(Description = "Invalid")]
+    [OpenApiEnum(Description = "Invalid")]
     Invalid,
 
-    [SwaggerEnum(Description = "Expired")]
+    [OpenApiEnum(Description = "Expired")]
     Expired,
 
-    [SwaggerEnum(Description = "Required password")]
+    [OpenApiEnum(Description = "Required password")]
     RequiredPassword,
 
-    [SwaggerEnum(Description = "Invalid password")]
+    [OpenApiEnum(Description = "Invalid password")]
     InvalidPassword,
 
-    [SwaggerEnum(Description = "External access denied")]
+    [OpenApiEnum(Description = "External access denied")]
     ExternalAccessDenied
 }
 

@@ -33,16 +33,19 @@ public class WhiteLabelItemDto
     /// <summary>
     /// File name
     /// </summary>
+    [OpenApiDescription("File name")]
     public string Name { get; set; }
 
     /// <summary>
     /// Size
     /// </summary>
+    [OpenApiDescription("Size")]
     public IMagickGeometry Size { get; set; }
 
     /// <summary>
     /// Path
     /// </summary>
+    [OpenApiDescription("Path")]
     public WhiteLabelItemPathDto Path { get; set; }
 }
 
@@ -51,10 +54,12 @@ public class WhiteLabelItemPathDto
     /// <summary>
     /// Path to the light theme logo
     /// </summary>
+    [OpenApiDescription("Path to the light theme logo")]
     public string Light { get; set; }
 
     /// <summary>
     /// Path to the dark theme logo
     /// </summary>
+    [OpenApiDescription("Path to the dark theme logo")]
     public string Dark { get; set; }
 }

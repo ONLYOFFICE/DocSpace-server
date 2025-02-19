@@ -28,5 +28,9 @@ namespace ASC.Files.Core.ApiModels;
 
 public interface IModelWithFile
 {
+    /// <summary>
+    /// File
+    /// </summary>
+    [OpenApiDescription("File")]
     IFormFile File { get; set; }
 }

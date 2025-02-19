@@ -35,21 +35,25 @@ public class RoomInvitationRequest
     /// Collection of invitation parameters
     /// </summary>
     [MaxEmailInvitations]
+    [OpenApiDescription("Collection of invitation parameters")]
     public IEnumerable<RoomInvitation> Invitations { get; set; }
 
     /// <summary>
     /// Notifies users about the shared room or not
     /// </summary>
+    [OpenApiDescription("Notifies users about the shared room or not")]
     public bool Notify { get; set; }
 
     /// <summary>
     /// Message to send when notifying about the shared room
     /// </summary>
+    [OpenApiDescription("Message to send when notifying about the shared room")]
     public string Message { get; set; }
 
     /// <summary>
     /// Culture
     /// </summary>
+    [OpenApiDescription("Culture")]
     public string Culture { get; set; }
 }
 
@@ -59,11 +63,13 @@ public class RoomInvitationRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// Room invitation
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Room invitation")]
     public RoomInvitationRequest RoomInvitation { get; set; }
 }

@@ -34,6 +34,7 @@ public class ArchiveRoomRequest
     /// <summary>
     /// Specifies whether to archive a room after the editing session is finished or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to archive a room after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 }
 
@@ -46,11 +47,13 @@ public class ArchiveRoomRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// Parameters for archiving a room
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Parameters for archiving a room")]
     public ArchiveRoomRequest ArchiveRoom { get; set; }
 }

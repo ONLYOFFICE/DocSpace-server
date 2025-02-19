@@ -31,7 +31,9 @@ public class LdapCronSettingsDto : IMapFrom<LdapCronSettings>
     /// <summary>
     /// Cron expression
     /// </summary>
+    [OpenApiDescription("Cron expression")]
     public string Cron { get; set; }
+    
     public void Mapping(Profile profile)
     {
         profile.CreateMap<LdapCronSettings, LdapCronSettingsDto>();

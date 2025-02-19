@@ -35,38 +35,43 @@ public class TfaRequestsDto
     /// TFA type (None, Sms, or App)
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
+    [OpenApiDescription("TFA type (None, Sms, or App)")]
     public TfaRequestsDtoType? Type { get; set; }
 
     /// <summary>
     /// User ID
     /// </summary>
+    [OpenApiDescription("User ID")]
     public Guid? Id { get; set; }
 
     /// <summary>
     /// List of trusted IP addresses
     /// </summary>
+    [OpenApiDescription("List of trusted IP addresses")]
     public List<string> TrustedIps { get; set; }
 
     /// <summary>
     /// List of users who must use the TFA verification
     /// </summary>
+    [OpenApiDescription("List of users who must use the TFA verification")]
     public List<Guid> MandatoryUsers { get; set; }
 
     /// <summary>
     /// List of groups who must use the TFA verification
     /// </summary>
+    [OpenApiDescription("List of groups who must use the TFA verification")]
     public List<Guid> MandatoryGroups { get; set; }
 }
 
 public enum TfaRequestsDtoType
 {
-    [SwaggerEnum("None")]
+    [OpenApiEnum("None")]
     None = 0,
 
-    [SwaggerEnum("Sms")]
+    [OpenApiEnum("Sms")]
     Sms = 1,
 
-    [SwaggerEnum("App")]
+    [OpenApiEnum("App")]
     App = 2
 }
 
@@ -78,5 +83,6 @@ public class TfaValidateRequestsDto
     /// <summary>
     /// TFA code
     /// </summary>
+    [OpenApiDescription("TFA code")]
     public string Code { get; set; }
 }

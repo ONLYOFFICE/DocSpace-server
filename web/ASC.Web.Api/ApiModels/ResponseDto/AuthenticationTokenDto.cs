@@ -31,41 +31,43 @@ public class AuthenticationTokenDto
     /// <summary>
     /// Authentication token
     /// </summary>
-    [SwaggerSchemaCustom(Example = "abcde12345")]
+    [OpenApiDescription("Authentication token", Example = "abcde12345")]
     public string Token { get; set; }
 
     /// <summary>
     /// Token expiration time
     /// </summary>
+    [OpenApiDescription("Token expiration time")]
     public DateTime Expires { get; set; }
 
     /// <summary>
     /// Specifies if the authentication code is sent by SMS or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Specifies if the authentication code is sent by SMS or not", Example = false)]
     public bool Sms { get; set; }
 
     /// <summary>
     /// Phone number
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    [OpenApiDescription("Phone number", Example = "")]
     public string PhoneNoise { get; set; }
 
     /// <summary>
     /// Specifies if the two-factor application is used or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Specifies if the two-factor application is used or not", Example = false)]
     public bool Tfa { get; set; }
 
     /// <summary>
     /// Two-factor authentication key
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    [OpenApiDescription("Two-factor authentication key", Example = "")]
     public string TfaKey { get; set; }
 
     /// <summary>
     /// Confirmation email URL
     /// </summary>
     [Url]
+    [OpenApiDescription("Confirmation email URL")]
     public string ConfirmUrl { get; set; }
 }

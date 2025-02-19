@@ -35,22 +35,26 @@ public class RoomLinkRequest : LinkRequestDtoBase
     /// Link name
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Link name")]
     public string Title { get; set; }
 
     /// <summary>
     /// Link type
     /// </summary>
+    [OpenApiDescription("Link type")]
     public LinkType LinkType { get; set; }
 
     /// <summary>
     /// Link password
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Link password")]
     public string Password { get; set; }
 
     /// <summary>
     /// Specifies whether downloading a file from a link is disabled or not
     /// </summary>
+    [OpenApiDescription("Specifies whether downloading a file from a link is disabled or not")]
     public bool DenyDownload { get; set; }
 }
 
@@ -65,11 +69,13 @@ public class RoomLinkRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// Room link
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Room link")]
     public RoomLinkRequest RoomLink { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,7 +53,10 @@ public class LicenseController(ILoggerProvider option,
     /// <short>Refresh the license</short>
     /// <path>api/2.0/settings/license/refresh</path>
     [Tags("Settings / License")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [EndpointName("refreshLicense")]
+    [EndpointSummary("Refresh the license")]
+    [EndpointDescription("Refreshes the license.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
     [HttpGet("refresh")]
     [AllowNotPayment]
     public async Task<bool> RefreshLicenseAsync()
@@ -75,7 +78,10 @@ public class LicenseController(ILoggerProvider option,
     /// </short>
     /// <path>api/2.0/settings/license/accept</path>
     [Tags("Settings / License")]
-    [SwaggerResponse(200, "Message about the result of activating license", typeof(object))]
+    [EndpointName("acceptLicense")]
+    [EndpointSummary("Activate a license")]
+    [EndpointDescription("Activates a license for the portal.")]
+    [OpenApiResponse(typeof(object), 200, "Message about the result of activating license")]
     [AllowNotPayment]
     [HttpPost("accept")]
     public async Task<object> AcceptLicenseAsync()
@@ -121,8 +127,11 @@ public class LicenseController(ILoggerProvider option,
     /// <path>api/2.0/settings/license/trial</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / License")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("activateTrial")]
+    [EndpointSummary("Activate a trial license")]
+    [EndpointDescription("Activates a trial license for the portal.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPost("trial")]
     public async Task<bool> ActivateTrialAsync()
     {
@@ -189,7 +198,10 @@ public class LicenseController(ILoggerProvider option,
     /// <path>api/2.0/settings/license/required</path>
     /// <requiresAuthorization>false</requiresAuthorization>\
     [Tags("Settings / License")]
-    [SwaggerResponse(200, "Boolean value: true if the license is required", typeof(bool))]
+    [EndpointName("requestLicense")]
+    [EndpointSummary("Request a license")]
+    [EndpointDescription("Requests a portal license if necessary.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the license is required")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("required")]
@@ -207,10 +219,13 @@ public class LicenseController(ILoggerProvider option,
     /// </short>
     /// <path>api/2.0/settings/license</path>
     [Tags("Settings / License")]
-    [SwaggerResponse(200, "License", typeof(object))]
-    [SwaggerResponse(400, "The uploaded file could not be found")]
-    [SwaggerResponse(403, "Portal Access")]
-    [SwaggerResponse(405, "Your pricing plan does not support this option")]
+    [EndpointName("uploadLicense")]
+    [EndpointSummary("Upload a license")]
+    [EndpointDescription("Uploads a portal license specified in the request.")]
+    [OpenApiResponse(typeof(object), 200, "License")]
+    [OpenApiResponse(400, "The uploaded file could not be found")]
+    [OpenApiResponse(403, "Portal Access")]
+    [OpenApiResponse(405, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]

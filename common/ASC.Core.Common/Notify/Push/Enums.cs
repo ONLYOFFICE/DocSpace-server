@@ -55,18 +55,18 @@ public enum PushModule
 
 public enum MobileAppType
 {
-    [SwaggerEnum("Ios projects")]
+    [OpenApiEnum("Ios projects")]
     IosProjects = 0,
 
-    [SwaggerEnum("Android projects")]
+    [OpenApiEnum("Android projects")]
     AndroidProjects = 1,
 
-    [SwaggerEnum("Ios documents")]
+    [OpenApiEnum("Ios documents")]
     IosDocuments = 2,
 
-    [SwaggerEnum("Android documents")]
+    [OpenApiEnum("Android documents")]
     AndroidDocuments = 3,
 
-    [SwaggerEnum("Desktop editor")]
+    [OpenApiEnum("Desktop editor")]
     DesktopEditor = 4
 }

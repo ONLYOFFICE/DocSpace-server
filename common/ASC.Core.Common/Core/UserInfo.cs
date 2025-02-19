@@ -31,62 +31,74 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// First name
     /// </summary>
+    [OpenApiDescription("First name")]
     public string FirstName { get; set; }
 
     /// <summary>
     /// Last name
     /// </summary>
+    [OpenApiDescription("Last name")]
     public string LastName { get; set; }
 
     /// <summary>
-    /// Username
+    /// User name
     /// </summary>
+    [OpenApiDescription("User name")]
     public string UserName { get; set; }
 
     /// <summary>
     /// Birthday
     /// </summary>
+    [OpenApiDescription("Birthday")]
     public DateTime? BirthDate { get; set; }
 
     /// <summary>
     /// Sex (male or female)
     /// </summary>
+    [OpenApiDescription("Sex (male or female)")]
     public bool? Sex { get; set; }
 
     /// <summary>
     /// Status
     /// </summary>
+    [OpenApiDescription("Status")]
     public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
 
     /// <summary>
     /// Activation status
     /// </summary>
+    [OpenApiDescription("Activation status")]
     public EmployeeActivationStatus ActivationStatus { get; set; } = EmployeeActivationStatus.NotActivated;
 
     /// <summary>
     /// The date and time when the user account was terminated
     /// </summary>
+    [OpenApiDescription("The date and time when the user account was terminated")]
     public DateTime? TerminatedDate { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Registration date
     /// </summary>
+    [OpenApiDescription("Registration date")]
     public DateTime? WorkFromDate { get; set; }
 
     /// <summary>
     /// Email
     /// </summary>
     [EmailAddress]
+    [OpenApiDescription("Email")]
     public string Email { get; set; }
 
     private string _contacts;
@@ -94,6 +106,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     /// <summary>
     /// List of contacts in the string format
     /// </summary>
+    [OpenApiDescription("List of contacts in the string format")]
     public string Contacts
     {
         get => _contacts;
@@ -107,80 +120,99 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     /// <summary>
     /// List of contacts
     /// </summary>
+    [OpenApiDescription("List of contacts")]
     public List<string> ContactsList { get; set; }
 
     /// <summary>
     /// Location
     /// </summary>
+    [OpenApiDescription("Location")]
     public string Location { get; set; }
 
     /// <summary>
     /// Notes
     /// </summary>
+    [OpenApiDescription("Notes")]
     public string Notes { get; set; }
 
     /// <summary>
     /// Specifies if the user account was removed or not
     /// </summary>
+    [OpenApiDescription("Specifies if the user account was removed or not")]
     public bool Removed { get; set; }
 
     /// <summary>
     /// Last modified date
     /// </summary>
+    [OpenApiDescription("Last modified date")]
     public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     /// Tenant ID
     /// </summary>
+    [OpenApiDescription("Tenant ID")]
     public int TenantId { get; set; }
 
     /// <summary>
     /// Spceifies if the user is active or not
     /// </summary>
+    [OpenApiDescription("Spceifies if the user is active or not")]
     public bool IsActive => ActivationStatus.HasFlag(EmployeeActivationStatus.Activated);
 
     /// <summary>
     /// Language
     /// </summary>
+    [OpenApiDescription("Language")]
     public string CultureName { get; set; }
 
     /// <summary>
     /// Mobile phone
     /// </summary>
+    [OpenApiDescription("Mobile phone")]
     public string MobilePhone { get; set; }
 
     /// <summary>
     /// Mobile phone activation status
     /// </summary>
+    [OpenApiDescription("Mobile phone activation status")]
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     /// <summary>
     /// LDAP user identificator
     /// </summary>
-    public string Sid { get; set; } // LDAP user identificator
+    [OpenApiDescription("LDAP user identificator")]
+    public string Sid { get; set; }
 
     /// <summary>
     /// LDAP user quota attribute
     /// </summary>
-    public long LdapQouta { get; init; } // LDAP user quota attribute
+    [OpenApiDescription("LDAP user quota attribute")]
+    public long LdapQouta { get; init; }
 
     /// <summary>
     /// SSO SAML user identificator
     /// </summary>
-    public string SsoNameId { get; set; } // SSO SAML user identificator
+    [OpenApiDescription("SSO SAML user identificator")]
+    public string SsoNameId { get; set; }
 
     /// <summary>
     /// SSO SAML user session identificator
     /// </summary>
-    public string SsoSessionId { get; set; } // SSO SAML user session identificator
+    [OpenApiDescription("SSO SAML user session identificator")]
+    public string SsoSessionId { get; set; }
 
     /// <summary>
     /// Creation date
     /// </summary>
+    [OpenApiDescription("Creation date")]
     public DateTime CreateDate { get; set; }
 
+
+    [OpenApiDescription("Created by")]
     public Guid? CreatedBy { get; set; }
 
+
+    [OpenApiDescription("Spam")]
     public bool? Spam { get; set; }
 
     public override string ToString()

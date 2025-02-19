@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,8 +42,11 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/list</path>
     [Tags("Migration")]
-    [SwaggerResponse(200, "Ok", typeof(string[]))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getMigrationList")]
+    [EndpointSummary("Get migration list")]
+    [EndpointDescription("Gets migration list")]
+    [OpenApiResponse(typeof(string[]), 200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("list")]
     public async Task<string[]> List()
     {
@@ -56,8 +59,11 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/init/{migratorName}</path>
     [Tags("Migration")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("uploadAndInitMigration")]
+    [EndpointSummary("Upload and init migration")]
+    [EndpointDescription("Uploads and inits migration")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPost("init/{migratorName}")]
     public async Task UploadAndInitAsync(MigratorNameRequestDto inDto)
     {
@@ -71,8 +77,11 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/status</path>
     [Tags("Migration")]
-    [SwaggerResponse(200, "Ok", typeof(MigrationStatusDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getMigrationStatus")]
+    [EndpointSummary("Get migration status")]
+    [EndpointDescription("Gets migration status")]
+    [OpenApiResponse(typeof(MigrationStatusDto), 200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("status")]
     public async Task<MigrationStatusDto> Status()
     {
@@ -104,8 +113,11 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/cancel</path>
     [Tags("Migration")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("cancelMigration")]
+    [EndpointSummary("Cancel migration")]
+    [EndpointDescription("Cancels migration")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPost("cancel")]
     public async Task CancelAsync()
     {
@@ -119,8 +131,11 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/clear</path>
     [Tags("Migration")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("clearMigration")]
+    [EndpointSummary("Clear migration")]
+    [EndpointDescription("Clears migration")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPost("clear")]
     public async Task ClearAsync()
     {
@@ -134,8 +149,11 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/migrate</path>
     [Tags("Migration")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("migrate")]
+    [EndpointSummary("Migrate")]
+    [EndpointDescription("Migrates")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPost("migrate")]
     public async Task MigrateAsync(MigrationApiInfo info)
     {
@@ -149,8 +167,11 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/logs</path>
     [Tags("Migration")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getMigrationLogs")]
+    [EndpointSummary("Get migration logs")]
+    [EndpointDescription("Gets migration logs")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("logs")]
     public async Task LogsAsync()
     {
@@ -176,8 +197,11 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/finish</path>
     [Tags("Migration")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("finishMigration")]
+    [EndpointSummary("Finish migration")]
+    [EndpointDescription("Finishes migration")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPost("finish")]
     public async Task FinishAsync(FinishDto inDto)
     {

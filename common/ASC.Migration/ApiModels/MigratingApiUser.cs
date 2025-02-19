@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Migration.Core.Models.Api;
 
 [ProtoContract]
@@ -33,6 +35,7 @@ public class MigratingApiUser : ImportableApiEntity
     /// Key
     /// </summary>
     [ProtoMember(2)]
+    [OpenApiDescription("Key")]
     public string Key { get; set; }
 
     /// <summary>
@@ -40,35 +43,41 @@ public class MigratingApiUser : ImportableApiEntity
     /// </summary>
     [ProtoMember(3)]
     [EmailAddress]
+    [OpenApiDescription("Email")]
     public string Email { get; set; }
 
     /// <summary>
     /// Display name
     /// </summary>
     [ProtoMember(4)]
+    [OpenApiDescription("Display name")]
     public string DisplayName { get; set; }
 
     /// <summary>
     /// First name
     /// </summary>
     [ProtoMember(5)]
+    [OpenApiDescription("First name")]
     public string FirstName { get; set; }
 
     /// <summary>
     /// Last name
     /// </summary>
     [ProtoMember(6)]
+    [OpenApiDescription("Last name")]
     public string LastName { get; set; }
 
     /// <summary>
     /// User type
     /// </summary>
     [ProtoMember(7)]
+    [OpenApiDescription("User type")]
     public EmployeeType UserType { get; set; }
 
     /// <summary>
     /// Migrating files
     /// </summary>
     [ProtoMember(8)]
+    [OpenApiDescription("Migrating files")]
     public MigratingApiFiles MigratingFiles { get; set; }
 }

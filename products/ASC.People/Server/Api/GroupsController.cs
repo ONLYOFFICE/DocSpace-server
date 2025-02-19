@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -56,7 +56,10 @@ public class GroupController(
     /// <path>api/2.0/groups</path>
     /// <collection>list</collection>
     [Tags("Group")]
-    [SwaggerResponse(200, "List of groups", typeof(IAsyncEnumerable<GroupDto>))]
+    [EndpointName("getGroups")]
+    [EndpointSummary("Get groups")]
+    [EndpointDescription("Returns the general information about all the groups, such as group ID and group manager.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<GroupDto>), 200, "List of groups")]
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(GeneralInformationRequestDto inDto)
     {
@@ -95,8 +98,11 @@ public class GroupController(
     /// </remarks>
     /// <path>api/2.0/groups/{id}</path>
     [Tags("Group")]
-    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
-    [SwaggerResponse(404, "Group not found")]
+    [EndpointName("getGroup")]
+    [EndpointSummary("Get a group")]
+    [EndpointDescription("Returns the detailed information about the selected group.")]
+    [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
+    [OpenApiResponse(404, "Group not found")]
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(DetailedInformationRequestDto inDto)
     {
@@ -114,7 +120,10 @@ public class GroupController(
     /// <path>api/2.0/groups/user/{userid}</path>
     /// <collection>list</collection>
     [Tags("Group")]
-    [SwaggerResponse(200, "List of groups", typeof(IEnumerable<GroupSummaryDto>))]
+    [EndpointName("getByUserId")]
+    [EndpointSummary("Get user groups")]
+    [EndpointDescription("Returns a list of groups for the user with the ID specified in the request.")]
+    [OpenApiResponse(typeof(IEnumerable<GroupSummaryDto>), 200, "List of groups")]
     [HttpGet("user/{userid:guid}")]
     public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(GetGroupByUserIdRequestDto inDto)
     {
@@ -138,7 +147,10 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups</path>
     [Tags("Group")]
-    [SwaggerResponse(200, "Newly created group with the detailed information", typeof(GroupDto))]
+    [EndpointName("addGroup")]
+    [EndpointSummary("Add a new group")]
+    [EndpointDescription("Adds a new group with the group manager, name, and members specified in the request.")]
+    [OpenApiResponse(typeof(GroupDto), 200, "Newly created group with the detailed information" )]
     [HttpPost]
     public async Task<GroupDto> AddGroupAsync(GroupRequestDto inDto)
     {
@@ -169,8 +181,11 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}</path>
     [Tags("Group")]
-    [SwaggerResponse(200, "Updated group with the detailed information", typeof(GroupDto))]
-    [SwaggerResponse(404, "Group not found")]
+    [EndpointName("updateGroup")]
+    [EndpointSummary("Update a group")]
+    [EndpointDescription("Updates the existing group changing the group manager, name, and/or members.")]
+    [OpenApiResponse(typeof(GroupDto), 200, "Updated group with the detailed information")]
+    [OpenApiResponse(404, "Group not found")]
     [HttpPut("{id:guid}")]
     public async Task<GroupDto> UpdateGroupAsync(UpdateGroupRequestDto inDto)
     {
@@ -212,8 +227,11 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}</path>
     [Tags("Group")]
-    [SwaggerResponse(200, "No content", typeof(NoContentResult))]
-    [SwaggerResponse(404, "Group not found")]
+    [EndpointName("deleteGroup")]
+    [EndpointSummary("Delete a group")]
+    [EndpointDescription("Deletes a group with the ID specified in the request from the list of groups on the portal.")]
+    [OpenApiResponse(typeof(NoContentResult), 200, "No content")]
+    [OpenApiResponse(404, "Group not found")]
     [HttpDelete("{id:guid}")]
     public async Task<NoContentResult> DeleteGroupAsync(GetGroupByIdRequestDto inDto)
     { 
@@ -237,8 +255,11 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{fromId}/members/{toId}</path>
     [Tags("Group")]
-    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
-    [SwaggerResponse(404, "Group not found")]
+    [EndpointName("transferMembersTo")]
+    [EndpointSummary("Move group members")]
+    [EndpointDescription("Moves all the members from the selected group to another one specified in the request.")]
+    [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
+    [OpenApiResponse(404, "Group not found")]
     [HttpPut("{fromId:guid}/members/{toId:guid}")]
     public async Task<GroupDto> TransferMembersToAsync(MoveGroupMemebersRequestDto inDto)
     {
@@ -265,7 +286,10 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}/members</path>
     [Tags("Group")]
-    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
+    [EndpointName("setMembersTo")]
+    [EndpointSummary("Replace group members")]
+    [EndpointDescription("Replaces the group members with those specified in the request.")]
+    [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
     [HttpPost("{id:guid}/members")]
     public async Task<GroupDto> SetMembersToAsync(MembersRequestDto inDto)
     {
@@ -283,8 +307,11 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}/members</path>
     [Tags("Group")]
-    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
-    [SwaggerResponse(404, "Group not found")]
+    [EndpointName("addMembersTo")]
+    [EndpointSummary("Add group members")]
+    [EndpointDescription("Adds new group members to the group with the ID specified in the request.")]
+    [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
+    [OpenApiResponse(404, "Group not found")]
     [HttpPut("{id:guid}/members")]
     public async Task<GroupDto> AddMembersToAsync(MembersRequestDto inDto)
     {
@@ -308,8 +335,11 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}/manager</path>
     [Tags("Group")]
-    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("setManager")]
+    [EndpointSummary("Set a group manager")]
+    [EndpointDescription("Sets a user with the ID specified in the request as a group manager.")]
+    [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
+    [OpenApiResponse(404, "User not found")]
     [HttpPut("{id:guid}/manager")]
     public async Task<GroupDto> SetManagerAsync(SetManagerRequestDto inDto)
     {
@@ -335,8 +365,11 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}/members</path>
     [Tags("Group")]
-    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
-    [SwaggerResponse(404, "Group not found")]
+    [EndpointName("removeMembersFrom")]
+    [EndpointSummary("Remove group members")]
+    [EndpointDescription("Removes the group members specified in the request from the selected group.")]
+    [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
+    [OpenApiResponse(404, "Group not found")]
     [HttpDelete("{id:guid}/members")]
     public async Task<GroupDto> RemoveMembersFromAsync(MembersRequestDto inDto)
     {
@@ -422,8 +455,11 @@ public class GroupControllerAdditional<T>(
     /// </summary>
     /// <path>api/2.0/group/room/{id}</path>
     [Tags("Group / Rooms")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getGroupsWithShared")]
+    [EndpointSummary("Get groups with shared")]
+    [EndpointDescription("Gets groups with shared")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<GroupDto>), 200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<GroupDto> GetGroupsWithSharedAsync(GetGroupsWithSharedRequestDto<T> inDto)
     {

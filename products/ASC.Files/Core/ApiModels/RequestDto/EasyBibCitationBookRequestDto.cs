@@ -31,5 +31,6 @@ public class EasyBibCitationBookRequestDto
     /// <summary>
     /// Citation data
     /// </summary>
+    [OpenApiDescription("Citation data")]
     public string CitationData { get; set; }
 }

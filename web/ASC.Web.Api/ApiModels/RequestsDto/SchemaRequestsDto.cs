@@ -34,6 +34,7 @@ public class SchemaBaseRequestsDto
     /// <summary>
     /// Team template ID
     /// </summary>
+    [OpenApiDescription("Team template ID")]
     public string Id { get; init; }
 }
 
@@ -45,50 +46,60 @@ public class SchemaRequestsDto : SchemaBaseRequestsDto
     /// <summary>
     /// Team template name
     /// </summary>
+    [OpenApiDescription("Team template name")]
     public string Name { get; set; }
 
     /// <summary>
     /// User caption
     /// </summary>
+    [OpenApiDescription("User caption")]
     public string UserCaption { get; init; }
 
     /// <summary>
     /// Users caption
     /// </summary>
+    [OpenApiDescription("Users caption")]
     public string UsersCaption { get; init; }
 
     /// <summary>
     /// Group caption
     /// </summary>
+    [OpenApiDescription("Group caption")]
     public string GroupCaption { get; init; }
 
     /// <summary>
     /// Groups caption
     /// </summary>
+    [OpenApiDescription("Groups caption")]
     public string GroupsCaption { get; init; }
 
     /// <summary>
     /// User status caption
     /// </summary>
+    [OpenApiDescription("User status caption")]
     public string UserPostCaption { get; init; }
 
     /// <summary>
     /// Registration date caption
     /// </summary>
+    [OpenApiDescription("Registration date caption")]
     public string RegDateCaption { get; init; }
 
     /// <summary>
     /// Group lead caption
     /// </summary>
+    [OpenApiDescription("Group lead caption")]
     public string GroupHeadCaption { get; init; }
 
     /// <summary>
     /// Guest caption
     /// </summary>
+    [OpenApiDescription("Guest caption")]
     public string GuestCaption { get; init; }
 
     /// <summary>
     /// Guests caption
     /// </summary>
+    [OpenApiDescription("Guests caption")]
     public string GuestsCaption { get; init; }
 }

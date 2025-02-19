@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,8 +54,11 @@ public class OwnerController(
     /// </short>
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
-    [SwaggerResponse(200, "Message about changing the portal owner", typeof(object))]
-    [SwaggerResponse(403, "Collaborator can not be an owner")]
+    [EndpointName("sendOwnerChangeInstructions")]
+    [EndpointSummary("Send the owner change instructions")]
+    [EndpointDescription("Sends the instructions to change the DocSpace owner.")]
+    [OpenApiResponse(typeof(object), 200, "Message about changing the portal owner")]
+    [OpenApiResponse(403, "Collaborator can not be an owner")]
     [HttpPost("")]
     public async Task<object> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
     {
@@ -94,9 +97,12 @@ public class OwnerController(
     /// </short>
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(400, "The user could not be found")]
-    [SwaggerResponse(409, "")]
+    [EndpointName("updateOwner")]
+    [EndpointSummary("Update the portal owner")]
+    [EndpointDescription("Updates the current portal owner with a new one specified in the request.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(400, "The user could not be found")]
+    [OpenApiResponse(409, "")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
     public async Task OwnerAsync(OwnerIdSettingsRequestDto inDto)

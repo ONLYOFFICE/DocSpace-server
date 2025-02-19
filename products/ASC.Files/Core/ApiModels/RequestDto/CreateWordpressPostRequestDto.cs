@@ -34,15 +34,18 @@ public class CreateWordpressPostRequestDto
     /// <summary>
     /// Post title
     /// </summary>
+    [OpenApiDescription("Post title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Post contents
     /// </summary>
+    [OpenApiDescription("Post contents")]
     public string Content { get; set; }
 
     /// <summary>
     /// Operation status
     /// </summary>
+    [OpenApiDescription("Operation status")]
     public int Status { get; set; }
 }

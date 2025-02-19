@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -62,8 +62,11 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/login/last</path>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
-    [SwaggerResponse(200, "List of login events", typeof(IEnumerable<LoginEventDto>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("getLastLoginEvents")]
+    [EndpointSummary("Get login history")]
+    [EndpointDescription("Returns all the latest user login activity, including successful logins and error logs.")]
+    [OpenApiResponse(typeof(IEnumerable<LoginEventDto>), 200, "List of login events")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/last")]
     public async Task<IEnumerable<LoginEventDto>> GetLastLoginEventsAsync()
     {
@@ -83,8 +86,11 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/events/last</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "List of audit trail data", typeof(IEnumerable<AuditEventDto>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("getLastAuditEvents")]
+    [EndpointSummary("Get audit trail data")]
+    [EndpointDescription("Returns a list of the latest changes (creation, modification, deletion, etc.) made by users to the entities (tasks, opportunities, files, etc.) on the portal.")]
+    [OpenApiResponse(typeof(IEnumerable<AuditEventDto>), 200, "List of audit trail data")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/last")]
     public async Task<IEnumerable<AuditEventDto>> GetLastAuditEventsAsync()
     {
@@ -104,8 +110,11 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/login/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
-    [SwaggerResponse(200, "List of filtered login events", typeof(IEnumerable<LoginEventDto>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("getLoginEventsByFilter")]
+    [EndpointSummary("Get filtered login events")]
+    [EndpointDescription("Returns a list of the login events by the parameters specified in the request.")]
+    [OpenApiResponse(typeof(IEnumerable<LoginEventDto>), 200, "List of filtered login events")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/filter")]
     public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilterAsync(LoginEventRequestDto inDto)
     {
@@ -136,8 +145,11 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/events/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "List of filtered audit trail data", typeof(IEnumerable<AuditEventDto>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("getAuditEventsByFilter")]
+    [EndpointSummary("Get filtered audit trail data")]
+    [EndpointDescription("Returns a list of the audit events by the parameters specified in the request.")]
+    [OpenApiResponse(typeof(IEnumerable<AuditEventDto>), 200, "List of filtered audit trail data")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/filter")]
     public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilterAsync(AuditEventRequestDto inDto)
     {
@@ -168,7 +180,10 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/types</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "Audit trail types", typeof(object))]
+    [EndpointName("getTypes")]
+    [EndpointSummary("Get audit trail types")]
+    [EndpointDescription("Returns all the available audit trail types.")]
+    [OpenApiResponse(typeof(object), 200, "Audit trail types")]
     [AllowAnonymous]
     [HttpGet("audit/types")]
     public object GetTypes()
@@ -192,7 +207,10 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/mappers</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "Audit trail mappers", typeof(object))]
+    [EndpointName("getMappers")]
+    [EndpointSummary("Get audit trail mappers")]
+    [EndpointDescription("Returns the mappers for the audit trail types.")]
+    [OpenApiResponse(typeof(object), 200, "Audit trail mappers")]
     [AllowAnonymous]
     [HttpGet("audit/mappers")]
     public object GetMappers(AuditTrailTypesRequestDto inDto)
@@ -225,8 +243,11 @@ public class SecurityController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/security/audit/login/report</path>
     [Tags("Security / Login history")]
-    [SwaggerResponse(200, "URL to the xlsx report file", typeof(object))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("createLoginHistoryReport")]
+    [EndpointSummary("Generate the login history report")]
+    [EndpointDescription("Generates the login history report.")]
+    [OpenApiResponse(typeof(object), 200, "URL to the xlsx report file")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("audit/login/report")]
     public async Task<object> CreateLoginHistoryReport()
     {
@@ -257,9 +278,12 @@ public class SecurityController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/security/audit/events/report</path>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "URL to the xlsx report file", typeof(object))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [EndpointName("createAuditTrailReport")]
+    [EndpointSummary("Generate the audit trail report")]
+    [EndpointDescription("Generates the audit trail report.")]
+    [OpenApiResponse(typeof(object), 200, "URL to the xlsx report file")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
     [HttpPost("audit/events/report")]
     public async Task<object> CreateAuditTrailReport()
     {
@@ -293,8 +317,11 @@ public class SecurityController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "Audit settings", typeof(TenantAuditSettings))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("getAuditSettings")]
+    [EndpointSummary("Get the audit trail settings")]
+    [EndpointDescription("Returns the audit trail settings.")]
+    [OpenApiResponse(typeof(TenantAuditSettings), 200, "Audit settings")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/settings/lifetime")]
     public async Task<TenantAuditSettings> GetAuditSettingsAsync()
     {
@@ -313,9 +340,12 @@ public class SecurityController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "Audit trail settings", typeof(TenantAuditSettings))]
-    [SwaggerResponse(400, "Exception in LoginHistoryLifeTime or AuditTrailLifeTime")]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("setAuditSettings")]
+    [EndpointSummary("Set the audit trail settings")]
+    [EndpointDescription("Sets the audit trail settings for the current portal.")]
+    [OpenApiResponse(typeof(TenantAuditSettings), 200, "Audit trail settings")]
+    [OpenApiResponse(400, "Exception in LoginHistoryLifeTime or AuditTrailLifeTime")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("audit/settings/lifetime")]
     public async Task<TenantAuditSettings> SetAuditSettings(TenantAuditSettingsWrapper inDto)
     {
@@ -344,8 +374,11 @@ public class SecurityController(PermissionContext permissionContext,
     /// </summary>
     /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
-    [SwaggerResponse(200, "Ok", typeof(CspDto))]
-    [SwaggerResponse(400, "Exception in Domains")]
+    [EndpointName("csp")]
+    [EndpointSummary("Csp")]
+    [EndpointDescription("Csp")]
+    [OpenApiResponse(typeof(CspDto), 200, "Ok")]
+    [OpenApiResponse(400, "Exception in Domains")]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName )]
     [HttpPost("csp")]
     public async Task<CspDto> Csp(CspRequestsDto request)
@@ -388,7 +421,10 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/csp</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / CSP")]
-    [SwaggerResponse(200, "Ok", typeof(CspDto))]
+    [EndpointName("getCsp")]
+    [EndpointSummary("Gets csp")]
+    [EndpointDescription("Gets csp")]
+    [OpenApiResponse(typeof(CspDto), 200, "Ok")]
     [AllowAnonymous]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpGet("csp")]

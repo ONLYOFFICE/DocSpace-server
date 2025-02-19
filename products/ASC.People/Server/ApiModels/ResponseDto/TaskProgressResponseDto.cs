@@ -31,26 +31,31 @@ public class TaskProgressResponseDto
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public string Id { get; set; }
 
     /// <summary>
     /// Error
     /// </summary>
+    [OpenApiDescription("Error")]
     public string Error { get; set; }
 
     /// <summary>
     /// Percentage
     /// </summary>
+    [OpenApiDescription("Percentage")]
     public int Percentage { get; set; }
 
     /// <summary>
     /// IsCompleted
     /// </summary>
+    [OpenApiDescription("IsCompleted")]
     public bool IsCompleted { get; set; }
 
     /// <summary>
     /// Status
     /// </summary>
+    [OpenApiDescription("Status")]
     public DistributedTaskStatus Status { get; set; }
 
     public static TaskProgressResponseDto Get(DistributedTaskProgress progressItem)

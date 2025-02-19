@@ -31,19 +31,19 @@ namespace ASC.Core.Users;
 [EnumExtensions]
 public enum EmployeeType
 {
-    [SwaggerEnum("All")]
+    [OpenApiEnum("All")]
     All = 0,
 
-    [SwaggerEnum("Room admin")]
+    [OpenApiEnum("Room admin")]
     RoomAdmin = 1,
 
-    [SwaggerEnum("Guest")]
+    [OpenApiEnum("Guest")]
     Guest = 2,
 
-    [SwaggerEnum("DocSpace admin")]
+    [OpenApiEnum("DocSpace admin")]
     DocSpaceAdmin = 3,
 	
-    [SwaggerEnum("User")]
+    [OpenApiEnum("User")]
     User = 4
 }
 

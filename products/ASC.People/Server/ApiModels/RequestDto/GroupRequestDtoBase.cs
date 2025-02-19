@@ -31,11 +31,13 @@ public abstract class GroupRequestDtoBase
     /// <summary>
     /// Group manager ID
     /// </summary>
+    [OpenApiDescription("Group manager ID")]
     public Guid GroupManager { get; set; }
 
     /// <summary>
     /// Group name
     /// </summary>
     [StringLength(128)]
+    [OpenApiDescription("Group name")]
     public string GroupName { get; set; }
 }

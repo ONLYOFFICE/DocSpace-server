@@ -34,5 +34,6 @@ public class WebhookRetryRequestsDto
     /// <summary>
     /// List of webhook IDs
     /// </summary>
+    [OpenApiDescription("List of webhook IDs")]
     public List<int> Ids { get; set; }
 }

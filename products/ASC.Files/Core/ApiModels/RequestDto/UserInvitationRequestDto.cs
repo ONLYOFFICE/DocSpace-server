@@ -34,11 +34,13 @@ public class UserInvitation
     /// <summary>
     /// List of user IDs
     /// </summary>
+    [OpenApiDescription("List of user IDs")]
     public IEnumerable<Guid> UsersIds { get; set; }
 
     /// <summary>
     /// Resend all
     /// </summary>
+    [OpenApiDescription("Resend all")]
     public bool ResendAll { get; set; }
 }
 
@@ -51,11 +53,13 @@ public class UserInvitationRequestDto<T>
     /// Room Id
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room Id")]
     public T Id { get; set; }
 
     /// <summary>
     /// User invitation
     /// </summary>
     [FromBody]
+    [OpenApiDescription("User invitation")]
     public UserInvitation UserInvitation { get; set; }
 }

@@ -31,16 +31,19 @@ public class AccountInfoDto
     /// <summary>
     /// Provider
     /// </summary>
+    [OpenApiDescription("Provider")]
     public string Provider { get; set; }
 
     /// <summary>
     /// URL
     /// </summary>
     [Url]
+    [OpenApiDescription("URL")]
     public string Url { get; set; }
 
     /// <summary>
     /// Specifies if an account is linked or not
     /// </summary>
+    [OpenApiDescription("Specifies if an account is linked or not")]
     public bool Linked { get; set; }
 }

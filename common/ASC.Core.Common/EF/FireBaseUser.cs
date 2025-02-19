@@ -28,41 +28,48 @@ namespace ASC.Core.Common.EF;
 
 public class FireBaseUser : BaseEntity
 {
-/// <summary>
+    /// <summary>
     /// ID
-/// </summary>
+    /// </summary>
+    [OpenApiDescription("ID")]
     public int Id { get; set; }
 
     /// <summary>
     /// User ID
     /// </summary>
+    [OpenApiDescription("User ID")]
     public Guid UserId { get; set; }
 
     /// <summary>
     /// Tenant ID
     /// </summary>
+    [OpenApiDescription("Tenant ID")]
     public int TenantId { get; set; }
 
     /// <summary>
     /// Firebase device token
     /// </summary>
     [MaxLength(255)]
+    [OpenApiDescription("Firebase device token")]
     public string FirebaseDeviceToken { get; set; }
 
     /// <summary>
     /// Application
     /// </summary>
     [MaxLength(20)]
+    [OpenApiDescription("Application")]
     public string Application { get; set; }
 
     /// <summary>
     /// Specifies if the user is subscribed to the push notifications or not
     /// </summary>
+    [OpenApiDescription("Specifies if the user is subscribed to the push notifications or not")]
     public bool? IsSubscribed { get; set; }
 
     /// <summary>
     /// Tenant
     /// </summary>
+    [OpenApiDescription("Tenant")]
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()

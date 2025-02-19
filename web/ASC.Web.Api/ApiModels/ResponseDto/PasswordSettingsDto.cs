@@ -31,41 +31,49 @@ public class PasswordSettingsDto
     /// <summary>
     /// Min length
     /// </summary>
+    [OpenApiDescription("Min length")]
     public int MinLength { get; set; }
 
     /// <summary>
     /// Upper case
     /// </summary>
+    [OpenApiDescription("Upper case")]
     public bool UpperCase { get; set; }
 
     /// <summary>
     /// Digits
     /// </summary>
+    [OpenApiDescription("Digits")]
     public bool Digits { get; set; }
 
     /// <summary>
     /// Spec symbols
     /// </summary>
+    [OpenApiDescription("Spec symbols")]
     public bool SpecSymbols { get; set; }
 
     /// <summary>
     /// Allowed characters regex str
     /// </summary>
+    [OpenApiDescription("Allowed characters regex str")]
     public string AllowedCharactersRegexStr { get; set; }
 
     /// <summary>
     /// Digits regex str
     /// </summary>
+    [OpenApiDescription("Digits regex str")]
     public string DigitsRegexStr { get; set; }
 
     /// <summary>
     /// Upper case regex str
     /// </summary>
+    [OpenApiDescription("Upper case regex str")]
     public string UpperCaseRegexStr { get; set; }
 
     /// <summary>
     /// Spec symbols regex str
     /// </summary>
+    [OpenApiDescription("Spec symbols regex str")]
     public string SpecSymbolsRegexStr { get; set; }
 }
 

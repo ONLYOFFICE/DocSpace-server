@@ -32,11 +32,13 @@ public class GroupMemberSecurityRequestDto<T>
     /// Folder Id
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder Id")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// Group Id
     /// </summary>
     [FromRoute(Name = "groupId")]
+    [OpenApiDescription("Group Id")]
     public Guid GroupId { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -86,9 +86,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Save file edits</short>
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
-    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    [EndpointName("saveEditingFromForm")]
+    [EndpointSummary("Save file edits")]
+    [EndpointDescription("Saves edits to a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "Saved file parameters")]
+    [OpenApiResponse(400, "No file id or folder id toFolderId determine provider")]
+    [OpenApiResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/saveediting")]
     public async Task<FileDto<T>> SaveEditingFromFormAsync(SaveEditingRequestDto<T> inDto)
     {
@@ -103,8 +106,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Start file editing</short>
     /// <path>api/2.0/files/file/{fileId}/startedit</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File key for Document Service", typeof(object))]
-    [SwaggerResponse(403, "You don't have enough permission to view the file")]
+    [EndpointName("startEdit")]
+    [EndpointSummary("Start file editing")]
+    [EndpointDescription("Informs about opening a file with the ID specified in the request for editing, locking it from being deleted or moved (this method is called by the mobile editors).")]
+    [OpenApiResponse(typeof(object), 200, "File key for Document Service")]
+    [OpenApiResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
     public async Task<object> StartEditAsync(StartEditRequestDto<T> inDto)
@@ -118,8 +124,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Starts filling</short>
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    [EndpointName("startFilling")]
+    [EndpointSummary("Start filling")]
+    [EndpointDescription("Starts filling a file with the ID specified in the request.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/startfilling")]
     public async Task StartFillingAsync(StartFillingRequestDto<T> inDto)
     {
@@ -132,8 +141,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Track file editing</short>
     /// <path>api/2.0/files/file/{fileId}/trackeditfile</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File changes", typeof(KeyValuePair<bool, string>))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [EndpointName("trackEditFile")]
+    [EndpointSummary("Track file editing")]
+    [EndpointDescription("Tracks file changes when editing.")]
+    [OpenApiResponse(typeof(KeyValuePair<bool, string>), 200, "File changes")]
+    [OpenApiResponse(403, "You don't have enough permission to perform the operation")]
     [AllowAnonymous]
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(TrackEditFileRequestDto<T> inDto)
@@ -148,8 +160,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Configuration parameters", typeof(ConfigurationDto<int>))]
-    [SwaggerResponse(403, "You don't have enough permission to view the file")]
+    [EndpointName("openEdit")]
+    [EndpointSummary("Open a file")]
+    [EndpointDescription("Returns the initialization configuration of a file to open it in the editor.")]
+    [OpenApiResponse(typeof(ConfigurationDto<int>), 200, "Configuration parameters")]
+    [OpenApiResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
@@ -325,7 +340,10 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Get file download link asynchronously</short>
     /// <path>api/2.0/files/file/{fileId}/presigned</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File download link", typeof(DocumentService.FileLink))]
+    [EndpointName("getPresignedFileUri")]
+    [EndpointSummary("Get file download link asynchronously")]
+    [EndpointDescription("Returns a link to download a file with the ID specified in the request asynchronously.")]
+    [OpenApiResponse(typeof(DocumentService.FileLink), 200, "File download link")]
     [HttpGet("{fileId}/presigned")]
     public async Task<DocumentService.FileLink> GetPresignedFileUriAsync(FileIdRequestDto<T> inDto)
     {
@@ -340,7 +358,10 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
+    [EndpointName("sharedUsers")]
+    [EndpointSummary("Get shared users")]
+    [EndpointDescription("Returns a list of users with their access rights to the file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(List<MentionWrapper>), 200, "List of users with their access rights to the file")]
     [HttpGet("{fileId}/sharedusers")]
     public async Task<List<MentionWrapper>> SharedUsers(FileIdRequestDto<T> inDto)
     {
@@ -354,7 +375,10 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/infousers</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
+    [EndpointName("getInfoUsers")]
+    [EndpointSummary("Get users with access rights")]
+    [EndpointDescription("Return list of users with their access rights to the file")]
+    [OpenApiResponse(typeof(List<MentionWrapper>), 200, "List of users with their access rights to the file")]
     [HttpPost("infousers")]
     public async Task<List<MentionWrapper>> GetInfoUsers(GetInfoUsersRequestDto inDto)
     {
@@ -367,7 +391,10 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Get reference data</short>
     /// <path>api/2.0/files/file/referencedata</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File reference data", typeof(FileReference))]
+    [EndpointName("getReferenceData")]
+    [EndpointSummary("Get reference data")]
+    [EndpointDescription("Returns the reference data to uniquely identify a file in its system and check the availability of insering data into the destination spreadsheet by the external link.")]
+    [OpenApiResponse(typeof(FileReference), 200, "File reference data")]
     [HttpPost("referencedata")]
     public async Task<FileReference> GetReferenceDataAsync(GetReferenceDataDto<T> inDto)
     {
@@ -381,7 +408,10 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "List of users with their access rights to the protected file", typeof(List<MentionWrapper>))]
+    [EndpointName("protectUsers")]
+    [EndpointSummary("Get users with protected file access")]
+    [EndpointDescription("Returns a list of users with their access rights to the protected file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(List<MentionWrapper>), 200, "List of users with their access rights to the protected file")]
     [HttpGet("{fileId}/protectusers")]
     public async Task<List<MentionWrapper>> ProtectUsers(FileIdRequestDto<T> inDto)
     {
@@ -406,9 +436,12 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <path>api/2.0/files/docservice</path>
     /// <collection>list</collection>
     [Tags("Files / Settings")]
-    [SwaggerResponse(200, "Document service information: the Document Server address, the Document Server address in the local private network, the Community Server address", typeof(DocServiceUrlDto))]
-    [SwaggerResponse(400, "Invalid input urls/Mixed Active Content is not allowed. HTTPS address for Document Server is required")]
-    //[SwaggerResponse(503, "Unable to establish a connection with the Document Server")]
+    [EndpointName("checkDocServiceUrl")]
+    [EndpointSummary("Check document service URL")]
+    [EndpointDescription("Checks the document service location.")]
+    [OpenApiResponse(typeof(DocServiceUrlDto), 200, "Document service information: the Document Server address, the Document Server address in the local private network, the Community Server address")]
+    [OpenApiResponse(400, "Invalid input urls/Mixed Active Content is not allowed. HTTPS address for Document Server is required")]
+    //[OpenApiResponse(503, "Unable to establish a connection with the Document Server")]
     [HttpPut("docservice")]
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {
@@ -483,7 +516,10 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
-    [SwaggerResponse(200, "The document service URL with the editor version specified", typeof(DocServiceUrlDto))]
+    [EndpointName("getDocServiceUrl")]
+    [EndpointSummary("Get document service URL")]
+    [EndpointDescription("Returns the address of the connected editors.")]
+    [OpenApiResponse(typeof(DocServiceUrlDto), 200, "The document service URL with the editor version specified")]
     [AllowAnonymous]
     [HttpGet("docservice")]
     public async Task<DocServiceUrlDto> GetDocServiceUrlAsync(DocServiceUrlRequestDto inDto)

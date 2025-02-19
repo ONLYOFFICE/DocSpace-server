@@ -31,15 +31,18 @@ public class DeepLinkDto
     /// <summary>
     /// Android package name
     /// </summary>
+    [OpenApiDescription("Android package name")]
     public string AndroidPackageName { get; set; }
 
     /// <summary>
     /// Url
     /// </summary>
+    [OpenApiDescription("Url")]
     public string Url { get; set; }
 
     /// <summary>
     /// Ios package id
     /// </summary>
+    [OpenApiDescription("Ios package id")]
     public string IosPackageId { get; set; }
 }

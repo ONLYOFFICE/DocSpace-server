@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,7 +43,10 @@ public class ReassignController(
     /// <short>Get the reassignment progress</short>
     /// <path>api/2.0/people/reassign/progress/{userid}</path>
     [Tags("People / User data")]
-    [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
+    [EndpointName("getReassignProgress")]
+    [EndpointSummary("Get the reassignment progress")]
+    [EndpointDescription("Returns the progress of the started data reassignment for the user with the ID specified in the request.")]
+    [OpenApiResponse(typeof(TaskProgressResponseDto), 200, "Reassignment progress")]
     [HttpGet("progress/{userid:guid}")]
     public async Task<TaskProgressResponseDto> GetReassignProgressAsync(ProgressRequestDto inDto)
     {
@@ -61,8 +64,11 @@ public class ReassignController(
     /// <short>Start the data reassignment</short>
     /// <path>api/2.0/people/reassign/start</path>
     [Tags("People / User data")]
-    [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
-    [SwaggerResponse(400, "Can not reassign data to user or from user")]
+    [EndpointName("startReassign")]
+    [EndpointSummary("Start the data reassignment")]
+    [EndpointDescription("Starts the data reassignment for the user with the ID specified in the request.")]
+    [OpenApiResponse(typeof(TaskProgressResponseDto), 200, "Reassignment progress")]
+    [OpenApiResponse(400, "Can not reassign data to user or from user")]
     [HttpPost("start")]
     public async Task<TaskProgressResponseDto> StartReassignAsync(StartReassignRequestDto inDto)
     {
@@ -104,7 +110,10 @@ public class ReassignController(
     /// <short>Terminate the data reassignment</short>
     /// <path>api/2.0/people/reassign/terminate</path>
     [Tags("People / User data")]
-    [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
+    [EndpointName("terminateReassign")]
+    [EndpointSummary("Terminate the data reassignment")]
+    [EndpointDescription("Terminates the data reassignment for the user with the ID specified in the request.")]
+    [OpenApiResponse(typeof(TaskProgressResponseDto), 200, "Reassignment progress")]
     [HttpPut("terminate")]
     public async Task<TaskProgressResponseDto> TerminateReassignAsync(TerminateRequestDto inDto)
     {

@@ -31,16 +31,19 @@ public class CurrenciesDto
     /// <summary>
     /// ISO country code
     /// </summary>
+    [OpenApiDescription("ISO country code")]
     public string ISOCountryCode { get; set; }
 
     /// <summary>
     /// ISO currency symbol
     /// </summary>
+    [OpenApiDescription("ISO currency symbol")]
     public string ISOCurrencySymbol { get; set; }
 
     /// <summary>
     /// Currency native name
     /// </summary>
+    [OpenApiDescription("Currency native name")]
     public string CurrencyNativeName { get; set; }
 
     public CurrenciesDto()

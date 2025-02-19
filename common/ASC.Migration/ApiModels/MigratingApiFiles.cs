@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Migration.Core.Models.Api;
 
 [ProtoContract]
@@ -33,17 +35,20 @@ public class MigratingApiFiles
     /// Folders Count
     /// </summary>
     [ProtoMember(1)]
+    [OpenApiDescription("Folders Count")]
     public int FoldersCount { get; set; }
 
     /// <summary>
     /// Files Count
     /// </summary>
     [ProtoMember(2)]
+    [OpenApiDescription("Files Count")]
     public int FilesCount { get; set; }
 
     /// <summary>
     /// Bytes Total
     /// </summary>
     [ProtoMember(3)]
+    [OpenApiDescription("Bytes Total")]
     public long BytesTotal { get; set; }
 }

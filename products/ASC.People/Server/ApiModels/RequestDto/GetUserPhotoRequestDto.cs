@@ -35,5 +35,6 @@ public class GetUserPhotoRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
+    [OpenApiDescription("User ID")]
     public string UserId { get; set; }
 }

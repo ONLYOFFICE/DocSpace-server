@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,7 +52,10 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/recent</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [EndpointName("addToRecent")]
+    [EndpointSummary("Add a file to the \"Recent\" section")]
+    [EndpointDescription("Adds a file with the ID specified in the request to the 'Recent' section.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
     [HttpPost("file/{fileId}/recent")]
     public async Task<FileDto<T>> AddToRecentAsync(FileIdRequestDto<T> inDto)
     {
@@ -70,8 +73,11 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites/{fileId}</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Boolean value: true - the file is favorite, false - the file is not favorite", typeof(bool))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [EndpointName("toggleFileFavorite")]
+    [EndpointSummary("Change the file favorite status")]
+    [EndpointDescription("Changes the favorite status of the file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true - the file is favorite, false - the file is not favorite")]
+    [OpenApiResponse(403, "You don't have enough permission to perform the operation")]
     [HttpGet("favorites/{fileId}")]
     public async Task<bool> ToggleFileFavoriteAsync(ToggleFileFavoriteRequestDto<T> inDto)
     {
@@ -91,8 +97,11 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [EndpointName("addFavorites")]
+    [EndpointSummary("Add favorite files and folders")]
+    [EndpointDescription("Adds files and folders with the IDs specified in the request to the favorite list.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("favorites")]
     public async Task<bool> AddFavoritesAsync(BaseBatchRequestDto inDto)
     {
@@ -111,7 +120,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <short>Add template files</short>
     /// <path>api/2.0/files/templates</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [EndpointName("addTemplates")]
+    [EndpointSummary("Add template files")]
+    [EndpointDescription("Adds files with the IDs specified in the request to the template list.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
     [HttpPost("templates")]
     public async Task<bool> AddTemplatesAsync(TemplatesRequestDto inDto)
     {
@@ -127,7 +139,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [EndpointName("deleteFavoritesFromBody")]
+    [EndpointSummary("Delete favorite files and folders (using body parameters)")]
+    [EndpointDescription("Removes files and folders with the IDs specified in the request from the favorite list. This method uses the body parameters.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
     [HttpDelete("favorites")]
     [Consumes("application/json")]
     public async Task<bool> DeleteFavoritesFromBodyAsync([FromBody] BaseBatchRequestDto inDto)
@@ -142,7 +157,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [EndpointName("deleteFavoritesFromQuery")]
+    [EndpointSummary("Delete favorite files and folders (using query parameters)")]
+    [EndpointDescription("Removes files and folders with the IDs specified in the request from the favorite list. This method uses the query parameters.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
     [HttpDelete("favorites")]
     public async Task<bool> DeleteFavoritesFromQueryAsync([FromQuery][ModelBinder(BinderType = typeof(BaseBatchModelBinder))] BaseBatchRequestDto inDto)
     {
@@ -155,7 +173,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <short>Delete template files</short>
     /// <path>api/2.0/files/templates</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [EndpointName("deleteTemplates")]
+    [EndpointSummary("Delete template files")]
+    [EndpointDescription("Removes files with the IDs specified in the request from the template list.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
     [HttpDelete("templates")]
     public async Task<bool> DeleteTemplatesAsync(DeleteTemplateFilesRequestDto inDto)
     {
@@ -170,7 +191,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <short>Delete recent files</short>
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "No content", typeof(NoContentResult))]
+    [EndpointName("deleteRecent")]
+    [EndpointSummary("Delete recent files")]
+    [EndpointDescription("Removes files with the IDs specified in the request from the 'Recent' section.")]
+    [OpenApiResponse(typeof(NoContentResult), 200, "No content")]
     [HttpDelete("recent")]
     public async Task<NoContentResult> DeleteRecentAsync(BaseBatchRequestDto inDto)
     {

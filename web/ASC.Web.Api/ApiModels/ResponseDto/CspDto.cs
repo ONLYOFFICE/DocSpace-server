@@ -31,10 +31,12 @@ public class CspDto
     /// <summary>
     /// Domains
     /// </summary>
+    [OpenApiDescription("Domains")]
     public IEnumerable<string> Domains { get; set; }
 
     /// <summary>
     /// Header
     /// </summary>
+    [OpenApiDescription("Header")]
     public string Header { get; set; }
 }

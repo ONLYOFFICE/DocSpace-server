@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,23 +36,27 @@ public class AuthProvidersRequestDto
     /// Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers
     /// </summary>
     [FromQuery(Name = "inviteView")]
+    [OpenApiDescription("Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers")]
     public bool InviteView {  get; set; }
 
     /// <summary>
     /// Specifies whether to return URLs in the format that is used on the Settings page
     /// </summary>
     [FromQuery(Name = "settingsView")]
+    [OpenApiDescription("Specifies whether to return URLs in the format that is used on the Settings page")]
     public bool SettingsView { get; set; }
 
     /// <summary>
     /// Method that is called after authorization
     /// </summary>
     [FromQuery(Name = "clientCallback")]
+    [OpenApiDescription("Method that is called after authorization")]
     public string ClientCallback { get; set; }
 
     /// <summary>
     /// Provider name if the response only from this provider is needed
     /// </summary>
     [FromQuery(Name = "fromOnly")]
+    [OpenApiDescription("Provider name if the response only from this provider is needed")]
     public string FromOnly { get; set; }
 }

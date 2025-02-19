@@ -34,11 +34,13 @@ public class UpdateComment
     /// <summary>
     /// File version
     /// </summary>
+    [OpenApiDescription("File version")]
     public int Version { get; set; }
 
     /// <summary>
     /// Comment text
     /// </summary>
+    [OpenApiDescription("Comment text")]
     public string Comment { get; set; }
 }
 
@@ -51,11 +53,13 @@ public class UpdateCommentRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// Parameters for updating a comment
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Parameters for updating a comment")]
     public UpdateComment File { get; set; }
 }

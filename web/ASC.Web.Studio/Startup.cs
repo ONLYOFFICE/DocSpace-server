@@ -44,14 +44,6 @@ public class Startup : BaseStartup
     {
         base.Configure(app, env);
         
-        if (OpenApiEnabled && _configuration.GetValue<bool>("openApi:enableUI"))
-        {
-            var endpoints = new Dictionary<string,string>();
-            _configuration.Bind("openApi:endpoints", endpoints);
-            app.UseOpenApiUI(endpoints);
-        }
-
-
         app.UseRouting();
 
         app.UseAuthentication();

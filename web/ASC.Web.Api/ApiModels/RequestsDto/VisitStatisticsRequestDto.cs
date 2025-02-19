@@ -35,11 +35,13 @@ public class VisitStatisticsRequestDto
     /// Start period date
     /// </summary>
     [FromQuery(Name = "fromDate")]
+    [OpenApiDescription("Start period date")]
     public ApiDateTime FromDate { get; set; }
 
     /// <summary>
     /// End period date
     /// </summary>
     [FromQuery(Name = "toDate")]
+    [OpenApiDescription("End period date")]
     public ApiDateTime ToDate { get; set; }
 }

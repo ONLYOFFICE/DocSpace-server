@@ -34,5 +34,6 @@ public class UploadLicenseRequestsDto
     /// <summary>
     /// License attachments
     /// </summary>
+    [OpenApiDescription("License attachments")]
     public IEnumerable<IFormFile> Files { get; set; }
 }

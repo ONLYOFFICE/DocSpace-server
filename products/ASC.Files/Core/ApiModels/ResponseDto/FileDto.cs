@@ -31,46 +31,49 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// Folder ID
     /// </summary>
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// Version
     /// </summary>
-    [SwaggerSchemaCustom(Example = 3)]
+    [OpenApiDescription("Version", Example = 3)]
     public int Version { get; set; }
 
     /// <summary>
     /// Version group
     /// </summary>
-    [SwaggerSchemaCustom(Example = 1)]
+    [OpenApiDescription("Version group", Example = 1)]
     public int VersionGroup { get; set; }
 
     /// <summary>
     /// Content length
     /// </summary>
-    [SwaggerSchemaCustom(Example = "12345")]
+    [OpenApiDescription("Content length", Example = "12345")]
     public string ContentLength { get; set; }
 
     /// <summary>
     /// Pure content length
     /// </summary>
+    [OpenApiDescription("Pure content length")]
     public long? PureContentLength { get; set; }
 
     /// <summary>
     /// File status
     /// </summary>
+    [OpenApiDescription("File status")]
     public FileStatus FileStatus { get; set; }
 
     /// <summary>
     /// Muted or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Muted or not", Example = false)]
     public bool Mute { get; set; }
 
     /// <summary>
     /// URL to view a file
     /// </summary>
-    [SwaggerSchemaCustom(Example = "https://www.onlyoffice.com/viewfile?fileid=2221")]
+    [OpenApiDescription("URL to view a file", Example = "https://www.onlyoffice.com/viewfile?fileid=2221")]
     [Url]
     public string ViewUrl { get; set; }
 
@@ -78,98 +81,116 @@ public class FileDto<T> : FileEntryDto<T>
     /// Web URL
     /// </summary>
     [Url]
+    [OpenApiDescription("Web URL")]
     public string WebUrl { get; set; }
 
     /// <summary>
     /// File type
     /// </summary>
+    [OpenApiDescription("File type")]
     public FileType FileType { get; set; }
 
     /// <summary>
     /// File extension
     /// </summary>
-    [SwaggerSchemaCustom(Example = ".txt")]
+    [OpenApiDescription("File extension", Example = ".txt")]
     public string FileExst { get; set; }
 
     /// <summary>
     /// Comment
     /// </summary>
+    [OpenApiDescription("Comment")]
     public string Comment { get; set; }
 
     /// <summary>
     /// Encrypted or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Encrypted or not", Example = false)]
     public bool? Encrypted { get; set; }
 
     /// <summary>
     /// Thumbnail URL
     /// </summary>
     [Url]
+    [OpenApiDescription("Thumbnail URL")]
     public string ThumbnailUrl { get; set; }
 
     /// <summary>
     /// Thumbnail status
     /// </summary>
+    [OpenApiDescription("Thumbnail status")]
     public Thumbnail ThumbnailStatus { get; set; }
 
     /// <summary>
     /// Locked or not
     /// </summary>
+    [OpenApiDescription("Locked or not")]
     public bool? Locked { get; set; }
 
     /// <summary>
     /// User ID who locked a file
     /// </summary>
+    [OpenApiDescription("User ID who locked a file")]
     public string LockedBy { get; set; }
 
     /// <summary>
     /// Is there a draft or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Is there a draft or not", Example = false)]
     public bool? HasDraft { get; set; }
 
     /// <summary>
     /// Is there a form or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Is there a form or not", Example = false)]
     public bool? IsForm { get; set; }
 
     /// <summary>
     /// Specifies if the filling has started or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Specifies if the filling has started or not", Example = false)]
     public bool? StartFilling { get; set; }
 
     /// <summary>
     /// InProcess folder ID
     /// </summary>
+    [OpenApiDescription("InProcess folder ID")]
     public int? InProcessFolderId { get; set; }
 
     /// <summary>
     /// InProcess folder title
     /// </summary>
+    [OpenApiDescription("InProcess folder title")]
     public string InProcessFolderTitle { get; set; }
 
     /// <summary>
     /// Draft info
     /// </summary>
+    [OpenApiDescription("Draft info")]
     public DraftLocation<T> DraftLocation { get; set; }
 
     /// <summary>
     /// File accessibility
     /// </summary>
+    [OpenApiDescription("File accessibility")]
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     /// <summary>
     /// Available external rights
     /// </summary>
+    [OpenApiDescription("Available external rights")]
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
 
     /// <summary>
     /// Last opened
     /// </summary>
+    [OpenApiDescription("Last opened")]
     public ApiDateTime LastOpened { get; set; }
+
+    /// <summary>
+    /// Expired
+    /// </summary>
+    [OpenApiDescription("Expired")]
     public ApiDateTime Expired { get; set; }
     
     public override FileEntryType FileEntryType { get => FileEntryType.File; }
@@ -397,20 +418,24 @@ public class DraftLocation<T>
     /// <summary>
     /// InProcess folder ID
     /// </summary> 
+    [OpenApiDescription("InProcess folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// InProcess folder title
     /// </summary>
+    [OpenApiDescription("InProcess folder title")]
     public string FolderTitle { get; set; }
 
     /// <summary>
     /// Draft ID
     /// </summary>
+    [OpenApiDescription("Draft ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// Draft title
     /// </summary>
+    [OpenApiDescription("Draft title")]
     public string FileTitle { get; set; }
 }

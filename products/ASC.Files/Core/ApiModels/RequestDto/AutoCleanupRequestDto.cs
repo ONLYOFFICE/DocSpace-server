@@ -34,10 +34,12 @@ public class AutoCleanupRequestDto
     /// <summary>
     /// Enables the auto-clearing or not
     /// </summary>
+    [OpenApiDescription("Enables the auto-clearing or not")]
     public bool Set { get; set; }
 
     /// <summary>
     /// A time interval when the auto-clearing will be performed
     /// </summary>
+    [OpenApiDescription("A time interval when the auto-clearing will be performed")]
     public DateToAutoCleanUp Gap { get; set; }
 }

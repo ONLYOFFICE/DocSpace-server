@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,10 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// <short>Get greeting settings</short>
     /// <path>api/2.0/settings/greetingsettings</path>
     [Tags("Settings / Greeting settings")]
-    [SwaggerResponse(200, "Greeting settings: tenant name", typeof(object))]
+    [EndpointName("getGreetingSettings")]
+    [EndpointSummary("Get greeting settings")]
+    [EndpointDescription("Returns the greeting settings for the current portal.")]
+    [OpenApiResponse(typeof(object), 200, "Greeting settings: tenant name")]
     [HttpGet("")]
     public object GetGreetingSettings()
     {
@@ -58,7 +61,10 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// <short>Check the default greeting settings</short>
     /// <path>api/2.0/settings/greetingsettings/isdefault</path>
     [Tags("Settings / Greeting settings")]
-    [SwaggerResponse(200, "Boolean value: true if the greeting settings of the current portal are set to default", typeof(bool))]
+    [EndpointName("isDefault")]
+    [EndpointSummary("Check the default greeting settings")]
+    [EndpointDescription("Checks if the greeting settings of the current portal are set to default or not.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the greeting settings of the current portal are set to default")]
     [HttpGet("isdefault")]
     public bool IsDefault()
     {
@@ -72,7 +78,10 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// <short>Save the greeting settings</short>
     /// <path>api/2.0/settings/greetingsettings</path>
     [Tags("Settings / Greeting settings")]
-    [SwaggerResponse(200, "Message about saving greeting settings successfully", typeof(object))]
+    [EndpointName("saveGreetingSettings")]
+    [EndpointSummary("Save the greeting settings")]
+    [EndpointDescription("Saves the greeting settings specified in the request to the current portal.")]
+    [OpenApiResponse(typeof(object), 200, "Message about saving greeting settings successfully")]
     [HttpPost("")]
     public async Task<object> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
     {
@@ -103,7 +112,10 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// <short>Restore the greeting settings</short>
     /// <path>api/2.0/settings/greetingsettings/restore</path>
     [Tags("Settings / Greeting settings")]
-    [SwaggerResponse(200, "Greeting settings: tenant name", typeof(object))]
+    [EndpointName("restoreGreetingSettings")]
+    [EndpointSummary("Restore the greeting settings")]
+    [EndpointDescription("Restores the current portal greeting settings.")]
+    [OpenApiResponse(typeof(object), 200, "Greeting settings: tenant name")]
     [HttpPost("restore")]
     public async Task<object> RestoreGreetingSettingsAsync()
     {

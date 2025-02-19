@@ -34,6 +34,7 @@ public class PaymentUrlRequestsDto : QuantityRequestDto
     /// <summary>
     /// Back URL
     /// </summary>
+    [OpenApiDescription("Back URL")]
     public string BackUrl { get; set; }
 }
 
@@ -45,5 +46,6 @@ public class QuantityRequestDto
     /// <summary>
     /// The quantity of payment
     /// </summary>
+    [OpenApiDescription("The quantity of payment")]
     public Dictionary<string, int> Quantity { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,11 +36,13 @@ public class GeneralInformationRequestDto
     /// User ID
     /// </summary>
     [FromQuery(Name = "userId")]
+    [OpenApiDescription("User ID")]
     public Guid? UserId { get; set; }
 
     /// <summary>
     /// Specifies if the user is a manager or not
     /// </summary>
     [FromQuery(Name = "manager")]
+    [OpenApiDescription("Specifies if the user is a manager or not")]
     public bool? Manager { get; set; }
 }

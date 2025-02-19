@@ -33,27 +33,30 @@ public class DbTenantPartner : BaseEntity
     /// <summary>
     /// Tenant id
     /// </summary>
+    [OpenApiDescription("Tenant id")]
     public int TenantId { get; set; }
 
     /// <summary>
     /// Partner id
     /// </summary>
     [MaxLength(36)]
+    [OpenApiDescription("Partner id")]
     public string PartnerId { get; set; }
 
     /// <summary>
     /// Affiliate id
     /// </summary>
     [MaxLength(50)]
+    [OpenApiDescription("Affiliate id")]
     public string AffiliateId { get; set; }
 
     /// <summary>
     /// Campaign
     /// </summary>
     [MaxLength(50)]
+    [OpenApiDescription("Campaign")]
     public string Campaign { get; set; }
 
-    [SwaggerIgnore]
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()

@@ -31,31 +31,31 @@ public class UsageSpaceStatItemDto
     /// <summary>
     /// Name
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Item name")]
+    [OpenApiDescription("Name", Example = "Item name")]
     public string Name { get; set; }
 
     /// <summary>
     /// Icon
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Item icon path")]
+    [OpenApiDescription("Icon", Example = "Item icon path")]
     public string Icon { get; set; }
 
     /// <summary>
     /// Specifies if the module space is disabled or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Specifies if the module space is disabled or not", Example = false)]
     public bool Disabled { get; set; }
 
     /// <summary>
     /// Size
     /// </summary>
-    [SwaggerSchemaCustom(Example = "0 Byte")]
+    [OpenApiDescription("Size", Example = "0 Byte")]
     public string Size { get; set; }
 
     /// <summary>
     /// URL
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Item url")]
+    [OpenApiDescription("URL", Example = "Item url")]
     public string Url { get; set; }
 }
 
@@ -64,23 +64,24 @@ public class ChartPointDto
     /// <summary>
     /// Display date
     /// </summary>
-    [SwaggerSchemaCustom(Example = "6/1/2024")]
+    [OpenApiDescription("Display date", Example = "6/1/2024")]
     public string DisplayDate { get; set; }
 
     /// <summary>
     /// Date
     /// </summary>
+    [OpenApiDescription("Date")]
     public DateTime Date { get; init; }
 
     /// <summary>
     /// Hosts
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    [OpenApiDescription("Hosts", Example = 0)]
     public int Hosts { get; set; }
 
     /// <summary>
     /// Hits
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    [OpenApiDescription("Hits", Example = 0)]
     public int Hits { get; set; }
 }

@@ -32,5 +32,6 @@ public class DeleteTemplateFilesRequestDto
     /// File IDs
     /// </summary>
     [FromBody]
+    [OpenApiDescription("File IDs")]
     public IEnumerable<int> FileIds { get; set; }
 }

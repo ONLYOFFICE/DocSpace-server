@@ -33,22 +33,26 @@ public class RoomDataLifetimeDto : IMapFrom<RoomDataLifetime>
     /// <summary>
     /// Specifies action
     /// </summary>
+    [OpenApiDescription("Specifies action")]
     public bool DeletePermanently { get; set; }
 
     /// <summary>
     /// Specifies time period type
     /// </summary>
     [EnumDataType(typeof(RoomDataLifetimePeriod))]
+    [OpenApiDescription("Specifies time period type")]
     public RoomDataLifetimePeriod Period { get; set; }
 
     /// <summary>
     /// Specifies time period value
     /// </summary>
     [Range(1, 999)]
+    [OpenApiDescription("Specifies time period value")]
     public int? Value { get; set; }
     
     /// <summary>
     /// Enabled
     /// </summary>
+    [OpenApiDescription("Enabled")]
     public bool? Enabled { get; set; }
 }

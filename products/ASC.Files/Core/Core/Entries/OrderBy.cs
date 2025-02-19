@@ -29,43 +29,43 @@ namespace ASC.Files.Core;
 [EnumExtensions]
 public enum SortedByType
 {
-    [SwaggerEnum("Date and time")]
+    [OpenApiEnum("Date and time")]
     DateAndTime,
 
-    [SwaggerEnum("AZ")]
+    [OpenApiEnum("AZ")]
     AZ,
 
-    [SwaggerEnum("Size")]
+    [OpenApiEnum("Size")]
     Size,
 
-    [SwaggerEnum("Author")]
+    [OpenApiEnum("Author")]
     Author,
 
-    [SwaggerEnum("Type")]
+    [OpenApiEnum("Type")]
     Type,
 
-    [SwaggerEnum("New")]
+    [OpenApiEnum("New")]
     New,
 
-    [SwaggerEnum("Date and time creation")]
+    [OpenApiEnum("Date and time creation")]
     DateAndTimeCreation,
 
-    [SwaggerEnum("Room type")]
+    [OpenApiEnum("Room type")]
     RoomType,
 
-    [SwaggerEnum("Tags")]
+    [OpenApiEnum("Tags")]
     Tags,
 
-    [SwaggerEnum("Room")]
+    [OpenApiEnum("Room")]
     Room,
 
-    [SwaggerEnum("Custom order")]
+    [OpenApiEnum("Custom order")]
     CustomOrder,
 
-    [SwaggerEnum("Last opened")]
+    [OpenApiEnum("Last opened")]
     LastOpened,
 
-    [SwaggerEnum("Used space")]
+    [OpenApiEnum("Used space")]
     UsedSpace
 }
 

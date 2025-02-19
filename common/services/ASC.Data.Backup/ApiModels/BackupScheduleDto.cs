@@ -35,26 +35,31 @@ public class BackupScheduleDto
     /// Storage type
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
+    [OpenApiDescription("Storage type")]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
     /// Storage parameters
     /// </summary>
+    [OpenApiDescription("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
     /// Maximum number of the stored backup copies
     /// </summary>
+    [OpenApiDescription("Maximum number of the stored backup copies")]
     public int? BackupsStored { get; set; }
 
     /// <summary>
     /// Cron parameters
     /// </summary>
+    [OpenApiDescription("Cron parameters")]
     public Cron CronParams { get; set; }
 
     /// <summary>
     /// Specifies if a dump will be created or not
     /// </summary>
+    [OpenApiDescription("Specifies if a dump will be created or not")]
     public bool Dump { get; set; }
 }
 
@@ -67,17 +72,18 @@ public class Cron
     /// Period
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
+    [OpenApiDescription("Period")]
     public BackupPeriod? Period { get; set; }
 
     /// <summary>
     /// Hour
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    [OpenApiDescription("Hour", Example = 0)]
     public int Hour { get; set; }
 
     /// <summary>
     /// Day
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    [OpenApiDescription("Day", Example = 0)]
     public int? Day { get; set; }
 }

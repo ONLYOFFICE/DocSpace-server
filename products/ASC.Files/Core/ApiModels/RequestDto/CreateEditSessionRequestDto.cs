@@ -32,11 +32,13 @@ public class CreateEditSessionRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// File size in bytes
     /// </summary>
     [FromQuery(Name = "fileSize")]
+    [OpenApiDescription("File size in bytes")]
     public long FileSize { get; set; }
 }

@@ -34,20 +34,24 @@ public class PasswordSettingsRequestsDto
     /// <summary>
     /// Minimum password length
     /// </summary>
+    [OpenApiDescription("Minimum password length")]
     public int MinLength { get; set; }
 
     /// <summary>
     /// Specifies if the password must include the uppercase letters or not
     /// </summary>
+    [OpenApiDescription("Specifies if the password must include the uppercase letters or not")]
     public bool UpperCase { get; set; }
 
     /// <summary>
     /// Specifies if the password must include the digits or not
     /// </summary>
+    [OpenApiDescription("Specifies if the password must include the digits or not")]
     public bool Digits { get; set; }
 
     /// <summary>
     /// Specifies if the password must include the special symbols or not
     /// </summary>
+    [OpenApiDescription("Specifies if the password must include the special symbols or not")]
     public bool SpecSymbols { get; set; }
 }

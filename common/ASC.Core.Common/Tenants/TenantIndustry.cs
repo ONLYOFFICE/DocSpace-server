@@ -28,54 +28,54 @@ namespace ASC.Core.Tenants;
 
 public enum TenantIndustry
 {
-    [SwaggerEnum("Other")]
+    [OpenApiEnum("Other")]
     Other,
 
-    [SwaggerEnum("Accounting")]
+    [OpenApiEnum("Accounting")]
     Accounting,
 
-    [SwaggerEnum("Advertising marketing PR")]
+    [OpenApiEnum("Advertising marketing PR")]
     AdvertisingMarketingPR,
 
-    [SwaggerEnum("Banking")]
+    [OpenApiEnum("Banking")]
     Banking,
 
-    [SwaggerEnum("Consulting")]
+    [OpenApiEnum("Consulting")]
     Consulting,
 
-    [SwaggerEnum("Design")]
+    [OpenApiEnum("Design")]
     Design,
 
-    [SwaggerEnum("Education")]
+    [OpenApiEnum("Education")]
     Education,
 
-    [SwaggerEnum("Environment")]
+    [OpenApiEnum("Environment")]
     Environment,
 
-    [SwaggerEnum("Financial services")]
+    [OpenApiEnum("Financial services")]
     FinancialServices,
 
-    [SwaggerEnum("Health care")]
+    [OpenApiEnum("Health care")]
     HealthCare,
 
-    [SwaggerEnum("IT")]
+    [OpenApiEnum("IT")]
     IT,
 
-    [SwaggerEnum("Legal")]
+    [OpenApiEnum("Legal")]
     Legal,
 
-    [SwaggerEnum("Manufacturing")]
+    [OpenApiEnum("Manufacturing")]
     Manufacturing,
 
-    [SwaggerEnum("Public sector")]
+    [OpenApiEnum("Public sector")]
     PublicSector,
 
-    [SwaggerEnum("Publishing")]
+    [OpenApiEnum("Publishing")]
     Publishing,
 
-    [SwaggerEnum("Retail sales")]
+    [OpenApiEnum("Retail sales")]
     RetailSales,
 
-    [SwaggerEnum("Telecommunications")]
+    [OpenApiEnum("Telecommunications")]
     Telecommunications
 }

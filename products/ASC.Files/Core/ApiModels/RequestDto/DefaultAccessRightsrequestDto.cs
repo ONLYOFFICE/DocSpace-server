@@ -32,5 +32,6 @@ public class DefaultAccessRightsrequestDto
     /// Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)")]
     public List<FileShare> Value { get; set; }
 }

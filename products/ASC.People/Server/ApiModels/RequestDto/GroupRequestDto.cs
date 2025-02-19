@@ -34,6 +34,7 @@ public class GroupRequestDto : GroupRequestDtoBase
     /// <summary>
     /// List of group member IDs
     /// </summary>
+    [OpenApiDescription("List of group member IDs")]
     public IEnumerable<Guid> Members { get; init; }
 }
 
@@ -45,6 +46,7 @@ public class MembersRequest
     /// <summary>
     /// List of group member IDs
     /// </summary>
+    [OpenApiDescription("List of group member IDs")]
     public IEnumerable<Guid> Members { get; init; }
 }
 
@@ -57,11 +59,13 @@ public class MembersRequestDto
     /// Group ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Group ID")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Members
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Members")]
     public MembersRequest Members { get; set; }
 }

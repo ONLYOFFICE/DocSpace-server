@@ -34,5 +34,6 @@ public class TerminateRequestDto
     /// <summary>
     /// User ID whose data is reassigned/removed
     /// </summary>
+    [OpenApiDescription("User ID whose data is reassigned/removed")]
     public Guid UserId { get; set; }
 }

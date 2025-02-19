@@ -50,40 +50,43 @@ public class CustomNavigationItem
     /// <summary>
     /// Id
     /// </summary>
+    [OpenApiDescription("Id")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Label
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Label")]
+    [OpenApiDescription("Label", Example = "Label")]
     public string Label { get; set; }
 
     /// <summary>
     /// URL
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Url")]
+    [OpenApiDescription("URL", Example = "Url")]
     public string Url { get; set; }
 
     /// <summary>
     /// Big image
     /// </summary>
-    [SwaggerSchemaCustom(Example = "data:image\\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkAgMAAAANjH3HAAAADFBMVEUAAADJycnJycnJycmiuNtHAAAAA3RSTlMAf4C\\/aSLHAAAAyElEQVR4Xu3NsQ3CMBSE4YubFB4ilHQegdGSjWACvEpGoEyBYiL05AdnXUGHolx10lf82MmOpfLeo5UoJUhBlpKkRCnhUy7b9XCWkqQMUkYlXVHSf8kTvkHKqKQrSnopg5SRxTMklLmS1MwaSWpmCSQ1MyOzWGZCYrEMEFksA4QqlAFuJJYBcCKxjM3FMySeIfEMC2dMOONCGZZgmdr1ly3TSrJMK9EyJBaaGrHQikYstAiJZRYSyiQEdyg5S8Evckih\\/YPscsdej0H6dc0TYw4AAAAASUVORK5CYII=")]
+    [OpenApiDescription("Big image", Example = "data:image\\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkAgMAAAANjH3HAAAADFBMVEUAAADJycnJycnJycmiuNtHAAAAA3RSTlMAf4C\\/aSLHAAAAyElEQVR4Xu3NsQ3CMBSE4YubFB4ilHQegdGSjWACvEpGoEyBYiL05AdnXUGHolx10lf82MmOpfLeo5UoJUhBlpKkRCnhUy7b9XCWkqQMUkYlXVHSf8kTvkHKqKQrSnopg5SRxTMklLmS1MwaSWpmCSQ1MyOzWGZCYrEMEFksA4QqlAFuJJYBcCKxjM3FMySeIfEMC2dMOONCGZZgmdr1ly3TSrJMK9EyJBaaGrHQikYstAiJZRYSyiQEdyg5S8Evckih\\/YPscsdej0H6dc0TYw4AAAAASUVORK5CYII=")]
     public string BigImg { get; set; }
 
     /// <summary>
     /// Small image
     /// </summary>
-    [SwaggerSchemaCustom(Example = "data:image\\/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8\\/9hAAAAUUlEQVR4AWMY\\/KC5o\\/cAEP9HxxgKcSpCGELYADyu2E6mAQjNxBlAWPNxkHdwGkBIM3KYYDUAr2ZCAE+oH8eujrAXDsA0k2EAAtDXAGLx4MpsADUgvkRKUlqfAAAAAElFTkSuQmCC")]
+    [OpenApiDescription("Small image", Example = "data:image\\/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8\\/9hAAAAUUlEQVR4AWMY\\/KC5o\\/cAEP9HxxgKcSpCGELYADyu2E6mAQjNxBlAWPNxkHdwGkBIM3KYYDUAr2ZCAE+oH8eujrAXDsA0k2EAAtDXAGLx4MpsADUgvkRKUlqfAAAAAElFTkSuQmCC")]
     public string SmallImg { get; set; }
 
     /// <summary>
     /// Show in menu or not
     /// </summary>
+    [OpenApiDescription("Show in menu or not")]
     public bool ShowInMenu { get; set; }
-    
+
     /// <summary>
     /// Show on home page or not
     /// </summary>
+    [OpenApiDescription("Show on home page or not")]
     public bool ShowOnHomePage { get; set; }
 
     private static string GetDefaultBigImg()

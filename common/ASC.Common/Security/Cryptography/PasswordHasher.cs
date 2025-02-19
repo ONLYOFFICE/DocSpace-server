@@ -32,16 +32,19 @@ public class PasswordHasher
     /// <summary>
     /// Size
     /// </summary>
+    [OpenApiDescription("Size")]
     public int Size { get; private set; }
 
     /// <summary>
     /// Iterations
     /// </summary>
+    [OpenApiDescription("Iterations")]
     public int Iterations { get; private set; }
 
     /// <summary>
     /// Salt
     /// </summary>
+    [OpenApiDescription("Salt")]
     public string Salt { get; private set; }
 
     public PasswordHasher(IConfiguration configuration, MachinePseudoKeys machinePseudoKeys)

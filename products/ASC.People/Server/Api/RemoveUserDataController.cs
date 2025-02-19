@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <short>Get the deletion progress</short>
     /// <path>api/2.0/people/remove/progress/{userid}</path>
     [Tags("People / User data")]
-    [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
+    [EndpointName("getRemoveProgress")]
+    [EndpointSummary("Get the deletion progress")]
+    [EndpointDescription("Returns the progress of the started data deletion for the user with the ID specified in the request.")]
+    [OpenApiResponse(typeof(TaskProgressResponseDto), 200, "Deletion progress")]
     [HttpGet("remove/progress/{userid:guid}")]
     public async Task<TaskProgressResponseDto> GetRemoveProgressAsync(ProgressRequestDto inDto)
     {
@@ -62,8 +65,9 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/people/self/delete</path>
     [Tags("People / User data")]
-    [SwaggerResponse(200, "Information message", typeof(object))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("sendInstructionsToDelete")]
+    [OpenApiResponse(typeof(object), 200, "Information message")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPut("self/delete")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<object> SendInstructionsToDeleteAsync()
@@ -88,10 +92,13 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <short>Start the data deletion</short>
     /// <path>api/2.0/people/remove/start</path>
     [Tags("People / User data")]
-    [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
-    [SwaggerResponse(400, "User exception")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("startRemove")]
+    [EndpointSummary("Start the data deletion")]
+    [EndpointDescription("Starts the data deletion for the user with the ID specified in the request.")]
+    [OpenApiResponse(typeof(TaskProgressResponseDto), 200, "Deletion progress")]
+    [OpenApiResponse(400, "User exception")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(404, "User not found")]
     [HttpPost("remove/start")]
     public async Task<TaskProgressResponseDto> StartRemoveAsync(TerminateRequestDto inDto)
     {
@@ -135,6 +142,9 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <short>Terminate the data deletion</short>
     /// <path>api/2.0/people/remove/terminate</path>
     [Tags("People / User data")]
+    [EndpointName("terminateRemove")]
+    [EndpointSummary("Terminate the data deletion")]
+    [EndpointDescription("Terminates the data deletion for the user with the ID specified in the request.")]
     [HttpPut("remove/terminate")]
     public async Task TerminateRemoveAsync(TerminateRequestDto inDto)
     {

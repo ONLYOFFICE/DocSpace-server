@@ -34,62 +34,63 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// <summary>
     /// Host
     /// </summary>
-    [SwaggerSchemaCustom(Example = "mail.example.com")]
+    [OpenApiDescription("Host", Example = "mail.example.com")]
     public string Host { get; set; }
 
     /// <summary>
     /// Port
     /// </summary>
-    [SwaggerSchemaCustom(Example = 25)]
+    [OpenApiDescription("Port", Example = 25)]
     [Range(1, 65535)]
     public int? Port { get; set; }
 
     /// <summary>
     /// Sender address
     /// </summary>
-    [SwaggerSchemaCustom(Example = "notify@example.com")]
+    [OpenApiDescription("Sender address", Example = "notify@example.com")]
     public string SenderAddress { get; set; }
 
     /// <summary>
     /// Sender display name
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Postman")]
+    [OpenApiDescription("Sender display name", Example = "Postman")]
     public string SenderDisplayName { get; set; }
 
     /// <summary>
     /// Credentials username
     /// </summary>
-    [SwaggerSchemaCustom(Example = "notify@example.com")]
+    [OpenApiDescription("Credentials username", Example = "notify@example.com")]
     [StringLength(255)]
     public string CredentialsUserName { get; set; }
 
     /// <summary>
     /// Credentials user password
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{password}")]
+    [OpenApiDescription("Credentials user password", Example = "{password}")]
     public string CredentialsUserPassword { get; set; }
 
     /// <summary>
     /// Enables SSL or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Enables SSL or not", Example = false)]
     public bool EnableSSL { get; set; }
 
     /// <summary>
     /// Enables authentication or not
     /// </summary>
+    [OpenApiDescription("Enables authentication or not")]
     public bool EnableAuth { get; set; }
 
     /// <summary>
     /// Specifies whether to use NTLM or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Specifies whether to use NTLM or not", Example = false)]
     public bool UseNtlm { get; set; }
 
     /// <summary>
     /// Specifies if the current settings are default or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Specifies if the current settings are default or not", Example = false)]
     public bool IsDefaultSettings { get; set; }
 
     public void Mapping(Profile profile)

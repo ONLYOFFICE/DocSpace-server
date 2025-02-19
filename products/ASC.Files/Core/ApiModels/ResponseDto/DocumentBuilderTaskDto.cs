@@ -31,41 +31,49 @@ public class DocumentBuilderTaskDto
     /// <summary>
     /// Id
     /// </summary>
+    [OpenApiDescription("Id")]
     public string Id { get; set; }
 
     /// <summary>
     /// Error
     /// </summary>
+    [OpenApiDescription("Error")]
     public string Error { get; set; }
 
     /// <summary>
     /// Percentage
     /// </summary>
+    [OpenApiDescription("Percentage")]
     public int Percentage { get; set; }
 
     /// <summary>
     /// Is completed
     /// </summary>
+    [OpenApiDescription("Is completed")]
     public bool IsCompleted { get; set; }
 
     /// <summary>
     /// Status
     /// </summary>
+    [OpenApiDescription("Status")]
     public DistributedTaskStatus Status { get; set; }
 
     /// <summary>
     /// Result file id
     /// </summary>
+    [OpenApiDescription("Result file id")]
     public object ResultFileId { get; set; }
 
     /// <summary>
     /// Result file name
     /// </summary>
+    [OpenApiDescription("Result file name")]
     public string ResultFileName { get; set; }
 
     /// <summary>
     /// Result file url
     /// </summary>
+    [OpenApiDescription("Result file url")]
     public string ResultFileUrl { get; set; }
 
     public static DocumentBuilderTaskDto Get(DistributedTaskProgress task)

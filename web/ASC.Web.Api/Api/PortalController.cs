@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -81,7 +81,10 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "Current portal information", typeof(TenantDto))]
+    [EndpointName("getPortal")]
+    [EndpointSummary("Get a portal")]
+    [EndpointDescription("Returns the current portal.")]
+    [OpenApiResponse(typeof(TenantDto), 200, "Current portal information")]
     [AllowNotPayment]
     [HttpGet("")]
     public async Task<TenantDto> Get()
@@ -104,7 +107,10 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/users/{userID}</path>
     [Tags("Portal / Users")]
-    [SwaggerResponse(200, "User information", typeof(UserInfo))]
+    [EndpointName("getUser")]
+    [EndpointSummary("Get a user by ID")]
+    [EndpointDescription("Returns a user with the ID specified in the request from the current portal.")]
+    [OpenApiResponse(typeof(UserInfo), 200, "User information")]
     [HttpGet("users/{userID:guid}")]
     public async Task<UserInfo> GetUserAsync(UserIDRequestDto inDto)
     {
@@ -119,7 +125,10 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/users/invite/{employeeType}</path>
     [Tags("Portal / Users")]
-    [SwaggerResponse(200, "Invitation link", typeof(object))]
+    [EndpointName("getInviteLink")]
+    [EndpointSummary("Get an invitation link")]
+    [EndpointDescription("Returns an invitation link for joining the portal.")]
+    [OpenApiResponse(typeof(object), 200, "Invitation link")]
     [HttpGet("users/invite/{employeeType}")]
     public async Task<object> GeInviteLinkAsync(InvitationLinkRequestDto inDto)
     {
@@ -149,7 +158,10 @@ public class PortalController(
     /// <path>api/2.0/portal/tenantextra</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Quota")]
-    [SwaggerResponse(200, "Extra tenant license information", typeof(TenantExtraDto))]
+    [EndpointName("getTenantExtra")]
+    [EndpointSummary("Get an extra tenant license")]
+    [EndpointDescription("Returns an extra tenant license for the portal.")]
+    [OpenApiResponse(typeof(TenantExtraDto), 200, "Extra tenant license information")]
     [AllowNotPayment]
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(PortalExtraTenantRequestDto inDto)
@@ -188,7 +200,10 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/usedspace</path>
     [Tags("Portal / Quota")]
-    [SwaggerResponse(200, "Used portal space", typeof(double))]
+    [EndpointName("getUsedSpace")]
+    [EndpointSummary("Get the used portal space")]
+    [EndpointDescription("Returns the used space of the current portal.")]
+    [OpenApiResponse(typeof(double), 200, "Used portal space")]
     [HttpGet("usedspace")]
     public async Task<double> GetUsedSpaceAsync()
     {
@@ -209,7 +224,10 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/userscount</path>
     [Tags("Portal / Users")]
-    [SwaggerResponse(200, "Number of portal users", typeof(long))]
+    [EndpointName("getUsersCount")]
+    [EndpointSummary("Get a number of portal users")]
+    [EndpointDescription("Returns a number of portal users.")]
+    [OpenApiResponse(typeof(long), 200, "Number of portal users")]
     [HttpGet("userscount")]
     public async Task<long> GetUsersCountAsync()
     {
@@ -225,7 +243,10 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/tariff</path>
     [Tags("Portal / Quota")]
-    [SwaggerResponse(200, "Current portal tariff", typeof(Tariff))]
+    [EndpointName("getTariff")]
+    [EndpointSummary("Get a portal tariff")]
+    [EndpointDescription("Returns the current portal tariff.")]
+    [OpenApiResponse(typeof(Tariff), 200, "Current portal tariff")]
     [AllowNotPayment]
     [HttpGet("tariff")]
     public async Task<TariffDto> GetTariffAsync(CurrentPortalTariffRequestDto inDto)
@@ -268,8 +289,11 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/quota</path>
     [Tags("Portal / Quota")]
-    [SwaggerResponse(200, "Current portal quota", typeof(TenantQuota))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getQuota")]
+    [EndpointSummary("Get a portal quota")]
+    [EndpointDescription("Returns the current portal quota.")]
+    [OpenApiResponse(typeof(TenantQuota), 200, "Current portal quota")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpGet("quota")]
     public async Task<TenantQuota> GetQuotaAsync()
@@ -298,7 +322,10 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/quota/right</path>
     [Tags("Portal / Quota")]
-    [SwaggerResponse(200, "Recommended portal quota", typeof(TenantQuota))]
+    [EndpointName("getRightQuota")]
+    [EndpointSummary("Get the recommended quota")]
+    [EndpointDescription("Returns the recommended quota for the current portal.")]
+    [OpenApiResponse(typeof(TenantQuota), 200, "Recommended portal quota")]
     [HttpGet("quota/right")]
     public async Task<TenantQuota> GetRightQuotaAsync()
     {
@@ -320,7 +347,10 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/path</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "Portal path", typeof(object))]
+    [EndpointName("getPortalPath")]
+    [EndpointSummary("Get a path to the portal")]
+    [EndpointDescription("Returns the full absolute path to the current portal.")]
+    [OpenApiResponse(typeof(object), 200, "Portal path")]
     [HttpGet("path")]
     public object GetFullAbsolutePath(PortalPathRequestDto inDto)
     {
@@ -336,7 +366,10 @@ public class PortalController(
     /// <path>api/2.0/portal/thumb</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "Thumbnail", typeof(FileResult))]
+    [EndpointName("getThumb")]
+    [EndpointSummary("Get a bookmark thumbnail")]
+    [EndpointDescription("Returns a thumbnail of the bookmark URL specified in the request.")]
+    [OpenApiResponse(typeof(FileResult), 200, "Thumbnail")]
     [HttpGet("thumb")]
     public async Task<FileResult> GetThumb(PortalThumbnailRequestDto inDto)
     {
@@ -369,6 +402,10 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/present/mark</path>
     [Tags("Portal / Users")]
+    [EndpointName("markPresentAsReaded")]
+    [EndpointSummary("Mark a gift message as read")]
+    [EndpointDescription("Marks a gift message as read.")]
+    [OpenApiResponse(200, "Gift message marked as read")]
     [HttpPost("present/mark")]
     public async Task MarkPresentAsReadedAsync()
     {
@@ -393,6 +430,10 @@ public class PortalController(
     /// <path>api/2.0/portal/mobile/registration</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
+    [EndpointName("registerMobileAppInstall")]
+    [EndpointSummary("Register the mobile app installation")]
+    [EndpointDescription("Registers the mobile app installation.")]
+    [OpenApiResponse(200, "Mobile app installation registered")]
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(MobileAppRequestsDto inDto)
     {
@@ -409,6 +450,10 @@ public class PortalController(
     /// <path>api/2.0/portal/mobile/registration</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
+    [EndpointName("registerMobileAppInstallByType")]
+    [EndpointSummary("Register the mobile app installation by mobile app type")]
+    [EndpointDescription("Registers the mobile app installation by mobile app type.")]
+    [OpenApiResponse(200, "Mobile app installation registered")]
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(PortalMobileAppRequestDto inDto)
     {
@@ -423,9 +468,12 @@ public class PortalController(
     /// <path>api/2.0/portal/portalrename</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "Confirmation email about authentication to the portal with a new name", typeof(object))]
-    [SwaggerResponse(400, "Alias is empty")]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("updatePortalName")]
+    [EndpointSummary("Update a portal name")]
+    [EndpointDescription("Updates a portal name with a new one specified in the request.")]
+    [OpenApiResponse(typeof(object), 200, "Confirmation email about authentication to the portal with a new name")]
+    [OpenApiResponse(400, "Alias is empty")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("portalrename")]
     public async Task<object> UpdatePortalName(PortalRenameRequestsDto inDto)
     {
@@ -510,6 +558,10 @@ public class PortalController(
     /// <path>api/2.0/portal/deleteportalimmediately</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
+    [EndpointName("deletePortalImmediately")]
+    [EndpointSummary("Delete a portal immediately")]
+    [EndpointDescription("Deletes the current portal immediately.")]
+    [OpenApiResponse(200, "Deleted the current portal successfully")]
     [HttpDelete("deleteportalimmediately")]
     public async Task DeletePortalImmediatelyAsync()
     {
@@ -551,6 +603,10 @@ public class PortalController(
     /// <short>Send suspension instructions</short>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
+    [EndpointName("sendSuspendInstructions")]
+    [EndpointSummary("Send suspension instructions")]
+    [EndpointDescription("Sends the instructions to suspend the current portal.")]
+    [OpenApiResponse(200, "Sent the instructions to suspend the current portal successfully")]
     [AllowNotPayment]
     [HttpPost("suspend")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -577,6 +633,10 @@ public class PortalController(
     /// <short>Send removal instructions</short>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
+    [EndpointName("sendDeleteInstructions")]
+    [EndpointSummary("Send removal instructions")]
+    [EndpointDescription("Sends the instructions to remove the current portal.")]
+    [OpenApiResponse(200, "Sent the instructions to remove the current portal successfully")]
     [AllowNotPayment]
     [HttpPost("delete")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -605,6 +665,10 @@ public class PortalController(
     /// <short>Restore a portal</short>
     /// <path>api/2.0/portal/continue</path>
     [Tags("Portal / Settings")]
+    [EndpointName("continuePortal")]
+    [EndpointSummary("Restore a portal")]
+    [EndpointDescription("Restores the current portal.")]
+    [OpenApiResponse(200, "Restored the current portal successfully")]
     [AllowSuspended]
     [HttpPut("continue")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalContinue")]
@@ -623,6 +687,10 @@ public class PortalController(
     /// <short>Deactivate a portal</short>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
+    [EndpointName("suspendPortal")]
+    [EndpointSummary("Deactivate a portal")]
+    [EndpointDescription("Deactivates the current portal.")]
+    [OpenApiResponse(200, "Deactivated the current portal successfully")]
     [HttpPut("suspend")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalSuspend")]
     public async Task SuspendPortalAsync()
@@ -644,7 +712,10 @@ public class PortalController(
     /// <short>Delete a portal</short>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "URL to the feedback form about removing a portal", typeof(object))]
+    [EndpointName("deletePortal")]
+    [EndpointSummary("Delete a portal")]
+    [EndpointDescription("Deletes the current portal.")]
+    [OpenApiResponse(typeof(object), 200, "URL to the feedback form about removing a portal")]
     [AllowNotPayment]
     [HttpDelete("delete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]
@@ -687,8 +758,11 @@ public class PortalController(
     /// <path>api/2.0/portal/sendcongratulations</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Portal / Users")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("sendCongratulations")]
+    [EndpointSummary("Send congratulations")]
+    [EndpointDescription("Sends congratulations to the user after registering the portal.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [AllowAnonymous]
     [HttpPost("sendcongratulations")]
     public async Task SendCongratulationsAsync([FromQuery] SendCongratulationsDto inDto)
@@ -728,8 +802,11 @@ public class PortalController(
     /// <path>api/2.0/portal/sendremoveinstructions</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Users")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("sendRemoveInstructions")]
+    [EndpointSummary("Send removal instructions")]
+    [EndpointDescription("Sends the instructions to remove the current portal.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [AllowAnonymous]
     [HttpPost("sendremoveinstructions")]
     public async Task SendRemoveInstructionsAsync([FromQuery] SendRemoveInstructionsDto inDto)

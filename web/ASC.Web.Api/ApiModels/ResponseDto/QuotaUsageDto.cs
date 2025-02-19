@@ -66,31 +66,37 @@ public class QuotaUsageDto
     /// <summary>
     /// Storage size
     /// </summary>
+    [OpenApiDescription("Storage size")]
     public ulong StorageSize { get; init; }
 
     /// <summary>
     /// Maximum file size
     /// </summary>
+    [OpenApiDescription("Maximum file size")]
     public ulong MaxFileSize { get; set; }
 
     /// <summary>
     /// Used size
     /// </summary>
+    [OpenApiDescription("Used size")]
     public ulong UsedSize { get; init; }
 
     /// <summary>
     /// maximum number of room administrators
     /// </summary>
+    [OpenApiDescription("maximum number of room administrators")]
     public int MaxRoomAdminsCount { get; init; }
 
     /// <summary>
     /// Number of room administrators
     /// </summary>
+    [OpenApiDescription("Number of room administrators")]
     public int RoomAdminCount { get; init; }
 
     /// <summary>
     /// Available size
     /// </summary>
+    [OpenApiDescription("Available size")]
     public ulong AvailableSize
     {
         get { return Math.Max(0, StorageSize > UsedSize ? StorageSize - UsedSize : 0); }
@@ -100,6 +106,7 @@ public class QuotaUsageDto
     /// <summary>
     /// Available number of users
     /// </summary>
+    [OpenApiDescription("Available number of users")]
     public int AvailableUsersCount
     {
         get { return Math.Max(0, MaxRoomAdminsCount - RoomAdminCount); }
@@ -109,21 +116,25 @@ public class QuotaUsageDto
     /// <summary>
     /// Storage usage
     /// </summary>
+    [OpenApiDescription("Storage usage")]
     public IList<QuotaUsage> StorageUsage { get; set; }
 
     /// <summary>
     /// User storage size
     /// </summary>
+    [OpenApiDescription("User storage size")]
     public long UserStorageSize { get; set; }
 
     /// <summary>
     /// User used size
     /// </summary>
+    [OpenApiDescription("User used size")]
     public long UserUsedSize { get; set; }
 
     /// <summary>
     /// User available size
     /// </summary>
+    [OpenApiDescription("User available size")]
     public long UserAvailableSize
     {
         get { return Math.Max(0, UserStorageSize - UserUsedSize); }
@@ -133,11 +144,13 @@ public class QuotaUsageDto
     /// <summary>
     /// Maximum number of users
     /// </summary>
+    [OpenApiDescription("Maximum number of users")]
     public long MaxUsers { get; set; }
 
     /// <summary>
     /// Number of users
     /// </summary>
+    [OpenApiDescription("Number of users")]
     public long UsersCount { get; set; }
 }
 
@@ -146,10 +159,12 @@ public class QuotaUsage
     /// <summary>
     /// Path to the storage
     /// </summary>
+    [OpenApiDescription("Path to the storage")]
     public string Path { get; set; }
 
     /// <summary>
     /// Storage size
     /// </summary>
+    [OpenApiDescription("Storage size")]
     public long Size { get; set; }
 }

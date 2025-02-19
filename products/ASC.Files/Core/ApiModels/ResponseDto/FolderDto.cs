@@ -31,124 +31,145 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// Parent folder ID
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10)]
+    [OpenApiDescription("Parent folder ID", Example = 10)]
     public T ParentId { get; set; }
 
     /// <summary>
     /// Number of files
     /// </summary>
-    [SwaggerSchemaCustom(Example = 5)]
+    [OpenApiDescription("Number of files", Example = 5)]
     public int FilesCount { get; set; }
 
     /// <summary>
     /// Number of folders
     /// </summary>
-    [SwaggerSchemaCustom(Example = 7)]
+    [OpenApiDescription("Number of folders", Example = 7)]
     public int FoldersCount { get; set; }
 
     /// <summary>
     /// Specifies if a folder is shareable or not
     /// </summary>
+    [OpenApiDescription("Specifies if a folder is shareable or not")]
     public bool? IsShareable { get; set; }
 
     /// <summary>
     /// Specifies if a folder is favorite or not
     /// </summary>
+    [OpenApiDescription("Specifies if a folder is favorite or not")]
     public bool? IsFavorite { get; set; }
 
     /// <summary>
     /// Number for a new folder
     /// </summary>
+    [OpenApiDescription("Number for a new folder")]
     public int New { get; set; }
 
     /// <summary>
     /// Specifies if a folder is muted or not
     /// </summary>
+    [OpenApiDescription("Specifies if a folder is muted or not")]
     public bool Mute { get; set; }
 
     /// <summary>
     /// List of tags
     /// </summary>
+    [OpenApiDescription("List of tags")]
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
     /// Logo
     /// </summary>
+    [OpenApiDescription("Logo")]
     public Logo Logo { get; set; }
 
     /// <summary>
     /// Specifies if a folder is pinned or not
     /// </summary>
+    [OpenApiDescription("Specifies if a folder is pinned or not")]
     public bool Pinned { get; set; }
 
     /// <summary>
     /// Room type
     /// </summary>
+    [OpenApiDescription("Room type")]
     public RoomType? RoomType { get; set; }
 
     /// <summary>
     /// Specifies if a folder is private or not
     /// </summary>
+    [OpenApiDescription("Specifies if a folder is private or not")]
     public bool Private { get; set; }
 
     /// <summary>
     /// Indexing
     /// </summary>
+    [OpenApiDescription("Indexing")]
     public bool Indexing { get; set; }
 
     /// <summary>
     /// Deny download
     /// </summary>
+    [OpenApiDescription("Deny download")]
     public bool DenyDownload { get; set; }
 
     /// <summary>
     /// Room data lifetime settings
     /// </summary>
+    [OpenApiDescription("Room data lifetime settings")]
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
     /// Watermark settings
     /// </summary>
+    [OpenApiDescription("Watermark settings")]
     public WatermarkDto Watermark { get; set; }
 
     /// <summary>
     /// Folder type
     /// </summary>
+    [OpenApiDescription("Folder type")]
     public FolderType? Type { get; set; }
 
     /// <summary>
     /// InRoom
     /// </summary>
+    [OpenApiDescription("InRoom")]
     public bool? InRoom { get; set; }
 
     /// <summary>
     /// Quota
     /// </summary>
+    [OpenApiDescription("Quota")]
     public long? QuotaLimit { get; set; }
 
     /// <summary>
     /// Specifies if the room has a custom quota or not
     /// </summary>
+    [OpenApiDescription("Specifies if the room has a custom quota or not")]
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
     /// Counter
     /// </summary>
+    [OpenApiDescription("Counter")]
     public long? UsedSpace { get; set; }
 
     /// <summary>
     /// Specifies if the link external
     /// </summary>
+    [OpenApiDescription("Specifies if the link external")]
     public bool? External { get; set; }
 
     /// <summary>
     /// Specifies if the password protected
     /// </summary>
+    [OpenApiDescription("Specifies if the password protected")]
     public bool? PasswordProtected { get; set; }
 
     /// <summary>
     /// Expired
     /// </summary>
+    [OpenApiDescription("Expired")]
     public bool? Expired { get; set; }
 
     /// <summary>

@@ -65,7 +65,10 @@ public class Startup : BaseStartup
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         base.Configure(app, env);
-
+        if (_configuration.GetValue<bool>("openApi:enableUI"))
+        {
+            app.UseOpenApiUI();
+        }
         app.MapWhen(
                 context => context.Request.Path.ToString().EndsWith("filehandler.ashx", StringComparison.OrdinalIgnoreCase),
             appBranch =>

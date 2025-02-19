@@ -47,6 +47,12 @@ namespace ASC.Api.Settings
         /// Get SSO settings
         /// </short>
         /// <returns>SsoSettingsV2 object</returns>
+        [Tags("Settings / SSO")]
+        [EndpointName("getSsoSettingsV2")]
+        [EndpointSummary("Get SSO settings")]
+        [EndpointDescription("Returns current portal SSO settings")]
+        [OpenApiResponse(typeof(SsoSettingsV2), 200, "SsoSettingsV2 object")]
+        [OpenApiResponse(403, "No permissions to perform this action")]
         [Read("ssov2")]
         public SsoSettingsV2 GetSsoSettingsV2()
         {
@@ -67,6 +73,12 @@ namespace ASC.Api.Settings
         /// Get default SSO settings
         /// </short>
         /// <returns>SsoSettingsV2 object</returns>
+        [Tags("Settings / SSO")]
+        [EndpointName("getDefaultSsoSettingsV2")]
+        [EndpointSummary("Get default SSO settings")]
+        [EndpointDescription("Returns default portal SSO settings")]
+        [OpenApiResponse(typeof(SsoSettingsV2), 200, "SsoSettingsV2 object")]
+        [OpenApiResponse(403, "No permissions to perform this action")]
         [Read("ssov2/default")]
         public SsoSettingsV2 GetDefaultSsoSettingsV2()
         {
@@ -82,6 +94,12 @@ namespace ASC.Api.Settings
         /// Get SSO settings constants
         /// </short>
         /// <returns>object</returns>
+        [Tags("Settings / SSO")]
+        [EndpointName("getSsoSettingsV2Constants")]
+        [EndpointSummary("Get SSO settings constants")]
+        [EndpointDescription("Returns SSO settings constants")]
+        [OpenApiResponse(typeof(object), 200, SsoSettingsV2 object")]
+        [OpenApiResponse(403, "No permissions to perform this action")]
         [Read("ssov2/constants")]
         public object GetSsoSettingsV2Constants()
         {
@@ -105,6 +123,12 @@ namespace ASC.Api.Settings
         /// <param name="serializeSettings">serialized SsoSettingsV2 object</param>
         /// <returns>SsoSettingsV2 object</returns>
         [Create("ssov2")]
+        [Tags("Settings / SSO")]
+        [EndpointName("saveSsoSettingsV2")]
+        [EndpointSummary("Save SSO settings")]
+        [EndpointDescription("Save SSO settings for current portal")]
+        [OpenApiResponse(typeof(SsoSettingsV2), 200, "SsoSettingsV2 object")]
+        [OpenApiResponse(403, "No permissions to perform this action")]
         public SsoSettingsV2 SaveSsoSettingsV2(string serializeSettings)
         {
             CheckSsoPermissions();
@@ -163,6 +187,12 @@ namespace ASC.Api.Settings
         /// </short>
         /// <returns>SsoSettingsV2 object</returns>
         [Delete("ssov2")]
+        [Tags("Settings / SSO")]
+        [EndpointName("resetSsoSettingsV2")]
+        [EndpointSummary("Reset SSO settings")]
+        [EndpointDescription("Reset SSO settings for current portal")]
+        [OpenApiResponse(typeof(SsoSettingsV2), 200, "SsoSettingsV2 object")]
+        [OpenApiResponse(403, "No permissions to perform this action")]
         public SsoSettingsV2 ResetSsoSettingsV2()
         {
             CheckSsoPermissions();

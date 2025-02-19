@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -79,7 +79,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Settings", typeof(SettingsDto))]
+    [EndpointName("getSettings")]
+    [EndpointSummary("Get the portal settings")]
+    [EndpointDescription("Returns a list of all the available portal settings with the current values for each parameter.")]
+    [OpenApiResponse(typeof(SettingsDto), 200, "Settings")]
     [HttpGet("")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
     public async Task<SettingsDto> GetSettingsAsync(PortalSettingsrequestDto inDto)
@@ -225,7 +228,10 @@ public partial class SettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/maildomainsettings</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Message about the result of saving the mail domain settings", typeof(object))]
+    [EndpointName("saveMailDomainSettings")]
+    [EndpointSummary("Save the mail domain settings")]
+    [EndpointDescription("Saves the mail domain settings specified in the request to the portal.")]
+    [OpenApiResponse(typeof(object), 200, "Message about the result of saving the mail domain settings")]
     [HttpPost("maildomainsettings")]
     public async Task<object> SaveMailDomainSettingsAsync(MailDomainSettingsRequestsDto inDto)
     {
@@ -273,7 +279,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/quota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Space usage and limits for upload", typeof(QuotaUsageDto))]
+    [EndpointName("getQuotaUsed")]
+    [EndpointSummary("Get the space usage")]
+    [EndpointDescription("Returns the space usage quota for the portal.")]
+    [OpenApiResponse(typeof(QuotaUsageDto), 200, "Space usage and limits for upload")]
     [HttpGet("quota")]
     public async Task<QuotaUsageDto> GetQuotaUsed()
     {
@@ -289,8 +298,11 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/userquotasettings</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Message about the result of saving the user quota settings", typeof(TenantUserQuotaSettings))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("saveUserQuotaSettings")]
+    [EndpointSummary("Save the user quota settings")]
+    [EndpointDescription("Saves the user quota settings specified in the request to the current portal.")]
+    [OpenApiResponse(typeof(TenantUserQuotaSettings), 200, "Message about the result of saving the user quota settings")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
@@ -344,7 +356,10 @@ public partial class SettingsController(MessageService messageService,
     /// </summary>
     /// <path>api/2.0/settings/userquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Ok", typeof(object))]
+    [EndpointName("getUserQuotaSettings")]
+    [EndpointSummary("Get user quota")]
+    [EndpointDescription("Gets user quota settings for the current portal.")]
+    [OpenApiResponse(typeof(object), 200, "Ok")]
     [HttpGet("userquotasettings")]
     public async Task<object> GetUserQuotaSettings()
     {
@@ -361,8 +376,11 @@ public partial class SettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/roomquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Tenant room quota settings", typeof(TenantRoomQuotaSettings))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("saveRoomQuotaSettings")]
+    [EndpointSummary("Save the room quota settings")]
+    [EndpointDescription("Saves the room quota settings specified in the request to the current portal.")]
+    [OpenApiResponse(typeof(TenantRoomQuotaSettings), 200, "Tenant room quota settings")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("roomquotasettings")]
     public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
@@ -419,9 +437,12 @@ public partial class SettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/tenantquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Tenant quota settings", typeof(TenantQuotaSettings))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(405, "Not available")]
+    [EndpointName("setTenantQuotaSettings")]
+    [EndpointSummary("Save the tenant quota settings")]
+    [EndpointDescription("Saves the tenant quota settings specified in the request to the current portal.")]
+    [OpenApiResponse(typeof(TenantQuotaSettings), 200, "Tenant quota settings")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
+    [OpenApiResponse(405, "Not available")]
     [HttpPut("tenantquotasettings")]
     public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(TenantQuotaSettingsRequestsDto inDto)
     {
@@ -472,7 +493,10 @@ public partial class SettingsController(MessageService messageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "List of all the available portal languages", typeof(IEnumerable<string>))]
+    [EndpointName("getSupportedCultures")]
+    [EndpointSummary("Get supported languages")]
+    [EndpointDescription("Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. 'de', 'en-US', etc.).")]
+    [OpenApiResponse(typeof(IEnumerable<string>), 200, "List of supported languages")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
@@ -488,7 +512,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/timezones</path>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "List of all the available time zones with their IDs and display names", typeof(List<TimezonesRequestsDto>))]
+    [EndpointName("getTimeZones")]
+    [EndpointSummary("Get time zones")]
+    [EndpointDescription("Returns a list of all the available portal time zones.")]
+    [OpenApiResponse(typeof(List<TimezonesRequestsDto>), 200, "List of time zones")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard,Administrators")]
     [HttpGet("timezones")]
     [AllowNotPayment]
@@ -522,7 +549,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Get hostname</short>
     /// <path>api/2.0/settings/machine</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Portal hostname", typeof(object))]
+    [EndpointName("getMachineName")]
+    [EndpointSummary("Get hostname")]
+    [EndpointDescription("Returns the portal hostname.")]
+    [OpenApiResponse(typeof(string), 200, "Portal hostname")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     [HttpGet("machine")]
     [AllowNotPayment]
@@ -537,10 +567,13 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Save the DNS settings</short>
     /// <path>api/2.0/settings/dns</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Message about changing DNS", typeof(object))]
-    [SwaggerResponse(400, "Invalid domain name/incorrect length of doman name")]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(405, "Method not allowed")]
+    [EndpointName("saveDnsSettings")]
+    [EndpointSummary("Save the DNS settings")]
+    [EndpointDescription("Saves the DNS settings specified in the request to the current portal.")]
+    [OpenApiResponse(typeof(object), 200, "Message about changing DNS")]
+    [OpenApiResponse(400, "Invalid domain name/incorrect length of doman name")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
+    [OpenApiResponse(405, "Method not allowed")]
     [HttpPut("dns")]
     public async Task<object> SaveDnsSettingsAsync(DnsSettingsRequestsDto inDto)
     {
@@ -556,6 +589,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/recalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
+    [EndpointName("recalculateQuota")]
+    [EndpointSummary("Recalculate quota")]
+    [EndpointDescription("Starts the process of quota recalculation.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -573,7 +610,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/checkrecalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Boolean value: true - quota recalculation process is enabled, false - quota recalculation process is disabled", typeof(bool))]
+    [EndpointName("checkRecalculateQuota")]
+    [EndpointSummary("Check quota recalculation")]
+    [EndpointDescription("Checks the process of quota recalculation.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
@@ -591,7 +631,10 @@ public partial class SettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/logo</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Portal logo image URL", typeof(object))]
+    [EndpointName("getLogo")]
+    [EndpointSummary("Get a portal logo")]
+    [EndpointDescription("Returns the portal logo image URL.")]
+    [OpenApiResponse(typeof(string), 200, "Portal logo URL")]
     [HttpGet("logo")]
     public async Task<object> GetLogoAsync()
     {
@@ -604,9 +647,12 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Complete the Wizard settings</short>
     /// <path>api/2.0/settings/wizard/complete</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Wizard settings", typeof(WizardSettings))]
-    [SwaggerResponse(400, "Incorrect email address/The password is empty")]
-    [SwaggerResponse(402, "You must enter a license key or license key is not correct or license expired or user quota does not match the license")]
+    [EndpointName("completeWizard")]
+    [EndpointSummary("Complete the Wizard settings")]
+    [EndpointDescription("Completes the Wizard settings.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(400, "Incorrect email address/The password is empty")]
+    [OpenApiResponse(402, "You must enter a license key or license key is not correct or license expired or user quota does not match the license")]
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
@@ -626,7 +672,11 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/welcome/close</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(405, "Not available")]
+    [EndpointName("closeWelcomePopup")]
+    [EndpointSummary("Close the welcome pop-up notification")]
+    [EndpointDescription("Closes the welcome pop-up notification.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(405, "Not available")]
     [HttpPut("welcome/close")]
     public async Task CloseWelcomePopupAsync()
     {
@@ -650,7 +700,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/colortheme</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Settings of the portal themes", typeof(CustomColorThemesSettingsDto))]
+    [EndpointName("getColorTheme")]
+    [EndpointSummary("Get a color theme")]
+    [EndpointDescription("Returns the portal color theme.")]
+    [OpenApiResponse(typeof(CustomColorThemesSettingsDto), 200, "Portal color theme")]
     [AllowAnonymous, AllowNotPayment, AllowSuspended]
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
@@ -664,7 +717,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Save a color theme</short>
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Portal theme settings", typeof(CustomColorThemesSettingsDto))]
+    [EndpointName("saveColorTheme")]
+    [EndpointSummary("Save a color theme")]
+    [EndpointDescription("Saves the portal color theme specified in the request.")]
+    [OpenApiResponse(typeof(CustomColorThemesSettingsDto), 200, "Saved color theme")]
     [HttpPut("colortheme")]
     public async Task<CustomColorThemesSettingsDto> SaveColorThemeAsync(CustomColorThemesSettingsRequestsDto inDto)
     {
@@ -736,7 +792,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Delete a color theme</short>
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Portal theme settings: custom color theme settings, selected or not, limit", typeof(CustomColorThemesSettingsDto))]
+    [EndpointName("deleteColorTheme")]
+    [EndpointSummary("Delete a color theme")]
+    [EndpointDescription("Deletes the portal color theme with the ID specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
     [HttpDelete("colortheme")]
     public async Task<CustomColorThemesSettingsDto> DeleteColorThemeAsync(DeleteColorThemeRequestDto inDto)
     {
@@ -768,8 +827,11 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Close the admin helper notification</short>
     /// <path>api/2.0/settings/closeadminhelper</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(405, "Not available")]
+    [EndpointName("closeAdminHelper")]
+    [EndpointSummary("Close the admin helper notification")]
+    [EndpointDescription("Closes the admin helper notification.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(405, "Not available")]
     [HttpPut("closeadminhelper")]
     public async Task CloseAdminHelperAsync()
     {
@@ -790,7 +852,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/timeandlanguage</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
+    [EndpointName("timeAndLanguage")]
+    [EndpointSummary("Set time zone and language")]
+    [EndpointDescription("Sets the portal time zone and language specified in the request.")]
+    [OpenApiResponse(typeof(object), 200, "Message about saving settings successfully")]
     [HttpPut("timeandlanguage")]
     public async Task<object> TimaAndLanguageAsync(TimeZoneRequestDto inDto)
     {
@@ -838,7 +903,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/defaultpage</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
+    [EndpointName("saveDefaultPageSetting")]
+    [EndpointSummary("Set the default product page")]
+    [EndpointDescription("Sets the default product page.")]
+    [OpenApiResponse(typeof(object), 200, "Message about saving settings successfully")]
     [HttpPut("defaultpage")]
     public async Task<object> SaveDefaultPageSettingAsync(DefaultProductRequestDto inDto)
     {
@@ -857,7 +925,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Update the email activation settings</short>
     /// <path>api/2.0/settings/emailactivation</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Updated email activation settings", typeof(EmailActivationSettings))]
+    [EndpointName("updateEmailActivationSettings")]
+    [EndpointSummary("Update the email activation settings")]
+    [EndpointDescription("Updates the email activation settings.")]
+    [OpenApiResponse(typeof(EmailActivationSettings), 200, "Updated email activation settings")]
     [HttpPut("emailactivation")]
     public async Task<EmailActivationSettings> UpdateEmailActivationSettingsAsync(EmailActivationSettings inDto)
     {
@@ -872,7 +943,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
-    [SwaggerResponse(200, "Module space usage statistics", typeof(List<UsageSpaceStatItemDto>))]
+    [EndpointName("getSpaceUsageStatistics")]
+    [EndpointSummary("Get the space usage statistics")]
+    [EndpointDescription("Returns the space usage statistics of the module with the ID specified in the request.")]
+    [OpenApiResponse(typeof(List<UsageSpaceStatItemDto>), 200, "Module space usage statistics")]
     [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(IdRequestDto<Guid> inDto)
     {
@@ -907,7 +981,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Get the socket settings</short>
     /// <path>api/2.0/settings/socket</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Socket settings: hub URL", typeof(object))]
+    [EndpointName("getSocketSettings")]
+    [EndpointSummary("Get the socket settings")]
+    [EndpointDescription("Returns the socket settings.")]
+    [OpenApiResponse(typeof(object), 200, "Socket settings")]
     [HttpGet("socket")]
     public object GetSocketSettings()
     {
@@ -944,7 +1021,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/authservice</path>
     /// <collection>list</collection>
     [Tags("Settings / Authorization")]
-    [SwaggerResponse(200, "Authorization services", typeof(IEnumerable<AuthServiceRequestsDto>))]
+    [EndpointName("getAuthServices")]
+    [EndpointSummary("Get the authorization services")]
+    [EndpointDescription("Returns the authorization services.")]
+    [OpenApiResponse(typeof(IEnumerable<AuthServiceRequestsDto>), 200, "List of authorization services")]
     [HttpGet("authservice")]
     public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
     {
@@ -964,9 +1044,12 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Save the authorization keys</short>
     /// <path>api/2.0/settings/authservice</path>
     [Tags("Settings / Authorization")]
-    [SwaggerResponse(200, "Boolean value: true if the authorization keys are changed", typeof(bool))]
-    [SwaggerResponse(400, "Bad keys")]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("saveAuthKeys")]
+    [EndpointSummary("Save the authorization keys")]
+    [EndpointDescription("Saves the authorization keys.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(400, "Bad keys")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("authservice")]
     public async Task<bool> SaveAuthKeys(AuthServiceRequestsDto inDto)
     {
@@ -1026,7 +1109,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Get the payment settings</short>
     /// <path>api/2.0/settings/payment</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity", typeof(object))]
+    [EndpointName("paymentSettings")]
+    [EndpointSummary("Get the payment settings")]
+    [EndpointDescription("Returns the portal payment settings.")]
+    [OpenApiResponse(typeof(object), 200, "Payment settings")]
     [AllowNotPayment]
     [HttpGet("payment")]
     public async Task<object> PaymentSettingsAsync()
@@ -1064,7 +1150,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramlink</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
-    [SwaggerResponse(200, "Telegram link", typeof(object))]
+    [EndpointName("telegramLink")]
+    [EndpointSummary("Get the Telegram link")]
+    [EndpointDescription("Returns a link that will connect TelegramBot to your account.")]
+    [OpenApiResponse(typeof(string), 200, "Telegram link")]
     [HttpGet("telegramlink")]
     public async Task<object> TelegramLink()
     {
@@ -1087,7 +1176,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramisconnected</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
-    [SwaggerResponse(200, "Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation", typeof(object))]
+    [EndpointName("telegramIsConnected")]
+    [EndpointSummary("Check the Telegram connection")]
+    [EndpointDescription("Checks if the user has connected to TelegramBot.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the user is connected to TelegramBot")]
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {
@@ -1102,6 +1194,10 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramdisconnect</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
+    [EndpointName("telegramDisconnect")]
+    [EndpointSummary("Unlink Telegram")]
+    [EndpointDescription("Unlinks TelegramBot from your account.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()
     {

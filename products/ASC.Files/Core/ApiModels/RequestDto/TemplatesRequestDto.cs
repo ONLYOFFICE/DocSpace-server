@@ -34,5 +34,6 @@ public class TemplatesRequestDto
     /// <summary>
     /// List of file IDs
     /// </summary>
+    [OpenApiDescription("List of file IDs")]
     public IEnumerable<int> FileIds { get; set; }
 }

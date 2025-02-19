@@ -31,40 +31,48 @@ public class FirebaseDto
     /// <summary>
     /// API key
     /// </summary>
+    [OpenApiDescription("API key")]
     public string ApiKey { get; set; }
 
     /// <summary>
     /// Authentication domain
     /// </summary>
+    [OpenApiDescription("Authentication domain")]
     public string AuthDomain { get; set; }
 
     /// <summary>
     /// Project ID
     /// </summary>
+    [OpenApiDescription("Project ID")]
     public string ProjectId { get; set; }
 
     /// <summary>
     /// Storage bucket
     /// </summary>
+    [OpenApiDescription("Storage bucket")]
     public string StorageBucket { get; set; }
 
     /// <summary>
     /// Message sender ID
     /// </summary>
+    [OpenApiDescription("Message sender ID")]
     public string MessagingSenderId { get; set; }
 
     /// <summary>
     /// Application ID
     /// </summary>
+    [OpenApiDescription("Application ID")]
     public string AppId { get; set; }
 
     /// <summary>
     /// Measurement ID
     /// </summary>
+    [OpenApiDescription("Measurement ID")]
     public string MeasurementId { get; set; }
 
     /// <summary>
     /// Database URL
     /// </summary>
+    [OpenApiDescription("Database URL")]
     public string DatabaseURL { get; set; }
 }

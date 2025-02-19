@@ -31,15 +31,18 @@ public abstract class LinkRequestDtoBase
     /// <summary>
     /// Link ID
     /// </summary>
+    [OpenApiDescription("Link ID")]
     public Guid LinkId { get; set; }
 
     /// <summary>
     /// Sharing rights
     /// </summary>
+    [OpenApiDescription("Sharing rights")]
     public FileShare Access { get; set; }
 
     /// <summary>
     /// Link expiration date
     /// </summary>
+    [OpenApiDescription("Link expiration date")]
     public ApiDateTime ExpirationDate { get; set; }
 }

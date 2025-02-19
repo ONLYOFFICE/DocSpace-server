@@ -45,28 +45,31 @@ public abstract class FileEntryDto
     /// <summary>
     /// Title
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Some titile.txt/ Some title")]
+    [OpenApiDescription("Title", Example = "Some titile.txt/ Some title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Access rights
     /// </summary>
+    [OpenApiDescription("Access rights")]
     public FileShare Access { get; set; }
 
     /// <summary>
     /// Specifies if the file is shared or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Specifies if the file is shared or not", Example = false)]
     public bool Shared { get; set; }
 
     /// <summary>
     /// Creation time
     /// </summary>
+    [OpenApiDescription("Creation time")]
     public ApiDateTime Created { get; set; }
 
     /// <summary>
     /// Author
     /// </summary>
+    [OpenApiDescription("Author")]
     public EmployeeDto CreatedBy { get; set; }
 
     private ApiDateTime _updated;
@@ -74,6 +77,7 @@ public abstract class FileEntryDto
     /// <summary>
     /// Time of the last file update
     /// </summary>
+    [OpenApiDescription("Time of the last file update")]
     public ApiDateTime Updated
     {
         get => _updated < Created ? Created : _updated;
@@ -83,41 +87,49 @@ public abstract class FileEntryDto
     /// <summary>
     /// Time when the file will be automatically deleted
     /// </summary>
+    [OpenApiDescription("Time when the file will be automatically deleted")]
     public ApiDateTime AutoDelete { get; set; }
 
     /// <summary>
     /// Root folder type
     /// </summary>
+    [OpenApiDescription("Root folder type")]
     public FolderType RootFolderType { get; set; }
 
     /// <summary>
     /// First parent folder type
     /// </summary>
+    [OpenApiDescription("First parent folder type")]
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
     /// A user who updated a file
     /// </summary>
+    [OpenApiDescription("A user who updated a file")]
     public EmployeeDto UpdatedBy { get; set; }
 
     /// <summary>
     /// Provider is specified or not
     /// </summary>
+    [OpenApiDescription("Provider is specified or not")]
     public bool? ProviderItem { get; set; }
 
     /// <summary>
     /// Provider key
     /// </summary>
+    [OpenApiDescription("Provider key")]
     public string ProviderKey { get; set; }
 
     /// <summary>
     /// Provider ID
     /// </summary>
+    [OpenApiDescription("Provider ID")]
     public int? ProviderId { get; set; }
 
     /// <summary>
     /// Order
     /// </summary>
+    [OpenApiDescription("Order")]
     public string Order { get; set; }
     
     public abstract FileEntryType FileEntryType { get; }
@@ -142,45 +154,57 @@ public abstract class FileEntryDto<T> : FileEntryDto
     /// <summary>
     /// Id
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10)]
+    [OpenApiDescription("Id", Example = 10)]
     public T Id { get; set; }
 
     /// <summary>
     /// Root folder id
     /// </summary>
+    [OpenApiDescription("Root folder id")]
     public T RootFolderId { get; set; }
 
     /// <summary>
     /// Origin id
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    [OpenApiDescription("Origin id")]
     public T OriginId { get; set; }
 
     /// <summary>
     /// Origin room id
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    [OpenApiDescription("Origin room id")]
     public T OriginRoomId { get; set; }
 
     /// <summary>
     /// Origin title
     /// </summary>
+    [OpenApiDescription("Origin title")]
     public string OriginTitle { get; set; }
 
     /// <summary>
     /// Origin room title
     /// </summary>
+    [OpenApiDescription("Origin room title")]
     public string OriginRoomTitle { get; set; }
 
     /// <summary>
     /// Can share
     /// </summary>
+    [OpenApiDescription("Can share")]
     public bool CanShare { get; set; }
 
     /// <summary>
     /// Security
     /// </summary>
+    [OpenApiDescription("Security")]
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
+
+    /// <summary>
+    /// Request token
+    /// </summary>
+    [OpenApiDescription("Request token")]
     public string RequestToken { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)

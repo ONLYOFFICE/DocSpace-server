@@ -34,31 +34,37 @@ public class SessionRequest
     /// <summary>
     /// File name
     /// </summary>
+    [OpenApiDescription("File name")]
     public string FileName { get; set; }
 
     /// <summary>
     /// File length in bytes
     /// </summary>
+    [OpenApiDescription("File length in bytes")]
     public long FileSize { get; set; }
 
     /// <summary>
     /// Relative path to the folder
     /// </summary>
+    [OpenApiDescription("Relative path to the folder")]
     public string RelativePath { get; set; }
 
     /// <summary>
     /// Creation time
     /// </summary>
+    [OpenApiDescription("Creation time")]
     public ApiDateTime CreateOn { get; set; }
 
     /// <summary>
     /// Specifies whether to encrypt a file or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to encrypt a file or not")]
     public bool Encrypted { get; set; }
 
     /// <summary>
     /// Create new if exists
     /// </summary>
+    [OpenApiDescription("Create new if exists")]
     public bool CreateNewIfExist { get; set; }
 }
 
@@ -69,11 +75,13 @@ public class SessionRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// Session
     /// </summary>
     [FromBody]
-    public SessionRequest Session {  get; set; }
+    [OpenApiDescription("Session")]
+    public SessionRequest Session { get; set; }
 }

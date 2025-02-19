@@ -34,10 +34,12 @@ public class FirebaseRequestsDto
     /// <summary>
     /// Firebase device token
     /// </summary>
+    [OpenApiDescription("Firebase device token")]
     public string FirebaseDeviceToken { get; set; }
 
     /// <summary>
     /// Specifies if the user is subscribed to the push notification or not
     /// </summary>
+    [OpenApiDescription("Specifies if the user is subscribed to the push notification or not")]
     public bool IsSubscribed { get; set; }
 }

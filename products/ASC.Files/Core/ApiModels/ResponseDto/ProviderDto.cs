@@ -31,34 +31,43 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
     /// <summary>
     /// Provider name
     /// </summary>
+    [OpenApiDescription("Provider name")]
     public string Name { get; init; } = Name;
 
     /// <summary>
     /// Provider key
     /// </summary>
+    [OpenApiDescription("Provider key")]
     public string Key { get; init; } = Key;
 
     /// <summary>
     /// Connected flag
     /// </summary>
+    [OpenApiDescription("Connected flag")]
     public bool Connected { get; init; } = Connected;
 
     /// <summary>
     /// Oauth flag
     /// </summary>
+    [OpenApiDescription("Oauth flag")]
     public bool Oauth { get; init; } = Oauth;
 
     /// <summary>
     /// Redirect url
     /// </summary>
+    [OpenApiDescription("Redirect url")]
     public string RedirectUrl { get; init; } = RedirectUrl;
 
     /// <summary>
     /// Required connection url flag
     /// </summary>
+    [OpenApiDescription("Required connection url flag")]
     public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
-    
-    /// <summary>Oauth client id</summary>
+
+    /// <summary>
+    /// Oauth client id
+    /// </summary>
     /// <type>System.String, System</type>
+    [OpenApiDescription("Oauth client id")]
     public string ClientId { get; init; } = ClientId;
 }

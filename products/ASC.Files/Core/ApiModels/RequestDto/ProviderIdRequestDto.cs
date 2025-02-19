@@ -32,5 +32,6 @@ public class ProviderIdRequestDto
     /// Provider ID
     /// </summary>
     [FromRoute(Name = "providerId")]
+    [OpenApiDescription("Provider ID")]
     public int ProviderId { get; set; }
 }

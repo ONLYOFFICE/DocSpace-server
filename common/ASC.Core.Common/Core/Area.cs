@@ -28,12 +28,12 @@ namespace ASC.Core.Common.Core;
 
 public enum Area
 {
-    [SwaggerEnum("All")]
+    [OpenApiEnum("All")]
     All,
 
-    [SwaggerEnum("People")]
+    [OpenApiEnum("People")]
     People,
 
-    [SwaggerEnum("Guests")]
+    [OpenApiEnum("Guests")]
     Guests
 }

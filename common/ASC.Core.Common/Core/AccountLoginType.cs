@@ -28,12 +28,12 @@ namespace ASC.Core;
 
 public enum AccountLoginType
 {
-    [SwaggerEnum("SSO")]
+    [OpenApiEnum("SSO")]
     SSO,
 
-    [SwaggerEnum("LDAP")]
+    [OpenApiEnum("LDAP")]
     LDAP,
 
-    [SwaggerEnum("Standart")]
+    [OpenApiEnum("Standart")]
     Standart
 }

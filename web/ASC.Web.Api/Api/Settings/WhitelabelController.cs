@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,8 +52,11 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/save</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("saveWhiteLabelSettings")]
+    [EndpointSummary("Save the white label settings")]
+    [EndpointDescription("Saves the white label settings specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is sucessful")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPost("whitelabel/save")]
     public async Task<bool> SaveWhiteLabelSettingsAsync(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -122,9 +125,12 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/savefromfiles</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(409, "No input files")]
+    [EndpointName("saveWhiteLabelSettingsFromFiles")]
+    [EndpointSummary("Save the white label settings from files")]
+    [EndpointDescription("Saves the white label settings from files.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is sucessful")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(409, "No input files")]
     [HttpPost("whitelabel/savefromfiles")]
     public async Task<bool> SaveWhiteLabelSettingsFromFilesAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -207,7 +213,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "White label logos", typeof(IAsyncEnumerable<WhiteLabelItemDto>))]
+    [EndpointName("getWhiteLabelLogos")]
+    [EndpointSummary("Get the white label logos")]
+    [EndpointDescription("Returns the white label logos.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<WhiteLabelItemDto>), 200, "White label logos")]
     [AllowNotPayment, AllowAnonymous, AllowSuspended]
     [HttpGet("whitelabel/logos")]
     public async IAsyncEnumerable<WhiteLabelItemDto> GetWhiteLabelLogosAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
@@ -285,7 +294,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/whitelabel/logos/isdefault</path>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Request properties of white label logos", typeof(IAsyncEnumerable<IsDefaultWhiteLabelLogosDto>))]
+    [EndpointName("getIsDefaultWhiteLabelLogos")]
+    [EndpointSummary("Check the default white label logos")]
+    [EndpointDescription("Specifies if the white label logos are default or not.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<IsDefaultWhiteLabelLogosDto>), 200, "Request properties of white label logos")]
     [HttpGet("whitelabel/logos/isdefault")]
     public async IAsyncEnumerable<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogos([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -320,7 +332,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logotext</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Logo text", typeof(object))]
+    [EndpointName("getWhiteLabelLogoText")]
+    [EndpointSummary("Get the white label logo text")]
+    [EndpointDescription("Returns the white label logo text.")]
+    [OpenApiResponse(typeof(object), 200, "Logo text")]
     [AllowNotPayment]
     [HttpGet("whitelabel/logotext")]
     public async Task<object> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
@@ -343,8 +358,11 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/restore</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("restoreWhiteLabelOptions")]
+    [EndpointSummary("Restore the white label options")]
+    [EndpointDescription("Restores the white label options.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPut("whitelabel/restore")]
     public async Task<bool> RestoreWhiteLabelOptionsAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -397,7 +415,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/companywhitelabel</path>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "List of company white label settings", typeof(List<CompanyWhiteLabelSettings>))]
+    [EndpointName("getLicensorData")]
+    [EndpointSummary("Get the licensor data")]
+    [EndpointDescription("Returns the licensor data.")]
+    [OpenApiResponse(typeof(List<CompanyWhiteLabelSettings>), 200, "List of company white label settings")]
     [HttpGet("companywhitelabel")]
     public async Task<List<CompanyWhiteLabelSettings>> GetLicensorDataAsync()
     {
@@ -421,9 +442,12 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Save the company white label settings</short>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(400, "Settings is empty")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("saveCompanyWhiteLabelSettings")]
+    [EndpointSummary("Save the company white label settings")]
+    [EndpointDescription("Saves the company white label settings specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(400, "Settings is empty")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPost("rebranding/company")]
     public async Task<bool> SaveCompanyWhiteLabelSettingsAsync(CompanyWhiteLabelSettingsWrapper companyWhiteLabelSettingsWrapper)
     {
@@ -451,7 +475,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Get the company white label settings</short>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Company white label settings", typeof(CompanyWhiteLabelSettingsDto))]
+    [EndpointName("getCompanyWhiteLabelSettings")]
+    [EndpointSummary("Get the company white label settings")]
+    [EndpointDescription("Returns the company white label settings.")]
+    [OpenApiResponse(typeof(CompanyWhiteLabelSettingsDto), 200, "Company white label settings")]
     [AllowNotPayment]
     [HttpGet("rebranding/company")]
     public async Task<CompanyWhiteLabelSettingsDto> GetCompanyWhiteLabelSettingsAsync()
@@ -467,8 +494,11 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Delete the company white label settings</short>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Default company white label settings", typeof(CompanyWhiteLabelSettings))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("deleteCompanyWhiteLabelSettings")]
+    [EndpointSummary("Delete the company white label settings")]
+    [EndpointDescription("Deletes the company white label settings.")]
+    [OpenApiResponse(typeof(CompanyWhiteLabelSettings), 200, "Default company white label settings")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpDelete("rebranding/company")]
     public async Task<CompanyWhiteLabelSettings> DeleteCompanyWhiteLabelSettingsAsync()
     {
@@ -489,9 +519,12 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Save the additional white label settings</short>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(400, "Settings is empty")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("saveAdditionalWhiteLabelSettings")]
+    [EndpointSummary("Save the additional white label settings")]
+    [EndpointDescription("Saves the additional white label settings specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(400, "Settings is empty")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPost("rebranding/additional")]
     public async Task<bool> SaveAdditionalWhiteLabelSettingsAsync(AdditionalWhiteLabelSettingsWrapper wrapper)
     {
@@ -515,7 +548,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Get the additional white label settings</short>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Additional white label settings", typeof(AdditionalWhiteLabelSettingsDto))]
+    [EndpointName("getAdditionalWhiteLabelSettings")]
+    [EndpointSummary("Get the additional white label settings")]
+    [EndpointDescription("Returns the additional white label settings.")]
+    [OpenApiResponse(typeof(AdditionalWhiteLabelSettingsDto), 200, "Additional white label settings")]
     [AllowNotPayment]
     [HttpGet("rebranding/additional")]
     public async Task<AdditionalWhiteLabelSettingsDto> GetAdditionalWhiteLabelSettingsAsync()
@@ -531,8 +567,11 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Delete the additional white label settings</short>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Default additional white label settings", typeof(AdditionalWhiteLabelSettings))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("deleteAdditionalWhiteLabelSettings")]
+    [EndpointSummary("Delete the additional white label settings")]
+    [EndpointDescription("Deletes the additional white label settings.")]
+    [OpenApiResponse(typeof(AdditionalWhiteLabelSettings), 200, "Default additional white label settings")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpDelete("rebranding/additional")]
     public async Task<AdditionalWhiteLabelSettings> DeleteAdditionalWhiteLabelSettingsAsync()
     {
@@ -553,9 +592,12 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Save the mail white label settings</short>
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
     [Tags("Settings / Rebranding")]
+    [EndpointName("saveMailWhiteLabelSettings")]
+    [EndpointSummary("Save the mail white label settings")]
+    [EndpointDescription("Saves the mail white label settings specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPost("rebranding/mail")]
     public async Task<bool> SaveMailWhiteLabelSettingsAsync(MailWhiteLabelSettings settings)
     {
@@ -577,8 +619,11 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("updateMailWhiteLabelSettings")]
+    [EndpointSummary("Update the mail white label settings")]
+    [EndpointDescription("Updates the mail white label settings with a paramater specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPut("rebranding/mail")]
     public async Task<bool> UpdateMailWhiteLabelSettings(MailWhiteLabelSettingsRequestsDto inDto)
     {
@@ -602,7 +647,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Mail white label settings", typeof(MailWhiteLabelSettings))]
+    [EndpointName("getMailWhiteLabelSettings")]
+    [EndpointSummary("Get the mail white label settings")]
+    [EndpointDescription("Returns the mail white label settings.")]
+    [OpenApiResponse(typeof(MailWhiteLabelSettings), 200, "Mail white label settings")]
     [HttpGet("rebranding/mail")]
     public async Task<MailWhiteLabelSettings> GetMailWhiteLabelSettingsAsync()
     {
@@ -616,8 +664,11 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Default mail white label settings", typeof(MailWhiteLabelSettings))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("deleteMailWhiteLabelSettings")]
+    [EndpointSummary("Delete the mail white label settings")]
+    [EndpointDescription("Deletes the mail white label settings.")]
+    [OpenApiResponse(typeof(MailWhiteLabelSettings), 200, "Default mail white label settings")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpDelete("rebranding/mail")]
     public async Task<MailWhiteLabelSettings> DeleteMailWhiteLabelSettingsAsync()
     {
@@ -638,7 +689,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Check the white label availability</short>
     /// <path>api/2.0/settings/enablewhitelabel</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Boolean value: true if the white label is enabled", typeof(bool))]
+    [EndpointName("getEnableWhitelabel")]
+    [EndpointSummary("Check the white label availability")]
+    [EndpointDescription("Checks if the white label is enabled or not.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the white label is enabled")]
     [HttpGet("enablewhitelabel")]
     public async Task<bool> GetEnableWhitelabelAsync()
     {

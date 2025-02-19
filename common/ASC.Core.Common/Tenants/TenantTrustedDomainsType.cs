@@ -28,12 +28,12 @@ namespace ASC.Core.Tenants;
 
 public enum TenantTrustedDomainsType
 {
-    [SwaggerEnum("None")]
+    [OpenApiEnum("None")]
     None,
 
-    [SwaggerEnum("Custom")]
+    [OpenApiEnum("Custom")]
     Custom,
 
-    [SwaggerEnum("All")]
+    [OpenApiEnum("All")]
     All
 }

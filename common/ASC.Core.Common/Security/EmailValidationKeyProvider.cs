@@ -31,25 +31,25 @@ public class EmailValidationKeyProvider
 {
     public enum ValidationResult
     {
-        [SwaggerEnum("Ok")]
+        [OpenApiEnum("Ok")]
         Ok,
 
-        [SwaggerEnum("Invalid")]
+        [OpenApiEnum("Invalid")]
         Invalid,
 
-        [SwaggerEnum("Expired")]
+        [OpenApiEnum("Expired")]
         Expired,
 
-        [SwaggerEnum("Tariff limit")]
+        [OpenApiEnum("Tariff limit")]
         TariffLimit,
 
-        [SwaggerEnum("User existed")]
+        [OpenApiEnum("User existed")]
         UserExisted,
 
-        [SwaggerEnum("User excluded")]
+        [OpenApiEnum("User excluded")]
         UserExcluded,
 
-        [SwaggerEnum("Quota failed")]
+        [OpenApiEnum("Quota failed")]
         QuotaFailed
     }
 
@@ -187,37 +187,44 @@ public class EmailValidationKeyModel
     /// <summary>
     /// Key
     /// </summary>
+    [OpenApiDescription("Key")]
     public string Key { get; set; }
 
     /// <summary>
     /// Employee type
     /// </summary>
+    [OpenApiDescription("Employee type")]
     public EmployeeType? EmplType { get; init; }
 
     /// <summary>
     /// Email
     /// </summary>
     [EmailAddress]
+    [OpenApiDescription("Email")]
     public string Email { get; init; }
 
     /// <summary>
     /// User ID
     /// </summary>
+    [OpenApiDescription("User ID")]
     public Guid? UiD { get; init; }
 
     /// <summary>
     /// Confirmation email type
     /// </summary>
+    [OpenApiDescription("Confirmation email type")]
     public ConfirmType? Type { get; init; }
 
     /// <summary>
     /// Access an account for the first time or not
     /// </summary>
+    [OpenApiDescription("Access an account for the first time or not")]
     public string First { get; init; }
 
     /// <summary>
     /// Room ID
     /// </summary>
+    [OpenApiDescription("Room ID")]
     public string RoomId { get; init; }
 
     public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first)

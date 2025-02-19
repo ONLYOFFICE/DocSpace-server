@@ -28,15 +28,15 @@ namespace ASC.Core.Billing;
 
 public enum TariffState
 {
-    [SwaggerEnum("Trial")]
+    [OpenApiEnum("Trial")]
     Trial,
 
-    [SwaggerEnum("Paid")]
+    [OpenApiEnum("Paid")]
     Paid,
 
-    [SwaggerEnum("Delay")]
+    [OpenApiEnum("Delay")]
     Delay,
 
-    [SwaggerEnum("Not paid")]
+    [OpenApiEnum("Not paid")]
     NotPaid
 }

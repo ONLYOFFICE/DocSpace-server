@@ -31,30 +31,30 @@ public class SmtpOperationStatusRequestsDto
     /// <summary>
     /// Specifies if the SMTP operation is completed or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = true)]
+    [OpenApiDescription("Specifies if the SMTP operation is completed or not", Example = true)]
     public bool Completed { get; set; }
 
     /// <summary>
     /// SMTP operation ID
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{some-random-guid}")]
+    [OpenApiDescription("SMTP operation ID", Example = "{some-random-guid}")]
     public string Id { get; set; }
 
     /// <summary>
     /// SMTP operation error
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    [OpenApiDescription("SMTP operation error", Example = "")]
     public string Error { get; set; }
 
     /// <summary>
     /// SMTP operation status
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    [OpenApiDescription("SMTP operation status", Example = "")]
     public string Status { get; set; }
 
     /// <summary>
     /// Percentage of SMTP operation completion
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    [OpenApiDescription("Percentage of SMTP operation completion", Example = 0)]
     public int Percents { get; set; }
 }

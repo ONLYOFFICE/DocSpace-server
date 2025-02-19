@@ -34,11 +34,13 @@ public class UpdateGroupRequest : GroupRequestDtoBase
     /// <summary>
     /// List of user IDs to add to the group
     /// </summary>
+    [OpenApiDescription("List of user IDs to add to the group")]
     public IEnumerable<Guid> MembersToAdd { get; set; }
 
     /// <summary>
     /// List of user IDs to remove from the group
     /// </summary>
+    [OpenApiDescription("List of user IDs to remove from the group")]
     public IEnumerable<Guid> MembersToRemove { get; set; }
 }
 
@@ -51,11 +53,13 @@ public class UpdateGroupRequestDto
     /// Group ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Group ID")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Update group parameters
     /// </summary>
     [FromBody]
-    public UpdateGroupRequest Update {  get; set; }
+    [OpenApiDescription("Update group parameters")]
+    public UpdateGroupRequest Update { get; set; }
 }

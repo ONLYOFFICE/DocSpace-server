@@ -36,6 +36,7 @@ public class GetGroupByUserIdRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
+    [OpenApiDescription("User ID")]
     public Guid UserId { get; set; }
 }
 
@@ -48,5 +49,6 @@ public class GetGroupByIdRequestDto
     /// Group ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Group ID")]
     public Guid Id { get; set; }
 }

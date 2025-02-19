@@ -31,10 +31,12 @@ public class RoomSecurityDto
     /// <summary>
     /// List of room members
     /// </summary>
+    [OpenApiDescription("List of room members")]
     public IEnumerable<FileShareDto> Members { get; set; }
 
     /// <summary>
     /// Warning
     /// </summary>
+    [OpenApiDescription("Warning")]
     public string Warning { get; set; }
 }

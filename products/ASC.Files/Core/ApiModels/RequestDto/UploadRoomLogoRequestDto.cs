@@ -34,5 +34,6 @@ public class UploadRoomLogoRequestDto
     /// <summary>
     /// Image data
     /// </summary>
+    [OpenApiDescription("Image data")]
     public IFormCollection FormCollection { get; set; }
 }

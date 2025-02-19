@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,7 +59,10 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections</path>
     [Tags("Security / Active connections")]
-    [SwaggerResponse(200, "Active portal connections", typeof(ActiveConnectionsDto))]
+    [EndpointName("getAllActiveConnections")]
+    [EndpointSummary("Get active connections")]
+    [EndpointDescription("Returns all the active connections to the portal.")]
+    [OpenApiResponse(typeof(ActiveConnectionsDto), 200, "Active portal connections")]
     [HttpGet("")]
     public async Task<ActiveConnectionsDto> GetAllActiveConnections()
     {
@@ -148,7 +151,10 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutallchangepassword</path>
     [Tags("Security / Active connections")]
-    [SwaggerResponse(200, "URL to the confirmation message for changing a password", typeof(object))]
+    [EndpointName("logOutAllActiveConnectionsChangePassword")]
+    [EndpointSummary("Log out and change password")]
+    [EndpointDescription("Logs out from all the active connections of the current user and changes their password.")]
+    [OpenApiResponse(typeof(object), 200, "URL to the confirmation message for changing a password")]
     [HttpPut("logoutallchangepassword")]
     public async Task<object> LogOutAllActiveConnectionsChangePassword()
     {
@@ -186,8 +192,11 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     [Tags("Security / Active connections")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "Method not available")]
+    [EndpointName("logOutAllActiveConnectionsForUser")]
+    [EndpointSummary("Log out for the user by ID")]
+    [EndpointDescription("Logs out from all the active connections of the user with the ID specified in the request.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "Method not available")]
     [HttpPut("logoutall/{userId:guid}")]
     public async Task LogOutAllActiveConnectionsForUserAsync(UserIdRequestDto inDto)
     {
@@ -210,7 +219,10 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
     [Tags("Security / Active connections")]
-    [SwaggerResponse(200, "Current user name", typeof(object))]
+    [EndpointName("logOutAllExceptThisConnection")]
+    [EndpointSummary("Log out from all connections")]
+    [EndpointDescription("Logs out from all the active connections except the current connection.")]
+    [OpenApiResponse(typeof(object), 200, "Current user name")]
     [HttpPut("logoutallexceptthis")]
     public async Task<object> LogOutAllExceptThisConnection()
     {
@@ -245,8 +257,11 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
     [Tags("Security / Active connections")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(403, "Method not available")]
+    [EndpointName("logOutActiveConnection")]
+    [EndpointSummary("Log out from the connection")]
+    [EndpointDescription("Logs out from the connection with the ID specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(403, "Method not available")]
     [HttpPut("logout/{loginEventId:int}")]
     public async Task<bool> LogOutActiveConnection(LoginEvenrIdRequestDto inDto)
     {

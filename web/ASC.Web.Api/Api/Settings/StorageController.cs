@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,8 +65,11 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "List of storages with the following parameters", typeof(List<StorageDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getAllStorages")]
+    [EndpointSummary("Get storages")]
+    [EndpointDescription("Returns a list of all the portal storages.")]
+    [OpenApiResponse(typeof(List<StorageDto>), 200, "List of storages with the following parameters")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("storage")]
     public async Task<List<StorageDto>> GetAllStoragesAsync()
     {
@@ -90,7 +93,10 @@ public class StorageController(ILoggerProvider option,
     /// <short>Get the storage progress</short>
     /// <path>api/2.0/settings/storage/progress</path>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "Storage progress", typeof(double))]
+    [EndpointName("getStorageProgress")]
+    [EndpointSummary("Get the storage progress")]
+    [EndpointDescription("Returns the storage progress.")]
+    [OpenApiResponse(typeof(double), 200, "Storage progress")]
     [AllowNotPayment]
     [HttpGet("storage/progress")]
     public async Task<double> GetStorageProgressAsync()
@@ -112,10 +118,13 @@ public class StorageController(ILoggerProvider option,
     /// <short>Start the storage encryption process</short>
     /// <path>api/2.0/settings/encryption/start</path>
     [Tags("Settings / Encryption")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(405, "Method not allowed")]
+    [EndpointName("startStorageEncryption")]
+    [EndpointSummary("Start the storage encryption process")]
+    [EndpointDescription("Starts the storage encryption process.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(405, "Method not allowed")]
     [HttpPost("encryption/start")]
     public async Task<bool> StartStorageEncryptionAsync(StorageEncryptionRequestsDto inDto)
     {
@@ -245,9 +254,12 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/encryption/settings</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Encryption")]
-    [SwaggerResponse(200, "Storage encryption settings", typeof(EncryptionSettings))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(405, "Method not allowed")]
+    [EndpointName("getStorageEncryptionSettings")]
+    [EndpointSummary("Get the storage encryption settings")]
+    [EndpointDescription("Returns the storage encryption settings.")]
+    [OpenApiResponse(typeof(EncryptionSettings), 200, "Storage encryption settings")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(405, "Method not allowed")]
     [HttpGet("encryption/settings")]
     public async Task<EncryptionSettings> GetStorageEncryptionSettingsAsync()
     {
@@ -286,8 +298,11 @@ public class StorageController(ILoggerProvider option,
     /// <short>Get the storage encryption progress</short>
     /// <path>api/2.0/settings/encryption/progress</path>
     [Tags("Settings / Encryption")]
-    [SwaggerResponse(200, "Storage encryption progress", typeof(double?))]
-    [SwaggerResponse(405, "Method not allowed")]
+    [EndpointName("getStorageEncryptionProgress")]
+    [EndpointSummary("Get the storage encryption progress")]
+    [EndpointDescription("Returns the storage encryption progress.")]
+    [OpenApiResponse(typeof(double?), 200, "Storage encryption progress")]
+    [OpenApiResponse(405, "Method not allowed")]
     [HttpGet("encryption/progress")]
     public async Task<double?> GetStorageEncryptionProgress()
     {
@@ -315,9 +330,12 @@ public class StorageController(ILoggerProvider option,
     /// <short>Update a storage</short>
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "Updated storage settings", typeof(StorageSettings))]
-    [SwaggerResponse(400, "Module")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("updateStorage")]
+    [EndpointSummary("Update a storage")]
+    [EndpointDescription("Updates a storage with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(StorageSettings), 200, "Updated storage settings")]
+    [OpenApiResponse(400, "Module")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPut("storage")]
     public async Task<StorageSettings> UpdateStorageAsync(StorageRequestsDto inDto)
     {
@@ -358,8 +376,11 @@ public class StorageController(ILoggerProvider option,
     /// <short>Reset the storage settings</short>
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("resetStorageToDefault")]
+    [EndpointSummary("Reset the storage settings")]
+    [EndpointDescription("Resets the storage settings to the default parameters.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpDelete("storage")]
     public async Task ResetStorageToDefaultAsync()
     {
@@ -391,8 +412,11 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/cdn</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "List of the CDN storages with the following parameters", typeof(List<StorageDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getAllCdnStorages")]
+    [EndpointSummary("Get the CDN storages")]
+    [EndpointDescription("Returns a list of all the CDN storages.")]
+    [OpenApiResponse(typeof(List<StorageDto>), 200, "List of the CDN storages with the following parameters")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("storage/cdn")]
     public async Task<List<StorageDto>> GetAllCdnStoragesAsync()
     {
@@ -416,9 +440,12 @@ public class StorageController(ILoggerProvider option,
     /// <short>Update the CDN storage</short>
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "Updated CDN storage", typeof(CdnStorageSettings))]
-    [SwaggerResponse(400, "Module")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("updateCdn")]
+    [EndpointSummary("Update the CDN storage")]
+    [EndpointDescription("Updates the CDN storage with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(CdnStorageSettings), 200, "Updated CDN storage")]
+    [OpenApiResponse(400, "Module")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPut("storage/cdn")]
     public async Task<CdnStorageSettings> UpdateCdnAsync(StorageRequestsDto inDto)
     {
@@ -461,8 +488,11 @@ public class StorageController(ILoggerProvider option,
     /// <short>Reset the CDN storage settings</short>
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("resetCdnToDefault")]
+    [EndpointSummary("Reset the CDN storage settings")]
+    [EndpointDescription("Resets the CDN storage settings to the default parameters.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpDelete("storage/cdn")]
     public async Task ResetCdnToDefaultAsync()
     {
@@ -480,8 +510,11 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/backup</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(List<StorageDto>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("getAllBackupStorages")]
+    [EndpointSummary("Get the backup storages")]
+    [EndpointDescription("Returns a list of all the backup storages.")]
+    [OpenApiResponse(typeof(List<StorageDto>), 200, "List of the backup storages with the following parameters")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("storage/backup")]
     public async Task<List<StorageDto>> GetAllBackupStorages()
     {
@@ -523,10 +556,13 @@ public class StorageController(ILoggerProvider option,
     /// <short>Get Amazon regions</short>
     /// <path>api/2.0/settings/storage/s3/regions</path>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "List of the Amazon regions", typeof(object))]
+    [EndpointName("getAmazonS3Regions")]
+    [EndpointSummary("Get Amazon regions")]
+    [EndpointDescription("Returns a list of all Amazon regions.")]
+    [OpenApiResponse(typeof(object), 200, "List of the Amazon regions")]
     [HttpGet("storage/s3/regions")]
     public object GetAmazonS3Regions()
     {
         return RegionEndpoint.EnumerableAllRegions;
     }
-    }
+}

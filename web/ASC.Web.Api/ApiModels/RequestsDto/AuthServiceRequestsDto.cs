@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,31 +34,37 @@ public class AuthServiceRequestsDto
     /// <summary>
     /// Name
     /// </summary>
+    [OpenApiDescription("Name")]
     public string Name { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Description
     /// </summary>
+    [OpenApiDescription("Description")]
     public string Description { get; set; }
 
     /// <summary>
     /// Instruction
     /// </summary>
+    [OpenApiDescription("Instruction")]
     public string Instruction { get; set; }
 
     /// <summary>
     /// Specifies if the authentication service can be set or not
     /// </summary>
+    [OpenApiDescription("Specifies if the authentication service can be set or not")]
     public bool CanSet { get; set; }
 
     /// <summary>
     /// List of authorization keys
     /// </summary>
+    [OpenApiDescription("List of authorization keys")]
     public List<AuthKey> Props { get; set; }
 
     public static async Task<AuthServiceRequestsDto> From(Consumer consumer)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,66 +34,79 @@ public class AuthRequestsDto
     /// <summary>
     /// Username / email
     /// </summary>
+    [OpenApiDescription("Username / email")]
     public string UserName { get; set; }
 
     /// <summary>
     /// Password
     /// </summary>
+    [OpenApiDescription("Password")]
     public string Password { get; set; }
 
     /// <summary>
     /// Password hash
     /// </summary>
+    [OpenApiDescription("Password hash")]
     public string PasswordHash { get; set; }
 
     /// <summary>
     /// Provider type
     /// </summary>
+    [OpenApiDescription("Provider type")]
     public string Provider { get; set; }
 
     /// <summary>
     /// Provider access token
     /// </summary>
+    [OpenApiDescription("Provider access token")]
     public string AccessToken { get; set; }
 
     /// <summary>
     /// Serialized user profile
     /// </summary>
+    [OpenApiDescription("Serialized user profile")]
     public string SerializedProfile { get; set; }
 
     /// <summary>
     /// Two-factor authentication code
     /// </summary>
+    [OpenApiDescription("Two-factor authentication code")]
     public string Code { get; set; }
 
     /// <summary>
     /// Code for getting a token
     /// </summary>
+    [OpenApiDescription("Code for getting a token")]
     public string CodeOAuth { get; set; }
 
     /// <summary>
     /// Session based authentication or not
     /// </summary>
+    [OpenApiDescription("Session based authentication or not")]
     public bool Session { get; set; }
 
     /// <summary>
     /// Confirmation data
     /// </summary>
+    [OpenApiDescription("Confirmation data")]
     public ConfirmData ConfirmData { get; set; }
 
     /// <summary>
     /// Type of captcha
     /// </summary>
+    [OpenApiDescription("Type of captcha")]
     public RecaptchaType RecaptchaType { get; set; }
 
     /// <summary>
     /// reCAPTCHA response
     /// </summary>
+    [OpenApiDescription("reCAPTCHA response")]
     public string RecaptchaResponse { get; set; }
 
     /// <summary>
     /// Culture
     /// </summary>
+    [OpenApiDescription("Culture")]
     public string Culture { get; set; }
 }
 
@@ -105,6 +118,7 @@ public class MobileRequestsDto
     /// <summary>
     /// Mobile phone
     /// </summary>
+    [OpenApiDescription("Mobile phone")]
     public string MobilePhone { get; set; }
 }
 
@@ -114,15 +128,18 @@ public class ConfirmData
     /// Email address
     /// </summary>
     [EmailAddress]
+    [OpenApiDescription("Email address")]
     public string Email { get; set; }
 
     /// <summary>
     /// Access an account for the first time or not
     /// </summary>
+    [OpenApiDescription("Access an account for the first time or not")]
     public bool? First { get; set; }
 
     /// <summary>
     /// Key
     /// </summary>
+    [OpenApiDescription("Key")]
     public string Key { get; set; }
 }

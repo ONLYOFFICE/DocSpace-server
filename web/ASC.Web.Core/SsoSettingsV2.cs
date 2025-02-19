@@ -93,50 +93,60 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     /// <summary>
     /// Specifies if SSO is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if SSO is enabled or not")]
     public bool? EnableSso { get; set; }
 
     /// <summary>
     /// IDP settings
     /// </summary>
+    [OpenApiDescription("IDP settings")]
     public SsoIdpSettings IdpSettings { get; set; }
 
     /// <summary>
     /// List of IDP certificates
     /// </summary>
+    [OpenApiDescription("List of IDP certificates")]
     public List<SsoCertificate> IdpCertificates { get; set; }
 
     /// <summary>
     /// IDP advanced certificate
     /// </summary>
+    [OpenApiDescription("IDP advanced certificate")]
     public SsoIdpCertificateAdvanced IdpCertificateAdvanced { get; set; }
 
     /// <summary>
     /// SP login label
     /// </summary>
+    [OpenApiDescription("SP login label")]
     public string SpLoginLabel { get; set; }
 
     /// <summary>
     /// List of SP certificates
     /// </summary>
+    [OpenApiDescription("List of SP certificates")]
     public List<SsoCertificate> SpCertificates { get; set; }
 
     /// <summary>
     /// SP advanced certificate
     /// </summary>
+    [OpenApiDescription("SP advanced certificate")]
     public SsoSpCertificateAdvanced SpCertificateAdvanced { get; set; }
 
     /// <summary>
     /// Field mapping
     /// </summary>
+    [OpenApiDescription("Field mapping")]
     public SsoFieldMapping FieldMapping { get; set; }
 
     /// <summary>
     /// Specifies if the authentication page will be hidden or not
     /// </summary>
+    [OpenApiDescription("Specifies if the authentication page will be hidden or not")]
     public bool HideAuthPage { get; set; }
 
     /// <summary>Users type</summary>
     /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
+    [OpenApiDescription("Users type")]
     public int UsersType { get; set; }
 }
 
@@ -148,31 +158,37 @@ public class SsoIdpSettings
     /// <summary>
     /// Entity ID
     /// </summary>
+    [OpenApiDescription("Entity ID")]
     public string EntityId { get; init; }
 
     /// <summary>
     /// SSO URL
     /// </summary>
+    [OpenApiDescription("SSO URL")]
     public string SsoUrl { get; init; }
 
     /// <summary>
     /// SSO binding
     /// </summary>
+    [OpenApiDescription("SSO binding")]
     public string SsoBinding { get; init; }
 
     /// <summary>
     /// SLO URL
     /// </summary>
+    [OpenApiDescription("SLO URL")]
     public string SloUrl { get; init; }
 
     /// <summary>
     /// SLO binding
     /// </summary>
+    [OpenApiDescription("SLO binding")]
     public string SloBinding { get; init; }
 
     /// <summary>
     /// Name ID format
     /// </summary>
+    [OpenApiDescription("Name ID format")]
     public string NameIdFormat { get; set; }
 }
 
@@ -186,32 +202,38 @@ public class SsoFieldMapping
     /// <summary>
     /// First name
     /// </summary>
+    [OpenApiDescription("First name")]
     public string FirstName { get; init; }
 
     /// <summary>
     /// Last name
     /// </summary>
+    [OpenApiDescription("Last name")]
     public string LastName { get; init; }
 
     /// <summary>
     /// Email
     /// </summary>
     [EmailAddress]
+    [OpenApiDescription("Email")]
     public string Email { get; init; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Location
     /// </summary>
+    [OpenApiDescription("Location")]
     public string Location { get; set; }
 
     /// <summary>
     /// Phone
     /// </summary>
+    [OpenApiDescription("Phone")]
     public string Phone { get; set; }
 }
 
@@ -225,36 +247,43 @@ public class SsoCertificate
     /// <summary>
     /// Specifies if a certificate is self-signed or not
     /// </summary>
+    [OpenApiDescription("Specifies if a certificate is self-signed or not")]
     public bool SelfSigned { get; set; }
 
     /// <summary>
     /// Certificate
     /// </summary>
+    [OpenApiDescription("Certificate")]
     public string Crt { get; set; }
 
     /// <summary>
     /// Key
     /// </summary>
+    [OpenApiDescription("Key")]
     public string Key { get; set; }
 
     /// <summary>
     /// Action
     /// </summary>
+    [OpenApiDescription("Action")]
     public string Action { get; set; }
 
     /// <summary>
     /// Domain name
     /// </summary>
+    [OpenApiDescription("Domain name")]
     public string DomainName { get; set; }
 
     /// <summary>
     /// Start date
     /// </summary>
+    [OpenApiDescription("Start date")]
     public DateTime StartDate { get; set; }
 
     /// <summary>
     /// Expiration date
     /// </summary>
+    [OpenApiDescription("Expiration date")]
     public DateTime ExpiredDate { get; set; }
 }
 
@@ -263,31 +292,37 @@ public class SsoIdpCertificateAdvanced
     /// <summary>
     /// Verification algorithm
     /// </summary>
+    [OpenApiDescription("Verification algorithm")]
     public string VerifyAlgorithm { get; set; }
 
     /// <summary>
     /// Specifies if the signatures of the SAML authentication responses sent to SP will be verified or not
     /// </summary>
+    [OpenApiDescription("Specifies if the signatures of the SAML authentication responses sent to SP will be verified or not")]
     public bool VerifyAuthResponsesSign { get; set; }
 
     /// <summary>
     /// Specifies if the signatures of the SAML logout requests sent to SP will be verified or not
     /// </summary>
+    [OpenApiDescription("Specifies if the signatures of the SAML logout requests sent to SP will be verified or not")]
     public bool VerifyLogoutRequestsSign { get; set; }
 
     /// <summary>
     /// Specifies if the signatures of the SAML logout responses sent to SP will be verified or not
     /// </summary>
+    [OpenApiDescription("Specifies if the signatures of the SAML logout responses sent to SP will be verified or not")]
     public bool VerifyLogoutResponsesSign { get; set; }
 
     /// <summary>
     /// Decryption algorithm
     /// </summary>
+    [OpenApiDescription("Decryption algorithm")]
     public string DecryptAlgorithm { get; set; }
 
     /// <summary>
     /// Specifies if the assertions will be decrypted or not
     /// </summary>
+    [OpenApiDescription("Specifies if the assertions will be decrypted or not")]
     public bool DecryptAssertions { get; set; }
 }
 
@@ -296,36 +331,43 @@ public class SsoSpCertificateAdvanced
     /// <summary>
     /// Signing algorithm
     /// </summary>
+    [OpenApiDescription("Signing algorithm")]
     public string SigningAlgorithm { get; set; }
 
     /// <summary>
     /// Specifies if SP will sign the SAML authentication requests sent to IdP or not
     /// </summary>
+    [OpenApiDescription("Specifies if SP will sign the SAML authentication requests sent to IdP or not")]
     public bool SignAuthRequests { get; set; }
 
     /// <summary>
     /// Specifies if SP will sign the SAML logout requests sent to IdP or not
     /// </summary>
+    [OpenApiDescription("Specifies if SP will sign the SAML logout requests sent to IdP or not")]
     public bool SignLogoutRequests { get; set; }
 
     /// <summary>
     /// Specifies if sign the SAML logout responses sent to IdP or not
     /// </summary>
+    [OpenApiDescription("Specifies if sign the SAML logout responses sent to IdP or not")]
     public bool SignLogoutResponses { get; set; }
 
     /// <summary>
     /// Encryption algorithm
     /// </summary>
+    [OpenApiDescription("Encryption algorithm")]
     public string EncryptAlgorithm { get; set; }
 
     /// <summary>
     /// Decryption algorithm
     /// </summary>
+    [OpenApiDescription("Decryption algorithm")]
     public string DecryptAlgorithm { get; set; }
-   
+
     /// <summary>
     /// Specifies if the assertions will be encrypted or not
     /// </summary>
+    [OpenApiDescription("Specifies if the assertions will be encrypted or not")]
     public bool EncryptAssertions { get; set; }
 }
 

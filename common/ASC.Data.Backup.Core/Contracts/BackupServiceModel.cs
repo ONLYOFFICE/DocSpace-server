@@ -29,22 +29,22 @@ namespace ASC.Data.Backup.Contracts;
 
 public enum BackupStorageType
 {
-    [SwaggerEnum(Description = "Documents")]
+    [OpenApiEnum(Description = "Documents")]
     Documents = 0,
 
-    [SwaggerEnum(Description = "Thridparty documents")]
+    [OpenApiEnum(Description = "Thridparty documents")]
     ThridpartyDocuments = 1,
 
-    [SwaggerEnum(Description = "Custom cloud")]
+    [OpenApiEnum(Description = "Custom cloud")]
     CustomCloud = 2,
 
-    [SwaggerEnum(Description = "Local")]
+    [OpenApiEnum(Description = "Local")]
     Local = 3,
 
-    [SwaggerEnum(Description = "Data store")]
+    [OpenApiEnum(Description = "Data store")]
     DataStore = 4,
 
-    [SwaggerEnum(Description = "Thirdparty consumer")]
+    [OpenApiEnum(Description = "Thirdparty consumer")]
     ThirdPartyConsumer = 5
 }
 
@@ -64,26 +64,31 @@ public class BackupHistoryRecord
     /// <summary>
     /// Backup ID
     /// </summary>
+    [OpenApiDescription("Backup ID")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// File name
     /// </summary>
+    [OpenApiDescription("File name")]
     public string FileName { get; set; }
 
     /// <summary>
     /// Storage type
     /// </summary>
+    [OpenApiDescription("Storage type")]
     public BackupStorageType StorageType { get; set; }
 
     /// <summary>
     /// Creation date
     /// </summary>
+    [OpenApiDescription("Creation date")]
     public DateTime CreatedOn { get; set; }
 
     /// <summary>
     /// Expiration date
     /// </summary>
+    [OpenApiDescription("Expiration date")]
     public DateTime ExpiresOn { get; set; }
 }
 

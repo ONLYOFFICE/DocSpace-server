@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,8 +43,11 @@ public class NotificationController    : ApiControllerBase
     /// </short>
     /// <path>api/2.0/people/phone</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Notification", typeof(object))]
-    [SwaggerResponse(501, "Not Implemented")]
+    [EndpointName("sendNotificationToChange")]
+    [EndpointSummary("Send a notification to change a phone")]
+    [EndpointDescription("Sends a notification to the user with the ID specified in the request to change their phone number.")]
+    [OpenApiResponse(typeof(object), 200, "Notification")]
+    [OpenApiResponse(501, "Not Implemented")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [HttpPost("phone")]
     public Task<object> SendNotificationToChangeAsync(UpdateMemberSimpleRequestDto inDto)

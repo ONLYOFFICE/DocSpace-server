@@ -28,9 +28,9 @@ namespace ASC.Files.Core.Core;
 
 public enum SubjectFilter
 {
-    [SwaggerEnum("Owner")]
+    [OpenApiEnum("Owner")]
     Owner = 0,
 
-    [SwaggerEnum("Member")]
+    [OpenApiEnum("Member")]
     Member = 1
 }

@@ -31,16 +31,19 @@ public class CustomColorThemesSettingsDto
     /// <summary>
     /// Themes
     /// </summary>
+    [OpenApiDescription("Themes")]
     public IEnumerable<CustomColorThemesSettingsItem> Themes { get; set; }
 
     /// <summary>
     /// Selected
     /// </summary>
+    [OpenApiDescription("Selected")]
     public int Selected { get; set; }
 
     /// <summary>
     /// Limit
     /// </summary>
+    [OpenApiDescription("Limit")]
     public int Limit { get; set; }
 
     public CustomColorThemesSettingsDto(CustomColorThemesSettings customColorThemesSettings, int limit)

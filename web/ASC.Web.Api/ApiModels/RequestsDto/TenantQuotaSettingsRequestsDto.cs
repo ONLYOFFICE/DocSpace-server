@@ -34,10 +34,12 @@ public class TenantQuotaSettingsRequestsDto
     /// <summary>
     /// Tenant ID
     /// </summary>
+    [OpenApiDescription("Tenant ID")]
     public int TenantId { get; set; }
 
     /// <summary>
     /// Quota
     /// </summary>
+    [OpenApiDescription("Quota")]
     public long Quota { get; set; }
 }

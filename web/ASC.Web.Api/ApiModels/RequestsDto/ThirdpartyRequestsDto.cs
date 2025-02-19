@@ -34,11 +34,13 @@ public class ThirdpartyRequestsDto
     /// <summary>
     /// Code
     /// </summary>
+    [OpenApiDescription("Code")]
     public string Code { get; set; }
 
     /// <summary>
     /// Redirect
     /// </summary>
+    [OpenApiDescription("Redirect")]
     public string Redirect { get; set; }
 }
 
@@ -51,18 +53,21 @@ public class ConfirmationCodeRequestDto
     /// URL where the user will be redirected to after they have granted the application access
     /// </summary>
     [FromQuery(Name = "redirect")]
+    [OpenApiDescription("URL where the user will be redirected to after they have granted the application access")]
     public string Redirect { get; set; }
 
     /// <summary>
     /// Confirmation code that can be exchanged for an OAuth token
     /// </summary>
     [FromQuery(Name = "code")]
+    [OpenApiDescription("Confirmation code that can be exchanged for an OAuth token")]
     public string Code { get; set; }
 
     /// <summary>
     /// Error
     /// </summary>
     [FromQuery(Name = "error")]
+    [OpenApiDescription("Error")]
     public string Error { get; set; }
 }
 
@@ -75,5 +80,6 @@ public class ConfirmationCodeUrlRequestDto
     /// Provider
     /// </summary>
     [FromRoute(Name = "provider")]
+    [OpenApiDescription("Provider")]
     public LoginProvider Provider { get; set; }
 }

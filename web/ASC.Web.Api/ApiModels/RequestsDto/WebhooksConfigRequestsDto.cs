@@ -34,6 +34,7 @@ public class WebhooksConfigRequestsDto
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public int Id { get; set; }
 
     /// <summary>
@@ -41,27 +42,32 @@ public class WebhooksConfigRequestsDto
     /// </summary>
     [StringLength(50)]
     [Required]
+    [OpenApiDescription("Name")]
     public string Name { get; set; }
 
     /// <summary>
     /// URI
     /// </summary>
     [Required]
+    [OpenApiDescription("URI")]
     public string Uri { get; set; }
 
     /// <summary>
     /// Secret key
     /// </summary>
     [StringLength(50)]
+    [OpenApiDescription("Secret key")]
     public string SecretKey { get; set; }
 
     /// <summary>
     /// Enabled or not
     /// </summary>
+    [OpenApiDescription("Enabled or not")]
     public bool? Enabled { get; set; }
 
     /// <summary>
     /// SSL
     /// </summary>
+    [OpenApiDescription("SSL")]
     public bool? SSL { get; set;}
 }

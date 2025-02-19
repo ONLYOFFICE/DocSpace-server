@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,11 +36,13 @@ public class DetailedInformationRequestDto
     /// Group ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Group ID")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Include members
     /// </summary>
     [FromQuery(Name = "includeMembers")]
+    [OpenApiDescription("Include members")]
     public bool IncludeMembers { get; set; } = true;
 }

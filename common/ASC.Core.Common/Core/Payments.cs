@@ -28,9 +28,9 @@ namespace ASC.Core;
 
 public enum Payments
 {
-    [SwaggerEnum("Paid")]
+    [OpenApiEnum("Paid")]
     Paid = 0,
 
-    [SwaggerEnum("Free")]
+    [OpenApiEnum("Free")]
     Free = 1
 }

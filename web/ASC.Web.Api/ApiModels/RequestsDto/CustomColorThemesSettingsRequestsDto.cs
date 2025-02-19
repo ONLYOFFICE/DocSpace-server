@@ -34,10 +34,12 @@ public class CustomColorThemesSettingsRequestsDto
     /// <summary>
     /// Custom color theme settings
     /// </summary>
+    [OpenApiDescription("Custom color theme settings")]
     public CustomColorThemesSettingsItem Theme { get; set; }
 
     /// <summary>
     /// Selected or not
     /// </summary>
+    [OpenApiDescription("Selected or not")]
     public int? Selected { get; set; }
 }

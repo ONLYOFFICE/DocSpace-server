@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,7 +48,10 @@ public class TipsController(ILoggerProvider option,
     /// <short>Update the tip settings</short>
     /// <path>api/2.0/settings/tips</path>
     [Tags("Settings / Tips")]
-    [SwaggerResponse(200, "Updated tip settings", typeof(TipsSettings))]
+    [EndpointName("updateTipsSettings")]
+    [EndpointSummary("Update the tip settings")]
+    [EndpointDescription("Updates the tip settings with a parameter specified in the request.")]
+    [OpenApiResponse(typeof(TipsSettings), 200, "Updated tip settings")]
     [HttpPut("")]
     public async Task<TipsSettings> UpdateTipsSettingsAsync(TipsRequestDto inDto)
     {
@@ -92,7 +95,10 @@ public class TipsController(ILoggerProvider option,
     /// <short>Update the tip subscription</short>
     /// <path>api/2.0/settings/tips/change/subscription</path>
     [Tags("Settings / Tips")]
-    [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]
+    [EndpointName("updateTipsSubscription")]
+    [EndpointSummary("Update the tip subscription")]
+    [EndpointDescription("Updates the tip subscription.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the user is subscribed to the tips")]
     [HttpPut("change/subscription")]
     public async Task<bool> UpdateTipsSubscriptionAsync()
     {
@@ -105,7 +111,10 @@ public class TipsController(ILoggerProvider option,
     /// <short>Check the tip subscription</short>
     /// <path>api/2.0/settings/tips/subscription</path>
     [Tags("Settings / Tips")]
-    [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]
+    [EndpointName("getTipsSubscription")]
+    [EndpointSummary("Check the tip subscription")]
+    [EndpointDescription("Checks if the current user is subscribed to the tips or not.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the user is subscribed to the tips")]
     [HttpGet("subscription")]
     public async Task<bool> GetTipsSubscriptionAsync()
     {

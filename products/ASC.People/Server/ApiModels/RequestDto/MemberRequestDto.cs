@@ -36,6 +36,7 @@ public class EmailMemberRequestDto
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
+    [OpenApiDescription("Email")]
     public string Email { get; set; }
 }
 
@@ -47,11 +48,13 @@ public class MemberBaseRequestDto : EmailMemberRequestDto
     /// <summary>
     /// Password
     /// </summary>
+    [OpenApiDescription("Password")]
     public string Password { get; set; }
 
     /// <summary>
     /// Password hash
     /// </summary>
+    [OpenApiDescription("Password hash")]
     public string PasswordHash { get; set; }
 }
 
@@ -64,12 +67,14 @@ public class MemberBaseByIdRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
+    [OpenApiDescription("User ID")]
     public Guid UserId { get; set; }
 
     /// <summary>
     /// Member base
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Member base")]
     public MemberBaseRequestDto MemberBase { get; set; }
 }
 
@@ -81,93 +86,111 @@ public class MemberRequestDto : MemberBaseRequestDto
     /// <summary>
     /// Employee type
     /// </summary>
+    [OpenApiDescription("Employee type")]
     public EmployeeType Type { get; set; }
 
     /// <summary>
     /// Specifies if this is a guest or a user
     /// </summary>
+    [OpenApiDescription("Specifies if this is a guest or a user")]
     public bool? IsUser { get; set; }
 
     /// <summary>
     /// First name
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("First name")]
     public string FirstName { get; set; }
 
     /// <summary>
     /// Last name
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Last name")]
     public string LastName { get; set; }
 
     /// <summary>
     /// List of user departments
     /// </summary>
+    [OpenApiDescription("List of user departments")]
     public Guid[] Department { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Location
     /// </summary>
+    [OpenApiDescription("Location")]
     public string Location { get; set; }
 
     /// <summary>
     /// Sex (male or female)
     /// </summary>
+    [OpenApiDescription("Sex (male or female)")]
     public SexEnum? Sex { get; set; }
 
     /// <summary>
     /// Birthday
     /// </summary>
+    [OpenApiDescription("Birthday")]
     public ApiDateTime Birthday { get; set; }
 
     /// <summary>
     /// Registration date (if it is not specified, then the current date will be set)
     /// </summary>
+    [OpenApiDescription("Registration date (if it is not specified, then the current date will be set)")]
     public ApiDateTime Worksfrom { get; set; }
 
     /// <summary>
     /// Comment
     /// </summary>
+    [OpenApiDescription("Comment")]
     public string Comment { get; set; }
 
     /// <summary>
     /// List of user contacts
     /// </summary>
+    [OpenApiDescription("List of user contacts")]
     public IEnumerable<Contact> Contacts { get; set; }
 
     /// <summary>
     /// Avatar photo URL
     /// </summary>
+    [OpenApiDescription("Avatar photo URL")]
     public string Files { get; set; }
 
     /// <summary>
     /// Specifies if the user is added via the invitation link or not
     /// </summary>
+    [OpenApiDescription("Specifies if the user is added via the invitation link or not")]
     public bool FromInviteLink { get; set; }
 
     /// <summary>
     /// Key
     /// </summary>
+    [OpenApiDescription("Key")]
     public string Key { get; set; }
 
     /// <summary>
     /// Language
     /// </summary>
+    [OpenApiDescription("Language")]
     public string CultureName { get; set; }
 
     /// <summary>
     /// Target
     /// </summary>
+    [OpenApiDescription("Target")]
     public Guid Target { get; set; }
 
     /// <summary>Spam</summary>
     /// <type>System.Boolean, System</type>
+    [OpenApiDescription("Spam")]
     public bool? Spam { get; set; }
 }
 
@@ -179,11 +202,13 @@ public class UpdateMemberRequestDto : MemberRequestDto
     /// <summary>
     /// User ID
     /// </summary>
+    [OpenApiDescription("User ID")]
     public string UserId { get; set; }
 
     /// <summary>
     /// Specifies whether to disable a user or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to disable a user or not")]
     public bool? Disable { get; set; }
 }
 
@@ -196,21 +221,23 @@ public class UpdateMemberByIdRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
+    [OpenApiDescription("User ID")]
     public string UserId { get; set; }
 
     /// <summary>
     /// Update member
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Update member")]
     public UpdateMemberRequestDto UpdateMember { get; set; }
 }
 
 public enum SexEnum
 {
-    [SwaggerEnum("Female")]
+    [OpenApiEnum("Female")]
     Female = 0,
 
-    [SwaggerEnum("Male")]
+    [OpenApiEnum("Male")]
     Male = 1
 }
 
@@ -222,6 +249,7 @@ public class UpdatePhotoMemberRequest
     /// <summary>
     /// Avatar photo URL
     /// </summary>
+    [OpenApiDescription("Avatar photo URL")]
     public string Files { get; set; }
 }
 
@@ -234,12 +262,14 @@ public class UpdatePhotoMemberRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
+    [OpenApiDescription("User ID")]
     public string UserId { get; set; }
 
     /// <summary>
     /// Update photo
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Update photo")]
     public UpdatePhotoMemberRequest UpdatePhoto { get; set; }
 }
 
@@ -253,6 +283,7 @@ public class GetMemberByIdRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
+    [OpenApiDescription("User ID")]
     public string UserId { get; set; }
 }
 
@@ -267,6 +298,7 @@ public class GetMemberByEmailRequestDto
     [FromQuery(Name = "email")]
     [EmailAddress]
     [StringLength(255)]
+    [OpenApiDescription("User email address")]
     public string Email { get; set; }
 }
 
@@ -279,6 +311,7 @@ public class GetMemberByQueryRequestDto
     /// Search query
     /// </summary>
     [FromRoute(Name = "query")]
+    [OpenApiDescription("Search query")]
     public string Query { get; set; }
 }
 
@@ -291,6 +324,7 @@ public class GetPeopleByQueryRequestDto
     /// Search query
     /// </summary>
     [FromQuery(Name = "query")]
+    [OpenApiDescription("Search query")]
     public string Query { get; set; }
 }
 
@@ -302,6 +336,7 @@ public class UpdateMemberSimpleRequestDto
     /// <summary>
     /// User ID
     /// </summary>
+    [OpenApiDescription("User ID")]
     public string UserId { get; set; }
 }
 
@@ -313,6 +348,7 @@ public class ContactsRequest
     /// <summary>
     /// List of user contacts
     /// </summary>
+    [OpenApiDescription("List of user contacts")]
     public IEnumerable<Contact> Contacts { get; set; }
 }
 
@@ -326,11 +362,13 @@ public class ContactsRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
+    [OpenApiDescription("User ID")]
     public string UserId { get; set; }
 
     /// <summary>
     /// Contacts
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Contacts")]
     public ContactsRequest Contacts { get; set; }
 }

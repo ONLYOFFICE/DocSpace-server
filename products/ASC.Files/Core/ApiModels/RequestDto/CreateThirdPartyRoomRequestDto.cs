@@ -34,51 +34,61 @@ public class CreateThirdPartyRoom
     /// <summary>
     /// Create as new folder
     /// </summary>
+    [OpenApiDescription("Create as new folder")]
     public bool CreateAsNewFolder { get; set; }
 
     /// <summary>
     /// Room name
     /// </summary>
+    [OpenApiDescription("Room name")]
     public string Title { get; set; }
 
     /// <summary>
     /// Room type
     /// </summary>
+    [OpenApiDescription("Room type")]
     public RoomType RoomType { get; set; }
 
     /// <summary>
     /// Private
     /// </summary>
+    [OpenApiDescription("Private")]
     public bool Private { get; set; }
 
     /// <summary>
     /// Indexing
     /// </summary>
+    [OpenApiDescription("Indexing")]
     public bool Indexing { get; set; }
     
     /// <summary>
     /// Deny download
     /// </summary>
+    [OpenApiDescription("Deny download")]
     public bool DenyDownload { get; set; }
     
     /// <summary>
     /// Color
     /// </summary>
+    [OpenApiDescription("Color")]
     public string Color { get; set; }
 
     /// <summary>
     /// Cover
     /// </summary>
+    [OpenApiDescription("Cover")]
     public string Cover { get; set; }
 
     /// <summary>
     /// Tags
     /// </summary>
+    [OpenApiDescription("Tags")]
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
     /// Logo
     /// </summary>
+    [OpenApiDescription("Logo")]
     public LogoRequest Logo { get; set; }
 }
 
@@ -92,11 +102,13 @@ public class CreateThirdPartyRoomRequestDto
     /// ID of the folder in the third-party storage in which the contents of the room will be stored
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("ID of the folder in the third-party storage in which the contents of the room will be stored")]
     public string Id { get; set; }
 
     /// <summary>
     /// ThirdParty room
     /// </summary>
     [FromBody]
+    [OpenApiDescription("ThirdParty room")]
     public CreateThirdPartyRoom Room { get; set; }
 }

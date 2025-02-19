@@ -33,35 +33,42 @@ public class WebhooksLogRequest
     /// <summary>
     /// Delivey start time
     /// </summary>
+    [OpenApiDescription("Delivey start time")]
     public DateTime? DeliveryFrom { get; set; }
 
     /// <summary>
     /// Delivey end time
     /// </summary>
+    [OpenApiDescription("Delivey end time")]
     public DateTime? DeliveryTo { get; set; }
 
     /// <summary>
     /// Hook URI
     /// </summary>
+    [OpenApiDescription("Hook URI")]
     public string HookUri { get; set; }
 
     /// <summary>
     /// Webhook ID
     /// </summary>
+    [OpenApiDescription("Webhook ID")]
     public int? WebhookId { get; set; }
 
     /// <summary>
     /// Config ID
     /// </summary>
+    [OpenApiDescription("Config ID")]
     public int? ConfigId { get; set; }
 
     /// <summary>
     /// Event ID
     /// </summary>
+    [OpenApiDescription("Event ID")]
     public int? EventId { get; set; }
 
     /// <summary>
     /// Webhook group status
     /// </summary>
+    [OpenApiDescription("Webhook group status")]
     public WebhookGroupStatus? GroupStatus { get; set; }
 }

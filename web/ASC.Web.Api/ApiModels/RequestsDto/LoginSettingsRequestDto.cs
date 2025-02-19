@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,17 +35,20 @@ public class LoginSettingsRequestDto
     /// Maximum number of the user attempts to log in
     /// </summary>
     [Range(1, 9999)]
+    [OpenApiDescription("Maximum number of the user attempts to log in")]
     public int AttemptCount { get; set; }
 
     /// <summary>
     /// The duration of the account suspension for unsuccessful login attempts
     /// </summary>
     [Range(1, 9999)]
+    [OpenApiDescription("The duration of the account suspension for unsuccessful login attempts")]
     public int BlockTime { get; set; }
 
     /// <summary>
     /// Expected server response time
     /// </summary>
     [Range(1, 9999)]
+    [OpenApiDescription("Expected server response time")]
     public int CheckPeriod { get; set; }
 }

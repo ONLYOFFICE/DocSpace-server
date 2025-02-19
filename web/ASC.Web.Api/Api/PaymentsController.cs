@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,7 +60,10 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/url</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
+    [EndpointName("getPaymentUrl")]
+    [EndpointSummary("Get the payment page URL")]
+    [EndpointDescription("Returns the URL to the payment page.")]
+    [OpenApiResponse(typeof(Uri), 200, "The URL to the payment page")]
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
@@ -93,7 +96,10 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/update</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [EndpointName("updatePayment")]
+    [EndpointSummary("Update the payment quantity")]
+    [EndpointDescription("Updates the quantity of payment.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
     [HttpPut("update")]
     public async Task<bool> PaymentUpdateAsync(QuantityRequestDto inDto)
     {
@@ -118,7 +124,10 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/account</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The URL to the payment account", typeof(object))]
+    [EndpointName("getPaymentAccount")]
+    [EndpointSummary("Get the payment account")]
+    [EndpointDescription("Returns the URL to the payment account.")]
+    [OpenApiResponse(typeof(object), 200, "The URL to the payment account")]
     [HttpGet("account")]
     public async Task<object> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
     {
@@ -149,7 +158,10 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/prices</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available portal prices", typeof(object))]
+    [EndpointName("getPrices")]
+    [EndpointSummary("Get prices")]
+    [EndpointDescription("Returns the available portal prices.")]
+    [OpenApiResponse(typeof(object), 200, "List of available portal prices")]
     [HttpGet("prices")]
     public async Task<object> GetPricesAsync()
     {
@@ -169,7 +181,10 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/currencies</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available portal currencies", typeof(IAsyncEnumerable<CurrenciesDto>))]
+    [EndpointName("getCurrencies")]
+    [EndpointSummary("Get currencies")]
+    [EndpointDescription("Returns the available portal currencies.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<CurrenciesDto>), 200, "List of available portal currencies")]
     [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetCurrenciesAsync()
     {
@@ -193,7 +208,10 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/quotas</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available portal quotas", typeof(IEnumerable<QuotaDto>))]
+    [EndpointName("getQuotas")]
+    [EndpointSummary("Get quotas")]
+    [EndpointDescription("Returns the available portal quotas.")]
+    [OpenApiResponse(typeof(IEnumerable<QuotaDto>), 200, "List of available portal quotas")]
     [HttpGet("quotas")]
     public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
     {
@@ -216,8 +234,11 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/quota</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getQuota")]
+    [EndpointSummary("Get quota payment information")]
+    [EndpointDescription("Returns the payment information about the current portal quota.")]
+    [OpenApiResponse(typeof(QuotaDto), 200, "Payment information about the current portal quota")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaAsync(PaymentInformationRequestDto inDto)
     {
@@ -237,9 +258,12 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/request</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(400, "Incorrect email or message text is empty")]
-    [SwaggerResponse(429, "Request limit is exceeded")]
+    [EndpointName("sendSalesRequest")]
+    [EndpointSummary("Send a payment request")]
+    [EndpointDescription("Sends a request for portal payment.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(400, "Incorrect email or message text is empty")]
+    [OpenApiResponse(429, "Request limit is exceeded")]
     [HttpPost("request")]
     public async Task SendSalesRequestAsync(SalesRequestsDto inDto)
     {

@@ -31,21 +31,25 @@ public class FilesStatisticsResultDto
     /// <summary>
     /// Used space of files in the \"My Documents\" section
     /// </summary>
+    [OpenApiDescription("Used space of files in the \"My Documents\" section")]
     public FilesStatisticsFolder MyDocumentsUsedSpace { get; set; }
 
     /// <summary>
     /// Used space of files in the \"Trash\" section
     /// </summary>
+    [OpenApiDescription("Used space of files in the \"Trash\" section")]
     public FilesStatisticsFolder TrashUsedSpace { get; set; }
 
     /// <summary>
     /// Used space of files in the \"Archive\" section
     /// </summary>
+    [OpenApiDescription("Used space of files in the \"Archive\" section")]
     public FilesStatisticsFolder ArchiveUsedSpace { get; set; }
 
     /// <summary>
     /// Used space of files in the \"Rooms\" section
     /// </summary>
+    [OpenApiDescription("Used space of files in the \"Rooms\" section")]
     public FilesStatisticsFolder RoomsUsedSpace { get; set; }
 }
 
@@ -54,10 +58,12 @@ public class FilesStatisticsFolder
     /// <summary>
     /// Folder title
     /// </summary>
+    [OpenApiDescription("Folder title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Used space
     /// </summary>
+    [OpenApiDescription("Used space")]
     public long UsedSpace { get; set; }
 }

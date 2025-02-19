@@ -31,116 +31,139 @@ public class TenantDto : IMapFrom<Tenant>
     /// <summary>
     /// Affiliate ID
     /// </summary>
+    [OpenApiDescription("Affiliate ID")]
     public string AffiliateId { get; set; }
 
     /// <summary>
     /// Tenant alias
     /// </summary>
+    [OpenApiDescription("Tenant alias")]
     public string TenantAlias { get; set; }
 
     /// <summary>
     /// Specifies if the calls are available for this tenant or not
     /// </summary>
+    [OpenApiDescription("Specifies if the calls are available for this tenant or not")]
     public bool Calls { get; set; }
 
     /// <summary>
     /// Campaign
     /// </summary>
+    [OpenApiDescription("Campaign")]
     public string Campaign { get; set; }
 
     /// <summary>
     /// Creation date and time
     /// </summary>
+    [OpenApiDescription("Creation date and time")]
     public DateTime CreationDateTime { get; internal set; }
 
     /// <summary>
     /// Hosted region
     /// </summary>
+    [OpenApiDescription("Hosted region")]
     public string HostedRegion { get; set; }
 
     /// <summary>
     /// Tenant ID
     /// </summary>
+    [OpenApiDescription("Tenant ID")]
     public int TenantId { get; internal set; }
 
     /// <summary>
     /// Tenant industry
     /// </summary>
+    [OpenApiDescription("Tenant industry")]
     public TenantIndustry Industry { get; set; }
 
     /// <summary>
     /// Language
     /// </summary>
+    [OpenApiDescription("Language")]
     public string Language { get; set; }
 
     /// <summary>
     /// Last modified date
     /// </summary>
+    [OpenApiDescription("Last modified date")]
     public DateTime LastModified { get; set; }
 
     /// <summary>
     /// Mapped domain
     /// </summary>
+    [OpenApiDescription("Mapped domain")]
     public string MappedDomain { get; set; }
 
     /// <summary>
     /// Name
     /// </summary>
+    [OpenApiDescription("Name")]
     public string Name { get; set; }
 
     /// <summary>
     /// Owner ID
     /// </summary>
+    [OpenApiDescription("Owner ID")]
     public Guid OwnerId { get; set; }
 
     /// <summary>
     /// Payment ID
     /// </summary>
+    [OpenApiDescription("Payment ID")]
     public string PaymentId { get; set; }
 
     /// <summary>
     /// Specifies if the ONLYOFFICE newsletter is allowed or not
     /// </summary>
+    [OpenApiDescription("Specifies if the ONLYOFFICE newsletter is allowed or not")]
     public bool Spam { get; set; }
 
     /// <summary>
     /// Tenant status
     /// </summary>
+    [OpenApiDescription("Tenant status")]
     public TenantStatus Status { get; internal set; }
 
     /// <summary>
     /// The date and time when the tenant status was changed
     /// </summary>
+    [OpenApiDescription("The date and time when the tenant status was changed")]
     public DateTime StatusChangeDate { get; internal set; }
 
     /// <summary>
     /// Time zone
     /// </summary>
+    [OpenApiDescription("Time zone")]
     public string TimeZone { get; set; }
 
     /// <summary>
     /// List of trusted domains
     /// </summary>
+    [OpenApiDescription("List of trusted domains")]
     public List<string> TrustedDomains { get; set; }
 
     /// <summary>
     /// Trusted domains in the string format
     /// </summary>
+    [OpenApiDescription("Trusted domains in the string format")]
     public string TrustedDomainsRaw { get; set; }
 
     /// <summary>
     /// Trusted domains type
     /// </summary>
+    [OpenApiDescription("Trusted domains type")]
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
     /// <summary>
     /// Version
     /// </summary>
+    [OpenApiDescription("Version")]
     public int Version { get; set; }
 
     /// <summary>
     /// The date and time when the tenant version was changed
     /// </summary>
+    [OpenApiDescription("The date and time when the tenant version was changed")]
     public DateTime VersionChanged { get; set; }
 
     public void Mapping(Profile profile)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,7 +51,10 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <path>api/2.0/settings/carddavurl</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / CardDav address book")]
-    [SwaggerResponse(200, "CardDav response", typeof(DavResponse))]
+    [EndpointName("getCardDavUrl")]
+    [EndpointSummary("Get a link to the CardDav address book")]
+    [EndpointDescription("Creates a CardDav address book for a user with all portal users and returns a link to this address book.")]
+    [OpenApiResponse(typeof(DavResponse), 200, "CardDav response")]
     [HttpGet("carddavurl")]
     public async Task<DavResponse> GetCardDavUrl()
     {
@@ -122,7 +125,10 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <path>api/2.0/settings/deletebook</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / CardDav address book")]
-    [SwaggerResponse(200, "CardDav response", typeof(DavResponse))]
+    [EndpointName("deleteCardDavAddressBook")]
+    [EndpointSummary("Delete a CardDav address book")]
+    [EndpointDescription("Deletes a CardDav address book with all portal users.")]
+    [OpenApiResponse(typeof(DavResponse), 200, "CardDav response")]
     [HttpDelete("deletebook")]
     public async Task<DavResponse> DeleteCardDavAddressBook()
     {

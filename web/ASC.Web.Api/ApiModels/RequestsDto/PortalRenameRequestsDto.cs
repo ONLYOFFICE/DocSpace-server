@@ -34,5 +34,6 @@ public class PortalRenameRequestsDto
     /// <summary>
     /// Portal name
     /// </summary>
+    [OpenApiDescription("Portal name")]
     public string Alias { get; set; }
 }

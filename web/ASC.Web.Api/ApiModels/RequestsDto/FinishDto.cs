@@ -31,5 +31,6 @@ public class FinishDto
     /// <summary>
     /// Is send welcome email
     /// </summary>
+    [OpenApiDescription("Is send welcome email")]
     public bool IsSendWelcomeEmail { get; set; }
 }

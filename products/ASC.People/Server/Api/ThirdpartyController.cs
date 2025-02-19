@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -61,7 +61,10 @@ public class ThirdpartyController(
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("People / Third-party accounts")]
-    [SwaggerResponse(200, "List of third-party accounts", typeof(ICollection<AccountInfoDto>))]
+    [EndpointName("getAuthProviders")]
+    [EndpointSummary("Get third-party accounts")]
+    [EndpointDescription("Returns a list of the available third-party accounts.")]
+    [OpenApiResponse(typeof(ICollection<AccountInfoDto>), 200, "List of third-party accounts")]
     [AllowAnonymous, AllowNotPayment]
     [HttpGet("providers")]
     public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(AuthProvidersRequestDto inDto)
@@ -111,8 +114,11 @@ public class ThirdpartyController(
     /// </short>
     /// <path>api/2.0/people/thirdparty/linkaccount</path>
     [Tags("People / Third-party accounts")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(405, "Error not allowed option")]
+    [EndpointName("linkAccount")]
+    [EndpointSummary("Link a third-party account")]
+    [EndpointDescription("Links a third-party account specified in the request to the user profile.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(405, "Error not allowed option")]
     [HttpPut("linkaccount")]
     public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
@@ -147,9 +153,12 @@ public class ThirdpartyController(
     /// <path>api/2.0/people/thirdparty/signup</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Third-party accounts")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(400, "Incorrect email")]
-    [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
+    [EndpointName("signupAccount")]
+    [EndpointSummary("Create a third-party account")]
+    [EndpointDescription("Creates a third-party account with the parameters specified in the request.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(400, "Incorrect email")]
+    [OpenApiResponse(403, "The invitation link is invalid or its validity has expired")]
     [AllowAnonymous]
     [HttpPost("signup")]
     public async Task SignupAccountAsync(SignupAccountRequestDto inDto)
@@ -250,6 +259,9 @@ public class ThirdpartyController(
     /// </short>
     /// <path>api/2.0/people/thirdparty/unlinkaccount</path>
     [Tags("People / Third-party accounts")]
+    [EndpointName("unlinkAccount")]
+    [EndpointSummary("Unlink a third-party account")]
+    [EndpointDescription("Unlinks a third-party account specified in the request from the user profile.")]
     [HttpDelete("unlinkaccount")]
     public async Task UnlinkAccountAsync(UnlinkAccountRequestDto inDto)
     {

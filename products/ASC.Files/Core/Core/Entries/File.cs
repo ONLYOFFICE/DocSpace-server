@@ -29,31 +29,31 @@ namespace ASC.Files.Core;
 [Flags]
 public enum FileStatus
 {
-    [SwaggerEnum(Description = "None")]
+    [OpenApiEnum(Description = "None")]
     None = 0x0,
 
-    [SwaggerEnum(Description = "Is editing")]
+    [OpenApiEnum(Description = "Is editing")]
     IsEditing = 0x1,
 
-    [SwaggerEnum(Description = "Is new")]
+    [OpenApiEnum(Description = "Is new")]
     IsNew = 0x2,
 
-    [SwaggerEnum(Description = "Is converting")]
+    [OpenApiEnum(Description = "Is converting")]
     IsConverting = 0x4,
 
-    [SwaggerEnum(Description = "Is original")]
+    [OpenApiEnum(Description = "Is original")]
     IsOriginal = 0x8,
 
-    [SwaggerEnum(Description = "Is editing alone")]
+    [OpenApiEnum(Description = "Is editing alone")]
     IsEditingAlone = 0x10,
 
-    [SwaggerEnum(Description = "Is favorite")]
+    [OpenApiEnum(Description = "Is favorite")]
     IsFavorite = 0x20,
 
-    [SwaggerEnum(Description = "Is template")]
+    [OpenApiEnum(Description = "Is template")]
     IsTemplate = 0x40,
 
-    [SwaggerEnum(Description = "Is fill form draft")]
+    [OpenApiEnum(Description = "Is fill form draft")]
     IsFillFormDraft = 0x80
 }
 

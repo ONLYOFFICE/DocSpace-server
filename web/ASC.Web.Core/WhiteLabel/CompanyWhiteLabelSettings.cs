@@ -34,6 +34,7 @@ public class CompanyWhiteLabelSettingsWrapper
     /// <summary>
     /// Company white label settings
     /// </summary>
+    [OpenApiDescription("Company white label settings")]
     public CompanyWhiteLabelSettings Settings { get; set; }
 }
 
@@ -45,6 +46,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
     /// Company name
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Company name")]
     public string CompanyName { get; set; }
 
     /// <summary>
@@ -52,6 +54,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
     /// </summary>
     [Url]
     [StringLength(255)]
+    [OpenApiDescription("Site")]
     public string Site { get; set; }
 
     /// <summary>
@@ -59,12 +62,14 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
+    [OpenApiDescription("Email address")]
     public string Email { get; set; }
 
     /// <summary>
     /// Address
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Address")]
     public string Address { get; set; }
 
     /// <summary>
@@ -72,12 +77,14 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
     /// </summary>
     [Phone]
     [StringLength(255)]
+    [OpenApiDescription("Phone")]
     public string Phone { get; set; }
 
     /// <summary>
     /// Specifies if a company is a licensor or not
     /// </summary>
     [JsonPropertyName("IsLicensor")]
+    [OpenApiDescription("Specifies if a company is a licensor or not")]
     public bool IsLicensor { get; set; }
 
     public CompanyWhiteLabelSettings(CoreSettings coreSettings)

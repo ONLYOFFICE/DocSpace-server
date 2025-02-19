@@ -32,6 +32,7 @@ public class FileIdRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 }
 
@@ -42,6 +43,7 @@ public class FilePrimaryIdRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("File ID")]
     public T Id { get; set; }
 }
 
@@ -51,5 +53,6 @@ public class OperationIdRequestDto
     /// Operation ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Operation ID")]
     public string Id { get; set; } = null;
 }

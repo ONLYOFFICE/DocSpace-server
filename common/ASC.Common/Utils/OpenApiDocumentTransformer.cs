@@ -24,26 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
 
-public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
+public class LowercaseDocumentTransformer : IOpenApiDocumentTransformer
 {
-    public void Apply(OpenApiDocument document, DocumentFilterContext context)
-    {
-        document.Paths.Remove(routeToHide);
-    }
-}
-
-public class LowercaseDocumentFilter : IDocumentFilter
-{
-    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
     {
         var paths = new OpenApiPaths();
-        foreach (var (key, value) in swaggerDoc.Paths)
+        foreach (var (key, value) in document.Paths)
         {
             var segments = key.Split('/');
 
@@ -56,14 +48,16 @@ public class LowercaseDocumentFilter : IDocumentFilter
             }
 
             var lowerCaseKey = string.Join("/", segments);
-            paths.Add(lowerCaseKey, value);
+            paths[lowerCaseKey] = value;
         }
 
-        swaggerDoc.Paths = paths;
+        document.Paths = paths;
+
+        return Task.CompletedTask;
     }
 }
 
-public class TagDescriptionsDocumentFilter : IDocumentFilter
+public class TagDescriptionsDocumentFilter : IOpenApiDocumentTransformer
 {
     private readonly Dictionary<string, string> _tagDescriptions = new()
     {
@@ -131,59 +125,45 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Settings / Webplugins", "Operations for working with webplugin settings." }
     };
 
-    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
     {
-        var customTags = new HashSet<string>();
-
-        foreach (var path in swaggerDoc.Paths)
+        if (document.Tags == null)
         {
-            foreach (var operation in path.Value.Operations)
-            {
-                foreach (var tag in operation.Value.Tags)
-                {
-                    customTags.Add(tag.Name);
-                }
-            }
+            return Task.CompletedTask; ;
         }
-
-        swaggerDoc.Tags = customTags
-            .Where(tag => _tagDescriptions.ContainsKey(tag))
-            .Select(tag => 
-            {
-                var tagParts = tag.Split(" / ");
-                var displayName = tagParts.Length > 1 ? tagParts[1] : tagParts[0];
-
-                var openApiTag = new OpenApiTag
-                {
-                    Name = tag,
-                    Description = _tagDescriptions[tag]
-                };
-                openApiTag.Extensions.Add("x-displayName", new OpenApiString(displayName));
-
-                return openApiTag;
-            }).ToList();
-
-        var groupTag = customTags
-            .Where(tag => _tagDescriptions.ContainsKey(tag))
-            .GroupBy(tag => tag.Split(" / ")[0])
-            .ToDictionary(group => group.Key, group => group.ToList());
-
-        var tagGroups = new OpenApiArray();
-        foreach (var group in groupTag)
+        var tagGroups = new Dictionary<string, OpenApiArray>();
+        foreach (var tag in document.Tags)
         {
-            var groupObject = new OpenApiObject();
-            var tagsArray = new OpenApiArray();
-
-            foreach(var tag in group.Value)
+            if (_tagDescriptions.TryGetValue(tag.Name, out var description))
             {
-                tagsArray.Add(new OpenApiString(tag));
+                tag.Description = description;
             }
 
-            groupObject["name"] = new OpenApiString(group.Key);
-            groupObject["tags"] = tagsArray;
-            tagGroups.Add(groupObject);
+            var tagParts = tag.Name.Split(" / ");
+            tag.Extensions["x-displayName"] = tagParts.Length > 1 ? new OpenApiString(tagParts[1]) : new OpenApiString(tagParts[0]);
+
+            var groupName = tagParts[0];
+            if (!tagGroups.ContainsKey(groupName))
+            {
+                tagGroups[groupName] = [];
+            }
+
+            tagGroups[groupName].Add(new OpenApiString(tag.Name));
         }
 
-        swaggerDoc.Extensions["x-tagGroups"] = tagGroups;
+        var tagGroupsArray = new OpenApiArray();
+        foreach (var group in tagGroups)
+        {
+            var groupObject = new OpenApiObject
+            {
+                ["name"] = new OpenApiString(group.Key),
+                ["tags"] = group.Value
+            };
+
+            tagGroupsArray.Add(groupObject);
+        }
+        document.Extensions["x-tagGroups"] = tagGroupsArray;
+
+        return Task.CompletedTask;
     }
 }

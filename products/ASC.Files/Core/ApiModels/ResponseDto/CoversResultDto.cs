@@ -28,6 +28,15 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class CoversResultDto
 {
+    /// <summary>
+    /// Cover ID
+    /// </summary>
+    [OpenApiDescription("Cover ID")]
     public string Id { get; set; }
+
+    /// <summary>
+    /// Cover data
+    /// </summary>
+    [OpenApiDescription("Cover data")]
     public string Data { get; set; }
 }

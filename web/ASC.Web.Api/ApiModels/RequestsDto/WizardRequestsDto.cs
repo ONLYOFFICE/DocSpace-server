@@ -35,31 +35,37 @@ public class WizardRequestsDto
     /// Email
     /// </summary>
     [EmailAddress]
+    [OpenApiDescription("Email")]
     public string Email { get; set; }
 
     /// <summary>
     /// Password hash
     /// </summary>
+    [OpenApiDescription("Password hash")]
     public string PasswordHash { get; set; }
 
     /// <summary>
     /// Language
     /// </summary>
+    [OpenApiDescription("Language")]
     public string Lng { get; set; }
 
     /// <summary>
     /// Time zone
     /// </summary>
+    [OpenApiDescription("Time zone")]
     public string TimeZone { get; set; }
 
     /// <summary>
     /// AMI ID
     /// </summary>
+    [OpenApiDescription("AMI ID")]
     public string AmiId { get; set; }
 
     /// <summary>
     /// Subscribed from the site or not
     /// </summary>
+    [OpenApiDescription("Subscribed from the site or not")]
     public bool SubscribeFromSite { get; set; }
 
     public void Deconstruct(out string email, out string passwordHash, out string lng, out string timeZone, out string amiid, out bool subscribeFromSite)

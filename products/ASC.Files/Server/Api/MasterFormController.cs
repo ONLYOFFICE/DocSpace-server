@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,8 +49,11 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Link to the form", typeof(object))]
-    [SwaggerResponse(403, "You don't have enough permission to view the file")]
+    [EndpointSummary("Check the form draft")]
+    [EndpointDescription("Checks if the current file is a form draft which can be filled out.")]
+    [EndpointName("checkFillFormDraft")]
+    [OpenApiResponse(typeof(object), 200, "Link to the form")]
+    [OpenApiResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<object> CheckFillFormDraftAsync(CheckFillFormDraftRequestDto<T> inDto)

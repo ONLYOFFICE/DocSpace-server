@@ -31,51 +31,57 @@ public class FileOperationDto
     /// <summary>
     /// Operation ID
     /// </summary>
+    [OpenApiDescription("Operation ID")]
     public string Id { get; set; }
 
     /// <summary>
     /// Operation type
     /// </summary>
     [JsonPropertyName("Operation")]
+    [OpenApiDescription("Operation type")]
     public FileOperationType OperationType { get; init; }
 
     /// <summary>
     /// Operation progress
     /// </summary>
-    [SwaggerSchemaCustom(Example = 100)]
+    [OpenApiDescription("Operation progress", Example = 100)]
     public int Progress { get; set; }
 
     /// <summary>
     /// Error
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    [OpenApiDescription("Error", Example = "")]
     public string Error { get; set; }
 
     /// <summary>
     /// Processing status
     /// </summary>
-    [SwaggerSchemaCustom(Example = "1")]
+    [OpenApiDescription("Processing status", Example = "1")]
     public string Processed { get; set; }
 
     /// <summary>
     /// Specifies if the operation is finished or not
     /// </summary>
+    [OpenApiDescription("Specifies if the operation is finished or not")]
     public bool Finished { get; set; }
 
     /// <summary>
     /// URL
     /// </summary>
     [Url]
+    [OpenApiDescription("URL")]
     public string Url { get; set; }
 
     /// <summary>
     /// List of files
     /// </summary>
+    [OpenApiDescription("List of files")]
     public List<FileEntryDto> Files { get; set; }
 
     /// <summary>
     /// List of folders
     /// </summary>
+    [OpenApiDescription("List of folders")]
     public List<FileEntryDto> Folders { get; set; }
 }
 

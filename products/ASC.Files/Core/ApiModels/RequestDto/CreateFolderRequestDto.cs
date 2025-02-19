@@ -35,6 +35,7 @@ public class CreateFolder
     /// Folder title
     /// </summary>
     [StringLength(165)]
+    [OpenApiDescription("Folder title")]
     public string Title { get; set; }
 }
 
@@ -47,11 +48,13 @@ public class CreateFolderRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// Folder
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Folder")]
     public CreateFolder Folder { get; set; }
 }

@@ -31,13 +31,13 @@ public class Contact
     /// <summary>
     /// Contact type
     /// </summary>
-    [SwaggerSchemaCustom(Example = "GTalk")]
+    [OpenApiDescription("Contact type", Example = "GTalk")]
     public string Type { get; set; }
 
     /// <summary>
     /// Contact value
     /// </summary>
-    [SwaggerSchemaCustom(Example = "my@gmail.com")]
+    [OpenApiDescription("Contact value", Example = "my@gmail.com")]
     public string Value { get; set; }
 
     //For binder

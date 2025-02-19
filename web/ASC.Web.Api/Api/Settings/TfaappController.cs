@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,7 +59,10 @@ public class TfaappController(
     ///<path>api/2.0/settings/tfaapp</path>
     ///<collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "TFA settings", typeof(IEnumerable<TfaSettingsDto>))]
+    [EndpointName("getTfaSettings")]
+    [EndpointSummary("Get the TFA settings")]
+    [EndpointDescription("Returns the current two-factor authentication settings.")]
+    [OpenApiResponse(typeof(IEnumerable<TfaSettingsDto>), 200, "TFA settings")]
     [HttpGet("tfaapp")]
     public async Task<IEnumerable<TfaSettingsDto>> GetTfaSettingsAsync()
     {
@@ -109,7 +112,10 @@ public class TfaappController(
     /// <short>Validate the TFA code</short>
     ///<path>api/2.0/settings/tfaapp/validate</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "True if the code is valid", typeof(bool))]
+    [EndpointName("validateTfaCode")]
+    [EndpointSummary("Validate the TFA code")]
+    [EndpointDescription("Validates the two-factor authentication code specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "True if the code is valid")]
     [HttpPost("tfaapp/validate")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth,Everyone")]
@@ -134,7 +140,10 @@ public class TfaappController(
     /// <short>Get confirmation email</short>
     ///<path>api/2.0/settings/tfaapp/confirm</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Confirmation email URL", typeof(object))]
+    [EndpointName("getTfaConfirmUrl")]
+    [EndpointSummary("Get confirmation email")]
+    [EndpointDescription("Returns the confirmation email URL for authorization via SMS or TFA application.")]
+    [OpenApiResponse(typeof(object), 200, "Confirmation email URL")]
     [HttpGet("tfaapp/confirm")]
     public async Task<object> TfaConfirmUrlAsync()
     {
@@ -170,8 +179,11 @@ public class TfaappController(
     /// <short>Update the TFA settings</short>
     ///<path>api/2.0/settings/tfaapp</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "True if the operation is successful", typeof(bool))]
-    [SwaggerResponse(405, "SMS settings are not available/TFA application settings are not available")]
+    [EndpointName("updateTfaSettings")]
+    [EndpointSummary("Update the TFA settings")]
+    [EndpointDescription("Updates the two-factor authentication settings with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "True if the operation is successful")]
+    [OpenApiResponse(405, "SMS settings are not available/TFA application settings are not available")]
     [HttpPut("tfaapp")]
     public async Task<bool> TfaSettingsAsync(TfaRequestsDto inDto)
     {
@@ -270,7 +282,10 @@ public class TfaappController(
     /// <short>Get confirmation email for updating TFA settings</short>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Confirmation email URL", typeof(object))]
+    [EndpointName("getTfaSettingsConfirmUrl")]
+    [EndpointSummary("Get confirmation email for updating TFA settings")]
+    [EndpointDescription("Returns the confirmation email URL for updating TFA settings.")]
+    [OpenApiResponse(typeof(object), 200, "Confirmation email URL")]
     [HttpPut("tfaappwithlink")]
     public async Task<object> TfaSettingsLink(TfaRequestsDto inDto)
     {
@@ -288,8 +303,11 @@ public class TfaappController(
     /// <short>Generate setup code</short>
     /// <path>api/2.0/settings/tfaapp/setup</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Setup code", typeof(SetupCode))]
-    [SwaggerResponse(405, "TFA application settings are not available")]
+    [EndpointName("generateTfaSetupCode")]
+    [EndpointSummary("Generate setup code")]
+    [EndpointDescription("Generates the setup TFA code for the current user.")]
+    [OpenApiResponse(typeof(SetupCode), 200, "Setup code")]
+    [OpenApiResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaapp/setup")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation")]
     public async Task<SetupCode> TfaAppGenerateSetupCodeAsync()
@@ -319,8 +337,11 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "List of TFA application codes", typeof(IEnumerable<object>))]
-    [SwaggerResponse(405, "TFA application settings are not available")]
+    [EndpointName("getTfaCodes")]
+    [EndpointSummary("Get the TFA codes")]
+    [EndpointDescription("Returns the two-factor authentication application codes.")]
+    [OpenApiResponse(typeof(IEnumerable<object>), 200, "List of TFA application codes")]
+    [OpenApiResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaappcodes")]
     public async Task<IEnumerable<object>> TfaAppGetCodesAsync()
     {
@@ -348,8 +369,11 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappnewcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "New backup codes", typeof(IEnumerable<object>))]
-    [SwaggerResponse(405, "TFA application settings are not available")]
+    [EndpointName("updateTfaCodes")]
+    [EndpointSummary("Update the TFA codes")]
+    [EndpointDescription("Requests the new backup codes for the two-factor authentication application.")]
+    [OpenApiResponse(typeof(IEnumerable<object>), 200, "New backup codes")]
+    [OpenApiResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewcodes")]
     public async Task<IEnumerable<object>> TfaAppRequestNewCodesAsync()
     {
@@ -376,9 +400,12 @@ public class TfaappController(
     /// <short>Unlink the TFA application</short>
     /// <path>api/2.0/settings/tfaappnewapp</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Login URL", typeof(object))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(405, "TFA application settings are not available")]
+    [EndpointName("unlinkTfaApp")]
+    [EndpointSummary("Unlink the TFA application")]
+    [EndpointDescription("Unlinks the current two-factor authentication application from the user account specified in the request.")]
+    [OpenApiResponse(typeof(object), 200, "Login URL")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewapp")]
     public async Task<object> TfaAppNewAppAsync(TfaRequestsDto inDto)
     {

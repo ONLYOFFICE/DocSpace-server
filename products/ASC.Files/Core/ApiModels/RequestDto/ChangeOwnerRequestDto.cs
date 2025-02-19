@@ -34,5 +34,6 @@ public class ChangeOwnerRequestDto : BaseBatchRequestDto
     /// <summary>
     /// New file owner ID
     /// </summary>
+    [OpenApiDescription("New file owner ID")]
     public Guid UserId { get; set; }
 }

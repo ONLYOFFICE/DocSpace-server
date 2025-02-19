@@ -34,5 +34,6 @@ public class MobileAppRequestsDto
     /// <summary>
     /// Mobile app type
     /// </summary>
+    [OpenApiDescription("Mobile app type")]
     public MobileAppType Type { get; set; }
 }

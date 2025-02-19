@@ -31,28 +31,30 @@ public class SecurityDto
     /// <summary>
     /// Module ID
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
+    [OpenApiDescription("Module ID", Example = "{00000000-0000-0000-0000-000000000000}")]
     public string WebItemId { get; set; }
 
     /// <summary>
     /// List of users with the access to the module
     /// </summary>
+    [OpenApiDescription("List of users with the access to the module")]
     public List<EmployeeDto> Users { get; set; }
 
     /// <summary>
     /// List of groups with the access to the module
     /// </summary>
+    [OpenApiDescription("List of groups with the access to the module")]
     public List<GroupSummaryDto> Groups { get; init; }
 
     /// <summary>
     /// Specifies if the security settings are enabled or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = true)]
+    [OpenApiDescription("Specifies if the security settings are enabled or not", Example = true)]
     public bool Enabled { get; set; }
 
     /// <summary>
     /// Specifies if this module is a subitem or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Specifies if this module is a subitem or not", Example = false)]
     public bool IsSubItem { get; set; }
 }

@@ -31,26 +31,31 @@ public record HistoryDto
     /// <summary>
     /// Action
     /// </summary>
+    [OpenApiDescription("Action")]
     public HistoryAction Action { get; init; }
 
     /// <summary>
     /// Initiator
     /// </summary>
+    [OpenApiDescription("Initiator")]
     public EmployeeDto Initiator { get; init; }
 
     /// <summary>
     /// Date
     /// </summary>
+    [OpenApiDescription("Date")]
     public ApiDateTime Date { get; init; }
 
     /// <summary>
     /// Data
     /// </summary>
+    [OpenApiDescription("Data")]
     public HistoryData Data { get; init; }
 
     /// <summary>
     /// Related
     /// </summary>
+    [OpenApiDescription("Related")]
     public List<HistoryDto> Related { get; set; }
 }
 

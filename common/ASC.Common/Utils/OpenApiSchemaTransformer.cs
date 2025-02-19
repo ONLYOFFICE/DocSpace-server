@@ -24,63 +24,65 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel;
+using System.Text.Json.Serialization.Metadata;
+
 using Bogus;
 
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-
-using Swashbuckle.AspNetCore.Annotations;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
 
 [AttributeUsage(AttributeTargets.Property)]
-public class SwaggerSchemaCustomAttribute : SwaggerSchemaAttribute
+public class OpenApiDescriptionAttribute : DescriptionAttribute
 {
     internal static readonly string DefaultStringExample = "some text";
     internal static readonly int DefaultIntExample = 1234;
-    public SwaggerSchemaCustomAttribute(string description = null)
+    public OpenApiDescriptionAttribute(string description)
     {
-        Description = description;
+        DescriptionValue = description;
     }
     
     public object Example { get; set; }
 }
 
-public class SwaggerSchemaCustomFilter : ISchemaFilter
+public class OpenApiDescriptionSchemaTransformer : IOpenApiSchemaTransformer
 {
-    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    public Task TransformAsync(OpenApiSchema schema, OpenApiSchemaTransformerContext context, CancellationToken cancellationToken)
     {
-        if (schema.Enum is { Count: > 0 } && context.Type is { IsEnum: true })
+        if (schema.Enum is { Count: > 0 })
         {
-            UpdateSchema(context.Type, schema);
-            return;
+            UpdateSchema(context.JsonTypeInfo.Type, schema);
+            return Task.CompletedTask;
         }
-        
-        if (context.MemberInfo is not PropertyInfo propertyInfo)
+        var propertyInfo = context?.JsonPropertyInfo;
+        if (propertyInfo == null) 
         {
-            return;
+            return Task.CompletedTask;
         }
-
         UpdateSchema(propertyInfo.PropertyType, schema);
-        
-        var swaggerSchemaCustomAttribute = propertyInfo.GetCustomAttributes(true).OfType<SwaggerSchemaCustomAttribute>().FirstOrDefault();
 
-        if (swaggerSchemaCustomAttribute != null)
+        var openApiCustomAttribute = context?.JsonPropertyInfo?.AttributeProvider?.GetCustomAttributes(true)?.OfType<OpenApiDescriptionAttribute>().FirstOrDefault();
+
+        if (openApiCustomAttribute != null)
         {
-            if (swaggerSchemaCustomAttribute.Example != null)
+            if (openApiCustomAttribute.Example != null)
             {
-                schema.Example = GetExample(swaggerSchemaCustomAttribute.Example);
+                schema.Example = GetExample(openApiCustomAttribute.Example);
             }
         }
         else
         {
             var example = GenerateFakeData(propertyInfo);
-            if(example != null)
+            if (example != null)
             {
                 schema.Example = example;
             }
         }
+
+        return Task.CompletedTask;
     }
 
     private OpenApiSchema UpdateSchema(Type checkType, OpenApiSchema result)
@@ -90,18 +92,18 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         {
             checkType = nullableType;
         }
-        
+
         if (checkType == typeof(int))
         {
-            result.Example = new OpenApiInteger(SwaggerSchemaCustomAttribute.DefaultIntExample);
-        } 
+            result.Example = new OpenApiInteger(OpenApiDescriptionAttribute.DefaultIntExample);
+        }
         else if (checkType == typeof(long) || checkType == typeof(ulong))
         {
             result.Example = new OpenApiLong(1234);
         }
         else if (checkType == typeof(string))
         {
-            result.Example = new OpenApiString(SwaggerSchemaCustomAttribute.DefaultStringExample);
+            result.Example = new OpenApiString(OpenApiDescriptionAttribute.DefaultStringExample);
         }
         else if (checkType == typeof(bool))
         {
@@ -119,7 +121,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         {
             result.Example = new OpenApiString(new Guid("{75A5F745-F697-4418-B38D-0FE0D277E258}").ToString());
         }
-        else if(checkType.IsClosedTypeOf(typeof(IDictionary<,>)))
+        else if (checkType.IsClosedTypeOf(typeof(IDictionary<,>)))
         {
             var array = new OpenApiArray();
             if (checkType.IsGenericType)
@@ -151,7 +153,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             {
                 checkType = checkType.GetGenericArguments().FirstOrDefault();
             }
-            else if(checkType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+            else if (checkType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
             {
                 checkType = checkType.GetInterfaces()
                     .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
@@ -171,29 +173,29 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 result.Example = array;
             }
 
-            if(arraySchema.OneOf.Count != 0)
+            if (arraySchema.OneOf.Count != 0)
             {
                 result.Items = new OpenApiSchema { AnyOf = arraySchema.OneOf };
             }
-            else if(checkType == typeof(object))
+            else if (checkType == typeof(object))
             {
                 result.Items = new OpenApiSchema { Type = "object" };
             }
 
         }
-        else if(checkType == typeof(JsonElement))
+        else if (checkType == typeof(JsonElement))
         {
             var oneOfSchema = new List<OpenApiSchema>
             {
                 new()
                 {
                     Type = "integer",
-                    Example = new OpenApiInteger(SwaggerSchemaCustomAttribute.DefaultIntExample)
+                    Example = new OpenApiInteger(OpenApiDescriptionAttribute.DefaultIntExample)
                 },
                 new()
                 {
                     Type = "string",
-                    Example = new OpenApiString(SwaggerSchemaCustomAttribute.DefaultStringExample)
+                    Example = new OpenApiString(OpenApiDescriptionAttribute.DefaultStringExample)
                 }
             };
 
@@ -209,7 +211,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             foreach (var enumValue in Enum.GetValues(checkType))
             {
                 var value = checkType.GetMember(enumValue.ToString())[0];
-                var enumAttribute = value.GetCustomAttributes<SwaggerEnumAttribute>().FirstOrDefault();
+                var enumAttribute = value.GetCustomAttributes<OpenApiEnumAttribute>().FirstOrDefault();
                 if (enumAttribute is { Ignore: false })
                 {
                     enumDataString.Add(new OpenApiString(enumValue.ToString()));
@@ -218,46 +220,28 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                     enumDescriptionInt.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
                 }
             }
-
-            if (enumDataString.Count > 0)
+            if(enumDataInt.Count > 0)
             {
-                result.OneOf = new List<OpenApiSchema>
-                {
-                    new()
-                    {
-                        Enum = enumDataString,
-                        Type = "string",
-                        Description = $"[{string.Join(", ", enumDescriptionString)}]",
-                        Example = enumDataString[0]
-                    },
-                    new()
-                    {
-                        Enum = enumDataInt,
-                        Type = "integer",
-                        Description = $"[{string.Join(", ", enumDescriptionInt)}]",
-                        Example = enumDataInt[0]
-                    }
-                };
-                result.Enum = null;
-                result.Type = null;
-                result.Format = null;
+                result.Enum = enumDataInt;
+                result.Description = $"[{string.Join(", ", enumDescriptionInt)}]";
+                result.Type = "integer";
+                result.Example = enumDataInt[0];
             }
         }
-        else if(checkType == typeof(object))
+        else if (checkType == typeof(object))
         {
             result.Example = new OpenApiObject
             {
-                ["int"] = new OpenApiInteger(SwaggerSchemaCustomAttribute.DefaultIntExample),
-                ["string"] = new OpenApiString(SwaggerSchemaCustomAttribute.DefaultStringExample),
+                ["int"] = new OpenApiInteger(OpenApiDescriptionAttribute.DefaultIntExample),
+                ["string"] = new OpenApiString(OpenApiDescriptionAttribute.DefaultStringExample),
                 ["boolean"] = new OpenApiBoolean(true)
             };
         }
-        else if(checkType == typeof(TimeSpan))
+        else if (checkType == typeof(TimeSpan))
         {
             var timeSpan = TimeSpan.Zero.ToString();
             result.Example = new OpenApiString(timeSpan);
         }
-
         return result;
     }
     private IOpenApiAny GetExample(object exampleValue)
@@ -273,7 +257,8 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             _ => null
         };
     }
-    private IOpenApiAny GenerateFakeData(PropertyInfo propertyInfo)
+
+    private IOpenApiAny GenerateFakeData(JsonPropertyInfo propertyInfo)
     {
         var faker = new Faker();
         var fileExtension = ".txt";
@@ -290,7 +275,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             case "Location":
                 return new OpenApiString(faker.Address.FullAddress());
             case "Password":
-                    return new OpenApiString(faker.Internet.Password());
+                return new OpenApiString(faker.Internet.Password());
             case "Extension":
             case "Ext":
             case "FileExtension":
@@ -305,12 +290,12 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             case "InstanceId":
             case "UserId":
             case "ProductId":
-                if(propertyInfo.PropertyType == typeof(string))
+                if (propertyInfo.PropertyType == typeof(string))
                 {
                     return new OpenApiString(faker.Random.Int(1, 10000).ToString());
                 }
 
-                if(propertyInfo.PropertyType == typeof(int))
+                if (propertyInfo.PropertyType == typeof(int))
                 {
                     return new OpenApiInteger(faker.Random.Int(1, 10000));
                 }
@@ -330,3 +315,4 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                type == typeof(JsonElement);
     }
 }
+

@@ -34,16 +34,19 @@ public class SecurityRequestsDto
     /// <summary>
     /// Product ID
     /// </summary>
+    [OpenApiDescription("Product ID")]
     public Guid ProductId { get; set; }
 
     /// <summary>
     /// User ID
     /// </summary>
+    [OpenApiDescription("User ID")]
     public Guid UserId { get; set; }
 
     /// <summary>
     /// Administrator or not
     /// </summary>
+    [OpenApiDescription("Administrator or not")]
     public bool Administrator { get; set; }
 }
 
@@ -55,6 +58,7 @@ public class SecuritySettingsRequestDto
     /// <summary>
     /// List of module IDs
     /// </summary>
+    [OpenApiDescription("List of module IDs")]
     [FromQuery(Name = "ids")]
     public IEnumerable<string> Ids { get; set; }
 }

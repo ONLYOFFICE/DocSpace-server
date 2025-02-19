@@ -34,6 +34,7 @@ public class LockFileParameters
     /// <summary>
     /// Specifies whether to lock a file or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to lock a file or not")]
     public bool LockFile { get; set; }
 }
 
@@ -46,11 +47,13 @@ public class LockFileRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// Parameters for locking a file
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Parameters for locking a file")]
     public LockFileParameters File { get; set; }
 }

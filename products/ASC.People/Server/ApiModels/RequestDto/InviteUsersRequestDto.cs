@@ -36,11 +36,13 @@ public class InviteUsersRequestDto
     /// </summary>
     [MaxEmailInvitations]
     [Required]
+    [OpenApiDescription("List of user invitations")]
     public IEnumerable<UserInvitation> Invitations { get; set; }
 
     /// <summary>
     /// Culture
     /// </summary>
+    [OpenApiDescription("Culture")]
     public string Culture { get; set; }
 }
 
@@ -49,5 +51,6 @@ public class UserInvitation : EmailInvitationDto
     /// <summary>
     /// Employee type
     /// </summary>
+    [OpenApiDescription("Employee type")]
     public EmployeeType Type { get; set; }
 }

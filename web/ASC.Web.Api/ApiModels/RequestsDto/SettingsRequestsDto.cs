@@ -34,6 +34,7 @@ public class OwnerIdSettingsRequestDto
     /// <summary>
     /// Owner ID
     /// </summary>
+    [OpenApiDescription("Owner ID")]
     public Guid OwnerId { get; set; }
 }
 
@@ -45,6 +46,7 @@ public class SettingsRequestsDto
     /// <summary>
     /// Version ID
     /// </summary>
+    [OpenApiDescription("Version ID")]
     public int VersionId { get; set; }
 }
 
@@ -56,6 +58,7 @@ public class TipsRequestDto
     /// <summary>
     /// Specifies whether to show tips for the user or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to show tips for the user or not")]
     public bool Show { get; set; } //tips
 }
 
@@ -67,6 +70,7 @@ public class DefaultProductRequestDto
     /// <summary>
     /// Default product ID
     /// </summary>
+    [OpenApiDescription("Default product ID")]
     public Guid DefaultProductID { get; set; }
 }
 
@@ -78,10 +82,12 @@ public class TimeZoneRequestDto
     /// <summary>
     /// Language
     /// </summary>
+    [OpenApiDescription("Language")]
     public string Lng { get; set; }
 
     /// <summary>
     /// Time zone ID
-    /// </summary>
+    /// </summary>  
+    [OpenApiDescription("Time zone ID")]
     public string TimeZoneID { get; set; }
 }

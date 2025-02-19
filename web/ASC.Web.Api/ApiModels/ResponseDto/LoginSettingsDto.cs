@@ -31,17 +31,24 @@ public class LoginSettingsDto : IMapFrom<LoginSettings>
     /// <summary>
     /// Maximum number of the user attempts to log in
     /// </summary>
+    [OpenApiDescription("Maximum number of the user attempts to log in")]
     public int AttemptCount { get; set; }
 
     /// <summary>
     /// The time for which the user will be blocked after unsuccessful login attempts
     /// </summary>
+    [OpenApiDescription("The time for which the user will be blocked after unsuccessful login attempts")]
     public int BlockTime { get; set; }
 
     /// <summary>
     /// The time to wait for a response from the server
     /// </summary>
+    [OpenApiDescription("The time to wait for a response from the server")]
     public int CheckPeriod { get; set; }
     
+    /// <summary>
+    /// Specifies whether the default settings are applied
+    /// </summary>
+    [OpenApiDescription("Specifies whether the default settings are applied")]
     public bool IsDefault { get; set; }
 }

@@ -35,53 +35,63 @@ public class UpdateRoomRequest
     /// Room name
     /// </summary>
     [StringLength(170)]
+    [OpenApiDescription("Room name")]
     public string Title { get; set; }
 
     /// <summary>
     /// Room quota
     /// </summary>
+    [OpenApiDescription("Room quota")]
     public long? Quota { get; set; }
     
     /// <summary>
     /// Indexing
     /// </summary>
+    [OpenApiDescription("Indexing")]
     public bool? Indexing { get; set; }
     
     /// <summary>
     /// Room quota
     /// </summary>
+    [OpenApiDescription("Room quota")]
     public bool? DenyDownload { get; set; }
 
     /// <summary>
     /// Lifetime
     /// </summary>
+    [OpenApiDescription("Lifetime")]
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
     /// Watermark settings
     /// </summary>
+    [OpenApiDescription("Watermark settings")]
     public WatermarkRequestDto Watermark { get; set; }
 
     /// <summary>
     /// Logo
     /// </summary>
+    [OpenApiDescription("Logo")]
     public LogoRequest Logo { get; set; }
 
     /// <summary>
     /// List of tags
     /// </summary>
+    [OpenApiDescription("List of tags")]
     public IEnumerable<string> Tags { get; set; }
     
     /// <summary>
     /// Color
     /// </summary>
     [StringLength(6)]
+    [OpenApiDescription("Color")]
     public string Color { get; set; }
 
     /// <summary>
     /// Cover
     /// </summary>
     [StringLength(50)]
+    [OpenApiDescription("Cover")]
     public string Cover { get; set; }
 }
 
@@ -94,11 +104,13 @@ public class UpdateRoomRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// Update room
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Update room")]
     public UpdateRoomRequest UpdateRoom { get; set; }
 }

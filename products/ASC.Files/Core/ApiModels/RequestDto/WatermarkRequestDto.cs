@@ -34,42 +34,50 @@ public class WatermarkRequestDto
     /// <summary>
     /// Specifies whether watermarks are on or off
     /// </summary>
+    [OpenApiDescription("Specifies whether watermarks are on or off")]
     public bool? Enabled { get; set; }
 
     /// <summary>
     /// Specifies whether to display: username, user email, user ip-adress, current date and room name 
     /// </summary>
+    [OpenApiDescription("Specifies whether to display: username, user email, user ip-adress, current date and room name ")]
     public WatermarkAdditions Additions { get; set; }
 
     /// <summary>
     /// Watermark Text
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Watermark Text")]
     public string Text { get; set; }
 
     /// <summary>
     /// Watermark text and image rotate
     /// </summary>
+    [OpenApiDescription("Watermark text and image rotate")]
     public int Rotate { get; set; }
 
     /// <summary>
     /// Watermark image scale
     /// </summary>
+    [OpenApiDescription("Watermark image scale")]
     public int ImageScale { get; set; }
 
     /// <summary>
     /// The path to the temporary image file
     /// </summary>
+    [OpenApiDescription("The path to the temporary image file")]
     public string ImageUrl { get; set; }
 
     /// <summary>
     /// Watermark image height
     /// </summary>
+    [OpenApiDescription("Watermark image height")]
     public double ImageHeight { get; set; }
 
     /// <summary>
     /// Watermark image width
     /// </summary>
+    [OpenApiDescription("Watermark image width")]
     public double ImageWidth { get; set; }
 }
 
@@ -82,11 +90,13 @@ public class WatermarkRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// Watermark settings
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Watermark settings")]
     public WatermarkRequestDto Watermark { get; set; }
 }

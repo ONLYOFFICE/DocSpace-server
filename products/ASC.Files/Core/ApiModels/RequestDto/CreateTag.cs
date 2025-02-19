@@ -35,5 +35,6 @@ public class CreateTagRequestDto
     /// Tag name
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Tag name")]
     public string Name { get; set; }
 }

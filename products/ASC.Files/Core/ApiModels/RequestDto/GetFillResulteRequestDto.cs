@@ -32,5 +32,6 @@ public class GetFillResulteRequestDto
     /// Filling session id
     /// </summary>
     [FromQuery(Name = "fillingSessionId")]
+    [OpenApiDescription("Filling session id")]
     public string FillingSessionId { get; set; }
 }

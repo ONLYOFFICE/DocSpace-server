@@ -34,11 +34,13 @@ public class CoverRequestDto
     /// <summary>
     /// Color
     /// </summary>
+    [OpenApiDescription("Color")]
     public string Color { get; set; }
 
     /// <summary>
     /// Cover
     /// </summary>
+    [OpenApiDescription("Cover")]
     public string Cover { get; set; }
 }
 
@@ -51,11 +53,13 @@ public class CoverRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// Parameters to change the room cover
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Parameters to change the room cover")]
     public CoverRequestDto Cover { get; set; } = null;
 }

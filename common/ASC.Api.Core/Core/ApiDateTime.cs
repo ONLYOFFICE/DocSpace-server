@@ -35,12 +35,13 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
     /// <summary>
     /// UtcTime
     /// </summary>
+    [OpenApiDescription("UtcTime")]
     public DateTime UtcTime { get; private set; }
 
     /// <summary>
     /// TimeZoneOffset
     /// </summary>
-    [SwaggerSchemaCustom(Example = "00:00:00")]
+    [OpenApiDescription("TimeZoneOffset", Example = "00:00:00")]
     public TimeSpan TimeZoneOffset { get; private set; }
 
     internal static readonly string[] Formats =

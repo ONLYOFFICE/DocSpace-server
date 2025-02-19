@@ -34,6 +34,7 @@ public class StartEdit
     /// <summary>
     /// Specifies whether to share a file with other users for editing or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to share a file with other users for editing or not")]
     public bool EditingAlone { get; set; }
 }
 
@@ -46,11 +47,13 @@ public class StartEditRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// Parameters for starting file editing
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Parameters for starting file editing")]
     public StartEdit File { get; set; }
 }

@@ -48,36 +48,36 @@ public class ThumbnailsDataDto
     /// <summary>
     /// Original photo
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_1280-1280.png")]
+    [OpenApiDescription("Original photo", Example = "default_user_photo_size_1280-1280.png")]
     public string Original { get; set; }
 
     /// <summary>
     /// Retina
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_360-360.png")]
+    [OpenApiDescription("Retina", Example = "default_user_photo_size_360-360.png")]
     public string Retina { get; set; }
 
     /// <summary>
     /// Maximum size
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_200-200.png")]
+    [OpenApiDescription("Maximum size", Example = "default_user_photo_size_200-200.png")]
     public string Max { get; set; }
 
     /// <summary>
     /// Big
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_82-82.png")]
+    [OpenApiDescription("Big", Example = "default_user_photo_size_82-82.png")]
     public string Big { get; set; }
 
     /// <summary>
     /// Medium
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_48-48.png")]
+    [OpenApiDescription("Medium", Example = "default_user_photo_size_48-48.png")]
     public string Medium { get; set; }
 
     /// <summary>
     /// Small
     /// </summary>
-    [SwaggerSchemaCustom(Example = "default_user_photo_size_32-32.png")]
+    [OpenApiDescription("Small", Example = "default_user_photo_size_32-32.png")]
     public string Small { get; set; }
 }

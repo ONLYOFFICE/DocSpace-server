@@ -31,26 +31,31 @@ public class StorageDto
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public string Id { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// List of authentication keys
     /// </summary>
+    [OpenApiDescription("List of authentication keys")]
     public List<AuthKey> Properties { get; set; }
 
     /// <summary>
     /// Specifies if this is the current storage or not
     /// </summary>
+    [OpenApiDescription("Specifies if this is the current storage or not")]
     public bool Current { get; set; }
 
     /// <summary>
     /// Specifies if this storage can be set or not
     /// </summary>
+    [OpenApiDescription("Specifies if this storage can be set or not")]
     public bool IsSet { get; set; }
 
     public static async Task<StorageDto> StorageWrapperInit<T>(DataStoreConsumer consumer, BaseStorageSettings<T> current) where T : class, ISettings<T>, new()

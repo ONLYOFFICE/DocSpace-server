@@ -34,36 +34,43 @@ public class CheckConversionRequestDto<T>
     /// <summary>
     /// File ID
     /// </summary>
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// Specifies if the conversion process is synchronous or not
     /// </summary>
+    [OpenApiDescription("Specifies if the conversion process is synchronous or not")]
     public bool Sync { get; set; }
 
     /// <summary>
     /// Specifies whether to start a conversion process or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to start a conversion process or not")]
     public bool StartConvert { get; set; }
 
     /// <summary>
     /// File version
     /// </summary>
+    [OpenApiDescription("File version")]
     public int Version { get; set; }
 
     /// <summary>
     /// Password
     /// </summary>
+    [OpenApiDescription("Password")]
     public string Password { get; set; }
     
     /// <summary>
     /// Output type
     /// </summary>
+    [OpenApiDescription("Output type")]
     public string OutputType { get; set; }
 
     /// <summary>
     /// Create new if exists
     /// </summary>
+    [OpenApiDescription("Create new if exists")]
     public bool CreateNewIfExist { get; set; }
 }
 
@@ -76,12 +83,14 @@ public class StartConversionRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// Check conversion  
     /// </summary>
     [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)]
+    [OpenApiDescription("Check conversion")]
     public CheckConversionRequestDto<T> CheckConversion { get; set; }
 }
 
@@ -94,11 +103,13 @@ public class CheckConversionStatusRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// Specifies if a conversion operation is started or not
     /// </summary>
     [FromQuery(Name = "start")]
+    [OpenApiDescription("Specifies if a conversion operation is started or not")]
     public bool Start { get; set; }
 }

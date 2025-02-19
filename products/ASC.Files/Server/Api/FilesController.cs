@@ -57,9 +57,12 @@ public class FilesControllerInternal(
     /// <path>api/2.0/files/file/{fileId}/log</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "List of actions performed on the file", typeof(IAsyncEnumerable<HistoryDto>))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "The required file was not found")]
+    [EndpointName("getHistory")]
+    [EndpointSummary("Get file history")]
+    [EndpointDescription("Get the list of actions performed on the file with the specified identifier")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<HistoryDto>), 200, "List of actions performed on the file")]
+    [OpenApiResponse(403, "You don't have enough permission to perform the operation")]
+    [OpenApiResponse(404, "The required file was not found")]
     [HttpGet("file/{fileId:int}/log")]
     public IAsyncEnumerable<HistoryDto> GetHistoryAsync(HistoryRequestDto inDto)
     {
@@ -105,8 +108,11 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}/history</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Updated information about file versions", typeof(IAsyncEnumerable<FileDto<int>>))]
-    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    [EndpointName("changeHistory")]
+    [EndpointSummary("Change version history")]
+    [EndpointDescription("Changes the version history of a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<FileDto<int>>), 200, "Updated information about file versions")]
+    [OpenApiResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> ChangeHistoryAsync(ChangeHistoryRequestDto<T> inDto)
     {
@@ -120,7 +126,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Conversion result", typeof(IAsyncEnumerable<ConversationResultDto>))]
+    [EndpointName("checkConversion")]
+    [EndpointSummary("Get conversion status")]
+    [EndpointDescription("Checks the conversion status of a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<ConversationResultDto>), 200, "Conversion result")]
     [HttpGet("file/{fileId}/checkconversion")]
     public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync(CheckConversionStatusRequestDto<T> inDto)
     {
@@ -140,7 +149,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Get file download link</short>
     /// <path>api/2.0/files/file/{fileId}/presigneduri</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File download link", typeof(string))]
+    [EndpointName("getPresignedUri")]
+    [EndpointSummary("Get file download link")]
+    [EndpointDescription("Returns a link to download a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(string), 200, "File download link")]
     [HttpGet("file/{fileId}/presigneduri")]
     public async Task<string> GetPresignedUri(FileIdRequestDto<T> inDto)
     {
@@ -153,7 +165,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Check the PDF file</short>
     /// <path>api/2.0/files/file/{fileId}/isformpdf</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Boolean value: true - the PDF file is form, false - the PDF file is not a form", typeof(bool))]
+    [EndpointName("isFormPDF")]
+    [EndpointSummary("Check if PDF file is form")]
+    [EndpointDescription("Checks if the PDF file is form or not.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true - the PDF file is form, false - the PDF file is not a form")]
     [HttpGet("file/{fileId}/isformpdf")]
     public async Task<bool> isFormPDF(FileIdRequestDto<T> inDto)
     {
@@ -166,10 +181,13 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Copy a file</short>
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Copied file entry information", typeof(FileEntryDto))]
-    [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [SwaggerResponse(404, "File not found")]
+    [EndpointName("copyFileAs")]
+    [EndpointSummary("Copy a file")]
+    [EndpointDescription("Copies (and converts if possible) an existing file to the specified folder.")]
+    [OpenApiResponse(typeof(FileEntryDto), 200, "Copied file entry information")]
+    [OpenApiResponse(400, "No file id or folder id toFolderId determine provider")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
+    [OpenApiResponse(404, "File not found")]
     [HttpPost("file/{fileId}/copyas")]
     public async Task<FileEntryDto> CopyFileAs(CopyAsRequestDto<T> inDto)
     {
@@ -193,7 +211,11 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <remarks>If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.</remarks>
     /// <path>api/2.0/files/{folderId}/file</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [EndpointName("createFile")]
+    [EndpointSummary("Create a file")]
+    [EndpointDescription("Creates a new file in the specified folder with the title specified in the request.\n\n **Note**: If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFileAsync(CreateFileRequestDto<T> inDto)
     {
@@ -206,8 +228,11 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Create an HTML file</short>
     /// <path>api/2.0/files/{folderId}/html</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [EndpointName("createHtmlFile")]
+    [EndpointSummary("Create an HTML file")]
+    [EndpointDescription("Creates an HTML (.html) file in the selected folder with the title and contents specified in the request.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
     [HttpPost("{folderId}/html")]
     public async Task<FileDto<T>> CreateHtmlFileAsync(CreateTextOrHtmlFileRequestDto<T> inDto)
     {
@@ -220,7 +245,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Create a txt file</short>
     /// <path>api/2.0/files/{folderId}/text</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [EndpointName("createTextFile")]
+    [EndpointSummary("Create a text file")]
+    [EndpointDescription("Creates a text (.txt) file in the selected folder with the title and contents specified in the request.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
     [HttpPost("{folderId}/text")]
     public async Task<FileDto<T>> CreateTextFileAsync(CreateTextOrHtmlFileRequestDto<T> inDto)
     {
@@ -234,7 +262,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [EndpointName("deleteFile")]
+    [EndpointSummary("Delete a file")]
+    [EndpointDescription("Deletes a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(DeleteRequestDto<T> inDto)
     {
@@ -251,7 +282,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <path>api/2.0/files/file/fillresult</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Ok", typeof(FillingFormResultDto<int>))]
+    [EndpointName("getFillResult")]
+    [EndpointSummary("Get fill result")]
+    [EndpointDescription("Gets the fill result for a form filling session.")]
+    [OpenApiResponse(typeof(FillingFormResultDto<int>), 200, "Ok")]
     [AllowAnonymous]
     [HttpGet("file/fillresult")]
     public async Task<FillingFormResultDto<T>> GetFillResultAsync(GetFillResulteRequestDto inDto)
@@ -268,7 +302,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}/edit/diff</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File version history data", typeof(EditHistoryDataDto))]
+    [EndpointName("getEditDiffUrl")]
+    [EndpointSummary("Get changes URL")]
+    [EndpointDescription("Returns a URL to the changes of a file version specified in the request.")]
+    [OpenApiResponse(typeof(EditHistoryDataDto), 200, "File version history data")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/diff")]
     public async Task<EditHistoryDataDto> GetEditDiffUrlAsync(EditDiffUrlRequestDto<T> inDto)
@@ -284,7 +321,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Version history data", typeof(IAsyncEnumerable<EditHistoryDto>))]
+    [EndpointName("getEditHistory")]
+    [EndpointSummary("Get version history")]
+    [EndpointDescription("Returns the version history of a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EditHistoryDto>), 200, "Version history data")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/history")]
     public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync(FileIdRequestDto<T> inDto)
@@ -299,14 +339,16 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
+    [EndpointName("getFileInfo")]
+    [EndpointSummary("Get file information")]
+    [EndpointDescription("Returns the detailed information about a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "File information")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}")]
     public async Task<FileDto<T>> GetFileInfoAsync(FileInfoRequestDto<T> inDto)
     {
         return await filesControllerHelper.GetFileInfoAsync(inDto.FileId, inDto.Version);
     }
-
 
     /// <summary>
     /// Returns the detailed information about all the available file versions with the ID specified in the request.
@@ -316,7 +358,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Information about file versions: folder ID, version, version group, content length, pure content length, file status, URL to view a file, web URL, file type, file extension, comment, encrypted or not, thumbnail URL, thumbnail status, locked or not, user ID who locked a file, denies file downloading or not, denies file sharing or not, file accessibility", typeof(IAsyncEnumerable<FileDto<int>>))]
+    [EndpointName("getFileVersionInfo")]
+    [EndpointSummary("Get file versions")]
+    [EndpointDescription("Returns the detailed information about all the available file versions with the ID specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<FileDto<int>>), 200, "Information about file versions: folder ID, version, version group, content length, pure content length, file status, URL to view a file, web URL, file type, file extension, comment, encrypted or not, thumbnail URL, thumbnail status, locked or not, user ID who locked a file, denies file downloading or not, denies file sharing or not, file accessibility")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync(FileIdRequestDto<T> inDto)
@@ -330,7 +375,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Lock a file</short>
     /// <path>api/2.0/files/file/{fileId}/lock</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Locked file information", typeof(FileDto<int>))]
+    [EndpointName("lockFile")]
+    [EndpointSummary("Lock a file")]
+    [EndpointDescription("Locks a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "Locked file information")]
     [HttpPut("file/{fileId}/lock")]
     public async Task<FileDto<T>> LockFileAsync(LockFileRequestDto<T> inDto)
     {
@@ -345,9 +393,12 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Version history data: file ID, key, file version, version group, a user who updated a file, creation time, history changes in the string format, list of history changes, server version", typeof(IAsyncEnumerable<EditHistoryDto>))]
-    [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
-    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    [EndpointName("restoreVersion")]
+    [EndpointSummary("Restore a file version")]
+    [EndpointDescription("Restores a file version specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EditHistoryDto>), 200, "Version history data: file ID, key, file version, version group, a user who updated a file, creation time, history changes in the string format, list of history changes, server version")]
+    [OpenApiResponse(400, "No file id or folder id toFolderId determine provider")]
+    [OpenApiResponse(403, "You do not have enough permissions to edit the file")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync(RestoreVersionRequestDto<T> inDto)
@@ -362,7 +413,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Conversion result", typeof(IAsyncEnumerable<ConversationResultDto>))]
+    [EndpointName("startConversion")]
+    [EndpointSummary("Start file conversion")]
+    [EndpointDescription("Starts a conversion operation of a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<ConversationResultDto>), 200, "Conversion result")]
     [HttpPut("file/{fileId}/checkconversion")]
     public IAsyncEnumerable<ConversationResultDto> StartConversion(StartConversionRequestDto<T> inDto)
     {
@@ -378,7 +432,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Update a comment</short>
     /// <path>api/2.0/files/file/{fileId}/comment</path>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Updated comment", typeof(object))]
+    [EndpointName("updateComment")]
+    [EndpointSummary("Update a comment")]
+    [EndpointDescription("Updates a comment in a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(object), 200, "Updated comment")]
     [HttpPut("file/{fileId}/comment")]
     public async Task<object> UpdateCommentAsync(UpdateCommentRequestDto<T> inDto)
     {
@@ -392,8 +449,11 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    [EndpointName("updateFile")]
+    [EndpointSummary("Update a file")]
+    [EndpointDescription("Updates the information of the selected file with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "Updated file information")]
+    [OpenApiResponse(403, "You do not have enough permissions to edit the file")]
     [AllowAnonymous]
     [HttpPut("file/{fileId}")]
     public async Task<FileDto<T>> UpdateFileAsync(UpdateFileRequestDto<T> inDto)
@@ -408,9 +468,12 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/{fileId}/update</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
-    [SwaggerResponse(404, "File not found")]
+    [EndpointName("updateFileStreamFromForm")]
+    [EndpointSummary("Update file contents")]
+    [EndpointDescription("Updates the contents of a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "Updated file information")]
+    [OpenApiResponse(403, "You do not have enough permissions to edit the file")]
+    [OpenApiResponse(404, "File not found")]
     [HttpPut("{fileId}/update")]
     public async Task<FileDto<T>> UpdateFileStreamFromFormAsync(FileStreamRequestDto<T> inDto)
     {
@@ -423,8 +486,11 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Create primary external link</short>
     /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
-    [SwaggerResponse(404, "Not Found")]
+    [EndpointName("createPrimaryExternalLink")]
+    [EndpointSummary("Create primary external link")]
+    [EndpointDescription("Creates a primary external link by the identifier specified in the request.")]
+    [OpenApiResponse(typeof(FileShareDto), 200, "File security information")]
+    [OpenApiResponse(404, "Not Found")]
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreatePrimaryExternalLinkAsync(FileLinkRequestDto<T> inDto)
     {
@@ -438,8 +504,11 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Get primary external link</short>
     /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
-    [SwaggerResponse(404, "Not Found")]
+    [EndpointName("getFilePrimaryExternalLink")]
+    [EndpointSummary("Get primary external link")]
+    [EndpointDescription("Returns the primary external link by the identifier specified in the request.")]
+    [OpenApiResponse(typeof(FileShareDto), 200, "File security information")]
+    [OpenApiResponse(404, "Not Found")]
     [AllowAnonymous]
     [HttpGet("file/{id}/link")]
     public async Task<FileShareDto> GetFilePrimaryExternalLinkAsync(FilePrimaryIdRequestDto<T> inDto)
@@ -454,9 +523,12 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Order is set")]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "Not Found")]
+    [EndpointName("setOrderFile")]
+    [EndpointSummary("Set order of a file")]
+    [EndpointDescription("Sets order of a file with ID specified in the request")]
+    [OpenApiResponse(200, "Order is set")]
+    [OpenApiResponse(403, "You don't have enough permission to perform the operation")]
+    [OpenApiResponse(404, "Not Found")]
     [HttpPut("{fileId}/order")]
     public async Task SetOrderFile(OrderFileRequestDto<T> inDto)
     {
@@ -469,7 +541,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/order</path>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Order is set")]
+    [EndpointName("setOrder")]
+    [EndpointSummary("Set order")]
+    [EndpointDescription("Sets order")]
+    [OpenApiResponse(200, "Order is set")]
     [HttpPut("order")]
     public async Task SetOrder(OrdersRequestDto<T> inDto)
     {
@@ -483,7 +558,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{id}/links</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File security information", typeof(IAsyncEnumerable<FileShareDto>))]
+    [EndpointName("getLinks")]
+    [EndpointSummary("Get file external links")]
+    [EndpointDescription("Returns the external links of a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<FileShareDto>), 200, "File security information")]
     [HttpGet("file/{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetLinksAsync(FilePrimaryIdRequestDto<T> inDto)
     {
@@ -506,7 +584,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Set an external link</short>
     /// <path>api/2.0/files/file/{id}/links</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
+    [EndpointName("setExternalLink")]
+    [EndpointSummary("Set an external link")]
+    [EndpointDescription("Sets an external link to a file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(FileShareDto), 200, "File security information")]
     [HttpPut("file/{id}/links")]
     public async Task<FileShareDto> SetExternalLinkAsync(FileLinkRequestDto<T> inDto)
     {
@@ -522,8 +603,11 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Save as pdf</short>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
-    [SwaggerResponse(404, "File not found")]
+    [EndpointName("saveAsPdf")]
+    [EndpointSummary("Save as pdf")]
+    [EndpointDescription("Saves a file with the identifier specified in the request as a PDF document")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
+    [OpenApiResponse(404, "File not found")]
     [HttpPost("file/{id}/saveaspdf")]
     public async Task<FileDto<T>> SaveAsPdf(SaveAsPdfRequestDto<T> inDto)
     {
@@ -546,7 +630,10 @@ public class FilesControllerCommon(
     /// <remarks>If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.</remarks>
     /// <path>api/2.0/files/@my/file</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [EndpointName("createFileMyDocuments")]
+    [EndpointSummary("Create a file in the 'My documents' section")]
+    [EndpointDescription("Creates a new file in the 'My documents' section with the title specified in the request.\n\n **Note**: If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileMyDocumentsAsync(CreateFile<JsonElement> inDto)
     {
@@ -560,8 +647,11 @@ public class FilesControllerCommon(
     /// <path>api/2.0/files/@common/html</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [EndpointName("createHtmlFileInCommon")]
+    [EndpointSummary("Create an HTML file in the 'Common' section")]
+    [EndpointDescription("Creates an HTML (.html) file in the 'Common' section with the title and contents specified in the request.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
     [HttpPost("@common/html")]
     public async Task<FileDto<int>> CreateHtmlFileInCommonAsync(CreateTextOrHtmlFile inDto)
     {
@@ -574,8 +664,11 @@ public class FilesControllerCommon(
     /// <short>Create an HTML file in the "My documents" section</short>
     /// <path>api/2.0/files/@my/html</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [EndpointName("createHtmlFileInMy")]
+    [EndpointSummary("Create an HTML file in the 'My documents' section")]
+    [EndpointDescription("Creates an HTML (.html) file in the 'My documents' section with the title and contents specified in the request.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
+    [OpenApiResponse(403, "You don't have enough permission to create")]
     [HttpPost("@my/html")]
     public async Task<FileDto<int>> CreateHtmlFileInMyAsync(CreateTextOrHtmlFile inDto)
     {
@@ -589,7 +682,10 @@ public class FilesControllerCommon(
     /// <path>api/2.0/files/@common/text</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [EndpointName("createTextFileInCommon")]
+    [EndpointSummary("Create a text file in the 'Common' section")]
+    [EndpointDescription("Creates a text (.txt) file in the 'Common' section with the title and contents specified in the request.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
     [HttpPost("@common/text")]
     public async Task<FileDto<int>> CreateTextFileInCommonAsync(CreateTextOrHtmlFile inDto)
     {
@@ -602,7 +698,10 @@ public class FilesControllerCommon(
     /// <short>Create a text file in the "My documents" section</short>
     /// <path>api/2.0/files/@my/text</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [EndpointName("createTextFileInMy")]
+    [EndpointSummary("Create a text file in the 'My documents' section")]
+    [EndpointDescription("Creates a text (.txt) file in the 'My documents' section with the title and contents specified in the request.")]
+    [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
     [HttpPost("@my/text")]
     public async Task<FileDto<int>> CreateTextFileInMyAsync(CreateTextOrHtmlFile inDto)
     {
@@ -617,7 +716,10 @@ public class FilesControllerCommon(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "List of file IDs", typeof(IEnumerable<JsonElement>))]
+    [EndpointName("createThumbnails")]
+    [EndpointSummary("Create thumbnails")]
+    [EndpointDescription("Creates thumbnails for the files with the IDs specified in the request.")]
+    [OpenApiResponse(typeof(IEnumerable<JsonElement>), 200, "List of file IDs")]
     [AllowAnonymous]
     [HttpPost("thumbnails")]
     public async Task<IEnumerable<JsonElement>> CreateThumbnailsAsync(BaseBatchRequestDto inDto)

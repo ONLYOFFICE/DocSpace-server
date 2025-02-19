@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -80,7 +80,10 @@ public class UserController(
     /// </summary>
     /// <path>api/2.0/people/tokendiagnostics</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Claims", typeof(object))]
+    [EndpointName("getClaims")]
+    [EndpointSummary("Get claims")]
+    [EndpointDescription("Gets claims")]
+    [OpenApiResponse(typeof(object), 200, "Claims")]
     [HttpGet("tokendiagnostics")]
     public object GetClaims()
     {
@@ -103,7 +106,10 @@ public class UserController(
     /// <path>api/2.0/people/active</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Newly added user with the detailed information", typeof(EmployeeFullDto))]
+    [EndpointName("addMemberAsActivated")]
+    [EndpointSummary("Add an activated user")]
+    [EndpointDescription("Adds an activated portal user with the first name, last name, email address, and several optional parameters specified in the request.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Newly added user with the detailed information")]
     [HttpPost("active")]
     public async Task<EmployeeFullDto> AddMemberAsActivatedAsync(MemberRequestDto inDto)
     {
@@ -171,8 +177,12 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Newly added user with the detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
+    [EndpointName("addMember")]
+    [EndpointSummary("Add a user")]
+    [EndpointDescription("Adds a new portal user with the first name, last name, email address, and several optional parameters specified in the request.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Newly added user with the detailed information")]
+    [OpenApiResponse(403, "The invitation link is invalid or its validity has expired")]
+    [OpenApiResponse(404, "User not found")]
     [HttpPost]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
@@ -318,8 +328,11 @@ public class UserController(
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "List of users", typeof(List<EmployeeDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("inviteUsers")]
+    [EndpointSummary("Invite users")]
+    [EndpointDescription("Invites users specified in the request to the current portal.")]
+    [OpenApiResponse(typeof(List<EmployeeDto>), 200, "List of users")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPost("invite")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
@@ -414,10 +427,13 @@ public class UserController(
     /// <short>Change a user password</short>
     /// <path>api/2.0/people/{userid}/password</path>
     [Tags("People / Password")]
-    [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorrect email")]
-    [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("changeUserPassword")]
+    [EndpointSummary("Change a user password")]
+    [EndpointDescription("Sets a new password to the user with the ID specified in the request.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed user information")]
+    [OpenApiResponse(400, "Incorrect email")]
+    [OpenApiResponse(403, "The invitation link is invalid or its validity has expired")]
+    [OpenApiResponse(404, "User not found")]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
@@ -501,9 +517,12 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Deleted user detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("deleteMember")]
+    [EndpointSummary("Delete a user")]
+    [EndpointDescription("Deletes a user with the ID specified in the request from the portal.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Deleted user detailed information")]
+    [OpenApiResponse(403, "You don't have enough permission to perform the operation")]
+    [OpenApiResponse(404, "User not found")]
     [HttpDelete("{userid}")]
     public async Task<EmployeeFullDto> DeleteMemberAsync(GetMemberByIdRequestDto inDto)
     {
@@ -552,9 +571,12 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/@self</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Detailed information about my profile", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("deleteProfile")]
+    [EndpointSummary("Delete my profile")]
+    [EndpointDescription("Deletes the current user profile.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed information about my profile")]
+    [OpenApiResponse(403, "You don't have enough permission to perform the operation")]
+    [OpenApiResponse(404, "User not found")]
     [HttpDelete("@self")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "ProfileRemove")]
     public async Task<EmployeeFullDto> DeleteProfile()
@@ -601,9 +623,12 @@ public class UserController(
     /// Removes guests from the list and from rooms
     /// </short>
     /// <path>api/2.0/people/guests</path>
-    [SwaggerResponse(200, "Request parameters for deleting guests")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
     [Tags("People / Guests")]
+    [EndpointName("deleteGuests")]
+    [EndpointSummary("Remove guests from the list and from rooms")]
+    [EndpointDescription("Removes guests from the list and from rooms to which you have invited them")]
+    [OpenApiResponse(200, "Request parameters for deleting guests")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpDelete("guests")]
     public async Task DeleteGuestsAsync(UpdateMembersRequestDto inDto)
     {
@@ -644,7 +669,10 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [EndpointName("getAdvanced")]
+    [EndpointSummary("Search users by status filter")]
+    [EndpointDescription("Returns a list of users matching the status filter and search query.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> GetAdvanced(AdvancedSearchDto inDto)
     {
@@ -679,7 +707,10 @@ public class UserController(
     /// <path>api/2.0/people</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [EndpointName("getAll")]
+    [EndpointSummary("Get profiles")]
+    [EndpointDescription("Returns a list of profiles for all the portal users.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
     [HttpGet]
     public IAsyncEnumerable<EmployeeFullDto> GetAll()
     {
@@ -695,8 +726,11 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("getByEmail")]
+    [EndpointSummary("Get a profile by user email")]
+    [EndpointDescription("Returns the detailed information about a profile of the user with the email specified in the request.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed profile information")]
+    [OpenApiResponse(404, "User not found")]
     [AllowNotPayment]
     [HttpGet("email")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
@@ -728,9 +762,12 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/{username}</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorect UserId")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("getById")]
+    [EndpointSummary("Get a profile by user name")]
+    [EndpointDescription("Returns the detailed information about a profile of the user with the name specified in the request.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed profile information")]
+    [OpenApiResponse(400, "Incorect UserId")]
+    [OpenApiResponse(404, "User not found")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     [HttpGet("{userid}", Order = 1)]
@@ -776,7 +813,10 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [EndpointName("getByStatus")]
+    [EndpointSummary("Get profiles by status")]
+    [EndpointDescription("Returns a list of profiles filtered by user status.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
     [HttpGet("status/{status}")]
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(GetByStatusRequestDto inDto)
     {
@@ -808,8 +848,11 @@ public class UserController(
     /// <path>api/2.0/people/filter</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getFullByFilter")]
+    [EndpointSummary("Search users and their information by extended filter")]
+    [EndpointDescription("Returns a list of users with full information about them matching the parameters specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("filter")]
     public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(SimpleByFilterRequestDto inDto)
     {
@@ -846,7 +889,9 @@ public class UserController(
     /// <path>api/2.0/people/info</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Module")]
-    [SwaggerResponse(200, "Module information", typeof(Module))]
+    [EndpointSummary("Get the People information")]
+    [EndpointDescription("Returns the information about the People module.")]
+    [OpenApiResponse(typeof(Module), 200, "Module information")]
     [HttpGet("info")]
     public Module GetModule()
     {
@@ -863,7 +908,10 @@ public class UserController(
     /// <path>api/2.0/people/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users", typeof(IAsyncEnumerable<EmployeeDto>))]
+    [EndpointName("getPeopleSearch")]
+    [EndpointSummary("Search users (using query parameters)")]
+    [EndpointDescription("Returns a list of users matching the search query. This method uses the query parameters.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeDto>), 200, "List of users")]
     [HttpGet("search")]
     public IAsyncEnumerable<EmployeeDto> GetPeopleSearch(GetPeopleByQueryRequestDto inDto)
     {
@@ -878,7 +926,10 @@ public class UserController(
     /// <path>api/2.0/people/@search/{query}</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [EndpointName("getSearch")]
+    [EndpointSummary("Search users")]
+    [EndpointDescription("Returns a list of users matching the search query.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
     [HttpGet("@search/{query}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetSearch(GetMemberByQueryRequestDto inDto)
     {
@@ -905,8 +956,11 @@ public class UserController(
     /// <path>api/2.0/people/simple/filter</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users", typeof(IAsyncEnumerable<EmployeeDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getSimpleByFilter")]
+    [EndpointSummary("Search users by extended filter")]
+    [EndpointDescription("Returns a list of users matching the parameters specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeDto>), 200, "List of users")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("simple/filter")]
     public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(SimpleByFilterRequestDto inDto)
     {
@@ -945,7 +999,10 @@ public class UserController(
     /// <path>api/2.0/people/delete</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [EndpointName("removeUsers")]
+    [EndpointSummary("Delete users")]
+    [EndpointDescription("Deletes a list of the users with the IDs specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
     {
@@ -1001,8 +1058,11 @@ public class UserController(
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("resendUserInvites")]
+    [EndpointSummary("Resend activation emails")]
+    [EndpointDescription("Resends emails to the users who have not activated their emails.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpPut("invite")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -1140,7 +1200,10 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
-    [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
+    [EndpointName("getTheme")]
+    [EndpointSummary("Get portal theme")]
+    [EndpointDescription("Returns a theme which is set to the current portal.")]
+    [OpenApiResponse(typeof(DarkThemeSettings), 200, "Theme")]
     [HttpGet("theme")]
     public async Task<DarkThemeSettings> GetThemeAsync()
     {
@@ -1155,7 +1218,10 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
-    [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
+    [EndpointName("changeTheme")]
+    [EndpointSummary("Change portal theme")]
+    [EndpointDescription("Changes the current portal theme.")]
+    [OpenApiResponse(typeof(DarkThemeSettings), 200, "Theme")]
     [HttpPut("theme")]
     public async Task<DarkThemeSettings> ChangeThemeAsync(DarkThemeSettingsRequestDto inDto)
     {
@@ -1177,7 +1243,10 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/@self</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Detailed information about my profile", typeof(EmployeeFullDto))]
+    [EndpointName("self")]
+    [EndpointSummary("Get my profile")]
+    [EndpointDescription("Returns the detailed information about the current user profile.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed information about my profile")]
     [AllowNotPayment]
     [HttpGet("@self")]
     public async Task<EmployeeFullDto> SelfAsync()
@@ -1201,10 +1270,13 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Message text", typeof(object))]
-    [SwaggerResponse(400, "Incorrect userId or email")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("sendEmailChangeInstructions")]
+    [EndpointSummary("Send instructions to change email")]
+    [EndpointDescription("Sends a message to the user email with the instructions to change the email address connected to the portal.")]
+    [OpenApiResponse(typeof(object), 200, "Message text")]
+    [OpenApiResponse(400, "Incorrect userId or email")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(404, "User not found")]
     [AllowNotPayment]
     [HttpPost("email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -1292,8 +1364,11 @@ public class UserController(
     /// <path>api/2.0/people/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
-    [SwaggerResponse(200, "Email with the password", typeof(object))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("sendUserPassword")]
+    [EndpointSummary("Remind a user password")]
+    [EndpointDescription("Reminds a password to the user using the email address specified in the request.")]
+    [OpenApiResponse(typeof(object), 200, "Email with the password")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
@@ -1328,7 +1403,10 @@ public class UserController(
     /// <path>api/2.0/people/activationstatus/{activationstatus}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [EndpointName("updateEmployeeActivationStatus")]
+    [EndpointSummary("Set an activation status to the users")]
+    [EndpointDescription("Sets the required activation status to the list of users with the IDs specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
     [AllowNotPayment]
     [HttpPut("activationstatus/{activationstatus}")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,Everyone")]
@@ -1385,9 +1463,12 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/{userid}/culture</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("updateMemberCulture")]
+    [EndpointSummary("Update user language")]
+    [EndpointDescription("Updates the user language with the parameter specified in the request.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed user information")]
+    [OpenApiResponse(403, "You don't have enough permission to perform the operation")]
+    [OpenApiResponse(404, "User not found")]
     [HttpPut("{userid}/culture")]
     public async Task<EmployeeFullDto> UpdateMemberCulture(UpdateMemberByIdRequestDto inDto)
     {
@@ -1413,10 +1494,13 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Updated user with the detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorrect user name")]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("updateMember")]
+    [EndpointSummary("Update a user")]
+    [EndpointDescription("Updates the data for the selected portal user with the first name, last name, email address, and/or optional parameters specified in the request.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Updated user with the detailed information")]
+    [OpenApiResponse(400, "Incorrect user name")]
+    [OpenApiResponse(403, "You don't have enough permission to perform the operation")]
+    [OpenApiResponse(404, "User not found")]
     [HttpPut("{userid}", Order = 1)]
     public async Task<EmployeeFullDto> UpdateMember(UpdateMemberByIdRequestDto inDto)
     {
@@ -1574,7 +1658,10 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [EndpointName("updateUserStatus")]
+    [EndpointSummary("Change a user status")]
+    [EndpointDescription("Changes a status for the users with the IDs specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
     [HttpPut("status/{status}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserStatus(UpdateMemberStatusRequestDto inDto)
     {
@@ -1667,7 +1754,10 @@ public class UserController(
     /// <path>api/2.0/people/type/{type}</path>
     /// <collection>list</collection>
     [Tags("People / User type")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [EndpointName("updateUserType")]
+    [EndpointSummary("Change a user type")]
+    [EndpointDescription("Changes a type for the users with the IDs specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
     [HttpPut("type/{type}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserTypeAsync(UpdateMemberTypeRequestDto inDto)
     {
@@ -1703,6 +1793,9 @@ public class UserController(
     /// <path>api/2.0/people/recalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Quota")]
+    [EndpointName("recalculateQuota")]
+    [EndpointSummary("Recalculate quota")]
+    [EndpointDescription("Starts the process of recalculating quota.")]
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -1719,7 +1812,10 @@ public class UserController(
     /// <path>api/2.0/people/checkrecalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Quota")]
-    [SwaggerResponse(200, "Task progress", typeof(TaskProgressDto))]
+    [EndpointName("checkRecalculateQuota")]
+    [EndpointSummary("Check quota recalculation")]
+    [EndpointDescription("Checks the process of recalculating quota.")]
+    [OpenApiResponse(typeof(TaskProgressDto), 200, "Task progress")]
     [HttpGet("checkrecalculatequota")]
     public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
     {
@@ -1736,8 +1832,11 @@ public class UserController(
     /// <path>api/2.0/people/userquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(402, "Failed to set quota per user. The entered value is greater than the total DocSpace storage")]
+    [EndpointName("updateUserQuota")]
+    [EndpointSummary("Change a user quota limit")]
+    [EndpointDescription("Changes a quota limit for the users with the IDs specified in the request.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
+    [OpenApiResponse(402, "Failed to set quota per user. The entered value is greater than the total DocSpace storage")]
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
@@ -1764,6 +1863,7 @@ public class UserController(
         if (coreBaseSettings.Standalone)
         {
             var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+
             if (tenantQuotaSetting.EnableQuota)
             {
                 if (tenantQuotaSetting.Quota < quota)
@@ -1806,9 +1906,12 @@ public class UserController(
     /// <path>api/2.0/people/resetquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]
-    [SwaggerResponse(200, "User detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
+    [EndpointName("resetUsersQuota")]
+    [EndpointSummary("Reset a user quota limit")]
+    [EndpointDescription("Resets a user quota limit with the ID specified in the request from the portal.")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "User detailed information")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
+    [OpenApiResponse(403, "The invitation link is invalid or its validity has expired")]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<EmployeeFullDto> ResetUsersQuota(UpdateMembersQuotaRequestDto inDto)
     {
@@ -2130,8 +2233,11 @@ public class UserControllerAdditional<T>(
     /// </summary>
     /// <path>api/2.0/people/room/{id}</path>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getUsersWithRoomShared")]
+    [EndpointSummary("Get users with shared in room")]
+    [EndpointDescription("Gets users with shared in room ID specified in request")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(UsersWithRoomSharedRequestDto<T> inDto)
     {

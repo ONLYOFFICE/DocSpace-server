@@ -34,16 +34,19 @@ public class SecurityInfoRequestDto : BaseBatchRequestDto
     /// <summary>
     /// Collection of sharing parameters
     /// </summary>
+    [OpenApiDescription("Collection of sharing parameters")]
     public IEnumerable<FileShareParams> Share { get; set; }
 
     /// <summary>
     /// Notifies users about the shared file or not
     /// </summary>
+    [OpenApiDescription("Notifies users about the shared file or not")]
     public bool Notify { get; set; }
 
     /// <summary>
     /// Message to send when notifying about the shared file
     /// </summary>
+    [OpenApiDescription("Message to send when notifying about the shared file")]
     public string SharingMessage { get; set; }
 }
 
@@ -55,16 +58,19 @@ public class SecurityInfoSimpleRequestDto
     /// <summary>
     /// Collection of sharing parameters
     /// </summary>
+    [OpenApiDescription("Collection of sharing parameters")]
     public IEnumerable<FileShareParams> Share { get; set; }
 
     /// <summary>
     /// Notifies users about the shared file or not
     /// </summary>
+    [OpenApiDescription("Notifies users about the shared file or not")]
     public bool Notify { get; set; }
 
     /// <summary>
     /// Message to send when notifying about the shared file
     /// </summary>
+    [OpenApiDescription("Message to send when notifying about the shared file")]
     public string SharingMessage { get; set; }
 }
 
@@ -77,12 +83,14 @@ public class FileSecurityInfoSimpleRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// Security info simple
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Security info simple")]
     public SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }
 }
 
@@ -95,11 +103,13 @@ public class FolderSecurityInfoSimpleRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// Security info simple
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Security info simple")]
     public SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }
 }

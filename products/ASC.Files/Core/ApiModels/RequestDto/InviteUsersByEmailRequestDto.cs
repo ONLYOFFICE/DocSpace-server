@@ -31,15 +31,18 @@ public class InviteUsersByEmailRequestDto
     /// <summary>
     /// Emails
     /// </summary>
+    [OpenApiDescription("Emails")]
     public IEnumerable<string> Emails { get; set; }
 
     /// <summary>
     /// Employee type
     /// </summary>
+    [OpenApiDescription("Employee type")]
     public EmployeeType EmployeeType { get; set; }
 
     /// <summary>
     /// Access
     /// </summary>
+    [OpenApiDescription("Access")]
     public FileShare Access { get; set; }
 }

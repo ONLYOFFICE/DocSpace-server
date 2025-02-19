@@ -31,37 +31,44 @@ public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
     /// <summary>
     /// Company name
     /// </summary>
+    [OpenApiDescription("Company name")]
     public string CompanyName { get; set; }
 
     /// <summary>
     /// Site
     /// </summary>
+    [OpenApiDescription("Site")]
     public string Site { get; set; }
 
     /// <summary>
     /// Email
     /// </summary>
     [EmailAddress]
+    [OpenApiDescription("Email")]
     public string Email { get; set; }
 
     /// <summary>
     /// Address
     /// </summary>
+    [OpenApiDescription("Address")]
     public string Address { get; set; }
 
     /// <summary>
     /// Phone number
     /// </summary>
+    [OpenApiDescription("Phone number")]
     public string Phone { get; set; }
 
     /// <summary>
     /// Specifies if a company is a licensor or not
     /// </summary>
+    [OpenApiDescription("Specifies if a company is a licensor or not")]
     public bool IsLicensor { get; set; }
 
     /// <summary>
     /// Specifies if these settings are default or not
     /// </summary>
+    [OpenApiDescription("Specifies if these settings are default or not")]
     public bool IsDefault { get; set; }
 
     public void Mapping(Profile profile)

@@ -2594,99 +2594,99 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public enum FilesSecurityActions
     {
-        [SwaggerEnum("Read")]
+        [OpenApiEnum("Read")]
         Read,
 
-        [SwaggerEnum("Comment")]
+        [OpenApiEnum("Comment")]
         Comment,
 
-        [SwaggerEnum("Fill forms")]
+        [OpenApiEnum("Fill forms")]
         FillForms,
 
-        [SwaggerEnum("Review")]
+        [OpenApiEnum("Review")]
         Review,
 
-        [SwaggerEnum("Create")]
+        [OpenApiEnum("Create")]
         Create,
 
-        [SwaggerEnum("Edit")]
+        [OpenApiEnum("Edit")]
         Edit,
 
-        [SwaggerEnum("Delete")]
+        [OpenApiEnum("Delete")]
         Delete,
 
-        [SwaggerEnum("Custom filter")]
+        [OpenApiEnum("Custom filter")]
         CustomFilter,
 
-        [SwaggerEnum("Edit room")]
+        [OpenApiEnum("Edit room")]
         EditRoom,
 
-        [SwaggerEnum("Rename")]
+        [OpenApiEnum("Rename")]
         Rename,
 
-        [SwaggerEnum("Read history")]
+        [OpenApiEnum("Read history")]
         ReadHistory,
 
-        [SwaggerEnum("Lock")]
+        [OpenApiEnum("Lock")]
         Lock,
 
-        [SwaggerEnum("Edit history")]
+        [OpenApiEnum("Edit history")]
         EditHistory,
 
-        [SwaggerEnum("Copy to")]
+        [OpenApiEnum("Copy to")]
         CopyTo,
 
-        [SwaggerEnum("Copy")]
+        [OpenApiEnum("Copy")]
         Copy,
 
-        [SwaggerEnum("Move to")]
+        [OpenApiEnum("Move to")]
         MoveTo,
 
-        [SwaggerEnum("Move")]
+        [OpenApiEnum("Move")]
         Move,
 
-        [SwaggerEnum("Pin")]
+        [OpenApiEnum("Pin")]
         Pin,
 
-        [SwaggerEnum("Mute")]
+        [OpenApiEnum("Mute")]
         Mute,
 
-        [SwaggerEnum("Edit access")]
+        [OpenApiEnum("Edit access")]
         EditAccess,
 
-        [SwaggerEnum("Duplicate")]
+        [OpenApiEnum("Duplicate")]
         Duplicate,
 
-        [SwaggerEnum("Submit to form gallery")]
+        [OpenApiEnum("Submit to form gallery")]
         SubmitToFormGallery,
 
-        [SwaggerEnum("Download")]
+        [OpenApiEnum("Download")]
         Download,
 
-        [SwaggerEnum("Convert")]
+        [OpenApiEnum("Convert")]
         Convert,
 
-        [SwaggerEnum("Copy shared link")]
+        [OpenApiEnum("Copy shared link")]
         CopySharedLink,
 
-        [SwaggerEnum("Read links")]
+        [OpenApiEnum("Read links")]
         ReadLinks,
 
-        [SwaggerEnum("Reconnect")]
+        [OpenApiEnum("Reconnect")]
         Reconnect,
 
-        [SwaggerEnum("Create room from")]
+        [OpenApiEnum("Create room from")]
         CreateRoomFrom,
 
-        [SwaggerEnum("Copy link")]
+        [OpenApiEnum("Copy link")]
         CopyLink,
 
-        [SwaggerEnum("Embed")]
+        [OpenApiEnum("Embed")]
         Embed,
 
-        [SwaggerEnum("Change owner")]        ChangeOwner,
+        [OpenApiEnum("Change owner")]        ChangeOwner,
 
-        [SwaggerEnum("Index export")]
+        [OpenApiEnum("Index export")]
         IndexExport
     }
 }

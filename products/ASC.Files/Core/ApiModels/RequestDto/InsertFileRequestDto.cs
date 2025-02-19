@@ -34,21 +34,25 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// File
     /// </summary>
+    [OpenApiDescription("File")]
     public IFormFile File { get; set; }
 
     /// <summary>
     /// File name
     /// </summary>
+    [OpenApiDescription("File name")]
     public string Title { get; set; }
 
     /// <summary>
     /// Specifies whether to create a new file if it already exists or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to create a new file if it already exists or not")]
     public bool CreateNewIfExist { get; set; }
 
     /// <summary>
     /// Specifies whether to keep the file converting status or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to keep the file converting status or not")]
     public bool KeepConvertStatus { get; set; }
 
 
@@ -58,6 +62,7 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// Request input stream
     /// </summary>
+    [OpenApiDescription("Request input stream")]
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;
@@ -100,6 +105,7 @@ public class InsertWithFileRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
@@ -107,5 +113,6 @@ public class InsertWithFileRequestDto<T>
     /// </summary>
     [FromForm]
     [ModelBinder(BinderType = typeof(InsertFileModelBinder))]
+    [OpenApiDescription("Insert file")]
     public InsertFileRequestDto InsertFile { get; set; }
 }

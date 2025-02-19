@@ -37,6 +37,7 @@ public class EmailInvitationDto
     /// Email address
     /// </summary>
     [EmailAddress]
+    [OpenApiDescription("Email address")]
     public string Email { get; set; }
 }
 

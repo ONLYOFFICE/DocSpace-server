@@ -34,6 +34,7 @@ public class ExternalShareRequestParam
     /// <summary>
     /// Password
     /// </summary>
+    [OpenApiDescription("Password")]
     public string Password { get; set; }
 }
 
@@ -46,11 +47,13 @@ public class ExternalShareRequestDto
     /// The unique document identifier
     /// </summary>
     [FromRoute(Name = "key")]
+    [OpenApiDescription("The unique document identifier")]
     public string Key { get; set; }
 
     /// <summary>
     /// External data parameters
     /// </summary>
     [FromBody]
+    [OpenApiDescription("External data parameters")]
     public ExternalShareRequestParam RequestParam { get; set; }
 }

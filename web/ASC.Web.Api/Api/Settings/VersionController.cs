@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,7 +45,10 @@ public class VersionController(PermissionContext permissionContext,
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Versions")]
-    [SwaggerResponse(200, "Current product versions", typeof(BuildVersion))]
+    [EndpointName("getBuildVersions")]
+    [EndpointSummary("Get the current build version")]
+    [EndpointDescription("Returns the current build version.")]
+    [OpenApiResponse(typeof(BuildVersion), 200, "Current product versions")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("build")]
@@ -63,7 +66,10 @@ public class VersionController(PermissionContext permissionContext,
     /// <path>api/2.0/settings/version</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Versions")]
-    [SwaggerResponse(200, "List of availibe portal versions including the current version", typeof(TenantVersionDto))]
+    [EndpointName("getVersions")]
+    [EndpointSummary("Get the portal versions")]
+    [EndpointDescription("Returns a list of the available portal versions including the current version.")]
+    [OpenApiResponse(typeof(TenantVersionDto), 200, "List of availibe portal versions including the current version")]
     [HttpGet("")]
     public async Task<TenantVersionDto> GetVersionsAsync()
     {
@@ -80,7 +86,10 @@ public class VersionController(PermissionContext permissionContext,
     /// <path>api/2.0/settings/version</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Versions")]
-    [SwaggerResponse(200, "List of availibe portal versions including the current version", typeof(TenantVersionDto))]
+    [EndpointName("setVersion")]
+    [EndpointSummary("Change the portal version")]
+    [EndpointDescription("Sets a version with the ID specified in the request to the current tenant.")]
+    [OpenApiResponse(typeof(TenantVersionDto), 200, "List of availibe portal versions including the current version")]
     [HttpPut("")]
     public async Task<TenantVersionDto> SetVersionAsync(SettingsRequestsDto inDto)
     {

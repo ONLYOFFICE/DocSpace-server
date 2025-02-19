@@ -28,57 +28,57 @@ namespace ASC.Files.Core;
 
 public enum FilterType
 {
-    [SwaggerEnum("None")]
+    [OpenApiEnum("None")]
     [EnumMember] None = 0,
 
-    [SwaggerEnum("Files  only")]
+    [OpenApiEnum("Files  only")]
     [EnumMember] FilesOnly = 1,
 
-    [SwaggerEnum("Folders only")]
+    [OpenApiEnum("Folders only")]
     [EnumMember] FoldersOnly = 2,
 
-    [SwaggerEnum("Documents only")]
+    [OpenApiEnum("Documents only")]
     [EnumMember] DocumentsOnly = 3,
 
-    [SwaggerEnum("Presentations only")]
+    [OpenApiEnum("Presentations only")]
     [EnumMember] PresentationsOnly = 4,
 
-    [SwaggerEnum("Spreadsheets only")]
+    [OpenApiEnum("Spreadsheets only")]
     [EnumMember] SpreadsheetsOnly = 5,
 
-    [SwaggerEnum("Images only")]
+    [OpenApiEnum("Images only")]
     [EnumMember] ImagesOnly = 7,
 
-    [SwaggerEnum("By user")]
+    [OpenApiEnum("By user")]
     [EnumMember] ByUser = 8,
 
-    [SwaggerEnum("By department")]
+    [OpenApiEnum("By department")]
     [EnumMember] ByDepartment = 9,
 
-    [SwaggerEnum("Archive only")]
+    [OpenApiEnum("Archive only")]
     [EnumMember] ArchiveOnly = 10,
 
-    [SwaggerEnum("By extension")]
+    [OpenApiEnum("By extension")]
     [EnumMember] ByExtension = 11,
 
-    [SwaggerEnum("Media only")]
+    [OpenApiEnum("Media only")]
     [EnumMember] MediaOnly = 12,
 
-    [SwaggerEnum("Filling forms rooms")]
+    [OpenApiEnum("Filling forms rooms")]
     [EnumMember] FillingFormsRooms = 13,
 
-    [SwaggerEnum("Editing rooms")]
+    [OpenApiEnum("Editing rooms")]
     [EnumMember] EditingRooms = 14,
 
-    [SwaggerEnum("Custom rooms")]
+    [OpenApiEnum("Custom rooms")]
     [EnumMember] CustomRooms = 17,
 
-    [SwaggerEnum("Public rooms")]
+    [OpenApiEnum("Public rooms")]
     [EnumMember] PublicRooms = 20,
 
-    [SwaggerEnum("Pdf")]
+    [OpenApiEnum("Pdf")]
     [EnumMember] Pdf = 22,
-    [SwaggerEnum("Pdf form")]
+    [OpenApiEnum("Pdf form")]
     [EnumMember] PdfForm = 23,
     [EnumMember] VirtualDataRooms = 24
 }

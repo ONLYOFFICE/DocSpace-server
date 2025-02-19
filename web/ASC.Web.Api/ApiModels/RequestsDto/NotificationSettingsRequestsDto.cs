@@ -34,11 +34,13 @@ public class NotificationSettingsRequestsDto
     /// <summary>
     /// Notification type
     /// </summary>
+    [OpenApiDescription("Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)")]
     public NotificationType Type { get; set; }
 
     /// <summary>
     /// Specifies if the notification type is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the notification type is enabled or not")]
     public bool IsEnabled { get; set; }
 }
 
@@ -52,5 +54,6 @@ public class NotificationTypeRequestsDto
     /// Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)
     /// </summary>
     [FromRoute(Name = "type")]
+    [OpenApiDescription("Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)")]
     public NotificationType Type { get; set; }
 }

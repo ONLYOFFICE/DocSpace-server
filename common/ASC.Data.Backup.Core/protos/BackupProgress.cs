@@ -27,13 +27,13 @@ namespace ASC.Data.Backup.Contracts;
 
 public enum BackupProgressEnum
 {
-    [SwaggerEnum(Description = "Backup")]
+    [OpenApiEnum(Description = "Backup")]
     Backup,
 
-    [SwaggerEnum(Description = "Restore")]
+    [OpenApiEnum(Description = "Restore")]
     Restore,
 
-    [SwaggerEnum(Description = "Transfer")]
+    [OpenApiEnum(Description = "Transfer")]
     Transfer
 }
 
@@ -44,42 +44,49 @@ public record BackupProgress
     /// Completed or not
     /// </summary>
     [ProtoMember(1)]
+    [OpenApiDescription("Completed or not")]
     public bool IsCompleted { get; set; }
 
     /// <summary>
     /// Progress
     /// </summary>
     [ProtoMember(2)]
+    [OpenApiDescription("Progress")]
     public int Progress { get; set; }
 
     /// <summary>
     /// Error
     /// </summary>
     [ProtoMember(3)]
+    [OpenApiDescription("Error")]
     public string Error { get; set; }
 
     /// <summary>
     /// Link
     /// </summary>
     [ProtoMember(4)]
+    [OpenApiDescription("Link")]
     public string Link { get; set; }
 
     /// <summary>
     /// Tenant id
     /// </summary>
     [ProtoMember(5)]
+    [OpenApiDescription("Tenant id")]
     public int TenantId { get; set; }
 
     /// <summary>
     /// Backup progress type
     /// </summary>
     [ProtoMember(6)]
+    [OpenApiDescription("Backup progress type")]
     public BackupProgressEnum BackupProgressEnum { get; set;}
 
     /// <summary>
     /// Task id
     /// </summary>
     [ProtoMember(7)]
+    [OpenApiDescription("Task id")]
     public string TaskId { get; set; }
 }
 

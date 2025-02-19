@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,7 +46,10 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <path>api/2.0/modules</path>
     /// <collection>list</collection>
     [Tags("Modules")]
-    [SwaggerResponse(200, "List of modules", typeof(IEnumerable<string>))]
+    [EndpointName("getAllPortalModules")]
+    [EndpointSummary("Get modules")]
+    [EndpointDescription("Returns a list of all the portal modules.")]
+    [OpenApiResponse(typeof(IEnumerable<string>), 200, "List of modules")]
     [HttpGet]
     public IEnumerable<string> GetAllPortalModules()
     {
@@ -69,7 +72,10 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <path>api/2.0/modules/info</path>
     /// <collection>list</collection>
     [Tags("Modules")]
-    [SwaggerResponse(200, "List of modules with their information", typeof(IEnumerable<Module>))]
+    [EndpointName("getAllWithInfo")]
+    [EndpointSummary("Get modules information")]
+    [EndpointDescription("Returns a list of all the portal modules with their information.")]
+    [OpenApiResponse(typeof(IEnumerable<Module>), 200, "List of modules with their information")]
     [HttpGet("info")]
     public IEnumerable<Module> GetAllWithInfo()
     {

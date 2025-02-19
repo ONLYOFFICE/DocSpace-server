@@ -29,19 +29,19 @@ namespace ASC.Files.Core.VirtualRooms;
 [Flags]
 public enum WatermarkAdditions
 {
-    [SwaggerEnum("User name")]
+    [OpenApiEnum("User name")]
     UserName = 1,
 
-    [SwaggerEnum("User email")]
+    [OpenApiEnum("User email")]
     UserEmail = 2,
 
-    [SwaggerEnum("User ip adress")]
+    [OpenApiEnum("User ip adress")]
     UserIpAdress = 4,
 
-    [SwaggerEnum("Current date")]
+    [OpenApiEnum("Current date")]
     CurrentDate = 8,
 
-    [SwaggerEnum("Room name")]
+    [OpenApiEnum("Room name")]
     RoomName = 16
 }
 public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRequestDto>

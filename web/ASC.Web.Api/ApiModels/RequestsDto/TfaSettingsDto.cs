@@ -31,35 +31,42 @@ public class TfaSettingsDto
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public string Id { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Specifies if the TFA settings are enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the TFA settings are enabled or not")]
     public bool Enabled { get; set; }
 
     /// <summary>
     /// Specifies if the TFA settings are available or not
     /// </summary>
+    [OpenApiDescription("Specifies if the TFA settings are available or not")]
     public bool Avaliable { get; set; }
 
     /// <summary>
     /// List of trusted IP addresses
     /// </summary>
+    [OpenApiDescription("List of trusted IP addresses")]
     public List<string> TrustedIps { get; set; }
 
     /// <summary>
     /// List of users who must use the TFA verification
     /// </summary>
+    [OpenApiDescription("List of users who must use the TFA verification")]
     public List<Guid> MandatoryUsers { get; set; }
 
     /// <summary>
     /// List of groups who must use the TFA verification
     /// </summary>
+    [OpenApiDescription("List of groups who must use the TFA verification")]
     public List<Guid> MandatoryGroups { get; set; }
 }

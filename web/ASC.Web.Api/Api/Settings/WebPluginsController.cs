@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,9 +44,12 @@ public class WebPluginsController(ApiContext apiContext,
     /// <path>api/2.0/settings/webplugins</path>
     /// <exception cref="CustomHttpException"></exception>
     [Tags("Settings / Webplugins")]
-    [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
-    [SwaggerResponse(400, "bad request")]
-    [SwaggerResponse(403, "Plugins disabled")]
+    [EndpointName("addWebPluginFromFile")]
+    [EndpointSummary("Add web plugin from file")]
+    [EndpointDescription("Adds web plugins from file.")]
+    [OpenApiResponse(typeof(WebPluginDto), 200, "Web plugin")]
+    [OpenApiResponse(400, "bad request")]
+    [OpenApiResponse(403, "Plugins disabled")]
     [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(WebPluginFromFileRequestDto inDto)
     {
@@ -80,8 +83,11 @@ public class WebPluginsController(ApiContext apiContext,
     /// </summary>
     /// <path>api/2.0/settings/webplugins</path>
     [Tags("Settings / Webplugins")]
-    [SwaggerResponse(200, "Web plugin", typeof(IEnumerable<WebPluginDto>))]
-    [SwaggerResponse(403, "Plugins disabled")]
+    [EndpointName("getWebPlugins")]
+    [EndpointSummary("Get web plugins")]
+    [EndpointDescription("Gets web plugins.")]
+    [OpenApiResponse(typeof(IEnumerable<WebPluginDto>), 200, "Web plugin")]
+    [OpenApiResponse(403, "Plugins disabled")]
     [HttpGet("")]
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(GetWebPluginsRequestDto inDto)
     {
@@ -104,8 +110,11 @@ public class WebPluginsController(ApiContext apiContext,
     /// </summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
-    [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
-    [SwaggerResponse(403, "Plugins disabled")]
+    [EndpointName("getWebPluginByName")]
+    [EndpointSummary("Get web plugin by name")]
+    [EndpointDescription("Gets web plugins by name specified in request.")]
+    [OpenApiResponse(typeof(WebPluginDto), 200, "Web plugin")]
+    [OpenApiResponse(403, "Plugins disabled")]
     [HttpGet("{name}")]
     public async Task<WebPluginDto> GetWebPluginAsync(WebPluginNameRequestDto inDto)
     {
@@ -123,8 +132,11 @@ public class WebPluginsController(ApiContext apiContext,
     /// </summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "Plugins disabled")]
+    [EndpointName("updateWebPlugin")]
+    [EndpointSummary("Update web plugin")]
+    [EndpointDescription("Updates web plugins.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "Plugins disabled")]
     [HttpPut("{name}")]
     public async Task UpdateWebPluginAsync(WebPluginRequestsDto inDto)
     {
@@ -142,8 +154,11 @@ public class WebPluginsController(ApiContext apiContext,
     /// </summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(403, "Plugins disabled")]
+    [EndpointName("deleteWebPlugin")]
+    [EndpointSummary("Delete web plugin")]
+    [EndpointDescription("Deletes web plugins by name specified in request.")]
+    [OpenApiResponse(200, "Ok")]
+    [OpenApiResponse(403, "Plugins disabled")]
     [HttpDelete("{name}")]
     public async Task DeleteWebPluginAsync(WebPluginNameRequestDto inDto)
     {

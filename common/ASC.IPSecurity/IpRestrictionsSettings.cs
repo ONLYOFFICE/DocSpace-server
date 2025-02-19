@@ -26,6 +26,8 @@
 
 using System.Text.Json.Serialization;
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.IPSecurity;
 
 public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
@@ -33,6 +35,7 @@ public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
     /// <summary>
     /// Specifies if the IP restrictions are enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the IP restrictions are enabled or not")]
     public bool Enable { get; init; }
 
     [JsonIgnore]

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,9 +54,12 @@ public class PhotoController(
     /// </short>
     /// <path>api/2.0/people/{userid}/photo/thumbnails</path>
     [Tags("People / Photos")]
-    [SwaggerResponse(200, "Thumbnail parameters", typeof(ThumbnailsDataDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("createMemberPhotoThumbnails")]
+    [EndpointSummary("Create photo thumbnails")]
+    [EndpointDescription("Creates photo thumbnails by coordinates of the original image specified in the request.")]
+    [OpenApiResponse(typeof(ThumbnailsDataDto), 200, "Thumbnail parameters")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(404, "User not found")]
     [HttpPost("{userid}/photo/thumbnails")]
     public async Task<ThumbnailsDataDto> CreateMemberPhotoThumbnails(ThumbnailsRequestDto inDto)
     {
@@ -110,9 +113,12 @@ public class PhotoController(
     /// </short>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
-    [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("deleteMemberPhoto")]
+    [EndpointSummary("Delete a user photo")]
+    [EndpointDescription("Deletes a photo of the user with the ID specified in the request.")]
+    [OpenApiResponse(typeof(ThumbnailsDataDto), 200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(404, "User not found")]
     [HttpDelete("{userid}/photo")]
     public async Task<ThumbnailsDataDto> DeleteMemberPhotoAsync(GetUserPhotoRequestDto inDto)
     {
@@ -146,9 +152,12 @@ public class PhotoController(
     /// </short>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
-    [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("getMemberPhoto")]
+    [EndpointSummary("Get a user photo")]
+    [EndpointDescription("Returns a photo of the user with the ID specified in the request.")]
+    [OpenApiResponse(typeof(ThumbnailsDataDto), 200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(404, "User not found")]
     [HttpGet("{userid}/photo")]
     public async Task<ThumbnailsDataDto> GetMemberPhoto(GetUserPhotoRequestDto inDto)
     {
@@ -170,9 +179,12 @@ public class PhotoController(
     /// </short>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
-    [SwaggerResponse(200, "Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("updateMemberPhoto")]
+    [EndpointSummary("Update a user photo")]
+    [EndpointDescription("Updates a photo of the user with the ID specified in the request.")]
+    [OpenApiResponse(typeof(ThumbnailsDataDto), 200, "Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(404, "User not found")]
     [HttpPut("{userid}/photo")]
     public async Task<ThumbnailsDataDto> UpdateMemberPhoto(UpdatePhotoMemberRequestDto inDto)
     {
@@ -208,7 +220,10 @@ public class PhotoController(
     /// </short>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
-    [SwaggerResponse(200, "Result of file uploading", typeof(FileUploadResultDto))]
+    [EndpointName("uploadMemberPhoto")]
+    [EndpointSummary("Upload a user photo")]
+    [EndpointDescription("Uploads a photo of the user with the ID specified in the request.")]
+    [OpenApiResponse(typeof(FileUploadResultDto), 200, "Result of file uploading")]
     [HttpPost("{userid}/photo")]
     public async Task<FileUploadResultDto> UploadMemberPhoto(UploadMemberPhotoRequestDto inDto)
     {

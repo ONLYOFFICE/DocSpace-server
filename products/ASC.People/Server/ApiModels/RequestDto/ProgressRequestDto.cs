@@ -36,5 +36,6 @@ public class ProgressRequestDto
     /// User ID whose data is reassigned
     /// </summary>
     [FromRoute(Name = "userid")]
+    [OpenApiDescription("User ID whose data is reassigned")]
     public Guid UserId { get; set; }
 }

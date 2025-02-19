@@ -34,10 +34,12 @@ public class RoomsNotificationsSettingsRequestDto
     /// <summary>
     /// Room ID
     /// </summary>
+    [OpenApiDescription("Room ID")]
     public object RoomsId { get; set; }
 
     /// <summary>
     /// Specifies if the room notifications are disabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the room notifications are disabled or not")]
     public bool Mute { get; set; }
 }

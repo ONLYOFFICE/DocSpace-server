@@ -34,12 +34,14 @@ public class WebPluginRequests
     /// <summary>
     /// Enabled
     /// </summary>
+    [OpenApiDescription("Enabled")]
     public bool Enabled { get; set; }
 
     /// <summary>
     /// Settings
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Settings")]
     public string Settings { get; set; }
 }
 
@@ -52,12 +54,14 @@ public class WebPluginRequestsDto
     /// Name
     /// </summary>
     [FromRoute(Name = "name")]
+    [OpenApiDescription("Name")]
     public string Name { get; set; }
 
     /// <summary>
     /// Web plugin
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Web plugin")]
     public WebPluginRequests WebPlugin { get; set; }
 }
 
@@ -70,6 +74,7 @@ public class WebPluginNameRequestDto
     /// Name
     /// </summary>
     [FromRoute(Name = "name")]
+    [OpenApiDescription("Name")]
     public string Name { get; set; }
 }
 
@@ -82,6 +87,7 @@ public class WebPluginFromFileRequestDto
     /// System
     /// </summary>
     [FromQuery(Name = "system")]
+    [OpenApiDescription("System")]
     public bool System { get; set; }
 }
 
@@ -95,5 +101,6 @@ public class GetWebPluginsRequestDto
     /// Enabled
     /// </summary>
     [FromQuery(Name = "enabled")]
+    [OpenApiDescription("Enabled")]
     public bool? Enabled { get; set; }
 }

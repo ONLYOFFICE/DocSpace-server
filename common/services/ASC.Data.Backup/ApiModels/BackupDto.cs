@@ -35,15 +35,18 @@ public class BackupDto
     /// Storage type
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
+    [OpenApiDescription("Storage type")]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
     /// Storage parameters
     /// </summary>
+    [OpenApiDescription("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
     /// Specifies if a dump will be created or not
     /// </summary>
+    [OpenApiDescription("Specifies if a dump will be created or not")]
     public bool Dump { get; set; }
 }

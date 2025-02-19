@@ -31,21 +31,24 @@ public class MigrationStatusDto
     /// <summary>
     /// Migration progress
     /// </summary>
-    [SwaggerSchemaCustom(Example = 1.0)]
+    [OpenApiDescription("Migration progress", Example = 1.0)]
     public double Progress { get; set; }
 
     /// <summary>
     /// Migration error
     /// </summary>
+    [OpenApiDescription("Migration error")]
     public string Error { get; set; }
 
     /// <summary>
     /// Migration API information
     /// </summary>
+    [OpenApiDescription("Migration API information")]
     public MigrationApiInfo ParseResult { get; set; }
 
     /// <summary>
     /// Specifies whether the migration is completed
     /// </summary>
+    [OpenApiDescription("Specifies whether the migration is completed")]
     public bool IsCompleted { get; set; }
 }

@@ -36,11 +36,13 @@ public class MoveGroupMemebersRequestDto
     /// Group ID to move from
     /// </summary>
     [FromRoute(Name = "fromId")]
+    [OpenApiDescription("Group ID to move from")]
     public Guid FromId { get; set; }
 
     /// <summary>
     /// Group ID to move to
     /// </summary>
     [FromRoute(Name = "toId")]
+    [OpenApiDescription("Group ID to move to")]
     public Guid ToId { get; set; }
 }

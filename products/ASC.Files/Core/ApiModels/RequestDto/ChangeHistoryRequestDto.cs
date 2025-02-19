@@ -34,11 +34,13 @@ public class ChangeHistory
     /// <summary>
     /// File version
     /// </summary>
+    [OpenApiDescription("File version")]
     public int Version { get; set; }
 
     /// <summary>
     /// Marks as a version or revision
     /// </summary>
+    [OpenApiDescription("Marks as a version or revision")]
     public bool ContinueVersion { get; set; }
 }
 
@@ -51,11 +53,13 @@ public class ChangeHistoryRequestDto<T>
     /// File Id
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File Id")]
     public T FileId { get; set; }
 
     /// <summary>
     /// File
     /// </summary>
     [FromBody]
+    [OpenApiDescription("File")]
     public ChangeHistory File { get; set; }
 }

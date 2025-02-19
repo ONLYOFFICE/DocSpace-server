@@ -31,32 +31,37 @@ public class FileShareDto
     /// <summary>
     /// Sharing rights
     /// </summary>
+    [OpenApiDescription("Sharing rights")]
     public FileShare Access { get; set; }
 
     /// <summary>
     /// A user who has the access to the specified file
     /// </summary>
+    [OpenApiDescription("A user who has the access to the specified file")]
     public object SharedTo { get; set; }
 
     /// <summary>
     /// Specifies if the file is locked by this user or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Specifies if the file is locked by this user or not", Example = false)]
     public bool IsLocked { get; set; }
 
     /// <summary>
     /// Specifies if this user is an owner of the specified file or not
     /// </summary>
+    [OpenApiDescription("Specifies if this user is an owner of the specified file or not", Example = false)]
     public bool IsOwner { get; set; }
 
     /// <summary>
     /// Spceifies if this user can edit the access to the specified file or not
     /// </summary>
+    [OpenApiDescription("Spceifies if this user can edit the access to the specified file or not", Example = false)]
     public bool CanEditAccess { get; set; }
 
     /// <summary>
     /// Subject type
     /// </summary>
+    [OpenApiDescription("Subject type")]
     public SubjectType SubjectType { get; set; }
 }
 
@@ -65,41 +70,76 @@ public class FileShareLink
     /// <summary>
     /// Id
     /// </summary>
+    [OpenApiDescription("Id")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Share link
     /// </summary>
+    [OpenApiDescription("Share link")]
     public string ShareLink { get; set; }
 
     /// <summary>
     /// Expiration date
     /// </summary>
+    [OpenApiDescription("Expiration date")]
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
     /// link type
     /// </summary>
+    [OpenApiDescription("link type")]
     public LinkType LinkType { get; set; }
+
+    /// <summary>
+    /// Password
+    /// </summary>
+    [OpenApiDescription("Password")]
     public string Password { get; set; }
+
+    /// <summary>
+    /// Deny download
+    /// </summary>
+    [OpenApiDescription("Deny download")]
     public bool? DenyDownload { get; set; }
+
+    /// <summary>
+    /// Is expired
+    /// </summary>
+    [OpenApiDescription("Is expired")]
     public bool? IsExpired { get; set; }
+
+    /// <summary>
+    /// Primary
+    /// </summary>
+    [OpenApiDescription("Primary")]
     public bool Primary { get; set; }
+
+    /// <summary>
+    /// Internal
+    /// </summary>
+    [OpenApiDescription("Internal")]
     public bool? Internal { get; set; }
+
+    /// <summary>
+    /// Request token
+    /// </summary>
+    [OpenApiDescription("Request token")]
     public string RequestToken { get; set; }
 }
 
 public enum LinkType
 {
-    [SwaggerEnum(Description = "Invitation")]
+    [OpenApiEnum(Description = "Invitation")]
     Invitation,
 
-    [SwaggerEnum(Description = "External")]
+    [OpenApiEnum(Description = "External")]
     External
 }
 

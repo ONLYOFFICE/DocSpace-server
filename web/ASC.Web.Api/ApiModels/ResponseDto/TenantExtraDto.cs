@@ -31,55 +31,66 @@ public class TenantExtraDto
     /// <summary>
     /// Specifies if the extra tenant license is customizable or not
     /// </summary>
+    [OpenApiDescription("Specifies if the extra tenant license is customizable or not")]
     public bool CustomMode { get; set; }
 
     /// <summary>
     /// Specifies if the extra tenant license is Opensource or not
     /// </summary>
+    [OpenApiDescription("Specifies if the extra tenant license is Opensource or not")]
     public bool Opensource { get; set; }
 
     /// <summary>
     /// Specifies if the extra tenant license is Enterprise or not
     /// </summary>
+    [OpenApiDescription("Specifies if the extra tenant license is Enterprise or not")]
     public bool Enterprise { get; set; }
 
     /// <summary>
     /// Specifies if the extra tenant license is Developer or not
     /// </summary>
+    [OpenApiDescription("Specifies if the extra tenant license is Developer or not")]
     public bool Developer { get; set; }
 
     /// <summary>
     /// License tariff
     /// </summary>
+    [OpenApiDescription("License tariff")]
     public Tariff Tariff { get; set; }
 
     /// <summary>
     /// License quota
     /// </summary>
+    [OpenApiDescription("License quota")]
     public QuotaDto Quota { get; set; }
 
     /// <summary>
     /// Specifies if the license is paid or not
     /// </summary>
+    [OpenApiDescription("Specifies if the license is paid or not")]
     public bool NotPaid { get; set; }
 
     /// <summary>
     /// The time when the license was accepted
     /// </summary>
+    [OpenApiDescription("The time when the license was accepted")]
     public string LicenseAccept { get; set; }
 
     /// <summary>
     /// Specifies if the tariff page is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the tariff page is enabled or not")]
     public bool EnableTariffPage { get; set; }
 
     /// <summary>
     /// Document server user quotas
     /// </summary>
+    [OpenApiDescription("Document server user quotas")]
     public Dictionary<string, DateTime> DocServerUserQuota { get; set; }
 
     /// <summary>
     /// Document server license
     /// </summary>
+    [OpenApiDescription("Document server license")]
     public License DocServerLicense { get; set; }
 }

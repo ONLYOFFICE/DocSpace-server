@@ -31,15 +31,18 @@ public class ConfirmDto : IMapFrom<Validation>
     /// <summary>
     /// Result
     /// </summary>
+    [OpenApiDescription("Result")]
     public ValidationResult Result { get; set; }
 
     /// <summary>
     /// Room id
     /// </summary>
+    [OpenApiDescription("Room id")]
     public string RoomId { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 }

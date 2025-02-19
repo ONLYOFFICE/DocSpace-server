@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,53 +35,62 @@ public class AuditEventRequestDto
     /// User ID
     /// </summary>
     [FromQuery(Name = "userId")]
+    [OpenApiDescription("User ID")]
     public Guid UserId { get; set; }
 
     /// <summary>
     /// Product
     /// </summary>
     [FromQuery(Name = "productType")]
+    [OpenApiDescription("Product")]
     public ProductType ProductType { get; set; }
 
     /// <summary>
     /// Module
     /// </summary>
     [FromQuery(Name = "moduleType")]
+    [OpenApiDescription("Module")]
     public ModuleType ModuleType { get; set; }
 
     /// <summary>
     /// Action type
     /// </summary>
     [FromQuery(Name = "actionType")]
+    [OpenApiDescription("Action type")]
     public ActionType ActionType { get; set; }
 
     /// <summary>
     /// Action
     /// </summary>
     [FromQuery(Name = "action")]
+    [OpenApiDescription("Action")]
     public MessageAction Action { get; set; }
 
     /// <summary>
     /// Entry
     /// </summary>
     [FromQuery(Name = "entryType")]
+    [OpenApiDescription("Entry")]
     public EntryType EntryType { get; set; }
 
     /// <summary>
     /// Target
     /// </summary>
     [FromQuery(Name = "target")]
+    [OpenApiDescription("Target")]
     public string Target {  get; set; }
 
     /// <summary>
     /// Start date
     /// </summary>
     [FromQuery(Name = "from")]
+    [OpenApiDescription("Start date")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
     /// End date
     /// </summary>
     [FromQuery(Name = "to")]
+    [OpenApiDescription("End date")]
     public ApiDateTime To { get; set; }
 }

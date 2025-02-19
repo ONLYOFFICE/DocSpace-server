@@ -36,5 +36,6 @@ public class UnlinkAccountRequestDto
     /// Provider name
     /// </summary>
     [FromQuery(Name = "provider")]
+    [OpenApiDescription("Provider name")]
     public string Provider { get; set; }
 }

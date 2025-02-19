@@ -31,20 +31,24 @@ public class EncryptionSettingsRequestsDto
     /// <summary>
     /// Password
     /// </summary>
+    [OpenApiDescription("Password")]
     public string Password { get; set; }
 
     /// <summary>
     /// Status
     /// </summary>
+    [OpenApiDescription("Status")]
     public EncryprtionStatus Status { get; set; }
 
     /// <summary>
     /// Notify users
     /// </summary>
+    [OpenApiDescription("Notify users")]
     public bool NotifyUsers { get; set; }
 
     /// <summary>
     /// Server root path
     /// </summary>
+    [OpenApiDescription("Server root path")]
     public string ServerRootPath { get; set; }
 }

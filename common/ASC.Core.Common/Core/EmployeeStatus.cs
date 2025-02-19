@@ -29,18 +29,18 @@ namespace ASC.Core.Users;
 [Flags]
 public enum EmployeeStatus
 {
-    [SwaggerEnum("Active")]
+    [OpenApiEnum("Active")]
     Active = 1,
 
-    [SwaggerEnum("Terminated")]
+    [OpenApiEnum("Terminated")]
     Terminated = 2,
 
-    [SwaggerEnum("Pending")]
+    [OpenApiEnum("Pending")]
     Pending = 4,
 
-    [SwaggerEnum("All")]
+    [OpenApiEnum("All")]
     All = Active | Terminated | Pending,
 
-    [SwaggerEnum("Default")]
+    [OpenApiEnum("Default")]
     Default = Active | Pending
 }

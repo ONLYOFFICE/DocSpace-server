@@ -60,23 +60,25 @@ public class CustomColorThemesSettingsItem
     /// <summary>
     /// Theme ID
     /// </summary>
-    [SwaggerSchemaCustom(Example = 1)]
+    [OpenApiDescription("Theme ID", Example = 1)]
     public int Id { get; set; }
 
     /// <summary>
     /// Theme name
     /// </summary>
-    [SwaggerSchemaCustom(Example = "blue")]
+    [OpenApiDescription("Theme name", Example = "blue")]
     public string Name { get; set; }
 
     /// <summary>
     /// Main colors
     /// </summary>
+    [OpenApiDescription("Main colors", Example = "{ Accent = \"#4781D1\", Buttons = \"#5299E0\" }")]
     public CustomColorThemesSettingsColorItem Main { get; set; }
 
     /// <summary>
     /// Text colors
     /// </summary>
+    [OpenApiDescription("Text colors", Example = "{ Accent = \"#FFFFFF\", Buttons = \"#FFFFFF\" }")]
     public CustomColorThemesSettingsColorItem Text { get; set; }
 
     public static List<CustomColorThemesSettingsItem> Default =>
@@ -136,12 +138,12 @@ public class CustomColorThemesSettingsColorItem
     /// <summary>
     /// Accent color
     /// </summary>
-    [SwaggerSchemaCustom(Example = "#4781D1")]
+    [OpenApiDescription("Accent color", Example = "#4781D1")]
     public string Accent { get; init; }
     
     /// <summary>
     /// Button color
     /// </summary>
-    [SwaggerSchemaCustom(Example = "#5299E0")]
+    [OpenApiDescription("Button color", Example = "#5299E0")]
     public string Buttons { get; init; }
 }

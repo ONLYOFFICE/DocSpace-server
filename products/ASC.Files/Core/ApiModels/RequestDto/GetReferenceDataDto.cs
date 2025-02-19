@@ -34,25 +34,30 @@ public class GetReferenceDataDto<T>
     /// <summary>
     /// The unique document identifier used by the service to get a link to the file
     /// </summary>
+    [OpenApiDescription("The unique document identifier used by the service to get a link to the file")]
     public T FileKey { get; set; }
 
     /// <summary>
     /// The unique system identifier
     /// </summary>
+    [OpenApiDescription("The unique system identifier")]
     public string InstanceId { get; set; }
 
     /// <summary>
     /// Source file ID
     /// </summary>
+    [OpenApiDescription("Source file ID")]
     public T SourceFileId { get; set; }
 
     /// <summary>
     /// The file name or relative path for the formula editor
     /// </summary>
+    [OpenApiDescription("The file name or relative path for the formula editor")]
     public string Path { get; set; }
 
     /// <summary>
     /// Link to file
     /// </summary>
+    [OpenApiDescription("Link to file")]
     public string Link { get; set; }
 }

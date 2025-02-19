@@ -29,13 +29,13 @@ namespace ASC.Web.Files.Services.DocumentService;
 [EnumExtensions]
 public enum EditorType
 {
-    [SwaggerEnum(Description = "Desktop")]
+    [OpenApiEnum(Description = "Desktop")]
     Desktop,
 
-    [SwaggerEnum(Description = "Mobile")]
+    [OpenApiEnum(Description = "Mobile")]
     Mobile,
 
-    [SwaggerEnum(Description = "Embedded")]
+    [OpenApiEnum(Description = "Embedded")]
     Embedded
 }
 
@@ -92,10 +92,10 @@ public class CoEditingConfig
 [EnumExtensions]
 public enum CoEditingConfigMode
 {
-    [SwaggerEnum("Fast")]
+    [OpenApiEnum("Fast")]
     Fast,
 
-    [SwaggerEnum("Strict")]
+    [OpenApiEnum("Strict")]
     Strict
 }
 

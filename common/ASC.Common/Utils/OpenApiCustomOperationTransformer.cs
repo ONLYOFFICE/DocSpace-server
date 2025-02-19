@@ -23,23 +23,27 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-using Microsoft.OpenApi.Models;
 
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi.Models;
 
 namespace ASC.Api.Core.Extensions;
 
-public class SwaggerCustomOperationFilter : IOperationFilter
+public class OpenApiCustomOperationTransformer : IOpenApiOperationTransformer
 {
-    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
     {
-        foreach (var parameter in operation.Parameters)
+        if(operation.Parameters == null)
         {
-            if (parameter.In == ParameterLocation.Query && parameter.Schema.Type == "array")
+            return Task.CompletedTask;
+        }
+        foreach(var parameter in operation.Parameters)
+        {
+            if(parameter.In == ParameterLocation.Query && parameter.Schema.Type == "array")
             {
                 parameter.Style = ParameterStyle.DeepObject;
             }
         }
+        return Task.CompletedTask;
     }
 }
-

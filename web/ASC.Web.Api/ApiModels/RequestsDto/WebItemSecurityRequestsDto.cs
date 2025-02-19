@@ -34,16 +34,19 @@ public class WebItemSecurityRequestsDto
     /// <summary>
     /// Module ID
     /// </summary>
+    [OpenApiDescription("Module ID")]
     public string Id { get; set; }
 
     /// <summary>
     /// Specifies if the module security settings are enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the module security settings are enabled or not")]
     public bool Enabled { get; set; }
 
     /// <summary>
     /// List of user/group IDs with the access to the module
     /// </summary>
+    [OpenApiDescription("List of user/group IDs with the access to the module")]
     public IEnumerable<Guid> Subjects { get; set; }
 }
 
@@ -55,5 +58,6 @@ public class WebItemsSecurityRequestsDto
     /// <summary>
     /// Products with security information
     /// </summary>
+    [OpenApiDescription("Products with security information")]
     public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }
 }

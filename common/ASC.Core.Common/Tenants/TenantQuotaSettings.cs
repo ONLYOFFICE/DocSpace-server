@@ -38,16 +38,19 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
     /// <summary>
     /// Specifies if the quota is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the quota is enabled or not")]
     public bool EnableQuota { get; set; }
 
     /// <summary>
     /// Quota
     /// </summary>
+    [OpenApiDescription("Quota")]
     public long Quota { get; set; }
 
     /// <summary>
     /// Date of the last quota recalculation
     /// </summary>
+    [OpenApiDescription("Date of the last quota recalculation")]
     public DateTime? LastRecalculateDate { get; set; }
 
     public TenantQuotaSettings GetDefault()

@@ -31,15 +31,18 @@ public class PluginsDto
     /// <summary>
     /// Specifies if the plugins are enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the plugins are enabled or not")]
     public bool Enabled { get; set; }
 
     /// <summary>
     /// Specifies if the plugins can be uploaded or not
     /// </summary>
+    [OpenApiDescription("Specifies if the plugins can be uploaded or not")]
     public bool Upload { get; set; }
 
     /// <summary>
     /// Specifies if the plugins can be deleted or not
     /// </summary>
+    [OpenApiDescription("Specifies if the plugins can be deleted or not")]
     public bool Delete { get; set; }
 }

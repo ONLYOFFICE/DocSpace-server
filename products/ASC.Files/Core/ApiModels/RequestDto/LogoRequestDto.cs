@@ -34,26 +34,31 @@ public class LogoRequest
     /// <summary>
     /// The path to the temporary image file
     /// </summary>
+    [OpenApiDescription("The path to the temporary image file")]
     public string TmpFile { get; set; }
 
     /// <summary>
     /// The X coordinate of the rectangle starting point
     /// </summary>
+    [OpenApiDescription("The X coordinate of the rectangle starting point")]
     public int X { get; set; }
 
     /// <summary>
     /// The Y coordinate of the rectangle starting point
     /// </summary>
+    [OpenApiDescription("The Y coordinate of the rectangle starting point")]
     public int Y { get; set; }
 
     /// <summary>
     /// The rectangle width
     /// </summary>
+    [OpenApiDescription("The rectangle width")]
     public uint Width { get; set; }
 
     /// <summary>
     /// The rectangle height
     /// </summary>
+    [OpenApiDescription("The rectangle height")]
     public uint Height { get; set; }
 }
 
@@ -66,11 +71,13 @@ public class LogoRequest<T>
     /// Room Id
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room Id")]
     public T Id { get; set; }
 
     /// <summary>
     /// Logo
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Logo")]
     public LogoRequest Logo { get; set; }
 }

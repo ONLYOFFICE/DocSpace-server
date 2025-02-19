@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,7 +52,10 @@ public class MessageSettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/messagesettings</path>
     [Tags("Settings / Messages")]
-    [SwaggerResponse(200, "Message about the result of saving new settings", typeof(object))]
+    [EndpointName("enableAdminMessageSettings")]
+    [EndpointSummary("Enable the administrator message settings")]
+    [EndpointDescription("Displays the contact form on the \"Sign In\" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.")]
+    [OpenApiResponse(typeof(object), 200, "Message about the result of saving new settings")]
     [HttpPost("messagesettings")]
     public async Task<object> EnableAdminMessageSettingsAsync(TurnOnAdminMessageSettingsRequestDto inDto)
     {
@@ -73,7 +76,10 @@ public class MessageSettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
-    [SwaggerResponse(200, "Lifetime value in minutes", typeof(CookieSettingsDto))]
+    [EndpointName("getCookieSettings")]
+    [EndpointSummary("Get cookies lifetime")]
+    [EndpointDescription("Returns the cookies lifetime value in minutes.")]
+    [OpenApiResponse(typeof(CookieSettingsDto), 200, "Lifetime value in minutes")]
     [HttpGet("cookiesettings")]
     public async Task<CookieSettingsDto> GetCookieSettings()
     {        
@@ -94,8 +100,11 @@ public class MessageSettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
-    [SwaggerResponse(200, "Message about the result of saving new settings", typeof(object))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("updateCookieSettings")]
+    [EndpointSummary("Update cookies lifetime")]
+    [EndpointDescription("Updates the cookies lifetime value in minutes.")]
+    [OpenApiResponse(typeof(object), 200, "Message about the result of saving new settings")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("cookiesettings")]
     public async Task<object> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
     {
@@ -122,9 +131,12 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/sendadmmail</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
-    [SwaggerResponse(200, "Message about the result of sending a message", typeof(object))]
-    [SwaggerResponse(400, "Incorrect email or message text is empty")]
-    [SwaggerResponse(429, "Request limit is exceeded")]
+    [EndpointName("sendAdminMail")]
+    [EndpointSummary("Send a message to the administrator")]
+    [EndpointDescription("Sends a message to the administrator email when unauthorized users encounter issues accessing DocSpace.")]
+    [OpenApiResponse(typeof(object), 200, "Message about the result of sending a message")]
+    [OpenApiResponse(400, "Incorrect email or message text is empty")]
+    [OpenApiResponse(429, "Request limit is exceeded")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
     public async Task<object> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
@@ -166,10 +178,13 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/sendjoininvite</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
-    [SwaggerResponse(200, "Message about sending a link to confirm joining the DocSpace", typeof(object))]
-    [SwaggerResponse(400, "Incorrect email or email already exists")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(429, "Request limit is exceeded")]
+    [EndpointName("sendJoinInvite")]
+    [EndpointSummary("Sends an invitation email")]
+    [EndpointDescription("Sends an invitation email with a link to the DocSpace.")]
+    [OpenApiResponse(typeof(object), 200, "Message about sending a link to confirm joining the DocSpace")]
+    [OpenApiResponse(400, "Incorrect email or email already exists")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(429, "Request limit is exceeded")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
     public async Task<object> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)

@@ -34,11 +34,13 @@ public class UpdateMembersRequestDto
     /// <summary>
     /// List of user IDs
     /// </summary>
+    [OpenApiDescription("List of user IDs")]
     public IEnumerable<Guid> UserIds { get; set; }
 
     /// <summary>
     /// Specifies whether to resend invitation letters to all the users or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to resend invitation letters to all the users or not")]
     public bool ResendAll { get; set; }
 }
 
@@ -51,12 +53,14 @@ public class UpdateMemberStatusRequestDto
     /// New user status
     /// </summary>
     [FromRoute(Name = "status")]
+    [OpenApiDescription("New user status")]
     public EmployeeStatus Status { get; set; }
 
     /// <summary>
     /// Update members
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Update members")]
     public UpdateMembersRequestDto UpdateMembers { get; set; }
 }
 
@@ -69,12 +73,14 @@ public class UpdateMemberTypeRequestDto
     /// New user type
     /// </summary>
     [FromRoute(Name = "type")]
+    [OpenApiDescription("New user type")]
     public EmployeeType Type { get; set; }
 
     /// <summary>
     /// Update members
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Update members")]
     public UpdateMembersRequestDto UpdateMembers { get; set; }
 }
 
@@ -87,11 +93,13 @@ public class UpdateMemberActivationStatusRequestDto
     /// Activation status
     /// </summary>
     [FromRoute(Name = "activationstatus")]
+    [OpenApiDescription("Activation status")]
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
     /// <summary>
     /// Update members
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Update members")]
     public UpdateMembersRequestDto UpdateMembers { get; set; }
 }

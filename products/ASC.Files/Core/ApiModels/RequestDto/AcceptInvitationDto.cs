@@ -31,5 +31,6 @@ public class AcceptInvitationDto
     /// <summary>
     /// Link key
     /// </summary>
+    [OpenApiDescription("Link key")]
     public string Key { get; set; }
 }

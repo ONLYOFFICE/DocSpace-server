@@ -31,15 +31,18 @@ public class UploadResultDto
     /// <summary>
     /// Specifies if the operation is successful or not
     /// </summary>
+    [OpenApiDescription("Specifies if the operation is successful or not")]
     public bool Success { get; set; }
 
     /// <summary>
     /// Data
     /// </summary>
+    [OpenApiDescription("Data")]
     public object Data { get; set; }
 
     /// <summary>
     /// Message
     /// </summary>
+    [OpenApiDescription("Message")]
     public string Message { get; set; }
 }

@@ -34,38 +34,44 @@ public class ConversationResultDto
     /// <summary>
     /// Operation ID
     /// </summary>
+    [OpenApiDescription("Operation ID")]
     public string Id { get; set; }
 
     /// <summary>
     /// Operation type
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Move")]
+    [OpenApiDescription("Operation type", Example = "Move")]
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; set; }
 
     /// <summary>
     /// Operation progress
     /// </summary>
+    [OpenApiDescription("Operation progress")]
     public int Progress { get; set; }
 
     /// <summary>
     /// Source file
     /// </summary>
+    [OpenApiDescription("Source file")]
     public string Source { get; set; }
 
     /// <summary>
     /// Resulting file
     /// </summary>
     [JsonPropertyName("result")]
+    [OpenApiDescription("Resulting file")]
     public object File { get; set; }
 
     /// <summary>
     /// Error
     /// </summary>
+    [OpenApiDescription("Error")]
     public string Error { get; set; }
 
     /// <summary>
     /// Specifies if the operation is processed or not
     /// </summary>
+    [OpenApiDescription("Specifies if the operation is processed or not")]
     public string Processed { get; set; }
 }

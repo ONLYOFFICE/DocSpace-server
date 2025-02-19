@@ -35,6 +35,7 @@ public class FolderIdRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 }
 
@@ -45,5 +46,6 @@ public class FolderPrimaryIdRequestDto<T>
     /// Folder Id
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Folder Id")]
     public T Id { get; set; }
 }

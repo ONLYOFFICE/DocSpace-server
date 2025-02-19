@@ -34,5 +34,6 @@ public class HideConfirmConvertRequestDto
     /// <summary>
     /// Specifies whether to set the specified settings or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to set the specified settings or not")]
     public bool Save { get; set; }
 }

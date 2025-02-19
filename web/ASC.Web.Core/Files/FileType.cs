@@ -31,30 +31,30 @@ namespace ASC.Web.Core.Files;
 [EnumExtensions]
 public enum FileType
 {
-    [SwaggerEnum("Unknown")]
+    [OpenApiEnum("Unknown")]
     Unknown = 0,
 
-    [SwaggerEnum("Archive")]
+    [OpenApiEnum("Archive")]
     Archive = 1,
 
-    [SwaggerEnum("Video")]
+    [OpenApiEnum("Video")]
     Video = 2,
 
-    [SwaggerEnum("Audio")]
+    [OpenApiEnum("Audio")]
     Audio = 3,
 
-    [SwaggerEnum("Image")]
+    [OpenApiEnum("Image")]
     Image = 4,
 
-    [SwaggerEnum("Spreadsheet")]
+    [OpenApiEnum("Spreadsheet")]
     Spreadsheet = 5,
 
-    [SwaggerEnum("Presentation")]
+    [OpenApiEnum("Presentation")]
     Presentation = 6,
 
-    [SwaggerEnum("Document")]
+    [OpenApiEnum("Document")]
     Document = 7,
 
-    [SwaggerEnum("Pdf")]
+    [OpenApiEnum("Pdf")]
     Pdf = 10
 }

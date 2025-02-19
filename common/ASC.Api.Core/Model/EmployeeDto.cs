@@ -33,60 +33,67 @@ public class EmployeeDto
     /// <summary>
     /// ID
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
+    [OpenApiDescription("ID", Example = "{00000000-0000-0000-0000-000000000000}")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Display name
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Mike Zanyatski")]
+    [OpenApiDescription("Display name", Example = "Mike Zanyatski")]
     public string DisplayName { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Manager")]
+    [OpenApiDescription("Title", Example = "Manager")]
     public string Title { get; set; }
 
     /// <summary>
     /// Avatar
     /// </summary>
+    [OpenApiDescription("Avatar")]
     public string Avatar { get; set; }
 
     /// <summary>
     /// Original size avatar
     /// </summary>
+    [OpenApiDescription("Original size avatar")]
     public string AvatarOriginal { get; set; }
 
     /// <summary>
     /// Maximum size avatar
     /// </summary>
+    [OpenApiDescription("Maximum size avatar")]
     public string AvatarMax { get; set; }
 
     /// <summary>
     /// Medium size avatar
     /// </summary>
+    [OpenApiDescription("Medium size avatar")]
     public string AvatarMedium { get; set; }
 
     /// <summary>
     /// Small avatar
     /// </summary>
-    [SwaggerSchemaCustom(Example = "url to small avatar")]
+    [OpenApiDescription("Small avatar", Example = "url to small avatar")]
     public string AvatarSmall { get; set; }
 
     /// <summary>
     /// Profile URL
     /// </summary>
+    [OpenApiDescription("Profile URL")]
     public string ProfileUrl { get; set; }
 
     /// <summary>
     /// Specifies if the user has an avatar or not
     /// </summary>
+    [OpenApiDescription("Specifies if the user has an avatar or not")]
     public bool HasAvatar { get; set; }
 
     /// <summary>
     /// Specifies if the user is an anonim or not
     /// </summary>
+    [OpenApiDescription("Specifies if the user is an anonim or not")]
     public bool IsAnonim { get; set; }
 }
 

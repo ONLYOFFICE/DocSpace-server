@@ -91,16 +91,19 @@ public class AuthKey
     /// <summary>
     /// Name
     /// </summary>
+    [OpenApiDescription("Name")]
     public string Name { get; init; }
 
     /// <summary>
     /// Value
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Value")]
     public string Value { get; init; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 }

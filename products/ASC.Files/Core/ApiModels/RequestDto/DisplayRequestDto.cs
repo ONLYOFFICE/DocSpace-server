@@ -34,5 +34,6 @@ public class DisplayRequestDto
     /// <summary>
     /// Specifies whether to set the specified settings or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to set the specified settings or not")]
     public bool Set { get; set; }
 }

@@ -32,36 +32,43 @@ public class Tariff
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public int Id { get; set; }
 
     /// <summary>
     /// Tariff state
     /// </summary>
+    [OpenApiDescription("Tariff state")]
     public TariffState State { get; set; }
 
     /// <summary>
     /// Due date
     /// </summary>
+    [OpenApiDescription("Due date")]
     public DateTime DueDate { get; set; }
 
     /// <summary>
     /// Delay due date
     /// </summary>
+    [OpenApiDescription("Delay due date")]
     public DateTime DelayDueDate { get; set; }
 
     /// <summary>
     /// License date
     /// </summary>
+    [OpenApiDescription("License date")]
     public DateTime LicenseDate { get; set; }
 
     /// <summary>
     /// Customer ID
     /// </summary>
+    [OpenApiDescription("Customer ID")]
     public string CustomerId { get; set; }
 
     /// <summary>
     /// List of quotas
     /// </summary>
+    [OpenApiDescription("List of quotas")]
     public List<Quota> Quotas { get; set; }
 
     public override int GetHashCode()
@@ -89,11 +96,13 @@ public class Quota(int id, int quantity) : IEquatable<Quota>
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public int Id { get; set; } = id;
 
     /// <summary>
     /// Quantity
     /// </summary>
+    [OpenApiDescription("Quantity")]
     public int Quantity { get; set; } = quantity;
 
     public bool Equals(Quota other)

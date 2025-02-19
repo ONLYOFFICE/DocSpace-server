@@ -31,45 +31,54 @@ public class Module(Product product)
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public Guid Id { get; set; } = product.ProductID;
 
     /// <summary>
     /// Product class name
     /// </summary>
+    [OpenApiDescription("Product class name")]
     public string AppName { get; set; } = product.ProductClassName;
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; } = product.Name;
 
     /// <summary>
     /// Start link
     /// </summary>
+    [OpenApiDescription("Start link")]
     public string Link { get; set; } = product.StartURL;
 
     /// <summary>
     /// Icon URL
     /// </summary>
+    [OpenApiDescription("Icon URL")]
     public string IconUrl { get; set; } = product.Context.IconFileName;
 
     /// <summary>
     /// Large image URL
     /// </summary>
+    [OpenApiDescription("Large image URL")]
     public string ImageUrl { get; set; } = product.Context.LargeIconFileName;
 
     /// <summary>
     /// Help URL
     /// </summary>
+    [OpenApiDescription("Help URL")]
     public string HelpUrl { get; set; } = product.HelpURL;
 
     /// <summary>
     /// Description
     /// </summary>
+    [OpenApiDescription("Description")]
     public string Description { get; set; } = product.Description;
 
     /// <summary>
     /// Specifies if the module is primary or not
     /// </summary>
+    [OpenApiDescription("Specifies if the module is primary or not")]
     public bool IsPrimary { get; set; } = product.IsPrimary;
 }

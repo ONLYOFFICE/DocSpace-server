@@ -31,46 +31,55 @@ public class EditHistoryDto
     /// <summary>
     /// File ID
     /// </summary>
+    [OpenApiDescription("File ID")]
     public int ID { get; set; }
 
     /// <summary>
     /// Key
     /// </summary>
+    [OpenApiDescription("Key")]
     public string Key { get; set; }
 
     /// <summary>
     /// File version
     /// </summary>
+    [OpenApiDescription("File version")]
     public int Version { get; set; }
 
     /// <summary>
     /// Version group
     /// </summary>
+    [OpenApiDescription("Version group")]
     public int VersionGroup { get; set; }
 
     /// <summary>
     /// A user who updated a file
     /// </summary>
+    [OpenApiDescription("A user who updated a file")]
     public EditHistoryAuthor User { get; set; }
 
     /// <summary>
     /// Creation time
     /// </summary>
+    [OpenApiDescription("Creation time")]
     public ApiDateTime Created { get; set; }
 
     /// <summary>
     /// History changes in the string format
     /// </summary>
+    [OpenApiDescription("History changes in the string format")]
     public string ChangesHistory { get; set; }
 
     /// <summary>
     /// List of history changes
     /// </summary>
+    [OpenApiDescription("List of history changes")]
     public List<EditHistoryChangesWrapper> Changes { get; set; }
 
     /// <summary>
     /// Server version
     /// </summary>
+    [OpenApiDescription("Server version")]
     public string ServerVersion { get; set; }
 
     public EditHistoryDto(EditHistory editHistory, ApiDateTimeHelper apiDateTimeHelper, UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)
@@ -92,12 +101,18 @@ public class EditHistoryChangesWrapper(EditHistoryChanges historyChanges, ApiDat
     /// <summary>
     /// User
     /// </summary>
+    [OpenApiDescription("User")]
     public EditHistoryAuthor User { get; set; } = historyChanges.Author;
 
     /// <summary>
     /// Created
     /// </summary>
+    [OpenApiDescription("Created")]
     public ApiDateTime Created { get; set; } = apiDateTimeHelper.Get(historyChanges.Date);
 
+    /// <summary>
+    /// Document SHA256
+    /// </summary>
+    [OpenApiDescription("Document SHA256")]
     public string DocumentSha256 { get; set; } = historyChanges.DocumentSha256;
 }

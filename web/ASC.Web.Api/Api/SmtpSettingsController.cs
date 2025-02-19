@@ -51,8 +51,11 @@ public class SmtpSettingsController(
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
-    [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("getSmtpSettings")]
+    [EndpointSummary("Get the SMTP settings")]
+    [EndpointDescription("Returns the current portal SMTP settings.")]
+    [OpenApiResponse(typeof(SmtpSettingsDto), 200, "SMTP settings")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("")]
     public async Task<SmtpSettingsDto> GetSmtpSettingsAsync()
     {
@@ -79,8 +82,11 @@ public class SmtpSettingsController(
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
-    [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("saveSmtpSettings")]
+    [EndpointSummary("Save the SMTP settings")]
+    [EndpointDescription("Saves the SMTP settings for the current portal.")]
+    [OpenApiResponse(typeof(SmtpSettingsDto), 200, "SMTP settings")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("")]
     public async Task<SmtpSettingsDto> SaveSmtpSettingsAsync(SmtpSettingsDto inDto)
     {
@@ -130,8 +136,11 @@ public class SmtpSettingsController(
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
-    [SwaggerResponse(200, "Default SMTP settings", typeof(SmtpSettingsDto))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("resetSmtpSettings")]
+    [EndpointSummary("Reset the SMTP settings")]
+    [EndpointDescription("Resets the SMTP settings of the current portal.")]
+    [OpenApiResponse(typeof(SmtpSettingsDto), 200, "Default SMTP settings")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("")]
     public async Task<SmtpSettingsDto> ResetSmtpSettingsAsync()
     {
@@ -163,8 +172,11 @@ public class SmtpSettingsController(
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp/test</path>
     [Tags("Security / SMTP settings")]
-    [SwaggerResponse(200, "SMTP operation status", typeof(SmtpOperationStatusRequestsDto))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("testSmtpSettings")]
+    [EndpointSummary("Test the SMTP settings")]
+    [EndpointDescription("Tests the SMTP settings for the current portal by sending a test message to the user email.")]
+    [OpenApiResponse(typeof(SmtpOperationStatusRequestsDto), 200, "SMTP operation status")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("test")]
     public async Task<SmtpOperationStatusRequestsDto> TestSmtpSettings()
     {
@@ -187,8 +199,11 @@ public class SmtpSettingsController(
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp/test/status</path>
     [Tags("Security / SMTP settings")]
-    [SwaggerResponse(200, "SMTP operation status", typeof(SmtpOperationStatusRequestsDto))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("getSmtpOperationStatus")]
+    [EndpointSummary("Get the SMTP test process status")]
+    [EndpointDescription("Returns the SMTP test process status.")]
+    [OpenApiResponse(typeof(SmtpOperationStatusRequestsDto), 200, "SMTP operation status")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("test/status")]
     public async Task<SmtpOperationStatusRequestsDto> GetSmtpOperationStatus()
     {

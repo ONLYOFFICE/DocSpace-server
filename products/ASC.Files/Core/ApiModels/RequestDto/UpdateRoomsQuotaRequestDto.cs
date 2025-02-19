@@ -34,6 +34,7 @@ public class UpdateRoomsQuotaRequestDto<T> : UpdateRoomsRoomIdsRequestDto<T>
     /// <summary>
     /// Room quota
     /// </summary>
+    [OpenApiDescription("Room quota")]
     public long Quota { get; set; }
 
 }
@@ -46,5 +47,6 @@ public class UpdateRoomsRoomIdsRequestDto<T>
     /// <summary>
     /// List of room IDs
     /// </summary>
+    [OpenApiDescription("List of room IDs")]
     public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
 }

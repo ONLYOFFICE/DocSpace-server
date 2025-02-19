@@ -31,10 +31,12 @@ public class IsDefaultWhiteLabelLogosDto
     /// <summary>
     /// White label logo name
     /// </summary>
+    [OpenApiDescription("White label logo name")]
     public string Name { get; set; }
 
     /// <summary>
     /// Specifies if the white label logo is default or not
     /// </summary>
+    [OpenApiDescription("Specifies if the white label logo is default or not")]
     public bool Default { get; set; }
 }

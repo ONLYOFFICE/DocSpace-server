@@ -28,22 +28,22 @@ namespace ASC.Files.Core;
 
 public enum DateToAutoCleanUp
 {
-    [SwaggerEnum(Description = "One week")]
+    [OpenApiEnum(Description = "One week")]
     OneWeek = 1,
 
-    [SwaggerEnum(Description = "Two weeks")]
+    [OpenApiEnum(Description = "Two weeks")]
     TwoWeeks,
 
-    [SwaggerEnum(Description = "One month")]
+    [OpenApiEnum(Description = "One month")]
     OneMonth,
 
-    [SwaggerEnum(Description = "Thirty days")]
+    [OpenApiEnum(Description = "Thirty days")]
     ThirtyDays,
 
-    [SwaggerEnum(Description = "Two months")]
+    [OpenApiEnum(Description = "Two months")]
     TwoMonths,
 
-    [SwaggerEnum(Description = "Three months")]
+    [OpenApiEnum(Description = "Three months")]
     ThreeMonths
 }
 
@@ -52,11 +52,13 @@ public class AutoCleanUpData
     /// <summary>
     /// Specifies if the auto-clearing setting is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the auto-clearing setting is enabled or not")]
     public bool IsAutoCleanUp { get; init; }
 
     /// <summary>
     /// The period when the trash bin will be cleared
     /// </summary>
+    [OpenApiDescription("The period when the trash bin will be cleared")]
     public DateToAutoCleanUp Gap { get; init; }
 
     public static AutoCleanUpData GetDefault()

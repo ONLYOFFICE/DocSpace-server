@@ -31,22 +31,24 @@ public class CheckDestFolderDto
     /// <summary>
     /// Result
     /// </summary>
+    [OpenApiDescription("Result")]
     public CheckDestFolderResult Result { get; set; }
 
     /// <summary>
     /// Files
     /// </summary>
+    [OpenApiDescription("Files")]
     public List<FileEntryDto> Files { get; set; }
 }
 
 public enum CheckDestFolderResult
 {
-    [SwaggerEnum(Description = "All allowed")]
+    [OpenApiEnum(Description = "All allowed")]
     AllAllowed,
 
-    [SwaggerEnum(Description = "Part allowed")]
+    [OpenApiEnum(Description = "Part allowed")]
     PartAllowed,
 
-    [SwaggerEnum(Description = "None allowed")]
+    [OpenApiEnum(Description = "None allowed")]
     NoneAllowed
 }

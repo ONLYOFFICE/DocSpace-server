@@ -31,91 +31,109 @@ public class AuditEventDto
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public int Id { get; set; }
 
     /// <summary>
     /// Date
     /// </summary>
+    [OpenApiDescription("Date")]
     public ApiDateTime Date { get; set; }
 
     /// <summary>
     /// User
     /// </summary>
+    [OpenApiDescription("User")]
     public string User { get; set; }
 
     /// <summary>
     /// User ID
     /// </summary>
+    [OpenApiDescription("User ID")]
     public Guid UserId { get; set; }
 
     /// <summary>
     /// Action
     /// </summary>
+    [OpenApiDescription("Action")]
     public string Action { get; set; }
 
     /// <summary>
     /// Action ID
     /// </summary>
+    [OpenApiDescription("Action ID")]
     public MessageAction ActionId { get; set; }
 
     /// <summary>
     /// IP
     /// </summary>
+    [OpenApiDescription("IP")]
     public string IP { get; set; }
 
     /// <summary>
     /// Country
     /// </summary>
+    [OpenApiDescription("Country")]
     public string Country { get; set; }
 
     /// <summary>
     /// City
     /// </summary>
+    [OpenApiDescription("City")]
     public string City { get; set; }
 
     /// <summary>
     /// Browser
     /// </summary>
+    [OpenApiDescription("Browser")]
     public string Browser { get; set; }
 
     /// <summary>
     /// Platform
     /// </summary>
+    [OpenApiDescription("Platform")]
     public string Platform { get; set; }
 
     /// <summary>
     /// Page
     /// </summary>
+    [OpenApiDescription("Page")]
     public string Page { get; set; }
 
     /// <summary>
     /// Action type
     /// </summary>
+    [OpenApiDescription("Action type")]
     public ActionType ActionType { get; set; }
 
     /// <summary>
     /// Product type
     /// </summary>
+    [OpenApiDescription("Product type")]
     public ProductType Product { get; set; }
 
     /// <summary>
     /// Module type
     /// </summary>
+    [OpenApiDescription("Module type")]
     public ModuleType Module { get; set; }
 
     /// <summary>
     /// List of targets
     /// </summary>
+    [OpenApiDescription("List of targets")]
     public IEnumerable<string> Target { get; set; }
 
     /// <summary>
     /// List of entry types
     /// </summary>
+    [OpenApiDescription("List of entry types")]
     public IEnumerable<EntryType> Entries { get; set; }
 
     /// <summary>
     /// Context
     /// </summary>
+    [OpenApiDescription("Context")]
     public string Context { get; set; }
     
     public AuditEventDto(AuditEvent auditEvent, AuditActionMapper auditActionMapper, ApiDateTimeHelper apiDateTimeHelper)

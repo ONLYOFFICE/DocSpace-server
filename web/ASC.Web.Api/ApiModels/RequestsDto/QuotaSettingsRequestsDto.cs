@@ -34,10 +34,12 @@ public class QuotaSettingsRequestsDto
     /// <summary>
     /// Specifies if the quota settings are enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the quota settings are enabled or not")]
     public bool EnableQuota { get; set; }
 
     /// <summary>
     /// Default quota value
     /// </summary>
+    [OpenApiDescription("Default quota value")]
     public JsonElement DefaultQuota { get; set; }
 }

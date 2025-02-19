@@ -44,33 +44,37 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Tenant ID
     /// </summary>
+    [OpenApiDescription("Tenant ID")]
     public int TenantId { get; set; }
 
     /// <summary>
     /// Name
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Default")]
+    [OpenApiDescription("Name", Example = "Default")]
     public string Name { get; set; }
 
     /// <summary>
     /// Price
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10.0)]
+    [OpenApiDescription("Price", Example = 10.0)]
     public decimal Price { get; set; }
 
     /// <summary>
     /// Price currency symbol
     /// </summary>
+    [OpenApiDescription("Price currency symbol")]
     public string PriceCurrencySymbol { get; set; }
 
     /// <summary>
     /// Product ID
     /// </summary>
+    [OpenApiDescription("Product ID")]
     public string ProductId { get; set; }
 
     /// <summary>
     /// Specifies if the tenant quota is visible or not
     /// </summary>
+    [OpenApiDescription("Specifies if the tenant quota is visible or not")]
     public bool Visible { get; set; }
 
     [JsonIgnore]
@@ -81,6 +85,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Tenant quota features
     /// </summary>
+    [OpenApiDescription("Tenant quota features")]
     public string Features
     {
         get
@@ -98,7 +103,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Maximum file size
     /// </summary>
-    [SwaggerSchemaCustom(Example = 25 * 1024 * 1024)]
+    [OpenApiDescription("Maximum file size", Example = 25 * 1024 * 1024)]
     public long MaxFileSize
     {
         get => _maxFileSizeFeature.Value;
@@ -110,7 +115,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Maximum total size
     /// </summary>
-    [SwaggerSchemaCustom(Example = long.MaxValue)]
+    [OpenApiDescription("Maximum total size", Example = long.MaxValue)]
     public long MaxTotalSize
     {
         get => _maxTotalSizeFeature.Value;
@@ -122,6 +127,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Number of portal users
     /// </summary>
+    [OpenApiDescription("Number of portal users")]
     public int CountUser
     {
         get => _countUserFeature.Value;
@@ -133,6 +139,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Number of portal room administrators
     /// </summary>
+    [OpenApiDescription("Number of portal room administrators")]
     public int CountRoomAdmin
     {
         get => _countPaidUserFeature.Value;
@@ -144,6 +151,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Number of room users
     /// </summary>
+    [OpenApiDescription("Number of room users")]
     public int UsersInRoom
     {
         get => _usersInRoomFeature.Value;
@@ -155,6 +163,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Number of rooms
     /// </summary>
+    [OpenApiDescription("Number of rooms")]
     public int CountRoom
     {
         get => _countRoomFeature.Value;
@@ -166,6 +175,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the tenant quota is nonprofit or not
     /// </summary>
+    [OpenApiDescription("Specifies if the tenant quota is nonprofit or not")]
     public bool NonProfit
     {
         get => _nonProfitFeature.Value;
@@ -177,6 +187,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the tenant quota is trial or not
     /// </summary>
+    [OpenApiDescription("Specifies if the tenant quota is trial or not")]
     public bool Trial
     {
         get => _trialFeature.Value;
@@ -188,6 +199,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the tenant quota is free or not
     /// </summary>
+    [OpenApiDescription("Specifies if the tenant quota is free or not")]
     public bool Free
     {
         get => _freeFeature.Value;
@@ -199,6 +211,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the tenant quota is updated or not
     /// </summary>
+    [OpenApiDescription("Specifies if the tenant quota is updated or not")]
     public bool Update
     {
         get => _updateFeature.Value;
@@ -210,6 +223,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the audit trail is available or not
     /// </summary>
+    [OpenApiDescription("Specifies if the audit trail is available or not")]
     public bool Audit
     {
         get => _auditFeature.Value;
@@ -221,6 +235,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if this tenant quota is Docs edition or not
     /// </summary>
+    [OpenApiDescription("Specifies if this tenant quota is Docs edition or not")]
     public bool DocsEdition
     {
         get => _docsEditionFeature.Value;
@@ -232,6 +247,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the LDAP settings are available or not
     /// </summary>
+    [OpenApiDescription("Specifies if the LDAP settings are available or not")]
     public bool Ldap
     {
         get => _ldapFeature.Value;
@@ -243,6 +259,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the SSO settings are available or not
     /// </summary>
+    [OpenApiDescription("Specifies if the SSO settings are available or not")]
     public bool Sso
     {
         get => _ssoFeature.Value;
@@ -254,6 +271,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the statistic settings are available or not
     /// </summary>
+    [OpenApiDescription("Specifies if the statistic settings are available or not")]
     public bool Statistic
     {
         get => _statisticFeature.Value;
@@ -264,6 +282,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     /// <summary>Specifies if the branding settings are available or not</summary>
     /// <type>System.Boolean, System</type>
+    [OpenApiDescription("Specifies if the branding settings are available or not")]
     public bool Branding
     {
         get => _brandingFeature.Value;
@@ -275,6 +294,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the customization settings are available or not
     /// </summary>
+    [OpenApiDescription("Specifies if the customization settings are available or not")]
     public bool Customization
     {
         get => _customizationFeature.Value;
@@ -285,6 +305,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     /// <summary>Specifies if the license is lifetime or not</summary>
     /// <type>System.Boolean, System</type>
+    [OpenApiDescription("Specifies if the license is lifetime or not")]
     public bool Lifetime
     {
         get => _lifetimeFeature.Value;
@@ -296,6 +317,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the custom domain URL is available or not
     /// </summary>
+    [OpenApiDescription("Specifies if the custom domain URL is available or not")]
     public bool Custom
     {
         get => _customFeature.Value;
@@ -307,6 +329,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the automatic Backup&amp;Restore feature is available or not
     /// </summary>
+    [OpenApiDescription("Specifies if the automatic Backup&amp;Restore feature is available or not")]
     public bool AutoBackupRestore
     {
         get => _autoBackupRestoreFeature.Value;
@@ -318,6 +341,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if Oauth is available or not
     /// </summary>
+    [OpenApiDescription("Specifies if Oauth is available or not")]
     public bool Oauth
     {
         get => _oauthFeature.Value;
@@ -329,6 +353,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the content search is available or not
     /// </summary>
+    [OpenApiDescription("Specifies if the content search is available or not")]
     public bool ContentSearch
     {
         get => _contentSearchFeature.Value;
@@ -340,6 +365,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the third-party accounts linking is available or not
     /// </summary>
+    [OpenApiDescription("Specifies if the third-party accounts linking is available or not")]
     public bool ThirdParty
     {
         get => _thirdPartyFeature.Value;

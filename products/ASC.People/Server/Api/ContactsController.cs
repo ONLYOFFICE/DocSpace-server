@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,9 +43,12 @@ public class ContactsController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
-    [SwaggerResponse(200, "Deleted user profile with the detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("deleteMemberContacts")]
+    [EndpointSummary("Delete user contacts")]
+    [EndpointDescription("Deletes the contacts of the user with the ID specified in the request from the portal.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Deleted user profile with the detailed information")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(404, "User not found")]
     [HttpDelete("{userid}/contacts")]
     public async Task<EmployeeFullDto> DeleteMemberContacts(ContactsRequestDto inDto)
     {
@@ -70,9 +73,12 @@ public class ContactsController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
-    [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("setMemberContacts")]
+    [EndpointSummary("Set user contacts")]
+    [EndpointDescription("Sets the contacts of the user with the ID specified in the request replacing the current portal data with the new data.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Updated user profile with the detailed information")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(404, "User not found")]
     [HttpPost("{userid}/contacts")]
     public async Task<EmployeeFullDto> SetMemberContacts(ContactsRequestDto inDto)
     {
@@ -98,9 +104,12 @@ public class ContactsController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
-    [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [EndpointName("updateMemberContacts")]
+    [EndpointSummary("Update user contacts")]
+    [EndpointDescription("Updates the contact information of the user with the ID specified in the request merging the new data into the current portal data.")]
+    [OpenApiResponse(typeof(EmployeeFullDto), 200, "Updated user profile with the detailed information")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(404, "User not found")]
     [HttpPut("{userid}/contacts")]
     public async Task<EmployeeFullDto> UpdateMemberContacts(ContactsRequestDto inDto)
     {

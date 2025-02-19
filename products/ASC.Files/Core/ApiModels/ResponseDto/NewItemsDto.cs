@@ -31,11 +31,13 @@ public class NewItemsDto<TItem>
     /// <summary>
     /// Date
     /// </summary>
+    [OpenApiDescription("Date")]
     public ApiDateTime Date { get; init; }
 
     /// <summary>
     /// Items
     /// </summary>
+    [OpenApiDescription("Items")]
     public IEnumerable<TItem> Items { get; init; }
 }
 
@@ -44,11 +46,13 @@ public class RoomNewItemsDto
     /// <summary>
     /// Room
     /// </summary>
+    [OpenApiDescription("Room")]
     public FileEntryDto Room { get; init; }
 
     /// <summary>
     /// Items
     /// </summary>
+    [OpenApiDescription("Items")]
     public IEnumerable<FileEntryDto> Items { get; init; }
 }
 

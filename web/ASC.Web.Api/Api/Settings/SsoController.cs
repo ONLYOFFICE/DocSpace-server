@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,7 +49,10 @@ public class SsoController(TenantManager tenantManager,
     /// <path>api/2.0/settings/ssov2</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / SSO")]
-    [SwaggerResponse(200, "SSO settings", typeof(SsoSettingsV2))]
+    [EndpointName("getSsoSettings")]
+    [EndpointSummary("Get the SSO settings")]
+    [EndpointDescription("Returns the current portal SSO settings.")]
+    [OpenApiResponse(typeof(SsoSettingsV2), 200, "SSO settings")]
     [HttpGet("")]
     [AllowAnonymous, AllowNotPayment]
     public async Task<SsoSettingsV2> GetSsoSettingsV2()
@@ -93,7 +96,10 @@ public class SsoController(TenantManager tenantManager,
     /// </short>
     /// <path>api/2.0/settings/ssov2/default</path>
     [Tags("Settings / SSO")]
-    [SwaggerResponse(200, "Default SSO settings", typeof(SsoSettingsV2))]
+    [EndpointName("getDefaultSsoSettings")]
+    [EndpointSummary("Get the default SSO settings")]
+    [EndpointDescription("Returns the default portal SSO settings.")]
+    [OpenApiResponse(typeof(SsoSettingsV2), 200, "Default SSO settings")]
     [HttpGet("default")]
     public async Task<SsoSettingsV2> GetDefaultSsoSettingsV2Async()
     {
@@ -109,7 +115,10 @@ public class SsoController(TenantManager tenantManager,
     /// </short>
     /// <path>api/2.0/settings/ssov2/constants</path>
     [Tags("Settings / SSO")]
-    [SwaggerResponse(200, "The SSO settings constants: SSO name ID format type, SSO binding type, SSO signing algorithm type, SSO SP certificate action type, SSO IDP certificate action type", typeof(object))]
+    [EndpointName("getSsoSettingsConstants")]
+    [EndpointSummary("Get the SSO settings constants")]
+    [EndpointDescription("Returns the SSO settings constants.")]
+    [OpenApiResponse(typeof(object), 200, "The SSO settings constants: SSO name ID format type, SSO binding type, SSO signing algorithm type, SSO SP certificate action type, SSO IDP certificate action type")]
     [HttpGet("constants")]
     public object GetSsoSettingsV2Constants()
     {
@@ -132,8 +141,11 @@ public class SsoController(TenantManager tenantManager,
     /// </short>
     /// <path>api/2.0/settings/ssov2</path>
     [Tags("Settings / SSO")]
-    [SwaggerResponse(200, "SSO settings", typeof(SsoSettingsV2))]
-    [SwaggerResponse(400, "Settings could not be null")]
+    [EndpointName("saveSsoSettings")]
+    [EndpointSummary("Save the SSO settings")]
+    [EndpointDescription("Saves the SSO settings for the current portal.")]
+    [OpenApiResponse(typeof(SsoSettingsV2), 200, "SSO settings")]
+    [OpenApiResponse(400, "Settings could not be null")]
     [HttpPost("")]
     public async Task<SsoSettingsV2> SaveSsoSettingsV2Async(SsoSettingsRequestsDto inDto)
     {
@@ -221,7 +233,10 @@ public class SsoController(TenantManager tenantManager,
     /// </short>
     /// <path>api/2.0/settings/ssov2</path>
     [Tags("Settings / SSO")]
-    [SwaggerResponse(200, "Default SSO settings", typeof(SsoSettingsV2))]
+    [EndpointName("resetSsoSettings")]
+    [EndpointSummary("Reset the SSO settings")]
+    [EndpointDescription("Resets the SSO settings of the current portal.")]
+    [OpenApiResponse(typeof(SsoSettingsV2), 200, "Default SSO settings")]
     [HttpDelete("")]
     public async Task<SsoSettingsV2> ResetSsoSettingsV2Async()
     {

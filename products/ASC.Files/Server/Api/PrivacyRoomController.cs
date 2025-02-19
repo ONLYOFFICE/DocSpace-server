@@ -56,8 +56,11 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [SwaggerResponse(200, "List of encryption key pairs", typeof(IEnumerable<EncryptionKeyPairDto>))]
-    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    [EndpointName("getPublicKeysWithAccess")]
+    [EndpointSummary("Get file key pairs")]
+    [EndpointDescription("Returns all the key pairs of the users who have access to the file with the ID specified in the request.")]
+    [OpenApiResponse(typeof(IEnumerable<EncryptionKeyPairDto>), 200, "List of encryption key pairs")]
+    [OpenApiResponse(403, "You do not have enough permissions to edit the file")]
     [HttpGet("access/{fileId}")]
     public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(FileIdRequestDto<T> inDto)
     {
@@ -91,8 +94,11 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom/keys</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [SwaggerResponse(200, "Encryption key pair: private key, public key, user ID", typeof(EncryptionKeyPairDto))]
-    [SwaggerResponse(403, "You don't have enough permission to this operation")]
+    [EndpointName("getKeys")]
+    [EndpointSummary("Get encryption keys")]
+    [EndpointDescription("Returns a key pair for the current user.")]
+    [OpenApiResponse(typeof(EncryptionKeyPairDto), 200, "Encryption key pair: private key, public key, user ID")]
+    [OpenApiResponse(403, "You don't have enough permission to this operation")]
     [HttpGet("keys")]
     public async Task<EncryptionKeyPairDto> GetKeysAsync()
     {
@@ -114,7 +120,10 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
+    [EndpointName("privacyRoom")]
+    [EndpointSummary("Check the Private Room settings")]
+    [EndpointDescription("Checks if the Private Room settings are enabled or not.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled")]
     [HttpGet("")]
     public async Task<bool> PrivacyRoomAsync()
     {
@@ -130,8 +139,11 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom/keys</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [SwaggerResponse(200, "Boolean value: true - the key pair is set", typeof(object))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [EndpointName("setKeys")]
+    [EndpointSummary("Set encryption keys")]
+    [EndpointDescription("Sets the key pair for the current user.")]
+    [OpenApiResponse(typeof(object), 200, "Boolean value: true - the key pair is set")]
+    [OpenApiResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("keys")]
     public async Task<object> SetKeysAsync(PrivacyRoomRequestDto inDto)
     {
@@ -168,8 +180,11 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [EndpointName("setPrivacyRoom")]
+    [EndpointSummary("Enable the Private Room settings")]
+    [EndpointDescription("Enables the Private Room settings.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled")]
+    [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("")]
     public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomEnableRequestDto inDto)
     {

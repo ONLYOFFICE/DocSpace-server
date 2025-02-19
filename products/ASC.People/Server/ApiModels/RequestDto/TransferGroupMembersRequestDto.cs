@@ -31,10 +31,12 @@ public class TransferGroupMembersRequestDto
     /// <summary>
     /// Group id
     /// </summary>
+    [OpenApiDescription("Group id")]
     public Guid GroupId { get; set; }
 
     /// <summary>
     /// New group id
     /// </summary>
+    [OpenApiDescription("New group id")]
     public Guid NewGroupId { get; set; }
 }

@@ -35,11 +35,13 @@ public class WhiteLabelRequestsDto
     /// Logo text
     /// </summary>
     [StringLength(30)]
+    [OpenApiDescription("Logo text")]
     public string LogoText { get; set; }
 
     /// <summary>
     /// Tenant IDs with their logos (light or dark)
     /// </summary>
+    [OpenApiDescription("Tenant IDs with their logos (light or dark)")]
     public IEnumerable<ItemKeyValuePair<string, LogoRequestsDto>> Logo { get; set; }
 }
 
@@ -48,11 +50,13 @@ public class LogoRequestsDto
     /// <summary>
     /// Light theme logo
     /// </summary>
+    [OpenApiDescription("Light theme logo")]
     public string Light { get; set; }
 
     /// <summary>
     /// Dark theme logo
     /// </summary>
+    [OpenApiDescription("Dark theme logo")]
     public string Dark { get; set; }
 }
 
@@ -64,10 +68,12 @@ public class WhiteLabelQueryRequestsDto
     /// <summary>
     /// Specifies if the logo is for a dark theme or not
     /// </summary>
+    [OpenApiDescription("Specifies if the logo is for a dark theme or not")]
     public bool? IsDark { get; set; }
 
     /// <summary>
     /// Specifies if the logo is for a default tenant or not
     /// </summary>
+    [OpenApiDescription("Specifies if the logo is for a default tenant or not")]
     public bool? IsDefault { get; set; }
 }

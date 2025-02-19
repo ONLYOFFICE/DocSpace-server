@@ -31,30 +31,36 @@ public class GroupMemberSecurityRequestDto
     /// <summary>
     /// User
     /// </summary>
+    [OpenApiDescription("User")]
     public EmployeeFullDto User { get; init; }
 
     /// <summary>
     /// Group access
     /// </summary>
+    [OpenApiDescription("Group access")]
     public FileShare GroupAccess { get; init; }
 
     /// <summary>
     /// User access
     /// </summary>
+    [OpenApiDescription("User access")]
     public FileShare? UserAccess { get; init; }
 
     /// <summary>
     /// Overridden
     /// </summary>
+    [OpenApiDescription("Overridden")]
     public bool Overridden { get; init; }
 
     /// <summary>
     /// Can edit access
     /// </summary>
+    [OpenApiDescription("Can edit access")]
     public bool CanEditAccess { get; init; }
 
     /// <summary>
     /// Owner
     /// </summary>
+    [OpenApiDescription("Owner")]
     public bool Owner { get; init; }
 }

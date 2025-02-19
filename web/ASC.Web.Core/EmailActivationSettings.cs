@@ -34,6 +34,7 @@ public class EmailActivationSettings : ISettings<EmailActivationSettings>
     /// <summary>
     /// Shown or hidden
     /// </summary>
+    [OpenApiDescription("Shown or hidden")]
     public bool Show { get; set; }
 
     [JsonIgnore]

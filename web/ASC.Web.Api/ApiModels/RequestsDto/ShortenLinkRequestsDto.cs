@@ -34,5 +34,6 @@ public class ShortenLinkRequestsDto
     /// <summary>
     /// Link
     /// </summary>
+    [OpenApiDescription("Link")]
     public string Link { get; set; }
 }

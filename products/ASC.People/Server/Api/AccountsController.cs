@@ -65,8 +65,11 @@ public class AccountsController<T>(
     /// </summary>
     /// <path>api/2.0/accounts/room/{id}/search</path>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [EndpointName("getAccountsEntriesWithShared")]
+    [EndpointSummary("Get accounts entries with shared")]
+    [EndpointDescription("Gets accounts entries with shared")]
+    [OpenApiResponse(typeof(IAsyncEnumerable<object>), 200, "Ok")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}/search")]
     public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(AccountsEntriesRequestDto<T> inDto)
     {

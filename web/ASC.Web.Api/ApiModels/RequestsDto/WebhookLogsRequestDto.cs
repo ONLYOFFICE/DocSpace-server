@@ -32,42 +32,48 @@ public class WebhookLogsRequestDto
     /// Delivey start time
     /// </summary>
     [FromQuery(Name = "deliveryFrom")]
-
+    [OpenApiDescription("Delivey start time")]
     public DateTime? DeliveryFrom { get; set; }
 
     /// <summary>
     /// Delivey end time
     /// </summary>
     [FromQuery(Name = "deliveryTo")]
+    [OpenApiDescription("Delivey end time")]
     public DateTime? DeliveryTo {  get; set; }
 
     /// <summary>
     /// Hook URI
     /// </summary>
     [FromQuery(Name = "hookUri")]
+    [OpenApiDescription("Hook URI")]
     public string HookUri { get; set; }
 
     /// <summary>
     /// Webhook ID
     /// </summary>
     [FromQuery(Name = "webhookId")]
+    [OpenApiDescription("Webhook ID")]
     public int? WebhookId {  get; set; }
 
     /// <summary>
     /// Config ID
     /// </summary>
     [FromQuery(Name = "configId")]
+    [OpenApiDescription("Config ID")]
     public int? ConfigId {  get; set; }
 
     /// <summary>
     /// Event ID
     /// </summary>
     [FromQuery(Name = "eventId")]
+    [OpenApiDescription("Event ID")]
     public int? EventId { get; set; }
 
     /// <summary>
     /// Webhook group status
     /// </summary>
     [FromQuery(Name = "groupStatus")]
+    [OpenApiDescription("Webhook group status")]
     public WebhookGroupStatus? GroupStatus { get; set; }
 }

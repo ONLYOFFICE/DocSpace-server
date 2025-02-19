@@ -36,16 +36,19 @@ public class CreateTextOrHtmlFile
     /// </summary>
     [Required]
     [StringLength(165)]
+    [OpenApiDescription("File title")]
     public string Title { get; set; }
 
     /// <summary>
     /// File contents
     /// </summary>
+    [OpenApiDescription("File contents")]
     public string Content { get; set; }
 
     /// <summary>
     /// Create new if exist
     /// </summary>
+    [OpenApiDescription("Create new if exist")]
     public bool CreateNewIfExist { get; set; }
 }
 
@@ -58,11 +61,13 @@ public class CreateTextOrHtmlFileRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// File
     /// </summary>
     [FromBody]
+    [OpenApiDescription("File")]
     public CreateTextOrHtmlFile File { get; set; }
 }

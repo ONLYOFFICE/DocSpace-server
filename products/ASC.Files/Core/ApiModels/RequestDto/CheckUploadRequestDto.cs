@@ -34,6 +34,7 @@ public class CheckUploadRequest
     /// <summary>
     /// File title
     /// </summary>
+    [OpenApiDescription("File title")]
     public IEnumerable<string> FilesTitle { get; set; }
 }
 
@@ -46,11 +47,13 @@ public class CheckUploadRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// Parameters for checking files uploading
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Parameters for checking files uploading")]
     public CheckUploadRequest Check { get; set; }
 }

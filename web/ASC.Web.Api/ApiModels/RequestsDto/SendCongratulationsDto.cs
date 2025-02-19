@@ -34,19 +34,23 @@ public class SendCongratulationsDto
     /// <summary>
     /// User ID
     /// </summary>
+    [OpenApiDescription("User ID")]
     public Guid Userid { get; set; }
 
     /// <summary>
     /// Email key
     /// </summary>
+    [OpenApiDescription("Email key")]
     public string Key { get; set; }
 }
 
 public class SendRemoveInstructionsDto
 {
     /// <summary>Uer ID</summary>
+    [OpenApiDescription("User ID")]
     public Guid Userid { get; set; }
 
     /// <summary>Email key</summary>
+    [OpenApiDescription("Email key")]
     public string Key { get; set; }
 }

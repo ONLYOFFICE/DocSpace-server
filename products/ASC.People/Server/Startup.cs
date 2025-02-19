@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.People;
 
 public class Startup : BaseStartup
@@ -44,5 +45,14 @@ public class Startup : BaseStartup
 
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
+    }
+
+    public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        base.Configure(app, env);
+        if (_configuration.GetValue<bool>("openApi:enableUI"))
+        {
+            app.UseOpenApiUI();
+        }
     }
 }

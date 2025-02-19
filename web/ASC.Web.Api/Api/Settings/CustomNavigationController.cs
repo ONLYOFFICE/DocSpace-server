@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,10 @@ public class CustomNavigationController(MessageService messageService,
     /// <path>api/2.0/settings/customnavigation/getall</path>
     /// <collection>list</collection>
     [Tags("Settings / Custom Navigation")]
-    [SwaggerResponse(200, "List of the custom navigation items", typeof(List<CustomNavigationItem>))]
+    [EndpointName("getCustomNavigationItems")]
+    [EndpointSummary("Get the custom navigation items")]
+    [EndpointDescription("Returns a list of the custom navigation items.")]
+    [OpenApiResponse(typeof(List<CustomNavigationItem>), 200, "List of the custom navigation items")]
     [HttpGet("getall")]
     public async Task<List<CustomNavigationItem>> GetCustomNavigationItemsAsync()
     {
@@ -57,7 +60,10 @@ public class CustomNavigationController(MessageService messageService,
     /// <short>Get a custom navigation item sample</short>
     /// <path>api/2.0/settings/customnavigation/getsample</path>
     [Tags("Settings / Custom Navigation")]
-    [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
+    [EndpointName("getCustomNavigationItemSample")]
+    [EndpointSummary("Get a custom navigation item sample")]
+    [EndpointDescription("Returns a custom navigation item sample.")]
+    [OpenApiResponse(typeof(CustomNavigationItem), 200, "Custom navigation item")]
     [HttpGet("getsample")]
     public CustomNavigationItem GetCustomNavigationItemSample()
     {
@@ -70,7 +76,10 @@ public class CustomNavigationController(MessageService messageService,
     /// <short>Get a custom navigation item by ID</short>
     /// <path>api/2.0/settings/customnavigation/get/{id}</path>
     [Tags("Settings / Custom Navigation")]
-    [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
+    [EndpointName("getCustomNavigationItem")]
+    [EndpointSummary("Get a custom navigation item by ID")]
+    [EndpointDescription("Returns a custom navigation item by the ID specified in the request.")]
+    [OpenApiResponse(typeof(CustomNavigationItem), 200, "Custom navigation item")]
     [HttpGet("get/{id:guid}")]
     public async Task<CustomNavigationItem> GetCustomNavigationItemAsync(IdRequestDto<Guid> inDto)
     {
@@ -83,7 +92,10 @@ public class CustomNavigationController(MessageService messageService,
     /// <short>Add a custom navigation item</short>
     /// <path>api/2.0/settings/customnavigation/create</path>
     [Tags("Settings / Custom Navigation")]
-    [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
+    [EndpointName("createCustomNavigationItem")]
+    [EndpointSummary("Add a custom navigation item")]
+    [EndpointDescription("Adds a custom navigation item with the parameters specified in the request.")]
+    [OpenApiResponse(typeof(CustomNavigationItem), 200, "Custom navigation item")]
     [HttpPost("create")]
     public async Task<CustomNavigationItem> CreateCustomNavigationItem(CustomNavigationItem inDto)
     {
@@ -143,6 +155,9 @@ public class CustomNavigationController(MessageService messageService,
     /// <short>Delete a custom navigation item</short>
     /// <path>api/2.0/settings/customnavigation/delete/{id}</path>
     [Tags("Settings / Custom Navigation")]
+    [EndpointName("deleteCustomNavigationItem")]
+    [EndpointSummary("Delete a custom navigation item")]
+    [EndpointDescription("Deletes a custom navigation item with the ID specified in the request.")]
     [HttpDelete("delete/{id:guid}")]
     public async Task DeleteCustomNavigationItem(IdRequestDto<Guid> inDto)
     {

@@ -28,15 +28,15 @@ namespace ASC.Files.Core.VirtualRooms;
 
 public enum SearchArea
 {
-    [SwaggerEnum("Active")]
+    [OpenApiEnum("Active")]
     Active,
 
-    [SwaggerEnum("Archive")]
+    [OpenApiEnum("Archive")]
     Archive,
 
-    [SwaggerEnum("Any")]
+    [OpenApiEnum("Any")]
     Any,
 
-    [SwaggerEnum("Recent by links")]
+    [OpenApiEnum("Recent by links")]
     RecentByLinks
 }

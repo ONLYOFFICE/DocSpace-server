@@ -35,5 +35,6 @@ public class DeleteBackupDto
     /// Backup Id
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Backup Id")]
     public Guid BackupId { get; set; }
 }

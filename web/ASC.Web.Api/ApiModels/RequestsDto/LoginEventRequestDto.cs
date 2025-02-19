@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,26 +31,27 @@ public class LoginEventRequestDto
     /// User ID
     /// </summary>
     [FromQuery(Name = "userId")]
+    [OpenApiDescription("User ID")]
     public Guid UserId { get; set; }
 
     /// <summary>
     /// Action
     /// </summary>
-
     [FromQuery(Name = "action")]
+    [OpenApiDescription("Action")]
     public MessageAction Action { get; set; }
 
     /// <summary>
     /// Start date
     /// </summary>
-
     [FromQuery(Name = "from")]
+    [OpenApiDescription("Start date")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
     /// End date
     /// </summary>
-
     [FromQuery(Name = "to")]
+    [OpenApiDescription("End date")]
     public ApiDateTime To { get; set; }
 }

@@ -31,10 +31,12 @@ public class TenantVersionDto(int version, IEnumerable<TenantVersion> tenantVers
     /// <summary>
     /// Current portal version
     /// </summary>
+    [OpenApiDescription("Current portal version")]
     public int Current { get; set; } = version;
 
     /// <summary>
     /// List of available portal versions
     /// </summary>
+    [OpenApiDescription("List of available portal versions")]
     public IEnumerable<TenantVersion> Versions { get; set; } = tenantVersions;
 }

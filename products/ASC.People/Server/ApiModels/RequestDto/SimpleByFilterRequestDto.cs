@@ -35,83 +35,97 @@ public class SimpleByFilterRequestDto
     /// User status
     /// </summary>
     [FromQuery(Name = "employeeStatus")]
+    [OpenApiDescription("User status")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
     /// Group ID
     /// </summary>
     [FromQuery(Name = "groupId")]
+    [OpenApiDescription("Group ID")]
     public Guid? GroupId { get; set; }
 
     /// <summary>
     /// Activation status
     /// </summary>
     [FromQuery(Name = "activationStatus")]
+    [OpenApiDescription("Activation status")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
     /// User type
     /// </summary>
     [FromQuery(Name = "employeeType")]
+    [OpenApiDescription("User type")]
     public EmployeeType? EmployeeType { get; set; }
 
     /// <summary>
     /// List of user types
     /// </summary>
     [FromQuery(Name = "employeeTypes")]
+    [OpenApiDescription("List of user types")]
     public EmployeeType[] EmployeeTypes { get; set; }
 
     /// <summary>
     /// Specifies if the user is an administrator or not
     /// </summary>
     [FromQuery(Name = "isAdministrator")]
+    [OpenApiDescription("Specifies if the user is an administrator or not")]
     public bool? IsAdministrator { get; set; }
 
     /// <summary>
     /// User payment status
     /// </summary>
     [FromQuery(Name = "payments")]
+    [OpenApiDescription("User payment status")]
     public Payments? Payments { get; set; }
 
     /// <summary>
     /// Account login type
     /// </summary>
     [FromQuery(Name = "accountLoginType")]
+    [OpenApiDescription("Account login type")]
     public AccountLoginType? AccountLoginType { get; set; }
 
     /// <summary>
     /// Filter by quota (All - 0, Default - 1, Custom - 2)
     /// </summary>
     [FromQuery(Name = "quotaFilter")]
+    [OpenApiDescription("Filter by quota (All - 0, Default - 1, Custom - 2)")]
     public QuotaFilter? QuotaFilter { get; set; }
 
     /// <summary>
     /// Specifies whether the user should be a member of a group or not
     /// </summary>
     [FromQuery(Name = "withoutGroup")]
+    [OpenApiDescription("Specifies whether the user should be a member of a group or not")]
     public bool? WithoutGroup { get; set; }
 
     /// <summary>
     /// Specifies whether or not the user should be a member of the group with the specified ID
     /// </summary>
     [FromQuery(Name = "excludeGroup")]
+    [OpenApiDescription("Specifies whether or not the user should be a member of the group with the specified ID")]
     public bool? ExcludeGroup { get; set; }
 
     /// <summary>
     /// Invited by me
     /// </summary>
     [FromQuery(Name = "invitedByMe")]
+    [OpenApiDescription("Invited by me")]
     public bool? InvitedByMe { get; set; }
 
     /// <summary>
     /// Inviter Id
     /// </summary>
     [FromQuery(Name = "inviterId")]
+    [OpenApiDescription("Inviter Id")]
     public Guid? InviterId { get; set; }
 
     /// <summary>
     /// Area
     /// </summary>
     [FromQuery(Name = "area")]
+    [OpenApiDescription("Area")]
     public Area Area { get; set; } = Area.All;
 }

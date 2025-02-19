@@ -33,37 +33,54 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// <summary>
     /// External data status
     /// </summary>
+    [OpenApiDescription("External data status")]
     public Status Status { get; set; }
 
     /// <summary>
     /// External data ID
     /// </summary>
+    [OpenApiDescription("External data ID")]
     public string Id { get; set; }
 
     /// <summary>
     /// External data title
     /// </summary>
+    [OpenApiDescription("External data title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Tenant ID
     /// </summary>
+    [OpenApiDescription("Tenant ID")]
     public int TenantId { get; set; }
 
+    /// <summary>
+    /// Entity ID
+    /// </summary>
+    [OpenApiDescription("Entity ID")]
     public string EntityId { get; set; }
    
+    /// <summary>
+    /// Entity title
+    /// </summary>
+    [OpenApiDescription("Entity title")]
     public string EntryTitle { get; set; }
 
     /// <summary>
     /// Specifies whether to share the external data or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to share the external data or not")]
     public bool Shared { get; set; }
 
     /// <summary>
     /// Link ID
     /// </summary>
+    [OpenApiDescription("Link ID")]
     public Guid LinkId { get; set; }
     
-    /// <summary>Specifies whether the user is authenticated or not</summary>
+    /// <summary>
+    /// Specifies whether the user is authenticated or not
+    /// </summary>
+    [OpenApiDescription("Specifies whether the user is authenticated or not")]
     public bool IsAuthenticated { get; set; }
 }

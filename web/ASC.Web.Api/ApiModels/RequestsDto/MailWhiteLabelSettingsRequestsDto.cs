@@ -34,5 +34,6 @@ public class MailWhiteLabelSettingsRequestsDto
     /// <summary>
     /// Specifies if the mail footer will be enabled or note
     /// </summary>
+    [OpenApiDescription("Specifies if the mail footer will be enabled or note")]
     public bool FooterEnabled { get; set; }
 }

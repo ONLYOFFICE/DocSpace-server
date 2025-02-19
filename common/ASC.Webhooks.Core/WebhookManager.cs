@@ -31,31 +31,37 @@ public class Webhook : IMapFrom<DbWebhook>
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public int Id { get; set; }
 
     /// <summary>
     /// Route
     /// </summary>
+    [OpenApiDescription("Route")]
     public string Route { get; init; }
 
     /// <summary>
     /// Method
     /// </summary>
+    [OpenApiDescription("Method")]
     public string Method { get; init; }
 
     /// <summary>
     /// Specifies if a webhook is disabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if a webhook is disabled or not")]
     public bool Disable { get; set; }
 
     /// <summary>
     /// Name
     /// </summary>
+    [OpenApiDescription("Name")]
     public string Name { get => WebHookResource.ResourceManager.GetString(Endpoint) ?? ""; }
 
     /// <summary>
     /// Description
     /// </summary>
+    [OpenApiDescription("Description")]
     public string Description { get => WebHookResource.ResourceManager.GetString($"{Endpoint}_Description") ?? ""; }
 
     private string Endpoint { get => $"{Method}|{Route}"; }

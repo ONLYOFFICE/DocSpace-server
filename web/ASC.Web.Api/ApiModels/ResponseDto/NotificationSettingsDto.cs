@@ -31,10 +31,12 @@ public class NotificationSettingsDto : IMapFrom<NotificationSettingsRequestsDto>
     /// <summary>
     /// Notification type
     /// </summary>
+    [OpenApiDescription("Notification type")]
     public NotificationType Type { get; set; }
 
     /// <summary>
     /// Specifies if the notification type is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the notification type is enabled or not")]
     public bool IsEnabled { get; set; }
 }

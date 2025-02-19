@@ -29,43 +29,43 @@ namespace ASC.Files.Core.Security;
 [Flags]
 public enum ShareFilterType
 {
-    [SwaggerEnum("User or group")]
+    [OpenApiEnum("User or group")]
     UserOrGroup = 0,
 
-    [SwaggerEnum("Invitation link")]
+    [OpenApiEnum("Invitation link")]
     InvitationLink = 1,
 
-    [SwaggerEnum("External link")]
+    [OpenApiEnum("External link")]
     ExternalLink = 2,
 
-    [SwaggerEnum("Additional external link")]
+    [OpenApiEnum("Additional external link")]
     AdditionalExternalLink = 4,
 
-    [SwaggerEnum("Primary external link")]
+    [OpenApiEnum("Primary external link")]
     PrimaryExternalLink = 8,
     Link = InvitationLink | ExternalLink | AdditionalExternalLink | PrimaryExternalLink,
 
-    [SwaggerEnum("User")]
+    [OpenApiEnum("User")]
     User = 16,
 
-    [SwaggerEnum("Group")]
+    [OpenApiEnum("Group")]
     Group = 32
 }
 
 public enum SubjectType
 {
-    [SwaggerEnum("User")]
+    [OpenApiEnum("User")]
     User = 0,
 
-    [SwaggerEnum("External link")]
+    [OpenApiEnum("External link")]
     ExternalLink = 1,
 
-    [SwaggerEnum("Group")]
+    [OpenApiEnum("Group")]
     Group = 2,
 
-    [SwaggerEnum("Invitation link")]
+    [OpenApiEnum("Invitation link")]
     InvitationLink = 3,
 
-    [SwaggerEnum("Primary external link")]
+    [OpenApiEnum("Primary external link")]
     PrimaryExternalLink = 4
 }

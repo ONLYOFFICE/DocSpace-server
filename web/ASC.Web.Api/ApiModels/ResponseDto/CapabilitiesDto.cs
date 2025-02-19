@@ -31,36 +31,43 @@ public class CapabilitiesDto
     /// <summary>
     /// Specifies if the LDAP settings are enabled or not
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    [OpenApiDescription("Specifies if the LDAP settings are enabled or not", Example = false)]
     public bool LdapEnabled { get; set; }
 
     /// <summary>
     /// Ldap domain
     /// </summary>
+    [OpenApiDescription("Ldap domain")]
     public string LdapDomain { get; set; }
 
     /// <summary>
     /// List of providers
     /// </summary>
+    [OpenApiDescription("List of providers")]
     public List<string> Providers { get; set; }
 
     /// <summary>
     /// SP login label
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    [OpenApiDescription("SP login label", Example = "")]
     public string SsoLabel { get; set; }
 
     /// <summary>
     /// Specifies if OAuth is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if OAuth is enabled or not")]
     public bool OauthEnabled { get; init; }
 
     /// <summary>
     /// SSO URL. If this parameter is empty, then the SSO settings are disabled
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    [OpenApiDescription("SSO URL. If this parameter is empty, then the SSO settings are disabled", Example = "")]
     [Url]
     public string SsoUrl { get; set; }
     
+    /// <summary>
+    /// Specifies if Identity Server is enabled or not
+    /// </summary>
+    [OpenApiDescription("Specifies if Identity Server is enabled or not")]
     public bool IdentityServerEnabled { get; set; }
 }

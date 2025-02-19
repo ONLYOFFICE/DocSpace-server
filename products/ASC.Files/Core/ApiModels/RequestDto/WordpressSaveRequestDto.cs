@@ -34,5 +34,6 @@ public class WordpressSaveRequestDto
     /// <summary>
     /// Authorization code
     /// </summary>
+    [OpenApiDescription("Authorization code")]
     public string Code { get; set; }
 }

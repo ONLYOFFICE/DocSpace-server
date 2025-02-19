@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.IPSecurity;
 
 public class IPRestriction : IpRestrictionBase, IMapFrom<TenantIpRestrictions>
@@ -31,11 +33,13 @@ public class IPRestriction : IpRestrictionBase, IMapFrom<TenantIpRestrictions>
     /// <summary>
     /// Restiction ID
     /// </summary>
+    [OpenApiDescription("Restiction ID")]
     public int Id { get; set; }
 
     /// <summary>
     /// Tenant ID
     /// </summary>
+    [OpenApiDescription("Tenant ID")]
     public int TenantId { get; set; }
 }
 
@@ -44,10 +48,12 @@ public class IpRestrictionBase
     /// <summary>
     /// IP address
     /// </summary>
+    [OpenApiDescription("IP address")]
     public string Ip { get; set; }
 
     /// <summary>
     /// Specifies if this address is for administrator users only or not
     /// </summary>
+    [OpenApiDescription("Specifies if this address is for administrator users only or not")]
     public bool ForAdmin { get; set; }
 }

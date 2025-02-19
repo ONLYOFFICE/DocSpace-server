@@ -31,31 +31,37 @@ public class WebhooksConfigDto : IMapFrom<WebhooksConfig>
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public int Id { get; set; }
 
     /// <summary>
     /// Name
     /// </summary>
+    [OpenApiDescription("Name")]
     public string Name { get; set; }
 
     /// <summary>
     /// URI
     /// </summary>
+    [OpenApiDescription("URI")]
     public string Uri { get; set; }
 
     /// <summary>
     /// Secret key
     /// </summary>
+    [OpenApiDescription("Secret key")]
     public string SecretKey { get; set; }
 
     /// <summary>
     /// Specifies if the webhooks are enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the webhooks are enabled or not")]
     public bool Enabled { get; set; }
 
     /// <summary>
     /// SSL
     /// </summary>
+    [OpenApiDescription("SSL")]
     public bool SSL { get; set; }
 }
 
@@ -64,11 +70,13 @@ public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
     /// <summary>
     /// Configs
     /// </summary>
+    [OpenApiDescription("Configs")]
     public WebhooksConfigDto Configs { get; set; }
 
     /// <summary>
     /// Status
     /// </summary>
+    [OpenApiDescription("Status")]
     public int Status { get; set; }
 
     public void Mapping(Profile profile)

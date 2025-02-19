@@ -32,11 +32,13 @@ public class ExternalShareDataRequestDto
     /// The unique key
     /// </summary>
     [FromRoute(Name = "key")]
+    [OpenApiDescription("The unique key")]
     public string Key { get; set; }
 
     /// <summary>
     /// The unique document identifier
     /// </summary>
     [FromQuery(Name = "fileId")]
+    [OpenApiDescription("The unique document identifier")]
     public string FileId { get; set; } = null;
 }

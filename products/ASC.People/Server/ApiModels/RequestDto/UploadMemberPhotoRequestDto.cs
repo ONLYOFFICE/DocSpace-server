@@ -35,11 +35,13 @@ public class UploadMemberPhotoRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
+    [OpenApiDescription("User ID")]
     public string UserId { get; set; }
 
     /// <summary>
     /// Image data
     /// </summary>
     [FromForm(Name = "formCollection")]
+    [OpenApiDescription("Image data")]
     public IFormCollection FormCollection { get; set; }
 }

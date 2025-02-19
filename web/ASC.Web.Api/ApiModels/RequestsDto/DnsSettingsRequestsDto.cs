@@ -34,10 +34,12 @@ public class DnsSettingsRequestsDto
     /// <summary>
     /// DNS
     /// </summary>
+    [OpenApiDescription("DNS")]
     public string DnsName { get; set; }
 
     /// <summary>
     /// Enabled or not
     /// </summary>
+    [OpenApiDescription("Enabled or not")]
     public bool Enable { get; set; }
 }

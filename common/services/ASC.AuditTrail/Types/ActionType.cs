@@ -28,63 +28,63 @@ namespace ASC.AuditTrail.Types;
 [EnumExtensions]
 public enum ActionType
 {
-    [SwaggerEnum("None")]
+    [OpenApiEnum("None")]
     None,
 
-    [SwaggerEnum("Create")]
+    [OpenApiEnum("Create")]
     Create,
 
-    [SwaggerEnum("Update")]
+    [OpenApiEnum("Update")]
     Update,
 
-    [SwaggerEnum("Delete")]
+    [OpenApiEnum("Delete")]
     Delete,
 
-    [SwaggerEnum("Link")]
+    [OpenApiEnum("Link")]
     Link,
 
-    [SwaggerEnum("Unlink")]
+    [OpenApiEnum("Unlink")]
     Unlink,
 
-    [SwaggerEnum("Attach")]
+    [OpenApiEnum("Attach")]
     Attach,
 
-    [SwaggerEnum("Detach")]
+    [OpenApiEnum("Detach")]
     Detach,
 
-    [SwaggerEnum("Send")]
+    [OpenApiEnum("Send")]
     Send,
 
-    [SwaggerEnum("Import")]
+    [OpenApiEnum("Import")]
     Import,
 
-    [SwaggerEnum("Export")]
+    [OpenApiEnum("Export")]
     Export,
 
-    [SwaggerEnum("Update access")]
+    [OpenApiEnum("Update access")]
     UpdateAccess,
 
-    [SwaggerEnum("Download")]
+    [OpenApiEnum("Download")]
     Download,
 
-    [SwaggerEnum("Upload")]
+    [OpenApiEnum("Upload")]
     Upload,
 
-    [SwaggerEnum("Copy")]
+    [OpenApiEnum("Copy")]
     Copy,
 
-    [SwaggerEnum("Move")]
+    [OpenApiEnum("Move")]
     Move,
 
-    [SwaggerEnum("Reassigns")]
+    [OpenApiEnum("Reassigns")]
     Reassigns,
 
-    [SwaggerEnum("Follow")]
+    [OpenApiEnum("Follow")]
     Follow,
 
-    [SwaggerEnum("Unfollow")]
+    [OpenApiEnum("Unfollow")]
     Unfollow,
 
-    [SwaggerEnum("Logout")]
+    [OpenApiEnum("Logout")]
     Logout
 }

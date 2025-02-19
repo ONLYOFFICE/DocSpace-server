@@ -34,6 +34,7 @@ public class LinkAccountRequestDto
     /// <summary>
     /// Third-party profile in the serialized format
     /// </summary>
+    [OpenApiDescription("Third-party profile in the serialized format")]
     public string SerializedProfile { get; set; }
 }
 
@@ -45,36 +46,43 @@ public class SignupAccountRequestDto : LinkAccountRequestDto
     /// <summary>
     /// Employee type
     /// </summary>
+    [OpenApiDescription("Employee type")]
     public EmployeeType? EmployeeType { get; set; }
 
     /// <summary>
     /// First name
     /// </summary>
+    [OpenApiDescription("First name")]
     public string FirstName { get; set; }
 
     /// <summary>
     /// Last name
     /// </summary>
+    [OpenApiDescription("Last name")]
     public string LastName { get; set; }
 
     /// <summary>
     /// Email address
     /// </summary>
     [EmailAddress]
+    [OpenApiDescription("Email address")]
     public string Email { get; set; }
 
     /// <summary>
     /// Password hash
     /// </summary>
+    [OpenApiDescription("Password hash")]
     public string PasswordHash { get; set; }
 
     /// <summary>
     /// Link key
     /// </summary>
+    [OpenApiDescription("Link key")]
     public string Key { get; set; }
 
     /// <summary>
     /// Culture
     /// </summary>
+    [OpenApiDescription("Culture")]
     public string Culture { get; set; }
 }

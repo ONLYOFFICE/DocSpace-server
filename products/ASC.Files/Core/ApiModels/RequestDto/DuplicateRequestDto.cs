@@ -30,9 +30,11 @@ public class DuplicateRequestDto
 {
     /// <summary>List of folder IDs</summary>
     /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    [OpenApiDescription("List of folder IDs")]
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
     /// <summary>List of file IDs</summary>
     /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    [OpenApiDescription("List of file IDs")]
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }

@@ -31,51 +31,61 @@ public class QuotaDto
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public int Id { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Price
     /// </summary>
+    [OpenApiDescription("Price")]
     public PriceDto Price { get; set; }
 
     /// <summary>
     /// Specifies if the quota is nonprofit or not
     /// </summary>
+    [OpenApiDescription("Specifies if the quota is nonprofit or not")]
     public bool NonProfit { get; set; }
 
     /// <summary>
     /// Specifies if the quota is free or not
     /// </summary>
+    [OpenApiDescription("Specifies if the quota is free or not")]
     public bool Free { get; set; }
 
     /// <summary>
     /// Specifies if the quota is trial or not
     /// </summary>
+    [OpenApiDescription("Specifies if the quota is trial or not")]
     public bool Trial { get; set; }
 
     /// <summary>
     /// List of quota features
     /// </summary>
+    [OpenApiDescription("List of quota features")]
     public IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
 
     /// <summary>
     /// User quota
     /// </summary>
+    [OpenApiDescription("User quota")]
     public TenantEntityQuotaSettings UsersQuota {  get; set; }
 
     /// <summary>
     /// Room quota
     /// </summary>
+    [OpenApiDescription("Room quota")]
     public TenantEntityQuotaSettings RoomsQuota {  get; set; }
 
     /// <summary>
     /// Tenant custom quota
     /// </summary>
+    [OpenApiDescription("Tenant custom quota")]
     public TenantQuotaSettings TenantCustomQuota { get; set; }
 }
 
@@ -84,36 +94,43 @@ public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public string Id { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Image URL
     /// </summary>
+    [OpenApiDescription("Image URL")]
     public string Image { get; set; }
 
     /// <summary>
     /// Value
     /// </summary>
+    [OpenApiDescription("Value")]
     public object Value { get; set; }
 
     /// <summary>
     /// Type
     /// </summary>
+    [OpenApiDescription("Type")]
     public string Type { get; set; }
 
     /// <summary>
     /// Used feature parameters
     /// </summary>
+    [OpenApiDescription("Used feature parameters")]
     public FeatureUsedDto Used { get; set; }
 
     /// <summary>
     /// Price title
     /// </summary>
+    [OpenApiDescription("Price title")]
     public string PriceTitle { get; set; }
 
     public bool Equals(TenantQuotaFeatureDto other)
@@ -135,12 +152,13 @@ public class PriceDto
     /// <summary>
     /// Value
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10.0)]
+    [OpenApiDescription("Value", Example = 10.0)]
     public decimal? Value { get; set; }
 
     /// <summary>
     /// Currency symbol
     /// </summary>
+    [OpenApiDescription("Currency symbol")]
     public string CurrencySymbol { get; set; }
 }
 
@@ -149,10 +167,12 @@ public class FeatureUsedDto
     /// <summary>
     /// Value
     /// </summary>
+    [OpenApiDescription("Value")]
     public object Value { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 }

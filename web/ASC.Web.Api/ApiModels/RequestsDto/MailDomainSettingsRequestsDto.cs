@@ -34,16 +34,19 @@ public class MailDomainSettingsRequestsDto
     /// <summary>
     /// Trusted domain type
     /// </summary>
+    [OpenApiDescription("Trusted domain type")]
     public TenantTrustedDomainsType Type { get; set; }
 
     /// <summary>
     /// List of trusted domains
     /// </summary>
+    [OpenApiDescription("List of trusted domains")]
     public List<string> Domains { get; set; }
 
     /// <summary>
     /// Invites as a user or not
     /// </summary>
+    [OpenApiDescription("Invites as a user or not")]
     public bool InviteUsersAsVisitors { get; set; }
 }
 
@@ -57,11 +60,13 @@ public class AdminMessageBaseSettingsRequestsDto
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
+    [OpenApiDescription("Email")]
     public string Email { get; set; }
 
     /// <summary>
     /// Culture
     /// </summary>
+    [OpenApiDescription("Culture")]
     public string Culture { get; set; }
 }
 
@@ -74,6 +79,7 @@ public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsD
     /// Message
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Message")]
     public string Message { get; set; }
 }
 
@@ -85,5 +91,6 @@ public class TurnOnAdminMessageSettingsRequestDto
     /// <summary>
     /// Specifies if the administrator messages are enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the administrator messages are enabled or not")]
     public bool TurnOn { get; set; }
 }

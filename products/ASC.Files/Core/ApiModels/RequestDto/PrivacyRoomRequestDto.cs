@@ -34,16 +34,19 @@ public class PrivacyRoomRequestDto
     /// <summary>
     /// Public key
     /// </summary>
+    [OpenApiDescription("Public key")]
     public string PublicKey { get; set; }
 
     /// <summary>
     /// Private key
     /// </summary>
+    [OpenApiDescription("Private key")]
     public string PrivateKeyEnc { get; set; }
 
     /// <summary>
     /// Encryption keys need to be updated or not
     /// </summary>
+    [OpenApiDescription("Encryption keys need to be updated or not")]
     public bool Update { get; set; }
 }
 
@@ -55,5 +58,6 @@ public class PrivacyRoomEnableRequestDto
     /// <summary>
     /// Specifies whether to enable the Private Room settings or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to enable the Private Room settings or not")]
     public bool Enable { get; set; }
 }

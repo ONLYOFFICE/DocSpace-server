@@ -36,17 +36,31 @@ public class OrderRequestDto
     /// </summary>
     [Range(1, int.MaxValue)]
     [JsonConverter(typeof(OrderRequestDtoConverter))]
+    [OpenApiDescription("Order")]
     public int Order { get; set; }
 }
 
 public class OrdersItemRequestDto<T> : OrderRequestDto
 {
+    /// <summary>
+    /// Entry Id
+    /// </summary>
+    [OpenApiDescription("Entry Id")]
     public T EntryId { get; set; }
+
+    /// <summary>
+    /// Entry type
+    /// </summary>
+    [OpenApiDescription("Entry type")]
     public FileEntryType EntryType { get; set; }
 }
 
 public class OrdersRequestDto<T>
 {
+    /// <summary>
+    /// Items
+    /// </summary>
+    [OpenApiDescription("Items")]
     public IEnumerable<OrdersItemRequestDto<T>> Items { get; set; }
 }
 
@@ -82,12 +96,14 @@ public class OrderFileRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// Order
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Order")]
     public OrderRequestDto Order { get; set; }
 }
 
@@ -100,11 +116,13 @@ public class OrderFolderRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
+    [OpenApiDescription("Folder ID")]
     public T FolderId { get; set; }
 
     /// <summary>
     /// Order
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Order")]
     public OrderRequestDto Order { get; set; }
 }

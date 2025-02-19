@@ -31,15 +31,18 @@ public class InviteResultDto
     /// <summary>
     /// Email
     /// </summary>
+    [OpenApiDescription("Email")]
     public string Email { get; set; }
 
     /// <summary>
     /// Success
     /// </summary>
+    [OpenApiDescription("Success")]
     public bool Success { get; set; }
 
     /// <summary>
     /// Message
     /// </summary>
+    [OpenApiDescription("Message")]
     public string Message { get; set; }
 }

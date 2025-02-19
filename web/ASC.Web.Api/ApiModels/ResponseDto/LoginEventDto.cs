@@ -31,65 +31,78 @@ public class LoginEventDto(LoginEvent loginEvent, ApiDateTimeHelper apiDateTimeH
     /// <summary>
     /// ID
     /// </summary>
+    [OpenApiDescription("ID")]
     public int Id { get; set; } = loginEvent.Id;
 
     /// <summary>
     /// Date
     /// </summary>
+    [OpenApiDescription("Date")]
     public ApiDateTime Date { get; set; } = apiDateTimeHelper.Get(loginEvent.Date);
 
     /// <summary>
     /// User
     /// </summary>
+    [OpenApiDescription("User")]
     public string User { get; set; } = loginEvent.UserName;
 
     /// <summary>
     /// User ID
     /// </summary>
+    [OpenApiDescription("User ID")]
     public Guid UserId { get; set; } = loginEvent.UserId;
 
     /// <summary>
     /// Login
     /// </summary>
+    [OpenApiDescription("Login")]
     public string Login { get; set; } = loginEvent.Login;
 
     /// <summary>
     /// Action
     /// </summary>
+    [OpenApiDescription("Action")]
     public string Action { get; set; } = loginEvent.ActionText;
 
     /// <summary>
     /// Action ID
     /// </summary>
+    [OpenApiDescription("Action ID")]
     public MessageAction ActionId { get; set; } = (MessageAction)loginEvent.Action;
 
     /// <summary>
     /// IP
     /// </summary>
+    [OpenApiDescription("IP")]
     public string IP { get; set; } = loginEvent.IP;
 
     /// <summary>
     /// Country
     /// </summary>
+    [OpenApiDescription("Country")]
     public string Country { get; set; } = loginEvent.Country;
 
     /// <summary>
     /// City
     /// </summary>
+    [OpenApiDescription("City")]
     public string City { get; set; } = loginEvent.City;
 
     /// <summary>
     /// Browser
     /// </summary>
+    [OpenApiDescription("Browser")]
     public string Browser { get; set; } = loginEvent.Browser;
 
     /// <summary>
     /// Platform
     /// </summary>
+    [OpenApiDescription("Platform")]
     public string Platform { get; set; } = loginEvent.Platform;
 
     /// <summary>
     /// Page
     /// </summary>
+    [OpenApiDescription("Page")]
     public string Page { get; set; } = loginEvent.Page;
 }

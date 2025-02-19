@@ -33,39 +33,46 @@ public class DbTenant : IMapFrom<Tenant>
     /// <summary>
     /// Id
     /// </summary>
+    [OpenApiDescription("Id")]
     public int Id { get; set; }
 
     /// <summary>
     /// Name
     /// </summary>
     [MaxLength(255)]
+    [OpenApiDescription("Name")]
     public string Name { get; set; }
 
     /// <summary>
     /// Alias
     /// </summary>
     [MaxLength(100)]
+    [OpenApiDescription("Alias")]
     public string Alias { get; set; }
 
     /// <summary>
     /// Mapped domain
     /// </summary>
     [MaxLength(100)]
+    [OpenApiDescription("Mapped domain")]
     public string MappedDomain { get; set; }
 
     /// <summary>
     /// Version
     /// </summary>
+    [OpenApiDescription("Version")]
     public int Version { get; set; }
 
     /// <summary>
     /// Version_changed
     /// </summary>
+    [OpenApiDescription("Version_changed")]
     public DateTime? Version_Changed { get; set; }
 
     /// <summary>
     /// Version changed
     /// </summary>
+    [OpenApiDescription("Version changed")]
     public DateTime VersionChanged
     {
         get => Version_Changed ?? DateTime.MinValue;
@@ -76,39 +83,46 @@ public class DbTenant : IMapFrom<Tenant>
     /// Language
     /// </summary>
     [MaxLength(10)]
+    [OpenApiDescription("Language")]
     public string Language { get; set; }
 
     /// <summary>
     /// Time zone
     /// </summary>
     [MaxLength(50)]
+    [OpenApiDescription("Time zone")]
     public string TimeZone { get; set; }
 
     /// <summary>
     /// Trusted domains raw
     /// </summary>
     [MaxLength(1024)]
+    [OpenApiDescription("Trusted domains raw")]
     public string TrustedDomainsRaw { get; set; }
 
     /// <summary>
     /// Trusted domains enabled
     /// </summary>
+    [OpenApiDescription("Trusted domains enabled")]
     public TenantTrustedDomainsType TrustedDomainsEnabled { get; set; }
 
     /// <summary>
     /// Status
     /// </summary>
+    [OpenApiDescription("Status")]
     public TenantStatus Status { get; set; }
 
     /// <summary>
     /// Status changed
     /// </summary>
+    [OpenApiDescription("Status changed")]
     public DateTime? StatusChanged { get; set; }
     //hack for DateTime?
 
     /// <summary>
     /// Status changed hack
     /// </summary>
+    [OpenApiDescription("Status changed hack")]
     public DateTime StatusChangedHack
     {
         get => StatusChanged ?? DateTime.MinValue;
@@ -118,37 +132,44 @@ public class DbTenant : IMapFrom<Tenant>
     /// <summary>
     /// Creation date time
     /// </summary>
+    [OpenApiDescription("Creation date time")]
     public DateTime CreationDateTime { get; set; }
 
     /// <summary>
     /// Owner id
     /// </summary>
+    [OpenApiDescription("Owner id")]
     public Guid? OwnerId { get; set; }
 
     /// <summary>
     /// Payment id
     /// </summary>
     [MaxLength(38)]
+    [OpenApiDescription("Payment id")]
     public string PaymentId { get; set; }
 
     /// <summary>
     /// Industry
     /// </summary>
+    [OpenApiDescription("Industry")]
     public TenantIndustry Industry { get; set; }
 
     /// <summary>
     /// Last modified
     /// </summary>
+    [OpenApiDescription("Last modified")]
     public DateTime LastModified { get; set; }
 
     /// <summary>
     /// Calls
     /// </summary>
+    [OpenApiDescription("Calls")]
     public bool Calls { get; set; }
 
     /// <summary>
     /// Partner
     /// </summary>
+    [OpenApiDescription("Partner")]
     public DbTenantPartner Partner { get; set; }
 
     public void Mapping(Profile profile)

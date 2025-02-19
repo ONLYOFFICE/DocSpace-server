@@ -34,6 +34,7 @@ public class BatchTagsRequestDto
     /// <summary>
     /// Tag names
     /// </summary>
+    [OpenApiDescription("Tag names")]
     public IEnumerable<string> Names { get; set; }
 }
 
@@ -47,11 +48,13 @@ public class BatchTagsRequestDto<T>
     /// Room Id
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room Id")]
     public T Id { get; set; }
 
     /// <summary>
     /// Batch tags
     /// </summary>
     [FromBody]
+    [OpenApiDescription("Batch tags")]
     public BatchTagsRequestDto BatchTags { get; set; }
 }

@@ -34,11 +34,13 @@ public class UpdateFile
     /// <summary>
     /// File title
     /// </summary>
+    [OpenApiDescription("File title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Number of the latest file version
     /// </summary>
+    [OpenApiDescription("Number of the latest file version")]
     public int LastVersion { get; set; }
 }
 
@@ -51,11 +53,13 @@ public class UpdateFileRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// File
     /// </summary>
     [FromBody]
+    [OpenApiDescription("File")]
     public UpdateFile File { get; set; }
 }

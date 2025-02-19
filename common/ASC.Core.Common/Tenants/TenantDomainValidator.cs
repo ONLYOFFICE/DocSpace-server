@@ -36,17 +36,19 @@ public class TenantDomainValidator
     /// <summary>
     /// Regex
     /// </summary>
+    [OpenApiDescription("Regex")]
     public string Regex { get; }
 
     /// <summary>
     /// Min length
     /// </summary>
+    [OpenApiDescription("Min length")]
     public int MinLength { get; }
 
     /// <summary>
     /// Max length
     /// </summary>
-    [SwaggerSchemaCustom(Example = 63)]
+    [OpenApiDescription("Max length", Example = 63)]
     public int MaxLength { get; }
 
     public TenantDomainValidator(IConfiguration configuration, CoreBaseSettings coreBaseSettings)

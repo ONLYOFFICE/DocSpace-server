@@ -31,10 +31,12 @@ public class RoomInvitation : EmailInvitationDto
     /// <summary>
     /// ID of the user with whom we want to share a room
     /// </summary>
+    [OpenApiDescription("ID of the user with whom we want to share a room")]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Sharing rights
     /// </summary>
+    [OpenApiDescription("Sharing rights")]
     public FileShare Access { get; set; }
 }

@@ -35,22 +35,27 @@ public class TrackEditFileRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
+
     /// <summary>
     /// Tab ID
     /// </summary>
     [FromQuery(Name = "tabId")]
+    [OpenApiDescription("Tab ID")]
     public Guid TabId { get; set; }
 
     /// <summary>
     /// Document key for tracking
     /// </summary>
     [FromQuery(Name = "docKeyForTrack")]
+    [OpenApiDescription("Document key for tracking")]
     public string DocKeyForTrack { get; set; }
 
     /// <summary>
     /// Specifies whether to finish file tracking or not
     /// </summary>
     [FromQuery(Name = "isFinish")]
+    [OpenApiDescription("Specifies whether to finish file tracking or not")]
     public bool IsFinish { get; set; }
 }

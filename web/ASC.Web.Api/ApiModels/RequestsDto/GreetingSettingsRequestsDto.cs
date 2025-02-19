@@ -35,5 +35,6 @@ public class GreetingSettingsRequestsDto
     /// Tenant name
     /// </summary>
     [StringLength(255)]
+    [OpenApiDescription("Tenant name")]
     public string Title { get; set; }
 }

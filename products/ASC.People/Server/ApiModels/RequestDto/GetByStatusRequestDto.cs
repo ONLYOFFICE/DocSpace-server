@@ -36,5 +36,6 @@ public class GetByStatusRequestDto
     /// User status
     /// </summary>
     [FromRoute(Name = "status")]
+    [OpenApiDescription("User status")]
     public EmployeeStatus Status {  get; set; }
 }

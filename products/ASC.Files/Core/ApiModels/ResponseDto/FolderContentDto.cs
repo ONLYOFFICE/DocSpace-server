@@ -31,45 +31,49 @@ public class FolderContentDto<T>
     /// <summary>
     /// List of files
     /// </summary>
+    [OpenApiDescription("List of files")]
     public List<FileEntryDto> Files { get; set; }
 
     /// <summary>
     /// List of folders
     /// </summary>
+    [OpenApiDescription("List of folders")]
     public List<FileEntryDto> Folders { get; set; }
 
     /// <summary>
     /// Current folder information
     /// </summary>
+    [OpenApiDescription("Current folder information")]
     public FolderDto<T> Current { get; set; }
 
     /// <summary>
     /// Folder path
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
+    [OpenApiDescription("Folder path", Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
     public object PathParts { get; set; }
 
     /// <summary>
     /// Folder start index
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    [OpenApiDescription("Folder start index", Example = 0)]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// Number of folder elements
     /// </summary>
-    [SwaggerSchemaCustom(Example = 4)]
+    [OpenApiDescription("Number of folder elements", Example = 4)]
     public int Count { get; set; }
 
     /// <summary>
     /// Total number of elements in the folder
     /// </summary>
-    [SwaggerSchemaCustom(Example = 4)]
+    [OpenApiDescription("Total number of elements in the folder", Example = 4)]
     public int Total { get; set; }
 
     /// <summary>
     /// New element index
     /// </summary>
+    [OpenApiDescription("New element index")]
     public int New { get; set; }
 }
 

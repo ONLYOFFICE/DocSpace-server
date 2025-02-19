@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,10 @@ public class PushController(ApiContext apiContext,
     /// <short>Save the Documents Firebase device token</short>
     /// <path>api/2.0/settings/push/docregisterdevice</path>
     [Tags("Security / Firebase")]
-    [SwaggerResponse(200, "FireBase user", typeof(FireBaseUser))]
+    [EndpointName("docRegisterPusnNotificationDevice")]
+    [EndpointSummary("Save the Documents Firebase device token")]
+    [EndpointDescription("Saves the Firebase device token specified in the request for the Documents application.")]
+    [OpenApiResponse(typeof(FireBaseUser), 200, "FireBase user")]
     [HttpPost("docregisterdevice")]
     public async Task<FireBaseUser> DocRegisterPusnNotificationDeviceAsync(FirebaseRequestsDto inDto)
     {
@@ -55,7 +58,10 @@ public class PushController(ApiContext apiContext,
     /// <short>Subscribe to Documents push notification</short>
     /// <path>api/2.0/settings/push/docsubscribe</path>
     [Tags("Security / Firebase")]
-    [SwaggerResponse(200, "FireBase user", typeof(FireBaseUser))]
+    [EndpointName("subscribeDocumentsPushNotification")]
+    [EndpointSummary("Subscribe to Documents push notification")]
+    [EndpointDescription("Subscribes to the Documents push notification.")]
+    [OpenApiResponse(typeof(FireBaseUser), 200, "FireBase user")]
     [HttpPut("docsubscribe")]
     public async Task<FireBaseUser> SubscribeDocumentsPushNotificationAsync(FirebaseRequestsDto inDto)
     {

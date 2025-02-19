@@ -35,11 +35,13 @@ public class GetRoomLinksRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
+    [OpenApiDescription("Room ID")]
     public T Id { get; set; }
 
     /// <summary>
     /// Link type
     /// </summary>
     [FromQuery(Name = "type")]
+    [OpenApiDescription("Link type")]
     public LinkType? Type { get; set; }
 }

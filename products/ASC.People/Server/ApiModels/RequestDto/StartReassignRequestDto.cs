@@ -34,15 +34,18 @@ public class StartReassignRequestDto
     /// <summary>
     /// User ID whose data will be reassigned to another user
     /// </summary>
+    [OpenApiDescription("User ID whose data will be reassigned to another user")]
     public Guid FromUserId { get; set; }
 
     /// <summary>
     /// User ID to whom all the data will be reassigned
     /// </summary>
+    [OpenApiDescription("User ID to whom all the data will be reassigned")]
     public Guid ToUserId { get; set; }
 
     /// <summary>
     /// Specifies whether to delete a profile when the data reassignment will be finished or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to delete a profile when the data reassignment will be finished or not")]
     public bool DeleteProfile { get; set; }
 }

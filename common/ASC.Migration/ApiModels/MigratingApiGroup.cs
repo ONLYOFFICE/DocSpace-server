@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Migration.Core.Models.Api;
 
 
@@ -34,17 +36,20 @@ public class MigratingApiGroup : ImportableApiEntity
     /// Group name
     /// </summary>
     [ProtoMember(2)]
+    [OpenApiDescription("Group name")]
     public string GroupName { get; set; }
 
     /// <summary>
     /// Module name
     /// </summary>
     [ProtoMember(3)]
+    [OpenApiDescription("Module name")]
     public string ModuleName { get; set; }
 
     /// <summary>
     /// List of user uid
     /// </summary>
     [ProtoMember(4)]
+    [OpenApiDescription("List of user uid")]
     public List<string> UserUidList { get; set; }
 }

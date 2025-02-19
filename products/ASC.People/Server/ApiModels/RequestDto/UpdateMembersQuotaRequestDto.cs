@@ -34,10 +34,12 @@ public class UpdateMembersQuotaRequestDto
     /// <summary>
     /// List of user IDs
     /// </summary>
+    [OpenApiDescription("List of user IDs")]
     public IEnumerable<Guid> UserIds { get; set; }
 
     /// <summary>
     /// Quota
     /// </summary>
+    [OpenApiDescription("Quota")]
     public JsonElement Quota { get; set; }
 }

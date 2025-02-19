@@ -31,11 +31,13 @@ public class ActiveConnectionsDto
     /// <summary>
     /// Login event
     /// </summary>
+    [OpenApiDescription("Login event")]
     public int LoginEvent { get; set; }
 
     /// <summary>
     /// Items
     /// </summary>
+    [OpenApiDescription("Items")]
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
@@ -44,55 +46,66 @@ public class ActiveConnectionsItemDto
     /// <summary>
     /// Id
     /// </summary>
+    [OpenApiDescription("Id")]
     public int Id { get; set; }
 
     /// <summary>
     /// Tenant id
     /// </summary>
+    [OpenApiDescription("Tenant id")]
     public int TenantId { get; set; }
 
     /// <summary>
     /// User id
     /// </summary>
+    [OpenApiDescription("User id")]
     public Guid UserId { get; set; }
 
     /// <summary>
     /// Mobile
     /// </summary>
+    [OpenApiDescription("Mobile")]
     public bool Mobile {  get; set; }
 
     /// <summary>
     /// Ip
     /// </summary>
+    [OpenApiDescription("Ip")]
     public string Ip { get; set; }
 
     /// <summary>
     /// Country
     /// </summary>
+    [OpenApiDescription("Country")]
     public string Country { get; set; }
 
     /// <summary>
     /// City
     /// </summary>
+    [OpenApiDescription("City")]
     public string City { get; set; }
 
     /// <summary>
     /// Browser
     /// </summary>
+    [OpenApiDescription("Browser")]
     public string Browser { get; set; }
 
     /// <summary>
     /// Platform
     /// </summary>
+    [OpenApiDescription("Platform")]
     public string Platform { get; set; }
 
     /// <summary>
     /// Date
     /// </summary>
+    [OpenApiDescription("Date")]
     public ApiDateTime Date { get; set; }
 
     /// <summary>
     /// Page
     /// </summary>
+    [OpenApiDescription("Page")]
     public string Page { get; set; }
 }

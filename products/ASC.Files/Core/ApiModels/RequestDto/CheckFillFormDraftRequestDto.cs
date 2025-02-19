@@ -34,21 +34,25 @@ public class CheckFillFormDraft
     /// <summary>
     /// File version
     /// </summary>
+    [OpenApiDescription("File version")]
     public int Version { get; set; }
 
     /// <summary>
     /// Action with a form
     /// </summary>
+    [OpenApiDescription("Action with a form")]
     public string Action { get; set; }
 
     /// <summary>
     /// Specifies whether to request a form for viewing or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to request a form for viewing or not")]
     public bool RequestView => (Action ?? "").Equals("view", StringComparison.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// Specifies whether to request an embedded form or not
     /// </summary>
+    [OpenApiDescription("Specifies whether to request an embedded form or not")]
     public bool RequestEmbedded => (Action ?? "").Equals("embedded", StringComparison.InvariantCultureIgnoreCase);
 }
 
@@ -62,11 +66,13 @@ public class CheckFillFormDraftRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
 
     /// <summary>
     /// File
     /// </summary>
     [FromBody]
+    [OpenApiDescription("File")]
     public CheckFillFormDraft File {  get; set; }
 }

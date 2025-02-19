@@ -31,15 +31,18 @@ public class TariffDto : Tariff
     /// <summary>
     /// Open source
     /// </summary>
+    [OpenApiDescription("Open source")]
     public bool? OpenSource { get; set; }
 
     /// <summary>
     /// Enterprise
     /// </summary>
+    [OpenApiDescription("Enterprise")]
     public bool? Enterprise { get; set; }
 
     /// <summary>
     /// Developer
     /// </summary>
+    [OpenApiDescription("Developer")]
     public bool? Developer { get; set; }
 }

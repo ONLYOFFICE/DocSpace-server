@@ -31,30 +31,36 @@ public class DocServiceUrlDto
     /// <summary>
     /// Version
     /// </summary>
+    [OpenApiDescription("Version")]
     public required string Version { get; set; }
 
     /// <summary>
     /// Doc service url api
     /// </summary>
+    [OpenApiDescription("Doc service url api")]
     public required string DocServiceUrlApi { get; set; }
 
     /// <summary>
     /// Doc service url
     /// </summary>
+    [OpenApiDescription("Doc service url")]
     public required string DocServiceUrl { get; set; }
 
     /// <summary>
     /// Doc service url internal
     /// </summary>
+    [OpenApiDescription("Doc service url internal")]
     public required string DocServiceUrlInternal { get; set; }
 
     /// <summary>
     /// Doc service portal url
     /// </summary>
+    [OpenApiDescription("Doc service portal url")]
     public required string DocServicePortalUrl { get; set; }
 
     /// <summary>
     /// Is default
     /// </summary>
+    [OpenApiDescription("Is default")]
     public required bool IsDefault { get; set; }
 }

@@ -35,34 +35,41 @@ public class OpenEditRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
+    [OpenApiDescription("File ID")]
     public T FileId { get; set; }
+
     /// <summary>
     /// File version
     /// </summary>
     [FromQuery(Name = "version")]
+    [OpenApiDescription("File version")]
     public int Version { get; set; }
 
     /// <summary>
     /// Specifies if a document will be opened for viewing only or not
     /// </summary>
     [FromQuery(Name = "view")]
+    [OpenApiDescription("Specifies if a document will be opened for viewing only or not")]
     public bool View { get; set; }
 
     /// <summary>
     /// Editor type
     /// </summary>
     [FromQuery(Name = "editorType")]
+    [OpenApiDescription("Editor type")]
     public EditorType EditorType { get; set; }
 
     /// <summary>
     /// Edit
     /// </summary>
     [FromQuery(Name = "edit")]
+    [OpenApiDescription("Edit")]
     public bool Edit { get; set; }
 
     /// <summary>
     /// Fill
     /// </summary>
     [FromQuery(Name = "fill")]
+    [OpenApiDescription("Fill")]
     public bool Fill { get; set; }
 }

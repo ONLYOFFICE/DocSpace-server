@@ -61,7 +61,7 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
-    [SwaggerResponse(200, "Portal api works")]
+    [OpenApiResponse(200, "Portal api works")]
     [HttpGet("test")]
     public IActionResult Check()
     {
@@ -80,7 +80,10 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/register</path>
     [Tags("Portal")]
-    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [EndpointName("register")]
+    [EndpointSummary("Register")]
+    [EndpointDescription("Register")]
+    [OpenApiResponse(typeof(IActionResult), 200, "Ok")]
     [HttpPost("register")]
     //[AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal,auth:portalbasic")]
@@ -320,7 +323,10 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/remove</path>
     [Tags("Portal")]
-    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [EndpointName("remove")]
+    [EndpointSummary("Remove")]
+    [EndpointDescription("Remove")]
+    [OpenApiResponse(typeof(IActionResult), 200, "Ok")]
     [HttpDelete("remove")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -404,7 +410,10 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/status</path>
     [Tags("Portal")]
-    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [EndpointName("changeStatus")]
+    [EndpointSummary("Status")]
+    [EndpointDescription("Status")]
+    [OpenApiResponse(typeof(IActionResult), 200, "Ok")]
     [HttpPut("status")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -464,7 +473,10 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/validateportalname</path>
     [Tags("Portal")]
-    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [EndpointName("checkExistingNamePortal")]
+    [EndpointSummary("Checks if portal exists")]
+    [EndpointDescription("Checks if portal exists")]
+    [OpenApiResponse(typeof(IActionResult), 200, "Ok")]
     [HttpPost("validateportalname")]
     [AllowCrossSiteJson]
     public async ValueTask<IActionResult> CheckExistingNamePortalAsync(TenantModel model)
@@ -496,7 +508,10 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/get</path>
     [Tags("Portal")]
-    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [EndpointName("getPortals")]
+    [EndpointSummary("Gets a list of portals")]
+    [EndpointDescription("Gets a list of portals")]
+    [OpenApiResponse(typeof(IActionResult), 200, "Ok")]
     [HttpGet("get")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -568,7 +583,10 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/signin</path>
     [Tags("Portal")]
-    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [EndpointName("signInToPortal")]
+    [EndpointSummary("Signs in to portal")]
+    [EndpointDescription("Signs in to portal")]
+    [OpenApiResponse(typeof(IActionResult), 200, "Ok")]
     [HttpPost("signin")]
     [AllowCrossSiteJson]
     public async Task<IActionResult> SignInToPortalAsync(TenantModel model)

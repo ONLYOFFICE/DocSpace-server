@@ -34,16 +34,19 @@ public abstract class TenantEntityQuotaSettings
     /// <summary>
     /// Specifies if the quota is enabled or not
     /// </summary>
+    [OpenApiDescription("Specifies if the quota is enabled or not")]
     public bool EnableQuota { get; set; }
 
     /// <summary>
     /// Default quota
     /// </summary>
+    [OpenApiDescription("Default quota")]
     public long DefaultQuota { get; set; } = DefaultQuotaValue;
 
     /// <summary>
     /// Date of the last quota recalculation
     /// </summary>
+    [OpenApiDescription("Date of the last quota recalculation")]
     public DateTime? LastRecalculateDate { get; set; }
 
 }

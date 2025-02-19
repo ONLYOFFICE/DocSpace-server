@@ -37,57 +37,57 @@ namespace ASC.Web.Studio.Utility;
 [EnumExtensions]
 public enum ConfirmType
 {
-    [SwaggerEnum("Emp invite")]
+    [OpenApiEnum("Emp invite")]
     EmpInvite,
 
-    [SwaggerEnum("Link invite")]
+    [OpenApiEnum("Link invite")]
     LinkInvite,
 
-    [SwaggerEnum("Portal suspend")]
+    [OpenApiEnum("Portal suspend")]
     PortalSuspend,
 
-    [SwaggerEnum("Portal continue")]
+    [OpenApiEnum("Portal continue")]
     PortalContinue,
 
-    [SwaggerEnum("Portal remove")]
+    [OpenApiEnum("Portal remove")]
     PortalRemove,
 
-    [SwaggerEnum("Dns change")]
+    [OpenApiEnum("Dns change")]
     DnsChange,
 
-    [SwaggerEnum("Portal owner change")]
+    [OpenApiEnum("Portal owner change")]
     PortalOwnerChange,
 
-    [SwaggerEnum("Activation")]
+    [OpenApiEnum("Activation")]
     Activation,
 
-    [SwaggerEnum("Email change")]
+    [OpenApiEnum("Email change")]
     EmailChange,
 
-    [SwaggerEnum("Email activation")]
+    [OpenApiEnum("Email activation")]
     EmailActivation,
 
-    [SwaggerEnum("Password change")]
+    [OpenApiEnum("Password change")]
     PasswordChange,
 
-    [SwaggerEnum("Profile remove")]
+    [OpenApiEnum("Profile remove")]
     ProfileRemove,
 
-    [SwaggerEnum("Phone activation")]
+    [OpenApiEnum("Phone activation")]
     PhoneActivation,
 
-    [SwaggerEnum("Phone auth")]
+    [OpenApiEnum("Phone auth")]
     PhoneAuth,
 
-    [SwaggerEnum("Auth")]
+    [OpenApiEnum("Auth")]
     Auth,
 
-    [SwaggerEnum("Tfa activation")]
+    [OpenApiEnum("Tfa activation")]
     TfaActivation,
 
-    [SwaggerEnum("Tfa auth")]
+    [OpenApiEnum("Tfa auth")]
     TfaAuth,
 
-    [SwaggerEnum("Wizard")]
+    [OpenApiEnum("Wizard")]
     Wizard
 }

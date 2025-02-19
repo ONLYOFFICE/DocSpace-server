@@ -31,35 +31,42 @@ public class FormGalleryDto : IMapFrom<OFormSettings>
     /// <summary>
     /// Path
     /// </summary>
+    [OpenApiDescription("Path")]
     public string Path { get; set; }
 
     /// <summary>
     /// Domain
     /// </summary>
+    [OpenApiDescription("Domain")]
     public string Domain { get; set; }
 
     /// <summary>
     /// Ext
     /// </summary>
+    [OpenApiDescription("Ext")]
     public string Ext { get; set; }
 
     /// <summary>
     /// Upload path
     /// </summary>
+    [OpenApiDescription("Upload path")]
     public string UploadPath { get; set; }
 
     /// <summary>
     /// Upload domain
     /// </summary>
+    [OpenApiDescription("Upload domain")]
     public string UploadDomain { get; set; }
 
     /// <summary>
     /// Upload ext
     /// </summary>
+    [OpenApiDescription("Upload ext")]
     public string UploadExt { get; set; }
 
     /// <summary>
     /// Upload dashboard
     /// </summary>
+    [OpenApiDescription("Upload dashboard")]
     public string UploadDashboard { get; set; }
 }

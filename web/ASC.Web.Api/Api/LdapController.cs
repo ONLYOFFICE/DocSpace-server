@@ -49,6 +49,10 @@ namespace ASC.Api.Settings
         /// </short>
         /// <returns>LDAPSupportSettings object</returns>
         [Read("ldap")]
+        [EndpointName("getLdapSettings")]
+        [EndpointSummary("Get LDAP settings")]
+        [EndpointDescription("Returns current portal LDAP settings")]
+        [OpenApiResponse(200, "LDAP settings returned successfully")]
         public LdapSettings GetLdapSettings()
         {
             CheckLdapPermissions();
@@ -82,6 +86,10 @@ namespace ASC.Api.Settings
         /// </short>
         /// <returns>string or null</returns>
         [Read("ldap/cron")]
+        [EndpointName("getLdapCronSettings")]
+        [EndpointSummary("Get LDAP AutoSync Cron expression")]
+        [EndpointDescription("Returns current portal LDAP AutoSync cron expression if any")]
+        [OpenApiResponse(200, "LDAP AutoSync Cron expression returned successfully")]
         public string GetLdapCronSettings()
         {
             CheckLdapPermissions();
@@ -104,6 +112,10 @@ namespace ASC.Api.Settings
         /// Sets LDAP AutoSync Cron expression
         /// </short>
         [Create("ldap/cron")]
+        [EndpointName("setLdapCronSettings")]
+        [EndpointSummary("Sets LDAP AutoSync Cron expression")]
+        [EndpointDescription("Sets current portal LDAP AutoSync cron expression")]
+        [OpenApiResponse(200, "LDAP AutoSync Cron expression set successfully")]
         public void SetLdapCronSettings(string cron)
         {
             CheckLdapPermissions();
@@ -145,6 +157,10 @@ namespace ASC.Api.Settings
         /// Sync LDAP
         /// </short>
         [Read("ldap/sync")]
+        [EndpointName("syncLdap")]
+        [EndpointSummary("Sync LDAP")]
+        [EndpointDescription("Start sync users and groups process by LDAP")]
+        [OpenApiResponse(200, "LDAP sync started successfully")]
         public LdapOperationStatus SyncLdap()
         {
             CheckLdapPermissions();
@@ -189,6 +205,10 @@ namespace ASC.Api.Settings
         /// Sync LDAP
         /// </short>
         [Read("ldap/sync/test")]
+        [EndpointName("testLdapSync")]
+        [EndpointSummary("Sync LDAP")]
+        [EndpointDescription("Starts the process of collecting preliminary changes on the portal according to the selected LDAP settings")]
+        [OpenApiResponse(200, "LDAP sync test started successfully")]
         public LdapOperationStatus TestLdapSync()
         {
             CheckLdapPermissions();
@@ -235,6 +255,10 @@ namespace ASC.Api.Settings
         /// <param name="settings">LDAPSupportSettings serialized string</param>
         /// <param name="acceptCertificate">Flag permits errors of checking certificates</param>
         [Create("ldap")]
+        [EndpointName("saveLdapSettings")]
+        [EndpointSummary("Save LDAP settings")]
+        [EndpointDescription("Save LDAP settings and start import/sync users and groups process by LDAP")]
+        [OpenApiResponse(200, "LDAP settings saved successfully")]
         public LdapOperationStatus SaveLdapSettings(string settings, bool acceptCertificate)
         {
             CheckLdapPermissions();
@@ -275,6 +299,10 @@ namespace ASC.Api.Settings
         /// Save LDAP settings
         /// </short>
         [Create("ldap/save/test")]
+        [EndpointName("testLdapSave")]
+        [EndpointSummary("Save LDAP settings")]
+        [EndpointDescription("Starts the process of collecting preliminary changes on the portal according to the LDAP settings")]
+        [OpenApiResponse(200, "LDAP settings saved successfully")]
         public LdapOperationStatus TestLdapSave(string settings, bool acceptCertificate)
         {
             CheckLdapPermissions();
@@ -322,6 +350,10 @@ namespace ASC.Api.Settings
         /// </short>
         /// <returns>LDAPSupportSettingsResult object</returns>
         [Read("ldap/status")]
+        [EndpointName("getLdapOperationStatus")]
+        [EndpointSummary("Get LDAP sync process status")]
+        [EndpointDescription("Returns LDAP sync process status")]
+        [OpenApiResponse(typeof(LdapOperationStatus), 200, "LDAP sync process status")]
         public LdapOperationStatus GetLdapOperationStatus()
         {
             CheckLdapPermissions();
@@ -337,6 +369,10 @@ namespace ASC.Api.Settings
         /// </short>
         /// <returns>LDAPSupportSettings object</returns>
         [Read("ldap/default")]
+        [EndpointName("getDefaultLdapSettings")]
+        [EndpointSummary("Get LDAP default settings")]
+        [EndpointDescription("Returns LDAP default settings")]
+        [OpenApiResponse(typeof(LdapSettings), 200, "LDAP default settings")]
         public LdapSettings GetDefaultLdapSettings()
         {
             CheckLdapPermissions();
