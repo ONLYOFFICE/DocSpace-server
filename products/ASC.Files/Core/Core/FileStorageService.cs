@@ -2149,7 +2149,7 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task SetFolderOrder<T>(T folderId, int order)
+    public async Task<Folder<T>> SetFolderOrder<T>(T folderId, int order)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
@@ -2165,6 +2165,8 @@ public class FileStorageService //: IFileStorageService
         {
             await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), order.ToString());
         }
+
+        return folder;
     }
 
     public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>>> GetNewRoomFilesAsync()
