@@ -554,15 +554,15 @@ public class WebhookFolderControllerAccessChecker(
         {
             if (int.TryParse(folderId, out var folderIdInt))
             {
-                var folderInt = await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(folderIdInt);
+                var folder = await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(folderIdInt);
 
-                return await fileSecurity.CanReadAsync(folderInt, webhookData.TargetUserId);
+                return await fileSecurity.CanReadAsync(folder, webhookData.TargetUserId);
             }
             else
             {
-                var folderString = await daoFactory.GetCacheFolderDao<string>().GetFolderAsync(folderId);
+                var folder = await daoFactory.GetCacheFolderDao<string>().GetFolderAsync(folderId);
 
-                return await fileSecurity.CanReadAsync(folderString, webhookData.TargetUserId);
+                return await fileSecurity.CanReadAsync(folder, webhookData.TargetUserId);
             }
         }
 
@@ -574,16 +574,16 @@ public class WebhookFolderControllerAccessChecker(
         {
             if (obj is FolderDto<int> folderDtoInt)
             {
-                var folderInt = await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(folderDtoInt.Id);
+                var folder = await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(folderDtoInt.Id);
 
-                return await fileSecurity.CanReadAsync(folderInt, webhookData.TargetUserId);
+                return await fileSecurity.CanReadAsync(folder, webhookData.TargetUserId);
             }
 
             if (obj is FolderDto<string> folderDtoString)
             {
-                var folderString = await daoFactory.GetCacheFolderDao<string>().GetFolderAsync(folderDtoString.Id);
+                var folder = await daoFactory.GetCacheFolderDao<string>().GetFolderAsync(folderDtoString.Id);
 
-                return await fileSecurity.CanReadAsync(folderString, webhookData.TargetUserId);
+                return await fileSecurity.CanReadAsync(folder, webhookData.TargetUserId);
             }
         }
 
