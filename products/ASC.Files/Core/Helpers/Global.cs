@@ -51,7 +51,6 @@ public class GlobalNotify
                 try
                 {
                     GlobalFolder.ProjectsRootFolderCache.Clear();
-                    GlobalFolder.UserRootFolderCache.Clear();
                     GlobalFolder.CommonFolderCache.Clear();
                     GlobalFolder.ShareFolderCache.Clear();
                     GlobalFolder.RecentFolderCache.Clear();
@@ -372,7 +371,8 @@ public class GlobalFolder(
     UserManager userManager,
     SettingsManager settingsManager,
     ILogger<GlobalFolder> logger,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    AscDistributedCache distributedCache)
 {
     internal static readonly IDictionary<int, int> ProjectsRootFolderCache = new ConcurrentDictionary<int, int>(); /*Use SYNCHRONIZED for cross thread blocks*/
 
@@ -454,7 +454,12 @@ public class GlobalFolder(
         return result;
     }
 
-    internal static readonly ConcurrentDictionary<string, Lazy<int>> UserRootFolderCache = new(); /*Use SYNCHRONIZED for cross thread blocks*/
+    public async Task ClearCacheFolderMyAsync(Guid userId)
+    {
+        var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{userId}";
+        await distributedCache.RemoveAsync(cacheKey);
+    }
+
 
     public async ValueTask<int> GetFolderMyAsync(IDaoFactory daoFactory)
     {
@@ -470,9 +475,13 @@ public class GlobalFolder(
 
         var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{authContext.CurrentAccount.ID}";
 
-        var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
+        var myFolderId = await distributedCache.GetAsync<int>(cacheKey);
+        if (myFolderId == 0)
+        {
+            myFolderId = await GetFolderIdAndProcessFirstVisitAsync(daoFactory, true);
+        }
 
-        return myFolderId.Value;
+        return myFolderId;
     }
 
     internal static readonly IDictionary<int, int> CommonFolderCache =
@@ -842,6 +851,11 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
         return IdConverter.Convert<T>(await FolderMyAsync);
     }
 
+    public async Task ClearCacheFolderMyAsync(Guid userId)
+    {
+        await globalFolder.ClearCacheFolderMyAsync(userId);
+    }
+    
     public async ValueTask<T> GetFolderProjectsAsync<T>()
     {
         return IdConverter.Convert<T>(await FolderProjectsAsync);

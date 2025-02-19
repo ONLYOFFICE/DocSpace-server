@@ -3089,6 +3089,9 @@ public class FileStorageService //: IFileStorageService
 
             await DeleteFilesAsync(fileIdsFromMy, folderIdTrash);
             await DeleteFoldersAsync(folderIdsFromMy, folderIdTrash);
+
+            await folderDao.DeleteFolderAsync(folderIdMy);
+            await globalFolderHelper.ClearCacheFolderMyAsync(userFromId);
         }
         return;
     }
