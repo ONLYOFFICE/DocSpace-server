@@ -1122,7 +1122,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("devtoolsaccess")]
     public async Task<TenantDevToolsAccessSettings> GetTenantAccessDevToolsSettingsAsync()
     {
-        return await settingsManager.LoadAsync<TenantDevToolsAccessSettings>(tenantManager.GetCurrentTenantId());
+        return await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
     }
 
     /// <summary>
