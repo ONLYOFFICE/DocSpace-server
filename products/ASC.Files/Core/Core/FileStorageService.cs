@@ -2977,6 +2977,12 @@ public class FileStorageService //: IFileStorageService
 
         await securityContext.AuthenticateMeWithoutCookieAsync(user);
 
+        var my = await globalFolderHelper.FolderMyAsync;
+        if (my == 0)
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
+            return;
+        }
         var shared = (await GetFolderItemsAsync(
             await globalFolderHelper.FolderMyAsync,
             0,
