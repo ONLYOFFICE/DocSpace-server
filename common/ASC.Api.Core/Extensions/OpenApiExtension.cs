@@ -24,84 +24,64 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Xml.XPath;
-using Microsoft.OpenApi;
-using Microsoft.OpenApi.Extensions;
-using Microsoft.OpenApi.Interfaces;
+using System.IO.Pipelines;
+using System.Text.Json.Serialization.Metadata;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Writers;
-using Swashbuckle.AspNetCore.SwaggerGen;
+
+using Scalar.AspNetCore;
+
 
 namespace ASC.Api.Core.Extensions;
 
 public static class OpenApiExtension
 {
-    public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddWebOpenApi(this IServiceCollection services, IConfiguration configuration)
     {
-        return services.AddSwaggerGen(c =>
+        return services.AddOpenApi("common", c =>
         {
             var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
-
-            c.ResolveConflictingActions(a => a.First());
-            c.CustomOperationIds(r =>
+            c.AddDocumentTransformer((document, context, cancellationToken) =>
             {
-                var actionName = r.ActionDescriptor.RouteValues["action"];
-
-                return (char.ToLower(actionName[0]) + actionName.Substring(1));
+                document.Info = new()
+                {
+                    Title = assemblyName,
+                    Version = "v2",
+                };
+                return Task.CompletedTask;
             });
 
-            c.CustomSchemaIds(CustomSchemaId);
+            c.CreateSchemaReferenceId = NestedSchemaReferenceId.Fun;
 
-            c.SwaggerDoc("common", new OpenApiInfo { Title = assemblyName, Version = "v2" });
-            c.SchemaFilter<SwaggerSchemaCustomFilter>();
-            c.DocumentFilter<LowercaseDocumentFilter>();
-            c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
-            c.DocumentFilter<TagDescriptionsDocumentFilter>();
-            c.OperationFilter<SwaggerCustomOperationFilter>();
-            c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
-            c.EnableAnnotations();
+            c.AddSchemaTransformer<OpenApiDescriptionSchemaTransformer>();
+            c.AddDocumentTransformer<LowercaseDocumentTransformer>();
+            c.AddDocumentTransformer((document, context, cancellationToken) =>
+            {
+                document.Paths.Remove("/api/2.0/capabilities.json");
+                return Task.CompletedTask;
+            });
+            c.AddDocumentTransformer<TagDescriptionsDocumentFilter>();
+            c.AddDocumentTransformer<OpenApiResponseDescriptionTransformer>();
+            c.AddOperationTransformer<OpenApiCustomOperationTransformer>();
             var serverUrls = configuration.GetSection("openApi:servers").Get<List<string>>() ?? [];
             var serverDescription = configuration.GetSection("openApi:serversDescription").Get<List<string>>() ?? [];
 
-            for (var i = 0; i < serverUrls.Count; i++)
+            c.AddDocumentTransformer((document, context, cancellationToken) =>
             {
-                c.AddServer(new OpenApiServer
+                for(var i = 0; i < serverUrls.Count; i++)
                 {
-                    Url = serverUrls[i], 
-                    Description = serverDescription.Count > i ? serverDescription[i] : null
-                });
-            }
-            
-            // ToDo: add security definitions
-            c.AddSecurityDefinition(CookiesManager.AuthCookiesName, new OpenApiSecurityScheme
-            {
-                Type = SecuritySchemeType.ApiKey,
-                In = ParameterLocation.Cookie,
-                Name = CookiesManager.AuthCookiesName
+                    document.Servers.Add(new OpenApiServer
+                    {
+                        Url = serverUrls[i],
+                        Description = serverDescription.Count > i ? serverDescription[i] : null,
+                    });
+                }
+                return Task.CompletedTask;
             });
 
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
-            if (File.Exists(xmlPath))
-            {
-                var doc = new XPathDocument(xmlPath);
+            
 
-                c.IncludeXmlComments(() => doc);
-                c.OperationFilter<XmlCustomTagFilter>(doc);
-
-                c.OperationFilter<AllowAnonymousFilter>();
-            }
-
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblies)
-            {
-                var xmlFileName = $"{assembly.GetName().Name}.xml";
-                var xmlPathOther = Path.Combine(AppContext.BaseDirectory, xmlFileName);
-
-                if (File.Exists(xmlPathOther) && xmlPathOther != xmlPath)
-                {
-                    c.IncludeXmlComments(xmlPathOther);
-                }
-            }
+            c.AddDocumentTransformer<SecurityDocumentTransformer>();
         });
     }
 
@@ -109,156 +89,173 @@ public static class OpenApiExtension
     {
         var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
 
-        app.UseSwagger(c =>
+        app.UseEndpoints(endpoints =>
         {
-            c.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
+            endpoints.MapOpenApi($"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}");
         });
         
         return app;
     }
 
-    public static IApplicationBuilder UseOpenApiUI(this IApplicationBuilder app, Dictionary<string, string> endpoints)
+    public static IApplicationBuilder UseOpenApiUI(this IApplicationBuilder app)
     {
-        app.UseSwaggerUI(o =>
+        var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
+        app.UseEndpoints(endpoints =>
         {
-            o.RoutePrefix = "openapi";
-            o.DocumentTitle = "DocSpace API";
-
-            foreach (var (name, route) in endpoints)
+            endpoints.MapScalarApiReference(options =>
             {
-                o.SwaggerEndpoint(route, name);
-            }
-        });
+                options.EndpointPathPrefix = $"scalar/{assemblyName.ToLower()}";
+                options
+                    .WithTheme(ScalarTheme.Purple)
+                    .WithTitle($"{assemblyName} API Documentation")
+                    .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+                    .WithOpenApiRoutePattern($"openapi/{assemblyName.ToLower()}/{{documentName}}.json");
+            });
 
-        app.UseEndpoints(endpointRouteBuilder =>
-        {
-            endpointRouteBuilder.MapSwagger();
         });
-
         return app;
     }
 
+}
+
+public class SecurityDocumentTransformer : IOpenApiDocumentTransformer
+{
+    public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
+    {
+        var requirements = new Dictionary<string, OpenApiSecurityScheme>
+        {
+            ["asc_auth_key"] = new OpenApiSecurityScheme
+            {
+                Scheme = "asc_auth_key",
+                Type = SecuritySchemeType.ApiKey,
+                In = ParameterLocation.Cookie,
+                Name = CookiesManager.AuthCookiesName
+            }
+        };
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes = requirements;
+
+        foreach (var path in document.Paths) 
+        {
+            foreach(var operation in path.Value.Operations)
+            {
+                var tags = context.DescriptionGroups.SelectMany(r => r.Items).Where(r => r.HttpMethod.Equals(operation.Key.ToString().ToUpper()) && ("/" + r.RelativePath).Equals(path.Key)).FirstOrDefault();
+                if(tags == null)
+                {
+                    continue;
+                }
+                var allowAnonymous = tags.ActionDescriptor.EndpointMetadata.OfType<AllowAnonymousAttribute>().FirstOrDefault();
+                if (allowAnonymous != null) 
+                {
+                    continue;
+                }
+                else
+                {
+                    operation.Value.Security.Add(new OpenApiSecurityRequirement
+                    {
+                        [new OpenApiSecurityScheme { Reference = new OpenApiReference { Id = "asc_auth_key", Type = ReferenceType.SecurityScheme } }] = new List<string> { "read", "write" }
+                    });
+                }
+            }
+        }
+        return Task.CompletedTask;
+    }
+}
+
+public static class NestedSchemaReferenceId
+{
+    private static readonly HashSet<string> _generatedSchemas = new HashSet<string>();
+    public static string Fun(JsonTypeInfo info)
+    {
+        var type = Nullable.GetUnderlyingType(info.Type) ?? info.Type;
+
+        if (_primitiveTypes.Contains(type) || IsEnumerableOfPrimitive(type) || (type == typeof(object) && !type.IsGenericType))
+        {
+            return null;
+        }
+        else if (info is JsonTypeInfo { Kind: JsonTypeInfoKind.Enumerable } || type.IsArray)
+        {
+                return null;
+        }
+        else if (info is JsonTypeInfo { Kind: JsonTypeInfoKind.Dictionary })
+        {
+            return null;
+        }
+        else
+        {
+            var name = CustomSchemaId(type);
+            if (!_generatedSchemas.Contains(name))
+            {
+                _generatedSchemas.Add(name);
+                return name;
+            }
+            else
+            {
+                return  $"{name}.{Guid.NewGuid()}";
+            }
+        }
+    }
+
+    private static bool IsEnumerableOfPrimitive(Type type)
+    {
+        if (type.IsGenericType)
+        {
+            if (typeof(IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
+                typeof(IAsyncEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
+                typeof(ICollection<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
+                typeof(List<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
+                typeof(IDictionary<,>).IsAssignableFrom(type.GetGenericTypeDefinition()))
+            {
+                return true;
+            }
+        }
+
+        return type.IsArray;
+    }
     private static string CustomSchemaId(Type type)
     {
         var name = type.FullName;
-
         if (string.IsNullOrEmpty(name))
         {
             return name;
         }
-        
         if (type.IsGenericType)
         {
             name = $"{name.Split('`')[0]}.{string.Join(".", type.GenericTypeArguments.Select(CustomSchemaId))}";
         }
+        if (_primitiveTypes.Contains(type)) 
+        {
+            return type.Name;
+        }
 
-        // Fix for nested classes
         name = name.Replace("+", "_");
-
         return name;
     }
 
-    private class AllowAnonymousFilter : IOperationFilter
-    {
-        public void Apply(OpenApiOperation operation, OperationFilterContext context)
-        {
-            var allowAnonymous = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
-                .Union(context.MethodInfo.GetCustomAttributes(true))
-                .OfType<AllowAnonymousAttribute>();
-
-            //var authorizeAttribute = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
-            //    .Union (context.MethodInfo.GetCustomAttributes(true)) .OfType<AuthorizeAttribute>();
-
-
-            if (allowAnonymous.Any())
-            {
-                operation.Security.Clear();
-            }
-            else
-            {
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = CookiesManager.AuthCookiesName }
-                        },
-                        ["read", "write"]
-                    }
-                });
-
-                operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
-            }
-
-            //if(authorizeAttribute.Any())
-            //{
-            //    var authorizationDescription = new StringBuilder(" (Auth:");
-            //    var policySelector = authorizeAttribute.Where(a => !string.IsNullOrEmpty(a.Policy)).Select(a => a.Policy);
-            //    var schemaSelector = authorizeAttribute.Where(a => !string.IsNullOrEmpty(a.AuthenticationSchemes)).Select(a => a.AuthenticationSchemes);
-            //    var rolesSelector = authorizeAttribute.Where(a => !string.IsNullOrEmpty(a.Roles)).Select(a => a.Roles);
-            //    ApplyAuthorizeAttribute(authorizationDescription, policySelector, schemaSelector, rolesSelector);
-            //    operation.Summary += authorizationDescription.ToString().TrimEnd(';') + ")";
-            //}
-        }
-
-        private void ApplyAuthorizeAttribute(StringBuilder authorizationDescription, IEnumerable<string> policySelector, IEnumerable<string> schemaSelector, IEnumerable<string> rolesSelector)
-        {
-            if (policySelector.Any())
-            {
-                authorizationDescription.Append($" Policy: {string.Join(", ", policySelector)};");
-            }
-            if (schemaSelector.Any())
-            {
-                authorizationDescription.Append($" Schema: {string.Join(", ", schemaSelector)};");
-            }
-            if (rolesSelector.Any())
-            {
-                authorizationDescription.Append($" Roles: {string.Join(", ", rolesSelector)};");
-            }
-        }
-    }
-
-    private class XmlCustomTagFilter(XPathDocument xmlDoc) : IOperationFilter
-    {
-        private readonly XPathNavigator _xmlNavigator = xmlDoc.CreateNavigator();
-
-        public void Apply(OpenApiOperation operation, OperationFilterContext context)
-        {
-            if (context.MethodInfo == null || context.MethodInfo.DeclaringType == null)
-            {
-                return;
-            }
-
-            var targetMethod = context.MethodInfo.DeclaringType.IsConstructedGenericType ? 
-                context.MethodInfo.GetUnderlyingGenericTypeMethod() : 
-                context.MethodInfo;
-
-            if (targetMethod == null)
-            {
-                return;
-            }
-
-            ApplyMethodTags(operation, targetMethod);
-        }
-
-        private void ApplyMethodTags(OpenApiOperation operation, MethodInfo methodInfo)
-        {
-            var methodMemberName = XmlCommentsNodeNameHelper.GetMemberNameForMethod(methodInfo);
-            var methodNode = _xmlNavigator.SelectSingleNode($"/doc/members/member[@name='{methodMemberName}']");
-
-            var shortNode = methodNode?.SelectSingleNode("short");
-            if (shortNode != null)
-            {
-                operation.AddExtension("x-shortName", new XmlShortNameExtension(XmlCommentsTextHelper.Humanize(shortNode.InnerXml)));
-            }
-        }
-    }
-
-    private class XmlShortNameExtension(string shortName) : IOpenApiExtension
-    {
-        public void Write(IOpenApiWriter writer, OpenApiSpecVersion specVersion)
-        {
-            writer.WriteValue(shortName);
-        }
-    }
+    private static readonly List<Type> _primitiveTypes =
+    [
+        typeof(bool),
+        typeof(byte),
+        typeof(int),
+        typeof(uint),
+        typeof(long),
+        typeof(ulong),
+        typeof(short),
+        typeof(ushort),
+        typeof(float),
+        typeof(double),
+        typeof(decimal),
+        typeof(DateTime),
+        typeof(DateTimeOffset),
+        typeof(TimeSpan),
+        typeof(Guid),
+        typeof(char),
+        typeof(Uri),
+        typeof(string),
+        typeof(IFormFile),
+        typeof(IFormFileCollection),
+        typeof(PipeReader),
+        typeof(Stream),
+        typeof(JsonElement)
+    ];
 }
