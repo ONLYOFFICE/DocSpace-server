@@ -1040,7 +1040,6 @@ public partial class SettingsController(MessageService messageService,
             new
             {
                 salesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail"),
-                feedbackAndSupportUrl = externalResourceSettingsHelper.Support.GetDefaultRegionalDomain(),
                 buyUrl = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("buy" + (configuration["license:type"] ?? "enterprise")),
                 coreBaseSettings.Standalone,
                 currentLicense = new
