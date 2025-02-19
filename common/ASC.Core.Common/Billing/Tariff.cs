@@ -27,47 +27,55 @@
 namespace ASC.Core.Billing;
 
 [DebuggerDisplay("{State} before {DueDate}")]
+[ProtoContract]
 public class Tariff
 {
     /// <summary>
     /// ID
     /// </summary>
+    [ProtoMember(1)]
     [OpenApiDescription("ID")]
     public int Id { get; set; }
 
     /// <summary>
     /// Tariff state
     /// </summary>
+    [ProtoMember(2)]
     [OpenApiDescription("Tariff state")]
     public TariffState State { get; set; }
 
     /// <summary>
     /// Due date
     /// </summary>
+    [ProtoMember(3)]
     [OpenApiDescription("Due date")]
     public DateTime DueDate { get; set; }
 
     /// <summary>
     /// Delay due date
     /// </summary>
+    [ProtoMember(4)]
     [OpenApiDescription("Delay due date")]
     public DateTime DelayDueDate { get; set; }
 
     /// <summary>
     /// License date
     /// </summary>
+    [ProtoMember(5)]
     [OpenApiDescription("License date")]
     public DateTime LicenseDate { get; set; }
 
     /// <summary>
     /// Customer ID
     /// </summary>
+    [ProtoMember(6)]
     [OpenApiDescription("Customer ID")]
     public string CustomerId { get; set; }
 
     /// <summary>
     /// List of quotas
     /// </summary>
+    [ProtoMember(7)]
     [OpenApiDescription("List of quotas")]
     public List<Quota> Quotas { get; set; }
 
@@ -91,19 +99,33 @@ public class Tariff
     }
 }
 
-public class Quota(int id, int quantity) : IEquatable<Quota>
+[ProtoContract]
+public class Quota : IEquatable<Quota>
 {
     /// <summary>
     /// ID
     /// </summary>
     [OpenApiDescription("ID")]
-    public int Id { get; set; } = id;
+    [ProtoMember(1)]
+    public int Id { get; set; }
 
     /// <summary>
     /// Quantity
     /// </summary>
     [OpenApiDescription("Quantity")]
-    public int Quantity { get; set; } = quantity;
+    [ProtoMember(2)]
+    public int Quantity { get; set; }
+
+    public Quota()
+    {
+        
+    }
+
+    public Quota(int id, int quantity)
+    {
+        Id = id;
+        Quantity = quantity;
+    }
 
     public bool Equals(Quota other)
     {
