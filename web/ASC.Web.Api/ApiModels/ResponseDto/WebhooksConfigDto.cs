@@ -59,6 +59,19 @@ public class WebhooksConfigDto : IMapFrom<DbWebhooksConfig>
     /// SSL
     /// </summary>
     public bool SSL { get; set; }
+
+    /// <summary>
+    /// Target user
+    /// </summary>
+    public EmployeeDto TargetUser { get; set; }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<Guid?, EmployeeDto>().ConvertUsing<WebhookMappingConverter>();
+
+        profile.CreateMap<DbWebhooksConfig, WebhooksConfigDto>()
+            .ForMember(src => src.TargetUser, ex => ex.MapFrom(map => map.TargetUserId));
+    }
 }
 
 public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
