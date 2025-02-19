@@ -528,11 +528,6 @@ public class WebhookEditorControllerAccessChecker(
             return true;
         }
 
-        if (webhookData.ResponseType == typeof(FileOperationDto))
-        {
-            return false;
-        }
-
         if (webhookData.RouteData.TryGetValue("fileId", out var fileId) && !string.IsNullOrEmpty(fileId))
         {
             if (int.TryParse(fileId, out var fileIdInt))
@@ -547,6 +542,11 @@ public class WebhookEditorControllerAccessChecker(
 
                 return await fileSecurity.CanReadAsync(file, webhookData.TargetUserId);
             }
+        }
+
+        if (webhookData.ResponseType == typeof(FileReference) || webhookData.ResponseType == typeof(List<MentionWrapper>))
+        {
+            return false;
         }
 
         var responseNode = System.Text.Json.Nodes.JsonNode.Parse(webhookData.ResponseString)["response"];

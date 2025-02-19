@@ -105,7 +105,7 @@ public class FoldersControllerThirdparty(
         permissionContext,
         fileShareDtoHelper);
 
-[WebhookAccessChecker(typeof(WebhookFolderControllerAccessChecker))]
+[WebhookAccessChecker(typeof(WebhookFoldersControllerAccessChecker))]
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
@@ -531,7 +531,7 @@ public class FoldersControllerCommon(
 
 
 [Scope]
-public class WebhookFolderControllerAccessChecker(
+public class WebhookFoldersControllerAccessChecker(
     SecurityContext securityContext,
     FileSecurity fileSecurity,
     IDaoFactory daoFactory) : IWebhookAccessChecker
@@ -545,7 +545,7 @@ public class WebhookFolderControllerAccessChecker(
             return true;
         }
 
-        if (webhookData.ResponseType == typeof(FileOperationDto))
+        if (webhookData.ResponseType == typeof(IAsyncEnumerable<FileOperationDto>))
         {
             return false;
         }
