@@ -56,19 +56,7 @@ public class WebhooksController(ApiContext context,
     [HttpGet("webhook")]
     public async IAsyncEnumerable<WebhooksConfigWithStatusDto> GetTenantWebhooks()
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-
-        if (await userManager.IsGuestAsync(currentUser))
-        {
-            throw new SecurityException();
-        }
-
-        Guid? targetUserId = null;
-
-        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
-        {
-            targetUserId = authContext.CurrentAccount.ID;
-        }
+        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
 
         await foreach (var webhook in dbWorker.GetTenantWebhooksWithStatus(targetUserId))
         {
@@ -88,22 +76,10 @@ public class WebhooksController(ApiContext context,
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-
-        if (await userManager.IsGuestAsync(currentUser))
-        {
-            throw new SecurityException();
-        }
-
-        Guid? targetUserId = null;
-
-        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
-        {
-            targetUserId = authContext.CurrentAccount.ID;
-        }
+        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
 
         ArgumentNullException.ThrowIfNull(inDto.SecretKey);
-        
+
         var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
 
         passwordSettingsManager.CheckPassword(inDto.SecretKey, passwordSettings);
@@ -125,38 +101,33 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-
-        if (await userManager.IsGuestAsync(currentUser))
-        {
-            throw new SecurityException();
-        }
-
-        Guid? targetUserId = null;
-
-        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
-        {
-            targetUserId = authContext.CurrentAccount.ID;
-        }
+        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
 
         ArgumentNullException.ThrowIfNull(inDto.Uri);
         ArgumentNullException.ThrowIfNull(inDto.Name);
 
-        var tenantId = tenantManager.GetCurrentTenantId();
+        var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
 
-        var DbWebhooksConfig = new DbWebhooksConfig
+        if (existingWebhook == null)
         {
-            Id= inDto.Id,   
-            Name = inDto.Name,
-            Uri = inDto.Uri,
-            SecretKey = inDto.SecretKey,
-            Enabled = inDto.Enabled,
-            SSL = inDto.SSL,
-            TenantId = tenantId,
-            TargetUserId = targetUserId
-        };
+            throw new ItemNotFoundException();
+        }
 
-        var webhook = await dbWorker.UpdateWebhookConfig(DbWebhooksConfig);
+        if (targetUserId.HasValue)
+        {
+            if (!existingWebhook.TargetUserId.HasValue || existingWebhook.TargetUserId.Value != authContext.CurrentAccount.ID)
+            {
+                throw new SecurityException();
+            }
+        }
+
+        existingWebhook.Name = inDto.Name;
+        existingWebhook.Uri = inDto.Uri;
+        existingWebhook.SecretKey = inDto.SecretKey;
+        existingWebhook.Enabled = inDto.Enabled;
+        existingWebhook.SSL = inDto.SSL;
+
+        var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
 
         return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
@@ -173,19 +144,17 @@ public class WebhooksController(ApiContext context,
     [HttpDelete("webhook/{id:int}")]
     public async Task<WebhooksConfigDto> RemoveWebhook(IdRequestDto<int> inDto)
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
 
-        if (await userManager.IsGuestAsync(currentUser))
+        var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
+
+        if (existingWebhook == null)
         {
-            throw new SecurityException();
+            throw new ItemNotFoundException();
         }
 
-        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        if (targetUserId.HasValue)
         {
-            var tenantId = tenantManager.GetCurrentTenantId();
-
-            var existingWebhook = await dbWorker.GetWebhookConfig(inDto.Id, tenantId);
-
             if (!existingWebhook.TargetUserId.HasValue || existingWebhook.TargetUserId.Value != authContext.CurrentAccount.ID)
             {
                 throw new SecurityException();
@@ -210,19 +179,7 @@ public class WebhooksController(ApiContext context,
     [HttpGet("webhooks/log")]
     public async IAsyncEnumerable<WebhooksLogDto> GetJournal(WebhookLogsRequestDto inDto)
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-
-        if (await userManager.IsGuestAsync(currentUser))
-        {
-            throw new SecurityException();
-        }
-
-        Guid? targetUserId = null;
-
-        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
-        {
-            targetUserId = authContext.CurrentAccount.ID;
-        }
+        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
 
         context.SetTotalCount(await dbWorker.GetTotalByQuery(inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, targetUserId));
 
@@ -250,19 +207,7 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook/{id:int}/retry")]
     public async Task<WebhooksLogDto> RetryWebhook(IdRequestDto<int> inDto)
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-
-        if (await userManager.IsGuestAsync(currentUser))
-        {
-            throw new SecurityException();
-        }
-
-        Guid? targetUserId = null;
-
-        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
-        {
-            targetUserId = authContext.CurrentAccount.ID;
-        }
+        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
 
         if (inDto.Id == 0)
         {
@@ -299,19 +244,7 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook/retry")]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-
-        if (await userManager.IsGuestAsync(currentUser))
-        {
-            throw new SecurityException();
-        }
-
-        Guid? targetUserId = null;
-
-        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
-        {
-            targetUserId = authContext.CurrentAccount.ID;
-        }
+        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
 
         foreach (var id in inDto.Ids)
         {
@@ -386,5 +319,29 @@ public class WebhooksController(ApiContext context,
         }
 
         return result;
+    }
+
+    private async Task<bool> CheckAdminPermissionsAsync()
+    {
+        if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            return true;
+        }
+
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (await userManager.IsGuestAsync(currentUser))
+        {
+            throw new SecurityException();
+        }
+
+        var settings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+
+        if (settings.LimitedAccessForUsers)
+        {
+            throw new SecurityException();
+        }
+
+        return false;
     }
 }
