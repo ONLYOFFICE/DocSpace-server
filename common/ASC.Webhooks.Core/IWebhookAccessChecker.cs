@@ -37,7 +37,6 @@ namespace ASC.Webhooks.Core
         public Type AccessCheckerType { get; set; }
         public Type ResponseType { get; set; }
         public string ResponseString { get; set; }
-        public Dictionary<string, (Type, object)> PostedData { get; set; }
-        public Dictionary<string, object> RouteData { get; set; }
+        public Dictionary<string, string> RouteData { get; set; }
     }
 }
