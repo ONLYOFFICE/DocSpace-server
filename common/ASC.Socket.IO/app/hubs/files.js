@@ -174,6 +174,8 @@ module.exports = (io) => {
       }
     }
 
+    changeSubscription("change-my-type", true, subscribe);
+
     function unsubscribe(roomParts) {
       if (!roomParts) return;
 
@@ -363,6 +365,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
+  function changeMyType({ tenantId, user } = {}) {
+    var room = `${tenantId}-change-my-type-${user.id}`;
+    filesIO.to(room).emit("s:change-my-type",  {id: user.id, data: user});
+  }
+
   function addUser({ tenantId, user } = {}) {
     var room = `${tenantId}-users`;
     filesIO.to(room).emit("s:add-user",  {id: user.id, data: user});
@@ -442,6 +449,7 @@ module.exports = (io) => {
     changeInvitationLimitValue,
     updateHistory,
     logoutSession,
+    changeMyType,
     addUser,
     updateUser,
     deleteUser,

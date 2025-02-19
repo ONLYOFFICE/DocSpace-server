@@ -120,7 +120,6 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
                 {
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupGuest.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupUser.ID);
-                    webItemSecurityCache.ClearCache(_tenantId);
                     await socketManager.DeleteGuestAsync(User);
                     await socketManager.AddUserAsync(userInfo);
                 }
@@ -128,15 +127,18 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
                 {
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupRoomAdmin.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupUser.ID);
-                    webItemSecurityCache.ClearCache(_tenantId);
                     await socketManager.UpdateUserAsync(userInfo);
                 }
                 else if (currentType is EmployeeType.DocSpaceAdmin)
                 {
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupAdmin.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupUser.ID);
-                    webItemSecurityCache.ClearCache(_tenantId);
                     await socketManager.UpdateUserAsync(userInfo);
+                }
+                if (currentType != _employeeType)
+                {
+                    webItemSecurityCache.ClearCache(_tenantId);
+                    await socketManager.ChangeUserTypeAsync(userInfo);
                 }
             }
             else if (_employeeType is EmployeeType.Guest)
@@ -145,7 +147,6 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
                 {
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupUser.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupGuest.ID);
-                    webItemSecurityCache.ClearCache(_tenantId);
                     await socketManager.DeleteUserAsync(User);
                     await socketManager.AddGuestAsync(userInfo);
                 }
@@ -153,7 +154,6 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
                 {
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupRoomAdmin.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupGuest.ID);
-                    webItemSecurityCache.ClearCache(_tenantId);
                     await socketManager.DeleteUserAsync(User);
                     await socketManager.AddGuestAsync(userInfo);
                 }
@@ -161,9 +161,14 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
                 {
                     await userManager.RemoveUserFromGroupAsync(User, Constants.GroupAdmin.ID);
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupGuest.ID);
-                    webItemSecurityCache.ClearCache(_tenantId);
                     await socketManager.DeleteUserAsync(User);
                     await socketManager.AddGuestAsync(userInfo);
+                }
+
+                if (currentType != _employeeType)
+                {
+                    webItemSecurityCache.ClearCache(_tenantId);
+                    await socketManager.ChangeUserTypeAsync(userInfo);
                 }
             }
         }

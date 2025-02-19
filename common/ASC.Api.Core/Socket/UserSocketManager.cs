@@ -40,6 +40,13 @@ public class UserSocketManager(ITariffService tariffService,
 {
     protected override string Hub => "files";
 
+    public async Task ChangeUserTypeAsync(UserInfo userInfo)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
+        await MakeRequest("change-my-type", new { tenantId, user = dto });
+    }
+
     public async Task AddUserAsync(UserInfo userInfo)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
