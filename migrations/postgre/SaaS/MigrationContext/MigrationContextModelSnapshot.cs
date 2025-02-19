@@ -1142,7 +1142,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("TenantId")
-                        .HasDatabaseName("tenant");
+                        .HasDatabaseName("IX_tenants_tariff_tenant");
 
                     b.ToTable("tenants_tariff", (string)null);
                 });
@@ -1347,8 +1347,10 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("ip_start");
 
                     b.Property<string>("City")
+                        .IsRequired()
                         .HasMaxLength(80)
-                        .HasColumnType("character varying(80)");
+                        .HasColumnType("varchar(80)")
+                        .HasColumnName("city");
 
                     b.Property<string>("Continent")
                         .IsRequired()
@@ -1363,11 +1365,14 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("country");
 
                     b.Property<string>("District")
+                        .IsRequired()
                         .HasMaxLength(80)
-                        .HasColumnType("character varying(80)");
+                        .HasColumnType("varchar(80)")
+                        .HasColumnName("district");
 
                     b.Property<int?>("GeonameId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("geoname_id");
 
                     b.Property<byte[]>("IPEnd")
                         .IsRequired()
@@ -1375,34 +1380,44 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("ip_end");
 
                     b.Property<float>("Latitude")
-                        .HasColumnType("real");
+                        .HasColumnType("real")
+                        .HasColumnName("latitude");
 
                     b.Property<float>("Longitude")
-                        .HasColumnType("real");
+                        .HasColumnType("real")
+                        .HasColumnName("longitude");
 
                     b.Property<string>("StateProv")
+                        .IsRequired()
                         .HasMaxLength(80)
-                        .HasColumnType("character varying(80)");
+                        .HasColumnType("varchar(80)")
+                        .HasColumnName("stateprov");
 
                     b.Property<string>("StateProvCode")
                         .HasMaxLength(15)
-                        .HasColumnType("character varying(15)")
+                        .HasColumnType("varchar(15)")
                         .HasColumnName("stateprov_code");
 
                     b.Property<string>("TimezoneName")
+                        .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("varchar(64)")
+                        .HasColumnName("timezone_name");
 
                     b.Property<float>("TimezoneOffset")
-                        .HasColumnType("real");
+                        .HasColumnType("real")
+                        .HasColumnName("timezone_offset");
 
                     b.Property<string>("WeatherCode")
+                        .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("weather_code");
 
                     b.Property<string>("ZipCode")
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("zipcode");
 
                     b.HasKey("AddrType", "IPStart");
 
@@ -1514,7 +1529,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasDatabaseName("alias");
 
                     b.HasIndex("LastModified")
-                        .HasDatabaseName("last_modified");
+                        .HasDatabaseName("IX_tenants_tenants_last_modified");
 
                     b.HasIndex("MappedDomain")
                         .HasDatabaseName("mappeddomain");
@@ -4572,13 +4587,13 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.HasKey("Id")
-                        .HasName("PRIMARY");
+                        .HasName("PK_short_links");
 
                     b.HasIndex("Short")
                         .IsUnique();
 
                     b.HasIndex("TenantId")
-                        .HasDatabaseName("tenant_id");
+                        .HasDatabaseName("IX_short_links_tenant_id");
 
                     b.ToTable("short_links", (string)null);
                 });
@@ -4986,7 +5001,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("Users");
+                    b.ToTable("core_user", (string)null);
 
                     b.HasData(
                         new
@@ -5232,7 +5247,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.HasKey("Id")
-                        .HasName("PRIMARY");
+                        .HasName("PK_backup_backup");
 
                     b.HasIndex("ExpiresOn")
                         .HasDatabaseName("expires_on");
@@ -5284,7 +5299,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("storage_type");
 
                     b.HasKey("TenantId")
-                        .HasName("PRIMARY");
+                        .HasName("PK_backup_schedule");
 
                     b.ToTable("backup_schedule", (string)null);
                 });
@@ -5489,7 +5504,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("parent_folder_id");
 
                     b.HasKey("TenantId", "EntryId", "EntryType")
-                        .HasName("primary");
+                        .HasName("PK_files_order");
 
                     b.HasIndex("TenantId", "ParentFolderId", "EntryType")
                         .HasDatabaseName("parent_folder_id");
@@ -5544,7 +5559,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("linked_for");
 
                     b.HasKey("TenantId", "SourceId", "LinkedId")
-                        .HasName("PRIMARY");
+                        .HasName("PK_files_link");
 
                     b.HasIndex("TenantId", "SourceId", "LinkedId", "LinkedFor")
                         .HasDatabaseName("linked_for");
@@ -5791,7 +5806,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("TenantId")
-                        .HasDatabaseName("tenant_id");
+                        .HasDatabaseName("IX_files_thirdparty_account_tenant_id");
 
                     b.ToTable("files_thirdparty_account", (string)null);
                 });
@@ -5916,10 +5931,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("character varying")
                         .HasColumnName("title");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("PK_files_folder");
 
                     b.HasIndex("ModifiedOn")
-                        .HasDatabaseName("modified_on");
+                        .HasDatabaseName("IX_files_folder_modified_on");
 
                     b.HasIndex("TenantId", "ParentId")
                         .HasDatabaseName("parent_id");
@@ -6206,8 +6222,20 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Property<string>("AuthorizedScopes")
                         .HasColumnType("text");
 
-                    b.Property<string>("IdentityClientClientId")
-                        .HasColumnType("character varying(255)");
+                    b.Property<string>("IdTokenClaims")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("IdTokenExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("IdTokenIssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("IdTokenMetadata")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IdTokenValue")
+                        .HasColumnType("text");
 
                     b.Property<bool?>("IsInvalidated")
                         .HasColumnType("boolean");
@@ -6246,13 +6274,9 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdentityClientClientId");
-
-                    b.HasIndex("RegisteredClientId");
-
                     b.HasIndex("TenantId");
 
-                    b.ToTable("IdentityAuthorizations", (string)null);
+                    b.ToTable("identity_authorizations", (string)null);
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityCert", b =>
@@ -6281,7 +6305,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnName("public_key");
 
                     b.HasKey("Id")
-                        .HasName("PRIMARY");
+                        .HasName("PK_identity_certs");
 
                     b.ToTable("identity_certs", (string)null);
                 });
@@ -6484,15 +6508,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.HasKey("PrincipalId", "RegisteredClientId")
                         .HasName("pk_identity_consents");
 
-                    b.HasIndex("IsInvalidated")
-                        .HasDatabaseName("idx_identity_consents_is_invalidated");
-
-                    b.HasIndex("PrincipalId")
-                        .HasDatabaseName("idx_identity_consents_principal_id");
-
-                    b.HasIndex("RegisteredClientId")
-                        .HasDatabaseName("idx_identity_consents_registered_client_id");
-
                     b.ToTable("identity_consents", (string)null);
                 });
 
@@ -6508,18 +6523,18 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("character varying(36)")
                         .HasColumnName("registered_client_id");
 
-                    b.Property<string>("ScopeName")
+                    b.Property<string>("Scopes")
                         .HasColumnType("text")
-                        .HasColumnName("scope_name");
+                        .HasColumnName("scopes");
 
-                    b.HasKey("PrincipalId", "RegisteredClientId", "ScopeName")
+                    b.HasKey("PrincipalId", "RegisteredClientId", "Scopes")
                         .HasName("pk_identity_consent_scopes");
 
                     b.HasIndex(new[] { "PrincipalId" }, "ix_identity_consent_scopes_principal_id");
 
                     b.HasIndex(new[] { "RegisteredClientId" }, "ix_identity_consent_scopes_registered_client_id");
 
-                    b.HasIndex(new[] { "ScopeName" }, "ix_identity_consent_scopes_scope_name");
+                    b.HasIndex(new[] { "Scopes" }, "ix_identity_consent_scopes_scopes");
 
                     b.ToTable("identity_consent_scopes", (string)null);
                 });
@@ -7233,23 +7248,11 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityAuthorization", b =>
                 {
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", null)
-                        .WithMany("IdentityAuthorizations")
-                        .HasForeignKey("IdentityClientClientId");
-
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
-                        .WithMany()
-                        .HasForeignKey("RegisteredClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("RegisteredClient");
 
                     b.Navigation("Tenant");
                 });
@@ -7323,26 +7326,14 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                     b.Navigation("ScopeNameNavigation");
                 });
 
-            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsent", b =>
-                {
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
-                        .WithMany("IdentityConsents")
-                        .HasForeignKey("RegisteredClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_identity_consents_registered_client");
-
-                    b.Navigation("RegisteredClient");
-                });
-
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsentScope", b =>
                 {
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityScope", "ScopeNameNavigation")
                         .WithMany("IdentityConsentScopes")
-                        .HasForeignKey("ScopeName")
+                        .HasForeignKey("Scopes")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_identity_consent_scopes_scope_name");
+                        .HasConstraintName("fk_identity_consent_scopes_scopes");
 
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityConsent", "Consent")
                         .WithMany("IdentityConsentScopes")
@@ -7399,13 +7390,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
             modelBuilder.Entity("ASC.MessagingSystem.EF.Model.DbAuditEvent", b =>
                 {
                     b.Navigation("FilesReferences");
-                });
-
-            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClient", b =>
-                {
-                    b.Navigation("IdentityAuthorizations");
-
-                    b.Navigation("IdentityConsents");
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsent", b =>

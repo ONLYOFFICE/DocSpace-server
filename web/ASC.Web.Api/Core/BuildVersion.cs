@@ -34,11 +34,7 @@ public class BuildVersion
     /// <summary>DocSpace version</summary>
     /// <type>System.String, System</type>
     public string DocSpace { get; set; }
-
-    /// <summary>Community Server version</summary>
-    /// <type>System.String, System</type>
-    public string CommunityServer { get; set; } //old
-
+    
     /// <summary>Document Server version</summary>
     /// <type>System.String, System</type>
     public string DocumentServer { get; set; }
@@ -65,8 +61,6 @@ public class BuildVersion
 
     public async Task<BuildVersion> GetCurrentBuildVersionAsync()
     {
-        CommunityServer = "12.0.0";
-
         DocSpace = GetDocSpaceVersion();
         DocumentServer = await GetDocumentVersionAsync();
 
@@ -75,7 +69,7 @@ public class BuildVersion
 
     private string GetDocSpaceVersion()
     {
-        return _configuration["version:number"] ?? "1.0.0";
+        return _configuration["version:number"] ?? "3.1.0";
     }
 
     private async Task<string> GetDocumentVersionAsync()

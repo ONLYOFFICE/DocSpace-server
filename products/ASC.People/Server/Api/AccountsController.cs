@@ -102,7 +102,8 @@ public class AccountsController<T>(
             includeStrangers,
             inDto.Area,
             inDto.InvitedByMe,
-            inDto.InviterId);
+            inDto.InviterId,
+            inDto.EmployeeTypes);
         
         var total = totalGroups + totalUsers;
         
@@ -129,6 +130,7 @@ public class AccountsController<T>(
                            inDto.Area,
                            inDto.InvitedByMe,
                            inDto.InviterId,
+                           inDto.EmployeeTypes,
                            usersOffset,
                            usersCount))
         {

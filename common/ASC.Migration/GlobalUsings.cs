@@ -37,6 +37,7 @@ global using ASC.Common.Security.Authentication;
 global using ASC.Common.Threading;
 global using ASC.Common.Web;
 global using ASC.Core;
+global using ASC.Api.Core.Socket;
 global using ASC.Core.Common.Core;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Features;

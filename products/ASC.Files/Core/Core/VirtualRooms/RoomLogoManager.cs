@@ -46,7 +46,8 @@ public class RoomLogoManager(
     SetupInfo setupInfo,
     FileSizeComment fileSizeComment,
     CommonLinkUtility commonLinkUtility, 
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    GlobalFolderHelper globalFolderHelper)
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
@@ -353,8 +354,12 @@ public class RoomLogoManager(
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
-        
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        {
+            throw new ItemNotFoundException();
+        }
+
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
             throw new ItemNotFoundException();
         }
@@ -430,7 +435,7 @@ public class RoomLogoManager(
     {
         var rand = new Random();
         var color = fileUtilityConfiguration.LogoColors[rand.Next(fileUtilityConfiguration.LogoColors.Count - 1)];
-        var result = MagickColor.FromRgba(color.R, color.G, color.B, 1).ToHexString();
+        var result = MagickColor.FromRgba(color.R, color.G, color.B, 1).ToHexString().Replace("#", string.Empty);
         return result[..^2];//without opacity
     }
 

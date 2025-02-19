@@ -45,12 +45,22 @@ public abstract class ActivePassiveBackgroundService<T>(ILogger logger, IService
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
             var workerOptions = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<T>>>().Value;
 
-            if (!await registerInstanceService.IsActive())
+            const int millisecondsDelay = 1000;
+            try
             {
-                logger.TraceActivePassiveBackgroundServiceIsNotActive(serviceName, workerOptions.InstanceId);
+                if (!await registerInstanceService.IsActive())
+                {
+                    logger.TraceActivePassiveBackgroundServiceIsNotActive(serviceName, workerOptions.InstanceId);
 
-                await Task.Delay(1000, stoppingToken);
-
+                    await Task.Delay(millisecondsDelay, stoppingToken);
+                    continue;
+                }
+            }
+            catch (Exception e)
+            {
+                logger.WarningWithException(e);
+                
+                await Task.Delay(millisecondsDelay, stoppingToken);
                 continue;
             }
 
@@ -62,6 +72,5 @@ public abstract class ActivePassiveBackgroundService<T>(ILogger logger, IService
             
             await Task.Delay(ExecuteTaskPeriod, stoppingToken);
         }
-
     }
 }

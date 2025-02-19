@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,12 +31,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
-import com.asc.common.data.client.entity.ClientEntity;
-import com.asc.common.data.client.repository.JpaClientRepository;
+import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.registration.core.domain.entity.Client;
+import com.asc.registration.core.domain.event.ClientEvent;
+import com.asc.registration.data.client.entity.ClientEntity;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
+import com.asc.registration.data.client.repository.JpaClientRepository;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,6 +54,8 @@ class ClientCommandRepositoryDomainAdapterTest {
   @InjectMocks private ClientCommandRepositoryDomainAdapter clientCommandRepositoryDomainAdapter;
   @Mock private JpaClientRepository jpaClientRepository;
   @Mock private ClientDataAccessMapper clientDataAccessMapper;
+  @Mock private AuthorizationMessagePublisher<ClientRemovedEvent> authorizationMessagePublisher;
+  @Mock private DomainEventPublisher<ClientEvent> messagePublisher;
 
   private Client client;
   private ClientId clientId;
@@ -60,35 +66,41 @@ class ClientCommandRepositoryDomainAdapterTest {
     MockitoAnnotations.openMocks(this);
 
     clientId = new ClientId(UUID.randomUUID());
-    tenantId = new TenantId(1);
+    tenantId = new TenantId(1L);
     client = mock(Client.class);
 
     when(client.getId()).thenReturn(clientId);
     when(clientDataAccessMapper.toEntity(any(Client.class))).thenReturn(mock(ClientEntity.class));
     when(clientDataAccessMapper.toDomain(any(ClientEntity.class))).thenReturn(client);
+
+    // Stub publish methods
+    doNothing().when(messagePublisher).publish(any(ClientEvent.class));
+    doNothing().when(authorizationMessagePublisher).publish(any(ClientRemovedEvent.class));
   }
 
   @Test
-  void saveClient() {
+  void whenClientIsSaved_thenClientIsReturned() {
     var clientEntity = mock(ClientEntity.class);
 
     when(jpaClientRepository.save(any(ClientEntity.class))).thenReturn(clientEntity);
 
-    var savedClient = clientCommandRepositoryDomainAdapter.saveClient(client);
+    var savedClient =
+        clientCommandRepositoryDomainAdapter.saveClient(mock(ClientEvent.class), client);
 
     verify(clientDataAccessMapper).toEntity(client);
     verify(jpaClientRepository).save(any(ClientEntity.class));
     verify(clientDataAccessMapper).toDomain(clientEntity);
+    verify(messagePublisher).publish(any(ClientEvent.class));
 
     assertEquals(client, savedClient);
   }
 
   @Test
-  void regenerateClientSecretByTenantIdAndClientId() {
+  void whenClientSecretIsRegenerated_thenNewSecretIsReturned() {
     var secretCaptor = ArgumentCaptor.forClass(String.class);
     var newSecret =
         clientCommandRepositoryDomainAdapter.regenerateClientSecretByTenantIdAndClientId(
-            tenantId, clientId);
+            mock(ClientEvent.class), tenantId, clientId);
 
     verify(jpaClientRepository)
         .regenerateClientSecretByClientId(
@@ -96,14 +108,15 @@ class ClientCommandRepositoryDomainAdapterTest {
             eq(clientId.getValue().toString()),
             secretCaptor.capture(),
             any(ZonedDateTime.class));
+    verify(messagePublisher).publish(any(ClientEvent.class));
 
     assertEquals(newSecret, secretCaptor.getValue());
   }
 
   @Test
-  void changeVisibilityByTenantIdAndClientId() {
+  void whenVisibilityIsChanged_thenRepositoryIsUpdated() {
     clientCommandRepositoryDomainAdapter.changeVisibilityByTenantIdAndClientId(
-        tenantId, clientId, true);
+        mock(ClientEvent.class), tenantId, clientId, true);
 
     verify(jpaClientRepository)
         .changeVisibility(
@@ -111,12 +124,13 @@ class ClientCommandRepositoryDomainAdapterTest {
             eq(clientId.getValue().toString()),
             eq(true),
             any(ZonedDateTime.class));
+    verify(messagePublisher).publish(any(ClientEvent.class));
   }
 
   @Test
-  void changeActivationByTenantIdAndClientId() {
+  void whenActivationIsChanged_thenRepositoryIsUpdated() {
     clientCommandRepositoryDomainAdapter.changeActivationByTenantIdAndClientId(
-        tenantId, clientId, true);
+        mock(ClientEvent.class), tenantId, clientId, true);
 
     verify(jpaClientRepository)
         .changeActivation(
@@ -124,84 +138,22 @@ class ClientCommandRepositoryDomainAdapterTest {
             eq(clientId.getValue().toString()),
             eq(true),
             any(ZonedDateTime.class));
+    verify(messagePublisher).publish(any(ClientEvent.class));
   }
 
   @Test
-  void deleteByTenantIdAndClientId() {
-    when(jpaClientRepository.deleteByClientIdAndTenantId(anyString(), anyInt())).thenReturn(1);
-
-    var result =
-        clientCommandRepositoryDomainAdapter.deleteByTenantIdAndClientId(tenantId, clientId);
-
-    verify(jpaClientRepository)
-        .deleteByClientIdAndTenantId(eq(clientId.getValue().toString()), eq(tenantId.getValue()));
-
-    assertEquals(1, result);
-  }
-
-  @Test
-  void regenerateClientSecretCorrectly() {
-    var secret =
-        clientCommandRepositoryDomainAdapter.regenerateClientSecretByTenantIdAndClientId(
-            tenantId, clientId);
-
-    verify(jpaClientRepository)
-        .regenerateClientSecretByClientId(
-            eq(tenantId.getValue()),
-            eq(clientId.getValue().toString()),
-            eq(secret),
-            any(ZonedDateTime.class));
-  }
-
-  @Test
-  void changeVisibilityCorrectly() {
-    clientCommandRepositoryDomainAdapter.changeVisibilityByTenantIdAndClientId(
-        tenantId, clientId, true);
-
-    verify(jpaClientRepository)
-        .changeVisibility(
-            eq(tenantId.getValue()),
-            eq(clientId.getValue().toString()),
-            eq(true),
-            any(ZonedDateTime.class));
-  }
-
-  @Test
-  void changeActivationCorrectly() {
-    clientCommandRepositoryDomainAdapter.changeActivationByTenantIdAndClientId(
-        tenantId, clientId, false);
-
-    verify(jpaClientRepository)
-        .changeActivation(
-            eq(tenantId.getValue()),
-            eq(clientId.getValue().toString()),
-            eq(false),
-            any(ZonedDateTime.class));
-  }
-
-  @Test
-  void deleteClient() {
+  void whenClientIsDeleted_thenRepositoryAndPublishersAreCalled() {
     when(jpaClientRepository.deleteByClientIdAndTenantId(anyString(), anyInt())).thenReturn(0);
 
     var result =
-        clientCommandRepositoryDomainAdapter.deleteByTenantIdAndClientId(tenantId, clientId);
+        clientCommandRepositoryDomainAdapter.deleteByTenantIdAndClientId(
+            mock(ClientEvent.class), tenantId, clientId);
 
     verify(jpaClientRepository)
         .deleteByClientIdAndTenantId(eq(clientId.getValue().toString()), eq(tenantId.getValue()));
+    verify(messagePublisher).publish(any(ClientEvent.class));
+    verify(authorizationMessagePublisher).publish(any(ClientRemovedEvent.class));
 
     assertEquals(0, result);
-  }
-
-  @Test
-  void verifySaveClientInteractions() {
-    var clientEntity = mock(ClientEntity.class);
-
-    when(jpaClientRepository.save(any(ClientEntity.class))).thenReturn(clientEntity);
-
-    clientCommandRepositoryDomainAdapter.saveClient(client);
-
-    verify(clientDataAccessMapper, times(1)).toEntity(any(Client.class));
-    verify(jpaClientRepository, times(1)).save(any(ClientEntity.class));
-    verify(clientDataAccessMapper, times(1)).toDomain(any(ClientEntity.class));
   }
 }

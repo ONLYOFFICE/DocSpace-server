@@ -88,6 +88,14 @@ public class FirstTimeTenantSettings(
                 throw new Exception(Resource.ErrorPasswordEmpty);
             }
 
+            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
+            {
+                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
+
+                await TariffSettings.SetLicenseAcceptAsync(settingsManager);
+                messageService.Send(MessageAction.LicenseKeyUploaded);
+            }
+
             await securityContext.SetUserPasswordHashAsync(currentUser.Id, passwordHash);
 
             email = email.Trim();
@@ -98,14 +106,6 @@ public class FirstTimeTenantSettings(
             }
 
             await userManager.UpdateUserInfoAsync(currentUser);
-
-            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
-            {
-                await TariffSettings.SetLicenseAcceptAsync(settingsManager);
-                messageService.Send(MessageAction.LicenseKeyUploaded);
-
-                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
-            }
 
             settings.Completed = true;
             await settingsManager.SaveAsync(settings);
