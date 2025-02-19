@@ -1635,7 +1635,7 @@ public class FileStorageService //: IFileStorageService
             throw GenerateException(e);
         }
     }
-    public async Task StartFillingAsync<T>(T fileId)
+    public async Task<File<T>> StartFillingAsync<T>(T fileId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -1667,6 +1667,8 @@ public class FileStorageService //: IFileStorageService
             await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
             await socketManager.CreateFileAsync(file);
         }
+
+        return file;
     }
     public async Task<string> StartEditAsync<T>(T fileId, bool editingAlone = false)
     {
