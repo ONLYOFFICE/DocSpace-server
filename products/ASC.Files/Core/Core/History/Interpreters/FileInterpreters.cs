@@ -70,7 +70,10 @@ public abstract class FileActionInterpreterBase : ActionInterpreter
 
 public record FileData : EntryData
 {
+    [OpenApiDescription("Accessibility")]
     public IDictionary<Accessibility, bool> Accessibility { get; }
+
+    [OpenApiDescription("View url")]
     public string ViewUrl { get; }
     
     public FileData(
@@ -91,7 +94,10 @@ public record FileData : EntryData
 
 public record FileOperationData : EntryOperationData
 {
+    [OpenApiDescription("Accessibility")]
     public IDictionary<Accessibility, bool> Accessibility { get; }
+
+    [OpenApiDescription("View url")]
     public string ViewUrl { get; }
     
     public FileOperationData(string id,
@@ -113,8 +119,13 @@ public record FileOperationData : EntryOperationData
 
 public record UserFileUpdateData : EntryData
 {
+    [OpenApiDescription("User name")]
     public string UserName { get; }
+
+    [OpenApiDescription("Accessibility")]
     public IDictionary<Accessibility, bool> Accessibility { get; }
+
+    [OpenApiDescription("View url")]
     public string ViewUrl { get; }
     public override string InitiatorName => UserName;
 
@@ -139,7 +150,10 @@ public record UserFileUpdateData : EntryData
 
 public record FileRenameData : RenameEntryData
 {
+    [OpenApiDescription("Accessibility")]
     public IDictionary<Accessibility, bool> Accessibility { get; }
+
+    [OpenApiDescription("View url")]
     public string ViewUrl { get; }
     
     public FileRenameData(string id,
@@ -159,10 +173,18 @@ public record FileRenameData : RenameEntryData
 
 public record FileIndexChangedData : EntryData
 {
+    [OpenApiDescription("Old index")]
     public int OldIndex { get; }
+
+    [OpenApiDescription("New index")]
     public int NewIndex { get; }
+
+    [OpenApiDescription("Accessibility")]
     public IDictionary<Accessibility, bool> Accessibility { get; }
+
+    [OpenApiDescription("View url")]
     public string ViewUrl { get; }
+
     private readonly string _context;
     
     public FileIndexChangedData(
@@ -201,6 +223,7 @@ public record FileIndexChangedData : EntryData
 
 public record FileVersionRemovedData : EntryData
 {
+    [OpenApiDescription("Version")]
     public int Version { get; }
     
     public FileVersionRemovedData(

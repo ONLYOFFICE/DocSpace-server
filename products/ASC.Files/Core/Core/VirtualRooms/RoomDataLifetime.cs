@@ -28,10 +28,19 @@ namespace ASC.Files.Core.VirtualRooms;
 
 public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataLifetimeDto>
 {
+    [OpenApiDescription("Delete permanently")]
     public bool DeletePermanently { get; set; }
+
+    [OpenApiDescription("Period")]
     public RoomDataLifetimePeriod Period { get; set; }
+
+    [OpenApiDescription("Value")]
     public int? Value { get; set; }
+
+    [OpenApiDescription("Start date")]
     public DateTime? StartDate { get; set; }
+
+    [OpenApiDescription("Enabled")]
     public bool? Enabled { get; set; }
 
     public DateTime GetExpirationUtc()

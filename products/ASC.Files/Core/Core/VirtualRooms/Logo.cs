@@ -31,31 +31,37 @@ public class Logo
     /// <summary>
     /// Original
     /// </summary>
+    [OpenApiDescription("Original")]
     public string Original { get; set; }
 
     /// <summary>
     /// Large
     /// </summary>
+    [OpenApiDescription("Large")]
     public string Large { get; set; }
 
     /// <summary>
     /// Medium
     /// </summary>
+    [OpenApiDescription("Medium")]
     public string Medium { get; set; }
 
     /// <summary>
     /// Small
     /// </summary>
+    [OpenApiDescription("Small")]
     public string Small { get; set; }
 
     /// <summary>
     /// Color
     /// </summary>
+    [OpenApiDescription("Color")]
     public string Color { get; set; }
 
     /// <summary>
     /// Cover
     /// </summary>
+    [OpenApiDescription("Cover")]
     public LogoCover Cover { get; set; }
 
     public bool IsDefault()
@@ -66,6 +72,9 @@ public class Logo
 
 public class LogoCover
 {
+    [OpenApiDescription("Id")]
     public string Id { get; set; }
+
+    [OpenApiDescription("Data")]
     public string Data { get; set; }
 }

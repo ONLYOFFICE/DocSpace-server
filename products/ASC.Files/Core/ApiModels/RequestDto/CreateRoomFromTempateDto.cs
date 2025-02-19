@@ -30,37 +30,44 @@ public class CreateRoomFromTempateDto
     /// <summary>
     /// Template id
     /// </summary>
+    [OpenApiDescription("Template id")]
     public int TemplateId { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Logo
     /// </summary>
+    [OpenApiDescription("Logo")]
     public LogoRequest Logo { get; set; }
 
     /// <summary>
     /// Copy logo
     /// </summary>
+    [OpenApiDescription("Copy logo")]
     public bool CopyLogo { get; set; }
 
     /// <summary>
     /// Collection of tags
     /// </summary>
+    [OpenApiDescription("Collection of tags")]
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
     /// Color
     /// </summary>
     [StringLength(6)]
+    [OpenApiDescription("Color")]
     public string Color { get; set; }
 
     /// <summary>
     /// Cover
     /// </summary>
     [StringLength(50)]
+    [OpenApiDescription("Cover")]
     public string Cover { get; set; }
 }

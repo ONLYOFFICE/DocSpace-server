@@ -25,6 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.FederatedLogin;
 
 [DebuggerDisplay("{AccessToken} (expired: {IsExpired})")]
@@ -33,18 +35,21 @@ public class OAuth20Token
     /// <summary>
     /// Access token
     /// </summary>
+    [OpenApiDescription("Access token")]
     [JsonPropertyName("access_token")]
     public string AccessToken { get; set; }
 
     /// <summary>
     /// Refresh token
     /// </summary>
+    [OpenApiDescription("Refresh token")]
     [JsonPropertyName("refresh_token")]
     public string RefreshToken { get; set; }
 
     /// <summary>
     /// Expires in
     /// </summary>
+    [OpenApiDescription("Expires in")]
     [JsonPropertyName("expires_in")]
     [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public long ExpiresIn { get; set; }
@@ -52,18 +57,21 @@ public class OAuth20Token
     /// <summary>
     /// Client id
     /// </summary>
+    [OpenApiDescription("Client id")]
     [JsonPropertyName("client_id")]
     public string ClientID { get; set; }
 
     /// <summary>
     /// Client secret
     /// </summary>
+    [OpenApiDescription("Client secret")]
     [JsonPropertyName("client_secret")]
     public string ClientSecret { get; set; }
 
     /// <summary>
     /// Redirect uri
     /// </summary>
+    [OpenApiDescription("Redirect uri")]
     [Url]
     [JsonPropertyName("redirect_uri")]
     public string RedirectUri { get; set; }
@@ -71,18 +79,21 @@ public class OAuth20Token
     /// <summary>
     /// Timestamp
     /// </summary>
+    [OpenApiDescription("Timestamp")]
     [JsonPropertyName("timestamp")]
     public DateTime Timestamp { get; set; }
 
     /// <summary>
     /// Origin json
     /// </summary>
+    [OpenApiDescription("Origin json")]
     [JsonIgnore]
     public string OriginJson { get; set; }
 
     /// <summary>
     /// Is expired
     /// </summary>
+    [OpenApiDescription("Is expired")]
     public bool IsExpired
     {
         get

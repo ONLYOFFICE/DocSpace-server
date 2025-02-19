@@ -175,37 +175,44 @@ public class EditHistoryDataDto
     /// URL to the file changes
     /// </summary>
     [Url]
+    [OpenApiDescription("URL to the file changes")]
     public string ChangesUrl { get; set; }
 
     /// <summary>
     /// Key
     /// </summary>
+    [OpenApiDescription("Key")]
     public string Key { get; set; }
 
     /// <summary>
     /// Previous version
     /// </summary>
+    [OpenApiDescription("Previous version")]
     public EditHistoryUrl Previous { get; set; }
 
     /// <summary>
     /// Token
     /// </summary>
+    [OpenApiDescription("Token")]
     public string Token { get; set; }
 
     /// <summary>
     /// File URL
     /// </summary>
     [Url]
+    [OpenApiDescription("File URL")]
     public string Url { get; set; }
 
     /// <summary>
     /// File version
     /// </summary>
+    [OpenApiDescription("File version")]
     public int Version { get; init; }
 
     /// <summary>
     /// File type
     /// </summary>
+    [OpenApiDescription("File type")]
     public string FileType { get; set; }
 }
 
@@ -215,16 +222,19 @@ public class EditHistoryUrl
     /// <summary>
     /// Key
     /// </summary>
+    [OpenApiDescription("Key")]
     public string Key { get; init; }
 
     /// <summary>
     /// Url
     /// </summary>
     [Url]
+    [OpenApiDescription("Url")]
     public string Url { get; init; }
 
     /// <summary>
     /// File type
     /// </summary>
+    [OpenApiDescription("File type")]
     public string FileType { get; set; }
 }

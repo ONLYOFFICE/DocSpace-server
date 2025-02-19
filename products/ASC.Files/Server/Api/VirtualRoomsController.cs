@@ -93,6 +93,10 @@ public class VirtualRoomsInternalController(
     /// <short>Start create a room based on a template</short>
     /// <path>api/2.0/files/rooms/fromTemplate</path>
     [Tags("Files / Rooms")]
+    [EndpointName("createRoom")]
+    [EndpointSummary("Start create a room based on a template")]
+    [EndpointDescription("Start create a room in the \"Rooms\" section based on a template.")]
+    [OpenApiResponse(typeof(RoomFromTemplateStatusDto), 200, "Room based on template")]
     [HttpPost("fromTemplate")]
     public async Task<RoomFromTemplateStatusDto> CreateRoomAsync(CreateRoomFromTempateDto dto)
     {
@@ -139,6 +143,10 @@ public class VirtualRoomsInternalController(
     /// <short>Get progress creating room</short>
     /// <path>api/2.0/files/rooms/fromTemplate/status</path>
     [Tags("Files / Rooms")]
+    [EndpointName("status")]
+    [EndpointSummary("Get progress creating room")]
+    [EndpointDescription("Get progress creating room based a template.")]
+    [OpenApiResponse(typeof(RoomFromTemplateStatusDto), 200, "Ok")]
     [HttpGet("fromTemplate/status")]
     public async Task<RoomFromTemplateStatusDto> Status()
     {

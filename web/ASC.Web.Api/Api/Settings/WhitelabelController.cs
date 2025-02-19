@@ -331,6 +331,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logos/restore</path>
     [Tags("Settings / Rebranding")]
+    [EndpointName("restoreWhiteLableLogos")]
+    [EndpointSummary("Restore the white label logos")]
+    [EndpointDescription("Restores the white label logos.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is sucessful")]
     [HttpPut("whitelabel/logos/restore")]
     public async Task<bool> RestoreWhiteLabelLogosAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -387,6 +391,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logotext/save</path>
     [Tags("Settings / Rebranding")]
+    [EndpointName("saveWhiteLableSettings")]
+    [EndpointSummary("Save the white label logo text settings")]
+    [EndpointDescription("Saves the white label logo text specified in the request.")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is sucessful")]
     [HttpPost("whitelabel/logotext/save")]
     public async Task<bool> SaveWhiteLabelLogoTextAsync(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {

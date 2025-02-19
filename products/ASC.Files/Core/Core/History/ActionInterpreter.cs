@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ServiceModel;
+
 namespace ASC.Files.Core.Core.History;
 
 public abstract class ActionInterpreter
@@ -79,11 +81,22 @@ public abstract class ActionInterpreter
 
 public record EntryData : HistoryData
 {
+    [OpenApiDescription("Id")]
     public int Id { get; }
+
+    [OpenApiDescription("Title")]
     public string Title { get; }
+
+    [OpenApiDescription("ParentTitle")]
     public string ParentTitle { get; }
+
+    [OpenApiDescription("ParentId")]
     public int? ParentId { get; }
+
+    [OpenApiDescription("ParentType")]
     public int? ParentType { get; }
+
+    [OpenApiDescription("Type")]
     public int? Type { get; }
 
     public EntryData(string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null, int? currentType = null)
@@ -101,11 +114,22 @@ public record EntryData : HistoryData
 
 public record RenameEntryData : HistoryData
 {
+    [OpenApiDescription("Id")]
     public int? Id { get; }
+
+    [OpenApiDescription("Old title")]
     public string OldTitle { get; }
+
+    [OpenApiDescription("New title")]
     public string NewTitle { get; }
+
+    [OpenApiDescription("Parent id")]
     public int? ParentId { get; }
+
+    [OpenApiDescription("Parent title")]
     public string ParentTitle { get; }
+
+    [OpenApiDescription("Parent type")]
     public int? ParentType { get; }
     
     public RenameEntryData(string id, string oldTitle, string newTitle, int? parentId = null, string parentTitle = null, int? parentType = null)
@@ -123,13 +147,28 @@ public record LinkData(string Title, string Id = null, string OldTitle = null, s
 
 public record EntryOperationData : HistoryData
 {
+    [OpenApiDescription("Id")]
     public int Id { get; }
+
+    [OpenApiDescription("Title")]
     public string Title { get; }
+
+    [OpenApiDescription("To folder id")]
     public string ToFolderId { get; }
+
+    [OpenApiDescription("Parent title")]
     public string ParentTitle { get; }
+
+    [OpenApiDescription("Parent type")]
     public int? ParentType { get; }
+
+    [OpenApiDescription("From parent title")]
     public string FromParentTitle { get; }
+
+    [OpenApiDescription("From parent type")]
     public int? FromParentType { get; }
+
+    [OpenApiDescription("From folder id")]
     public int? FromFolderId { get; }
     
     public EntryOperationData(

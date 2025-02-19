@@ -76,11 +76,13 @@ public class OrderBy(SortedByType sortedByType, bool isAsc)
     /// Is asc
     /// </summary>
     [JsonPropertyName("is_asc")]
+    [OpenApiDescription("Is asc")]
     public bool IsAsc { get; init; } = isAsc;
 
     /// <summary>
     /// Sorted by
     /// </summary>
     [JsonPropertyName("property")]
+    [OpenApiDescription("Sorted by")]
     public SortedByType SortedBy { get; set; } = sortedByType;
 }

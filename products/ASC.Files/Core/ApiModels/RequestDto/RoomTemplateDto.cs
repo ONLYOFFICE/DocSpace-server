@@ -30,41 +30,49 @@ public class RoomTemplateDto
     /// <summary>
     /// Room id
     /// </summary>
+    [OpenApiDescription("Room id")]
     public int RoomId { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Logo
     /// </summary>
+    [OpenApiDescription("Logo")]
     public LogoRequest Logo { get; set; }
 
     /// <summary>
     ///  Copy room logo
     /// </summary>
+    [OpenApiDescription("Copy room logo")]
     public bool CopyLogo { get; set; }
 
     /// <summary>
     /// Collection of share user emails
     /// </summary>
+    [OpenApiDescription("Collection of share user emails")]
     public IEnumerable<string> Share { get; set; }
 
     /// <summary>
     ///  Collection of share groups
     /// </summary>
+    [OpenApiDescription("Collection of share groups")]
     public List<Guid> Groups { get; set; }
 
     /// <summary>
     ///  Public 
     /// </summary>
+    [OpenApiDescription("Public")]
     public bool Public { get; set; }
 
     /// <summary>
     ///  Collection of tags
     /// </summary>
+    [OpenApiDescription("Collection of tags")]
     public IEnumerable<string> Tags { get; set; }
 
 
@@ -72,11 +80,13 @@ public class RoomTemplateDto
     /// Color
     /// </summary>
     [StringLength(6)]
+    [OpenApiDescription("Color")]
     public string Color { get; set; }
 
     /// <summary>
     /// Cover
     /// </summary>
     [StringLength(50)]
+    [OpenApiDescription("Cover")]
     public string Cover { get; set; }
 }

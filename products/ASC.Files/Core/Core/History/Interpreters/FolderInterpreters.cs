@@ -28,7 +28,10 @@ namespace ASC.Files.Core.Core.History.Interpreters;
 
 public record FolderIndexChangedData : EntryData
 {
+    [OpenApiDescription("Old index")]
     public int OldIndex { get; }
+
+    [OpenApiDescription("New index")]
     public int NewIndex { get; }
     private readonly string _context;
     

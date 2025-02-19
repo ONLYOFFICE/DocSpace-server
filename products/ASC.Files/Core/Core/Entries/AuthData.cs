@@ -32,32 +32,38 @@ public class AuthData(string url = null, string login = null, string password = 
     /// <summary>
     /// Login
     /// </summary>
+    [OpenApiDescription("Login")]
     public string Login { get; init; } = login ?? string.Empty;
 
     /// <summary>
     /// Password
     /// </summary>
+    [OpenApiDescription("Password")]
     public string Password { get; init; } = password ?? string.Empty;
 
     /// <summary>
     /// Raw token
     /// </summary>
+    [OpenApiDescription("Raw token")]
     public string RawToken { get; init; } = token ?? string.Empty;
 
     /// <summary>
     /// Url
     /// </summary>
     [Url]
+    [OpenApiDescription("Url")]
     public string Url { get; set; } = url ?? string.Empty;
 
     /// <summary>
     /// Provider
     /// </summary>
+    [OpenApiDescription("Provider")]
     public string Provider { get; init; } = provider ?? string.Empty;
 
     /// <summary>
     /// Token
     /// </summary>
+    [OpenApiDescription("Token")]
     public OAuth20Token Token
     {
         get

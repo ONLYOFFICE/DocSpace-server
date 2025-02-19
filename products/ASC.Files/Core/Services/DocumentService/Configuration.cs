@@ -508,61 +508,73 @@ public class PermissionsConfig
     /// <summary>
     /// Change history
     /// </summary>
+    [OpenApiDescription("Change history")]
     public bool ChangeHistory { get; set; }
 
     /// <summary>
     /// Comment
     /// </summary>
+    [OpenApiDescription("Comment")]
     public bool Comment { get; set; } = true;
 
     /// <summary>
     /// Chat
     /// </summary>
+    [OpenApiDescription("Chat")]
     public bool Chat { get; set; } = true;
 
     /// <summary>
     /// Download
     /// </summary>
+    [OpenApiDescription("Download")]
     public bool Download { get; set; } = true;
 
     /// <summary>
     /// Edit
     /// </summary>
+    [OpenApiDescription("Edit")]
     public bool Edit { get; set; } = true;
 
     /// <summary>
     /// FillForms
     /// </summary>
+    [OpenApiDescription("FillForms")]
     public bool FillForms { get; set; } = true;
 
     /// <summary>
     /// ModifyFilter
     /// </summary>
+    [OpenApiDescription("ModifyFilter")]
     public bool ModifyFilter { get; set; } = true;
 
     /// <summary>
     /// Protect
     /// </summary>
+    [OpenApiDescription("Protect")]
     public bool Protect { get; set; } = true;
 
     /// <summary>
     /// Print
     /// </summary>
+    [OpenApiDescription("Print")]
     public bool Print { get; set; } = true;
 
     /// <summary>
     /// Rename
     /// </summary>
+    [OpenApiDescription("Rename")]
     public bool Rename { get; set; }
 
     /// <summary>
     /// Review
     /// </summary>
+    [OpenApiDescription("Review")]
     public bool Review { get; set; } = true;
 
     /// <summary>
     /// Copy
     /// </summary>
+    [OpenApiDescription("Copy")]
     public bool Copy { get; set; } = true;
 }
 
@@ -651,9 +663,11 @@ public class Paragraph
         Align = 2;
     }
     [JsonPropertyName("align")]
+    [OpenApiDescription("Align")]
     public int Align { get; set; }
 
     [JsonPropertyName("runs")]
+    [OpenApiDescription("Runs")]
     public List<Run> Runs { get; set; }
 }
 public class Run(string text, bool usedInHash = true)
@@ -661,11 +675,14 @@ public class Run(string text, bool usedInHash = true)
     internal bool UsedInHash => usedInHash;
 
     [JsonPropertyName("fill")]
+    [OpenApiDescription("Fill")]
     public int[] Fill { get; set; } = [124, 124, 124];
 
     [JsonPropertyName("text")]
+    [OpenApiDescription("Text")]
     public string Text { get; set; } = text;
-
+    
+    [OpenApiDescription("Font size")]
     [JsonPropertyName("font-size")]
     public string FontSize { get; set; } = "26";
 }
@@ -675,42 +692,50 @@ public class FileReference
     /// <summary>
     /// File reference data
     /// </summary>
+    [OpenApiDescription("File reference data")]
     public FileReferenceData ReferenceData { get; set; }
 
     /// <summary>
     /// Error
     /// </summary>
+    [OpenApiDescription("Error")]
     public string Error { get; set; }
 
     /// <summary>
     /// Path
     /// </summary>
+    [OpenApiDescription("Path")]
     public string Path { get; set; }
 
     /// <summary>
     /// URL
     /// </summary>
     [Url]
+    [OpenApiDescription("URL")]
     public string Url { get; set; }
 
     /// <summary>
     /// File type
     /// </summary>
+    [OpenApiDescription("File type")]
     public string FileType { get; set; }
 
     /// <summary>
     /// Key
     /// </summary>
+    [OpenApiDescription("Key")]
     public string Key { get; set; }
 
     /// <summary>
     /// Link
     /// </summary>
+    [OpenApiDescription("Link")]
     public string Link { get; set; }
 
     /// <summary>
     /// Token
     /// </summary>
+    [OpenApiDescription("Token")]
     public string Token { get; set; }
 }
 
@@ -719,11 +744,13 @@ public class FileReferenceData
     /// <summary>
     /// File key
     /// </summary>
+    [OpenApiDescription("File key")]
     public string FileKey { get; set; }
 
     /// <summary>
     /// Instance ID
     /// </summary>
+    [OpenApiDescription("Instance ID")]
     public string InstanceId { get; set; }
 }
 
@@ -945,6 +972,7 @@ public class GobackConfig
     /// <summary>
     /// Url
     /// </summary>
+    [OpenApiDescription("Url")]
     public string Url { get; set; }
 }
 
@@ -998,6 +1026,7 @@ public class PluginsConfig
     // private readonly CoreBaseSettings _coreBaseSettings = coreBaseSettings;
     // private readonly TenantManager _tenantManager = tenantManager;
 
+    [OpenApiDescription("PluginsData")]
     public string[] PluginsData
     {
         get
@@ -1033,17 +1062,20 @@ public class RecentConfig
     /// <summary>
     /// Folder
     /// </summary>
+    [OpenApiDescription("Folder")]
     public string Folder { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Url
     /// </summary>
     [Url]
+    [OpenApiDescription("Url")]
     public string Url { get; set; }
 }
 
@@ -1052,17 +1084,20 @@ public class TemplatesConfig
     /// <summary>
     /// Image
     /// </summary>
+    [OpenApiDescription("Image")]
     public string Image { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
+    [OpenApiDescription("Title")]
     public string Title { get; set; }
 
     /// <summary>
     /// Url
     /// </summary>
     [Url]
+    [OpenApiDescription("Url")]
     public string Url { get; set; }
 }
 
@@ -1071,15 +1106,18 @@ public class UserConfig
     /// <summary>
     /// Id
     /// </summary>
+    [OpenApiDescription("Id")]
     public string Id { get; set; }
 
     /// <summary>
     /// Name
     /// </summary>
+    [OpenApiDescription("Name")]
     public string Name { get; set; }
 
     /// <summary>
     /// Image
     /// </summary>
+    [OpenApiDescription("Image")]
     public string Image { get; set; }
 }

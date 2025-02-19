@@ -31,16 +31,19 @@ public class BaseRoomTemplateStatusDto
     /// <summary>
     /// Progress
     /// </summary>
+    [OpenApiDescription("Progress")]
     public double Progress { get; set; }
 
     /// <summary>
     /// Error
     /// </summary>
+    [OpenApiDescription("Error")]
     public string Error { get; set; }
 
     /// <summary>
     /// IsCompleted
     /// </summary>
+    [OpenApiDescription("IsCompleted")]
     public bool IsCompleted { get; set; }
 }
 
@@ -49,6 +52,7 @@ public class RoomTemplateStatusDto : BaseRoomTemplateStatusDto
     /// <summary>
     /// Template id
     /// </summary>
+    [OpenApiDescription("Template id")]
     public int TemplateId { get; set; }
 }
 
@@ -57,5 +61,6 @@ public class RoomFromTemplateStatusDto : BaseRoomTemplateStatusDto
     /// <summary>
     /// Room id
     /// </summary>
+    [OpenApiDescription("Room id")]
     public int RoomId { get; set; }
 }

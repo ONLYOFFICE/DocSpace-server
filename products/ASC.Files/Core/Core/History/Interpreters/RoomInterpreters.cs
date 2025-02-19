@@ -302,15 +302,25 @@ public class RoomInviteResendInterpreter : ActionInterpreter
 
 public record UserHistoryData : HistoryData
 {
+    [OpenApiDescription("User")]
     public EmployeeDto User { get; set; }
+
+    [OpenApiDescription("Access")]
     public string Access { get; set; }
+
+    [OpenApiDescription("Old access")]
     public string OldAccess { get; set; }
 }
 
 public record GroupHistoryData : HistoryData
 {
+    [OpenApiDescription("Group")]
     public GroupSummaryDto Group { get; set; }
+
+    [OpenApiDescription("Access")]
     public string Access { get; set; }
+
+    [OpenApiDescription("Old access")]
     public string OldAccess { get; set; }
 }
 
@@ -323,6 +333,6 @@ public record LifeTimeHistoryData : EntryData
     {
         LifeTime = lifeTime;
     }
-
+    [OpenApiDescription("LifeTime")]
     public RoomDataLifetime LifeTime { get; set; }
 }

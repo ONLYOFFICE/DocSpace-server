@@ -31,6 +31,7 @@ public class PublicDto
     /// <summary>
     /// Template id
     /// </summary>
+    [OpenApiDescription("Template id")]
     [FromRoute(Name="id")]
     public int Id { get; set; }
 }
@@ -41,10 +42,12 @@ public class SetPublicDto
     /// <summary>
     /// Template id
     /// </summary>
+    [OpenApiDescription("Template id")]
     public int Id { get; set; }
 
     /// <summary>
     /// Public settings
     /// </summary>
+    [OpenApiDescription("Public settings")]
     public bool Public { get; set; }
 }
