@@ -2076,7 +2076,7 @@ public class FileStorageService //: IFileStorageService
         return result;
     }
 
-    public async Task SetFileOrder<T>(T fileId, int order)
+    public async Task<File<T>> SetFileOrder<T>(T fileId, int order)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
@@ -2091,6 +2091,8 @@ public class FileStorageService //: IFileStorageService
         {
             await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), order.ToString());
         }
+
+        return file;
     }
 
     public async Task SetOrderAsync<T>(IEnumerable<OrdersItemRequestDto<T>> items)
