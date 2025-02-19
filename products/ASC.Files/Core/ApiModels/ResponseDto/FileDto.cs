@@ -315,7 +315,7 @@ public class FileDtoHelper(
                 {
                     var role = roleList.FirstOrDefault(r => !r.Submitted);
 
-                    if (properties.FormFilling.IsFillingPaused)
+                    if (!DateTime.MinValue.Equals(properties.FormFilling.FillingStopedDate))
                     {
                         result.FormFillingStatus = FormFillingStatus.Stoped;
                     }

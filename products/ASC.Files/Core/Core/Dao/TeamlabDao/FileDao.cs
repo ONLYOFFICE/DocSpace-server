@@ -65,7 +65,8 @@ internal class FileDao(
     FileChecker fileChecker,
     EntryManager entryManager,
     FileSharing fileSharing,
-    FilesMessageService filesMessageService)
+    FilesMessageService filesMessageService,
+    FormRoleDtoHelper formRoleDtoHelper)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -1396,9 +1397,10 @@ internal class FileDao(
             await filesDbContext.DeleteFormRoleMappingsAsync(tenantId, formId);
             return;
         }
-
+        var sequence = 0;
         foreach (var formRole in formRoles)
         {
+            sequence++;
             var roleDb = new DbFilesFormRoleMapping
             {
                 TenantId = tenantId,
@@ -1406,7 +1408,7 @@ internal class FileDao(
                 UserId = formRole.UserId,
                 RoleName = formRole.RoleName,
                 RoleColor = formRole.RoleColor,
-                Sequence = formRole.Sequence,
+                Sequence = sequence,
                 Submitted = formRole.Submitted
 
             };
@@ -1489,17 +1491,17 @@ internal class FileDao(
             yield return role;
         }
     }
-    public async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
+    public async IAsyncEnumerable<FormRoleDto> GetFormRoles(int formId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
+        var properties = await daoFactory.GetFileDao<int>().GetProperties(formId);
+
         await foreach (var e in filesDbContext.DbFormRolesAsync(tenantId, formId))
         {
-            e.OpenedAt = _tenantUtil.DateTimeFromUtc(e.OpenedAt);
-            e.SubmissionDate = _tenantUtil.DateTimeFromUtc(e.SubmissionDate);
-            yield return e;
+            yield return formRoleDtoHelper.Get(properties, e);
         }
     }
     public async Task<FormRole> ChangeUserFormRoleAsync(int formId, FormRole formRole)

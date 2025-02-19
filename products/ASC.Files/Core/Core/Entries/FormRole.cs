@@ -30,14 +30,9 @@ public class FormRole
 {
     public string RoleName { get; set; }
     public string RoleColor { get; set; }
-
     public Guid UserId { get; set; }
-
     public int Sequence { get; set; }
-
     public bool Submitted { get; set; }
     public DateTime OpenedAt { get; set; }
-
     public DateTime SubmissionDate { get; set; }
-
 }

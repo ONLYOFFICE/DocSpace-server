@@ -467,7 +467,7 @@ internal class ProviderFileDao(
     {
         throw new NotImplementedException();
     }
-    public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
+    public IAsyncEnumerable<FormRoleDto> GetFormRoles(string formId)
     {
         throw new NotImplementedException();
     }

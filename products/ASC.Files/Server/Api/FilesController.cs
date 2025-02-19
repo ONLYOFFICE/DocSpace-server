@@ -534,34 +534,16 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [SwaggerResponse(200, "Updated information about form role mappings", typeof(FormRole))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPost("file/{fileId}/formrolemapping")]
-    public async Task<IEnumerable<FormRole>> SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
+    public async Task SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
     {
-        return await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
-    }
-
-    [Tags("Files / Files")]
-    [SwaggerResponse(200, "Successfully reassigned the form role to another user", typeof(FormRole))]
-    [SwaggerResponse(403, "You do not have enough permissions to reassign the role")]
-    [HttpPut("file/{fileId}/formroleassignment")]
-    public async Task<FormRole> ReassignFormRoleToUser(ReassignFormRoleToUserDto<T> inDto)
-    {
-        return await fileStorageService.ReassignFormRoleToUser(inDto.FormId, inDto.RoleName, inDto.UserId, inDto.ToUserId);
-    }
-
-    [Tags("Files / Files")]
-    [SwaggerResponse(200, "Successfully reopened the form for the user", typeof(FormRole))]
-    [SwaggerResponse(403, "You do not have enough permissions to reopen the form")]
-    [HttpPut("file/{fileId}/formrolereopen")]
-    public async Task ReopenFormForUser(ReopenFormRoleForUserDto<T> inDto)
-    {
-        await fileStorageService.ReopenFormForUser(inDto.FormId, inDto.RoleName, inDto.UserId, inDto.ResetSubsequentRoles);
+        await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
     }
 
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRole>))]
     [SwaggerResponse(403, "You do not have enough permissions to view the form roles")]
     [HttpGet("file/{fileId}/formroles")]
-    public IAsyncEnumerable<FormRole> GetAllFormRoles(FileIdRequestDto<T> inDto)
+    public IAsyncEnumerable<FormRoleDto> GetAllFormRoles(FileIdRequestDto<T> inDto)
     {
         return fileStorageService.GetAllFormRoles(inDto.FileId);
     }

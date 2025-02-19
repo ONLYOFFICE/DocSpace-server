@@ -307,7 +307,7 @@ public interface IFileDao<T>
     /// </summary>
     /// <param name="formId"></param>
     /// <returns></returns>
-    IAsyncEnumerable<FormRole> GetFormRoles(T formId);
+    IAsyncEnumerable<FormRoleDto> GetFormRoles(T formId);
 
     /// <summary>
     /// Get form role mappings

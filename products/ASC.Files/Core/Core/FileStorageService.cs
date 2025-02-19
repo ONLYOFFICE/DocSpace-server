@@ -4319,7 +4319,7 @@ public class FileStorageService //: IFileStorageService
         return [..users];
     }
 
-    public async Task<IEnumerable<FormRole>> SaveFormRoleMapping<T>(T formId, IEnumerable<FormRole> roles)
+    public async Task SaveFormRoleMapping<T>(T formId, IEnumerable<FormRole> roles)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         await ValidateChangeRolesPermission(formId, fileDao);
@@ -4329,8 +4329,6 @@ public class FileStorageService //: IFileStorageService
         var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
         properties.FormFilling.StartFilling = true;
         await fileDao.SaveProperties(formId, properties);
-
-        return roles;
     }
 
     public async Task<FormRole> ReassignFormRoleToUser<T>(T formId, string roleName, Guid userId, Guid toUserId)
@@ -4356,7 +4354,7 @@ public class FileStorageService //: IFileStorageService
         }
         await fileDao.ReopenFormForUser(formId, roleName, userId, resetSubsequentRoles);
     }
-    public async IAsyncEnumerable<FormRole> GetAllFormRoles<T>(T formId)
+    public async IAsyncEnumerable<FormRoleDto> GetAllFormRoles<T>(T formId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         await ValidateChangeRolesPermission(formId, fileDao);
@@ -4386,11 +4384,19 @@ public class FileStorageService //: IFileStorageService
         switch (action)
         {
             case FormFillingManageAction.Stop:
-                properties.FormFilling.IsFillingPaused = true;
+                var role = await fileDao.GetFormRoles(formId).Where(r => r.Submitted == false).FirstOrDefaultAsync();
+                properties.FormFilling.FillingStopedDate = DateTime.UtcNow;
+                properties.FormFilling.FormFillingInterruption =
+                    new FormFillingInterruption
+                    {
+                        UserId = authContext.CurrentAccount.ID,
+                        RoleName = role?.RoleName
+                    };
                 break;
 
             case FormFillingManageAction.Resume:
-                properties.FormFilling.IsFillingPaused = false;
+                properties.FormFilling.FillingStopedDate = DateTime.MinValue;
+                properties.FormFilling.FormFillingInterruption = null;
                 break;
 
             default:

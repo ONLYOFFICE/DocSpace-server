@@ -79,6 +79,13 @@ public class FormFillingProperties<T>
     public T ResultsFolderId { get; set; }
     public T ResultsFileID { get; set; }
     public int ResultFormNumber { get; set; }
-    public bool IsFillingPaused { get; set; }
+    public DateTime FillingStopedDate { get; set; }
+    public FormFillingInterruption? FormFillingInterruption { get; set; }
 
+}
+
+public struct FormFillingInterruption
+{
+    public Guid UserId { get; set; }
+    public string RoleName { get; set; }
 }
