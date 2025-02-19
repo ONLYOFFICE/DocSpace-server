@@ -24,10 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Webhooks.Core;
+namespace ASC.Api.Core.Core;
 
-public interface IWebhookPublisher
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
+public class WebhookAccessCheckerAttribute : Attribute
 {
-    public Task PublishAsync(Webhook webhook, string requestPayload, WebhookData webhookData);
-    public Task<DbWebhooksLog> PublishAsync(int webhookId, string requestPayload, int configId);
+    public Type WebhookAccessCheckerType { get; private set; }
+
+    public WebhookAccessCheckerAttribute(Type accessCheckerType)
+    {
+        if (!typeof(IWebhookAccessChecker).IsAssignableFrom(accessCheckerType))
+        {
+            throw new ArgumentException("The type must implement the interface IWebhookAccessChecker", nameof(accessCheckerType));
+        }
+
+        WebhookAccessCheckerType = accessCheckerType;
+    }
 }

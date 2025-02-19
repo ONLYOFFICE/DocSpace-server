@@ -42,7 +42,7 @@ public class WebhooksGlobalFilterAttribute(
 
     public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
-        var webhook = await GetWebhookAsync(context.HttpContext);
+        var (webhook, webhookData) = await GetWebhookAsync(context.HttpContext);
         var skip = webhook == null;
 
         if (!skip)
@@ -67,9 +67,9 @@ public class WebhooksGlobalFilterAttribute(
 
             try
             {
-                var resultContent = Encoding.UTF8.GetString(_stream.ToArray());
+                var requestPayload = Encoding.UTF8.GetString(_stream.ToArray());
 
-                await webhookPublisher.PublishAsync(webhook.Id, resultContent);
+                await webhookPublisher.PublishAsync(webhook, requestPayload, webhookData);
             }
             catch (Exception e)
             {
@@ -78,12 +78,13 @@ public class WebhooksGlobalFilterAttribute(
         }
     }
 
+
     public void Dispose()
     {
         _stream?.Dispose();
     }
 
-    private async Task<Webhook> GetWebhookAsync(HttpContext context)
+    private async Task<(Webhook webhook, WebhookData WebhookData)> GetWebhookAsync(HttpContext context)
     {
         var method = context.Request.Method;
         var endpoint = (RouteEndpoint)context.GetEndpoint();
@@ -92,17 +93,17 @@ public class WebhooksGlobalFilterAttribute(
 
         if (routePattern == null)
         {
-            return null;
+            return (null, null);
         }
-        
+
         if (disabled != null)
         {
-            return null;
+            return (null, null);
         }
-        
+
         if (!DbWorker.MethodList.Contains(method))
         {
-            return null;
+            return (null, null);
         }
 
         var key = $"{method}{routePattern}";
@@ -114,12 +115,95 @@ public class WebhooksGlobalFilterAttribute(
                 _webhooks.TryAdd(key, webhook);
             }
         }
-        
+
         if (webhook == null || (await settingsManager.LoadAsync<WebHooksSettings>()).Ids.Contains(webhook.Id))
+        {
+            return (null, null);
+        }
+
+        var webhookData = await GetWebhookDataAsync(context, endpoint);
+
+        return (webhook, webhookData);
+    }
+
+    private static async Task<WebhookData> GetWebhookDataAsync(HttpContext context, RouteEndpoint endpoint)
+    {
+        var accessCheckerAttribute = endpoint?.Metadata.GetMetadata<WebhookAccessCheckerAttribute>();
+
+        if (accessCheckerAttribute == null)
         {
             return null;
         }
 
-        return webhook;
+        var returnType = GetReturnTypeFromRouteEndpoint(endpoint);
+
+        var postedData = await GetPostedDataAsync(context, endpoint);
+
+        var routeData = context.GetRouteData().Values.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        return new WebhookData
+        {
+            AccessCheckerType = accessCheckerAttribute.WebhookAccessCheckerType,
+            ResponseType = returnType,
+            PostedData =postedData,
+            RouteData = routeData
+        };
+    }
+
+    private static Type GetReturnTypeFromRouteEndpoint(RouteEndpoint endpoint)
+    {
+        var returnType = endpoint?.Metadata?.GetMetadata<ControllerActionDescriptor>()?.MethodInfo?.ReturnType;
+
+        if (returnType == null)
+        {
+             return null;
+        }
+
+        return returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>)
+            ? returnType.GetGenericArguments().First()
+            : returnType;
+    }
+
+    private static async Task<Dictionary<string, (Type, object)>> GetPostedDataAsync(HttpContext context, RouteEndpoint endpoint)
+    {
+        if (context.Request.ContentType!= "application/json")
+        {
+            return null;
+        }
+
+        var actionDescriptor = endpoint?.Metadata.GetMetadata<ControllerActionDescriptor>();
+
+        if (actionDescriptor == null)
+        {
+            return null;
+        }
+
+        var data = new Dictionary<string, (Type, object)>();
+
+        using (var reader = new StreamReader(context.Request.Body))
+        {
+            var bodyString = await reader.ReadToEndAsync();
+
+            if (string.IsNullOrEmpty(bodyString))
+            {
+                return null;
+            }
+
+            var bodyObject = JsonSerializer.Deserialize<Dictionary<string, object>>(bodyString);
+
+            foreach (var property in bodyObject)
+            {
+                var type = actionDescriptor.Parameters.FirstOrDefault(p => p.Name == property.Key)?.ParameterType;
+
+                if (type == null)
+                {
+                    continue;
+                }
+
+                data.Add(property.Key, (type, property.Value));
+            }
+        }
+
+        return data;
     }
 }

@@ -58,10 +58,10 @@ public class WebhooksConfigRequestsDto
     /// <summary>
     /// Enabled or not
     /// </summary>
-    public bool? Enabled { get; set; }
+    public bool Enabled { get; set; }
 
     /// <summary>
     /// SSL
     /// </summary>
-    public bool? SSL { get; set;}
+    public bool SSL { get; set;}
 }

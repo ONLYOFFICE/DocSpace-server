@@ -26,12 +26,16 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
+[WebhookDisable]
 public class WebhooksController(ApiContext context,
         PermissionContext permissionContext,
         ApiContext apiContext,
+        AuthContext authContext,
         WebItemManager webItemManager,
         IMemoryCache memoryCache,
         DbWorker dbWorker,
+        TenantManager tenantManager,
+        UserManager userManager,
         IHttpContextAccessor httpContextAccessor,
         IMapper mapper,
         WebhookPublisher webhookPublisher,
@@ -52,9 +56,21 @@ public class WebhooksController(ApiContext context,
     [HttpGet("webhook")]
     public async IAsyncEnumerable<WebhooksConfigWithStatusDto> GetTenantWebhooks()
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        await foreach (var webhook in dbWorker.GetTenantWebhooksWithStatus())
+        if (await userManager.IsGuestAsync(currentUser))
+        {
+            throw new SecurityException();
+        }
+
+        Guid? targetUserId = null;
+
+        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            targetUserId = authContext.CurrentAccount.ID;
+        }
+
+        await foreach (var webhook in dbWorker.GetTenantWebhooksWithStatus(targetUserId))
         {
             yield return mapper.Map<WebhooksConfigWithStatusDto>(webhook);
         }
@@ -72,17 +88,29 @@ public class WebhooksController(ApiContext context,
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (await userManager.IsGuestAsync(currentUser))
+        {
+            throw new SecurityException();
+        }
+
+        Guid? targetUserId = null;
+
+        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            targetUserId = authContext.CurrentAccount.ID;
+        }
 
         ArgumentNullException.ThrowIfNull(inDto.SecretKey);
         
         var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
 
         passwordSettingsManager.CheckPassword(inDto.SecretKey, passwordSettings);
-        
-        var webhook = await dbWorker.AddWebhookConfig(inDto.Uri, inDto.Name, inDto.SecretKey, inDto.Enabled, inDto.SSL);
 
-        return mapper.Map<WebhooksConfig, WebhooksConfigDto>(webhook);
+        var webhook = await dbWorker.AddWebhookConfig(inDto.Uri, inDto.Name, inDto.SecretKey, inDto.Enabled, inDto.SSL, targetUserId);
+
+        return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
 
     /// <summary>
@@ -97,11 +125,40 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        var webhook = await dbWorker.UpdateWebhookConfig(inDto.Id, inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL);
+        if (await userManager.IsGuestAsync(currentUser))
+        {
+            throw new SecurityException();
+        }
 
-        return mapper.Map<WebhooksConfig, WebhooksConfigDto>(webhook);
+        Guid? targetUserId = null;
+
+        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            targetUserId = authContext.CurrentAccount.ID;
+        }
+
+        ArgumentNullException.ThrowIfNull(inDto.Uri);
+        ArgumentNullException.ThrowIfNull(inDto.Name);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var DbWebhooksConfig = new DbWebhooksConfig
+        {
+            Id= inDto.Id,   
+            Name = inDto.Name,
+            Uri = inDto.Uri,
+            SecretKey = inDto.SecretKey,
+            Enabled = inDto.Enabled,
+            SSL = inDto.SSL,
+            TenantId = tenantId,
+            TargetUserId = targetUserId
+        };
+
+        var webhook = await dbWorker.UpdateWebhookConfig(DbWebhooksConfig);
+
+        return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
 
     /// <summary>
@@ -116,11 +173,28 @@ public class WebhooksController(ApiContext context,
     [HttpDelete("webhook/{id:int}")]
     public async Task<WebhooksConfigDto> RemoveWebhook(IdRequestDto<int> inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (await userManager.IsGuestAsync(currentUser))
+        {
+            throw new SecurityException();
+        }
+
+        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            var tenantId = tenantManager.GetCurrentTenantId();
+
+            var existingWebhook = await dbWorker.GetWebhookConfig(inDto.Id, tenantId);
+
+            if (!existingWebhook.TargetUserId.HasValue || existingWebhook.TargetUserId.Value != authContext.CurrentAccount.ID)
+            {
+                throw new SecurityException();
+            }
+        }
 
         var webhook = await dbWorker.RemoveWebhookConfigAsync(inDto.Id);
 
-        return mapper.Map<WebhooksConfig, WebhooksConfigDto>(webhook);
+        return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
 
     /// <summary>
@@ -136,17 +210,29 @@ public class WebhooksController(ApiContext context,
     [HttpGet("webhooks/log")]
     public async IAsyncEnumerable<WebhooksLogDto> GetJournal(WebhookLogsRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        context.SetTotalCount(await dbWorker.GetTotalByQuery(inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus));
+        if (await userManager.IsGuestAsync(currentUser))
+        {
+            throw new SecurityException();
+        }
+
+        Guid? targetUserId = null;
+
+        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            targetUserId = authContext.CurrentAccount.ID;
+        }
+
+        context.SetTotalCount(await dbWorker.GetTotalByQuery(inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, targetUserId));
 
         var startIndex = Convert.ToInt32(context.StartIndex);
         var count = Convert.ToInt32(context.Count);
 
-        await foreach (var j in dbWorker.ReadJournal(startIndex, count, inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus))
+        await foreach (var j in dbWorker.ReadJournal(startIndex, count, inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, targetUserId))
         {
             j.Log.Config = j.Config;
-            yield return mapper.Map<WebhooksLog, WebhooksLogDto>(j.Log);
+            yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(j.Log);
         }
     }
 
@@ -164,7 +250,19 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook/{id:int}/retry")]
     public async Task<WebhooksLogDto> RetryWebhook(IdRequestDto<int> inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (await userManager.IsGuestAsync(currentUser))
+        {
+            throw new SecurityException();
+        }
+
+        Guid? targetUserId = null;
+
+        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            targetUserId = authContext.CurrentAccount.ID;
+        }
 
         if (inDto.Id == 0)
         {
@@ -178,9 +276,14 @@ public class WebhooksController(ApiContext context,
             throw new ItemNotFoundException();
         }
 
+        if (targetUserId.HasValue && item.Config.TargetUserId != targetUserId)
+        {
+            throw new SecurityException();
+        }
+
         var result = await webhookPublisher.PublishAsync(item.Id, item.RequestPayload, item.ConfigId);
 
-        return mapper.Map<WebhooksLog, WebhooksLogDto>(result);
+        return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
     }
 
     /// <summary>
@@ -196,7 +299,19 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook/retry")]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (await userManager.IsGuestAsync(currentUser))
+        {
+            throw new SecurityException();
+        }
+
+        Guid? targetUserId = null;
+
+        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            targetUserId = authContext.CurrentAccount.ID;
+        }
 
         foreach (var id in inDto.Ids)
         {
@@ -207,9 +322,14 @@ public class WebhooksController(ApiContext context,
                 continue;
             }
 
+            if (targetUserId.HasValue && item.Config.TargetUserId != targetUserId)
+            {
+                continue;
+            }
+
             var result = await webhookPublisher.PublishAsync(item.Id, item.RequestPayload, item.ConfigId);
 
-            yield return mapper.Map<WebhooksLog, WebhooksLogDto>(result);
+            yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
         }
     }
 
@@ -226,6 +346,8 @@ public class WebhooksController(ApiContext context,
     [HttpGet("webhooks")]
     public async IAsyncEnumerable<Webhook> Settings()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         var settings = await settingsManager.LoadAsync<WebHooksSettings>();
 
         foreach (var w in await dbWorker.GetWebhooksAsync())
@@ -247,6 +369,8 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook/{id:int}")]
     public async Task<Webhook> DisableWebHook(IdRequestDto<int> inDto)
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         var settings = await settingsManager.LoadAsync<WebHooksSettings>();
 
         Webhook result = null;

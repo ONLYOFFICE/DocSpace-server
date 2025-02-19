@@ -24,17 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+using System.Text.Json.Nodes;
+
+using ASC.Core.Tenants;
+
+using Microsoft.Extensions.DependencyInjection;
+
 namespace ASC.Webhooks.Core;
 
 [Scope(typeof(IWebhookPublisher))]
 public class WebhookPublisher(
+    IServiceProvider serviceProvider,
     DbWorker dbWorker,
     IEventBus eventBus,
     SecurityContext securityContext,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    TenantUtil tenantUtil)
     : IWebhookPublisher
 {
-    public async Task PublishAsync(int webhookId, string requestPayload)
+    public async Task PublishAsync(Webhook webhook, string requestPayload, WebhookData webhookData)
     {
         if (string.IsNullOrEmpty(requestPayload))
         {
@@ -45,34 +54,106 @@ public class WebhookPublisher(
 
         foreach (var config in webhookConfigs)
         {
-            await PublishAsync(webhookId, requestPayload, config.Id);
+            if (config.TargetUserId.HasValue)
+            {
+                if (securityContext.CurrentAccount.ID != config.TargetUserId.Value)
+                {
+                    if (webhookData?.AccessCheckerType == null)
+                    {
+                        continue;
+                    }
+
+                    webhookData.TargetUserId = config.TargetUserId.Value;
+                    webhookData.ResponseString = requestPayload;
+
+                    var accessChecker = (IWebhookAccessChecker)serviceProvider.GetRequiredService(webhookData.AccessCheckerType);
+                    if (!await accessChecker.CheckAccessAsync(webhookData))
+                    {
+                        continue;
+                    }
+                }
+            }
+
+            await PublishAsync(webhook.Id, requestPayload, config.Id);
         }
     }
 
-    public async Task<WebhooksLog> PublishAsync(int webhookId, string requestPayload, int configId)
+    public async Task<DbWebhooksLog> PublishAsync(int webhookId, string requestResponse, int configId)
     {
-        if (string.IsNullOrEmpty(requestPayload))
+        if (string.IsNullOrEmpty(requestResponse))
         {
             return null;
         }
 
-        var webhooksLog = new WebhooksLog
+        var tenantId = tenantManager.GetCurrentTenantId();
+            
+        var webhooksLog = new DbWebhooksLog
         {
             WebhookId = webhookId,
             CreationTime = DateTime.UtcNow,
-            RequestPayload = requestPayload,
-            ConfigId = configId
+            RequestPayload = requestResponse,
+            ConfigId = configId,
+            TenantId = tenantId
         };
 
+        webhooksLog = await PreProcessWebHookLog(webhooksLog);
         var webhook = await dbWorker.WriteToJournal(webhooksLog);
 
-        await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(
-            securityContext.CurrentAccount.ID,
-            (tenantManager.GetCurrentTenant()).Id)
+        var @event = new WebhookRequestIntegrationEvent(securityContext.CurrentAccount.ID, tenantId)
         {
             WebhookId = webhook.Id
-        });
+        };
+
+        await eventBus.PublishAsync(@event);
 
         return webhook;
+    }
+
+    private async Task<DbWebhooksLog> PreProcessWebHookLog(DbWebhooksLog dbWebhooksLog)
+    {
+        var requestResponse = dbWebhooksLog.RequestPayload;
+       
+        var webhooksConfig = await dbWorker.GetWebhookConfig(dbWebhooksLog.TenantId, dbWebhooksLog.ConfigId);
+
+        var jsonNode = JsonNode.Parse(requestResponse);
+        var data = (jsonNode["response"] ?? jsonNode["data"] ?? jsonNode.Root);
+
+        var requestPayload = new
+        {
+            Action = new
+            {
+                //                Id = entry.Id,
+                CreateOn = dbWebhooksLog.CreationTime,
+                CreateBy = securityContext.CurrentAccount.ID,
+                Trigger = "*"
+            },
+            Data = data,
+            Webhook = new
+            {
+                Id = webhooksConfig.Id,
+                Name = webhooksConfig.Name,
+                PayloadUrl = webhooksConfig.Uri,
+                LastSuccessOn = webhooksConfig.LastSuccessOn.HasValue ? tenantUtil.DateTimeFromUtc(webhooksConfig.LastSuccessOn.Value) : new DateTime?(),
+                LastFailureOn = webhooksConfig.LastFailureOn.HasValue ? tenantUtil.DateTimeFromUtc(webhooksConfig.LastFailureOn.Value) : new DateTime?(),
+                LastFailureContent = webhooksConfig.LastFailureContent,
+                RetryOn = new DateTime?(),
+                RetryCount = 0,
+
+                //Target = new {
+                //  Type = "room", //  room | folder | file,
+                //  Id = 111
+                //},
+                Triggers = "[*]"
+            }
+        };
+
+        var jsonSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase            
+        };
+
+        dbWebhooksLog.RequestPayload = JsonSerializer.Serialize(requestPayload, jsonSerializerOptions);
+
+        return dbWebhooksLog;
     }
 }
