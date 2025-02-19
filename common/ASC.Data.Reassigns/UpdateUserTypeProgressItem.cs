@@ -72,7 +72,7 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
             if (_employeeType == EmployeeType.Guest)
             {
                 await fileStorageService.CopySharedFilesAsync(User, ToUser);
-                await fileStorageService.DeletePersonalDataAsync<int>(User, withTrash: false);
+                await fileStorageService.ClearPersonalFolderAsync<int>(User);
             }
 
             await SetPercentageAndCheckCancellationAsync(40, true);

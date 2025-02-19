@@ -456,12 +456,6 @@ public class GlobalFolder(
 
     internal static readonly ConcurrentDictionary<string, Lazy<int>> UserRootFolderCache = new(); /*Use SYNCHRONIZED for cross thread blocks*/
 
-    public void ClearCacheForUser(Guid userId)
-    {
-        var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{userId}";
-        UserRootFolderCache.TryRemove(cacheKey, out _);
-    }
-
     public async ValueTask<int> GetFolderMyAsync(IDaoFactory daoFactory)
     {
         if (!authContext.IsAuthenticated)
@@ -846,11 +840,6 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     public async Task<T> GetFolderMyAsync<T>()
     {
         return IdConverter.Convert<T>(await FolderMyAsync);
-    }
-
-    public void ClearCacheForUser(Guid userId)
-    {
-        globalFolder.ClearCacheForUser(userId);
     }
 
     public async ValueTask<T> GetFolderProjectsAsync<T>()

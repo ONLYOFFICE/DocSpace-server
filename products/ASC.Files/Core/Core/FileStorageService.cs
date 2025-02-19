@@ -2953,7 +2953,7 @@ public class FileStorageService //: IFileStorageService
         var rooms = (await GetFolderItemsAsync(
                     await globalFolderHelper.GetFolderVirtualRooms(),
                     0,
-                    0,
+                    -1,
                     new List<FilterType>() { FilterType.FoldersOnly },
                     false,
                     user.ToString(),
@@ -3014,7 +3014,7 @@ public class FileStorageService //: IFileStorageService
         await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
     }
 
-    public async Task DeletePersonalDataAsync<T>(Guid userFromId, bool checkPermission = false, bool withTrash = true)
+    public async Task DeletePersonalDataAsync<T>(Guid userFromId, bool checkPermission = false)
     {
         if (checkPermission)
         {
@@ -3040,64 +3040,102 @@ public class FileStorageService //: IFileStorageService
             var fileIdsFromMy = await fileDao.GetFilesAsync(folderIdMy).ToListAsync();
             var folderIdsFromMy = await folderDao.GetFoldersAsync(folderIdMy).ToListAsync();
 
-            await DeleteFilesAsync(fileIdsFromMy);
-            await DeleteFoldersAsync(folderIdsFromMy);
+            await DeleteFilesAsync(fileIdsFromMy, folderIdTrash);
+            await DeleteFoldersAsync(folderIdsFromMy, folderIdTrash);
 
             await folderDao.DeleteFolderAsync(folderIdMy);
-            globalFolderHelper.ClearCacheForUser(userFromId);
         }
 
-        if (!Equals(folderIdTrash, 0) && withTrash)
+        if (!Equals(folderIdTrash, 0))
         {
             var fileIdsFromTrash = await fileDao.GetFilesAsync(folderIdTrash).ToListAsync();
             var folderIdsFromTrash = await folderDao.GetFoldersAsync(folderIdTrash).ToListAsync();
 
-            await DeleteFilesAsync(fileIdsFromTrash);
-            await DeleteFoldersAsync(folderIdsFromTrash);
+            await DeleteFilesAsync(fileIdsFromTrash, folderIdTrash);
+            await DeleteFoldersAsync(folderIdsFromTrash, folderIdTrash);
 
             await folderDao.DeleteFolderAsync(folderIdTrash);
         }
 
         await fileSecurity.RemoveSubjectAsync(userFromId, true);
         return;
+    }
 
-        async Task DeleteFilesAsync(IEnumerable<T> fileIds)
+    public async Task ClearPersonalFolderAsync<T>(Guid userFromId, bool checkPermission = false)
+    {
+        if (checkPermission)
         {
-            foreach (var fileId in fileIds)
-            {
-                var file = await fileDao.GetFileAsync(fileId);
-
-                await fileMarker.RemoveMarkAsNewForAllAsync(file);
-
-                await fileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
-
-                if (file.RootFolderType == FolderType.TRASH && !Equals(folderIdTrash, 0))
-                {
-                    await folderDao.ChangeTreeFolderSizeAsync(folderIdTrash, (-1) * file.ContentLength);
-                }
-
-                await linkDao.DeleteAllLinkAsync(file.Id);
-
-                await fileDao.SaveProperties(file.Id, null);
-            }
+            await DemandPermissionToDeletePersonalDataAsync(userFromId);
         }
 
-        async Task DeleteFoldersAsync(IEnumerable<Folder<T>> folders)
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        var linkDao = daoFactory.GetLinkDao<T>();
+
+        if (folderDao == null || fileDao == null || linkDao == null)
         {
-            foreach (var folder in folders)
+            return;
+        }
+
+        _logger.InformationDeletePersonalData(userFromId);
+
+        var folderIdMy = await folderDao.GetFolderIDUserAsync(false, userFromId);
+        var folderIdTrash = await folderDao.GetFolderIDTrashAsync(false, userFromId);
+
+        if (!Equals(folderIdMy, 0))
+        {
+            var fileIdsFromMy = await fileDao.GetFilesAsync(folderIdMy).ToListAsync();
+            var folderIdsFromMy = await folderDao.GetFoldersAsync(folderIdMy).ToListAsync();
+
+            await DeleteFilesAsync(fileIdsFromMy, folderIdTrash);
+            await DeleteFoldersAsync(folderIdsFromMy, folderIdTrash);
+        }
+        return;
+    }
+
+    private async Task DeleteFilesAsync<T>(IEnumerable<T> fileIds, T folderIdTrash)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        var linkDao = daoFactory.GetLinkDao<T>();
+
+        foreach (var fileId in fileIds)
+        {
+            var file = await fileDao.GetFileAsync(fileId);
+
+            await fileMarker.RemoveMarkAsNewForAllAsync(file);
+
+            await fileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
+
+            if (file.RootFolderType == FolderType.TRASH && !Equals(folderIdTrash, 0))
             {
-                await fileMarker.RemoveMarkAsNewForAllAsync(folder);
+                await folderDao.ChangeTreeFolderSizeAsync(folderIdTrash, (-1) * file.ContentLength);
+            }
 
-                var files = await fileDao.GetFilesAsync(folder.Id).ToListAsync();
-                await DeleteFilesAsync(files);
+            await linkDao.DeleteAllLinkAsync(file.Id);
 
-                var subfolders = await folderDao.GetFoldersAsync(folder.Id).ToListAsync();
-                await DeleteFoldersAsync(subfolders);
+            await fileDao.SaveProperties(file.Id, null);
+        }
+    }
 
-                if (await folderDao.IsEmptyAsync(folder.Id))
-                {
-                    await folderDao.DeleteFolderAsync(folder.Id);
-                }
+    private async Task DeleteFoldersAsync<T>(IEnumerable<Folder<T>> folders, T folderIdTrash)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+
+        foreach (var folder in folders)
+        {
+            await fileMarker.RemoveMarkAsNewForAllAsync(folder);
+
+            var files = await fileDao.GetFilesAsync(folder.Id).ToListAsync();
+            await DeleteFilesAsync(files, folderIdTrash);
+
+            var subfolders = await folderDao.GetFoldersAsync(folder.Id).ToListAsync();
+            await DeleteFoldersAsync(subfolders, folderIdTrash);
+
+            if (await folderDao.IsEmptyAsync(folder.Id))
+            {
+                await folderDao.DeleteFolderAsync(folder.Id);
             }
         }
     }
