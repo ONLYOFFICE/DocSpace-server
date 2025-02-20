@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -89,13 +89,13 @@ public interface ClientDomainService {
   ClientUpdatedEvent disableClient(Audit audit, Client client);
 
   /**
-   * Invalidates an existing client, marking it for removal.
+   * Deletes an existing client.
    *
    * @param audit the audit information related to the update
    * @param client the client to be invalidated
    * @return a {@link ClientDeletedEvent} indicating the client was invalidated
    */
-  ClientDeletedEvent invalidateClient(Audit audit, Client client);
+  ClientDeletedEvent deleteClient(Audit audit, Client client);
 
   /**
    * Regenerates the secret for an existing client.

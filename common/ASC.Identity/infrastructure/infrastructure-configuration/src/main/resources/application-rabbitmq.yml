@@ -20,15 +20,3 @@ spring:
       key-store-password: ${RABBIT_SSL_KEYSTORE_PASSWORD:}
       trust-store: ${RABBIT_TRUST_STORE:}
       trust-store-password: ${RABBIT_TRUST_STORE_PASSWORD:}
-  cloud:
-    messaging:
-      rabbitmq:
-        queues:
-          audit:
-            deadExchange: ${RABBITMQ_AUDIT_DEAD_EXCHANGE:asc_identity_audit_dlx}
-            deadQueue: ${RABBITMQ_AUDIT_DEAD_QUEUE:asc_identity_audit_dlq}
-            deadRouting: ${RABBITMQ_AUDIT_DEAD_ROUTING:asc_identity_audit_dlr}
-            exchange: ${RABBITMQ_AUDIT_EXCHANGE:asc_identity_audit_exchange}
-            queue: ${RABBITMQ_AUDIT_QUEUE:asc_identity_audit_queue}
-            routing: ${RABBITMQ_AUDIT_ROUTING:asc_identity_audit_routing}
-            singleActiveConsumer: true

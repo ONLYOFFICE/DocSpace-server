@@ -49,6 +49,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
     public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit)
     {
         Init();
+        BackupProgressItemType = BackupProgressItemType.Backup;
         _userId = Guid.Empty;
         TenantId = schedule.TenantId;
         _storageType = schedule.StorageType;
@@ -63,6 +64,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
     public void Init(StartBackupRequest request, bool isScheduled, string tempFolder, int limit)
     {
         Init();
+        BackupProgressItemType = BackupProgressItemType.Backup;
         _userId = request.UserId;
         TenantId = request.TenantId;
         _storageType = request.StorageType;
@@ -84,6 +86,9 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         var backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
         var backupPortalTask = scope.ServiceProvider.GetService<BackupPortalTask>();
         var tempStream = scope.ServiceProvider.GetService<TempStream>();
+        var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        await tenantManager.SetCurrentTenantAsync(TenantId);
+        await socketManager.BackupProgressAsync(0);
 
         var dateTime = coreBaseSettings.Standalone ? DateTime.Now : DateTime.UtcNow;
         var tempFile = "";
@@ -111,6 +116,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
                     return;
                 }
                 Percentage = 0.9 * args.Progress;
+                await socketManager.BackupProgressAsync((int)Percentage);
                 await PublishChanges();
             };
 
@@ -178,16 +184,14 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         }
         finally
         {
-            if (!CancellationToken.IsCancellationRequested)
+            try
             {
-                try
-                {
-                    await PublishChanges();
-                }
-                catch (Exception error)
-                {
-                    logger.ErrorPublish(error);
-                }
+                await socketManager.EndBackupAsync(ToBackupProgress());
+                await PublishChanges();
+            }
+            catch (Exception error)
+            {
+                logger.ErrorPublish(error);
             }
             try
             {

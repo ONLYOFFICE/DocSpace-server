@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Threading;
-
 namespace ASC.Data.Backup.Tasks;
 
 [Scope]
@@ -51,9 +49,10 @@ public class RestorePortalTask(DbFactory dbFactory,
 
     private ColumnMapper _columnMapper;
     private string _region;
+    private bool _expectDump;
     private CancellationToken _cancellationToken;
 
-    public void Init(string region, string fromFilePath, CancellationToken cancellationToken, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
+    public void Init(string region, string fromFilePath, bool expectDump, CancellationToken cancellationToken, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(fromFilePath);
 
@@ -67,6 +66,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         _columnMapper = columnMapper ?? new ColumnMapper();
         _region = region;
         _cancellationToken = cancellationToken;
+        _expectDump = expectDump; 
         Init(tenantId);
     }
 
@@ -80,7 +80,17 @@ public class RestorePortalTask(DbFactory dbFactory,
         {
             await using (var entry = dataReader.GetEntry(KeyHelper.GetDumpKey()))
             {
-                Dump = entry != null && coreBaseSettings.Standalone;
+                Dump = entry != null;
+            }
+
+            if (Dump && !coreBaseSettings.Standalone)
+            {
+                throw new ArgumentException(BackupResource.BackupNotFound);
+            }
+
+            if (Dump != _expectDump)
+            {
+                throw new ArgumentException(BackupResource.BackupInvalid);
             }
 
             if (Dump)

@@ -90,7 +90,7 @@ public class TransferPortalTask(DbFactory dbFactory,
 
             //restore db data from temporary file
             var restoreTask = serviceProvider.GetService<RestorePortalTask>();
-            restoreTask.Init(ToRegion, backupFilePath, CancellationToken.None, columnMapper: columnMapper);
+            restoreTask.Init(ToRegion, backupFilePath, false, CancellationToken.None, columnMapper: columnMapper);
             restoreTask.ProcessStorage = false;
             restoreTask.ProgressChanged = args => SetCurrentStepProgress(args.Progress);
             foreach (var moduleName in _ignoredModules)

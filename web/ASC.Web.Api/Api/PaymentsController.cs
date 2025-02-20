@@ -39,6 +39,7 @@ namespace ASC.Web.Api.Controllers;
 public class PaymentController(UserManager userManager,
         TenantManager tenantManager,
         ITariffService tariffService,
+        IQuotaService quotaService,
         SecurityContext securityContext,
         RegionHelper regionHelper,
         QuotaHelper tariffHelper,
@@ -68,6 +69,16 @@ public class PaymentController(UserManager userManager,
         
         if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
             !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        {
+            return null;
+        }
+
+        var monthQuotas = (await quotaService.GetTenantQuotasAsync())
+            .Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Year)
+            .ToList();
+
+        // TODO: Temporary restriction. Only monthly tariff available for purchase
+        if (inDto.Quantity.Count != 1 || !monthQuotas.Any(q => q.Name == inDto.Quantity.First().Key))
         {
             return null;
         }
@@ -103,6 +114,14 @@ public class PaymentController(UserManager userManager,
 
         if (!(await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
             securityContext.CurrentAccount.ID != payer.Id)
+        {
+            return false;
+        }
+
+        var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+
+        // TODO: Temporary restriction. Only changing the quota for the current tariff is available
+        if (inDto.Quantity.Count != 1 || quota.Name != inDto.Quantity.First().Key)
         {
             return false;
         }
@@ -169,7 +188,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/currencies</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available portal currencies", typeof(CurrenciesDto))]
+    [SwaggerResponse(200, "List of available portal currencies", typeof(IAsyncEnumerable<CurrenciesDto>))]
     [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetCurrenciesAsync()
     {
@@ -193,7 +212,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/quotas</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available portal quotas", typeof(QuotaDto))]
+    [SwaggerResponse(200, "List of available portal quotas", typeof(IEnumerable<QuotaDto>))]
     [HttpGet("quotas")]
     public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
     {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,10 +31,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-import com.asc.common.data.scope.entity.ScopeEntity;
-import com.asc.common.data.scope.repository.JpaScopeRepository;
 import com.asc.registration.core.domain.entity.Scope;
+import com.asc.registration.data.scope.entity.ScopeEntity;
 import com.asc.registration.data.scope.mapper.ScopeDataAccessMapper;
+import com.asc.registration.data.scope.repository.JpaScopeRepository;
 import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,7 +66,7 @@ class ScopeQueryRepositoryAdapterTest {
   }
 
   @Test
-  void testFindByName() {
+  void whenScopeIsFoundByName_thenReturnScope() {
     when(jpaScopeRepository.findById("testScope")).thenReturn(Optional.of(scopeEntity));
 
     var result = scopeQueryRepositoryAdapter.findByName("testScope");
@@ -79,7 +79,7 @@ class ScopeQueryRepositoryAdapterTest {
   }
 
   @Test
-  void testFindAll() {
+  void whenAllScopesAreQueried_thenReturnAllScopes() {
     when(jpaScopeRepository.findAll()).thenReturn(Collections.singletonList(scopeEntity));
 
     var result = scopeQueryRepositoryAdapter.findAll();

@@ -96,7 +96,7 @@ public class LicenseReader(
         await tariffService.DeleteDefaultBillingInfoAsync();
     }
 
-    public async Task RefreshLicenseAsync(Func<string, Task<bool>> validateFunc)
+    public async Task RefreshLicenseAsync(Func<License, Task<(bool, string)>> validateFunc)
     {
         if (string.IsNullOrEmpty(LicensePath))
         {
@@ -124,9 +124,10 @@ public class LicenseReader(
                     await SaveLicenseAsync(licenseStream, LicensePath);
                 }
 
-                if (!await validateFunc(license.ResourceKey))
+                var (valid, error) = await validateFunc(license);
+                if (!valid)
                 {
-                    throw new BillingNotConfiguredException("License not correct");
+                    throw new BillingNotConfiguredException($"License validation failed: {error}");
                 }
 
                 await LicenseToDBAsync(license);
@@ -264,14 +265,7 @@ public class LicenseReader(
         }
         else
         {
-            if (logger.IsEnabled(LogLevel.Debug))
-            {
-                logger.ErrorWithException(error);
-            }
-            else
-            {
-                logger.ErrorWithException(error);
-            }
+            logger.ErrorWithException(error);
         }
     }
 }

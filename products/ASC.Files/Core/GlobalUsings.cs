@@ -58,6 +58,7 @@ global using ASC.Api.Utils;
 global using ASC.AuditTrail;
 global using ASC.AuditTrail.Models;
 global using ASC.AuditTrail.Repositories;
+global using ASC.AuditTrail.Types;
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;
@@ -72,16 +73,21 @@ global using ASC.Core;
 global using ASC.Core.ChunkedUploader;
 global using ASC.Core.Common;
 global using ASC.Core.Common.Configuration;
+global using ASC.Files.Core.RoomTemplates.Events;
+
+global using ASC.Files.Core.RoomTemplates.Operations;
 global using ASC.Core.Common.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
+global using ASC.Core.Common.Hosting;
 global using ASC.Core.Common.Messaging;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Common.Users;
+global using ASC.Core.Notify.Senders;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
@@ -92,6 +98,7 @@ global using ASC.Data.Storage.S3;
 global using ASC.ElasticSearch;
 global using ASC.ElasticSearch.Core;
 global using ASC.ElasticSearch.Service;
+global using ASC.Api.Core.Socket;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
 global using ASC.FederatedLogin;
@@ -166,27 +173,36 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
+
 global using AutoMapper;
+
 global using Box.V2;
 global using Box.V2.Auth;
 global using Box.V2.Config;
 global using Box.V2.Models;
+
 global using DocuSign.eSign.Api;
 global using DocuSign.eSign.Client;
 global using DocuSign.eSign.Model;
+
 global using Dropbox.Api;
 global using Dropbox.Api.Files;
+
 global using Google;
 global using Google.Apis.Auth.OAuth2;
 global using Google.Apis.Auth.OAuth2.Flows;
 global using Google.Apis.Auth.OAuth2.Responses;
 global using Google.Apis.Drive.v3;
 global using Google.Apis.Services;
+
 global using ICSharpCode.SharpZipLib.GZip;
 global using ICSharpCode.SharpZipLib.Tar;
 global using ICSharpCode.SharpZipLib.Zip;
+
 global using Joonasw.AspNetCore.SecurityHeaders.Csp.Builder;
+
 global using JWT.Exceptions;
+
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc;
@@ -203,17 +219,24 @@ global using Microsoft.Extensions.Primitives;
 global using Microsoft.Graph;
 global using Microsoft.OneDrive.Sdk;
 global using Microsoft.SharePoint.Client;
+
 global using NetEscapades.EnumGenerators;
+
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
+
 global using OpenSearch.Client;
+
 global using ProtoBuf;
+
 global using WebDav;
+
 global using static ASC.Files.Core.Data.AbstractDao;
 global using static ASC.Files.Core.Helpers.DocumentService;
 global using static ASC.Files.Core.Helpers.DocumentService.CommandResponse;
 global using static ASC.Web.Files.Services.DocumentService.DocumentServiceTracker;
 global using static ASC.Web.Files.Utils.FileTracker;
+
 global using CommandMethod = ASC.Files.Core.Helpers.DocumentService.CommandMethod;
 global using Constants = ASC.Core.Users.Constants;
 global using ContentType = System.Net.Mime.ContentType;

@@ -157,7 +157,7 @@ public class BackupAjaxHandler(
             throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
+        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.RoomTemplates || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -173,7 +173,7 @@ public class BackupAjaxHandler(
             throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
+        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.RoomTemplates || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -309,7 +309,14 @@ public class BackupAjaxHandler(
 
     #region restore
 
-    public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify, string serverBaseUri)
+    public async Task<string> StartRestoreAsync(string backupId,
+        BackupStorageType storageType,
+        Dictionary<string, string> storageParams, 
+        bool notify,
+        string serverBaseUri,
+        bool dump,
+        bool enqueueTask = true, 
+        string taskId = null)
     {
         await DemandPermissionsRestoreAsync();
         var tenantId = GetCurrentTenantId();
@@ -318,7 +325,8 @@ public class BackupAjaxHandler(
             TenantId = tenantId,
             NotifyAfterCompletion = notify,
             StorageParams = storageParams,
-            ServerBaseUri = serverBaseUri
+            ServerBaseUri = serverBaseUri,
+            Dump =  dump
         };
 
         if (Guid.TryParse(backupId, out var guidBackupId))
@@ -330,7 +338,7 @@ public class BackupAjaxHandler(
             restoreRequest.StorageType = storageType;
             restoreRequest.FilePathOrId = storageParams["filePath"];
 
-            if (restoreRequest.StorageType == BackupStorageType.Local)
+            if (restoreRequest.StorageType == BackupStorageType.Local && enqueueTask)
             {
                 var path = await GetTmpFilePathAsync(tenantId);
                 path = File.Exists(path + ".tar.gz") ? path + ".tar.gz" : path + ".tar";
@@ -338,7 +346,7 @@ public class BackupAjaxHandler(
             }
         }
 
-        await backupService.StartRestoreAsync(restoreRequest);
+        return await backupService.StartRestoreAsync(restoreRequest, enqueueTask, taskId);
     }
 
     public async Task<BackupProgress> GetRestoreProgressAsync()

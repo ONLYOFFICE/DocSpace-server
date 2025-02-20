@@ -64,6 +64,14 @@ module.exports = (io) => {
       return;
     }
 
+    const isAdmin = () => {
+      return socket.handshake.session?.user?.isAdmin;
+    }
+
+    const isOwner = () => {
+      return socket.handshake.session?.user?.isOwner;
+    }
+
     const userId = () => {
       return socket.handshake.session?.user?.id;
     }
@@ -108,7 +116,7 @@ module.exports = (io) => {
     });
 
     socket.on("restore-backup", () => {
-      const room = getRoom("backup-restore");
+      const room = getRoom("restore");
       const sess = socket.handshake.session;
       const tenant = sess?.portal?.tenantId || "unknown";
       const user = sess?.user?.id || "unknown";
@@ -144,11 +152,22 @@ module.exports = (io) => {
     function subscribe(roomParts) {
       if (!roomParts) return;
 
-      if (Array.isArray(roomParts)) {
+      if (Array.isArray(roomParts)) 
+      {
+        if(!isAdmin() && !isOwner())
+        {
+          roomParts = roomParts.filter(rp=> rp != "backup");
+        }
         const rooms = roomParts.map((p) => getRoom(p));
         logger.info(`client ${socket.id} join rooms [${rooms.join(",")}]`);
         socket.join(rooms);
-      } else {
+      } 
+      else 
+      {
+        if(roomParts == "backup" && !isAdmin() && !isOwner())
+        {
+            return;
+        }
         const room = getRoom(roomParts);
         logger.info(`client ${socket.id} join room ${room}`);
         socket.join(room);
@@ -158,7 +177,8 @@ module.exports = (io) => {
     function unsubscribe(roomParts) {
       if (!roomParts) return;
 
-      if (Array.isArray(roomParts)) {
+      if (Array.isArray(roomParts))
+      {
         const rooms = roomParts.map((p) => getRoom(p));
         logger.info(`client ${socket.id} leave rooms [${rooms.join(",")}]`);
         socket.leave(rooms);
@@ -343,6 +363,67 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
+  function addUser({ tenantId, user } = {}) {
+    var room = `${tenantId}-users`;
+    filesIO.to(room).emit("s:add-user",  {id: user.id, data: user});
+  }
+
+  function updateUser({ tenantId, user } = {}) {
+    var room = `${tenantId}-users`;
+    filesIO.to(room).emit("s:update-user", {id: user.id, data: user});
+  }
+
+  function deleteUser({ tenantId, userId } = {}) {
+    var room = `${tenantId}-users`;
+    filesIO.to(room).emit("s:delete-user", userId);
+  }
+
+  function addGroup({ tenantId, group } = {}) {
+    var room = `${tenantId}-groups`;
+    filesIO.to(room).emit("s:add-group",  {id: group.id, data: group});
+  }
+
+  function updateGroup({ tenantId, group } = {}) {
+    var room = `${tenantId}-groups`;
+    filesIO.to(room).emit("s:update-group", {id: group.id, data: group});
+  }
+
+  function deleteGroup({ tenantId, groupId } = {}) {
+    var room = `${tenantId}-groups`;
+    filesIO.to(room).emit("s:delete-group", groupId);
+  }
+
+  function addGuest({ tenantId, room, guest } = {}) {
+    var room = `${tenantId}-guests-${room}`;
+    filesIO.to(room).emit("s:add-guest",  {id: guest.id, data: guest});
+  }
+
+  function updateGuest({ tenantId, room, guest } = {}) {
+    var room = `${tenantId}-guests-${room}`;
+    filesIO.to(room).emit("s:update-guest", {id: guest.id, data: guest});
+  }
+
+  function deleteGuest({ tenantId, room, guestId } = {}) {
+    var room = `${tenantId}-guests-${room}`;
+    filesIO.to(room).emit("s:delete-guest", guestId);
+  }
+
+  function backupProgress({ tenantId, percentage } = {}) {
+    filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", {progress: percentage});
+  }
+
+  function restoreProgress({ tenantId, percentage } = {}) {
+    filesIO.to(`${tenantId}-restore`).emit("s:restore-progress", {progress: percentage});
+  }
+
+  function endBackup({ tenantId, result } = {}) {
+    filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", result);
+  }
+
+  function endRestore({ tenantId, result } = {}) {
+    filesIO.to(`${tenantId}-restore`).emit("s:restore-progress", result);
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -360,6 +441,19 @@ module.exports = (io) => {
     markAsNewFolders,
     changeInvitationLimitValue,
     updateHistory,
-    logoutSession
+    logoutSession,
+    addUser,
+    updateUser,
+    deleteUser,
+    addGroup,
+    updateGroup,
+    deleteGroup,
+    addGuest,
+    updateGuest,
+    deleteGuest,
+    backupProgress,
+    restoreProgress,
+    endBackup,
+    endRestore
   };
 };

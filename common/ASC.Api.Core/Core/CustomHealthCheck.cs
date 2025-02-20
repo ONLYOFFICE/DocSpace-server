@@ -96,10 +96,14 @@ public static class CustomHealthCheck
 
         if (rabbitMQConfiguration != null)
         {
-            //hcBuilder.AddRabbitMQ(x => x.ConnectionFactory = rabbitMQConfiguration.GetConnectionFactory(),
-            //                    name: "rabbitMQ",
-            //                    tags: new[] { "rabbitMQ", "services" },
-            //                    timeout: new TimeSpan(0, 0, 30));
+            hcBuilder.AddRabbitMQ(async sp => {
+                                        var rabbitMqPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
+
+                                        return await rabbitMqPersistentConnection.GetConnection();
+                                },
+                                name: "rabbitMQ",
+                                tags: new[] { "rabbitMQ", "services" },
+                                timeout: new TimeSpan(0, 0, 30));
         }
         else
         {

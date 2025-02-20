@@ -32,6 +32,7 @@ global using System.Text.Json;
 global using System.Web;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
+global using ASC.Api.Core.Socket;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Model;

@@ -41,7 +41,8 @@ public class GroupController(
     GroupFullDtoHelper groupFullDtoHelper,
     MessageService messageService,
     PermissionContext permissionContext,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    UserSocketManager socketManager)
     : ControllerBase
 {
     /// <summary>
@@ -56,7 +57,7 @@ public class GroupController(
     /// <path>api/2.0/groups</path>
     /// <collection>list</collection>
     [Tags("Group")]
-    [SwaggerResponse(200, "List of groups", typeof(GroupDto))]
+    [SwaggerResponse(200, "List of groups", typeof(IAsyncEnumerable<GroupDto>))]
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(GeneralInformationRequestDto inDto)
     {
@@ -114,7 +115,7 @@ public class GroupController(
     /// <path>api/2.0/groups/user/{userid}</path>
     /// <collection>list</collection>
     [Tags("Group")]
-    [SwaggerResponse(200, "List of groups", typeof(GroupSummaryDto))]
+    [SwaggerResponse(200, "List of groups", typeof(IEnumerable<GroupSummaryDto>))]
     [HttpGet("user/{userid:guid}")]
     public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(GetGroupByUserIdRequestDto inDto)
     {
@@ -158,7 +159,10 @@ public class GroupController(
 
         messageService.Send(MessageAction.GroupCreated, MessageTarget.Create(group.ID), group.Name);
 
-        return await groupFullDtoHelper.Get(group, true);
+        var dto = await groupFullDtoHelper.Get(group, true);
+
+        await socketManager.AddGroupAsync(dto);
+        return dto;
     }
 
     /// <summary>
@@ -201,7 +205,9 @@ public class GroupController(
 
         messageService.Send(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
 
-        return await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
+        var dto = await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
+        await socketManager.UpdateGroupAsync(dto);
+        return dto;
     }
 
     /// <summary>
@@ -225,7 +231,8 @@ public class GroupController(
         await fileSecurity.RemoveSubjectAsync(inDto.Id, false);
 
         messageService.Send(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
-
+        await socketManager.DeleteGroupAsync(inDto.Id);
+        
         return NoContent();
     }
 
@@ -422,7 +429,7 @@ public class GroupControllerAdditional<T>(
     /// </summary>
     /// <path>api/2.0/group/room/{id}</path>
     [Tags("Group / Rooms")]
-    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<GroupDto> GetGroupsWithSharedAsync(GetGroupsWithSharedRequestDto<T> inDto)

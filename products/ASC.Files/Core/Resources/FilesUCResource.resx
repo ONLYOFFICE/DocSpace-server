@@ -153,6 +153,9 @@
   <data name="Recent" xml:space="preserve">
     <value>Recent</value>
   </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Templates</value>
+  </data>
   <data name="SharedForMe" xml:space="preserve">
     <value>Shared with me</value>
   </data>

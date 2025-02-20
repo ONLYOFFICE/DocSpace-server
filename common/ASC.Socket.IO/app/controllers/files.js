@@ -112,5 +112,70 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/add-user", (req, res) => {
+    files.addUser(req.body);
+    res.end();
+  });
+
+  router.post("/update-user", (req, res) => {
+    files.updateUser(req.body);
+    res.end();
+  });
+
+  router.post("/delete-user", (req, res) => {
+    files.deleteUser(req.body);
+    res.end();
+  });
+
+  router.post("/add-group", (req, res) => {
+    files.addGroup(req.body);
+    res.end();
+  });
+
+  router.post("/update-group", (req, res) => {
+    files.updateGroup(req.body);
+    res.end();
+  });
+
+  router.post("/delete-group", (req, res) => {
+    files.deleteGroup(req.body);
+    res.end();
+  });
+
+  router.post("/add-guest", (req, res) => {
+    files.addGuest(req.body);
+    res.end();
+  });
+
+  router.post("/update-guest", (req, res) => {
+    files.updateGuest(req.body);
+    res.end();
+  });
+
+  router.post("/delete-guest", (req, res) => {
+    files.deleteGuest(req.body);
+
+  });
+
+  router.post("/backup-progress", (req, res) => {
+    files.backupProgress(req.body);
+    res.end();
+  });
+
+  router.post("/restore-progress", (req, res) => {
+    files.restoreProgress(req.body);
+    res.end();
+  });
+
+  router.post("/end-backup", (req, res) => {
+    files.endBackup(req.body);
+    res.end();
+  });
+
+  router.post("/end-restore", (req, res) => {
+    files.endRestore(req.body);
+    res.end();
+  });
+
   return router;
 };

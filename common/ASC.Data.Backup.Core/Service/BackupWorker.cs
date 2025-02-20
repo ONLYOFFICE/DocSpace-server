@@ -200,7 +200,7 @@ public class BackupWorker(
         }
     }
 
-    public async Task<BackupProgress> StartRestoreAsync(StartRestoreRequest request)
+    public async Task<BackupProgress> StartRestoreAsync(StartRestoreRequest request, bool enqueueTask = true, string taskId = null)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
@@ -210,12 +210,27 @@ public class BackupWorker(
                 await _progressQueue.DequeueTask(item.Id);
                 item = null;
             }
-            if (item == null)
+
+            if (item == null || (enqueueTask && item.Id == taskId && item.Status == DistributedTaskStatus.Created))
             {
+
                 item = serviceProvider.GetService<RestoreProgressItem>();
+
                 item.Init(request, TempFolder, _upgradesPath);
 
-                await _progressQueue.EnqueueTask(item);
+                if (!string.IsNullOrEmpty(taskId))
+                {
+                    item.Id = taskId;
+                }
+
+                if (enqueueTask)
+                {
+                    await _progressQueue.EnqueueTask(item);
+                }
+                else
+                {
+                    await _progressQueue.PublishTask(item);
+                }
             }
             return ToBackupProgress(item);
         }
@@ -294,22 +309,7 @@ public class BackupWorker(
         {
             return null;
         }
-        var progress = new BackupProgress
-        {
-            IsCompleted = progressItem.IsCompleted,
-            Progress = (int)progressItem.Percentage,
-            Error = progressItem.Exception != null ? progressItem.Exception.Message : "",
-            TenantId = progressItem.TenantId,
-            BackupProgressEnum = progressItem.BackupProgressItemType.Convert(),
-            TaskId = progressItem.Id
-        };
-
-        if (progressItem.BackupProgressItemType is BackupProgressItemType.Backup or BackupProgressItemType.Transfer && progressItem.Link != null)
-        {
-            progress.Link = progressItem.Link;
-        }
-
-        return progress;
+        return progressItem.ToBackupProgress();
     }
 
     public async Task<bool> IsInstanceTooBusy()

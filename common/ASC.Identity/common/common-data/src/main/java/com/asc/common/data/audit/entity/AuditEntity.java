@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,7 +43,7 @@ import lombok.NoArgsConstructor;
 public class AuditEntity {
 
   /** The unique identifier for the audit event. */
-  @Id private int id;
+  @Id private long id;
 
   /** The initiator of the audit event. */
   private String initiator;
@@ -69,7 +69,7 @@ public class AuditEntity {
 
   /** The identifier for the tenant associated with the audit event. This field is not nullable. */
   @Column(nullable = false, name = "tenant_id")
-  private int tenantId;
+  private long tenantId;
 
   /** The identifier for the user associated with the audit event. This field is not nullable. */
   @Column(nullable = false, name = "user_id")

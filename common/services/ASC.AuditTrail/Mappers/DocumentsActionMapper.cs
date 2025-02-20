@@ -62,7 +62,7 @@ internal class FilesActionMapper : IModuleActionMapper
                             MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered
                         ]
                     },
-                    { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied
+                    { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied, MessageAction.FileVersionRemoved
                         ]
                     },
                     { ActionType.UpdateAccess, [MessageAction.FileUpdatedAccess, MessageAction.FileUpdatedAccessFor, MessageAction.FileRemovedFromList, MessageAction.FileExternalLinkAccessUpdated
