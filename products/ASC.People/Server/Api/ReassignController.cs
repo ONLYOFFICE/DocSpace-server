@@ -131,11 +131,11 @@ public class ReassignController(
     /// Returns is necessary reassign rooms and share files.
     /// </summary>
     /// <short>Returns is necessary reassign</short>
-    /// <path>api/2.0/people/reassign/necessary/{userid}</path>
+    /// <path>api/2.0/people/reassign/necessary</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
-    [HttpGet("necessary/{userid:guid}")]
-    public async Task<NecessaryReassignDto> CanReassignAsync(UserIdRequestDto inDto)
+    [HttpGet("necessary")]
+    public async Task<bool> NecessaryReassignAsync(NecessaryReassignDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
@@ -149,9 +149,12 @@ public class ReassignController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var anyShare = await fileStorageService.AnySharedFilesAsync(inDto.UserId);
-        var anyRooms = await fileStorageService.AnyRoomsAsync(inDto.UserId);
+        var result = await fileStorageService.AnyRoomsAsync(inDto.UserId);
+        if (inDto.Type is EmployeeType.Guest && !result) 
+        {
+            result = await fileStorageService.AnySharedFilesAsync(inDto.UserId);
+        }
 
-        return new NecessaryReassignDto() { Share = anyShare , Rooms = anyRooms};
+        return result;
     }
 }
