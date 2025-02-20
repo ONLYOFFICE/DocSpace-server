@@ -2089,13 +2089,14 @@ public class FileStorageService //: IFileStorageService
         var newOrder = await fileDao.SetCustomOrder(fileId, file.ParentId, order);
         if (newOrder != 0 && newOrder != file.Order)
         {
+            file.Order = order;
             await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), order.ToString());
         }
 
         return file;
     }
 
-    public async Task SetOrderAsync<T>(IEnumerable<OrdersItemRequestDto<T>> items)
+    public async IAsyncEnumerable<FileEntry<T>> SetOrderAsync<T>(IEnumerable<OrdersItemRequestDto<T>> items)
     {
         var contextId = Guid.NewGuid().ToString();
         
@@ -2114,7 +2115,7 @@ public class FileStorageService //: IFileStorageService
         {
             FileEntry<T> entry = item.EntryType == FileEntryType.File ? files.Get(item.EntryId) : folders.Get(item.EntryId);
             entry.NotFoundIfNull();
-            
+
             var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
             var room = await daoFactory.GetCacheFolderDao<T>().GetFolderAsync(roomId);
             
@@ -2134,6 +2135,7 @@ public class FileStorageService //: IFileStorageService
                         var newOrder = await fileDao.SetCustomOrder(file.Id, file.ParentId, item.Order);
                         if (newOrder != 0)
                         {
+                            entry.Order = item.Order;
                             await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), item.Order.ToString(), contextId);
                         }
 
@@ -2144,12 +2146,15 @@ public class FileStorageService //: IFileStorageService
                         var newOrder = await folderDao.SetCustomOrder(folder.Id, folder.ParentId, item.Order);
                         if (newOrder != 0)
                         {
+                            entry.Order = item.Order;
                             await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), item.Order.ToString(), contextId);
                         }
 
                         break;
                     }
             }
+
+            yield return entry;
         }
     }
 
@@ -2167,6 +2172,7 @@ public class FileStorageService //: IFileStorageService
 
         if (newOrder != 0 && newOrder != folder.Order)
         {
+            folder.Order = order;
             await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), order.ToString());
         }
 
