@@ -70,4 +70,10 @@ public class WebhookLogsRequestDto
     /// </summary>
     [FromQuery(Name = "groupStatus")]
     public WebhookGroupStatus? GroupStatus { get; set; }
+
+    /// <summary>
+    /// Target user ID
+    /// </summary>
+    [FromQuery(Name = "targetUserId")]
+    public Guid? TargetUserId { get; set; }
 }

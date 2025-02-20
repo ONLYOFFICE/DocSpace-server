@@ -64,4 +64,9 @@ public class WebhooksConfigRequestsDto
     /// SSL
     /// </summary>
     public bool SSL { get; set;}
+
+    /// <summary>
+    /// Target user ID
+    /// </summary>
+    public Guid? TargetUserId { get; set; }
 }

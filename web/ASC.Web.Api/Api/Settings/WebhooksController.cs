@@ -76,7 +76,10 @@ public class WebhooksController(ApiContext context,
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
+        if (!await CheckAdminPermissionsAsync())
+        {
+            inDto.TargetUserId = authContext.CurrentAccount.ID;
+        }
 
         ArgumentNullException.ThrowIfNull(inDto.SecretKey);
 
@@ -84,7 +87,7 @@ public class WebhooksController(ApiContext context,
 
         passwordSettingsManager.CheckPassword(inDto.SecretKey, passwordSettings);
 
-        var webhook = await dbWorker.AddWebhookConfig(inDto.Uri, inDto.Name, inDto.SecretKey, inDto.Enabled, inDto.SSL, targetUserId);
+        var webhook = await dbWorker.AddWebhookConfig(inDto.Uri, inDto.Name, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.TargetUserId);
 
         return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
@@ -101,8 +104,6 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
-
         ArgumentNullException.ThrowIfNull(inDto.Uri);
         ArgumentNullException.ThrowIfNull(inDto.Name);
 
@@ -113,9 +114,11 @@ public class WebhooksController(ApiContext context,
             throw new ItemNotFoundException();
         }
 
-        if (targetUserId.HasValue)
+        if (!await CheckAdminPermissionsAsync())
         {
-            if (!existingWebhook.TargetUserId.HasValue || existingWebhook.TargetUserId.Value != authContext.CurrentAccount.ID)
+            inDto.TargetUserId = authContext.CurrentAccount.ID;
+
+            if (existingWebhook.TargetUserId != inDto.TargetUserId)
             {
                 throw new SecurityException();
             }
@@ -126,6 +129,7 @@ public class WebhooksController(ApiContext context,
         existingWebhook.SecretKey = inDto.SecretKey;
         existingWebhook.Enabled = inDto.Enabled;
         existingWebhook.SSL = inDto.SSL;
+        existingWebhook.TargetUserId = inDto.TargetUserId;
 
         var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
 
@@ -144,8 +148,6 @@ public class WebhooksController(ApiContext context,
     [HttpDelete("webhook/{id:int}")]
     public async Task<WebhooksConfigDto> RemoveWebhook(IdRequestDto<int> inDto)
     {
-        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
-
         var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
 
         if (existingWebhook == null)
@@ -153,9 +155,9 @@ public class WebhooksController(ApiContext context,
             throw new ItemNotFoundException();
         }
 
-        if (targetUserId.HasValue)
+        if (!await CheckAdminPermissionsAsync())
         {
-            if (!existingWebhook.TargetUserId.HasValue || existingWebhook.TargetUserId.Value != authContext.CurrentAccount.ID)
+            if (existingWebhook.TargetUserId != authContext.CurrentAccount.ID)
             {
                 throw new SecurityException();
             }
@@ -179,14 +181,17 @@ public class WebhooksController(ApiContext context,
     [HttpGet("webhooks/log")]
     public async IAsyncEnumerable<WebhooksLogDto> GetJournal(WebhookLogsRequestDto inDto)
     {
-        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
+        if (!await CheckAdminPermissionsAsync())
+        {
+            inDto.TargetUserId = authContext.CurrentAccount.ID;
+        }
 
-        context.SetTotalCount(await dbWorker.GetTotalByQuery(inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, targetUserId));
+        context.SetTotalCount(await dbWorker.GetTotalByQuery(inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.TargetUserId));
 
         var startIndex = Convert.ToInt32(context.StartIndex);
         var count = Convert.ToInt32(context.Count);
 
-        await foreach (var j in dbWorker.ReadJournal(startIndex, count, inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, targetUserId))
+        await foreach (var j in dbWorker.ReadJournal(startIndex, count, inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.TargetUserId))
         {
             j.Log.Config = j.Config;
             yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(j.Log);
@@ -207,8 +212,6 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook/{id:int}/retry")]
     public async Task<WebhooksLogDto> RetryWebhook(IdRequestDto<int> inDto)
     {
-        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
-
         if (inDto.Id == 0)
         {
             throw new ArgumentException(nameof(inDto.Id));
@@ -221,9 +224,12 @@ public class WebhooksController(ApiContext context,
             throw new ItemNotFoundException();
         }
 
-        if (targetUserId.HasValue && item.Config.TargetUserId != targetUserId)
+        if (!await CheckAdminPermissionsAsync())
         {
-            throw new SecurityException();
+            if (item.Config.TargetUserId != authContext.CurrentAccount.ID)
+            {
+                throw new SecurityException();
+            }
         }
 
         var result = await webhookPublisher.PublishAsync(item.Id, item.RequestPayload, item.ConfigId);
@@ -244,7 +250,7 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook/retry")]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
-        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
+        var isAdmin = await CheckAdminPermissionsAsync();
 
         foreach (var id in inDto.Ids)
         {
@@ -255,7 +261,7 @@ public class WebhooksController(ApiContext context,
                 continue;
             }
 
-            if (targetUserId.HasValue && item.Config.TargetUserId != targetUserId)
+            if (!isAdmin && item.Config.TargetUserId != authContext.CurrentAccount.ID)
             {
                 continue;
             }
