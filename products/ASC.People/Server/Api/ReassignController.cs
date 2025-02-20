@@ -135,7 +135,7 @@ public class ReassignController(
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [HttpGet("necessary")]
-    public async Task<bool> NecessaryReassignAsync(NecessaryReassignDto inDto)
+    public async Task<bool> NecessaryReassignAsync([FromQuery] NecessaryReassignDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
