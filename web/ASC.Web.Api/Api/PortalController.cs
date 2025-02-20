@@ -93,7 +93,14 @@ public class PortalController(
             return new TenantDto { TenantId = tenant.Id };
         }
 
-        return mapper.Map<TenantDto>(tenant);
+        var dto =  mapper.Map<TenantDto>(tenant);
+
+        if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+        {
+            dto.Region = await apiSystemHelper.GetTenantRegionAsync(dto.Name);
+        }
+
+        return dto;
     }
 
     /// <summary>

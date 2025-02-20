@@ -173,6 +173,35 @@ public class ApiSystemHelper
         await awsDynamoDbClient.DeleteItemAsync(request);
     }
 
+    public async Task<string> GetTenantRegionAsync(string portalName)
+    {
+        using var awsDynamoDbClient = GetDynamoDBClient();
+
+        portalName = portalName.Trim().ToLowerInvariant();
+
+        var tenantDomain = $"{portalName}.{_coreBaseSettings.Basedomain}";
+
+        var getItemRequest = new GetItemRequest
+        {
+            TableName = _regionTableName,
+            Key = new Dictionary<string, AttributeValue>
+            {
+                { TenantDomainKey, new AttributeValue { S = tenantDomain } }
+            },
+            ProjectionExpression = TenantRegionKey,
+            ConsistentRead = true
+        };
+
+        var getItemResponse = await awsDynamoDbClient.GetItemAsync(getItemRequest);
+
+        if (getItemResponse.Item.TryGetValue(TenantRegionKey, out var region))
+        {
+            return region.S;
+        }
+
+        return null;
+    }
+
     public async Task<IEnumerable<string>> FindTenantsInCacheAsync(string portalName)
     {
         using var awsDynamoDbClient = GetDynamoDBClient();
