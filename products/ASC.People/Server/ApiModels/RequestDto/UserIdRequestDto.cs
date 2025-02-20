@@ -30,7 +30,7 @@ namespace ASC.People.ApiModels.RequestDto;
 /// <summary>
 /// 
 /// </summary>
-public class ProgressRequestDto
+public class UserIdRequestDto
 {
     /// <summary>
     /// User ID

@@ -2938,17 +2938,32 @@ public class FileStorageService //: IFileStorageService
         return await folderDao.GetFilesUsedSpace();
     }
 
-    public async Task ReassignRoomsAsync(Guid user, Guid? reassign)
+
+    public async Task<bool> AnyRoomsAsync(Guid user)
     {
         var tenant = tenantManager.GetCurrentTenant();
         var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        var initiatorType = await userManager.GetUserTypeAsync(initiator.Id);
-        var currentType = await userManager.GetUserTypeAsync(user);
 
-        if (!initiator.IsOwner(tenant) && currentType is EmployeeType.DocSpaceAdmin)
-        {
-            return;
-        }
+        var any = (await GetFolderItemsAsync(
+                    await globalFolderHelper.GetFolderVirtualRooms(),
+                    0,
+                    -1,
+                    new List<FilterType>() { FilterType.FoldersOnly },
+                    false,
+                    user.ToString(),
+                    "",
+                    [],
+                    false,
+                    false,
+                    null,
+                    SearchArea.Active)).Entries.Any();
+
+        return any;
+    }
+
+    public async Task ReassignRoomsAsync(Guid user, Guid? reassign)
+    {
+        var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
 
         var rooms = (await GetFolderItemsAsync(
                     await globalFolderHelper.GetFolderVirtualRooms(),
@@ -2969,6 +2984,36 @@ public class FileStorageService //: IFileStorageService
 
         await ChangeOwnerAsync(ids, [], reassign.HasValue ? reassign.Value : securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
         await ChangeOwnerAsync(thirdIds, [], reassign.HasValue ? reassign.Value : securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+    }
+
+    public async Task<bool> AnySharedFilesAsync(Guid user)
+    {
+        var initUser = securityContext.CurrentAccount.ID;
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(user);
+
+        var my = await globalFolderHelper.FolderMyAsync;
+        if (my == 0)
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
+            return false;
+        }
+        var any = (await GetFolderItemsAsync(
+            await globalFolderHelper.FolderMyAsync,
+            0,
+            -1,
+            new List<FilterType>() { FilterType.FilesOnly },
+            false,
+            user.ToString(),
+            "",
+            [],
+            false,
+            false,
+            null,
+            SearchArea.Any)).Entries.Where(e => e.Shared).Any();
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
+        return any;
     }
 
     public async Task CopySharedFilesAsync(Guid user, Guid toUser)

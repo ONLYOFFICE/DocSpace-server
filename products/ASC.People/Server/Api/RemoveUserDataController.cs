@@ -44,7 +44,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpGet("remove/progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetRemoveProgressAsync(ProgressRequestDto inDto)
+    public async Task<TaskProgressResponseDto> GetRemoveProgressAsync(UserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 

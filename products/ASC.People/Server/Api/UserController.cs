@@ -1826,7 +1826,7 @@ public class UserController(
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [HttpGet("type/progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetReassignProgressAsync(ProgressRequestDto inDto)
+    public async Task<TaskProgressResponseDto> GetReassignProgressAsync(UserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
