@@ -152,9 +152,9 @@ public class BackupService(
         return await backupWorker.GetBackupProgressAsync(tenantId);
     }
     
-    public async Task StopBackupAsync(int tenantId)
+    public async Task CancelBackupAsync(int tenantId)
     {
-        await backupWorker.StopBackupAsync(tenantId);
+        await backupWorker.CancelBackupAsync(tenantId);
     }
 
     public async Task CancelRestoreAsync(int tenantId)

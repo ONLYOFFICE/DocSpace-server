@@ -208,18 +208,17 @@ public class BackupController(
     }
 
     /// <summary>
-    /// Stop current backup.
+    /// Cancel current backup.
     /// </summary>
-    /// <short>Stop current backup</short>
-    /// <path>api/2.0/backup/stopbackup</path>
+    /// <short>Cancel current backup</short>
+    /// <path>api/2.0/backup/cancelbackup</path>
     [Tags("Backup")]
     [SwaggerResponse(200)]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
-    [HttpPost("stopbackup")]
-    public async Task StopBackupAsync()
+    [HttpPost("cancelbackup")]
+    public async Task CancelBackupAsync()
     {
-        await backupAjaxHandler.StopBackupAsync();
+        await backupAjaxHandler.CancelBackupAsync();
     }
 
     /// <summary>
@@ -234,7 +233,7 @@ public class BackupController(
     [HttpPost("cancelrestore")]
     public async Task CancelRestoreAsync()
     {
-        await backupAjaxHandler.StopBackupAsync();
+        await backupAjaxHandler.CancelRestoreAsync();
     }
 
     /// <summary>

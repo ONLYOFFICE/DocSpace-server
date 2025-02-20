@@ -132,7 +132,7 @@ public class BackupWorker(
         }
     }
 
-    public async Task StopBackupAsync(int tenantId)
+    public async Task CancelBackupAsync(int tenantId)
     {
         var tasks = (await _progressQueue.GetAllTasks<BackupProgressItem>()).Where(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
 
