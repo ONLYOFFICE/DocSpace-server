@@ -212,9 +212,16 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
         
-        if (formOpenSetup != null && file.IsForm && result.Document.Permissions.Copy && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+        if (formOpenSetup != null && file.IsForm)
         {
-            result.StartFilling = formOpenSetup.CanStartFilling;
+            if (result.Document.Permissions.Copy && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+            {
+                result.StartFilling = formOpenSetup.CanStartFilling;
+            }
+            if (!string.IsNullOrEmpty(formOpenSetup.RoleName))
+            {
+                result.EditorConfig.User.Roles = new List<string> { formOpenSetup.RoleName };
+            }
         }
 
         if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
@@ -228,7 +235,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 };
             }
         }
-       
         return result;
     }
 

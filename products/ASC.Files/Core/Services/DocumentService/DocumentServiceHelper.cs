@@ -616,6 +616,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             if (role != null)
             {
                 result.CanFill = true;
+                result.RoleName = role.RoleName;
                 if (role.OpenedAt.Equals(DateTime.MinValue))
                 {
                     role.OpenedAt = DateTime.UtcNow;

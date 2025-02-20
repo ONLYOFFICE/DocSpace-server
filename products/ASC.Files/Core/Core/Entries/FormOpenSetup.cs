@@ -35,6 +35,6 @@ public class FormOpenSetup<T>
     public string FillingSessionId { get; set; }
     public EditorType EditorType { get; set; }
     public File<T> Draft { get; set; }
-    public int RoleName { get; set; }
+    public string RoleName { get; set; }
 
 }

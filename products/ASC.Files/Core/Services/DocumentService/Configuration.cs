@@ -1082,4 +1082,9 @@ public class UserConfig
     /// Image
     /// </summary>
     public string Image { get; set; }
+
+    /// <summary>
+    /// Roles
+    /// </summary>
+    public List<string> Roles { get; set; }
 }
