@@ -27,6 +27,7 @@
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
+[WebhookAccessChecker(typeof(WebhookFileEntryAccessChecker))]
 public class VirtualRoomsInternalController(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,
@@ -164,6 +165,7 @@ public class VirtualRoomsInternalController(
     }
 }
 
+[WebhookAccessChecker(typeof(WebhookFileEntryAccessChecker))]
 public class VirtualRoomsThirdPartyController(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,
@@ -213,6 +215,7 @@ public class VirtualRoomsThirdPartyController(
 }
 
 [DefaultRoute("rooms")]
+[WebhookAccessChecker(typeof(WebhookFileEntryAccessChecker))]
 public abstract class VirtualRoomsController<T>(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,

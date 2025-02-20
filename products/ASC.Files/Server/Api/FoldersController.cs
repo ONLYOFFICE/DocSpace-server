@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Webhooks.Core;
-
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -105,7 +103,7 @@ public class FoldersControllerThirdparty(
         permissionContext,
         fileShareDtoHelper);
 
-[WebhookAccessChecker(typeof(WebhookFoldersControllerAccessChecker))]
+[WebhookAccessChecker(typeof(WebhookFileEntryAccessChecker))]
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
@@ -299,20 +297,20 @@ public abstract class FoldersController<T>(
 
         return await fileStorageService.GetFilesUsedSpace();
     }
-    
+
     /// <summary>
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
     /// <short>Get primary external link</short>
-    /// <path>api/2.0/files/folder/{id}/link</path>
+    /// <path>api/2.0/files/folder/{folderId}/link</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder security information", typeof(FileShareDto))]
     [SwaggerResponse(404, "Not Found")]
     [AllowAnonymous]
-    [HttpGet("folder/{id}/link")]
-    public async Task<FileShareDto> GetFolderPrimaryExternalLinkAsync(FolderPrimaryIdRequestDto<T> inDto)
+    [HttpGet("folder/{folderId}/link")]
+    public async Task<FileShareDto> GetFolderPrimaryExternalLinkAsync(FolderIdRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.Folder);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.FolderId, FileEntryType.Folder);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -526,67 +524,5 @@ public class FoldersControllerCommon(
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
         yield return await globalFolderHelper.FolderArchiveAsync;
-    }
-}
-
-
-[Scope]
-public class WebhookFoldersControllerAccessChecker(
-    SecurityContext securityContext,
-    FileSecurity fileSecurity,
-    IDaoFactory daoFactory) : IWebhookAccessChecker
-{
-    private readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true };
-
-    public async Task<bool> CheckAccessAsync(WebhookData webhookData)
-    {
-        if (securityContext.CurrentAccount.ID == webhookData.TargetUserId)
-        {
-            return true;
-        }
-
-        if (webhookData.ResponseType == typeof(IAsyncEnumerable<FileOperationDto>))
-        {
-            return false;
-        }
-
-        if (webhookData.RouteData.TryGetValue("folderId", out var folderId) && !string.IsNullOrEmpty(folderId))
-        {
-            if (int.TryParse(folderId, out var folderIdInt))
-            {
-                var folder = await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(folderIdInt);
-
-                return await fileSecurity.CanReadAsync(folder, webhookData.TargetUserId);
-            }
-            else
-            {
-                var folder = await daoFactory.GetCacheFolderDao<string>().GetFolderAsync(folderId);
-
-                return await fileSecurity.CanReadAsync(folder, webhookData.TargetUserId);
-            }
-        }
-
-        var responseNode = System.Text.Json.Nodes.JsonNode.Parse(webhookData.ResponseString)["response"];
-
-        var obj = JsonSerializer.Deserialize(responseNode, webhookData.ResponseType, _options);
-
-        if (obj != null)
-        {
-            if (obj is FolderDto<int> folderDtoInt)
-            {
-                var folder = await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(folderDtoInt.Id);
-
-                return await fileSecurity.CanReadAsync(folder, webhookData.TargetUserId);
-            }
-
-            if (obj is FolderDto<string> folderDtoString)
-            {
-                var folder = await daoFactory.GetCacheFolderDao<string>().GetFolderAsync(folderDtoString.Id);
-
-                return await fileSecurity.CanReadAsync(folder, webhookData.TargetUserId);
-            }
-        }
-
-        return false;
     }
 }

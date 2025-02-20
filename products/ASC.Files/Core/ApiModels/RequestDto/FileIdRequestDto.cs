@@ -35,16 +35,6 @@ public class FileIdRequestDto<T>
     public T FileId { get; set; }
 }
 
-
-public class FilePrimaryIdRequestDto<T>
-{
-    /// <summary>
-    /// File ID
-    /// </summary>
-    [FromRoute(Name = "id")]
-    public T Id { get; set; }
-}
-
 public class OperationIdRequestDto
 {
     /// <summary>

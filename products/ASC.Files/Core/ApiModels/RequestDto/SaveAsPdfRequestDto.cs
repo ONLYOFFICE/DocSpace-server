@@ -51,8 +51,8 @@ public class SaveAsPdfRequestDto<T>
     /// <summary>
     /// File ID
     /// </summary>
-    [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
 
     /// <summary>
     /// Parameters for saving file as pdf

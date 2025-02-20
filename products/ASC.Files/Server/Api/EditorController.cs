@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Web.Api.Core;
-using ASC.Webhooks.Core;
 
 namespace ASC.Files.Api;
 
@@ -64,7 +63,7 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         FileSecurity fileSecurity)
         : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
 
-[WebhookAccessChecker(typeof(WebhookEditorControllerAccessChecker))]
+[WebhookAccessChecker(typeof(WebhookFileEntryAccessChecker))]
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
@@ -510,66 +509,5 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
             IsDefault = filesLinkUtility.IsDefault
         };
-    }
-}
-
-[Scope]
-public class WebhookEditorControllerAccessChecker(
-    SecurityContext securityContext,
-    FileSecurity fileSecurity,
-    IDaoFactory daoFactory) : IWebhookAccessChecker
-{
-    private readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true };
-
-    public async Task<bool> CheckAccessAsync(WebhookData webhookData)
-    {
-        if (securityContext.CurrentAccount.ID == webhookData.TargetUserId)
-        {
-            return true;
-        }
-
-        if (webhookData.RouteData.TryGetValue("fileId", out var fileId) && !string.IsNullOrEmpty(fileId))
-        {
-            if (int.TryParse(fileId, out var fileIdInt))
-            {
-                var file = await daoFactory.GetFileDao<int>().GetFileAsync(fileIdInt);
-
-                return await fileSecurity.CanReadAsync(file, webhookData.TargetUserId);
-            }
-            else
-            {
-                var file = await daoFactory.GetFileDao<string>().GetFileAsync(fileId);
-
-                return await fileSecurity.CanReadAsync(file, webhookData.TargetUserId);
-            }
-        }
-
-        if (webhookData.ResponseType == typeof(FileReference) || webhookData.ResponseType == typeof(List<MentionWrapper>))
-        {
-            return false;
-        }
-
-        var responseNode = System.Text.Json.Nodes.JsonNode.Parse(webhookData.ResponseString)["response"];
-
-        var obj = JsonSerializer.Deserialize(responseNode, webhookData.ResponseType, _options);
-
-        if (obj != null)
-        {
-            if (obj is FileDto<int> fileDtoInt)
-            {
-                var file = await daoFactory.GetFileDao<int>().GetFileAsync(fileDtoInt.Id);
-
-                return await fileSecurity.CanReadAsync(file, webhookData.TargetUserId);
-            }
-
-            if (obj is FileDto<string> fileDtoString)
-            {
-                var file = await daoFactory.GetFileDao<string>().GetFileAsync(fileDtoString.Id);
-
-                return await fileSecurity.CanReadAsync(file, webhookData.TargetUserId);
-            }
-        }
-
-        return false;
     }
 }
