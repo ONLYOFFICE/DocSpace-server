@@ -53,7 +53,7 @@ public class Builder<T>(ThumbnailSettings settings,
     private IDataStore _dataStore;
 
     private readonly List<string> _imageFormatsCanBeCrop =
-        [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tga", ".webp"];
+        [".bmp", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tga", ".webp"];
 
     internal async Task BuildThumbnail(FileData<T> fileData)
     {
