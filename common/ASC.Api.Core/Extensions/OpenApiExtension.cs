@@ -24,14 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.IO.Pipelines;
-using System.Text.Json.Serialization.Metadata;
-using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi.Models;
-
-using Scalar.AspNetCore;
-
-
 namespace ASC.Api.Core.Extensions;
 
 public static class OpenApiExtension
@@ -40,22 +32,27 @@ public static class OpenApiExtension
     {
         return services.AddOpenApi("common", c =>
         {
-            var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
-            c.AddDocumentTransformer((document, context, cancellationToken) =>
+            var fullName = Assembly.GetEntryAssembly()?.FullName;
+            
+            if (fullName != null)
             {
-                document.Info = new()
+                var assemblyName = fullName.Split(',').First();
+                c.AddDocumentTransformer((document, _, _) =>
                 {
-                    Title = assemblyName,
-                    Version = "v2",
-                };
-                return Task.CompletedTask;
-            });
+                    document.Info = new()
+                    {
+                        Title = assemblyName,
+                        Version = "v2",
+                    };
+                    return Task.CompletedTask;
+                });
+            }
 
             c.CreateSchemaReferenceId = NestedSchemaReferenceId.Fun;
 
             c.AddSchemaTransformer<OpenApiDescriptionSchemaTransformer>();
             c.AddDocumentTransformer<LowercaseDocumentTransformer>();
-            c.AddDocumentTransformer((document, context, cancellationToken) =>
+            c.AddDocumentTransformer((document, _, _) =>
             {
                 document.Paths.Remove("/api/2.0/capabilities.json");
                 return Task.CompletedTask;
@@ -67,7 +64,7 @@ public static class OpenApiExtension
             var serverUrls = configuration.GetSection("openApi:servers").Get<List<string>>() ?? [];
             var serverDescription = configuration.GetSection("openApi:serversDescription").Get<List<string>>() ?? [];
 
-            c.AddDocumentTransformer((document, context, cancellationToken) =>
+            c.AddDocumentTransformer((document, _, _) =>
             {
                 for(var i = 0; i < serverUrls.Count; i++)
                 {
@@ -88,32 +85,39 @@ public static class OpenApiExtension
 
     public static IApplicationBuilder UseOpenApi(this IApplicationBuilder app)
     {
-        var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
-
-        app.UseEndpoints(endpoints =>
+        var fullName = Assembly.GetEntryAssembly()?.FullName;
+        if (fullName != null)
         {
-            endpoints.MapOpenApi($"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}");
-        });
-        
+            var assemblyName = fullName.Split(',').First();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapOpenApi($"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}");
+            });
+        }
+
         return app;
     }
 
     public static IApplicationBuilder UseOpenApiUI(this IApplicationBuilder app)
     {
-        var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
-        app.UseEndpoints(endpoints =>
+        var fullName = Assembly.GetEntryAssembly()?.FullName;
+        if (fullName != null)
         {
-            endpoints.MapScalarApiReference(options =>
+            var assemblyName = fullName.Split(',').First();
+            app.UseEndpoints(endpoints =>
             {
-                options.EndpointPathPrefix = $"scalar/{assemblyName.ToLower()}";
-                options
-                    .WithTheme(ScalarTheme.Purple)
-                    .WithTitle($"{assemblyName} API Documentation")
-                    .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-                    .WithOpenApiRoutePattern($"openapi/{assemblyName.ToLower()}/{{documentName}}.json");
+                endpoints.MapScalarApiReference($"scalar/{assemblyName.ToLower()}", options =>
+                {
+                    options
+                        .WithTheme(ScalarTheme.Purple)
+                        .WithTitle($"{assemblyName} API Documentation")
+                        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+                        .WithOpenApiRoutePattern($"openapi/{assemblyName.ToLower()}/{{documentName}}.json");
+                });
             });
+        }
 
-        });
         return app;
     }
 
@@ -125,7 +129,7 @@ public class SecurityDocumentTransformer : IOpenApiDocumentTransformer
     {
         var requirements = new Dictionary<string, OpenApiSecurityScheme>
         {
-            ["asc_auth_key"] = new OpenApiSecurityScheme
+            ["asc_auth_key"] = new()
             {
                 Scheme = "asc_auth_key",
                 Type = SecuritySchemeType.ApiKey,
@@ -140,7 +144,7 @@ public class SecurityDocumentTransformer : IOpenApiDocumentTransformer
         {
             foreach(var operation in path.Value.Operations)
             {
-                var tags = context.DescriptionGroups.SelectMany(r => r.Items).Where(r => r.HttpMethod.Equals(operation.Key.ToString().ToUpper()) && ("/" + r.RelativePath).Equals(path.Key)).FirstOrDefault();
+                var tags = context.DescriptionGroups.SelectMany(r => r.Items).FirstOrDefault(r => r.HttpMethod != null && r.HttpMethod.Equals(operation.Key.ToString().ToUpper()) && ("/" + r.RelativePath).Equals(path.Key));
                 if(tags == null)
                 {
                     continue;
@@ -150,13 +154,11 @@ public class SecurityDocumentTransformer : IOpenApiDocumentTransformer
                 {
                     continue;
                 }
-                else
+
+                operation.Value.Security.Add(new OpenApiSecurityRequirement
                 {
-                    operation.Value.Security.Add(new OpenApiSecurityRequirement
-                    {
-                        [new OpenApiSecurityScheme { Reference = new OpenApiReference { Id = "asc_auth_key", Type = ReferenceType.SecurityScheme } }] = new List<string> { "read", "write" }
-                    });
-                }
+                    [new OpenApiSecurityScheme { Reference = new OpenApiReference { Id = "asc_auth_key", Type = ReferenceType.SecurityScheme } }] = new List<string> { "read", "write" }
+                });
             }
         }
         return Task.CompletedTask;
@@ -165,7 +167,7 @@ public class SecurityDocumentTransformer : IOpenApiDocumentTransformer
 
 public static class NestedSchemaReferenceId
 {
-    private static readonly HashSet<string> _generatedSchemas = new HashSet<string>();
+    private static readonly HashSet<string> _generatedSchemas = [];
     public static string Fun(JsonTypeInfo info)
     {
         var type = Nullable.GetUnderlyingType(info.Type) ?? info.Type;
@@ -174,41 +176,35 @@ public static class NestedSchemaReferenceId
         {
             return null;
         }
-        else if (info is JsonTypeInfo { Kind: JsonTypeInfoKind.Enumerable } || type.IsArray)
-        {
-                return null;
-        }
-        else if (info is JsonTypeInfo { Kind: JsonTypeInfoKind.Dictionary })
+
+        if (info is { Kind: JsonTypeInfoKind.Enumerable } || type.IsArray)
         {
             return null;
         }
-        else
+
+        if (info is { Kind: JsonTypeInfoKind.Dictionary })
         {
-            var name = CustomSchemaId(type);
-            if (!_generatedSchemas.Contains(name))
-            {
-                _generatedSchemas.Add(name);
-                return name;
-            }
-            else
-            {
-                return  $"{name}.{Guid.NewGuid()}";
-            }
+            return null;
         }
+
+        var name = CustomSchemaId(type);
+        return _generatedSchemas.Add(name) ? name : $"{name}.{Guid.NewGuid()}";
     }
 
     private static bool IsEnumerableOfPrimitive(Type type)
     {
-        if (type.IsGenericType)
+        if (!type.IsGenericType)
         {
-            if (typeof(IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
-                typeof(IAsyncEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
-                typeof(ICollection<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
-                typeof(List<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
-                typeof(IDictionary<,>).IsAssignableFrom(type.GetGenericTypeDefinition()))
-            {
-                return true;
-            }
+            return type.IsArray;
+        }
+
+        if (typeof(IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
+            typeof(IAsyncEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
+            typeof(ICollection<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
+            typeof(List<>).IsAssignableFrom(type.GetGenericTypeDefinition()) ||
+            typeof(IDictionary<,>).IsAssignableFrom(type.GetGenericTypeDefinition()))
+        {
+            return true;
         }
 
         return type.IsArray;

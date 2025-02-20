@@ -27,6 +27,7 @@
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.IdentityModel.Tokens.Jwt;
+global using System.IO.Pipelines;
 global using System.Linq.Expressions;
 global using System.Net;
 global using System.Reflection;
@@ -41,6 +42,7 @@ global using System.Text;
 global using System.Text.Encodings.Web;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using System.Text.Json.Serialization.Metadata;
 global using System.Text.RegularExpressions;
 global using System.Threading.Channels;
 global using System.Threading.RateLimiting;
@@ -141,6 +143,7 @@ global using Microsoft.AspNetCore.Mvc.Authorization;
 global using Microsoft.AspNetCore.Mvc.Controllers;
 global using Microsoft.AspNetCore.Mvc.Filters;
 global using Microsoft.AspNetCore.Mvc.Routing;
+global using Microsoft.AspNetCore.OpenApi;
 global using Microsoft.AspNetCore.Routing;
 global using Microsoft.AspNetCore.Routing.Constraints;
 global using Microsoft.AspNetCore.Routing.Patterns;
@@ -157,6 +160,7 @@ global using Microsoft.Extensions.Options;
 global using Microsoft.Extensions.Primitives;
 global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.Net.Http.Headers;
+global using Microsoft.OpenApi.Models;
 
 global using NLog;
 global using NLog.AWS.Logger;
@@ -165,6 +169,8 @@ global using NLog.Web;
 
 global using RedisRateLimiting;
 global using RedisRateLimiting.AspNetCore;
+
+global using Scalar.AspNetCore;
 
 global using StackExchange.Redis;
 global using StackExchange.Redis.Extensions.Core.Abstractions;

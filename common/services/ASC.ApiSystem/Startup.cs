@@ -168,15 +168,7 @@ public class Startup
         { 
             app.UseCors(CustomCorsPolicyName);
         }
-
-        if (_configuration.GetValue<bool>("openApi:enable"))
-        {
-            app.UseOpenApi();
-        }
-        if (_configuration.GetValue<bool>("openApi:enableUI"))
-        {
-            app.UseOpenApiUI();
-        }
+        
         app.UseSynchronizationContextMiddleware();
 
         app.UseTenantMiddleware();
@@ -200,5 +192,14 @@ public class Startup
                 Predicate = r => r.Name.Contains("self")
             });
         });
+        
+        if (_configuration.GetValue<bool>("openApi:enable"))
+        {
+            app.UseOpenApi();
+        }
+        if (_configuration.GetValue<bool>("openApi:enableUI"))
+        {
+            app.UseOpenApiUI();
+        }
     }
 }

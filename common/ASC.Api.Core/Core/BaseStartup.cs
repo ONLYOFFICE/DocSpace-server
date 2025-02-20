@@ -553,10 +553,7 @@ public abstract class BaseStartup
         app.UseLoggerMiddleware();
 
 
-        if (OpenApiEnabled)
-        {
-            app.UseOpenApi();
-        }
+
 
         app.UseEndpoints(endpoints =>
         {
@@ -568,7 +565,12 @@ public abstract class BaseStartup
 
             endpoints.MapHealthChecks("/liveness", new HealthCheckOptions { Predicate = r => r.Name.Contains("self") });
         });
-
+        
+        if (OpenApiEnabled)
+        {
+            app.UseOpenApi();
+        }
+        
         app.Map("/switch", appBuilder =>
         {
             appBuilder.Run(async context =>
