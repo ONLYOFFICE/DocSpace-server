@@ -70,7 +70,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// ]]>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Tags("Files / Operations")]
-    [EndpointName("createUploadSession")]
     [EndpointSummary("Chunked upload")]
     [EndpointDescription("Creates a session to upload large files in multiple chunks to the folder with the ID specified in the request.\n\n **Note**: Each chunk can have different length but the length should be multiple of <b>512</b> and greater or equal to <b>10 mb</b>. Last chunk can have any size.\n After the initial response to the request with the <b>200 OK</b> status, you must get the <em>location</em> field value from the response. Send all your chunks to this location.\n Each chunk must be sent in the exact order the chunks appear in the file.\n After receiving each chunk, the server will respond with the current information about the upload session if no errors occurred.\n    /// When the number of bytes uploaded is equal to the number of bytes you sent in the initial request, the server responds with the <b>201 Created</b> status and sends you information about the uploaded file.")]
     [OpenApiResponse(typeof(object), 200, "Information about created session")]
@@ -98,7 +97,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// ]]>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
-    [EndpointName("createEditSession")]
     [EndpointSummary("Create the editing session")]
     [EndpointDescription("Creates a session to edit the existing file with multiple chunks (needed for WebDAV).")]
     [OpenApiResponse(typeof(object), 200, "Information about created session")]
@@ -114,7 +112,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </summary>
     /// <path>api/2.0/files/{folderId}/upload/check</path>
     [Tags("Files / Folders")]
-    [EndpointName("checkUpload")]
     [EndpointSummary("Check upload")]
     [EndpointDescription("Checks upload")]
     [OpenApiResponse(typeof(List<string>), 200, "Inserted file")]
@@ -130,7 +127,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <short>Insert a file</short>
     /// <path>api/2.0/files/{folderId}/insert</path>
     [Tags("Files / Folders")]
-    [EndpointName("insertFile")]
     [EndpointSummary("Insert a file")]
     [EndpointDescription("Inserts a file specified in the request to the selected folder by single file uploading.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "Inserted file")]
@@ -157,7 +153,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </remarks>
     /// <path>api/2.0/files/{folderId}/upload</path>
     [Tags("Files / Folders")]
-    [EndpointName("uploadFile")]
     [EndpointSummary("Upload a file")]
     [EndpointDescription("Uploads a file specified in the request to the selected folder by single file uploading or standart multipart/form-data method.\n\n **Note**: You can upload files in two different ways: <ol><li>Using single file upload. You should set the Content-Type and Content-Disposition headers to specify a file name and content type, and send the file to the request body.</li><li>Using standart multipart/form-data method.</li></ol>")]
     [OpenApiResponse(typeof(object), 200, "Inserted file")]
@@ -183,7 +178,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <path>api/2.0/files/@common/insert</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [EndpointName("insertFileToCommonFromBody")]
     [EndpointSummary("Insert a file to the \"Common\" section")]
     [EndpointDescription("Inserts a file specified in the request to the \"Common\" section by single file uploading.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "Inserted file")]
@@ -201,7 +195,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <short>Insert a file to the "My documents" section</short>
     /// <path>api/2.0/files/@my/insert</path>
     [Tags("Files / Folders")]
-    [EndpointName("insertFileToMyFromBody")]
     [EndpointSummary("Insert a file to the \"My documents\" section")]
     [EndpointDescription("Inserts a file specified in the request to the \"My documents\" section by single file uploading.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "Inserted file")]
@@ -228,7 +221,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <path>api/2.0/files/@common/upload</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [EndpointName("uploadFileToCommon")]
     [EndpointSummary("Upload a file to the \"Common\" section")]
     [EndpointDescription("Uploads a file specified in the request to the \"Common\" section by single file uploading or standart multipart/form-data method.\n\n **Note**: You can upload files in two different ways: <ol><li>Using single file upload. You should set the Content-Type and Content-Disposition headers to specify a file name and content type, and send the file to the request body.</li><li>Using standart multipart/form-data method.</li></ol>")]
     [OpenApiResponse(typeof(object), 200, "Uploaded file(s)")]
@@ -256,7 +248,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// </remarks>
     /// <path>api/2.0/files/@my/upload</path>
     [Tags("Files / Folders")]
-    [EndpointName("uploadFileToMy")]
     [EndpointSummary("Upload a file to the \"My documents\" section")]
     [EndpointDescription("Uploads a file specified in the request to the \"My documents\" section by single file uploading or standart multipart/form-data method.\n\n **Note**: You can upload files in two different ways: <ol><li>Using single file upload. You should set the Content-Type and Content-Disposition headers to specify a file name and content type, and send the file to the request body.</li><li>Using standart multipart/form-data method.</li></ol>")]
     [OpenApiResponse(typeof(object), 200, "Uploaded file(s)")]

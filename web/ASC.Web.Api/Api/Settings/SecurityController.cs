@@ -59,7 +59,6 @@ public class SecurityController(
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [EndpointName("getWebItemSettingsSecurity")]
     [EndpointSummary("Get the security settings")]
     [EndpointDescription("Returns the security settings for the modules specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<SecurityDto>), 200, "Security settings")]
@@ -108,7 +107,6 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/{id}</path>
     [Tags("Settings / Security")]
-    [EndpointName("getWebItemSecurity")]
     [EndpointSummary("Get the module availability")]
     [EndpointDescription("Returns the availability of the module with the ID specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true - module is enabled, false - module is disabled")]
@@ -128,7 +126,6 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/modules</path>
     [Tags("Settings / Security")]
-    [EndpointName("getEnabledModules")]
     [EndpointSummary("Get the enabled modules")]
     [EndpointDescription("Returns a list of all the enabled modules.")]
     [OpenApiResponse(typeof(object), 200, "List of enabled modules")]
@@ -150,7 +147,6 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
-    [EndpointName("getPasswordSettings")]
     [EndpointSummary("Get the password settings")]
     [EndpointDescription("Returns the portal password settings.")]
     [OpenApiResponse(typeof(PasswordSettingsDto), 200, "Password settings")]
@@ -171,7 +167,6 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
-    [EndpointName("updatePasswordSettings")]
     [EndpointSummary("Set the password settings")]
     [EndpointDescription("Sets the portal password settings.")]
     [OpenApiResponse(typeof(PasswordSettingsDto), 200, "Password settings")]
@@ -209,7 +204,6 @@ public class SecurityController(
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [EndpointName("setWebItemSecurity")]
     [EndpointSummary("Set the module security settings")]
     [EndpointDescription("Sets the security settings to the module with the ID specified in the request.")]
     [OpenApiResponse(typeof(IEnumerable<SecurityDto>), 200, "Security settings")]
@@ -263,7 +257,6 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/access</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [EndpointName("setAccessToWebItems")]
     [EndpointSummary("Set the access settings to products")]
     [EndpointDescription("Sets the access settings to the products with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IEnumerable<SecurityDto>), 200, "Security settings")]
@@ -323,7 +316,6 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [EndpointName("getProductAdministrators")]
     [EndpointSummary("Get the product administrators")]
     [EndpointDescription("Returns a list of all the product administrators with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeDto>), 200, "List of product administrators with the following parameters")]
@@ -346,7 +338,6 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
-    [EndpointName("isProductAdministrator")]
     [EndpointSummary("Check a product administrator")]
     [EndpointDescription("Checks if the selected user is a product administrator with the ID specified in the request.")]
     [OpenApiResponse(typeof(object), 200, "Object with the user security information: product ID, user ID, administrator or not")]
@@ -365,7 +356,6 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
-    [EndpointName("setProductAdministrator")]
     [EndpointSummary("Set a product administrator")]
     [EndpointDescription("Sets the selected user as a product administrator with the ID specified in the request.")]
     [OpenApiResponse(typeof(object), 200, "Object with the user security information: product ID, user ID, administrator or not")]
@@ -414,7 +404,6 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
-    [EndpointName("updateLoginSettings")]
     [EndpointSummary("Update login settings")]
     [EndpointDescription("Updates the login settings with the parameters specified in the request.")]
     [OpenApiResponse(typeof(LoginSettingsDto), 200, "Updated login settings")]
@@ -443,7 +432,6 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
-    [EndpointName("getLoginSettings")]
     [EndpointSummary("Get login settings")]
     [EndpointDescription("Returns the portal login settings.")]
     [OpenApiResponse(typeof(LoginSettingsDto), 200, "Login settings")]
@@ -462,7 +450,6 @@ public class SecurityController(
     /// </summary>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
-    [EndpointName("setDefaultLoginSettings")]
     [EndpointSummary("Set default login settings")]
     [EndpointDescription("Returns the portal login settings.")]
     [OpenApiResponse(typeof(LoginSettingsDto), 200, "Login settings")]

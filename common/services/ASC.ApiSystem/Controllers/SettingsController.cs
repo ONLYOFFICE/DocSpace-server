@@ -64,7 +64,6 @@ public class SettingsController(CommonMethods commonMethods,
     /// </summary>
     /// <path>apisystem/settings</path>
     [Tags("Settings")]
-    [EndpointName("getSettings")]
     [EndpointSummary("Gets settings")]
     [EndpointDescription("Gets settings")]
     [OpenApiResponse(typeof(IActionResult), 200, "Settings")]
@@ -100,7 +99,6 @@ public class SettingsController(CommonMethods commonMethods,
     /// </summary>
     /// <path>apisystem/settings/save</path>
     [Tags("Settings")]
-    [EndpointName("saveSettings")]
     [EndpointSummary("Saves settings")]
     [EndpointDescription("Saves settings")]
     [OpenApiResponse(typeof(IActionResult), 200, "Settings")]
@@ -161,7 +159,6 @@ public class SettingsController(CommonMethods commonMethods,
     /// </summary>
     /// <path>apisystem/settings/checkdomain</path>
     [Tags("Settings")]
-    [EndpointName("checkDomain")]
     [EndpointSummary("Checks domain")]
     [EndpointDescription("Checks domain")]
     [OpenApiResponse(typeof(IActionResult), 200, "True if success")]

@@ -44,7 +44,6 @@ public class CustomNavigationController(MessageService messageService,
     /// <path>api/2.0/settings/customnavigation/getall</path>
     /// <collection>list</collection>
     [Tags("Settings / Custom Navigation")]
-    [EndpointName("getCustomNavigationItems")]
     [EndpointSummary("Get the custom navigation items")]
     [EndpointDescription("Returns a list of the custom navigation items.")]
     [OpenApiResponse(typeof(List<CustomNavigationItem>), 200, "List of the custom navigation items")]
@@ -60,7 +59,6 @@ public class CustomNavigationController(MessageService messageService,
     /// <short>Get a custom navigation item sample</short>
     /// <path>api/2.0/settings/customnavigation/getsample</path>
     [Tags("Settings / Custom Navigation")]
-    [EndpointName("getCustomNavigationItemSample")]
     [EndpointSummary("Get a custom navigation item sample")]
     [EndpointDescription("Returns a custom navigation item sample.")]
     [OpenApiResponse(typeof(CustomNavigationItem), 200, "Custom navigation item")]
@@ -76,7 +74,6 @@ public class CustomNavigationController(MessageService messageService,
     /// <short>Get a custom navigation item by ID</short>
     /// <path>api/2.0/settings/customnavigation/get/{id}</path>
     [Tags("Settings / Custom Navigation")]
-    [EndpointName("getCustomNavigationItem")]
     [EndpointSummary("Get a custom navigation item by ID")]
     [EndpointDescription("Returns a custom navigation item by the ID specified in the request.")]
     [OpenApiResponse(typeof(CustomNavigationItem), 200, "Custom navigation item")]
@@ -92,7 +89,6 @@ public class CustomNavigationController(MessageService messageService,
     /// <short>Add a custom navigation item</short>
     /// <path>api/2.0/settings/customnavigation/create</path>
     [Tags("Settings / Custom Navigation")]
-    [EndpointName("createCustomNavigationItem")]
     [EndpointSummary("Add a custom navigation item")]
     [EndpointDescription("Adds a custom navigation item with the parameters specified in the request.")]
     [OpenApiResponse(typeof(CustomNavigationItem), 200, "Custom navigation item")]
@@ -155,7 +151,6 @@ public class CustomNavigationController(MessageService messageService,
     /// <short>Delete a custom navigation item</short>
     /// <path>api/2.0/settings/customnavigation/delete/{id}</path>
     [Tags("Settings / Custom Navigation")]
-    [EndpointName("deleteCustomNavigationItem")]
     [EndpointSummary("Delete a custom navigation item")]
     [EndpointDescription("Deletes a custom navigation item with the ID specified in the request.")]
     [HttpDelete("delete/{id:guid}")]

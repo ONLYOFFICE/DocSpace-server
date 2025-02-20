@@ -59,7 +59,6 @@ public class FoldersControllerInternal(
     /// <path>api/2.0/files/folder/{folderId}/log</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [EndpointName("getActivityHistory")]
     [EndpointSummary("Get folder history")]
     [EndpointDescription("Get the activity history of a folder with a specified identifier")]
     [OpenApiResponse(typeof(IAsyncEnumerable<HistoryDto>), 200, "List of actions in the folder")]
@@ -77,7 +76,6 @@ public class FoldersControllerInternal(
     /// <short>Get folder form filter</short>
     /// <path>api/2.0/files/{folderId}/formfilter</path>
     [Tags("Files / Folders")]
-    [EndpointName("getFolder")]
     [EndpointSummary("Get folder form filter")]
     [EndpointDescription("Get form filter of a folder with id specified in request")]
     [AllowAnonymous]
@@ -127,7 +125,6 @@ public abstract class FoldersController<T>(
     /// <short>Create a folder</short>
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
-    [EndpointName("createFolder")]
     [EndpointSummary("Create a folder")]
     [EndpointDescription("Creates a new folder with the title specified in the request. The parent folder ID can be also specified.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "New folder parameters")]
@@ -146,7 +143,6 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [EndpointName("deleteFolder")]
     [EndpointSummary("Delete a folder")]
     [EndpointDescription("Deletes a folder with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
@@ -166,7 +162,6 @@ public abstract class FoldersController<T>(
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/order</path>
     [Tags("Files / Folders")]
-    [EndpointName("setFileOrder")]
     [EndpointSummary("Set file order")]
     [EndpointDescription("Sets file order in the folder with ID specified in the request")]
     [HttpPut("folder/{folderId}/order")]
@@ -184,7 +179,6 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/{folderId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
-    [EndpointName("getFolderById")]
     [EndpointSummary("Get a folder by ID")]
     [EndpointDescription("Returns the detailed list of files and folders located in the folder with the ID specified in the request.")]
     [OpenApiResponse(typeof(FolderContentDto<int>), 200, "Folder contents")]
@@ -213,7 +207,6 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
-    [EndpointName("getFolderInfo")]
     [EndpointSummary("Get folder information")]
     [EndpointDescription("Returns the detailed information about a folder with the ID specified in the request.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Folder parameters")]
@@ -233,7 +226,6 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}/path</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [EndpointName("getFolderPath")]
     [EndpointSummary("Get the folder path")]
     [EndpointDescription("Returns a path to the folder with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileEntryDto>), 200, "List of file entry information")]
@@ -256,7 +248,6 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/{folderId}/subfolders</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [EndpointName("getFolders")]
     [EndpointSummary("Get subfolders")]
     [EndpointDescription("Returns a list of all the subfolders from a folder with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileEntryDto>), 200, "List of file entry information")]
@@ -278,7 +269,6 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/{folderId}/news</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [EndpointName("getNewItems")]
     [EndpointSummary("Get new folder items")]
     [EndpointDescription("Returns a list of all the new items from a folder with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileEntryDto>), 200, "List of file entry information")]
@@ -300,7 +290,6 @@ public abstract class FoldersController<T>(
     /// <short>Rename a folder</short>
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
-    [EndpointName("renameFolder")]
     [EndpointSummary("Rename a folder")]
     [EndpointDescription("Renames the selected folder with a new title specified in the request.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Folder parameters")]
@@ -319,7 +308,6 @@ public abstract class FoldersController<T>(
     /// <short>Get used space of files</short>
     /// <path>api/2.0/files/filesusedspace</path>
     [Tags("Files / Folders")]
-    [EndpointName("getFilesUsedSpace")]
     [EndpointSummary("Get used space of files")]
     [EndpointDescription("Returns the used space of files in the root folders.")]
     [OpenApiResponse(typeof(FilesStatisticsResultDto), 200, "Used space of files in the root folders")]
@@ -337,7 +325,6 @@ public abstract class FoldersController<T>(
     /// <short>Get primary external link</short>
     /// <path>api/2.0/files/folder/{id}/link</path>
     [Tags("Files / Folders")]
-    [EndpointName("getFolderPrimaryExternalLink")]
     [EndpointSummary("Get primary external link")]
     [EndpointDescription("Returns the primary external link by the identifier specified in the request.")]
     [OpenApiResponse(typeof(FileShareDto), 200, "Folder security information")]
@@ -368,7 +355,6 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@common</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [EndpointName("getCommonFolder")]
     [EndpointSummary("Get the \"Common\" section")]
     [EndpointDescription("Returns the detailed list of files and folders located in the \"Common\" section.")]
     [OpenApiResponse(typeof(FolderContentDto<int>), 200, "The \"Common\" section contents")]
@@ -387,7 +373,6 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@favorites</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [EndpointName("getFavoritesFolder")]
     [EndpointSummary("Get the \"Favorites\" section")]
     [EndpointDescription("Returns the detailed list of files and folders located in the \"Favorites\" section.")]
     [OpenApiResponse(typeof(FolderContentDto<int>), 200, "The \"Favorites\" section contents")]
@@ -405,7 +390,6 @@ public class FoldersControllerCommon(
     /// <short>Get the "My documents" section</short>
     /// <path>api/2.0/files/@my</path>
     [Tags("Files / Folders")]
-    [EndpointName("getMyFolder")]
     [EndpointSummary("Get the \"My documents\" section")]
     [EndpointDescription("Returns the detailed list of files and folders located in the \"My documents\" section.")]
     [OpenApiResponse(typeof(FolderContentDto<int>), 200, "The \"My documents\" section contents")]
@@ -423,7 +407,6 @@ public class FoldersControllerCommon(
     /// <short>Get the "Private Room" section</short>
     /// <path>api/2.0/files/@privacy</path>
     [Tags("Files / Folders")]
-    [EndpointName("getPrivacyFolder")]
     [EndpointSummary("Get the \"Private Room\" section")]
     [EndpointDescription("Returns the detailed list of files and folders located in the \"Private Room\" section.")]
     [OpenApiResponse(typeof(FolderContentDto<int>), 200, "The \"Private Room\" section contents")]
@@ -447,7 +430,6 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@projects</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [EndpointName("getProjectsFolder")]
     [EndpointSummary("Get the \"In projects\" section")]
     [EndpointDescription("Returns the detailed list of files and folders located in the \"In projects\" section.")]
     [OpenApiResponse(typeof(FolderContentDto<string>), 200, "The \"In projects\" section contents")]
@@ -466,7 +448,6 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@recent</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [EndpointName("getRecentFolder")]
     [EndpointSummary("Get the \"Recent\" section")]
     [EndpointDescription("Returns the detailed list of files located in the \"Recent\" section.")]
     [OpenApiResponse(typeof(FolderContentDto<int>), 200, "The \"Recent\" section contents")]
@@ -485,7 +466,6 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@root</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [EndpointName("getRootFolders")]
     [EndpointSummary("Get filtered sections")]
     [EndpointDescription("Returns all the sections matching the parameters specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FolderContentDto<int>>), 200, "List of section contents with the following parameters")]
@@ -509,7 +489,6 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [EndpointName("getShareFolder")]
     [EndpointSummary("Get the \"Shared with me\" section")]
     [EndpointDescription("Returns the detailed list of files and folders located in the \"Shared with me\" section.")]
     [OpenApiResponse(typeof(FolderContentDto<int>), 200, "The \"Shared with me\" section contents")]
@@ -528,7 +507,6 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@templates</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [EndpointName("getTemplatesFolder")]
     [EndpointSummary("Get the \"Templates\" section")]
     [EndpointDescription("Returns the detailed list of files located in the \"Templates\" section.")]
     [OpenApiResponse(typeof(FolderContentDto<int>), 200, "The \"Templates\" section contents")]
@@ -546,7 +524,6 @@ public class FoldersControllerCommon(
     /// <short>Get the "Trash" section</short>
     /// <path>api/2.0/files/@trash</path>
     [Tags("Files / Folders")]
-    [EndpointName("getTrashFolder")]
     [EndpointSummary("Get the \"Trash\" section")]
     [EndpointDescription("Returns the detailed list of files and folders located in the \"Trash\" section.")]
     [OpenApiResponse(typeof(FolderContentDto<int>), 200, "The \"Trash\" section contents")]

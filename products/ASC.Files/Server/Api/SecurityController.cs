@@ -65,7 +65,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("getFileSecurityInfo")]
     [EndpointSummary("Get the shared file information")]
     [EndpointDescription("Returns the detailed information about the shared file with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileShareDto>), 200, "List of shared file information")]
@@ -86,7 +85,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("getFolderSecurityInfo")]
     [EndpointSummary("Get the shared folder information")]
     [EndpointDescription("Returns the detailed information about the shared folder with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileShareDto>), 200, "List of shared file information")]
@@ -107,7 +105,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("setFileSecurityInfo")]
     [EndpointSummary("Share a file")]
     [EndpointDescription("Sets the sharing settings to a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileShareDto>), 200, "List of shared file information: sharing rights, a user who has the access to the specified file, the file is locked by this user or not, this user is an owner of the specified file or not, this user can edit the access to the specified file or not")]
@@ -128,7 +125,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("setFolderSecurityInfo")]
     [EndpointSummary("Share a folder")]
     [EndpointDescription("Sets the sharing settings to a folder with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileShareDto>), 200, "List of shared folder information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not")]
@@ -149,7 +145,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("getEncryptionAccess")]
     [EndpointSummary("Get file encryption keys")]
     [EndpointDescription("Returns the encryption keys to access a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(List<EncryptionKeyPairDto>), 200, "List of encryption key pairs: encrypted private key, public key, user ID")]
@@ -168,7 +163,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("sendEditorNotify")]
     [EndpointSummary("Send the mention message")]
     [EndpointDescription("Sends a message to the users who are mentioned in the file with the ID specified in the request.")]
     [OpenApiResponse(typeof(List<AceShortWrapper>), 200, "List of access rights information")]
@@ -184,7 +178,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("getGroupsMembersWithFolderSecurity")]
     [EndpointSummary("Get groups members with folder security")]
     [EndpointDescription("Gets groups memebers with folder security")]
     [OpenApiResponse(typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>), 200, "Ok")]
@@ -232,7 +225,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("changeOwner")]
     [EndpointSummary("Change the file owner")]
     [EndpointDescription("Changes the owner of the file with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileEntryDto>), 200, "File entry information")]
@@ -260,7 +252,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("getSecurityInfo")]
     [EndpointSummary("Get the sharing rights")]
     [EndpointDescription("Returns the sharing rights for all the files and folders specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileShareDto>), 200, "List of shared files and folders information")]
@@ -286,7 +277,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("removeSecurityInfo")]
     [EndpointSummary("Remove the sharing rights")]
     [EndpointDescription("Removes the sharing rights from all the files and folders specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -311,7 +301,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("setSecurityInfo")]
     [EndpointSummary("Set the sharing rights")]
     [EndpointDescription("Sets the sharing rights to all the files and folders specified in the request.")] 
     [OpenApiResponse(typeof(IAsyncEnumerable<FileShareDto>), 200, "List of shared files and folders information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not")]
@@ -338,7 +327,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("getExternalShareData")]
     [EndpointSummary("Get the external data")]
     [EndpointDescription("Returns the external data by the key specified in the request.")]
     [OpenApiResponse(typeof(ExternalShareDto), 200, "External data")]
@@ -359,7 +347,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("applyExternalSharePassword")]
     [EndpointSummary("Apply external data password")]
     [EndpointDescription("Applies a password specified in the request to get the external data.")]
     [OpenApiResponse(typeof(ExternalShareDto), 200, "External data")]

@@ -42,7 +42,6 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <short>Start create room template</short>
     /// <path>api/2.0/files/roomtemplate</path>
     [Tags("Files / Rooms")]
-    [EndpointName("createTemplate")]
     [EndpointSummary("Start create room template")]
     [EndpointDescription("Start create room template.")]
     [OpenApiResponse(typeof(IEnumerable<RoomTemplateStatusDto>), 200, "Room template status")]
@@ -101,7 +100,6 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <short>Get progress creating room template</short>
     /// <path>api/2.0/files/roomtemplate/status</path>
     [Tags("Files / Rooms")]
-    [EndpointName("status")]
     [EndpointSummary("Get progress creating room template")]
     [EndpointDescription("Get progress creating room template.")]
     [OpenApiResponse(typeof(IEnumerable<RoomTemplateStatusDto>), 200, "Room template status")]
@@ -137,7 +135,6 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <short>Get public</short>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
     [Tags("Files / Rooms")]
-    [EndpointName("isPublic")]
     [EndpointSummary("Get public")]
     [EndpointDescription("Get public settings.")]
     [OpenApiResponse(typeof(bool), 200, "Ok")]
@@ -154,7 +151,6 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <short>Set public</short>
     /// <path>api/2.0/files/roomtemplate/public</path>
     [Tags("Files / Rooms")]
-    [EndpointName("setPublic")]
     [EndpointSummary("Set public")]
     [EndpointDescription("Set public settings.")]
     [OpenApiResponse(200, "Ok")]

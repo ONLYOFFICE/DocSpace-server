@@ -49,7 +49,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/capabilities</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [EndpointName("capabilities")]
     [EndpointSummary("Get providers")]
     [EndpointDescription("Returns a list of the available providers.\n\n **Note**: Available provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.")]
     [OpenApiResponse(typeof(List<List<string>>), 200, "List of provider keys")]
@@ -71,7 +70,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [EndpointName("createWordpressPost")]
     [EndpointSummary("Create a WordPress post")]
     [EndpointDescription("Creates a WordPress post with the parameters specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -105,7 +103,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/{providerId}</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
-    [EndpointName("deleteThirdParty")]
     [EndpointSummary("Remove a third-party account")]
     [EndpointDescription("Removes the third-party storage service account with the ID specified in the request.")]
     [OpenApiResponse(typeof(object), 200, "Third-party folder ID")]
@@ -122,7 +119,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-delete</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [EndpointName("deleteWordpressInfo")]
     [EndpointSummary("Delete the WordPress information")]
     [EndpointDescription("Deletes the WordPress plugin information.")]
     [OpenApiResponse(typeof(object), 200, "Object with the \"success\" field: true if the operation is successful")]
@@ -151,7 +147,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/common</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [EndpointName("getCommonThirdPartyFolders")]
     [EndpointSummary("Get common third-party services")]
     [EndpointDescription("Returns a list of the third-party services connected to the \"Common\" section.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FolderDto<string>>), 200, "List of common third-party folders")]
@@ -174,7 +169,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [EndpointName("getThirdPartyAccounts")]
     [EndpointSummary("Get third-party accounts")]
     [EndpointDescription("Returns a list of all the connected third-party accounts.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<ThirdPartyParams>), 200, "List of connected providers information")]
@@ -190,7 +184,6 @@ public class ThirdpartyController(
     /// <short>Get a third-party account backup</short>
     /// <path>api/2.0/files/thirdparty/backup</path>
     [Tags("Files / Third-party integration")]
-    [EndpointName("getBackupThirdPartyAccount")]
     [EndpointSummary("Get a third-party account backup")]
     [EndpointDescription("Return a backup of the connected third-party account.")]
     [OpenApiResponse(typeof(FolderDto<string>), 200, "Folder for the third-party account backup")]
@@ -214,7 +207,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-info</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [EndpointName("getWordpressInfo")]
     [EndpointSummary("Get the WordPress information")]
     [EndpointDescription("Returns the WordPress plugin information.")]
     [OpenApiResponse(typeof(object), 200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information")]
@@ -253,7 +245,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
-    [EndpointName("saveThirdParty")]
     [EndpointSummary("Save a third-party account")]
     [EndpointDescription("Saves the third-party storage service account. For WebDav, Yandex, kDrive and SharePoint, the login and password are used for authentication. For other providers, the authentication is performed using a token received via OAuth 2.0.\n\n **Note**: List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.")]
     [OpenApiResponse(typeof(FolderDto<string>), 200, "Connected provider folder")]
@@ -282,7 +273,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/backup</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
-    [EndpointName("saveThirdPartyBackup")]
     [EndpointSummary("Save a third-party account backup")]
     [EndpointDescription("Saves a backup of the connected third-party account.\n\n **Note**: List of provider key: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive")]
     [OpenApiResponse(typeof(FolderDto<string>), 200, "Folder for the third-party account backup")]
@@ -313,7 +303,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-save</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [EndpointName("wordpressSave")]
     [EndpointSummary("Save the user WordPress information")]
     [EndpointDescription("Saves the user WordPress information when logging in.")]
     [OpenApiResponse(typeof(object), 200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information")]
@@ -363,7 +352,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/providers</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [EndpointName("getAllProviders")]
     [EndpointSummary("Get all providers")]
     [EndpointDescription("Returns a list of the all providers.\n\n **Note**: Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud")]
     [OpenApiResponse(typeof(List<ProviderDto>), 200, "List of provider")]

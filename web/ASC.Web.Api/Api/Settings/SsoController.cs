@@ -49,7 +49,6 @@ public class SsoController(TenantManager tenantManager,
     /// <path>api/2.0/settings/ssov2</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / SSO")]
-    [EndpointName("getSsoSettings")]
     [EndpointSummary("Get the SSO settings")]
     [EndpointDescription("Returns the current portal SSO settings.")]
     [OpenApiResponse(typeof(SsoSettingsV2), 200, "SSO settings")]
@@ -96,7 +95,6 @@ public class SsoController(TenantManager tenantManager,
     /// </short>
     /// <path>api/2.0/settings/ssov2/default</path>
     [Tags("Settings / SSO")]
-    [EndpointName("getDefaultSsoSettings")]
     [EndpointSummary("Get the default SSO settings")]
     [EndpointDescription("Returns the default portal SSO settings.")]
     [OpenApiResponse(typeof(SsoSettingsV2), 200, "Default SSO settings")]
@@ -115,7 +113,6 @@ public class SsoController(TenantManager tenantManager,
     /// </short>
     /// <path>api/2.0/settings/ssov2/constants</path>
     [Tags("Settings / SSO")]
-    [EndpointName("getSsoSettingsConstants")]
     [EndpointSummary("Get the SSO settings constants")]
     [EndpointDescription("Returns the SSO settings constants.")]
     [OpenApiResponse(typeof(object), 200, "The SSO settings constants: SSO name ID format type, SSO binding type, SSO signing algorithm type, SSO SP certificate action type, SSO IDP certificate action type")]
@@ -141,7 +138,6 @@ public class SsoController(TenantManager tenantManager,
     /// </short>
     /// <path>api/2.0/settings/ssov2</path>
     [Tags("Settings / SSO")]
-    [EndpointName("saveSsoSettings")]
     [EndpointSummary("Save the SSO settings")]
     [EndpointDescription("Saves the SSO settings for the current portal.")]
     [OpenApiResponse(typeof(SsoSettingsV2), 200, "SSO settings")]
@@ -233,7 +229,6 @@ public class SsoController(TenantManager tenantManager,
     /// </short>
     /// <path>api/2.0/settings/ssov2</path>
     [Tags("Settings / SSO")]
-    [EndpointName("resetSsoSettings")]
     [EndpointSummary("Reset the SSO settings")]
     [EndpointDescription("Resets the SSO settings of the current portal.")]
     [OpenApiResponse(typeof(SsoSettingsV2), 200, "Default SSO settings")]

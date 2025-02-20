@@ -82,7 +82,6 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [EndpointName("getIsAuthentificated")]
     [EndpointSummary("Check authentication")]
     [EndpointDescription("Checks if the current user is authenticated or not.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the current user is authenticated")]
@@ -102,7 +101,6 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/{code}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [EndpointName("authenticateMeFromBodyWithCode")]
     [EndpointSummary("Authenticate a user by code")]
     [EndpointDescription("Authenticates the current user by SMS or two-factor authentication code.")]
     [OpenApiResponse(typeof(AuthenticationTokenDto), 200, "Authentication data")]
@@ -181,7 +179,6 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [EndpointName("authenticateMe")]
     [EndpointSummary("Authenticate a user")]
     [EndpointDescription("Authenticates the current user by SMS, authenticator app, or without two-factor authentication.")]
     [OpenApiResponse(typeof(AuthenticationTokenDto), 200, "Authentication data")]
@@ -297,7 +294,6 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/logout</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [EndpointName("logout")]
     [EndpointSummary("Log out")]
     [EndpointDescription("Logs out of the current user account.")]
     [OpenApiResponse(typeof(object), 200, "Ok")]
@@ -347,7 +343,6 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/confirm</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [EndpointName("checkConfirm")]
     [EndpointSummary("Open confirmation email URL")]
     [EndpointDescription("Opens a confirmation email URL to validate a certain action (employee invitation, portal removal, phone activation, etc.).")]
     [OpenApiResponse(typeof(ConfirmDto), 200, "Validation result: Ok, Invalid, or Expired")]
@@ -377,7 +372,6 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/setphone</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [EndpointName("saveMobilePhone")]
     [EndpointSummary("Set a mobile phone")]
     [EndpointDescription("Sets a mobile phone for the current user.")]
     [OpenApiResponse(typeof(AuthenticationTokenDto), 200, "Authentication data")]
@@ -406,7 +400,6 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/sendsms</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [EndpointName("sendSmsCode")]
     [EndpointSummary("Send SMS code")]
     [EndpointDescription("Sends SMS with an authentication code.")]
     [OpenApiResponse(typeof(AuthenticationTokenDto), 200, "Authentication data")]

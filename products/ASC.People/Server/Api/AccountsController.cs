@@ -65,7 +65,6 @@ public class AccountsController<T>(
     /// </summary>
     /// <path>api/2.0/accounts/room/{id}/search</path>
     [Tags("People / Search")]
-    [EndpointName("getAccountsEntriesWithShared")]
     [EndpointSummary("Get accounts entries with shared")]
     [EndpointDescription("Gets accounts entries with shared")]
     [OpenApiResponse(typeof(IAsyncEnumerable<object>), 200, "Ok")]

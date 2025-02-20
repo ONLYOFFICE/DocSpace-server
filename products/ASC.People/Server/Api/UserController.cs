@@ -81,7 +81,6 @@ public class UserController(
     /// </summary>
     /// <path>api/2.0/people/tokendiagnostics</path>
     [Tags("People / Profiles")]
-    [EndpointName("getClaims")]
     [EndpointSummary("Get claims")]
     [EndpointDescription("Gets claims")]
     [OpenApiResponse(typeof(object), 200, "Claims")]
@@ -107,7 +106,6 @@ public class UserController(
     /// <path>api/2.0/people/active</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Profiles")]
-    [EndpointName("addMemberAsActivated")]
     [EndpointSummary("Add an activated user")]
     [EndpointDescription("Adds an activated portal user with the first name, last name, email address, and several optional parameters specified in the request.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Newly added user with the detailed information")]
@@ -186,7 +184,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people</path>
     [Tags("People / Profiles")]
-    [EndpointName("addMember")]
     [EndpointSummary("Add a user")]
     [EndpointDescription("Adds a new portal user with the first name, last name, email address, and several optional parameters specified in the request.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Newly added user with the detailed information")]
@@ -346,7 +343,6 @@ public class UserController(
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [EndpointName("inviteUsers")]
     [EndpointSummary("Invite users")]
     [EndpointDescription("Invites users specified in the request to the current portal.")]
     [OpenApiResponse(typeof(List<EmployeeDto>), 200, "List of users")]
@@ -446,7 +442,6 @@ public class UserController(
     /// <short>Change a user password</short>
     /// <path>api/2.0/people/{userid}/password</path>
     [Tags("People / Password")]
-    [EndpointName("changeUserPassword")]
     [EndpointSummary("Change a user password")]
     [EndpointDescription("Sets a new password to the user with the ID specified in the request.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed user information")]
@@ -536,7 +531,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
-    [EndpointName("deleteMember")]
     [EndpointSummary("Delete a user")]
     [EndpointDescription("Deletes a user with the ID specified in the request from the portal.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Deleted user detailed information")]
@@ -598,7 +592,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/@self</path>
     [Tags("People / Profiles")]
-    [EndpointName("deleteProfile")]
     [EndpointSummary("Delete my profile")]
     [EndpointDescription("Deletes the current user profile.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed information about my profile")]
@@ -652,7 +645,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/guests</path>
     [Tags("People / Guests")]
-    [EndpointName("deleteGuests")]
     [EndpointSummary("Remove guests from the list and from rooms")]
     [EndpointDescription("Removes guests from the list and from rooms to which you have invited them")]
     [OpenApiResponse(200, "Request parameters for deleting guests")]
@@ -697,7 +689,6 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [EndpointName("getAdvanced")]
     [EndpointSummary("Search users by status filter")]
     [EndpointDescription("Returns a list of users matching the status filter and search query.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
@@ -735,7 +726,6 @@ public class UserController(
     /// <path>api/2.0/people</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [EndpointName("getAll")]
     [EndpointSummary("Get profiles")]
     [EndpointDescription("Returns a list of profiles for all the portal users.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
@@ -754,7 +744,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
-    [EndpointName("getByEmail")]
     [EndpointSummary("Get a profile by user email")]
     [EndpointDescription("Returns the detailed information about a profile of the user with the email specified in the request.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed profile information")]
@@ -790,7 +779,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/{username}</path>
     [Tags("People / Profiles")]
-    [EndpointName("getById")]
     [EndpointSummary("Get a profile by user name")]
     [EndpointDescription("Returns the detailed information about a profile of the user with the name specified in the request.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed profile information")]
@@ -841,7 +829,6 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [EndpointName("getByStatus")]
     [EndpointSummary("Get profiles by status")]
     [EndpointDescription("Returns a list of profiles filtered by user status.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
@@ -876,7 +863,6 @@ public class UserController(
     /// <path>api/2.0/people/filter</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [EndpointName("getFullByFilter")]
     [EndpointSummary("Search users and their information by extended filter")]
     [EndpointDescription("Returns a list of users with full information about them matching the parameters specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
@@ -936,7 +922,6 @@ public class UserController(
     /// <path>api/2.0/people/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [EndpointName("getPeopleSearch")]
     [EndpointSummary("Search users (using query parameters)")]
     [EndpointDescription("Returns a list of users matching the search query. This method uses the query parameters.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeDto>), 200, "List of users")]
@@ -954,7 +939,6 @@ public class UserController(
     /// <path>api/2.0/people/@search/{query}</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [EndpointName("getSearch")]
     [EndpointSummary("Search users")]
     [EndpointDescription("Returns a list of users matching the search query.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
@@ -984,7 +968,6 @@ public class UserController(
     /// <path>api/2.0/people/simple/filter</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [EndpointName("getSimpleByFilter")]
     [EndpointSummary("Search users by extended filter")]
     [EndpointDescription("Returns a list of users matching the parameters specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeDto>), 200, "List of users")]
@@ -1027,7 +1010,6 @@ public class UserController(
     /// <path>api/2.0/people/delete</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [EndpointName("removeUsers")]
     [EndpointSummary("Delete users")]
     [EndpointDescription("Deletes a list of the users with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
@@ -1086,7 +1068,6 @@ public class UserController(
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [EndpointName("resendUserInvites")]
     [EndpointSummary("Resend activation emails")]
     [EndpointDescription("Resends emails to the users who have not activated their emails.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
@@ -1228,7 +1209,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
-    [EndpointName("getTheme")]
     [EndpointSummary("Get portal theme")]
     [EndpointDescription("Returns a theme which is set to the current portal.")]
     [OpenApiResponse(typeof(DarkThemeSettings), 200, "Theme")]
@@ -1246,7 +1226,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
-    [EndpointName("changeTheme")]
     [EndpointSummary("Change portal theme")]
     [EndpointDescription("Changes the current portal theme.")]
     [OpenApiResponse(typeof(DarkThemeSettings), 200, "Theme")]
@@ -1271,7 +1250,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/@self</path>
     [Tags("People / Profiles")]
-    [EndpointName("self")]
     [EndpointSummary("Get my profile")]
     [EndpointDescription("Returns the detailed information about the current user profile.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed information about my profile")]
@@ -1298,7 +1276,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
-    [EndpointName("sendEmailChangeInstructions")]
     [EndpointSummary("Send instructions to change email")]
     [EndpointDescription("Sends a message to the user email with the instructions to change the email address connected to the portal.")]
     [OpenApiResponse(typeof(object), 200, "Message text")]
@@ -1400,7 +1377,6 @@ public class UserController(
     /// <path>api/2.0/people/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
-    [EndpointName("sendUserPassword")]
     [EndpointSummary("Remind a user password")]
     [EndpointDescription("Reminds a password to the user using the email address specified in the request.")]
     [OpenApiResponse(typeof(object), 200, "Email with the password")]
@@ -1439,7 +1415,6 @@ public class UserController(
     /// <path>api/2.0/people/activationstatus/{activationstatus}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [EndpointName("updateEmployeeActivationStatus")]
     [EndpointSummary("Set an activation status to the users")]
     [EndpointDescription("Sets the required activation status to the list of users with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
@@ -1499,7 +1474,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/{userid}/culture</path>
     [Tags("People / Profiles")]
-    [EndpointName("updateMemberCulture")]
     [EndpointSummary("Update user language")]
     [EndpointDescription("Updates the user language with the parameter specified in the request.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Detailed user information")]
@@ -1530,7 +1504,6 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
-    [EndpointName("updateMember")]
     [EndpointSummary("Update a user")]
     [EndpointDescription("Updates the data for the selected portal user with the first name, last name, email address, and/or optional parameters specified in the request.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Updated user with the detailed information")]
@@ -1702,7 +1675,6 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [EndpointName("updateUserStatus")]
     [EndpointSummary("Change a user status")]
     [EndpointDescription("Changes a status for the users with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
@@ -1815,7 +1787,6 @@ public class UserController(
     /// <path>api/2.0/people/type/{type}</path>
     /// <collection>list</collection>
     [Tags("People / User type")]
-    [EndpointName("updateUserType")]
     [EndpointSummary("Change a user type")]
     [EndpointDescription("Changes a type for the users with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
@@ -1864,7 +1835,6 @@ public class UserController(
     /// <path>api/2.0/people/recalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Quota")]
-    [EndpointName("recalculateQuota")]
     [EndpointSummary("Recalculate quota")]
     [EndpointDescription("Starts the process of recalculating quota.")]
     [HttpGet("recalculatequota")]
@@ -1883,7 +1853,6 @@ public class UserController(
     /// <path>api/2.0/people/checkrecalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Quota")]
-    [EndpointName("checkRecalculateQuota")]
     [EndpointSummary("Check quota recalculation")]
     [EndpointDescription("Checks the process of recalculating quota.")]
     [OpenApiResponse(typeof(TaskProgressDto), 200, "Task progress")]
@@ -1903,7 +1872,6 @@ public class UserController(
     /// <path>api/2.0/people/userquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]
-    [EndpointName("updateUserQuota")]
     [EndpointSummary("Change a user quota limit")]
     [EndpointDescription("Changes a quota limit for the users with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
@@ -1977,7 +1945,6 @@ public class UserController(
     /// <path>api/2.0/people/resetquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]
-    [EndpointName("resetUsersQuota")]
     [EndpointSummary("Reset a user quota limit")]
     [EndpointDescription("Resets a user quota limit with the ID specified in the request from the portal.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "User detailed information")]
@@ -2304,7 +2271,6 @@ public class UserControllerAdditional<T>(
     /// </summary>
     /// <path>api/2.0/people/room/{id}</path>
     [Tags("People / Search")]
-    [EndpointName("getUsersWithRoomShared")]
     [EndpointSummary("Get users with shared in room")]
     [EndpointDescription("Gets users with shared in room ID specified in request")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "Ok")]

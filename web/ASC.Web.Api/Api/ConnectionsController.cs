@@ -59,7 +59,6 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections</path>
     [Tags("Security / Active connections")]
-    [EndpointName("getAllActiveConnections")]
     [EndpointSummary("Get active connections")]
     [EndpointDescription("Returns all the active connections to the portal.")]
     [OpenApiResponse(typeof(ActiveConnectionsDto), 200, "Active portal connections")]
@@ -151,7 +150,6 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutallchangepassword</path>
     [Tags("Security / Active connections")]
-    [EndpointName("logOutAllActiveConnectionsChangePassword")]
     [EndpointSummary("Log out and change password")]
     [EndpointDescription("Logs out from all the active connections of the current user and changes their password.")]
     [OpenApiResponse(typeof(object), 200, "URL to the confirmation message for changing a password")]
@@ -192,7 +190,6 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     [Tags("Security / Active connections")]
-    [EndpointName("logOutAllActiveConnectionsForUser")]
     [EndpointSummary("Log out for the user by ID")]
     [EndpointDescription("Logs out from all the active connections of the user with the ID specified in the request.")]
     [OpenApiResponse(200, "Ok")]
@@ -219,7 +216,6 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
     [Tags("Security / Active connections")]
-    [EndpointName("logOutAllExceptThisConnection")]
     [EndpointSummary("Log out from all connections")]
     [EndpointDescription("Logs out from all the active connections except the current connection.")]
     [OpenApiResponse(typeof(object), 200, "Current user name")]
@@ -257,7 +253,6 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
     [Tags("Security / Active connections")]
-    [EndpointName("logOutActiveConnection")]
     [EndpointSummary("Log out from the connection")]
     [EndpointDescription("Logs out from the connection with the ID specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]

@@ -43,7 +43,6 @@ public class ReassignController(
     /// <short>Get the reassignment progress</short>
     /// <path>api/2.0/people/reassign/progress/{userid}</path>
     [Tags("People / User data")]
-    [EndpointName("getReassignProgress")]
     [EndpointSummary("Get the reassignment progress")]
     [EndpointDescription("Returns the progress of the started data reassignment for the user with the ID specified in the request.")]
     [OpenApiResponse(typeof(TaskProgressResponseDto), 200, "Reassignment progress")]
@@ -64,7 +63,6 @@ public class ReassignController(
     /// <short>Start the data reassignment</short>
     /// <path>api/2.0/people/reassign/start</path>
     [Tags("People / User data")]
-    [EndpointName("startReassign")]
     [EndpointSummary("Start the data reassignment")]
     [EndpointDescription("Starts the data reassignment for the user with the ID specified in the request.")]
     [OpenApiResponse(typeof(TaskProgressResponseDto), 200, "Reassignment progress")]
@@ -110,7 +108,6 @@ public class ReassignController(
     /// <short>Terminate the data reassignment</short>
     /// <path>api/2.0/people/reassign/terminate</path>
     [Tags("People / User data")]
-    [EndpointName("terminateReassign")]
     [EndpointSummary("Terminate the data reassignment")]
     [EndpointDescription("Terminates the data reassignment for the user with the ID specified in the request.")]
     [OpenApiResponse(typeof(TaskProgressResponseDto), 200, "Reassignment progress")]

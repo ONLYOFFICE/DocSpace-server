@@ -52,7 +52,6 @@ public class LdapController(
     /// <path>api/2.0/settings/ldap</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
-    [EndpointName("getLdapSettings")]
     [EndpointSummary("Get the LDAP settings")]
     [EndpointDescription("Returns the current portal LDAP settings.")]
     [OpenApiResponse(typeof(LdapSettingsDto), 200, "LDAP settings")]
@@ -98,7 +97,6 @@ public class LdapController(
     /// <path>api/2.0/settings/ldap/cron</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
-    [EndpointName("getLdapCronSettings")]
     [EndpointSummary("Get the LDAP cron expression")]
     [EndpointDescription("Returns the LDAP autosynchronous cron expression for the current portal if it exists.")]
     [OpenApiResponse(typeof(LdapCronSettingsDto), 200, "LDAP cron settings")]
@@ -126,7 +124,6 @@ public class LdapController(
     /// <path>api/2.0/settings/ldap/cron</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
-    [EndpointName("setLdapCronSettings")]
     [EndpointSummary("Set the LDAP cron expression")]
     [EndpointDescription("Sets the LDAP autosynchronous cron expression to the current portal.")]
     [HttpPost("cron")]
@@ -172,7 +169,6 @@ public class LdapController(
     /// <path>api/2.0/settings/ldap/sync</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
-    [EndpointName("syncLdap")]
     [EndpointSummary("Synchronize with LDAP server")]
     [EndpointDescription("Synchronizes the portal data with the new information from the LDAP server.")]
     [OpenApiResponse(typeof(LdapStatusDto), 200, "LDAP operation status")]
@@ -201,7 +197,6 @@ public class LdapController(
     /// <path>api/2.0/settings/ldap/sync/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
-    [EndpointName("testLdapSync")]
     [EndpointSummary("Test the LDAP synchronization")]
     [EndpointDescription("Starts the process of collecting preliminary changes on the portal during the synchronization process according to the selected LDAP settings.")]
     [OpenApiResponse(typeof(LdapStatusDto), 200, "LDAP operation status")]
@@ -228,7 +223,6 @@ public class LdapController(
     /// <path>api/2.0/settings/ldap</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
-    [EndpointName("saveLdapSettings")]
     [EndpointSummary("Save the LDAP settings")]
     [EndpointDescription("Saves the LDAP settings specified in the request and starts importing/synchronizing users and groups by LDAP.")]
     [OpenApiResponse(typeof(LdapStatusDto), 200, "LDAP operation status")]
@@ -262,7 +256,6 @@ public class LdapController(
     /// <path>api/2.0/settings/ldap/save/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
-    [EndpointName("testLdapSave")]
     [EndpointSummary("Test the LDAP saving process")]
     [EndpointDescription("Starts the process of saving LDAP settings and collecting preliminary changes on the portal according to them.")]
     [OpenApiResponse(typeof(LdapStatusDto), 200, "LDAP operation status")]
@@ -289,7 +282,6 @@ public class LdapController(
     /// <path>api/2.0/settings/ldap/status</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
-    [EndpointName("getLdapOperationStatus")]
     [EndpointSummary("Get the LDAP synchronization process status")]
     [EndpointDescription("Returns the LDAP synchronization process status.")]
     [OpenApiResponse(typeof(LdapStatusDto), 200, "LDAP operation status")]
@@ -314,7 +306,6 @@ public class LdapController(
     /// <path>api/2.0/settings/ldap/default</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
-    [EndpointName("getDefaultLdapSettings")]
     [EndpointSummary("Get the LDAP default settings")]
     [EndpointDescription("Returns the LDAP default settings.")]
     [OpenApiResponse(typeof(LdapSettingsDto), 200, "LDAP default settings: enable LDAP authentication or not, start TLS or not, enable SSL or not, send welcome email or not, server name, user name, port number, user filter, login attribute, LDAP settings mapping, access rights, user is a group member or not, group name, user attribute, group filter, group attribute, group name attribute, authentication is enabled or not, login, password, accept certificate or not")]

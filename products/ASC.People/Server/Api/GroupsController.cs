@@ -57,7 +57,6 @@ public class GroupController(
     /// <path>api/2.0/groups</path>
     /// <collection>list</collection>
     [Tags("Group")]
-    [EndpointName("getGroups")]
     [EndpointSummary("Get groups")]
     [EndpointDescription("Returns the general information about all the groups, such as group ID and group manager.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<GroupDto>), 200, "List of groups")]
@@ -99,7 +98,6 @@ public class GroupController(
     /// </remarks>
     /// <path>api/2.0/groups/{id}</path>
     [Tags("Group")]
-    [EndpointName("getGroup")]
     [EndpointSummary("Get a group")]
     [EndpointDescription("Returns the detailed information about the selected group.")]
     [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
@@ -121,7 +119,6 @@ public class GroupController(
     /// <path>api/2.0/groups/user/{userid}</path>
     /// <collection>list</collection>
     [Tags("Group")]
-    [EndpointName("getByUserId")]
     [EndpointSummary("Get user groups")]
     [EndpointDescription("Returns a list of groups for the user with the ID specified in the request.")]
     [OpenApiResponse(typeof(IEnumerable<GroupSummaryDto>), 200, "List of groups")]
@@ -148,7 +145,6 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups</path>
     [Tags("Group")]
-    [EndpointName("addGroup")]
     [EndpointSummary("Add a new group")]
     [EndpointDescription("Adds a new group with the group manager, name, and members specified in the request.")]
     [OpenApiResponse(typeof(GroupDto), 200, "Newly created group with the detailed information" )]
@@ -185,7 +181,6 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}</path>
     [Tags("Group")]
-    [EndpointName("updateGroup")]
     [EndpointSummary("Update a group")]
     [EndpointDescription("Updates the existing group changing the group manager, name, and/or members.")]
     [OpenApiResponse(typeof(GroupDto), 200, "Updated group with the detailed information")]
@@ -233,7 +228,6 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}</path>
     [Tags("Group")]
-    [EndpointName("deleteGroup")]
     [EndpointSummary("Delete a group")]
     [EndpointDescription("Deletes a group with the ID specified in the request from the list of groups on the portal.")]
     [OpenApiResponse(typeof(NoContentResult), 200, "No content")]
@@ -262,7 +256,6 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{fromId}/members/{toId}</path>
     [Tags("Group")]
-    [EndpointName("transferMembersTo")]
     [EndpointSummary("Move group members")]
     [EndpointDescription("Moves all the members from the selected group to another one specified in the request.")]
     [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
@@ -293,7 +286,6 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}/members</path>
     [Tags("Group")]
-    [EndpointName("setMembersTo")]
     [EndpointSummary("Replace group members")]
     [EndpointDescription("Replaces the group members with those specified in the request.")]
     [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
@@ -314,7 +306,6 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}/members</path>
     [Tags("Group")]
-    [EndpointName("addMembersTo")]
     [EndpointSummary("Add group members")]
     [EndpointDescription("Adds new group members to the group with the ID specified in the request.")]
     [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
@@ -342,7 +333,6 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}/manager</path>
     [Tags("Group")]
-    [EndpointName("setManager")]
     [EndpointSummary("Set a group manager")]
     [EndpointDescription("Sets a user with the ID specified in the request as a group manager.")]
     [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
@@ -372,7 +362,6 @@ public class GroupController(
     /// </short>
     /// <path>api/2.0/groups/{id}/members</path>
     [Tags("Group")]
-    [EndpointName("removeMembersFrom")]
     [EndpointSummary("Remove group members")]
     [EndpointDescription("Removes the group members specified in the request from the selected group.")]
     [OpenApiResponse(typeof(GroupDto), 200, "Group with the detailed information")]
@@ -462,7 +451,6 @@ public class GroupControllerAdditional<T>(
     /// </summary>
     /// <path>api/2.0/group/room/{id}</path>
     [Tags("Group / Rooms")]
-    [EndpointName("getGroupsWithShared")]
     [EndpointSummary("Get groups with shared")]
     [EndpointDescription("Gets groups with shared")]
     [OpenApiResponse(typeof(IAsyncEnumerable<GroupDto>), 200, "Ok")]

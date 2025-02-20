@@ -69,7 +69,6 @@ public class VirtualRoomsInternalController(
     /// <short>Create a room</short>
     /// <path>api/2.0/files/rooms</path>
     [Tags("Files / Rooms")]
-    [EndpointName("createRoom")]
     [EndpointSummary("Create a room")]
     [EndpointDescription("Creates a room in the \"Rooms\" section.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Room information")]
@@ -93,7 +92,6 @@ public class VirtualRoomsInternalController(
     /// <short>Start create a room based on a template</short>
     /// <path>api/2.0/files/rooms/fromTemplate</path>
     [Tags("Files / Rooms")]
-    [EndpointName("createRoom")]
     [EndpointSummary("Start create a room based on a template")]
     [EndpointDescription("Start create a room in the \"Rooms\" section based on a template.")]
     [OpenApiResponse(typeof(RoomFromTemplateStatusDto), 200, "Room based on template")]
@@ -143,7 +141,6 @@ public class VirtualRoomsInternalController(
     /// <short>Get progress creating room</short>
     /// <path>api/2.0/files/rooms/fromTemplate/status</path>
     [Tags("Files / Rooms")]
-    [EndpointName("status")]
     [EndpointSummary("Get progress creating room")]
     [EndpointDescription("Get progress creating room based a template.")]
     [OpenApiResponse(typeof(RoomFromTemplateStatusDto), 200, "Ok")]
@@ -211,7 +208,6 @@ public class VirtualRoomsThirdPartyController(
     /// <short>Create a third-party room</short>
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
     [Tags("Files / Rooms")]
-    [EndpointName("createRoomThirdParty")]
     [EndpointSummary("Create a third-party room")]
     [EndpointDescription("Creates a room in the \"Rooms\" section stored in a third-party storage.")]
     [OpenApiResponse(typeof(FolderDto<string>), 200, "Room information")]
@@ -254,7 +250,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Rooms")]
-    [EndpointName("getRoomInfo")]
     [EndpointSummary("Get room information")]
     [EndpointDescription("Returns the room information.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Room information")]
@@ -273,7 +268,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Rename a room</short>
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Files / Rooms")]
-    [EndpointName("updateRoom")]
     [EndpointSummary("Rename a room")]
     [EndpointDescription("Renames a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Updated room information")]
@@ -294,7 +288,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/roomquota</path>
     /// <collection>list</collection>
     [Tags("Files / Quota")]
-    [EndpointName("updateRoomsQuota")]
     [EndpointSummary("Change a room quota limit")]
     [EndpointDescription("Changes a quota limit for the rooms with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FolderDto<int>>), 200, "List of rooms with the detailed information")]
@@ -333,7 +326,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/resetquota</path>
     /// <collection>list</collection>
     [Tags("Files / Quota")]
-    [EndpointName("resetRoomQuota")]
     [EndpointSummary("Reset a room quota limit")]
     [EndpointDescription("Resets a quota limit for the rooms with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FolderDto<int>>), 200, "List of rooms with the detailed information")]
@@ -362,7 +354,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Remove a room</short>
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Files / Rooms")]
-    [EndpointName("deleteRoom")]
     [EndpointSummary("Remove a room")]
     [EndpointDescription("Removes a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(FileOperationDto), 200, "File operation")]
@@ -380,7 +371,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Archive a room</short>
     /// <path>api/2.0/files/rooms/{id}/archive</path>
     [Tags("Files / Rooms")]
-    [EndpointName("archiveRoom")]
     [EndpointSummary("Archive a room")]
     [EndpointDescription("Moves a room with the ID specified in the request to the \"Archive\" section.")]
     [OpenApiResponse(typeof(FileOperationDto), 200, "File operation")]
@@ -407,7 +397,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Unarchive a room</short>
     /// <path>api/2.0/files/rooms/{id}/unarchive</path>
     [Tags("Files / Rooms")]
-    [EndpointName("unarchiveRoom")]
     [EndpointSummary("Unarchive a room")]
     [EndpointDescription("Moves a room with the ID specified in the request from the \"Archive\" section to the \"Rooms\" section.")]
     [OpenApiResponse(typeof(FileOperationDto), 200, "File operation")]
@@ -433,7 +422,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Set room access rights</short>
     /// <path>api/2.0/files/rooms/{id}/share</path>
     [Tags("Files / Rooms")]
-    [EndpointName("setRoomSecurity")]
     [EndpointSummary("Set room access rights")]
     [EndpointDescription("Sets the access rights to a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(RoomSecurityDto), 200, "Room security information")]
@@ -483,7 +471,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Rooms")]
-    [EndpointName("getRoomSecurityInfo")]
     [EndpointSummary("Get room access rights")]
     [EndpointDescription("Returns the access rights of a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileShareDto>), 200, "Security information of room files")]
@@ -509,7 +496,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Set an external or invitation link</short>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     [Tags("Files / Rooms")]
-    [EndpointName("setLink")]
     [EndpointSummary("Set an external or invitation link")]
     [EndpointDescription("Sets an external or invitation link with the ID specified in the request.")]
     [OpenApiResponse(typeof(FileShareDto), 200, "Room security information")]
@@ -534,7 +520,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/links</path>
     /// <collection>list</collection>
     [Tags("Files / Rooms")]
-    [EndpointName("getRoomLinks")]
     [EndpointSummary("Get room links")]
     [EndpointDescription("Returns the links of a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileShareDto>), 200, "Room security information")]
@@ -566,7 +551,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Get primary external link</short>
     /// <path>api/2.0/files/rooms/{id}/link</path>
     [Tags("Files / Rooms")]
-    [EndpointName("getRoomsPrimaryExternalLink")]
     [EndpointSummary("Get primary external link")]
     [EndpointDescription("Returns the primary external link of a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(FileShareDto), 200, "Room security information")]
@@ -585,7 +569,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Add room tags</short>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Files / Rooms")]
-    [EndpointName("addTags")]
     [EndpointSummary("Add room tags")]
     [EndpointDescription("Adds the tags to a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Room information")]
@@ -604,7 +587,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Remove room tags</short>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Files / Rooms")]
-    [EndpointName("deleteTags")]
     [EndpointSummary("Remove room tags")]
     [EndpointDescription("Removes the tags from a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Room information")]
@@ -624,7 +606,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Create a room logo</short>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Files / Rooms")]
-    [EndpointName("createRoomLogo")]
     [EndpointSummary("Create a room logo")]
     [EndpointDescription("Creates a logo for a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Room information")]
@@ -644,7 +625,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <path>api/2.0/files/rooms/{id}/cover</path>
     [Tags("Files / Rooms")]
-    [EndpointName("changeRoomCover")]
     [EndpointSummary("Change room cover")]
     [EndpointDescription("Changes room cover")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Room cover")]
@@ -665,7 +645,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <path>api/2.0/files/rooms/covers</path>
     [Tags("Files / Rooms")]
-    [EndpointName("getCovers")]
     [EndpointSummary("Get covers")]
     [EndpointDescription("Gets covers")]
     [OpenApiResponse(typeof(IAsyncEnumerable<CoversResultDto>), 200, "Gets room cover")]
@@ -684,7 +663,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Remove a room logo</short>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Files / Rooms")]
-    [EndpointName("deleteRoomLogo")]
     [EndpointSummary("Remove a room logo")]
     [EndpointDescription("Removes a logo from a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Room information")]
@@ -704,7 +682,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Pin a room</short>
     /// <path>api/2.0/files/rooms/{id}/pin</path>
     [Tags("Files / Rooms")]
-    [EndpointName("pinRoom")]
     [EndpointSummary("Pin a room")]
     [EndpointDescription("Pins a room with the ID specified in the request to the top of the list.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Room information")]
@@ -722,7 +699,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Unpin a room</short>
     /// <path>api/2.0/files/rooms/{id}/unpin</path>
     [Tags("Files / Rooms")]
-    [EndpointName("unpinRoom")]
     [EndpointSummary("Unpin a room")]
     [EndpointDescription("Unpins a room with the ID specified in the request from the top of the list.")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Room information")]
@@ -740,7 +716,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Resend room invitations</short>\
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     [Tags("Files / Rooms")]
-    [EndpointName("resendEmailInvitations")]
     [EndpointSummary("Resend room invitations")]
     [EndpointDescription("Resends the email invitations to a room with the ID specified in the request to the selected users.")]
     [HttpPost("{id}/resend")]
@@ -755,7 +730,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <path>api/2.0/files/rooms/{id}/reorder</path>
     [Tags("Files / Rooms")]
-    [EndpointName("reorder")]
     [EndpointSummary("Reorder a room")]
     [EndpointDescription("Reorders to a room with ID specified in the request")]
     [OpenApiResponse(typeof(FolderDto<int>), 200, "Room information")]
@@ -775,7 +749,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/news</path>
     /// <collection>list</collection>
     [Tags("Files / Rooms")]
-    [EndpointName("getNewItemsFromRoom")]
     [EndpointSummary("Get new room items")]
     [EndpointDescription("Returns a list of all the new items from a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(List<NewItemsDto<FileEntryDto>>), 200, "List of file entry information")]
@@ -827,7 +800,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <short>Get rooms</short>
     /// <path>api/2.0/files/rooms</path>
     [Tags("Files / Rooms")]
-    [EndpointName("getRoomsFolder")]
     [EndpointSummary("Get rooms")]
     [EndpointDescription("Returns the contents of the \"Rooms\" section by the parameters specified in the request.")]
     [OpenApiResponse(typeof(FolderContentDto<int>), 200, "Returns the contents of the \"Rooms\" section")]
@@ -891,7 +863,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <short>Create a tag</short>
     /// <path>api/2.0/files/tags</path>
     [Tags("Files / Rooms")]
-    [EndpointName("createTag")]
     [EndpointSummary("Create a tag")]
     [EndpointDescription("Creates a custom tag with the parameters specified in the request.")]
     [OpenApiResponse(typeof(object), 200, "New tag name")]
@@ -910,7 +881,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <path>api/2.0/files/tags</path>
     /// <collection>list</collection>
     [Tags("Files / Rooms")]
-    [EndpointName("getTagsInfo")]
     [EndpointSummary("Get tags")]
     [EndpointDescription("Returns a list of custom tags.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<object>), 200, "List of tag names")]
@@ -932,7 +902,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <short>Delete tags</short>
     /// <path>api/2.0/files/tags</path>
     [Tags("Files / Rooms")]
-    [EndpointName("deleteCustomTags")]
     [EndpointSummary("Delete tags")]
     [EndpointDescription("Deletes a bunch of custom tags specified in the request.")]
     [OpenApiResponse(200, "Ok")]
@@ -949,7 +918,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <short>Upload an image for room logo</short>
     /// <path>api/2.0/files/logos</path>
     [Tags("Files / Rooms")]
-    [EndpointName("uploadRoomLogo")]
     [EndpointSummary("Upload an image for room logo")]
     [EndpointDescription("Uploads a temporary image to create a room logo.")]
     [OpenApiResponse(typeof(UploadResultDto), 200, "Upload result")]
@@ -995,7 +963,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <path>api/2.0/files/rooms/{id:int}/indexexport</path>
     /// <exception cref="NotSupportedException"></exception>
     [Tags("Files / Rooms")]
-    [EndpointName("startRoomIndexExport")]
     [EndpointSummary("Start room index export")]
     [EndpointDescription("Starts room index export")]
     [OpenApiResponse(typeof(DocumentBuilderTaskDto), 200, "Ok")]
@@ -1050,7 +1017,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// </summary>
     /// <path>api/2.0/files/rooms/indexexport</path>
     [Tags("Files / Rooms")]
-    [EndpointName("getRoomIndexExport")]
     [EndpointSummary("Get room index export")]
     [EndpointDescription("Gets room index export")]
     [OpenApiResponse(typeof(DocumentBuilderTaskDto), 200, "Ok")]
@@ -1070,7 +1036,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// </summary>
     /// <path>api/2.0/files/rooms/indexexport</path>
     [Tags("Files / Rooms")]
-    [EndpointName("terminateRoomIndexExport")]
     [EndpointSummary("Terminate room index export")]
     [EndpointDescription("Terminates room index export")]
     [OpenApiResponse(200, "Ok")]
@@ -1090,7 +1055,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// </summary>
     /// <path>api/2.0/files/rooms/news</path>
     [Tags("Files / Rooms")]
-    [EndpointName("getRoomsNewItems")]
     [EndpointSummary("Get room new items")]
     [EndpointDescription("Gets room new items")]
     [OpenApiResponse(typeof(List<NewItemsDto<RoomNewItemsDto>>), 200, "List of new items")]

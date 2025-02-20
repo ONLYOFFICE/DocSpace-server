@@ -43,7 +43,6 @@ public class NotificationController    : ApiControllerBase
     /// </short>
     /// <path>api/2.0/people/phone</path>
     [Tags("People / Profiles")]
-    [EndpointName("sendNotificationToChange")]
     [EndpointSummary("Send a notification to change a phone")]
     [EndpointDescription("Sends a notification to the user with the ID specified in the request to change their phone number.")]
     [OpenApiResponse(typeof(object), 200, "Notification")]

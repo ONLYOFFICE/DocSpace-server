@@ -51,7 +51,6 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     [Tags("Files / Files")]
     [EndpointSummary("Check the form draft")]
     [EndpointDescription("Checks if the current file is a form draft which can be filled out.")]
-    [EndpointName("checkFillFormDraft")]
     [OpenApiResponse(typeof(object), 200, "Link to the form")]
     [OpenApiResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]

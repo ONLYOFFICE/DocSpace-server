@@ -54,7 +54,6 @@ public class OwnerController(
     /// </short>
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
-    [EndpointName("sendOwnerChangeInstructions")]
     [EndpointSummary("Send the owner change instructions")]
     [EndpointDescription("Sends the instructions to change the DocSpace owner.")]
     [OpenApiResponse(typeof(object), 200, "Message about changing the portal owner")]
@@ -97,7 +96,6 @@ public class OwnerController(
     /// </short>
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
-    [EndpointName("updateOwner")]
     [EndpointSummary("Update the portal owner")]
     [EndpointDescription("Updates the current portal owner with a new one specified in the request.")]
     [OpenApiResponse(200, "Ok")]

@@ -43,7 +43,6 @@ public class SettingsController(
     /// <short>Change the third-party settings access</short>
     /// <path>api/2.0/files/thirdparty</path>
     [Tags("Files / Settings")]
-    [EndpointName("changeAccessToThirdparty")]
     [EndpointSummary("Change the third-party settings access")]
     [EndpointDescription("Changes the access to the third-party settings.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -61,7 +60,6 @@ public class SettingsController(
     /// <short>Confirm the file deletion</short>
     /// <path>api/2.0/files/changedeleteconfim</path>
     [Tags("Files / Settings")]
-    [EndpointName("changeDeleteConfirm")]
     [EndpointSummary("Confirm the file deletion")]
     [EndpointDescription("Specifies whether to confirm the file deletion or not.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -78,7 +76,6 @@ public class SettingsController(
     /// <short>Change the archive format (using body parameters)</short>
     /// <path>api/2.0/files/settings/downloadtargz</path>
     [Tags("Files / Settings")]
-    [EndpointName("changeDownloadZipFromBody")]
     [EndpointSummary("Change the archive format (using body parameters)")]
     [EndpointDescription("Changes the format of the downloaded archive from .zip to .tar.gz. This method uses the body parameters.")]
     [OpenApiResponse(typeof(ICompress), 200, "Archive")]
@@ -96,7 +93,6 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/downloadtargz</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
-    [EndpointName("changeDownloadZipFromForm")]
     [EndpointSummary("Change the archive format (using form parameters)")]
     [EndpointDescription("Changes the format of the downloaded archive from .zip to .tar.gz. This method uses the form parameters.")]
     [OpenApiResponse(typeof(ICompress), 200, "Archive")]
@@ -114,7 +110,6 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/favorites</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
-    [EndpointName("displayFavorite")]
     [EndpointSummary("Display the \"Favorites\" folder")]
     [EndpointDescription("Displays the \"Favorites\" folder.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the parameter is enabled")]
@@ -134,7 +129,6 @@ public class SettingsController(
     /// <path>api/2.0/files/displayRecent</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
-    [EndpointName("displayRecent")]
     [EndpointSummary("Display the \"Recent\" folder")]
     [EndpointDescription("Displays the \"Recent\" folder.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the parameter is enabled")]
@@ -154,7 +148,6 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/templates</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
-    [EndpointName("displayTemplates")]
     [EndpointSummary("Display the \"Templates\" folder")]
     [EndpointDescription("Displays the \"Templates\" folder.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the parameter is enabled")]
@@ -173,7 +166,6 @@ public class SettingsController(
     /// <short>Change the external sharing ability</short>
     /// <path>api/2.0/files/settings/external</path>
     [Tags("Files / Settings")]
-    [EndpointName("externalShare")]
     [EndpointSummary("Change the external sharing ability")]
     [EndpointDescription("Changes the ability to share a file externally.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the parameter is enabled")]
@@ -189,7 +181,6 @@ public class SettingsController(
     /// <short>Change the external sharing ability on social networks</short>
     /// <path>api/2.0/files/settings/externalsocialmedia</path>
     [Tags("Files / Settings")]
-    [EndpointName("externalShareSocialMedia")]
     [EndpointSummary("Change the external sharing ability on social networks")]
     [EndpointDescription("Changes the ability to share a file externally on social networks.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the parameter is enabled")]
@@ -205,7 +196,6 @@ public class SettingsController(
     /// <short>Change the forcasaving ability</short>
     /// <path>api/2.0/files/forcesave</path>
     [Tags("Files / Settings")]
-    [EndpointName("forcesave")]
     [EndpointSummary("Change the forcasaving ability")]
     [EndpointDescription("Changes the ability to force save a file.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the parameter is enabled")]
@@ -223,7 +213,6 @@ public class SettingsController(
     /// <path>api/2.0/files/settings</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Settings")]
-    [EndpointName("getFilesSettings")]
     [EndpointSummary("Get file settings")]
     [EndpointDescription("Returns all the file settings.")]
     [OpenApiResponse(typeof(FilesSettingsDto), 200, "File settings")]
@@ -240,7 +229,6 @@ public class SettingsController(
     /// <short>Get the Documents information</short>
     /// <path>api/2.0/files/info</path>
     [Tags("Files / Settings")]
-    [EndpointName("getModule")]
     [EndpointSummary("Get the Documents information")]
     [EndpointDescription("Returns the information about the Documents module.")]
     [OpenApiResponse(typeof(Module), 200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL")]
@@ -257,7 +245,6 @@ public class SettingsController(
     /// <short>Hide confirmation dialog when canceling operation</short>
     /// <path>api/2.0/files/hideconfirmroomlifetime</path>
     [Tags("Files / Settings")]
-    [EndpointName("hideConfirmCancelOperation")]
     [EndpointSummary("Hide confirmation dialog when canceling operation")]
     [EndpointDescription("Hide confirmation dialog when canceling operation.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the parameter is enabled")]
@@ -273,7 +260,6 @@ public class SettingsController(
     /// <short>Hide the confirmation dialog when converting</short>
     /// <path>api/2.0/files/hideconfirmconvert</path>
     [Tags("Files / Settings")]
-    [EndpointName("hideConfirmConvert")]
     [EndpointSummary("Hide the confirmation dialog when converting")]
     [EndpointDescription("Hides the confirmation dialog for saving the file copy in the original format when converting a file.")]
     [OpenApiResponse(typeof(Module), 200, "Boolean value: true if the operation is successful")]
@@ -289,7 +275,6 @@ public class SettingsController(
     /// <short>Hide confirmation dialog when changing room lifetime settings</short>
     /// <path>api/2.0/files/hideconfirmroomlifetime</path>
     [Tags("Files / Settings")]
-    [EndpointName("hideConfirmRoomLifetime")]
     [EndpointSummary("Hide confirmation dialog when changing room lifetime settings")]
     [EndpointDescription("Hide confirmation dialog when changing room lifetime settings.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the parameter is enabled")]
@@ -305,7 +290,6 @@ public class SettingsController(
     /// <short>Check the Private Room availability</short>
     /// <path>api/2.0/files/@privacy/available</path>
     [Tags("Files / Settings")]
-    [EndpointName("isAvailablePrivacyRoomSettings")]
     [EndpointSummary("Check the Private Room availability")]
     [EndpointDescription("Checks if the Private Room settings are available or not.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the Private Room settings are available")]
@@ -321,7 +305,6 @@ public class SettingsController(
     /// <short>Change the ability to store the forcesaved files</short>
     /// <path>api/2.0/files/storeforcesave</path>
     [Tags("Files / Settings")]
-    [EndpointName("storeForcesave")]
     [EndpointSummary("Change the ability to store the forcesaved files")]
     [EndpointDescription("Changes the ability to store the forcesaved file versions.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -338,7 +321,6 @@ public class SettingsController(
     /// <short>Change the ability to upload original formats</short>
     /// <path>api/2.0/files/storeoriginal</path>
     [Tags("Files / Settings")]
-    [EndpointName("storeOriginal")]
     [EndpointSummary("Change the ability to upload original formats")]
     [EndpointDescription("Changes the ability to upload documents in the original formats as well.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -355,7 +337,6 @@ public class SettingsController(
     /// <short>Ask a new file name</short>
     /// <path>api/2.0/files/keepnewfilename</path>
     [Tags("Files / Settings")]
-    [EndpointName("keepNewFileName")]
     [EndpointSummary("Ask a new file name")]
     [EndpointDescription("Specifies whether to ask a user for a file name on creation or not.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -371,7 +352,6 @@ public class SettingsController(
     /// <short>Display a file extension</short>
     /// <path>api/2.0/files/displayfileextension</path>
     [Tags("Files / Settings")]
-    [EndpointName("displayFileExtension")]
     [EndpointSummary("Display a file extension")]
     [EndpointDescription("Specifies whether to display a file extension or not.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the parameter is enabled")]
@@ -387,7 +367,6 @@ public class SettingsController(
     /// <short>Update a file version if it exists</short>
     /// <path>api/2.0/files/updateifexist</path>
     [Tags("Files / Settings")]
-    [EndpointName("updateIfExist")]
     [EndpointSummary("Update a file version if it exists")]
     [EndpointDescription("Updates a file version if a file with such a name already exists.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -403,7 +382,6 @@ public class SettingsController(
     /// <short>Get the trash bin auto-clearing setting</short>
     /// <path>api/2.0/files/settings/autocleanup</path>
     [Tags("Files / Settings")]
-    [EndpointName("getAutomaticallyCleanUp")]
     [EndpointSummary("Get the trash bin auto-clearing setting")]
     [EndpointDescription("Returns the trash bin auto-clearing setting.")]
     [OpenApiResponse(typeof(AutoCleanUpData), 200, "The auto-clearing setting properties: auto-clearing or not, a time interval when the auto-clearing will be performed")]
@@ -419,7 +397,6 @@ public class SettingsController(
     /// <short>Update the trash bin auto-clearing setting</short>
     /// <path>api/2.0/files/settings/autocleanup</path>
     [Tags("Files / Settings")]
-    [EndpointName("changeAutomaticallyCleanUp")]
     [EndpointSummary("Update the trash bin auto-clearing setting")]
     [EndpointDescription("Updates the trash bin auto-clearing setting.")]
     [OpenApiResponse(typeof(AutoCleanUpData), 200, "The auto-clearing setting properties: auto-clearing or not, a time interval when the auto-clearing will be performed")]
@@ -437,7 +414,6 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/dafaultaccessrights</path>
     /// <collection>list</collection>
     [Tags("Files / Settings")]
-    [EndpointName("changeDefaultAccessRights")]
     [EndpointSummary("Change the default access rights")]
     [EndpointDescription("Changes the default access rights in the sharing settings.")]
     [OpenApiResponse(typeof(List<FileShare>), 200, "Updated sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)")]
@@ -454,7 +430,6 @@ public class SettingsController(
     /// <short>Open document in same browser tab</short>
     /// <path>api/2.0/files/settings/openeditorinsametab</path>
     [Tags("Files / Settings")]
-    [EndpointName("setOpenEditorInSameTab")]
     [EndpointSummary("Open document in same browser tab")]
     [EndpointDescription("Change the ability to open in a document in the same browser tab")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the parameter is enabled")]

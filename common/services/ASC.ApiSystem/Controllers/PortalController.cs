@@ -80,7 +80,6 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/register</path>
     [Tags("Portal")]
-    [EndpointName("register")]
     [EndpointSummary("Register")]
     [EndpointDescription("Register")]
     [OpenApiResponse(typeof(IActionResult), 200, "Ok")]
@@ -323,7 +322,6 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/remove</path>
     [Tags("Portal")]
-    [EndpointName("remove")]
     [EndpointSummary("Remove")]
     [EndpointDescription("Remove")]
     [OpenApiResponse(typeof(IActionResult), 200, "Ok")]
@@ -410,7 +408,6 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/status</path>
     [Tags("Portal")]
-    [EndpointName("changeStatus")]
     [EndpointSummary("Status")]
     [EndpointDescription("Status")]
     [OpenApiResponse(typeof(IActionResult), 200, "Ok")]
@@ -473,7 +470,6 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/validateportalname</path>
     [Tags("Portal")]
-    [EndpointName("checkExistingNamePortal")]
     [EndpointSummary("Checks if portal exists")]
     [EndpointDescription("Checks if portal exists")]
     [OpenApiResponse(typeof(IActionResult), 200, "Ok")]
@@ -508,7 +504,6 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/get</path>
     [Tags("Portal")]
-    [EndpointName("getPortals")]
     [EndpointSummary("Gets a list of portals")]
     [EndpointDescription("Gets a list of portals")]
     [OpenApiResponse(typeof(IActionResult), 200, "Ok")]
@@ -583,7 +578,6 @@ public class PortalController(
     /// </summary>
     /// <path>apisystem/portal/signin</path>
     [Tags("Portal")]
-    [EndpointName("signInToPortal")]
     [EndpointSummary("Signs in to portal")]
     [EndpointDescription("Signs in to portal")]
     [OpenApiResponse(typeof(IActionResult), 200, "Ok")]

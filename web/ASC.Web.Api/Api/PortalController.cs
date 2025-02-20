@@ -81,7 +81,6 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal</path>
     [Tags("Portal / Settings")]
-    [EndpointName("getPortal")]
     [EndpointSummary("Get a portal")]
     [EndpointDescription("Returns the current portal.")]
     [OpenApiResponse(typeof(TenantDto), 200, "Current portal information")]
@@ -107,7 +106,6 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/users/{userID}</path>
     [Tags("Portal / Users")]
-    [EndpointName("getUser")]
     [EndpointSummary("Get a user by ID")]
     [EndpointDescription("Returns a user with the ID specified in the request from the current portal.")]
     [OpenApiResponse(typeof(UserInfo), 200, "User information")]
@@ -125,7 +123,6 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/users/invite/{employeeType}</path>
     [Tags("Portal / Users")]
-    [EndpointName("getInviteLink")]
     [EndpointSummary("Get an invitation link")]
     [EndpointDescription("Returns an invitation link for joining the portal.")]
     [OpenApiResponse(typeof(object), 200, "Invitation link")]
@@ -158,7 +155,6 @@ public class PortalController(
     /// <path>api/2.0/portal/tenantextra</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Quota")]
-    [EndpointName("getTenantExtra")]
     [EndpointSummary("Get an extra tenant license")]
     [EndpointDescription("Returns an extra tenant license for the portal.")]
     [OpenApiResponse(typeof(TenantExtraDto), 200, "Extra tenant license information")]
@@ -200,7 +196,6 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/usedspace</path>
     [Tags("Portal / Quota")]
-    [EndpointName("getUsedSpace")]
     [EndpointSummary("Get the used portal space")]
     [EndpointDescription("Returns the used space of the current portal.")]
     [OpenApiResponse(typeof(double), 200, "Used portal space")]
@@ -224,7 +219,6 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/userscount</path>
     [Tags("Portal / Users")]
-    [EndpointName("getUsersCount")]
     [EndpointSummary("Get a number of portal users")]
     [EndpointDescription("Returns a number of portal users.")]
     [OpenApiResponse(typeof(long), 200, "Number of portal users")]
@@ -243,7 +237,6 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/tariff</path>
     [Tags("Portal / Quota")]
-    [EndpointName("getTariff")]
     [EndpointSummary("Get a portal tariff")]
     [EndpointDescription("Returns the current portal tariff.")]
     [OpenApiResponse(typeof(Tariff), 200, "Current portal tariff")]
@@ -289,7 +282,6 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/quota</path>
     [Tags("Portal / Quota")]
-    [EndpointName("getQuota")]
     [EndpointSummary("Get a portal quota")]
     [EndpointDescription("Returns the current portal quota.")]
     [OpenApiResponse(typeof(TenantQuota), 200, "Current portal quota")]
@@ -322,7 +314,6 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/quota/right</path>
     [Tags("Portal / Quota")]
-    [EndpointName("getRightQuota")]
     [EndpointSummary("Get the recommended quota")]
     [EndpointDescription("Returns the recommended quota for the current portal.")]
     [OpenApiResponse(typeof(TenantQuota), 200, "Recommended portal quota")]
@@ -348,7 +339,6 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/path</path>
     [Tags("Portal / Settings")]
-    [EndpointName("getPortalPath")]
     [EndpointSummary("Get a path to the portal")]
     [EndpointDescription("Returns the full absolute path to the current portal.")]
     [OpenApiResponse(typeof(object), 200, "Portal path")]
@@ -367,7 +357,6 @@ public class PortalController(
     /// <path>api/2.0/portal/thumb</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
-    [EndpointName("getThumb")]
     [EndpointSummary("Get a bookmark thumbnail")]
     [EndpointDescription("Returns a thumbnail of the bookmark URL specified in the request.")]
     [OpenApiResponse(typeof(FileResult), 200, "Thumbnail")]
@@ -403,7 +392,6 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/present/mark</path>
     [Tags("Portal / Users")]
-    [EndpointName("markPresentAsReaded")]
     [EndpointSummary("Mark a gift message as read")]
     [EndpointDescription("Marks a gift message as read.")]
     [OpenApiResponse(200, "Gift message marked as read")]
@@ -431,7 +419,6 @@ public class PortalController(
     /// <path>api/2.0/portal/mobile/registration</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
-    [EndpointName("registerMobileAppInstall")]
     [EndpointSummary("Register the mobile app installation")]
     [EndpointDescription("Registers the mobile app installation.")]
     [OpenApiResponse(200, "Mobile app installation registered")]
@@ -451,7 +438,6 @@ public class PortalController(
     /// <path>api/2.0/portal/mobile/registration</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
-    [EndpointName("registerMobileAppInstallByType")]
     [EndpointSummary("Register the mobile app installation by mobile app type")]
     [EndpointDescription("Registers the mobile app installation by mobile app type.")]
     [OpenApiResponse(200, "Mobile app installation registered")]
@@ -469,7 +455,6 @@ public class PortalController(
     /// <path>api/2.0/portal/portalrename</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
-    [EndpointName("updatePortalName")]
     [EndpointSummary("Update a portal name")]
     [EndpointDescription("Updates a portal name with a new one specified in the request.")]
     [OpenApiResponse(typeof(object), 200, "Confirmation email about authentication to the portal with a new name")]
@@ -559,7 +544,6 @@ public class PortalController(
     /// <path>api/2.0/portal/deleteportalimmediately</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
-    [EndpointName("deletePortalImmediately")]
     [EndpointSummary("Delete a portal immediately")]
     [EndpointDescription("Deletes the current portal immediately.")]
     [OpenApiResponse(200, "Deleted the current portal successfully")]
@@ -604,7 +588,6 @@ public class PortalController(
     /// <short>Send suspension instructions</short>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
-    [EndpointName("sendSuspendInstructions")]
     [EndpointSummary("Send suspension instructions")]
     [EndpointDescription("Sends the instructions to suspend the current portal.")]
     [OpenApiResponse(200, "Sent the instructions to suspend the current portal successfully")]
@@ -634,7 +617,6 @@ public class PortalController(
     /// <short>Send removal instructions</short>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
-    [EndpointName("sendDeleteInstructions")]
     [EndpointSummary("Send removal instructions")]
     [EndpointDescription("Sends the instructions to remove the current portal.")]
     [OpenApiResponse(200, "Sent the instructions to remove the current portal successfully")]
@@ -666,7 +648,6 @@ public class PortalController(
     /// <short>Restore a portal</short>
     /// <path>api/2.0/portal/continue</path>
     [Tags("Portal / Settings")]
-    [EndpointName("continuePortal")]
     [EndpointSummary("Restore a portal")]
     [EndpointDescription("Restores the current portal.")]
     [OpenApiResponse(200, "Restored the current portal successfully")]
@@ -688,7 +669,6 @@ public class PortalController(
     /// <short>Deactivate a portal</short>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
-    [EndpointName("suspendPortal")]
     [EndpointSummary("Deactivate a portal")]
     [EndpointDescription("Deactivates the current portal.")]
     [OpenApiResponse(200, "Deactivated the current portal successfully")]
@@ -713,7 +693,6 @@ public class PortalController(
     /// <short>Delete a portal</short>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
-    [EndpointName("deletePortal")]
     [EndpointSummary("Delete a portal")]
     [EndpointDescription("Deletes the current portal.")]
     [OpenApiResponse(typeof(object), 200, "URL to the feedback form about removing a portal")]
@@ -759,7 +738,6 @@ public class PortalController(
     /// <path>api/2.0/portal/sendcongratulations</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Portal / Users")]
-    [EndpointName("sendCongratulations")]
     [EndpointSummary("Send congratulations")]
     [EndpointDescription("Sends congratulations to the user after registering the portal.")]
     [OpenApiResponse(200, "Ok")]
@@ -803,7 +781,6 @@ public class PortalController(
     /// <path>api/2.0/portal/sendremoveinstructions</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Users")]
-    [EndpointName("sendRemoveInstructions")]
     [EndpointSummary("Send removal instructions")]
     [EndpointDescription("Sends the instructions to remove the current portal.")]
     [OpenApiResponse(200, "Ok")]

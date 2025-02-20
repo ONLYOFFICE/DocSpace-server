@@ -65,7 +65,6 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [EndpointName("getAllStorages")]
     [EndpointSummary("Get storages")]
     [EndpointDescription("Returns a list of all the portal storages.")]
     [OpenApiResponse(typeof(List<StorageDto>), 200, "List of storages with the following parameters")]
@@ -93,7 +92,6 @@ public class StorageController(ILoggerProvider option,
     /// <short>Get the storage progress</short>
     /// <path>api/2.0/settings/storage/progress</path>
     [Tags("Settings / Storage")]
-    [EndpointName("getStorageProgress")]
     [EndpointSummary("Get the storage progress")]
     [EndpointDescription("Returns the storage progress.")]
     [OpenApiResponse(typeof(double), 200, "Storage progress")]
@@ -118,7 +116,6 @@ public class StorageController(ILoggerProvider option,
     /// <short>Start the storage encryption process</short>
     /// <path>api/2.0/settings/encryption/start</path>
     [Tags("Settings / Encryption")]
-    [EndpointName("startStorageEncryption")]
     [EndpointSummary("Start the storage encryption process")]
     [EndpointDescription("Starts the storage encryption process.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -254,7 +251,6 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/encryption/settings</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Encryption")]
-    [EndpointName("getStorageEncryptionSettings")]
     [EndpointSummary("Get the storage encryption settings")]
     [EndpointDescription("Returns the storage encryption settings.")]
     [OpenApiResponse(typeof(EncryptionSettings), 200, "Storage encryption settings")]
@@ -298,7 +294,6 @@ public class StorageController(ILoggerProvider option,
     /// <short>Get the storage encryption progress</short>
     /// <path>api/2.0/settings/encryption/progress</path>
     [Tags("Settings / Encryption")]
-    [EndpointName("getStorageEncryptionProgress")]
     [EndpointSummary("Get the storage encryption progress")]
     [EndpointDescription("Returns the storage encryption progress.")]
     [OpenApiResponse(typeof(double?), 200, "Storage encryption progress")]
@@ -330,7 +325,6 @@ public class StorageController(ILoggerProvider option,
     /// <short>Update a storage</short>
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
-    [EndpointName("updateStorage")]
     [EndpointSummary("Update a storage")]
     [EndpointDescription("Updates a storage with the parameters specified in the request.")]
     [OpenApiResponse(typeof(StorageSettings), 200, "Updated storage settings")]
@@ -376,7 +370,6 @@ public class StorageController(ILoggerProvider option,
     /// <short>Reset the storage settings</short>
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
-    [EndpointName("resetStorageToDefault")]
     [EndpointSummary("Reset the storage settings")]
     [EndpointDescription("Resets the storage settings to the default parameters.")]
     [OpenApiResponse(200, "Ok")]
@@ -412,7 +405,6 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/cdn</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [EndpointName("getAllCdnStorages")]
     [EndpointSummary("Get the CDN storages")]
     [EndpointDescription("Returns a list of all the CDN storages.")]
     [OpenApiResponse(typeof(List<StorageDto>), 200, "List of the CDN storages with the following parameters")]
@@ -440,7 +432,6 @@ public class StorageController(ILoggerProvider option,
     /// <short>Update the CDN storage</short>
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
-    [EndpointName("updateCdn")]
     [EndpointSummary("Update the CDN storage")]
     [EndpointDescription("Updates the CDN storage with the parameters specified in the request.")]
     [OpenApiResponse(typeof(CdnStorageSettings), 200, "Updated CDN storage")]
@@ -488,7 +479,6 @@ public class StorageController(ILoggerProvider option,
     /// <short>Reset the CDN storage settings</short>
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
-    [EndpointName("resetCdnToDefault")]
     [EndpointSummary("Reset the CDN storage settings")]
     [EndpointDescription("Resets the CDN storage settings to the default parameters.")]
     [OpenApiResponse(200, "Ok")]
@@ -510,7 +500,6 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/backup</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [EndpointName("getAllBackupStorages")]
     [EndpointSummary("Get the backup storages")]
     [EndpointDescription("Returns a list of all the backup storages.")]
     [OpenApiResponse(typeof(List<StorageDto>), 200, "List of the backup storages with the following parameters")]
@@ -556,7 +545,6 @@ public class StorageController(ILoggerProvider option,
     /// <short>Get Amazon regions</short>
     /// <path>api/2.0/settings/storage/s3/regions</path>
     [Tags("Settings / Storage")]
-    [EndpointName("getAmazonS3Regions")]
     [EndpointSummary("Get Amazon regions")]
     [EndpointDescription("Returns a list of all Amazon regions.")]
     [OpenApiResponse(typeof(object), 200, "List of the Amazon regions")]

@@ -47,3 +47,16 @@ public class OpenApiCustomOperationTransformer : IOpenApiOperationTransformer
         return Task.CompletedTask;
     }
 }
+
+public class OapenApiTagOpeartionTrnsformer : IOpenApiOperationTransformer
+{
+    public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
+    {
+        var routeValues = context.Description.ActionDescriptor.RouteValues;
+        var controllerName = routeValues.ContainsKey("controller") ? routeValues["controller"] : "UnknownController";
+        var actionName = routeValues.ContainsKey("action") ? routeValues["action"] : "UnknownAction";
+        var operationId = $"{controllerName.ToLower()}{actionName}";
+        operation.OperationId = operationId;
+        return Task.CompletedTask;
+    }
+}

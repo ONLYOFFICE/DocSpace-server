@@ -48,7 +48,6 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [EndpointName("getTenantWebhooks")]
     [EndpointSummary("Get webhooks")]
     [EndpointDescription("Returns a list of the tenant webhooks.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<WebhooksConfigWithStatusDto>), 200, "List of tenant webhooks with their config parameters")]
@@ -71,7 +70,6 @@ public class WebhooksController(ApiContext context,
     /// </short>
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
-    [EndpointName("createWebhook")]
     [EndpointSummary("Create a webhook")]
     [EndpointDescription("Creates a new tenant webhook with the parameters specified in the request.")]
     [OpenApiResponse(typeof(WebhooksConfigDto), 200, "Tenant webhook with its config parameters")]
@@ -99,7 +97,6 @@ public class WebhooksController(ApiContext context,
     /// </short>
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
-    [EndpointName("updateWebhook")]
     [EndpointSummary("Update a webhook")]
     [EndpointDescription("Updates the tenant webhook with the parameters specified in the request.")]
     [OpenApiResponse(typeof(WebhooksConfigDto), 200, "Updated tenant webhook with its config parameters")]
@@ -121,7 +118,6 @@ public class WebhooksController(ApiContext context,
     /// </short>
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
-    [EndpointName("removeWebhook")]
     [EndpointSummary("Remove a webhook")]
     [EndpointDescription("Removes the tenant webhook with the ID specified in the request.")]
     [OpenApiResponse(typeof(WebhooksConfigDto), 200, "Tenant webhook with its config parameters")]
@@ -144,7 +140,6 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhooks/log</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [EndpointName("getWebhookLogs")]
     [EndpointSummary("Get webhook logs")]
     [EndpointDescription("Returns the logs of the webhook activities.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<WebhooksLogDto>), 200, "Logs of the webhook activities")]
@@ -173,7 +168,6 @@ public class WebhooksController(ApiContext context,
     /// </short>
     /// <path>api/2.0/settings/webhook/{id}/retry</path>
     [Tags("Settings / Webhooks")]
-    [EndpointName("retryWebhook")]
     [EndpointSummary("Retry a webhook")]
     [EndpointDescription("Retries a webhook with the ID specified in the request.")]
     [OpenApiResponse(typeof(WebhooksLogDto), 200, "Logs of the webhook activities")]
@@ -210,7 +204,6 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook/retry</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [EndpointName("retryWebhooks")]
     [EndpointSummary("Retry webhooks")]
     [EndpointDescription("Retries all the webhooks with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<WebhooksLogDto>), 200, "Logs of the webhook activities")]
@@ -243,7 +236,6 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhooks</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [EndpointName("getWebhookSettings")]
     [EndpointSummary("Get webhook settings")]
     [EndpointDescription("Returns settings of all webhooks.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<Webhook>), 200, "List of webhook settings")]
@@ -267,7 +259,6 @@ public class WebhooksController(ApiContext context,
     /// </short>
     /// <path>api/2.0/settings/webhook/{id}</path>
     [Tags("Settings / Webhooks")]
-    [EndpointName("disableWebhook")]
     [EndpointSummary("Disable a webhook")]
     [EndpointDescription("Disables a webhook with the ID specified in the request.")]
     [OpenApiResponse(typeof(Webhook), 200, "Webhook settings")]

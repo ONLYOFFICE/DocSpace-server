@@ -42,7 +42,6 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/list</path>
     [Tags("Migration")]
-    [EndpointName("getMigrationList")]
     [EndpointSummary("Get migration list")]
     [EndpointDescription("Gets migration list")]
     [OpenApiResponse(typeof(string[]), 200, "Ok")]
@@ -59,7 +58,6 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/init/{migratorName}</path>
     [Tags("Migration")]
-    [EndpointName("uploadAndInitMigration")]
     [EndpointSummary("Upload and init migration")]
     [EndpointDescription("Uploads and inits migration")]
     [OpenApiResponse(200, "Ok")]
@@ -77,7 +75,6 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/status</path>
     [Tags("Migration")]
-    [EndpointName("getMigrationStatus")]
     [EndpointSummary("Get migration status")]
     [EndpointDescription("Gets migration status")]
     [OpenApiResponse(typeof(MigrationStatusDto), 200, "Ok")]
@@ -113,7 +110,6 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/cancel</path>
     [Tags("Migration")]
-    [EndpointName("cancelMigration")]
     [EndpointSummary("Cancel migration")]
     [EndpointDescription("Cancels migration")]
     [OpenApiResponse(200, "Ok")]
@@ -131,7 +127,6 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/clear</path>
     [Tags("Migration")]
-    [EndpointName("clearMigration")]
     [EndpointSummary("Clear migration")]
     [EndpointDescription("Clears migration")]
     [OpenApiResponse(200, "Ok")]
@@ -149,7 +144,6 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/migrate</path>
     [Tags("Migration")]
-    [EndpointName("migrate")]
     [EndpointSummary("Migrate")]
     [EndpointDescription("Migrates")]
     [OpenApiResponse(200, "Ok")]
@@ -167,7 +161,6 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/logs</path>
     [Tags("Migration")]
-    [EndpointName("getMigrationLogs")]
     [EndpointSummary("Get migration logs")]
     [EndpointDescription("Gets migration logs")]
     [OpenApiResponse(200, "Ok")]
@@ -197,7 +190,6 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/finish</path>
     [Tags("Migration")]
-    [EndpointName("finishMigration")]
     [EndpointSummary("Finish migration")]
     [EndpointDescription("Finishes migration")]
     [OpenApiResponse(200, "Ok")]

@@ -52,7 +52,6 @@ public class MessageSettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/messagesettings</path>
     [Tags("Settings / Messages")]
-    [EndpointName("enableAdminMessageSettings")]
     [EndpointSummary("Enable the administrator message settings")]
     [EndpointDescription("Displays the contact form on the \"Sign In\" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.")]
     [OpenApiResponse(typeof(object), 200, "Message about the result of saving new settings")]
@@ -76,7 +75,6 @@ public class MessageSettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
-    [EndpointName("getCookieSettings")]
     [EndpointSummary("Get cookies lifetime")]
     [EndpointDescription("Returns the cookies lifetime value in minutes.")]
     [OpenApiResponse(typeof(CookieSettingsDto), 200, "Lifetime value in minutes")]
@@ -100,7 +98,6 @@ public class MessageSettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
-    [EndpointName("updateCookieSettings")]
     [EndpointSummary("Update cookies lifetime")]
     [EndpointDescription("Updates the cookies lifetime value in minutes.")]
     [OpenApiResponse(typeof(object), 200, "Message about the result of saving new settings")]
@@ -131,7 +128,6 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/sendadmmail</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
-    [EndpointName("sendAdminMail")]
     [EndpointSummary("Send a message to the administrator")]
     [EndpointDescription("Sends a message to the administrator email when unauthorized users encounter issues accessing DocSpace.")]
     [OpenApiResponse(typeof(object), 200, "Message about the result of sending a message")]
@@ -178,7 +174,6 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/sendjoininvite</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
-    [EndpointName("sendJoinInvite")]
     [EndpointSummary("Sends an invitation email")]
     [EndpointDescription("Sends an invitation email with a link to the DocSpace.")]
     [OpenApiResponse(typeof(object), 200, "Message about sending a link to confirm joining the DocSpace")]

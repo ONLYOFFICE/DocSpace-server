@@ -56,7 +56,6 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [EndpointName("getPublicKeysWithAccess")]
     [EndpointSummary("Get file key pairs")]
     [EndpointDescription("Returns all the key pairs of the users who have access to the file with the ID specified in the request.")]
     [OpenApiResponse(typeof(IEnumerable<EncryptionKeyPairDto>), 200, "List of encryption key pairs")]
@@ -94,7 +93,6 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom/keys</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [EndpointName("getKeys")]
     [EndpointSummary("Get encryption keys")]
     [EndpointDescription("Returns a key pair for the current user.")]
     [OpenApiResponse(typeof(EncryptionKeyPairDto), 200, "Encryption key pair: private key, public key, user ID")]
@@ -120,7 +118,6 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [EndpointName("privacyRoom")]
     [EndpointSummary("Check the Private Room settings")]
     [EndpointDescription("Checks if the Private Room settings are enabled or not.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled")]
@@ -139,7 +136,6 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom/keys</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [EndpointName("setKeys")]
     [EndpointSummary("Set encryption keys")]
     [EndpointDescription("Sets the key pair for the current user.")]
     [OpenApiResponse(typeof(object), 200, "Boolean value: true - the key pair is set")]
@@ -180,7 +176,6 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [EndpointName("setPrivacyRoom")]
     [EndpointSummary("Enable the Private Room settings")]
     [EndpointDescription("Enables the Private Room settings.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled")]

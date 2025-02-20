@@ -79,7 +79,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
-    [EndpointName("getSettings")]
     [EndpointSummary("Get the portal settings")]
     [EndpointDescription("Returns a list of all the available portal settings with the current values for each parameter.")]
     [OpenApiResponse(typeof(SettingsDto), 200, "Settings")]
@@ -228,7 +227,6 @@ public partial class SettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/maildomainsettings</path>
     [Tags("Settings / Common settings")]
-    [EndpointName("saveMailDomainSettings")]
     [EndpointSummary("Save the mail domain settings")]
     [EndpointDescription("Saves the mail domain settings specified in the request to the portal.")]
     [OpenApiResponse(typeof(object), 200, "Message about the result of saving the mail domain settings")]
@@ -279,7 +277,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/quota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
-    [EndpointName("getQuotaUsed")]
     [EndpointSummary("Get the space usage")]
     [EndpointDescription("Returns the space usage quota for the portal.")]
     [OpenApiResponse(typeof(QuotaUsageDto), 200, "Space usage and limits for upload")]
@@ -298,7 +295,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/userquotasettings</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
-    [EndpointName("saveUserQuotaSettings")]
     [EndpointSummary("Save the user quota settings")]
     [EndpointDescription("Saves the user quota settings specified in the request to the current portal.")]
     [OpenApiResponse(typeof(TenantUserQuotaSettings), 200, "Message about the result of saving the user quota settings")]
@@ -356,7 +352,6 @@ public partial class SettingsController(MessageService messageService,
     /// </summary>
     /// <path>api/2.0/settings/userquotasettings</path>
     [Tags("Settings / Quota")]
-    [EndpointName("getUserQuotaSettings")]
     [EndpointSummary("Get user quota")]
     [EndpointDescription("Gets user quota settings for the current portal.")]
     [OpenApiResponse(typeof(object), 200, "Ok")]
@@ -376,7 +371,6 @@ public partial class SettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/roomquotasettings</path>
     [Tags("Settings / Quota")]
-    [EndpointName("saveRoomQuotaSettings")]
     [EndpointSummary("Save the room quota settings")]
     [EndpointDescription("Saves the room quota settings specified in the request to the current portal.")]
     [OpenApiResponse(typeof(TenantRoomQuotaSettings), 200, "Tenant room quota settings")]
@@ -437,7 +431,6 @@ public partial class SettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/tenantquotasettings</path>
     [Tags("Settings / Quota")]
-    [EndpointName("setTenantQuotaSettings")]
     [EndpointSummary("Save the tenant quota settings")]
     [EndpointDescription("Saves the tenant quota settings specified in the request to the current portal.")]
     [OpenApiResponse(typeof(TenantQuotaSettings), 200, "Tenant quota settings")]
@@ -493,7 +486,6 @@ public partial class SettingsController(MessageService messageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
-    [EndpointName("getSupportedCultures")]
     [EndpointSummary("Get supported languages")]
     [EndpointDescription("Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. 'de', 'en-US', etc.).")]
     [OpenApiResponse(typeof(IEnumerable<string>), 200, "List of supported languages")]
@@ -512,7 +504,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/timezones</path>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
-    [EndpointName("getTimeZones")]
     [EndpointSummary("Get time zones")]
     [EndpointDescription("Returns a list of all the available portal time zones.")]
     [OpenApiResponse(typeof(List<TimezonesRequestsDto>), 200, "List of time zones")]
@@ -549,7 +540,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Get hostname</short>
     /// <path>api/2.0/settings/machine</path>
     [Tags("Settings / Common settings")]
-    [EndpointName("getMachineName")]
     [EndpointSummary("Get hostname")]
     [EndpointDescription("Returns the portal hostname.")]
     [OpenApiResponse(typeof(string), 200, "Portal hostname")]
@@ -567,7 +557,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Save the DNS settings</short>
     /// <path>api/2.0/settings/dns</path>
     [Tags("Settings / Common settings")]
-    [EndpointName("saveDnsSettings")]
     [EndpointSummary("Save the DNS settings")]
     [EndpointDescription("Saves the DNS settings specified in the request to the current portal.")]
     [OpenApiResponse(typeof(object), 200, "Message about changing DNS")]
@@ -589,7 +578,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/recalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
-    [EndpointName("recalculateQuota")]
     [EndpointSummary("Recalculate quota")]
     [EndpointDescription("Starts the process of quota recalculation.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -610,7 +598,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/checkrecalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
-    [EndpointName("checkRecalculateQuota")]
     [EndpointSummary("Check quota recalculation")]
     [EndpointDescription("Checks the process of quota recalculation.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -631,7 +618,6 @@ public partial class SettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/logo</path>
     [Tags("Settings / Common settings")]
-    [EndpointName("getLogo")]
     [EndpointSummary("Get a portal logo")]
     [EndpointDescription("Returns the portal logo image URL.")]
     [OpenApiResponse(typeof(string), 200, "Portal logo URL")]
@@ -647,7 +633,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Complete the Wizard settings</short>
     /// <path>api/2.0/settings/wizard/complete</path>
     [Tags("Settings / Common settings")]
-    [EndpointName("completeWizard")]
     [EndpointSummary("Complete the Wizard settings")]
     [EndpointDescription("Completes the Wizard settings.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -672,7 +657,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/welcome/close</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
-    [EndpointName("closeWelcomePopup")]
     [EndpointSummary("Close the welcome pop-up notification")]
     [EndpointDescription("Closes the welcome pop-up notification.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -700,7 +684,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/colortheme</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
-    [EndpointName("getColorTheme")]
     [EndpointSummary("Get a color theme")]
     [EndpointDescription("Returns the portal color theme.")]
     [OpenApiResponse(typeof(CustomColorThemesSettingsDto), 200, "Portal color theme")]
@@ -717,7 +700,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Save a color theme</short>
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
-    [EndpointName("saveColorTheme")]
     [EndpointSummary("Save a color theme")]
     [EndpointDescription("Saves the portal color theme specified in the request.")]
     [OpenApiResponse(typeof(CustomColorThemesSettingsDto), 200, "Saved color theme")]
@@ -792,7 +774,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Delete a color theme</short>
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
-    [EndpointName("deleteColorTheme")]
     [EndpointSummary("Delete a color theme")]
     [EndpointDescription("Deletes the portal color theme with the ID specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -827,7 +808,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Close the admin helper notification</short>
     /// <path>api/2.0/settings/closeadminhelper</path>
     [Tags("Settings / Common settings")]
-    [EndpointName("closeAdminHelper")]
     [EndpointSummary("Close the admin helper notification")]
     [EndpointDescription("Closes the admin helper notification.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -852,7 +832,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/timeandlanguage</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
-    [EndpointName("timeAndLanguage")]
     [EndpointSummary("Set time zone and language")]
     [EndpointDescription("Sets the portal time zone and language specified in the request.")]
     [OpenApiResponse(typeof(object), 200, "Message about saving settings successfully")]
@@ -903,7 +882,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/defaultpage</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
-    [EndpointName("saveDefaultPageSetting")]
     [EndpointSummary("Set the default product page")]
     [EndpointDescription("Sets the default product page.")]
     [OpenApiResponse(typeof(object), 200, "Message about saving settings successfully")]
@@ -925,7 +903,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Update the email activation settings</short>
     /// <path>api/2.0/settings/emailactivation</path>
     [Tags("Settings / Common settings")]
-    [EndpointName("updateEmailActivationSettings")]
     [EndpointSummary("Update the email activation settings")]
     [EndpointDescription("Updates the email activation settings.")]
     [OpenApiResponse(typeof(EmailActivationSettings), 200, "Updated email activation settings")]
@@ -943,7 +920,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
-    [EndpointName("getSpaceUsageStatistics")]
     [EndpointSummary("Get the space usage statistics")]
     [EndpointDescription("Returns the space usage statistics of the module with the ID specified in the request.")]
     [OpenApiResponse(typeof(List<UsageSpaceStatItemDto>), 200, "Module space usage statistics")]
@@ -981,7 +957,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Get the socket settings</short>
     /// <path>api/2.0/settings/socket</path>
     [Tags("Settings / Common settings")]
-    [EndpointName("getSocketSettings")]
     [EndpointSummary("Get the socket settings")]
     [EndpointDescription("Returns the socket settings.")]
     [OpenApiResponse(typeof(object), 200, "Socket settings")]
@@ -1021,7 +996,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/authservice</path>
     /// <collection>list</collection>
     [Tags("Settings / Authorization")]
-    [EndpointName("getAuthServices")]
     [EndpointSummary("Get the authorization services")]
     [EndpointDescription("Returns the authorization services.")]
     [OpenApiResponse(typeof(IEnumerable<AuthServiceRequestsDto>), 200, "List of authorization services")]
@@ -1044,7 +1018,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Save the authorization keys</short>
     /// <path>api/2.0/settings/authservice</path>
     [Tags("Settings / Authorization")]
-    [EndpointName("saveAuthKeys")]
     [EndpointSummary("Save the authorization keys")]
     [EndpointDescription("Saves the authorization keys.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -1109,7 +1082,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Get the payment settings</short>
     /// <path>api/2.0/settings/payment</path>
     [Tags("Settings / Common settings")]
-    [EndpointName("paymentSettings")]
     [EndpointSummary("Get the payment settings")]
     [EndpointDescription("Returns the portal payment settings.")]
     [OpenApiResponse(typeof(object), 200, "Payment settings")]
@@ -1150,7 +1122,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramlink</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
-    [EndpointName("telegramLink")]
     [EndpointSummary("Get the Telegram link")]
     [EndpointDescription("Returns a link that will connect TelegramBot to your account.")]
     [OpenApiResponse(typeof(string), 200, "Telegram link")]
@@ -1176,7 +1147,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramisconnected</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
-    [EndpointName("telegramIsConnected")]
     [EndpointSummary("Check the Telegram connection")]
     [EndpointDescription("Checks if the user has connected to TelegramBot.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the user is connected to TelegramBot")]
@@ -1194,7 +1164,6 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramdisconnect</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
-    [EndpointName("telegramDisconnect")]
     [EndpointSummary("Unlink Telegram")]
     [EndpointDescription("Unlinks TelegramBot from your account.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]

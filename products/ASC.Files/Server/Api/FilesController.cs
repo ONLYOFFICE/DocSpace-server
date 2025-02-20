@@ -57,7 +57,6 @@ public class FilesControllerInternal(
     /// <path>api/2.0/files/file/{fileId}/log</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [EndpointName("getHistory")]
     [EndpointSummary("Get file history")]
     [EndpointDescription("Get the list of actions performed on the file with the specified identifier")]
     [OpenApiResponse(typeof(IAsyncEnumerable<HistoryDto>), 200, "List of actions performed on the file")]
@@ -108,7 +107,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}/history</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [EndpointName("changeHistory")]
     [EndpointSummary("Change version history")]
     [EndpointDescription("Changes the version history of a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileDto<int>>), 200, "Updated information about file versions")]
@@ -126,7 +124,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [EndpointName("checkConversion")]
     [EndpointSummary("Get conversion status")]
     [EndpointDescription("Checks the conversion status of a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<ConversationResultDto>), 200, "Conversion result")]
@@ -149,7 +146,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Get file download link</short>
     /// <path>api/2.0/files/file/{fileId}/presigneduri</path>
     [Tags("Files / Files")]
-    [EndpointName("getPresignedUri")]
     [EndpointSummary("Get file download link")]
     [EndpointDescription("Returns a link to download a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(string), 200, "File download link")]
@@ -165,7 +161,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Check the PDF file</short>
     /// <path>api/2.0/files/file/{fileId}/isformpdf</path>
     [Tags("Files / Files")]
-    [EndpointName("isFormPDF")]
     [EndpointSummary("Check if PDF file is form")]
     [EndpointDescription("Checks if the PDF file is form or not.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true - the PDF file is form, false - the PDF file is not a form")]
@@ -181,7 +176,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Copy a file</short>
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
     [Tags("Files / Files")]
-    [EndpointName("copyFileAs")]
     [EndpointSummary("Copy a file")]
     [EndpointDescription("Copies (and converts if possible) an existing file to the specified folder.")]
     [OpenApiResponse(typeof(FileEntryDto), 200, "Copied file entry information")]
@@ -211,7 +205,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <remarks>If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.</remarks>
     /// <path>api/2.0/files/{folderId}/file</path>
     [Tags("Files / Files")]
-    [EndpointName("createFile")]
     [EndpointSummary("Create a file")]
     [EndpointDescription("Creates a new file in the specified folder with the title specified in the request.\n\n **Note**: If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
@@ -228,7 +221,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Create an HTML file</short>
     /// <path>api/2.0/files/{folderId}/html</path>
     [Tags("Files / Files")]
-    [EndpointName("createHtmlFile")]
     [EndpointSummary("Create an HTML file")]
     [EndpointDescription("Creates an HTML (.html) file in the selected folder with the title and contents specified in the request.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
@@ -245,7 +237,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Create a txt file</short>
     /// <path>api/2.0/files/{folderId}/text</path>
     [Tags("Files / Files")]
-    [EndpointName("createTextFile")]
     [EndpointSummary("Create a text file")]
     [EndpointDescription("Creates a text (.txt) file in the selected folder with the title and contents specified in the request.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
@@ -262,7 +253,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [EndpointName("deleteFile")]
     [EndpointSummary("Delete a file")]
     [EndpointDescription("Deletes a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
@@ -282,7 +272,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <path>api/2.0/files/file/fillresult</path>
     [Tags("Files / Files")]
-    [EndpointName("getFillResult")]
     [EndpointSummary("Get fill result")]
     [EndpointDescription("Gets the fill result for a form filling session.")]
     [OpenApiResponse(typeof(FillingFormResultDto<int>), 200, "Ok")]
@@ -302,7 +291,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}/edit/diff</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [EndpointName("getEditDiffUrl")]
     [EndpointSummary("Get changes URL")]
     [EndpointDescription("Returns a URL to the changes of a file version specified in the request.")]
     [OpenApiResponse(typeof(EditHistoryDataDto), 200, "File version history data")]
@@ -321,7 +309,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [EndpointName("getEditHistory")]
     [EndpointSummary("Get version history")]
     [EndpointDescription("Returns the version history of a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EditHistoryDto>), 200, "Version history data")]
@@ -339,7 +326,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [EndpointName("getFileInfo")]
     [EndpointSummary("Get file information")]
     [EndpointDescription("Returns the detailed information about a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "File information")]
@@ -358,7 +344,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [EndpointName("getFileVersionInfo")]
     [EndpointSummary("Get file versions")]
     [EndpointDescription("Returns the detailed information about all the available file versions with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileDto<int>>), 200, "Information about file versions: folder ID, version, version group, content length, pure content length, file status, URL to view a file, web URL, file type, file extension, comment, encrypted or not, thumbnail URL, thumbnail status, locked or not, user ID who locked a file, denies file downloading or not, denies file sharing or not, file accessibility")]
@@ -375,7 +360,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Lock a file</short>
     /// <path>api/2.0/files/file/{fileId}/lock</path>
     [Tags("Files / Files")]
-    [EndpointName("lockFile")]
     [EndpointSummary("Lock a file")]
     [EndpointDescription("Locks a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "Locked file information")]
@@ -393,7 +377,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [EndpointName("restoreVersion")]
     [EndpointSummary("Restore a file version")]
     [EndpointDescription("Restores a file version specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EditHistoryDto>), 200, "Version history data: file ID, key, file version, version group, a user who updated a file, creation time, history changes in the string format, list of history changes, server version")]
@@ -413,7 +396,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [EndpointName("startConversion")]
     [EndpointSummary("Start file conversion")]
     [EndpointDescription("Starts a conversion operation of a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<ConversationResultDto>), 200, "Conversion result")]
@@ -432,7 +414,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Update a comment</short>
     /// <path>api/2.0/files/file/{fileId}/comment</path>
     [Tags("Files / Operations")]
-    [EndpointName("updateComment")]
     [EndpointSummary("Update a comment")]
     [EndpointDescription("Updates a comment in a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(object), 200, "Updated comment")]
@@ -449,7 +430,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [EndpointName("updateFile")]
     [EndpointSummary("Update a file")]
     [EndpointDescription("Updates the information of the selected file with the parameters specified in the request.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "Updated file information")]
@@ -468,7 +448,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/{fileId}/update</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [EndpointName("updateFileStreamFromForm")]
     [EndpointSummary("Update file contents")]
     [EndpointDescription("Updates the contents of a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "Updated file information")]
@@ -486,7 +465,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Create primary external link</short>
     /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
-    [EndpointName("createPrimaryExternalLink")]
     [EndpointSummary("Create primary external link")]
     [EndpointDescription("Creates a primary external link by the identifier specified in the request.")]
     [OpenApiResponse(typeof(FileShareDto), 200, "File security information")]
@@ -504,7 +482,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Get primary external link</short>
     /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
-    [EndpointName("getFilePrimaryExternalLink")]
     [EndpointSummary("Get primary external link")]
     [EndpointDescription("Returns the primary external link by the identifier specified in the request.")]
     [OpenApiResponse(typeof(FileShareDto), 200, "File security information")]
@@ -523,7 +500,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
-    [EndpointName("setOrderFile")]
     [EndpointSummary("Set order of a file")]
     [EndpointDescription("Sets order of a file with ID specified in the request")]
     [OpenApiResponse(200, "Order is set")]
@@ -541,7 +517,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/order</path>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     [Tags("Files / Files")]
-    [EndpointName("setOrder")]
     [EndpointSummary("Set order")]
     [EndpointDescription("Sets order")]
     [OpenApiResponse(200, "Order is set")]
@@ -558,7 +533,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{id}/links</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [EndpointName("getLinks")]
     [EndpointSummary("Get file external links")]
     [EndpointDescription("Returns the external links of a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileShareDto>), 200, "File security information")]
@@ -584,7 +558,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Set an external link</short>
     /// <path>api/2.0/files/file/{id}/links</path>
     [Tags("Files / Files")]
-    [EndpointName("setExternalLink")]
     [EndpointSummary("Set an external link")]
     [EndpointDescription("Sets an external link to a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(FileShareDto), 200, "File security information")]
@@ -603,7 +576,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Save as pdf</short>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>
     [Tags("Files / Files")]
-    [EndpointName("saveAsPdf")]
     [EndpointSummary("Save as pdf")]
     [EndpointDescription("Saves a file with the identifier specified in the request as a PDF document")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
@@ -630,7 +602,6 @@ public class FilesControllerCommon(
     /// <remarks>If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.</remarks>
     /// <path>api/2.0/files/@my/file</path>
     [Tags("Files / Files")]
-    [EndpointName("createFileMyDocuments")]
     [EndpointSummary("Create a file in the 'My documents' section")]
     [EndpointDescription("Creates a new file in the 'My documents' section with the title specified in the request.\n\n **Note**: If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
@@ -647,7 +618,6 @@ public class FilesControllerCommon(
     /// <path>api/2.0/files/@common/html</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [EndpointName("createHtmlFileInCommon")]
     [EndpointSummary("Create an HTML file in the 'Common' section")]
     [EndpointDescription("Creates an HTML (.html) file in the 'Common' section with the title and contents specified in the request.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
@@ -664,7 +634,6 @@ public class FilesControllerCommon(
     /// <short>Create an HTML file in the "My documents" section</short>
     /// <path>api/2.0/files/@my/html</path>
     [Tags("Files / Files")]
-    [EndpointName("createHtmlFileInMy")]
     [EndpointSummary("Create an HTML file in the 'My documents' section")]
     [EndpointDescription("Creates an HTML (.html) file in the 'My documents' section with the title and contents specified in the request.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
@@ -682,7 +651,6 @@ public class FilesControllerCommon(
     /// <path>api/2.0/files/@common/text</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [EndpointName("createTextFileInCommon")]
     [EndpointSummary("Create a text file in the 'Common' section")]
     [EndpointDescription("Creates a text (.txt) file in the 'Common' section with the title and contents specified in the request.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
@@ -698,7 +666,6 @@ public class FilesControllerCommon(
     /// <short>Create a text file in the "My documents" section</short>
     /// <path>api/2.0/files/@my/text</path>
     [Tags("Files / Files")]
-    [EndpointName("createTextFileInMy")]
     [EndpointSummary("Create a text file in the 'My documents' section")]
     [EndpointDescription("Creates a text (.txt) file in the 'My documents' section with the title and contents specified in the request.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
@@ -716,7 +683,6 @@ public class FilesControllerCommon(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [EndpointName("createThumbnails")]
     [EndpointSummary("Create thumbnails")]
     [EndpointDescription("Creates thumbnails for the files with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IEnumerable<JsonElement>), 200, "List of file IDs")]

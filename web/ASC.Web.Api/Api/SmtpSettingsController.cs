@@ -51,7 +51,6 @@ public class SmtpSettingsController(
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
-    [EndpointName("getSmtpSettings")]
     [EndpointSummary("Get the SMTP settings")]
     [EndpointDescription("Returns the current portal SMTP settings.")]
     [OpenApiResponse(typeof(SmtpSettingsDto), 200, "SMTP settings")]
@@ -82,7 +81,6 @@ public class SmtpSettingsController(
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
-    [EndpointName("saveSmtpSettings")]
     [EndpointSummary("Save the SMTP settings")]
     [EndpointDescription("Saves the SMTP settings for the current portal.")]
     [OpenApiResponse(typeof(SmtpSettingsDto), 200, "SMTP settings")]
@@ -136,7 +134,6 @@ public class SmtpSettingsController(
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
-    [EndpointName("resetSmtpSettings")]
     [EndpointSummary("Reset the SMTP settings")]
     [EndpointDescription("Resets the SMTP settings of the current portal.")]
     [OpenApiResponse(typeof(SmtpSettingsDto), 200, "Default SMTP settings")]
@@ -172,7 +169,6 @@ public class SmtpSettingsController(
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp/test</path>
     [Tags("Security / SMTP settings")]
-    [EndpointName("testSmtpSettings")]
     [EndpointSummary("Test the SMTP settings")]
     [EndpointDescription("Tests the SMTP settings for the current portal by sending a test message to the user email.")]
     [OpenApiResponse(typeof(SmtpOperationStatusRequestsDto), 200, "SMTP operation status")]
@@ -199,7 +195,6 @@ public class SmtpSettingsController(
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp/test/status</path>
     [Tags("Security / SMTP settings")]
-    [EndpointName("getSmtpOperationStatus")]
     [EndpointSummary("Get the SMTP test process status")]
     [EndpointDescription("Returns the SMTP test process status.")]
     [OpenApiResponse(typeof(SmtpOperationStatusRequestsDto), 200, "SMTP operation status")]

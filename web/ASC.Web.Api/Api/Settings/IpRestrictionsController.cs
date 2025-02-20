@@ -44,7 +44,6 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <path>api/2.0/settings/iprestrictions</path>
     /// <collection>list</collection>
     [Tags("Settings / IP restrictions")]
-    [EndpointName("getIpRestrictions")]
     [EndpointSummary("Get the IP portal restrictions")]
     [EndpointDescription("Returns the IP portal restrictions.")]
     [OpenApiResponse(typeof(IEnumerable<IPRestriction>), 200, "List of IP restrictions parameters")]
@@ -62,7 +61,6 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <short>Save the IP restriction settings</short>
     /// <path>api/2.0/settings/iprestrictions</path>
     [Tags("Settings / IP restrictions")]
-    [EndpointName("saveIpRestrictions")]
     [EndpointSummary("Save the IP restriction settings")]
     [EndpointDescription("Updates the IP restriction settings with a parameter specified in the request.")]
     [OpenApiResponse(typeof(IpRestrictionsDto), 200, "Updated IP restriction settings")]
@@ -109,7 +107,6 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <short>Get the IP restriction settings</short>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     [Tags("Settings / IP restrictions")]
-    [EndpointName("readIpRestrictionsSettings")]
     [EndpointSummary("Get the IP restriction settings")]
     [EndpointDescription("Returns the IP restriction settings.")]
     [OpenApiResponse(typeof(IPRestrictionsSettings), 200, "IP restriction settings")]
@@ -127,7 +124,6 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <short>Save the IP restriction settings</short>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     [Tags("Settings / IP restrictions")]
-    [EndpointName("updateIpRestrictionsSettings")]
     [EndpointSummary("Save the IP restriction settings")]
     [EndpointDescription("Updates the IP restriction settings with a parameter specified in the request.")]
     [OpenApiResponse(typeof(IpRestrictionsDto), 200, "Updated IP restriction settings")]

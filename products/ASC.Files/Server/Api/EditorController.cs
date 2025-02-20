@@ -86,7 +86,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Save file edits</short>
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     [Tags("Files / Files")]
-    [EndpointName("saveEditingFromForm")]
     [EndpointSummary("Save file edits")]
     [EndpointDescription("Saves edits to a file with the ID specified in the request.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "Saved file parameters")]
@@ -106,7 +105,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Start file editing</short>
     /// <path>api/2.0/files/file/{fileId}/startedit</path>
     [Tags("Files / Files")]
-    [EndpointName("startEdit")]
     [EndpointSummary("Start file editing")]
     [EndpointDescription("Informs about opening a file with the ID specified in the request for editing, locking it from being deleted or moved (this method is called by the mobile editors).")]
     [OpenApiResponse(typeof(object), 200, "File key for Document Service")]
@@ -124,7 +122,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Starts filling</short>
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
-    [EndpointName("startFilling")]
     [EndpointSummary("Start filling")]
     [EndpointDescription("Starts filling a file with the ID specified in the request.")]
     [OpenApiResponse(200, "Ok")]
@@ -141,7 +138,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Track file editing</short>
     /// <path>api/2.0/files/file/{fileId}/trackeditfile</path>
     [Tags("Files / Files")]
-    [EndpointName("trackEditFile")]
     [EndpointSummary("Track file editing")]
     [EndpointDescription("Tracks file changes when editing.")]
     [OpenApiResponse(typeof(KeyValuePair<bool, string>), 200, "File changes")]
@@ -160,7 +156,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [EndpointName("openEdit")]
     [EndpointSummary("Open a file")]
     [EndpointDescription("Returns the initialization configuration of a file to open it in the editor.")]
     [OpenApiResponse(typeof(ConfigurationDto<int>), 200, "Configuration parameters")]
@@ -340,7 +335,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Get file download link asynchronously</short>
     /// <path>api/2.0/files/file/{fileId}/presigned</path>
     [Tags("Files / Files")]
-    [EndpointName("getPresignedFileUri")]
     [EndpointSummary("Get file download link asynchronously")]
     [EndpointDescription("Returns a link to download a file with the ID specified in the request asynchronously.")]
     [OpenApiResponse(typeof(DocumentService.FileLink), 200, "File download link")]
@@ -358,7 +352,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
-    [EndpointName("sharedUsers")]
     [EndpointSummary("Get shared users")]
     [EndpointDescription("Returns a list of users with their access rights to the file with the ID specified in the request.")]
     [OpenApiResponse(typeof(List<MentionWrapper>), 200, "List of users with their access rights to the file")]
@@ -375,7 +368,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/infousers</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [EndpointName("getInfoUsers")]
     [EndpointSummary("Get users with access rights")]
     [EndpointDescription("Return list of users with their access rights to the file")]
     [OpenApiResponse(typeof(List<MentionWrapper>), 200, "List of users with their access rights to the file")]
@@ -391,7 +383,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Get reference data</short>
     /// <path>api/2.0/files/file/referencedata</path>
     [Tags("Files / Files")]
-    [EndpointName("getReferenceData")]
     [EndpointSummary("Get reference data")]
     [EndpointDescription("Returns the reference data to uniquely identify a file in its system and check the availability of insering data into the destination spreadsheet by the external link.")]
     [OpenApiResponse(typeof(FileReference), 200, "File reference data")]
@@ -408,7 +399,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [EndpointName("protectUsers")]
     [EndpointSummary("Get users with protected file access")]
     [EndpointDescription("Returns a list of users with their access rights to the protected file with the ID specified in the request.")]
     [OpenApiResponse(typeof(List<MentionWrapper>), 200, "List of users with their access rights to the protected file")]
@@ -436,7 +426,6 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <path>api/2.0/files/docservice</path>
     /// <collection>list</collection>
     [Tags("Files / Settings")]
-    [EndpointName("checkDocServiceUrl")]
     [EndpointSummary("Check document service URL")]
     [EndpointDescription("Checks the document service location.")]
     [OpenApiResponse(typeof(DocServiceUrlDto), 200, "Document service information: the Document Server address, the Document Server address in the local private network, the Community Server address")]
@@ -516,7 +505,6 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
-    [EndpointName("getDocServiceUrl")]
     [EndpointSummary("Get document service URL")]
     [EndpointDescription("Returns the address of the connected editors.")]
     [OpenApiResponse(typeof(DocServiceUrlDto), 200, "The document service URL with the editor version specified")]

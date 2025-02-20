@@ -59,7 +59,6 @@ public class TfaappController(
     ///<path>api/2.0/settings/tfaapp</path>
     ///<collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [EndpointName("getTfaSettings")]
     [EndpointSummary("Get the TFA settings")]
     [EndpointDescription("Returns the current two-factor authentication settings.")]
     [OpenApiResponse(typeof(IEnumerable<TfaSettingsDto>), 200, "TFA settings")]
@@ -112,7 +111,6 @@ public class TfaappController(
     /// <short>Validate the TFA code</short>
     ///<path>api/2.0/settings/tfaapp/validate</path>
     [Tags("Settings / TFA settings")]
-    [EndpointName("validateTfaCode")]
     [EndpointSummary("Validate the TFA code")]
     [EndpointDescription("Validates the two-factor authentication code specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "True if the code is valid")]
@@ -140,7 +138,6 @@ public class TfaappController(
     /// <short>Get confirmation email</short>
     ///<path>api/2.0/settings/tfaapp/confirm</path>
     [Tags("Settings / TFA settings")]
-    [EndpointName("getTfaConfirmUrl")]
     [EndpointSummary("Get confirmation email")]
     [EndpointDescription("Returns the confirmation email URL for authorization via SMS or TFA application.")]
     [OpenApiResponse(typeof(object), 200, "Confirmation email URL")]
@@ -179,7 +176,6 @@ public class TfaappController(
     /// <short>Update the TFA settings</short>
     ///<path>api/2.0/settings/tfaapp</path>
     [Tags("Settings / TFA settings")]
-    [EndpointName("updateTfaSettings")]
     [EndpointSummary("Update the TFA settings")]
     [EndpointDescription("Updates the two-factor authentication settings with the parameters specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "True if the operation is successful")]
@@ -282,7 +278,6 @@ public class TfaappController(
     /// <short>Get confirmation email for updating TFA settings</short>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
-    [EndpointName("getTfaSettingsConfirmUrl")]
     [EndpointSummary("Get confirmation email for updating TFA settings")]
     [EndpointDescription("Returns the confirmation email URL for updating TFA settings.")]
     [OpenApiResponse(typeof(object), 200, "Confirmation email URL")]
@@ -303,7 +298,6 @@ public class TfaappController(
     /// <short>Generate setup code</short>
     /// <path>api/2.0/settings/tfaapp/setup</path>
     [Tags("Settings / TFA settings")]
-    [EndpointName("generateTfaSetupCode")]
     [EndpointSummary("Generate setup code")]
     [EndpointDescription("Generates the setup TFA code for the current user.")]
     [OpenApiResponse(typeof(SetupCode), 200, "Setup code")]
@@ -337,7 +331,6 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [EndpointName("getTfaCodes")]
     [EndpointSummary("Get the TFA codes")]
     [EndpointDescription("Returns the two-factor authentication application codes.")]
     [OpenApiResponse(typeof(IEnumerable<object>), 200, "List of TFA application codes")]
@@ -369,7 +362,6 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappnewcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [EndpointName("updateTfaCodes")]
     [EndpointSummary("Update the TFA codes")]
     [EndpointDescription("Requests the new backup codes for the two-factor authentication application.")]
     [OpenApiResponse(typeof(IEnumerable<object>), 200, "New backup codes")]
@@ -400,7 +392,6 @@ public class TfaappController(
     /// <short>Unlink the TFA application</short>
     /// <path>api/2.0/settings/tfaappnewapp</path>
     [Tags("Settings / TFA settings")]
-    [EndpointName("unlinkTfaApp")]
     [EndpointSummary("Unlink the TFA application")]
     [EndpointDescription("Unlinks the current two-factor authentication application from the user account specified in the request.")]
     [OpenApiResponse(typeof(object), 200, "Login URL")]

@@ -44,7 +44,6 @@ public class WebPluginsController(ApiContext apiContext,
     /// <path>api/2.0/settings/webplugins</path>
     /// <exception cref="CustomHttpException"></exception>
     [Tags("Settings / Webplugins")]
-    [EndpointName("addWebPluginFromFile")]
     [EndpointSummary("Add web plugin from file")]
     [EndpointDescription("Adds web plugins from file.")]
     [OpenApiResponse(typeof(WebPluginDto), 200, "Web plugin")]
@@ -83,7 +82,6 @@ public class WebPluginsController(ApiContext apiContext,
     /// </summary>
     /// <path>api/2.0/settings/webplugins</path>
     [Tags("Settings / Webplugins")]
-    [EndpointName("getWebPlugins")]
     [EndpointSummary("Get web plugins")]
     [EndpointDescription("Gets web plugins.")]
     [OpenApiResponse(typeof(IEnumerable<WebPluginDto>), 200, "Web plugin")]
@@ -110,7 +108,6 @@ public class WebPluginsController(ApiContext apiContext,
     /// </summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
-    [EndpointName("getWebPluginByName")]
     [EndpointSummary("Get web plugin by name")]
     [EndpointDescription("Gets web plugins by name specified in request.")]
     [OpenApiResponse(typeof(WebPluginDto), 200, "Web plugin")]
@@ -132,7 +129,6 @@ public class WebPluginsController(ApiContext apiContext,
     /// </summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
-    [EndpointName("updateWebPlugin")]
     [EndpointSummary("Update web plugin")]
     [EndpointDescription("Updates web plugins.")]
     [OpenApiResponse(200, "Ok")]
@@ -154,7 +150,6 @@ public class WebPluginsController(ApiContext apiContext,
     /// </summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
-    [EndpointName("deleteWebPlugin")]
     [EndpointSummary("Delete web plugin")]
     [EndpointDescription("Deletes web plugins by name specified in request.")]
     [OpenApiResponse(200, "Ok")]

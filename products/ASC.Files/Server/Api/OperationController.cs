@@ -44,7 +44,6 @@ public class OperationController(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
-    [EndpointName("bulkDownload")]
     [EndpointSummary("Bulk download")]
     [EndpointDescription("Starts the download process of files and folders with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
@@ -71,7 +70,6 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/copy</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [EndpointName("copyBatchItems")]
     [EndpointSummary("Copy to a folder")]
     [EndpointDescription("Copies all the selected files and folders to the folder with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
@@ -94,7 +92,6 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/delete</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [EndpointName("deleteBatchItems")]
     [EndpointSummary("Delete files and folders")]
     [EndpointDescription("Deletes the files and folders with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
@@ -111,7 +108,6 @@ public class OperationController(
     }
     
     [Tags("Files / Operations")]
-    [EndpointName("deleteVersionBatchItems")]
     [EndpointSummary("Delete files and folders")]
     [EndpointDescription("Deletes the files and folders with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
@@ -135,7 +131,6 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/emptytrash</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [EndpointName("emptyTrash")]
     [EndpointSummary("Empty the Trash folder")]
     [EndpointDescription("Deletes all the files and folders from the Trash folder.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
@@ -160,7 +155,6 @@ public class OperationController(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
-    [EndpointName("getOperationStatuses")]
     [EndpointSummary("Get active operations")]
     [EndpointDescription("Returns a list of all the active operations.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
@@ -181,7 +175,6 @@ public class OperationController(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
-    [EndpointName("getOperationStatuses")]
     [EndpointSummary("Get statuses of operations")]
     [EndpointDescription("Retrieves the statuses of operations filtered by the specified operation type.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations statuses")]
@@ -202,7 +195,6 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/markasread</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [EndpointName("markAsRead")]
     [EndpointSummary("Mark as read")]
     [EndpointDescription("Marks the files and folders with the IDs specified in the request as read.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
@@ -224,7 +216,6 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [EndpointName("moveBatchItems")]
     [EndpointSummary("Move to a folder")]
     [EndpointDescription("Moves all the selected files and folders to the folder with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
@@ -245,7 +236,6 @@ public class OperationController(
     /// </summary>
     /// <path>api/2.0/files/fileops/duplicate</path>
     [Tags("Files / Operations")]
-    [EndpointName("duplicateBatchItems")]
     [EndpointSummary("Duplicate files and folders")]
     [EndpointDescription("Duplicates all the selected files and folders.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
@@ -266,7 +256,6 @@ public class OperationController(
     /// </summary>
     /// <path>api/2.0/files/fileops/checkdestfolder</path>
     [Tags("Files / Operations")]
-    [EndpointName("moveOrCopyDestFolderCheck")]
     [EndpointSummary("Move or copy")]
     [EndpointDescription("Moves or copies")]
     [OpenApiResponse(typeof(CheckDestFolderDto), 200, "Result")]
@@ -315,7 +304,6 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [EndpointName("moveOrCopyBatchCheck")]
     [EndpointSummary("Check files and folders for conflicts")]
     [EndpointDescription("Checks a batch of files and folders for conflicts when moving or copying them to the folder with the ID specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileEntryDto>), 200, "List of file entry information")]
@@ -352,7 +340,6 @@ public class OperationController(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
-    [EndpointName("terminateTasks")]
     [EndpointSummary("Finish active operations")]
     [EndpointDescription("Finishes an operation with the ID specified in the request or all the active operations.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]

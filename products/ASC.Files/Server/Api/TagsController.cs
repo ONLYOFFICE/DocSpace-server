@@ -52,7 +52,6 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/recent</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [EndpointName("addToRecent")]
     [EndpointSummary("Add a file to the \"Recent\" section")]
     [EndpointDescription("Adds a file with the ID specified in the request to the 'Recent' section.")]
     [OpenApiResponse(typeof(FileDto<int>), 200, "New file information")]
@@ -73,7 +72,6 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites/{fileId}</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [EndpointName("toggleFileFavorite")]
     [EndpointSummary("Change the file favorite status")]
     [EndpointDescription("Changes the favorite status of the file with the ID specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true - the file is favorite, false - the file is not favorite")]
@@ -97,7 +95,6 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
-    [EndpointName("addFavorites")]
     [EndpointSummary("Add favorite files and folders")]
     [EndpointDescription("Adds files and folders with the IDs specified in the request to the favorite list.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -120,7 +117,6 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <short>Add template files</short>
     /// <path>api/2.0/files/templates</path>
     [Tags("Files / Files")]
-    [EndpointName("addTemplates")]
     [EndpointSummary("Add template files")]
     [EndpointDescription("Adds files with the IDs specified in the request to the template list.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -139,7 +135,6 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
-    [EndpointName("deleteFavoritesFromBody")]
     [EndpointSummary("Delete favorite files and folders (using body parameters)")]
     [EndpointDescription("Removes files and folders with the IDs specified in the request from the favorite list. This method uses the body parameters.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -157,7 +152,6 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
-    [EndpointName("deleteFavoritesFromQuery")]
     [EndpointSummary("Delete favorite files and folders (using query parameters)")]
     [EndpointDescription("Removes files and folders with the IDs specified in the request from the favorite list. This method uses the query parameters.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -173,7 +167,6 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <short>Delete template files</short>
     /// <path>api/2.0/files/templates</path>
     [Tags("Files / Files")]
-    [EndpointName("deleteTemplates")]
     [EndpointSummary("Delete template files")]
     [EndpointDescription("Removes files with the IDs specified in the request from the template list.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -191,7 +184,6 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <short>Delete recent files</short>
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Files")]
-    [EndpointName("deleteRecent")]
     [EndpointSummary("Delete recent files")]
     [EndpointDescription("Removes files with the IDs specified in the request from the 'Recent' section.")]
     [OpenApiResponse(typeof(NoContentResult), 200, "No content")]

@@ -42,7 +42,6 @@ public class PushController(ApiContext apiContext,
     /// <short>Save the Documents Firebase device token</short>
     /// <path>api/2.0/settings/push/docregisterdevice</path>
     [Tags("Security / Firebase")]
-    [EndpointName("docRegisterPusnNotificationDevice")]
     [EndpointSummary("Save the Documents Firebase device token")]
     [EndpointDescription("Saves the Firebase device token specified in the request for the Documents application.")]
     [OpenApiResponse(typeof(FireBaseUser), 200, "FireBase user")]
@@ -58,7 +57,6 @@ public class PushController(ApiContext apiContext,
     /// <short>Subscribe to Documents push notification</short>
     /// <path>api/2.0/settings/push/docsubscribe</path>
     [Tags("Security / Firebase")]
-    [EndpointName("subscribeDocumentsPushNotification")]
     [EndpointSummary("Subscribe to Documents push notification")]
     [EndpointDescription("Subscribes to the Documents push notification.")]
     [OpenApiResponse(typeof(FireBaseUser), 200, "FireBase user")]

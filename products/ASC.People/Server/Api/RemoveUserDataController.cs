@@ -42,7 +42,6 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <short>Get the deletion progress</short>
     /// <path>api/2.0/people/remove/progress/{userid}</path>
     [Tags("People / User data")]
-    [EndpointName("getRemoveProgress")]
     [EndpointSummary("Get the deletion progress")]
     [EndpointDescription("Returns the progress of the started data deletion for the user with the ID specified in the request.")]
     [OpenApiResponse(typeof(TaskProgressResponseDto), 200, "Deletion progress")]
@@ -65,7 +64,6 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/people/self/delete</path>
     [Tags("People / User data")]
-    [EndpointName("sendInstructionsToDelete")]
     [OpenApiResponse(typeof(object), 200, "Information message")]
     [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPut("self/delete")]
@@ -92,7 +90,6 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <short>Start the data deletion</short>
     /// <path>api/2.0/people/remove/start</path>
     [Tags("People / User data")]
-    [EndpointName("startRemove")]
     [EndpointSummary("Start the data deletion")]
     [EndpointDescription("Starts the data deletion for the user with the ID specified in the request.")]
     [OpenApiResponse(typeof(TaskProgressResponseDto), 200, "Deletion progress")]
@@ -142,7 +139,6 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <short>Terminate the data deletion</short>
     /// <path>api/2.0/people/remove/terminate</path>
     [Tags("People / User data")]
-    [EndpointName("terminateRemove")]
     [EndpointSummary("Terminate the data deletion")]
     [EndpointDescription("Terminates the data deletion for the user with the ID specified in the request.")]
     [HttpPut("remove/terminate")]

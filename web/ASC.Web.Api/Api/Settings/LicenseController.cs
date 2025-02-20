@@ -53,7 +53,6 @@ public class LicenseController(ILoggerProvider option,
     /// <short>Refresh the license</short>
     /// <path>api/2.0/settings/license/refresh</path>
     [Tags("Settings / License")]
-    [EndpointName("refreshLicense")]
     [EndpointSummary("Refresh the license")]
     [EndpointDescription("Refreshes the license.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -78,7 +77,6 @@ public class LicenseController(ILoggerProvider option,
     /// </short>
     /// <path>api/2.0/settings/license/accept</path>
     [Tags("Settings / License")]
-    [EndpointName("acceptLicense")]
     [EndpointSummary("Activate a license")]
     [EndpointDescription("Activates a license for the portal.")]
     [OpenApiResponse(typeof(object), 200, "Message about the result of activating license")]
@@ -127,7 +125,6 @@ public class LicenseController(ILoggerProvider option,
     /// <path>api/2.0/settings/license/trial</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / License")]
-    [EndpointName("activateTrial")]
     [EndpointSummary("Activate a trial license")]
     [EndpointDescription("Activates a trial license for the portal.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -198,7 +195,6 @@ public class LicenseController(ILoggerProvider option,
     /// <path>api/2.0/settings/license/required</path>
     /// <requiresAuthorization>false</requiresAuthorization>\
     [Tags("Settings / License")]
-    [EndpointName("requestLicense")]
     [EndpointSummary("Request a license")]
     [EndpointDescription("Requests a portal license if necessary.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the license is required")]
@@ -219,7 +215,6 @@ public class LicenseController(ILoggerProvider option,
     /// </short>
     /// <path>api/2.0/settings/license</path>
     [Tags("Settings / License")]
-    [EndpointName("uploadLicense")]
     [EndpointSummary("Upload a license")]
     [EndpointDescription("Uploads a portal license specified in the request.")]
     [OpenApiResponse(typeof(object), 200, "License")]

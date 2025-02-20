@@ -62,7 +62,6 @@ public class ThirdpartyController(
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("People / Third-party accounts")]
-    [EndpointName("getAuthProviders")]
     [EndpointSummary("Get third-party accounts")]
     [EndpointDescription("Returns a list of the available third-party accounts.")]
     [OpenApiResponse(typeof(ICollection<AccountInfoDto>), 200, "List of third-party accounts")]
@@ -115,7 +114,6 @@ public class ThirdpartyController(
     /// </short>
     /// <path>api/2.0/people/thirdparty/linkaccount</path>
     [Tags("People / Third-party accounts")]
-    [EndpointName("linkAccount")]
     [EndpointSummary("Link a third-party account")]
     [EndpointDescription("Links a third-party account specified in the request to the user profile.")]
     [OpenApiResponse(200, "Ok")]
@@ -154,7 +152,6 @@ public class ThirdpartyController(
     /// <path>api/2.0/people/thirdparty/signup</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Third-party accounts")]
-    [EndpointName("signupAccount")]
     [EndpointSummary("Create a third-party account")]
     [EndpointDescription("Creates a third-party account with the parameters specified in the request.")]
     [OpenApiResponse(200, "Ok")]
@@ -260,7 +257,6 @@ public class ThirdpartyController(
     /// </short>
     /// <path>api/2.0/people/thirdparty/unlinkaccount</path>
     [Tags("People / Third-party accounts")]
-    [EndpointName("unlinkAccount")]
     [EndpointSummary("Unlink a third-party account")]
     [EndpointDescription("Unlinks a third-party account specified in the request from the user profile.")]
     [HttpDelete("unlinkaccount")]

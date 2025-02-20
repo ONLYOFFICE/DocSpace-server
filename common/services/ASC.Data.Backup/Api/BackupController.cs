@@ -55,7 +55,6 @@ public class BackupController(
     /// <short>Get the backup schedule</short>
     /// <path>api/2.0/backup/getbackupschedule</path>
     [Tags("Backup")]
-    [EndpointName("getBackupSchedule")]
     [EndpointSummary("Get the backup schedule")]
     [EndpointDescription("Returns the backup schedule of the current portal.")]
     [OpenApiResponse(typeof(BackupAjaxHandler.Schedule), 200, "Backup schedule")]
@@ -72,7 +71,6 @@ public class BackupController(
     /// <short>Create the backup schedule</short>
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
-    [EndpointName("createBackupSchedule")]
     [EndpointSummary("Create the backup schedule")]
     [EndpointDescription("Creates the backup schedule of the current portal with the parameters specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -124,7 +122,6 @@ public class BackupController(
     /// <short>Delete the backup schedule</short>
     /// <path>api/2.0/backup/deletebackupschedule</path>
     [Tags("Backup")]
-    [EndpointName("deleteBackupSchedule")]
     [EndpointSummary("Delete the backup schedule")]
     [EndpointDescription("Deletes the backup schedule of the current portal.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -143,7 +140,6 @@ public class BackupController(
     /// <short>Start the backup</short>
     /// <path>api/2.0/backup/startbackup</path>
     [Tags("Backup")]
-    [EndpointName("startBackup")]
     [EndpointSummary("Start the backup")]
     [EndpointDescription("Starts the backup of the current portal with the parameters specified in the request.")]
     [OpenApiResponse(typeof(BackupProgress), 200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link")]
@@ -223,7 +219,6 @@ public class BackupController(
     /// <short>Get the backup progress</short>
     /// <path>api/2.0/backup/getbackupprogress</path>
     [Tags("Backup")]
-    [EndpointName("getBackupProgress")]
     [EndpointSummary("Get the backup progress")]
     [EndpointDescription("Returns the progress of the started backup.")]
     [OpenApiResponse(typeof(BackupProgress), 200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link")]
@@ -242,7 +237,6 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackuphistory</path>
     /// <collection>list</collection>
     [Tags("Backup")]
-    [EndpointName("getBackupHistory")]
     [EndpointSummary("Get the backup history")]
     [EndpointDescription("Returns the history of the started backup.")]
     [OpenApiResponse(typeof(List<BackupHistoryRecord>), 200, "List of backup history records")]
@@ -259,7 +253,6 @@ public class BackupController(
     /// <short>Delete the backup</short>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
     [Tags("Backup")]
-    [EndpointName("deleteBackup")]
     [EndpointSummary("Delete the backup")]
     [EndpointDescription("Deletes the backup with the ID specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -277,7 +270,6 @@ public class BackupController(
     /// <short>Delete the backup history</short>
     /// <path>api/2.0/backup/deletebackuphistory</path>
     [Tags("Backup")]
-    [EndpointName("deleteBackupHistory")]
     [EndpointSummary("Delete the backup history")]
     [EndpointDescription("Deletes the backup history of the current portal.")]
     [OpenApiResponse(200, "Boolean value: true if the operation is successful")]
@@ -295,7 +287,6 @@ public class BackupController(
     /// <short>Start the restoring process</short>
     /// <path>api/2.0/backup/startrestore</path>
     [Tags("Backup")]
-    [EndpointName("startBackupRestore")]
     [EndpointSummary("Start the restoring process")]
     [EndpointDescription("Starts the data restoring process of the current portal with the parameters specified in the request.")]
     [OpenApiResponse(typeof(BackupProgress), 200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link")]
@@ -357,7 +348,6 @@ public class BackupController(
     /// <path>api/2.0/backup/getrestoreprogress</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Backup")]
-    [EndpointName("getRestoreProgress")]
     [EndpointSummary("Get the restoring progress")]
     [EndpointDescription("Returns the progress of the started restoring process.")]
     [OpenApiResponse(typeof(BackupProgress), 200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link")]
@@ -376,7 +366,6 @@ public class BackupController(
     /// <path>api/2.0/backup/backuptmp</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Backup")]
-    [EndpointName("getTempPath")]
     [EndpointSummary("Get the temporary backup folder")]
     [EndpointDescription("Returns a path to the temporary folder with the stored backup.")]
     [HttpGet("backuptmp")]

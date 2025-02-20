@@ -54,7 +54,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logos/save</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("saveWhiteLabelSettings")]
     [EndpointSummary("Save the white label settings")]
     [EndpointDescription("Saves the white label settings specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is sucessful")]
@@ -127,7 +126,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logos/savefromfiles</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("saveWhiteLabelSettingsFromFiles")]
     [EndpointSummary("Save the white label settings from files")]
     [EndpointDescription("Saves the white label settings from files.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is sucessful")]
@@ -217,7 +215,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [EndpointName("getWhiteLabelLogos")]
     [EndpointSummary("Get the white label logos")]
     [EndpointDescription("Returns the white label logos.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<WhiteLabelItemDto>), 200, "White label logos")]
@@ -298,7 +295,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/whitelabel/logos/isdefault</path>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [EndpointName("getIsDefaultWhiteLabelLogos")]
     [EndpointSummary("Check the default white label logos")]
     [EndpointDescription("Specifies if the white label logos are default or not.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<IsDefaultWhiteLabelLogosDto>), 200, "Request properties of white label logos")]
@@ -331,7 +327,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logos/restore</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("restoreWhiteLableLogos")]
     [EndpointSummary("Restore the white label logos")]
     [EndpointDescription("Restores the white label logos.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is sucessful")]
@@ -391,7 +386,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logotext/save</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("saveWhiteLableSettings")]
     [EndpointSummary("Save the white label logo text settings")]
     [EndpointDescription("Saves the white label logo text specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is sucessful")]
@@ -432,7 +426,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logotext</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("getWhiteLabelLogoText")]
     [EndpointSummary("Get the white label logo text")]
     [EndpointDescription("Returns the white label logo text.")]
     [OpenApiResponse(typeof(object), 200, "Logo text")]
@@ -458,7 +451,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/whitelabel/logotext/isdefault</path>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [EndpointName("getIsDefaultWhiteLabelLogoText")]
     [EndpointSummary("Check the default white label logo text")]
     [EndpointDescription("Specifies if the white label logo text are default or not.")]
     [OpenApiResponse(typeof(IsDefaultWhiteLabelLogosDto), 200, "Request properties of white label logos")]
@@ -486,7 +478,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logotext/restore</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("restoreWhiteLabelOptions")]
     [EndpointSummary("Restore the white label options")]
     [EndpointDescription("Restores the white label options.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -527,7 +518,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/companywhitelabel</path>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [EndpointName("getLicensorData")]
     [EndpointSummary("Get the licensor data")]
     [EndpointDescription("Returns the licensor data.")]
     [OpenApiResponse(typeof(List<CompanyWhiteLabelSettings>), 200, "List of company white label settings")]
@@ -554,7 +544,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Save the company white label settings</short>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("saveCompanyWhiteLabelSettings")]
     [EndpointSummary("Save the company white label settings")]
     [EndpointDescription("Saves the company white label settings specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -594,7 +583,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Get the company white label settings</short>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("getCompanyWhiteLabelSettings")]
     [EndpointSummary("Get the company white label settings")]
     [EndpointDescription("Returns the company white label settings.")]
     [OpenApiResponse(typeof(CompanyWhiteLabelSettingsDto), 200, "Company white label settings")]
@@ -613,7 +601,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Delete the company white label settings</short>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("deleteCompanyWhiteLabelSettings")]
     [EndpointSummary("Delete the company white label settings")]
     [EndpointDescription("Deletes the company white label settings.")]
     [OpenApiResponse(typeof(CompanyWhiteLabelSettings), 200, "Default company white label settings")]
@@ -642,7 +629,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Save the additional white label settings</short>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("saveAdditionalWhiteLabelSettings")]
     [EndpointSummary("Save the additional white label settings")]
     [EndpointDescription("Saves the additional white label settings specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -668,7 +654,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Get the additional white label settings</short>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("getAdditionalWhiteLabelSettings")]
     [EndpointSummary("Get the additional white label settings")]
     [EndpointDescription("Returns the additional white label settings.")]
     [OpenApiResponse(typeof(AdditionalWhiteLabelSettingsDto), 200, "Additional white label settings")]
@@ -687,7 +672,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Delete the additional white label settings</short>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("deleteAdditionalWhiteLabelSettings")]
     [EndpointSummary("Delete the additional white label settings")]
     [EndpointDescription("Deletes the additional white label settings.")]
     [OpenApiResponse(typeof(AdditionalWhiteLabelSettings), 200, "Default additional white label settings")]
@@ -717,7 +701,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
-    [EndpointName("saveMailWhiteLabelSettings")]
     [EndpointSummary("Save the mail white label settings")]
     [EndpointDescription("Saves the mail white label settings specified in the request.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -743,7 +726,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
-    [EndpointName("getMailWhiteLabelSettings")]
     [EndpointSummary("Get the mail white label settings")]
     [EndpointDescription("Returns the mail white label settings.")]
     [OpenApiResponse(typeof(MailWhiteLabelSettings), 200, "Mail white label settings")]
@@ -762,7 +744,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
-    [EndpointName("deleteMailWhiteLabelSettings")]
     [EndpointSummary("Delete the mail white label settings")]
     [EndpointDescription("Deletes the mail white label settings.")]
     [OpenApiResponse(typeof(MailWhiteLabelSettings), 200, "Default mail white label settings")]
@@ -789,7 +770,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>Check the white label availability</short>
     /// <path>api/2.0/settings/enablewhitelabel</path>
     [Tags("Settings / Rebranding")]
-    [EndpointName("getEnableWhitelabel")]
     [EndpointSummary("Check the white label availability")]
     [EndpointDescription("Checks if the white label is enabled or not.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the white label is enabled")]

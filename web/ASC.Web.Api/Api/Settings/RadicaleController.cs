@@ -51,7 +51,6 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <path>api/2.0/settings/carddavurl</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / CardDav address book")]
-    [EndpointName("getCardDavUrl")]
     [EndpointSummary("Get a link to the CardDav address book")]
     [EndpointDescription("Creates a CardDav address book for a user with all portal users and returns a link to this address book.")]
     [OpenApiResponse(typeof(DavResponse), 200, "CardDav response")]
@@ -125,7 +124,6 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <path>api/2.0/settings/deletebook</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / CardDav address book")]
-    [EndpointName("deleteCardDavAddressBook")]
     [EndpointSummary("Delete a CardDav address book")]
     [EndpointDescription("Deletes a CardDav address book with all portal users.")]
     [OpenApiResponse(typeof(DavResponse), 200, "CardDav response")]

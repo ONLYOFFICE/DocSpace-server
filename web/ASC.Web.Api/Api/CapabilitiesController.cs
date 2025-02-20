@@ -54,7 +54,6 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     ///<path>api/2.0/capabilities</path>
     ///<requiresAuthorization>false</requiresAuthorization>
     [Tags("Capabilities")]
-    [EndpointName("getPortalCapabilities")]
     [EndpointSummary("Get portal capabilities")]
     [EndpointDescription("Returns the information about portal capabilities.")]
     [OpenApiResponse(typeof(CapabilitiesDto), 200, "Portal capabilities")]

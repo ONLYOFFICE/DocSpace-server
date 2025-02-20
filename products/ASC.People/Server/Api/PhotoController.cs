@@ -54,7 +54,6 @@ public class PhotoController(
     /// </short>
     /// <path>api/2.0/people/{userid}/photo/thumbnails</path>
     [Tags("People / Photos")]
-    [EndpointName("createMemberPhotoThumbnails")]
     [EndpointSummary("Create photo thumbnails")]
     [EndpointDescription("Creates photo thumbnails by coordinates of the original image specified in the request.")]
     [OpenApiResponse(typeof(ThumbnailsDataDto), 200, "Thumbnail parameters")]
@@ -113,7 +112,6 @@ public class PhotoController(
     /// </short>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
-    [EndpointName("deleteMemberPhoto")]
     [EndpointSummary("Delete a user photo")]
     [EndpointDescription("Deletes a photo of the user with the ID specified in the request.")]
     [OpenApiResponse(typeof(ThumbnailsDataDto), 200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small")]
@@ -152,7 +150,6 @@ public class PhotoController(
     /// </short>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
-    [EndpointName("getMemberPhoto")]
     [EndpointSummary("Get a user photo")]
     [EndpointDescription("Returns a photo of the user with the ID specified in the request.")]
     [OpenApiResponse(typeof(ThumbnailsDataDto), 200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small")]
@@ -179,7 +176,6 @@ public class PhotoController(
     /// </short>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
-    [EndpointName("updateMemberPhoto")]
     [EndpointSummary("Update a user photo")]
     [EndpointDescription("Updates a photo of the user with the ID specified in the request.")]
     [OpenApiResponse(typeof(ThumbnailsDataDto), 200, "Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small")]
@@ -220,7 +216,6 @@ public class PhotoController(
     /// </short>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
-    [EndpointName("uploadMemberPhoto")]
     [EndpointSummary("Upload a user photo")]
     [EndpointDescription("Uploads a photo of the user with the ID specified in the request.")]
     [OpenApiResponse(typeof(FileUploadResultDto), 200, "Result of file uploading")]

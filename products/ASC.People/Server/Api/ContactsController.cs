@@ -43,7 +43,6 @@ public class ContactsController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
-    [EndpointName("deleteMemberContacts")]
     [EndpointSummary("Delete user contacts")]
     [EndpointDescription("Deletes the contacts of the user with the ID specified in the request from the portal.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Deleted user profile with the detailed information")]
@@ -73,7 +72,6 @@ public class ContactsController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
-    [EndpointName("setMemberContacts")]
     [EndpointSummary("Set user contacts")]
     [EndpointDescription("Sets the contacts of the user with the ID specified in the request replacing the current portal data with the new data.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Updated user profile with the detailed information")]
@@ -104,7 +102,6 @@ public class ContactsController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
-    [EndpointName("updateMemberContacts")]
     [EndpointSummary("Update user contacts")]
     [EndpointDescription("Updates the contact information of the user with the ID specified in the request merging the new data into the current portal data.")]
     [OpenApiResponse(typeof(EmployeeFullDto), 200, "Updated user profile with the detailed information")]

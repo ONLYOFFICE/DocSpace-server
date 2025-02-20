@@ -48,7 +48,6 @@ public class TipsController(ILoggerProvider option,
     /// <short>Update the tip settings</short>
     /// <path>api/2.0/settings/tips</path>
     [Tags("Settings / Tips")]
-    [EndpointName("updateTipsSettings")]
     [EndpointSummary("Update the tip settings")]
     [EndpointDescription("Updates the tip settings with a parameter specified in the request.")]
     [OpenApiResponse(typeof(TipsSettings), 200, "Updated tip settings")]
@@ -95,7 +94,6 @@ public class TipsController(ILoggerProvider option,
     /// <short>Update the tip subscription</short>
     /// <path>api/2.0/settings/tips/change/subscription</path>
     [Tags("Settings / Tips")]
-    [EndpointName("updateTipsSubscription")]
     [EndpointSummary("Update the tip subscription")]
     [EndpointDescription("Updates the tip subscription.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the user is subscribed to the tips")]
@@ -111,7 +109,6 @@ public class TipsController(ILoggerProvider option,
     /// <short>Check the tip subscription</short>
     /// <path>api/2.0/settings/tips/subscription</path>
     [Tags("Settings / Tips")]
-    [EndpointName("getTipsSubscription")]
     [EndpointSummary("Check the tip subscription")]
     [EndpointDescription("Checks if the current user is subscribed to the tips or not.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the user is subscribed to the tips")]

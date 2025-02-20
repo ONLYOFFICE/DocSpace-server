@@ -61,7 +61,6 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/url</path>
     [Tags("Portal / Payment")]
-    [EndpointName("getPaymentUrl")]
     [EndpointSummary("Get the payment page URL")]
     [EndpointDescription("Returns the URL to the payment page.")]
     [OpenApiResponse(typeof(Uri), 200, "The URL to the payment page")]
@@ -107,7 +106,6 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/update</path>
     [Tags("Portal / Payment")]
-    [EndpointName("updatePayment")]
     [EndpointSummary("Update the payment quantity")]
     [EndpointDescription("Updates the quantity of payment.")]
     [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
@@ -143,7 +141,6 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/account</path>
     [Tags("Portal / Payment")]
-    [EndpointName("getPaymentAccount")]
     [EndpointSummary("Get the payment account")]
     [EndpointDescription("Returns the URL to the payment account.")]
     [OpenApiResponse(typeof(object), 200, "The URL to the payment account")]
@@ -177,7 +174,6 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/prices</path>
     [Tags("Portal / Payment")]
-    [EndpointName("getPrices")]
     [EndpointSummary("Get prices")]
     [EndpointDescription("Returns the available portal prices.")]
     [OpenApiResponse(typeof(object), 200, "List of available portal prices")]
@@ -200,7 +196,6 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/currencies</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [EndpointName("getCurrencies")]
     [EndpointSummary("Get currencies")]
     [EndpointDescription("Returns the available portal currencies.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<CurrenciesDto>), 200, "List of available portal currencies")]
@@ -227,7 +222,6 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/quotas</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [EndpointName("getQuotas")]
     [EndpointSummary("Get quotas")]
     [EndpointDescription("Returns the available portal quotas.")]
     [OpenApiResponse(typeof(IEnumerable<QuotaDto>), 200, "List of available portal quotas")]
@@ -253,7 +247,6 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/quota</path>
     [Tags("Portal / Payment")]
-    [EndpointName("getQuota")]
     [EndpointSummary("Get quota payment information")]
     [EndpointDescription("Returns the payment information about the current portal quota.")]
     [OpenApiResponse(typeof(QuotaDto), 200, "Payment information about the current portal quota")]
@@ -277,7 +270,6 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/request</path>
     [Tags("Portal / Payment")]
-    [EndpointName("sendSalesRequest")]
     [EndpointSummary("Send a payment request")]
     [EndpointDescription("Sends a request for portal payment.")]
     [OpenApiResponse(200, "Ok")]

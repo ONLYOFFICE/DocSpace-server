@@ -63,6 +63,7 @@ public static class OpenApiExtension
             c.AddDocumentTransformer<TagDescriptionsDocumentFilter>();
             c.AddDocumentTransformer<OpenApiResponseDescriptionTransformer>();
             c.AddOperationTransformer<OpenApiCustomOperationTransformer>();
+            c.AddOperationTransformer<OapenApiTagOpeartionTrnsformer>();
             var serverUrls = configuration.GetSection("openApi:servers").Get<List<string>>() ?? [];
             var serverDescription = configuration.GetSection("openApi:serversDescription").Get<List<string>>() ?? [];
 

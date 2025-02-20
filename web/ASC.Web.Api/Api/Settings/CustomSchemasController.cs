@@ -44,7 +44,6 @@ public class CustomSchemasController(MessageService messageService,
     /// <path>api/2.0/settings/customschemas</path>
     /// <collection>list</collection>
     [Tags("Settings / Team templates")]
-    [EndpointName("getPeopleSchemas")]
     [EndpointSummary("Get team templates")]
     [EndpointDescription("Returns all portal team templates that allow users to name their organization (or group), add members, and define their activities within the portal.")]
     [OpenApiResponse(typeof(List<SchemaRequestsDto>), 200, "List of team templates with the following parameters")]
@@ -81,7 +80,6 @@ public class CustomSchemasController(MessageService messageService,
     /// <short>Save the naming settings</short>
     /// <path>api/2.0/settings/customschemas</path>
     [Tags("Settings / Team templates")]
-    [EndpointName("saveNamingSettings")]
     [EndpointSummary("Save the naming settings")]
     [EndpointDescription("Saves the names from the team template with the ID specified in the request.")]
     [OpenApiResponse(typeof(SchemaRequestsDto), 200, "Team template with the following parameters")]
@@ -107,7 +105,6 @@ public class CustomSchemasController(MessageService messageService,
     /// <short>Create a custom team template</short>
     /// <path>api/2.0/settings/customschemas</path>
     [Tags("Settings / Team templates")]
-    [EndpointName("saveCustomNamingSettings")]
     [EndpointSummary("Create a custom team template")]
     [EndpointDescription("Creates a custom team template with the parameters specified in the request.")]
     [OpenApiResponse(typeof(SchemaRequestsDto), 200, "Custom team template with the following parameters")]
@@ -170,7 +167,6 @@ public class CustomSchemasController(MessageService messageService,
     /// <short>Get a team template by ID</short>
     /// <path>api/2.0/settings/customschemas/{id}</path>
     [Tags("Settings / Team templates")]
-    [EndpointName("getPeopleSchema")]
     [EndpointSummary("Get a team template by ID")]
     [EndpointDescription("Returns a team template by the ID specified in the request.")]
     [OpenApiResponse(typeof(SchemaRequestsDto), 200, "Team template with the following parameters")]

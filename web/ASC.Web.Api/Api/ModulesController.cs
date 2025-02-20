@@ -46,7 +46,6 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <path>api/2.0/modules</path>
     /// <collection>list</collection>
     [Tags("Modules")]
-    [EndpointName("getAllPortalModules")]
     [EndpointSummary("Get modules")]
     [EndpointDescription("Returns a list of all the portal modules.")]
     [OpenApiResponse(typeof(IEnumerable<string>), 200, "List of modules")]
@@ -72,7 +71,6 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <path>api/2.0/modules/info</path>
     /// <collection>list</collection>
     [Tags("Modules")]
-    [EndpointName("getAllWithInfo")]
     [EndpointSummary("Get modules information")]
     [EndpointDescription("Returns a list of all the portal modules with their information.")]
     [OpenApiResponse(typeof(IEnumerable<Module>), 200, "List of modules with their information")]

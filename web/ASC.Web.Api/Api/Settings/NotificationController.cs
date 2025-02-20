@@ -43,7 +43,6 @@ public class NotificationController(
     /// <short>Check notification availability</short>
     /// <path>api/2.0/settings/notification/{type}</path>
     [Tags("Settings / Notifications")]
-    [EndpointName("getNotificationSettings")]
     [EndpointSummary("Check notification availability")]
     [EndpointDescription("Checks if the notification type specified in the request is enabled or not.")]
     [OpenApiResponse(typeof(NotificationSettingsDto), 200, "Notification settings")]
@@ -61,7 +60,6 @@ public class NotificationController(
     /// <short>Enable notifications</short>
     /// <path>api/2.0/settings/notification</path>
     [Tags("Settings / Notifications")]
-    [EndpointName("setSettings")]
     [EndpointSummary("Enable notifications")]
     [EndpointDescription("Enables the notification type specified in the request.")]
     [OpenApiResponse(typeof(NotificationSettingsDto), 200, "Notification settings")]
@@ -79,7 +77,6 @@ public class NotificationController(
     /// <short>Get room notification settings</short>
     /// <path>api/2.0/settings/notification/rooms</path>
     [Tags("Settings / Notifications")]
-    [EndpointName("getRoomsNotificationSettings")]
     [EndpointSummary("Get room notification settings")]
     [EndpointDescription("Returns a list of rooms with the disabled notifications")]
     [OpenApiResponse(typeof(RoomsNotificationSettingsDto), 200, "Room notification settings")]
@@ -96,7 +93,6 @@ public class NotificationController(
     /// <short>Set room notification status</short>
     /// <path>api/2.0/settings/notification/rooms</path>
     [Tags("Settings / Notifications")]
-    [EndpointName("setRoomsNotificationStatus")]
     [EndpointSummary("Set room notification status")]
     [EndpointDescription("Sets a notification status for a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(RoomsNotificationSettingsDto), 200, "Room notification settings")]

@@ -62,7 +62,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/login/last</path>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
-    [EndpointName("getLastLoginEvents")]
     [EndpointSummary("Get login history")]
     [EndpointDescription("Returns all the latest user login activity, including successful logins and error logs.")]
     [OpenApiResponse(typeof(IEnumerable<LoginEventDto>), 200, "List of login events")]
@@ -86,7 +85,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/events/last</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
-    [EndpointName("getLastAuditEvents")]
     [EndpointSummary("Get audit trail data")]
     [EndpointDescription("Returns a list of the latest changes (creation, modification, deletion, etc.) made by users to the entities (tasks, opportunities, files, etc.) on the portal.")]
     [OpenApiResponse(typeof(IEnumerable<AuditEventDto>), 200, "List of audit trail data")]
@@ -110,7 +108,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/login/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
-    [EndpointName("getLoginEventsByFilter")]
     [EndpointSummary("Get filtered login events")]
     [EndpointDescription("Returns a list of the login events by the parameters specified in the request.")]
     [OpenApiResponse(typeof(IEnumerable<LoginEventDto>), 200, "List of filtered login events")]
@@ -145,7 +142,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/events/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
-    [EndpointName("getAuditEventsByFilter")]
     [EndpointSummary("Get filtered audit trail data")]
     [EndpointDescription("Returns a list of the audit events by the parameters specified in the request.")]
     [OpenApiResponse(typeof(IEnumerable<AuditEventDto>), 200, "List of filtered audit trail data")]
@@ -180,7 +176,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/types</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / Audit trail data")]
-    [EndpointName("getTypes")]
     [EndpointSummary("Get audit trail types")]
     [EndpointDescription("Returns all the available audit trail types.")]
     [OpenApiResponse(typeof(object), 200, "Audit trail types")]
@@ -207,7 +202,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/mappers</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / Audit trail data")]
-    [EndpointName("getMappers")]
     [EndpointSummary("Get audit trail mappers")]
     [EndpointDescription("Returns the mappers for the audit trail types.")]
     [OpenApiResponse(typeof(object), 200, "Audit trail mappers")]
@@ -243,7 +237,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/security/audit/login/report</path>
     [Tags("Security / Login history")]
-    [EndpointName("createLoginHistoryReport")]
     [EndpointSummary("Generate the login history report")]
     [EndpointDescription("Generates the login history report.")]
     [OpenApiResponse(typeof(object), 200, "URL to the xlsx report file")]
@@ -278,7 +271,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/security/audit/events/report</path>
     [Tags("Security / Audit trail data")]
-    [EndpointName("createAuditTrailReport")]
     [EndpointSummary("Generate the audit trail report")]
     [EndpointDescription("Generates the audit trail report.")]
     [OpenApiResponse(typeof(object), 200, "URL to the xlsx report file")]
@@ -317,7 +309,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
-    [EndpointName("getAuditSettings")]
     [EndpointSummary("Get the audit trail settings")]
     [EndpointDescription("Returns the audit trail settings.")]
     [OpenApiResponse(typeof(TenantAuditSettings), 200, "Audit settings")]
@@ -340,7 +331,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
-    [EndpointName("setAuditSettings")]
     [EndpointSummary("Set the audit trail settings")]
     [EndpointDescription("Sets the audit trail settings for the current portal.")]
     [OpenApiResponse(typeof(TenantAuditSettings), 200, "Audit trail settings")]
@@ -374,7 +364,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// </summary>
     /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
-    [EndpointName("csp")]
     [EndpointSummary("Csp")]
     [EndpointDescription("Csp")]
     [OpenApiResponse(typeof(CspDto), 200, "Ok")]
@@ -421,7 +410,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/csp</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / CSP")]
-    [EndpointName("getCsp")]
     [EndpointSummary("Gets csp")]
     [EndpointDescription("Gets csp")]
     [OpenApiResponse(typeof(CspDto), 200, "Ok")]
