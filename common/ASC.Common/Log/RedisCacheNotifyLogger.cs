@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,38 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Billing;
+namespace ASC.Common.Log;
 
-[ProtoContract]
-public class PaymentInfo
+internal static partial class RedisCacheNotifyLogger
 {
-    [ProtoMember(1)] public int ID { get; set; }
+    [LoggerMessage(LogLevel.Error, "RedisCacheNotify Publish")]
+    public static partial void ErrorRedisCacheNotifyPublish(this ILogger logger, Exception exception);
 
-    [ProtoMember(2)] public int Status { get; set; }
-
-    [ProtoMember(3)] public int PaymentSystemId { get; set; }
-
-    [ProtoMember(4)] public string CartId { get; set; }
-
-    [ProtoMember(5)] public string FName { get; set; }
-
-    [ProtoMember(6)] public string LName { get; set; }
-
-    [ProtoMember(7)] public string Email { get; set; }
-
-    [ProtoMember(8)] public DateTime PaymentDate { get; set; }
-
-    [ProtoMember(9)] public decimal Price { get; set; }
-
-    [ProtoMember(10)] public int Qty { get; set; }
-
-    [ProtoMember(11)] public string PaymentCurrency { get; set; }
-
-    [ProtoMember(12)] public string PaymentMethod { get; set; }
-
-    [ProtoMember(13)] public int QuotaId { get; set; }
-
-    [ProtoMember(14)] public int ProductRef { get; set; }
-
-    [ProtoMember(15)] public string CustomerId { get; set; }
+    [LoggerMessage(LogLevel.Error, "RedisCacheNotify Subscribe")]
+    public static partial void ErrorRedisCacheNotifySubscribe(this ILogger logger, Exception exception);
 }
