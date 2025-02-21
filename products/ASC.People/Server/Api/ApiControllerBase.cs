@@ -44,6 +44,7 @@ public abstract class ApiControllerBase : ControllerBase;
 
 [Scope]
 public class WebhookPeopleAccessChecker(
+    AuthManager authentication,
     UserManager userManager,
     SecurityContext securityContext,
     IPermissionResolver permissionResolver) : IWebhookAccessChecker
@@ -152,7 +153,7 @@ public class WebhookPeopleAccessChecker(
             }
         }
 
-        var account = new Common.Security.Authentication.Account(userId, null, false);
+        var account = await authentication.GetAccountByIDAsync(targetUser.TenantId, targetUser.Id);
 
         return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
     }
