@@ -87,7 +87,7 @@ public class FilesControllerThirdparty(
         fileShareDtoHelper,
         distributedCache);
 
-[WebhookAccessChecker(typeof(WebhookFileEntryAccessChecker))]
+[WebhookAccessChecker<WebhookFileEntryAccessChecker>]
 public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
         FileOperationsManager fileOperationsManager,
@@ -539,7 +539,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     }
 }
 
-[WebhookAccessChecker(typeof(WebhookFileEntryAccessChecker))]
+[WebhookAccessChecker<WebhookFileEntryAccessChecker>]
 public class FilesControllerCommon(
         GlobalFolderHelper globalFolderHelper,
         FileStorageService fileStorageService,

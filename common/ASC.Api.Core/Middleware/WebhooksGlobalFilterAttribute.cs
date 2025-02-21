@@ -128,7 +128,7 @@ public class WebhooksGlobalFilterAttribute(
 
     private static WebhookData GetWebhookDataAsync(HttpContext context, RouteEndpoint endpoint)
     {
-        var accessCheckerAttribute = endpoint?.Metadata.GetMetadata<WebhookAccessCheckerAttribute>();
+        var accessCheckerAttribute = endpoint?.Metadata.GetMetadata<IWebhookAccessCheckerAttribute>();
 
         if (accessCheckerAttribute == null)
         {

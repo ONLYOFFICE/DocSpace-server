@@ -39,7 +39,7 @@ public class UploadControllerThirdparty(UploadControllerHelper filesControllerHe
         FileDtoHelper fileDtoHelper)
     : UploadController<string>(filesControllerHelper, folderDtoHelper, fileDtoHelper);
 
-[WebhookAccessChecker(typeof(WebhookFileEntryAccessChecker))]
+[WebhookAccessChecker<WebhookFileEntryAccessChecker>]
 public abstract class UploadController<T>(UploadControllerHelper filesControllerHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
@@ -156,7 +156,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     }
 }
 
-[WebhookAccessChecker(typeof(WebhookFileEntryAccessChecker))]
+[WebhookAccessChecker<WebhookFileEntryAccessChecker>]
 public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
         UploadControllerHelper filesControllerHelper,
         FolderDtoHelper folderDtoHelper,

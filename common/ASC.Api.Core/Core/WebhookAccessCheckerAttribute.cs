@@ -27,17 +27,12 @@
 namespace ASC.Api.Core.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
-public class WebhookAccessCheckerAttribute : Attribute
+public class WebhookAccessCheckerAttribute<T> : Attribute, IWebhookAccessCheckerAttribute  where T : class, IWebhookAccessChecker
 {
-    public Type WebhookAccessCheckerType { get; private set; }
+    public Type WebhookAccessCheckerType => typeof(T);
+}
 
-    public WebhookAccessCheckerAttribute(Type accessCheckerType)
-    {
-        if (!typeof(IWebhookAccessChecker).IsAssignableFrom(accessCheckerType))
-        {
-            throw new ArgumentException("The type must implement the interface IWebhookAccessChecker", nameof(accessCheckerType));
-        }
-
-        WebhookAccessCheckerType = accessCheckerType;
-    }
+public interface IWebhookAccessCheckerAttribute
+{
+    Type WebhookAccessCheckerType { get; }
 }
