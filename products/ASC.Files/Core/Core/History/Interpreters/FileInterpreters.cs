@@ -199,6 +199,29 @@ public record FileIndexChangedData : EntryData
     }
 }
 
+public record FileVersionRemovedData : EntryData
+{
+    public int Version { get; }
+    
+    public FileVersionRemovedData(
+        string id,
+        string title,
+        int? parentId = null,
+        string parentTitle = null,
+        int? parentType = null,
+        string version = "") : base(id,
+        title,
+        parentId,
+        parentTitle,
+        parentType)
+    {
+        if (int.TryParse(version, out var versionParsed))
+        {
+            Version = versionParsed;
+        }
+    }
+}
+
 #endregion
 
 #region Interpreters
@@ -282,6 +305,21 @@ public class FileDeletedInterpreter : ActionInterpreter
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         return new ValueTask<HistoryData>(new EntryData(target, description[0]));
+    }
+}
+
+public class FileVersionDeletedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {        
+        var desc = GetAdditionalDescription(description);
+        return new ValueTask<HistoryData>(new FileVersionRemovedData(
+            target,
+            description[0],
+            desc.ParentId,
+            desc.ParentTitle,
+            desc.ParentType, 
+            description[1]));
     }
 }
 

@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common;
 using ASC.Files.Service.Services.Thumbnail;
 
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
@@ -36,6 +37,7 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
     private readonly ITariffService _tariffService;
     private readonly TenantManager _tenantManager;
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
+    private readonly BaseCommonLinkUtility _baseCommonLinkUtility;
 
     private ThumbnailRequestedIntegrationEventHandler()
     {
@@ -47,13 +49,15 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
         IDbContextFactory<FilesDbContext> dbContextFactory,
         ITariffService tariffService,
         TenantManager tenantManager,
-        ChannelWriter<FileData<int>> channelWriter)
+        ChannelWriter<FileData<int>> channelWriter,
+        BaseCommonLinkUtility baseCommonLinkUtility)
     {
         _logger = logger;
         _channelWriter = channelWriter;
         _tariffService = tariffService;
         _tenantManager = tenantManager;
         _dbContextFactory = dbContextFactory;
+        _baseCommonLinkUtility = baseCommonLinkUtility;
     }
 
     private async Task<IEnumerable<FileData<int>>> GetFreezingThumbnailsAsync()
@@ -79,7 +83,9 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
         {
             _ = await _tenantManager.SetCurrentTenantAsync(r.TenantId);
             var tariff = await _tariffService.GetTariffAsync(r.TenantId);
-            var fileData = new FileData<int>(r.TenantId, r.ModifiedBy, r.Id, "", tariff.State);
+            var baseUrl = _baseCommonLinkUtility.GetFullAbsolutePath(string.Empty);
+            
+            var fileData = new FileData<int>(r.TenantId, r.ModifiedBy, r.Id, baseUrl, tariff.State);
 
             return fileData;
         }).ToListAsync();

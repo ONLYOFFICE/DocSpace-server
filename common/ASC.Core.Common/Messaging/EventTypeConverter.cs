@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Newtonsoft.Json;
-
 namespace ASC.MessagingSystem.Mapping;
 
 [Scope]
@@ -41,10 +39,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
 
         if (source.Description is { Count: > 0 })
         {
-            loginEvent.DescriptionRaw = JsonConvert.SerializeObject(source.Description, new JsonSerializerSettings
-                {
-                    DateTimeZoneHandling = DateTimeZoneHandling.Utc
-                });
+            loginEvent.DescriptionRaw = JsonSerializer.Serialize(source.Description);
         }
 
         return loginEvent;
@@ -66,11 +61,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
 
         if (source.Description is { Count: > 0 })
         {
-            auditEvent.DescriptionRaw =
-                JsonConvert.SerializeObject(GetSafeDescription(source.Description), new JsonSerializerSettings
-                {
-                    DateTimeZoneHandling = DateTimeZoneHandling.Utc
-                });
+            auditEvent.DescriptionRaw = JsonSerializer.Serialize(GetSafeDescription(source.Description));
         }
 
         return auditEvent;

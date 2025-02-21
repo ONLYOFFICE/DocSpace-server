@@ -29,17 +29,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// Base batch request parameters
 /// </summary>
-public class FileBaseBatchRequestDto
-{
-    /// <summary>
-    /// List of file IDs
-    /// </summary>
-    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
-}
-
-/// <summary>
-/// Base batch request parameters
-/// </summary>
 public class BaseBatchRequestDto
 {
     /// <summary>
@@ -85,6 +74,21 @@ public class DeleteBatchRequestDto : BaseBatchRequestDto
     /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
     /// </summary>
     public bool Immediately { get; set; }
+}
+
+/// <summary>
+/// Request parameters for deleting file's version
+/// </summary>
+public class DeleteVersionBatchRequestDto
+{
+    /// <summary>
+    /// Specifies whether to delete a file after the editing session is finished or not
+    /// </summary>
+    public bool DeleteAfter { get; set; }
+    
+    public int FileId { get; set; }
+    
+    public IEnumerable<int> Versions { get; set; } = new List<int>();
 }
 
 /// <summary>
@@ -148,12 +152,13 @@ public class BatchRequestDto : BaseBatchRequestDto
 }
 
 /// <summary>
-/// Request parameters for checking files and folders for conflicts
+/// The data transfer object containing the operation type for which statuses are retrieved.
 /// </summary>
-public class BatchSimpleRequestDto : BaseBatchRequestDto
+public class FileOperationResultRequestDto
 {
     /// <summary>
-    /// Destination folder ID
+    /// Specifies the type of file operation to be retrieved.
     /// </summary>
-    public JsonElement DestFolderId { get; set; }
+    [FromRoute(Name = "operationType")]
+    public FileOperationType OperationType { get; set; }
 }

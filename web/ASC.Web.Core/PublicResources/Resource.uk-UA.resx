@@ -514,6 +514,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
   <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
     <value>Поле коду підтвердження не може бути порожнім</value>
   </data>

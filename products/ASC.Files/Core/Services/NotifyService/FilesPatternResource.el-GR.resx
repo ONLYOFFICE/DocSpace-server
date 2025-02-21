@@ -114,9 +114,6 @@ $Message</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Η κατάσταση υπογραφής άλλαξε</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Αναφέρεται στο έγγραφο</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Η αποστολή έχει ολοκληρωθεί.</value>
   </data>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,78 +28,64 @@
 package com.asc.authorization.data.authorization.repository;
 
 import com.asc.authorization.data.authorization.entity.AuthorizationEntity;
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 /**
- * Repository interface for performing CRUD operations on {@link AuthorizationEntity} objects.
- * Extends {@link JpaRepository}, providing basic CRUD functionality and query methods.
+ * Repository interface for managing {@link AuthorizationEntity} objects in the database.
+ *
+ * <p>Provides CRUD operations, custom queries, and methods specific to handling authorization data.
+ * Extends {@link JpaRepository} to leverage Spring Data JPA functionality.
  */
 public interface JpaAuthorizationRepository
     extends JpaRepository<AuthorizationEntity, AuthorizationEntity.AuthorizationId> {
 
   /**
-   * Finds an AuthorizationEntity by its authorization ID.
+   * Finds an {@link AuthorizationEntity} by its unique authorization ID.
    *
-   * @param id The ID of the authorization entity to find.
-   * @return An Optional containing the found AuthorizationEntity, or an empty Optional if no entity
-   *     with the given ID is found.
+   * @param id the unique identifier of the authorization entity.
+   * @return an {@link Optional} containing the {@link AuthorizationEntity} if found, otherwise
+   *     empty.
    */
   @Query("SELECT a FROM AuthorizationEntity a WHERE a.id = :id")
-  Optional<AuthorizationEntity> findByAuthorizationId(String id);
+  Optional<AuthorizationEntity> findByAuthorizationId(@Param("id") String id);
 
   /**
-   * Finds an authorization entity by registered client ID, principal ID and grant type.
+   * Finds an {@link AuthorizationEntity} using a composite key consisting of the registered client
+   * ID, principal ID, and authorization grant type.
    *
-   * @param registeredClientId the registered client ID
-   * @param principalId the principal ID
-   * @param authorizationGrantType the grant type of the authorization
-   * @return an {@link Optional} containing the found authorization entity, or empty if not found
+   * @param registeredClientId the ID of the registered client associated with the authorization.
+   * @param principalId the ID of the principal (user or entity) associated with the authorization.
+   * @param authorizationGrantType the grant type of the authorization (e.g., "authorization_code").
+   * @return an {@link Optional} containing the {@link AuthorizationEntity} if found, otherwise
+   *     empty.
    */
   Optional<AuthorizationEntity> findByRegisteredClientIdAndPrincipalIdAndAuthorizationGrantType(
       String registeredClientId, String principalId, String authorizationGrantType);
 
   /**
-   * Finds an authorization entity by its state.
+   * Finds an {@link AuthorizationEntity} by matching the provided token against various
+   * token-related fields.
    *
-   * @param state the state of the authorization entity
-   * @return an {@link Optional} containing the found authorization entity, or empty if not found
-   */
-  Optional<AuthorizationEntity> findByState(String state);
-
-  /**
-   * Finds an authorization entity by its authorization code value.
+   * <p>The search is performed against the following fields:
    *
-   * @param authorizationCode the authorization code value
-   * @return an {@link Optional} containing the found authorization entity, or empty if not found
-   */
-  Optional<AuthorizationEntity> findByAuthorizationCodeValue(String authorizationCode);
-
-  /**
-   * Finds an authorization entity by its access token value.
+   * <ul>
+   *   <li>State
+   *   <li>Authorization code value
+   *   <li>Access token value
+   *   <li>Refresh token value
+   *   <li>Access token hash
+   *   <li>Refresh token hash
+   * </ul>
    *
-   * @param accessToken the access token value
-   * @return an {@link Optional} containing the found authorization entity, or empty if not found
-   */
-  Optional<AuthorizationEntity> findByAccessTokenValue(String accessToken);
-
-  /**
-   * Finds an authorization entity by its refresh token value.
-   *
-   * @param refreshToken the refresh token value
-   * @return an {@link Optional} containing the found authorization entity, or empty if not found
-   */
-  Optional<AuthorizationEntity> findByRefreshTokenValue(String refreshToken);
-
-  /**
-   * Finds an authorization entity by state, authorization code value, access token value, or
-   * refresh token value.
-   *
-   * @param token the token to search for (can be state, authorization code, access token, or
-   *     refresh token)
-   * @return an {@link Optional} containing the found authorization entity, or empty if not found
+   * @param token the token value to search for, matching any of the specified fields.
+   * @return an {@link Optional} containing the {@link AuthorizationEntity} if a match is found,
+   *     otherwise empty.
    */
   @Query(
       "SELECT a FROM AuthorizationEntity a WHERE a.state = :token"
@@ -111,4 +97,63 @@ public interface JpaAuthorizationRepository
   Optional<AuthorizationEntity>
       findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(
           @Param("token") String token);
+
+  /**
+   * Deletes all authorizations for a specific principal and registered client.
+   *
+   * @param principalId the ID of the principal (user) whose authorizations are to be deleted.
+   * @param registeredClientId the ID of the registered client associated with the authorizations.
+   */
+  @Modifying
+  @Query(
+      value =
+          "DELETE FROM identity_authorizations WHERE principal_id = :principalId AND registered_client_id = :registeredClientId",
+      nativeQuery = true)
+  void deleteAllAuthorizationsByPrincipalIdAndClientId(
+      @Param("principalId") String principalId,
+      @Param("registeredClientId") String registeredClientId);
+
+  /**
+   * Deletes all authorizations associated with a specific registered client.
+   *
+   * @param clientId the ID of the registered client whose authorizations are to be deleted.
+   */
+  @Modifying
+  @Query(
+      value = "DELETE FROM identity_authorizations WHERE registered_client_id = :clientId",
+      nativeQuery = true)
+  void deleteAllAuthorizationsByClientId(@Param("clientId") String clientId);
+
+  /**
+   * Retrieves a list of authorizations for a specific principal, optionally filtered by a last
+   * modified date. The query limits results to valid consents (non-empty token fields) and orders
+   * them by the most recent modification date.
+   *
+   * @param principalId the ID of the principal (user) whose authorizations are to be retrieved.
+   * @param lastModifiedAt an optional filter to exclude authorizations modified after the specified
+   *     date.
+   * @param limit the maximum number of authorizations to retrieve.
+   * @return a {@link List} of {@link AuthorizationEntity} objects matching the query criteria.
+   */
+  @Query(
+      value =
+          """
+                SELECT *
+                FROM identity_authorizations
+                WHERE principal_id = :principalId
+                  AND (:lastModifiedAt IS NULL OR modified_at < :lastModifiedAt)
+                  AND (
+                    (authorization_code_value IS NOT NULL AND authorization_code_value <> '')
+                    OR (access_token_value IS NOT NULL AND access_token_value <> '')
+                    OR (refresh_token_value IS NOT NULL AND refresh_token_value <> '')
+                  )
+                  AND authorization_grant_type = 'authorization_code'
+                ORDER BY modified_at DESC
+                LIMIT :limit
+                """,
+      nativeQuery = true)
+  List<AuthorizationEntity> findConsentedAuthorizationsByPrincipalId(
+      @Param("principalId") String principalId,
+      @Param("lastModifiedAt") ZonedDateTime lastModifiedAt,
+      @Param("limit") int limit);
 }

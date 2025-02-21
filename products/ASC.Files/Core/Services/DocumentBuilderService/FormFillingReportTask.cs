@@ -40,7 +40,7 @@ public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : Docum
 
         script = script
             .Replace("${tempFileName}", tempFileName)
-            .Replace("${inputData}", JsonConvert.SerializeObject(data));
+            .Replace("${inputData}", JsonSerializer.Serialize(data));
         
         return new DocumentBuilderInputData(script, tempFileName, "");
     }

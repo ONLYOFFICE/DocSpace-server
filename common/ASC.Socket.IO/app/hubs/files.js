@@ -363,6 +363,51 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
+  function addUser({ tenantId, user } = {}) {
+    var room = `${tenantId}-users`;
+    filesIO.to(room).emit("s:add-user",  {id: user.id, data: user});
+  }
+
+  function updateUser({ tenantId, user } = {}) {
+    var room = `${tenantId}-users`;
+    filesIO.to(room).emit("s:update-user", {id: user.id, data: user});
+  }
+
+  function deleteUser({ tenantId, userId } = {}) {
+    var room = `${tenantId}-users`;
+    filesIO.to(room).emit("s:delete-user", userId);
+  }
+
+  function addGroup({ tenantId, group } = {}) {
+    var room = `${tenantId}-groups`;
+    filesIO.to(room).emit("s:add-group",  {id: group.id, data: group});
+  }
+
+  function updateGroup({ tenantId, group } = {}) {
+    var room = `${tenantId}-groups`;
+    filesIO.to(room).emit("s:update-group", {id: group.id, data: group});
+  }
+
+  function deleteGroup({ tenantId, groupId } = {}) {
+    var room = `${tenantId}-groups`;
+    filesIO.to(room).emit("s:delete-group", groupId);
+  }
+
+  function addGuest({ tenantId, room, guest } = {}) {
+    var room = `${tenantId}-guests-${room}`;
+    filesIO.to(room).emit("s:add-guest",  {id: guest.id, data: guest});
+  }
+
+  function updateGuest({ tenantId, room, guest } = {}) {
+    var room = `${tenantId}-guests-${room}`;
+    filesIO.to(room).emit("s:update-guest", {id: guest.id, data: guest});
+  }
+
+  function deleteGuest({ tenantId, room, guestId } = {}) {
+    var room = `${tenantId}-guests-${room}`;
+    filesIO.to(room).emit("s:delete-guest", guestId);
+  }
+
   function backupProgress({ tenantId, percentage } = {}) {
     filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", {progress: percentage});
   }
@@ -397,6 +442,15 @@ module.exports = (io) => {
     changeInvitationLimitValue,
     updateHistory,
     logoutSession,
+    addUser,
+    updateUser,
+    deleteUser,
+    addGroup,
+    updateGroup,
+    deleteGroup,
+    addGuest,
+    updateGuest,
+    deleteGuest,
     backupProgress,
     restoreProgress,
     endBackup,

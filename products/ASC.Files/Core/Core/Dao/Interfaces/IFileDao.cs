@@ -207,6 +207,8 @@ public interface IFileDao<T>
     /// </summary>
     /// <param name="fileId">file id</param>
     Task DeleteFileAsync(T fileId);
+    Task DeleteFileVersionAsync(File<T> file, int version);
+    
     /// <summary>
     ///   Deletes a file including all previous versions
     /// </summary>

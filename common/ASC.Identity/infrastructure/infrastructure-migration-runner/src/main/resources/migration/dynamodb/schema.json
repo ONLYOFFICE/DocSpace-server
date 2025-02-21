@@ -1,0 +1,31 @@
+{
+  "TableName": "RegisteredClient",
+  "KeySchema": [
+    { "AttributeName": "client_id", "KeyType": "HASH" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "client_id", "AttributeType": "S" },
+    { "AttributeName": "tenant_id", "AttributeType": "N" },
+    { "AttributeName": "created_on", "AttributeType": "S" }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  },
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "tenant-created-index",
+      "KeySchema": [
+        { "AttributeName": "tenant_id", "KeyType": "HASH" },
+        { "AttributeName": "created_on", "KeyType": "RANGE" }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  ]
+}
