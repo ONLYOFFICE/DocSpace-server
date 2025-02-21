@@ -138,7 +138,7 @@ public class FolderIndexReorderedInterpreter : ActionInterpreter
         var desc = GetAdditionalDescription(description);
         var title = description[0];
         
-        var isRoom = desc.ParentType is (int)FolderType.VirtualRooms or (int)FolderType.Archive;
+        var isRoom = desc.ParentType is (int)FolderType.VirtualRooms or (int)FolderType.RoomTemplates or (int)FolderType.Archive;
         var parentId = isRoom ? int.Parse(target) : desc.ParentId;
         var parentTitle = isRoom ? title : desc.ParentTitle;
         var parentType = isRoom ? (int)FolderType.VirtualDataRoom : desc.ParentType;

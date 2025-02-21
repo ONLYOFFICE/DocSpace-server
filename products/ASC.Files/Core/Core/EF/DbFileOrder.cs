@@ -84,7 +84,7 @@ public static class DbFileOrderExtension
             entity.ToTable("files_order");
 
             entity.HasKey(e => new { e.TenantId, e.EntryId, e.EntryType })
-                .HasName("primary");
+                .HasName("PK_files_order");
 
             entity.HasIndex(e => new { e.TenantId, e.ParentFolderId, e.EntryType })
                 .HasDatabaseName("parent_folder_id");

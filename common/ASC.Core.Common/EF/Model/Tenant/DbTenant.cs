@@ -338,7 +338,7 @@ public static class DbTenantExtension
             entity.ToTable("tenants_tenants");
 
             entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("last_modified");
+                .HasDatabaseName("IX_tenants_tenants_last_modified");
 
             entity.HasIndex(e => e.MappedDomain)
                 .HasDatabaseName("mappeddomain");

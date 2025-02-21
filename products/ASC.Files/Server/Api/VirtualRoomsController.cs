@@ -42,7 +42,11 @@ public class VirtualRoomsInternalController(
     ApiContext apiContext,
     FilesMessageService filesMessageService,
     SettingsManager settingsManager,
-    ApiDateTimeHelper apiDateTimeHelper)
+    ApiDateTimeHelper apiDateTimeHelper,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    IEventBus eventBus,
+    RoomTemplatesWorker roomTemplatesWorker)
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -71,13 +75,92 @@ public class VirtualRoomsInternalController(
     {
         var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
         if (lifetime != null)
-        { 
+        {
             lifetime.StartDate = DateTime.UtcNow;
         }
 
         var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, inDto.Tags, inDto.Logo);
 
         return await _folderDtoHelper.GetAsync(room);
+    }
+
+    /// <summary>
+    /// Start create a room in the "Rooms" section based on a template.
+    /// </summary>
+    /// <short>Start create a room based on a template</short>
+    /// <path>api/2.0/files/rooms/fromTemplate</path>
+    [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Status", typeof(RoomFromTemplateStatusDto))]
+    [HttpPost("fromTemplate")]
+    public async Task<RoomFromTemplateStatusDto> CreateRoomAsync(CreateRoomFromTempateDto dto)
+    {
+        LogoSettings logo = null;
+        if (dto.Logo != null)
+        {
+            logo = new LogoSettings
+            {
+                Height = dto.Logo.Height,
+                Width = dto.Logo.Width,
+                TmpFile = dto.Logo.TmpFile,
+                X = dto.Logo.X,
+                Y = dto.Logo.Y
+            };
+        }
+
+        var taskId = await roomTemplatesWorker.StartCreateRoomAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID,
+          dto.TemplateId,
+          dto.Title,
+          logo,
+          dto.CopyLogo,
+          dto.Tags,
+          dto.Cover,
+          dto.Color,
+          false);
+
+        await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
+        {
+            TemplateId = dto.TemplateId,
+            Logo = logo,
+            CopyLogo = dto.CopyLogo,
+            Title = dto.Title,
+            Tags = dto.Tags,
+            Cover = dto.Cover,
+            Color = dto.Color,
+            TaskId = taskId
+        });
+        return await Status();
+    }
+
+    /// <summary>
+    /// Get progress creating room based a template
+    /// </summary>
+    /// <short>Get progress creating room</short>
+    /// <path>api/2.0/files/rooms/fromTemplate/status</path>
+    [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Status", typeof(RoomFromTemplateStatusDto))]
+    [HttpGet("fromTemplate/status")]
+    public async Task<RoomFromTemplateStatusDto> Status()
+    {
+        try
+        {
+            var status = await roomTemplatesWorker.GetStatusRoomCreatingAsync(tenantManager.GetCurrentTenantId());
+            if (status != null)
+            {
+                var result = new RoomFromTemplateStatusDto
+                {
+                    Progress = status.Percentage,
+                    Error = status.Exception != null ? status.Exception.Message : "",
+                    IsCompleted = status.IsCompleted,
+                    RoomId = status.RoomId
+                };
+                return result;
+            }
+        }
+        catch
+        {
+
+        }
+        return null;
     }
 }
 
@@ -274,6 +357,12 @@ public abstract class VirtualRoomsController<T>(
     [HttpPut("{id}/archive")]
     public async Task<FileOperationDto> ArchiveRoomAsync(ArchiveRoomRequestDto<T> inDto)
     {
+        var room = await _fileStorageService.GetFolderAsync(inDto.Id);
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+        {
+            throw new ItemNotFoundException();
+        }
+
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
         var movableRoom = JsonSerializer.SerializeToElement(inDto.Id);
         
@@ -292,9 +381,15 @@ public abstract class VirtualRoomsController<T>(
     [HttpPut("{id}/unarchive")]
     public async Task<FileOperationDto> UnarchiveRoomAsync(ArchiveRoomRequestDto<T> inDto)
     {
+        var room = await _fileStorageService.GetFolderAsync(inDto.Id);
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+        {
+            throw new ItemNotFoundException();
+        }
+
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync);
         var movableRoom = JsonSerializer.SerializeToElement(inDto.Id);
-        
+
         await fileOperationsManager.PublishMoveOrCopyAsync([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter);
         return await fileOperationDtoHelper.GetAsync((await fileOperationsManager.GetOperationResults()).FirstOrDefault());
     }
@@ -317,6 +412,14 @@ public abstract class VirtualRoomsController<T>(
         if (inDto.RoomInvitation.Invitations == null || !inDto.RoomInvitation.Invitations.Any())
         {
             return result;
+        }
+
+        var room = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
+
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync 
+            && inDto.RoomInvitation.Invitations.Any(i=> i.Access != FileShare.None && i.Access != FileShare.Read))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
         }
 
         var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.RoomInvitation.Invitations);
@@ -648,9 +751,12 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpGet("rooms")]
     public async Task<FolderContentDto<int>> GetRoomsFolderAsync(RoomContentRequestDto inDto)
     {
-        var parentId = inDto.SearchArea != SearchArea.Archive 
-            ? await globalFolderHelper.GetFolderVirtualRooms()
-            : await globalFolderHelper.GetFolderArchive();
+        var parentId = inDto.SearchArea switch
+        {
+            SearchArea.Archive => await globalFolderHelper.GetFolderArchive(),
+            SearchArea.Templates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
+            _ => await globalFolderHelper.GetFolderVirtualRooms()
+        };
 
         var filter = RoomTypeExtensions.MapToFilterType(inDto.Type);
 
@@ -677,8 +783,8 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             inDto.SubjectId,
             filterValue,
             [],
-            inDto.SearchInContent ?? false,
-            inDto.WithSubfolders ?? false,
+            true,
+            false,
             orderBy,
             inDto.SearchArea ?? SearchArea.Active,
             0,
@@ -799,6 +905,11 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     public async Task<DocumentBuilderTaskDto> StartRoomIndexExportAsync(RoomIdRequestDto<int> inDto)
     {
         var room = await fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
+
+        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+        {
+            throw new ItemNotFoundException();
+        }
 
         var fileSecurity = serviceProvider.GetService<FileSecurity>();
 

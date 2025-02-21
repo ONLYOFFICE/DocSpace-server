@@ -119,9 +119,6 @@ $__AuthorName đã xóa phòng: $RoomTitle</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Trạng thái ký tên đã thay đổi</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Được nhắc đến trong tài liệu</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Gửi thư đã xong.</value>
   </data>

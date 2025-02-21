@@ -308,7 +308,8 @@ public class PortalController(
         return (await tenantManager.GetTenantQuotasAsync()).OrderBy(r => r.Price)
                             .FirstOrDefault(quota =>
                                             quota.CountUser > needUsersCount
-                                            && quota.MaxTotalSize > usedSpace);
+                                            && quota.MaxTotalSize > usedSpace
+                                            && !quota.Year);
     }
 
 

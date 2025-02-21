@@ -169,6 +169,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Templates.
+        /// </summary>
+        public static string RoomTemplates {
+            get {
+                return ResourceManager.GetString("RoomTemplates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Shared with me.
         /// </summary>
         public static string SharedForMe {

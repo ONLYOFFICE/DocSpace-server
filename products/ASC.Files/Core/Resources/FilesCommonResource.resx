@@ -562,4 +562,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="RoleEnum_ContentCreator" xml:space="preserve">
     <value>Content Creator</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Cannot delete current version of file</value>
+  </data>
 </root>

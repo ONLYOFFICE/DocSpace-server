@@ -134,9 +134,6 @@ $__AuthorName 删除了房间： $RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>协作空间消息通知。已在文档中提及</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>已在文档中提及</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>邮件发送完成。</value>
   </data>
