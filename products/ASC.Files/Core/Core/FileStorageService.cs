@@ -3016,7 +3016,7 @@ public class FileStorageService //: IFileStorageService
         return any;
     }
 
-    public async Task CopySharedFilesAsync(Guid user, Guid toUser)
+    public async Task MoveSharedFilesAsync(Guid user, Guid toUser)
     {
         var initUser = securityContext.CurrentAccount.ID;
 
@@ -3052,11 +3052,15 @@ public class FileStorageService //: IFileStorageService
             var folder = await CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
             foreach (var file in shared)
             {
-                await fileDao.CopyFileAsync(file, folder.Id);
+                await fileDao.MoveFileAsync(file, folder.Id);
             }
         }
 
         await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
+        if (shared.Count > 0)
+        {
+            await DeleteFromRecentAsync([], shared, true);
+        }
     }
 
     public async Task DeletePersonalDataAsync<T>(Guid userFromId, bool checkPermission = false)
