@@ -69,14 +69,14 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
 
             await SetPercentageAndCheckCancellationAsync(10, true);
 
-            if (_employeeType == EmployeeType.Guest)
-            {
-                await fileStorageService.ClearPersonalFolderAsync<int>(User);
-            }
+            await fileStorageService.ReassignRoomsAsync(User, ToUser);
 
             await SetPercentageAndCheckCancellationAsync(40, true);
 
-            await fileStorageService.ReassignRoomsAsync(User, ToUser);
+            if (_employeeType == EmployeeType.Guest)
+            {
+                await fileStorageService.DeletePersonalFolderAsync<int>(User);
+            }
 
             await SetPercentageAndCheckCancellationAsync(80, true);
 

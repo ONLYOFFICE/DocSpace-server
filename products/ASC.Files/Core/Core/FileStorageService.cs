@@ -3033,7 +3033,7 @@ public class FileStorageService //: IFileStorageService
         return;
     }
 
-    public async Task ClearPersonalFolderAsync<T>(Guid userFromId, bool checkPermission = false)
+    public async Task DeletePersonalFolderAsync<T>(Guid userFromId, bool checkPermission = false)
     {
         if (checkPermission)
         {
