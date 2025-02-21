@@ -3054,11 +3054,13 @@ public class FileStorageService //: IFileStorageService
             {
                 await fileDao.MoveFileAsync(file, folder.Id);
             }
-            await DeleteFromRecentAsync([], shared, true);
-            await fileDao.ReassignFilesAsync(toUser, shared);
         }
 
         await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
+        if (shared.Count > 0)
+        {
+            await DeleteFromRecentAsync([], shared, true);
+        }
     }
 
     public async Task DeletePersonalDataAsync<T>(Guid userFromId, bool checkPermission = false)

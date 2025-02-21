@@ -1473,21 +1473,12 @@ internal class FileDao(
 
         if (exceptFolderIds == null || !exceptFolderIds.Any())
         {
-            await filesDbContext.ReassignFilesByCreateByAsync(tenantId, oldOwnerId, newOwnerId);
+            await filesDbContext.ReassignFilesAsync(tenantId, oldOwnerId, newOwnerId);
         }
         else
         {
             await filesDbContext.ReassignFilesPartiallyAsync(tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
         }
-    }
-
-    public async Task ReassignFilesAsync(Guid newOwnerId, IEnumerable<int> fileIds)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        await filesDbContext.ReassignFilesAsync(tenantId, newOwnerId, fileIds);
     }
 
     public IAsyncEnumerable<File<int>> GetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
