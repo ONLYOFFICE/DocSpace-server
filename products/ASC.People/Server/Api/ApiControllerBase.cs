@@ -24,6 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json.Nodes;
+
+using ASC.Common.Security;
+using ASC.Webhooks.Core;
+
 namespace ASC.People.Api;
 
 /// <summary>
@@ -35,3 +40,120 @@ namespace ASC.People.Api;
 [ApiController]
 [ControllerName("people")]
 public abstract class ApiControllerBase : ControllerBase;
+
+
+[Scope]
+public class WebhookPeopleAccessChecker(
+    UserManager userManager,
+    SecurityContext securityContext,
+    IPermissionResolver permissionResolver) : IWebhookAccessChecker
+{
+    public async Task<bool> CheckAccessAsync(WebhookData webhookData)
+    {
+        if (securityContext.CurrentAccount.ID == webhookData.TargetUserId)
+        {
+            return true;
+        }
+
+        if (typeof(EmployeeDto).IsAssignableFrom(webhookData.ResponseType))
+        {
+            var entryNode = JsonNode.Parse(webhookData.ResponseString)["response"];
+            return await CheckAccessByResponse(entryNode, false, webhookData.TargetUserId);
+        }
+
+        if (typeof(IEnumerable<EmployeeDto>).IsAssignableFrom(webhookData.ResponseType) ||
+            typeof(IAsyncEnumerable<EmployeeDto>).IsAssignableFrom(webhookData.ResponseType))
+        {
+            var entryNodes = JsonNode.Parse(webhookData.ResponseString)["response"].AsArray();
+            foreach (var entryNode in entryNodes)
+            {
+                if (!await CheckAccessByResponse(entryNode, false, webhookData.TargetUserId))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        if (typeof(GroupDto).IsAssignableFrom(webhookData.ResponseType))
+        {
+            var entryNode = JsonNode.Parse(webhookData.ResponseString)["response"];
+            return await CheckAccessByResponse(entryNode, true, webhookData.TargetUserId);
+        }
+
+        if (typeof(IEnumerable<GroupDto>).IsAssignableFrom(webhookData.ResponseType) ||
+            typeof(IAsyncEnumerable<GroupDto>).IsAssignableFrom(webhookData.ResponseType))
+        {
+            var entryNodes = JsonNode.Parse(webhookData.ResponseString)["response"].AsArray();
+            foreach (var entryNode in entryNodes)
+            {
+                if (!await CheckAccessByResponse(entryNode, true, webhookData.TargetUserId))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        var accessByFileId = await CheckAccessByRouteAsync(webhookData.RouteData, "userid", false, webhookData.TargetUserId);
+        if (accessByFileId.HasValue)
+        {
+            return accessByFileId.Value;
+        }
+
+        return false;
+    }
+
+    private async Task<bool?> CheckAccessByRouteAsync(Dictionary<string, string> routeData, string param, bool isGroup, Guid userId)
+    {
+        if (routeData.TryGetValue(param, out var idStr) && Guid.TryParse(idStr, out var id))
+        {
+            return await CheckAccessAsync(id, isGroup, userId);
+        }
+
+        return null;
+    }
+
+    private async Task<bool> CheckAccessByResponse(JsonNode entryNode, bool isGroup, Guid userId)
+    {
+        if (entryNode == null)
+        {
+            return false;
+        }
+
+        var entryIdNode = entryNode["id"];
+
+        if (Guid.TryParse(entryIdNode.GetValue<string>(), out var id))
+        {
+            return await CheckAccessAsync(id, isGroup, userId);
+        }
+
+        return false;
+    }
+
+    async Task<bool> CheckAccessAsync(Guid id, bool isGroup, Guid userId)
+    {
+        var targetUser = await userManager.GetUsersAsync(userId);
+
+        if (await userManager.IsDocSpaceAdminAsync(targetUser))
+        {
+            return true;
+        }
+
+        if (!isGroup)
+        {
+            var user = await userManager.GetUsersAsync(id);
+
+            if (await userManager.IsGuestAsync(user))
+            {
+                return user.CreatedBy == userId;
+            }
+        }
+
+        var account = new Common.Security.Authentication.Account(userId, null, false);
+
+        return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
+    }
+}
