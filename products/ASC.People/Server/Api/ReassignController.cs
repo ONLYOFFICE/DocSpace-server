@@ -150,10 +150,6 @@ public class ReassignController(
         }
 
         var result = await fileStorageService.AnyRoomsAsync(inDto.UserId);
-        if (inDto.Type is EmployeeType.Guest && !result) 
-        {
-            result = await fileStorageService.AnySharedFilesAsync(inDto.UserId);
-        }
 
         return result;
     }
