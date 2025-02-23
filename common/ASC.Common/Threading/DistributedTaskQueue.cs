@@ -249,7 +249,7 @@ public class DistributedTaskQueue(
 
     private async Task<List<DistributedTask>> LoadFromCache()
     {
-        return await hybridCache.GetOrDefaultAsync<List<DistributedTask>>(_name);
+        return await hybridCache.GetOrDefaultAsync<List<DistributedTask>>(_name) ?? [];
     }
 
     private async Task<List<DistributedTask>> DeleteOrphanCacheItem(IEnumerable<DistributedTask> queueTasks)

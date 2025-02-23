@@ -227,7 +227,7 @@ public class FileConverterQueue(IFusionCache hybridCache, IDistributedLockProvid
 
     private async Task<List<FileConverterOperationResult>> LoadFromCacheAsync(string cacheKey)
     {
-        return await hybridCache.GetOrDefaultAsync<List<FileConverterOperationResult>>(cacheKey);
+        return await hybridCache.GetOrDefaultAsync<List<FileConverterOperationResult>>(cacheKey) ?? [];
     }
 }
 

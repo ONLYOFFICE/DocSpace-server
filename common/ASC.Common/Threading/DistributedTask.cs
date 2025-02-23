@@ -38,6 +38,7 @@ public class DistributedTask
     [ProtoMember(11)]
     protected readonly Dictionary<string, string> _props = new();
 
+    [JsonIgnore]
     public Func<DistributedTask, Task> Publication { get; set; }
 
     /// <summary>Instance ID</summary>
