@@ -27,9 +27,10 @@
 namespace ASC.Common.Threading;
 
 [Transient]
-public class DistributedTaskQueue(IServiceProvider serviceProvider,
+public class DistributedTaskQueue(
+    IServiceProvider serviceProvider,
     ICacheNotify<DistributedTaskCancelation> cancelTaskNotify,
-    IDistributedCache distributedCache,
+    IFusionCache hybridCache,
     ILogger<DistributedTaskQueue> logger)
 {
     public const string QUEUE_DEFAULT_PREFIX = "asc_distributed_task_queue_";
@@ -171,7 +172,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
         if (queueTasks.Count == 0)
         {
-            await distributedCache.RemoveAsync(_name);
+            await hybridCache.RemoveAsync(_name);
         }
         else
         {
@@ -237,34 +238,18 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
     {
         if (queueTasks.Count == 0)
         {
-            await distributedCache.RemoveAsync(_name);
+            await hybridCache.RemoveAsync(_name);
 
             return;
         }
-
-        using var ms = new MemoryStream();
-
-        Serializer.Serialize(ms, queueTasks);
-
-        await distributedCache.SetAsync(_name, ms.ToArray(), new DistributedCacheEntryOptions
-        {
-            AbsoluteExpiration = DateTime.UtcNow.AddDays(1)
-        });
+        
+        await hybridCache.SetAsync(_name, queueTasks, TimeSpan.FromDays(1));
 
     }
 
     private async Task<List<DistributedTask>> LoadFromCache()
     {
-        var serializedObject = await distributedCache.GetAsync(_name);
-
-        if (serializedObject == null)
-        {
-            return [];
-        }
-
-        using var ms = new MemoryStream(serializedObject);
-
-        return Serializer.Deserialize<List<DistributedTask>>(ms);
+        return await hybridCache.GetOrDefaultAsync<List<DistributedTask>>(_name);
     }
 
     private async Task<List<DistributedTask>> DeleteOrphanCacheItem(IEnumerable<DistributedTask> queueTasks)

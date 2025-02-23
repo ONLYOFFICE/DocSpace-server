@@ -119,7 +119,6 @@ global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
@@ -134,6 +133,8 @@ global using SkiaSharp;
 global using Twilio.Clients;
 global using Twilio.Rest.Api.V2010.Account;
 global using Twilio.Types;
+
+global using ZiggyCreatures.Caching.Fusion;
 
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 global using SecurityContext = ASC.Core.SecurityContext;

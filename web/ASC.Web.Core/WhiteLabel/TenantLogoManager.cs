@@ -34,7 +34,7 @@ public class TenantLogoManager(
     TenantManager tenantManager,
     AuthContext authContext,
     IConfiguration configuration,
-    IDistributedCache distributedCache)
+    IFusionCache hybridCache)
 {
     public bool WhiteLabelEnabled
     {
@@ -206,24 +206,21 @@ public class TenantLogoManager(
 
         foreach (var customCulture in customCultures)
         {
-            await distributedCache.RemoveAsync(GetCacheKey(customCulture));
+            await hybridCache.RemoveAsync(GetCacheKey(customCulture));
         }
 
-        await distributedCache.RemoveAsync(GetCacheKey(string.Empty));
+        await hybridCache.RemoveAsync(GetCacheKey(string.Empty));
     }
 
 
     private async Task<byte[]> GetMailLogoDataFromCacheAsync(string culture)
     {
-        return await distributedCache.GetAsync(GetCacheKey(culture));
+        return await hybridCache.GetOrDefaultAsync<byte[]>(GetCacheKey(culture));
     }
 
     private async Task InsertMailLogoDataToCacheAsync(byte[] data, string culture)
     {
-        await distributedCache.SetAsync(GetCacheKey(culture), data, new DistributedCacheEntryOptions
-        {
-            AbsoluteExpiration = DateTime.UtcNow.Add(TimeSpan.FromDays(1))
-        });
+        await hybridCache.SetAsync(GetCacheKey(culture), data, TimeSpan.FromDays(1));
     }
 
     private string GetCacheKey(string culture)

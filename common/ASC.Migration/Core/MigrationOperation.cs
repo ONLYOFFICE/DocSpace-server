@@ -34,7 +34,7 @@ public class MigrationOperation(
     MigrationCore migrationCore,
     TenantManager tenantManager,
     SecurityContext securityContext,
-    IDistributedCache cache)
+    IFusionCache hybridCache)
     : DistributedTaskProgress
 {
     private string _migratorName;
@@ -122,7 +122,7 @@ public class MigrationOperation(
                 throw new ItemNotFoundException(MigrationResource.MigrationNotFoundException);
             }
 
-            var folder = await cache.GetStringAsync($"migration folder - {TenantId}");
+            var folder = await hybridCache.GetOrDefaultAsync<string>($"migration folder - {TenantId}");
             await migrator.InitAsync(folder, onlyParse ? OperationType.Parse : OperationType.Migration, CancellationToken);
 
             await migrator.ParseAsync(onlyParse);

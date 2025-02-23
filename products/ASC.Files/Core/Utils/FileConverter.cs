@@ -31,7 +31,7 @@ using Serializer = ProtoBuf.Serializer;
 namespace ASC.Web.Files.Utils;
 
 [Singleton]
-public class FileConverterQueue(IDistributedCache distributedCache, IDistributedLockProvider distributedLockProvider)
+public class FileConverterQueue(IFusionCache hybridCache, IDistributedLockProvider distributedLockProvider)
 {
     private const string Cache_key_prefix = "asc_file_converter_queue_";
 
@@ -212,19 +212,12 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
     {
         if (!queueTasks.Any())
         {
-            await distributedCache.RemoveAsync(cacheKey);
+            await hybridCache.RemoveAsync(cacheKey);
 
             return;
         }
 
-        using var ms = new MemoryStream();
-
-        Serializer.Serialize(ms, queueTasks);
-
-        await distributedCache.SetAsync(cacheKey, ms.ToArray(), new DistributedCacheEntryOptions
-        {
-            SlidingExpiration = TimeSpan.FromMinutes(15)
-        });
+        await hybridCache.SetAsync(cacheKey, queueTasks, TimeSpan.FromMinutes(15));
     }
 
     internal static string GetCacheKey<T>()
@@ -234,16 +227,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
 
     private async Task<List<FileConverterOperationResult>> LoadFromCacheAsync(string cacheKey)
     {
-        var serializedObject = await distributedCache.GetAsync(cacheKey);
-
-        if (serializedObject == null)
-        {
-            return [];
-        }
-
-        using var ms = new MemoryStream(serializedObject);
-
-        return Serializer.Deserialize<List<FileConverterOperationResult>>(ms);
+        return await hybridCache.GetOrDefaultAsync<List<FileConverterOperationResult>>(cacheKey);
     }
 }
 

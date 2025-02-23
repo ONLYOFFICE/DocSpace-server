@@ -46,7 +46,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         IServiceProvider serviceProvider,
         AuditEventsRepository auditEventsRepository,
         LoginEventsRepository loginEventsRepository,
-        IDistributedCache distributedCache,
+        IFusionCache hybridCache,
         IEventBus eventBus)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
@@ -67,10 +67,10 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         var nowDate = scheduleDate.Date;
         var startDateToNotifyUnusedPortals = nowDate;
 
-        var cacheValue = await distributedCache.GetStringAsync(CacheKey);
+        var cacheValue = await hybridCache.GetOrDefaultAsync<string>(CacheKey);
         if (string.IsNullOrEmpty(cacheValue))
         {
-            await distributedCache.SetStringAsync(CacheKey, JsonSerializer.Serialize(startDateToNotifyUnusedPortals));
+            await hybridCache.SetAsync(CacheKey, JsonSerializer.Serialize(startDateToNotifyUnusedPortals));
         }
         else
         {

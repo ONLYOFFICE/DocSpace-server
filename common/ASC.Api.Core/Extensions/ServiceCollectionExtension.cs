@@ -24,6 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+
+using ZiggyCreatures.Caching.Fusion;
+
 namespace ASC.Api.Core.Extensions;
 
 public static class ServiceCollectionExtension
@@ -57,17 +63,20 @@ public static class ServiceCollectionExtension
     }
 
     public static IServiceCollection AddDistributedCache(this IServiceCollection services, IConnectionMultiplexer connection)
-    {        
+    {       
+        var cacheBuilder = services.AddFusionCache()
+            .WithSystemTextJsonSerializer()
+            .WithDistributedCache(new RedisCache(new RedisCacheOptions {ConnectionMultiplexerFactory = () => Task.FromResult(connection)}))
+            .WithMemoryCache(new MemoryCache(new MemoryCacheOptions()))
+            .AsHybridCache();
+        
         if (connection != null)
         {
-            services.AddStackExchangeRedisCache(config =>
-            {
-                config.ConnectionMultiplexerFactory = () => Task.FromResult(connection);
-            });
+            cacheBuilder.WithDistributedCache(new RedisCache(new RedisCacheOptions {ConnectionMultiplexerFactory = () => Task.FromResult(connection)}));
         }
         else
         {
-            services.AddDistributedMemoryCache();
+            cacheBuilder.WithDistributedCache(new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions())));
         }
 
         return services;
