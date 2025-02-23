@@ -92,7 +92,7 @@ public class VirtualRoomsInternalController(
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomFromTemplateStatusDto))]
     [HttpPost("fromTemplate")]
-    public async Task<RoomFromTemplateStatusDto> CreateRoomAsync(CreateRoomFromTempateDto dto)
+    public async Task<RoomFromTemplateStatusDto> CreateRoomFromTemplateAsync(CreateRoomFromTemplateDto dto)
     {
         LogoSettings logo = null;
         if (dto.Logo != null)
@@ -128,7 +128,7 @@ public class VirtualRoomsInternalController(
             Color = dto.Color,
             TaskId = taskId
         });
-        return await Status();
+        return await GetRoomCreatingStatus();
     }
 
     /// <summary>
@@ -139,7 +139,7 @@ public class VirtualRoomsInternalController(
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomFromTemplateStatusDto))]
     [HttpGet("fromTemplate/status")]
-    public async Task<RoomFromTemplateStatusDto> Status()
+    public async Task<RoomFromTemplateStatusDto> GetRoomCreatingStatus()
     {
         try
         {

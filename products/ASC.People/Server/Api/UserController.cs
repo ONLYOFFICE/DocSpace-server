@@ -876,7 +876,7 @@ public class UserController(
     [Tags("People / Module")]
     [SwaggerResponse(200, "Module information", typeof(Module))]
     [HttpGet("info")]
-    public Module GetModule()
+    public Module GetPeopleModule()
     {
         var product = new PeopleProduct();
         product.Init();
