@@ -61,7 +61,7 @@ public class FilesControllerInternal(
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "The required file was not found")]
     [HttpGet("file/{fileId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(HistoryRequestDto inDto)
+    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(HistoryRequestDto inDto)
     {
         return historyApiHelper.GetFileHistoryAsync(inDto.FileId, inDto.FromDate, inDto.ToDate);
     }
@@ -471,7 +471,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Order is set")]
     [HttpPut("order")]
-    public async Task SetOrder(OrdersRequestDto<T> inDto)
+    public async Task SetFilesOrder(OrdersRequestDto<T> inDto)
     {
         await fileStorageService.SetOrderAsync(inDto.Items);
     }

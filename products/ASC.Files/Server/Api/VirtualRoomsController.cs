@@ -699,7 +699,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "List of file entry information", typeof(List<NewItemsDto<FileEntryDto>>))]
     [HttpGet("{id}/news")]
-    public async Task<List<NewItemsDto<FileEntryDto>>> GetNewItemsFromRoomAsync(RoomIdRequestDto<T> inDto)
+    public async Task<List<NewItemsDto<FileEntryDto>>> GetNewRoomItemsAsync(RoomIdRequestDto<T> inDto)
     {
         var newItems = await _fileStorageService.GetNewRoomFilesAsync(inDto.Id);
         var result = new List<NewItemsDto<FileEntryDto>>();
