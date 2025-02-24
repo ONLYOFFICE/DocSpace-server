@@ -568,6 +568,43 @@ public class NotifyClient(WorkContext notifyContext,
         }
         return notifiableUsers.ToArray();
     }
+
+    public async Task SendFormStartedFilling<T>(FileEntry<T> room, File<T> file, IEnumerable<Guid> aces, Guid userId)
+    {
+        if (aces.Count() == 0)
+        {
+            return;
+        }
+
+        var client = notifyContext.RegisterClient(serviceProvider, notifySource);
+        var recipientsProvider = notifySource.GetRecipientsProvider();
+
+        var folderId = room.Id.ToString();
+        var roomUrl = pathProvider.GetRoomsUrl(folderId, false);
+
+        var user = await userManager.GetUsersAsync(userId);
+        var userUrl = baseCommonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userId));
+        var userName = user.DisplayUserName(displayUserSettingsHelper);
+
+        foreach (var ace in aces)
+        {
+            var recipient = await notifySource.GetRecipientsProvider().GetRecipientAsync(ace.ToString());
+
+            await client.SendNoticeAsync(
+                NotifyConstants.EventFormStartedFilling,
+                room.UniqID,
+                recipient,
+                ConfigurationConstants.NotifyEMailSenderSysName,
+                new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id))),
+                new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
+                new TagValue(NotifyConstants.RoomTitle, room.Title),
+                new TagValue(NotifyConstants.RoomUrl, roomUrl),
+                new TagValue(Tags.FromUserName, userName),
+                new TagValue(Tags.FromUserLink, userUrl)
+                );
+
+        }
+    }
     private async Task<bool> CanNotifyRoom<T>(FileEntry<T> room, UserInfo user)
     {
         if (room is not { FileEntryType: FileEntryType.Folder })

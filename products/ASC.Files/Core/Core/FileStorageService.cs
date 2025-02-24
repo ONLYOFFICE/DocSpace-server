@@ -4457,6 +4457,11 @@ public class FileStorageService //: IFileStorageService
     public async Task SaveFormRoleMapping<T>(T formId, IEnumerable<FormRole> roles)
     {
         var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+
+        var form = await fileDao.GetFileAsync(formId);
+        var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
+
         await ValidateChangeRolesPermission(formId, fileDao);
 
         await fileDao.SaveFormRoleMapping(formId, roles);
@@ -4464,6 +4469,8 @@ public class FileStorageService //: IFileStorageService
         var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
         properties.FormFilling.StartFilling = true;
         await fileDao.SaveProperties(formId, properties);
+
+        await notifyClient.SendFormStartedFilling(currentRoom, form, roles.Select(role => role.UserId).Distinct(), authContext.CurrentAccount.ID);
     }
 
     public async Task<FormRole> ReassignFormRoleToUser<T>(T formId, string roleName, Guid userId, Guid toUserId)

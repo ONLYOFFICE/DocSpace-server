@@ -165,6 +165,17 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 
+        ///      Activity notification. &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; started the form filling process:  &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///    .
+        /// </summary>
+        public static string pattern_FormStartedFilling {
+            get {
+                return ResourceManager.GetString("pattern_FormStartedFilling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. You filled out the form $Message
         ///
         ///You filled out the form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room &quot;$RoomTitle&quot;:&quot;$RoomURL&quot;
@@ -341,6 +352,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string subject_FormReceived {
             get {
                 return ResourceManager.GetString("subject_FormReceived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DocSpace notification..
+        /// </summary>
+        public static string subject_FormStartedFilling {
+            get {
+                return ResourceManager.GetString("subject_FormStartedFilling", resourceCulture);
             }
         }
         
