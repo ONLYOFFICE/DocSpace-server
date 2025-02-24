@@ -24,9 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+
 using ASC.Api.Core.Cors.Enums;
+using ASC.Core.Common;
 
 using Microsoft.AspNetCore.Cors;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ASC.Web.Api.Controllers;
 
@@ -50,7 +55,12 @@ public class SecurityController(PermissionContext permissionContext,
         CoreBaseSettings coreBaseSettings,
         ApiContext apiContext,
         CspSettingsHelper cspSettingsHelper, 
-        ApiDateTimeHelper apiDateTimeHelper)
+        ApiDateTimeHelper apiDateTimeHelper,
+        SecurityContext securityContext,
+        UserManager userManager,
+        UserFormatter userFormatter,
+        MachinePseudoKeys machinePseudoKeys,
+        BaseCommonLinkUtility baseCommonLinkUtility)
     : ControllerBase
 {
     /// <summary>
@@ -402,6 +412,41 @@ public class SecurityController(PermissionContext permissionContext,
             Header = await cspSettingsHelper.CreateHeaderAsync(settings.Domains)
         };
     }
+
+    /// <summary>
+    /// Generate Jwt Token for communication between login (client) and identity services 
+    /// </summary>
+    /// <path>api/2.0/security/oauth2/token</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [HttpGet("oauth2/token")]
+    [SwaggerResponse(200, "Jwt Token", typeof(string))]
+    public async Task<string> GenerateJwtToken()
+    {
+        var key = new SymmetricSecurityKey(machinePseudoKeys.GetMachineConstant(256));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var tenant = tenantManager.GetCurrentTenant();
+        var userId = securityContext.CurrentAccount.ID;
+        var userInfo = await userManager.GetUsersAsync(userId);
+        var isAdmin = await userManager.GetUserTypeAsync(userInfo.Id) is EmployeeType.DocSpaceAdmin;
+        var serverRootPath = baseCommonLinkUtility.ServerRootPath;
+       
+        var token = new JwtSecurityToken(
+            issuer: serverRootPath,
+            audience: serverRootPath,
+            claims: new List<Claim>() {
+                new Claim("sub", securityContext.CurrentAccount.ID.ToString()), 
+                new Claim("user_name", userFormatter.GetUserName(userInfo)),
+                new Claim("user_email", userInfo.Email),
+                new Claim("tenant_id", tenant.Id.ToString()),
+                new Claim("tenant_url", serverRootPath),
+                new Claim("is_admin", isAdmin.ToString())
+            },
+            expires: DateTime.Now.AddHours(1),
+            signingCredentials: creds);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    
 
     private async Task DemandAuditPermissionAsync()
     {
