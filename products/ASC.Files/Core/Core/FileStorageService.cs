@@ -2507,7 +2507,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async ValueTask<object> DeleteThirdPartyAsync(string providerId)
+    public async ValueTask<string> DeleteThirdPartyAsync(string providerId)
     {
         var providerDao = daoFactory.ProviderDao;
         if (providerDao == null)

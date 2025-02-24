@@ -235,10 +235,10 @@ public class SecurityController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/security/audit/login/report</path>
     [Tags("Security / Login history")]
-    [SwaggerResponse(200, "URL to the xlsx report file", typeof(object))]
+    [SwaggerResponse(200, "URL to the xlsx report file", typeof(string))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("audit/login/report")]
-    public async Task<object> CreateLoginHistoryReport()
+    public async Task<string> CreateLoginHistoryReport()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -267,11 +267,11 @@ public class SecurityController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/security/audit/events/report</path>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "URL to the xlsx report file", typeof(object))]
+    [SwaggerResponse(200, "URL to the xlsx report file", typeof(string))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("audit/events/report")]
-    public async Task<object> CreateAuditTrailReport()
+    public async Task<string> CreateAuditTrailReport()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

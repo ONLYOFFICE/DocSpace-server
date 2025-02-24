@@ -134,9 +134,9 @@ public class TfaappController(
     /// <short>Get confirmation email</short>
     ///<path>api/2.0/settings/tfaapp/confirm</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Confirmation email URL", typeof(object))]
+    [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
     [HttpGet("tfaapp/confirm")]
-    public async Task<object> TfaConfirmUrlAsync()
+    public async Task<string> TfaConfirmUrlAsync()
     {
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
@@ -270,9 +270,9 @@ public class TfaappController(
     /// <short>Get confirmation email for updating TFA settings</short>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Confirmation email URL", typeof(object))]
+    [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
     [HttpPut("tfaappwithlink")]
-    public async Task<object> TfaSettingsLink(TfaRequestsDto inDto)
+    public async Task<string> TfaSettingsLink(TfaRequestsDto inDto)
     {
         if (await TfaSettingsAsync(inDto))
         {

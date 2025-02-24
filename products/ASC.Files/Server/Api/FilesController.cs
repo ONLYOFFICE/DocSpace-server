@@ -378,9 +378,9 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Update a comment</short>
     /// <path>api/2.0/files/file/{fileId}/comment</path>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Updated comment", typeof(object))]
+    [SwaggerResponse(200, "Updated comment", typeof(string))]
     [HttpPut("file/{fileId}/comment")]
-    public async Task<object> UpdateCommentAsync(UpdateCommentRequestDto<T> inDto)
+    public async Task<string> UpdateCommentAsync(UpdateCommentRequestDto<T> inDto)
     {
         return await filesControllerHelper.UpdateCommentAsync(inDto.FileId, inDto.File.Version, inDto.File.Comment);
     }

@@ -99,9 +99,9 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/{providerId}</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "Third-party folder ID", typeof(object))]
+    [SwaggerResponse(200, "Third-party folder ID", typeof(string))]
     [HttpDelete("thirdparty/{providerId:int}")]
-    public async Task<object> DeleteThirdPartyAsync(ProviderIdRequestDto inDto)
+    public async Task<string> DeleteThirdPartyAsync(ProviderIdRequestDto inDto)
     {
         return await fileStorageService.DeleteThirdPartyAsync(inDto.ProviderId.ToString(CultureInfo.InvariantCulture));
     }

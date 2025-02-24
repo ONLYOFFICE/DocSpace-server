@@ -137,9 +137,9 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/account</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The URL to the payment account", typeof(object))]
+    [SwaggerResponse(200, "The URL to the payment account", typeof(string))]
     [HttpGet("account")]
-    public async Task<object> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
+    public async Task<string> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
