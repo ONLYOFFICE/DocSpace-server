@@ -428,6 +428,7 @@ public class SecurityController(PermissionContext permissionContext,
         var userId = securityContext.CurrentAccount.ID;
         var userInfo = await userManager.GetUsersAsync(userId);
         var isAdmin = await userManager.GetUserTypeAsync(userInfo.Id) is EmployeeType.DocSpaceAdmin;
+        var isGuest = await userManager.IsGuestAsync(userId);
         var serverRootPath = baseCommonLinkUtility.ServerRootPath;
        
         var token = new JwtSecurityToken(
@@ -440,7 +441,8 @@ public class SecurityController(PermissionContext permissionContext,
                 new Claim("user_email", userInfo.Email),
                 new Claim("tenant_id", tenant.Id.ToString()),
                 new Claim("tenant_url", serverRootPath),
-                new Claim("is_admin", isAdmin.ToString())
+                new Claim("is_admin", isAdmin.ToString().ToLower()),
+                new Claim("is_guest", isGuest.ToString().ToLower())
             },
             expires: DateTime.Now.AddHours(1),
             signingCredentials: creds);
