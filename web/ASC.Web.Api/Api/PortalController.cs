@@ -99,7 +99,7 @@ public class PortalController(
         {
             dto.Region = await apiSystemHelper.GetTenantRegionAsync(dto.Name);
         }
-
+        dto.Region = "DEU";
         return dto;
     }
 
