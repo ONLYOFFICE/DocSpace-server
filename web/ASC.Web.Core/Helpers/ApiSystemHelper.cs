@@ -196,7 +196,18 @@ public class ApiSystemHelper
 
         if (getItemResponse.Item.TryGetValue(TenantRegionKey, out var region))
         {
-            return region.S;
+            if (region.S == "us-west-2")
+            {
+                return "US";
+            }
+            else if (region.S == "eu-central-1")
+            {
+                return "DEU";
+            }
+            else 
+            {
+                return region.S;
+            }
         }
 
         return null;
