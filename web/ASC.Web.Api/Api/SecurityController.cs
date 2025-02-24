@@ -435,6 +435,7 @@ public class SecurityController(PermissionContext permissionContext,
             audience: serverRootPath,
             claims: new List<Claim>() {
                 new Claim("sub", securityContext.CurrentAccount.ID.ToString()), 
+                new Claim("user_id", securityContext.CurrentAccount.ID.ToString()), 
                 new Claim("user_name", userFormatter.GetUserName(userInfo)),
                 new Claim("user_email", userInfo.Email),
                 new Claim("tenant_id", tenant.Id.ToString()),
