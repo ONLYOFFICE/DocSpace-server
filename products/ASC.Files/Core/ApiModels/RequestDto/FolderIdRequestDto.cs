@@ -37,3 +37,13 @@ public class FolderIdRequestDto<T>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
 }
+
+
+public class FolderPrimaryIdRequestDto<T>
+{
+    /// <summary>
+    /// Folder Id
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+}

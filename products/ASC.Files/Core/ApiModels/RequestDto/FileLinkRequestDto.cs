@@ -51,8 +51,8 @@ public class FileLinkRequestDto<T>
     /// <summary>
     /// File ID
     /// </summary>
-    [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
 
     /// <summary>
     /// External link parameters

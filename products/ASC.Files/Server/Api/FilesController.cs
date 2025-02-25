@@ -422,14 +422,14 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Creates a primary external link by the identifier specified in the request.
     /// </summary>
     /// <short>Create primary external link</short>
-    /// <path>api/2.0/files/file/{fileId}/link</path>
+    /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
     [SwaggerResponse(404, "Not Found")]
-    [HttpPost("file/{fileId}/link")]
+    [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreatePrimaryExternalLinkAsync(FileLinkRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.FileId, FileEntryType.File, inDto.File.Access, expirationDate: inDto.File.ExpirationDate, requiredAuth: inDto.File.Internal, allowUnlimitedDate: true);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.Access, expirationDate: inDto.File.ExpirationDate, requiredAuth: inDto.File.Internal, allowUnlimitedDate: true);
         return await fileShareDtoHelper.Get(linkAce);
     }
 
@@ -437,15 +437,15 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
     /// <short>Get primary external link</short>
-    /// <path>api/2.0/files/file/{fileId}/link</path>
+    /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
     [SwaggerResponse(404, "Not Found")]
     [AllowAnonymous]
-    [HttpGet("file/{fileId}/link")]
-    public async Task<FileShareDto> GetFilePrimaryExternalLinkAsync(FileIdRequestDto<T> inDto)
+    [HttpGet("file/{id}/link")]
+    public async Task<FileShareDto> GetFilePrimaryExternalLinkAsync(FilePrimaryIdRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.FileId, FileEntryType.File);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -488,21 +488,21 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Returns the external links of a file with the ID specified in the request.
     /// </summary>
     /// <short>Get file external links</short>
-    /// <path>api/2.0/files/file/{fileId}/links</path>
+    /// <path>api/2.0/files/file/{id}/links</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(IAsyncEnumerable<FileShareDto>))]
-    [HttpGet("file/{fileId}/links")]
-    public async IAsyncEnumerable<FileShareDto> GetLinksAsync(FileIdRequestDto<T> inDto)
+    [HttpGet("file/{id}/links")]
+    public async IAsyncEnumerable<FileShareDto> GetLinksAsync(FilePrimaryIdRequestDto<T> inDto)
     {
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
 
-        var totalCount = await fileStorageService.GetPureSharesCountAsync(inDto.FileId, FileEntryType.File, ShareFilterType.ExternalLink, null);
+        var totalCount = await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.File, ShareFilterType.ExternalLink, null);
 
         apiContext.SetCount(Math.Min(totalCount - offset, count)).SetTotalCount(totalCount);
 
-        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.FileId, FileEntryType.File, ShareFilterType.ExternalLink, null, offset, count))
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.File, ShareFilterType.ExternalLink, null, offset, count))
         {
             yield return await fileShareDtoHelper.Get(ace);
         }
@@ -512,13 +512,13 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Sets an external link to a file with the ID specified in the request.
     /// </summary>
     /// <short>Set an external link</short>
-    /// <path>api/2.0/files/file/{fileId}/links</path>
+    /// <path>api/2.0/files/file/{id}/links</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
-    [HttpPut("file/{fileId}/links")]
+    [HttpPut("file/{id}/links")]
     public async Task<FileShareDto> SetExternalLinkAsync(FileLinkRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.SetExternalLinkAsync(inDto.FileId, FileEntryType.File, inDto.File.LinkId, null, inDto.File.Access, requiredAuth: inDto.File.Internal, 
+        var linkAce = await fileStorageService.SetExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.LinkId, null, inDto.File.Access, requiredAuth: inDto.File.Internal, 
             primary: inDto.File.Primary, expirationDate: inDto.File.ExpirationDate);
 
         return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
@@ -528,14 +528,14 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Saves a file with the identifier specified in the request as a PDF document
     /// </summary>
     /// <short>Save as pdf</short>
-    /// <path>api/2.0/files/file/{fileId}/saveaspdf</path>
+    /// <path>api/2.0/files/file/{id}/saveaspdf</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [SwaggerResponse(404, "File not found")]
-    [HttpPost("file/{fileId}/saveaspdf")]
+    [HttpPost("file/{id}/saveaspdf")]
     public async Task<FileDto<T>> SaveAsPdf(SaveAsPdfRequestDto<T> inDto)
     {
-        return await filesControllerHelper.SaveAsPdf(inDto.FileId, inDto.File.FolderId, inDto.File.Title);
+        return await filesControllerHelper.SaveAsPdf(inDto.Id, inDto.File.FolderId, inDto.File.Title);
     }
 }
 

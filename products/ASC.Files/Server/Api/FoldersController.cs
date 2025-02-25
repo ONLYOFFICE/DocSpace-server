@@ -302,15 +302,15 @@ public abstract class FoldersController<T>(
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
     /// <short>Get primary external link</short>
-    /// <path>api/2.0/files/folder/{folderId}/link</path>
+    /// <path>api/2.0/files/folder/{id}/link</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder security information", typeof(FileShareDto))]
     [SwaggerResponse(404, "Not Found")]
     [AllowAnonymous]
-    [HttpGet("folder/{folderId}/link")]
-    public async Task<FileShareDto> GetFolderPrimaryExternalLinkAsync(FolderIdRequestDto<T> inDto)
+    [HttpGet("folder/{id}/link")]
+    public async Task<FileShareDto> GetFolderPrimaryExternalLinkAsync(FolderPrimaryIdRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.FolderId, FileEntryType.Folder);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.Folder);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
