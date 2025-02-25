@@ -54,10 +54,10 @@ public class OwnerController(
     /// </short>
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
-    [SwaggerResponse(200, "Message about changing the portal owner", typeof(object))]
+    [SwaggerResponse(200, "Message about changing the portal owner", typeof(OwnerChangeInstructionsDto))]
     [SwaggerResponse(403, "Collaborator can not be an owner")]
     [HttpPost("")]
-    public async Task<object> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
+    public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -74,7 +74,7 @@ public class OwnerController(
             Guid.Empty.Equals(newOwner.Id) || 
             newOwner.Status != EmployeeStatus.Active)
         {
-            return new { Status = 0, Message = Resource.ErrorAccessDenied };
+            return new OwnerChangeInstructionsDto { Status = 0, Message = Resource.ErrorAccessDenied };
         }
 
         var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
@@ -83,7 +83,7 @@ public class OwnerController(
         messageService.Send(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
 
         var emailLink = $"<a href=\"mailto:{owner.Email}\">{owner.Email}</a>";
-        return new { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
+        return new OwnerChangeInstructionsDto { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
     }
 
     /// <summary>

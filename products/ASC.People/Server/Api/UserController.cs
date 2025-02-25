@@ -877,7 +877,7 @@ public class UserController(
     [Tags("People / Module")]
     [SwaggerResponse(200, "Module information", typeof(Module))]
     [HttpGet("info")]
-    public Module GetModule()
+    public Module GetPeopleModule()
     {
         var product = new PeopleProduct();
         product.Init();
@@ -1230,14 +1230,14 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Message text", typeof(object))]
+    [SwaggerResponse(200, "Message text", typeof(string))]
     [SwaggerResponse(400, "Incorrect userId or email")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "User not found")]
     [AllowNotPayment]
     [HttpPost("email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<object> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
+    public async Task<string> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
     {
         Guid.TryParse(inDto.UserId, out var userid);
 
@@ -1317,6 +1317,7 @@ public class UserController(
         {
             await socketManager.UpdateUserAsync(user);
         }
+        
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
 
@@ -1329,13 +1330,13 @@ public class UserController(
     /// <path>api/2.0/people/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
-    [SwaggerResponse(200, "Email with the password", typeof(object))]
+    [SwaggerResponse(200, "Email with the password", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<object> SendUserPasswordAsync(EmailMemberRequestDto inDto)
+    public async Task<string> SendUserPasswordAsync(EmailMemberRequestDto inDto)
     {
         if (authContext.IsAuthenticated)
         {
