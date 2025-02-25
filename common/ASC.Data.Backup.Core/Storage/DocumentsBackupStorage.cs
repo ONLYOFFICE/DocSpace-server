@@ -33,7 +33,7 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
         IDaoFactory daoFactory,
         StorageFactory storageFactory,
         IServiceProvider serviceProvider,
-        AscDistributedCache cache)
+        AscHybridCache cache)
     : IBackupStorage, IGetterWriteOperator
 {
     private int _tenantId;

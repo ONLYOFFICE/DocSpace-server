@@ -31,7 +31,7 @@ public class ConsumerBackupStorage(
         StorageSettingsHelper storageSettingsHelper,
         SetupInfo setupInfo,
         StorageFactory storageFactory,
-        AscDistributedCache cache)
+        AscHybridCache cache)
     : IBackupStorage, IGetterWriteOperator
 {
     private IDataStore _store;

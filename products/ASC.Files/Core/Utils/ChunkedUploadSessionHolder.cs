@@ -30,7 +30,7 @@ namespace ASC.Web.Files.Utils;
 public class ChunkedUploadSessionHolder(
     GlobalStore globalStore,
     SetupInfo setupInfo,
-    AscDistributedCache cache,
+    AscHybridCache cache,
     FileHelper fileHelper)
 {
     

@@ -27,7 +27,7 @@
 namespace ASC.Common.Caching;
 
 [Singleton]
-public class AscDistributedCache(IFusionCache hybridCache)
+public class AscHybridCache(IFusionCache hybridCache)
 {
     public async Task<T> GetAsync<T>(string key)
     {

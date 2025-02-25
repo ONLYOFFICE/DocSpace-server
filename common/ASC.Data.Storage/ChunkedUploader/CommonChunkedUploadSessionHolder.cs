@@ -29,7 +29,7 @@ namespace ASC.Core.ChunkedUploader;
 public class CommonChunkedUploadSessionHolder(
     IDataStore dataStore,
     string domain,
-    AscDistributedCache cache,
+    AscHybridCache cache,
     long maxChunkUploadSize = 10 * 1024 * 1024)
 {
     public IDataStore DataStore { get; set; } = dataStore;

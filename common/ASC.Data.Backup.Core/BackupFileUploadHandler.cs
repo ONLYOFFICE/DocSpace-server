@@ -39,7 +39,7 @@ public class BackupFileUploadHandler
     public async Task Invoke(HttpContext context,
         PermissionContext permissionContext,
         BackupAjaxHandler backupAjaxHandler,
-        AscDistributedCache cache,
+        AscHybridCache cache,
         TenantManager tenantManager,
         SetupInfo setupInfo)
     {
