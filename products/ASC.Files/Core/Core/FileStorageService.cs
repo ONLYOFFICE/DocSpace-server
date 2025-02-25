@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Data;
+
 namespace ASC.Web.Files.Services.WCFService;
 
 [Scope]
@@ -2984,6 +2986,68 @@ public class FileStorageService //: IFileStorageService
 
         await ChangeOwnerAsync(ids, [], reassign.HasValue ? reassign.Value : securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
         await ChangeOwnerAsync(thirdIds, [], reassign.HasValue ? reassign.Value : securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+    }
+
+    public async Task<bool> AnySharedFilesAsync(Guid user)
+    {
+        var initUser = securityContext.CurrentAccount.ID;
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(user);
+
+        var my = await globalFolderHelper.FolderMyAsync;
+        if (my == 0)
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
+            return false;
+        }
+        var any = (await GetFolderItemsAsync(
+            await globalFolderHelper.FolderMyAsync,
+            0,
+            -1,
+            new List<FilterType>() { FilterType.FilesOnly },
+            false,
+            user.ToString(),
+            "",
+            [],
+            false,
+            false,
+            null,
+            SearchArea.Any)).Entries.Where(e => e.Shared).Any();
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
+        return any;
+    }
+
+    public async Task MoveSharedFilesAsync(Guid user, Guid toUser)
+    {
+        var initUser = securityContext.CurrentAccount.ID;
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var my = await folderDao.GetFolderIDUserAsync(false, user);
+        if (my == 0)
+        {
+            return;
+        }
+
+        var shared = await fileDao.GetFilesAsync(my).SelectAwait(async q=> await fileDao.GetFileAsync(q)).Where(q=> q.Shared).Select(q=> q.Id).ToListAsync();
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
+        if (shared.Count > 0)
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
+            var userInfo = await userManager.GetUsersAsync(user);
+            var folder = await CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
+            foreach (var file in shared)
+            {
+                await fileDao.MoveFileAsync(file, folder.Id);
+            }
+            await DeleteFromRecentAsync([], shared, true);
+            await fileDao.ReassignFilesAsync(toUser, shared);
+        }
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
     }
 
     public async Task DeletePersonalDataAsync<T>(Guid userFromId, bool checkPermission = false)

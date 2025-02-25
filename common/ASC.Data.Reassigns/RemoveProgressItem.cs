@@ -35,7 +35,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
 {
     /// <summary>ID of the user whose data is deleted</summary>
     /// <type>System.Guid, System</type>
-    public Guid FromUser { get; private set; }
+    public Guid UserId { get; private set; }
 
     /// <summary>The user whose data is deleted</summary>
     /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
@@ -60,11 +60,11 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
         _httpHeaders = httpHeaders;
         _tenantId = tenantId;
         User = user;
-        FromUser = user.Id;
+        UserId = user.Id;
         _currentUserId = currentUserId;
         _notify = notify;
         _deleteProfile = deleteProfile;
-        Id = QueueWorkerRemove.GetProgressItemId(tenantId, FromUser);
+        Id = QueueWorkerRemove.GetProgressItemId(tenantId, UserId);
         Status = DistributedTaskStatus.Created;
         Exception = null;
         Percentage = 0;
@@ -101,19 +101,20 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
             Percentage = 30;
             await PublishChanges();
 
-            await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
+            await fileStorageService.DeletePersonalDataAsync<int>(UserId);
 
             if (IsGuest)
             {
+                await fileStorageService.MoveSharedFilesAsync(UserId, _currentUserId);
                 Percentage = 50;
                 await PublishChanges();
 
-                await fileStorageService.ReassignRoomsFilesAsync(FromUser);
+                await fileStorageService.ReassignRoomsFilesAsync(UserId);
                 
                 Percentage = 70;
                 await PublishChanges();
                 
-                await fileStorageService.ReassignRoomsFoldersAsync(FromUser);
+                await fileStorageService.ReassignRoomsFoldersAsync(UserId);
             }
 
             Percentage = 95;
@@ -170,7 +171,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
                     continue;
                 }
 
-                usageSpaceWrapper.DocsSpace = await manager.GetUserSpaceUsageAsync(FromUser);
+                usageSpaceWrapper.DocsSpace = await manager.GetUserSpaceUsageAsync(UserId);
             }
 
             if (item.ID == WebItemManager.MailProductID)
@@ -181,7 +182,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
                     continue;
                 }
 
-                usageSpaceWrapper.MailSpace = await manager.GetUserSpaceUsageAsync(FromUser);
+                usageSpaceWrapper.MailSpace = await manager.GetUserSpaceUsageAsync(UserId);
             }
 
             if (item.ID == WebItemManager.TalkProductID)
@@ -192,7 +193,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
                     continue;
                 }
 
-                usageSpaceWrapper.TalkSpace = await manager.GetUserSpaceUsageAsync(FromUser);
+                usageSpaceWrapper.TalkSpace = await manager.GetUserSpaceUsageAsync(UserId);
             }
         }
         return usageSpaceWrapper;
@@ -200,16 +201,16 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
 
     private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, string userName)
     {
-        await userPhotoManager.RemovePhotoAsync(FromUser);
-        await userManager.DeleteUserAsync(FromUser);
+        await userPhotoManager.RemovePhotoAsync(UserId);
+        await userManager.DeleteUserAsync(UserId);
 
         if (_httpHeaders != null)
         {
-            messageService.SendHeadersMessage(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
+            messageService.SendHeadersMessage(MessageAction.UserDeleted, MessageTarget.Create(UserId), _httpHeaders, userName);
         }
         else
         {
-            messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
+            messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(UserId), userName);
         }
     }
 
@@ -222,11 +223,11 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
 
         if (_httpHeaders != null)
         {
-            messageService.SendHeadersMessage(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), _httpHeaders, userName);
+            messageService.SendHeadersMessage(MessageAction.UserDataRemoving, MessageTarget.Create(UserId), _httpHeaders, userName);
         }
         else
         {
-            messageService.Send(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), userName);
+            messageService.Send(MessageAction.UserDataRemoving, MessageTarget.Create(UserId), userName);
         }
     }
 
