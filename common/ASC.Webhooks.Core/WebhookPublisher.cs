@@ -43,6 +43,44 @@ public class WebhookPublisher(
     TenantUtil tenantUtil)
     : IWebhookPublisher
 {
+    private static readonly JsonSerializerOptions _serializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+    public async Task PublishAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checher, T data)
+    {
+        if (data == null)
+        {
+            return;
+        }
+
+        var webhookConfigs = await dbWorker.GetWebhookConfigs().Where(r => r.Enabled).ToListAsync();
+
+        var requestPayload = JsonSerializer.Serialize(data, _serializerOptions);
+
+        foreach (var config in webhookConfigs)
+        {
+            if (config.TargetUserId.HasValue)
+            {
+                if (securityContext.CurrentAccount.ID != config.TargetUserId.Value)
+                {
+                    if (checher == null)
+                    {
+                        continue;
+                    }
+
+                    if (!await checher.CheckAccessAsync(data, config.TargetUserId.Value))
+                    {
+                        continue;
+                    }
+                }
+            }
+
+            await PublishAsync((int)trigger, requestPayload, config.Id);
+        }
+    }
+
     public async Task PublishAsync(Webhook webhook, string requestPayload, WebhookData webhookData)
     {
         if (string.IsNullOrEmpty(requestPayload))
@@ -147,12 +185,7 @@ public class WebhookPublisher(
             }
         };
 
-        var jsonSerializerOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase            
-        };
-
-        dbWebhooksLog.RequestPayload = JsonSerializer.Serialize(requestPayload, jsonSerializerOptions);
+        dbWebhooksLog.RequestPayload = JsonSerializer.Serialize(requestPayload, _serializerOptions);
 
         return dbWebhooksLog;
     }

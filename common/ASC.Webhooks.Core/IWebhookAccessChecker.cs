@@ -26,6 +26,11 @@
 
 namespace ASC.Webhooks.Core
 {
+    public interface IWebhookAccessChecker<T>
+    {
+        public Task<bool> CheckAccessAsync(T data, Guid targetUserId);
+    }
+
     public interface IWebhookAccessChecker
     {
         public Task<bool> CheckAccessAsync(WebhookData webhookData);
