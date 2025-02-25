@@ -26,7 +26,6 @@
 
 namespace ASC.People.Api;
 
-[WebhookAccessChecker<WebhookPeopleAccessChecker>]
 public class UserController(
     CommonLinkUtility commonLinkUtility,
     ICache cache,

@@ -63,7 +63,6 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         FileSecurity fileSecurity)
         : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
 
-[WebhookAccessChecker<WebhookFileEntryAccessChecker>]
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,

@@ -47,7 +47,6 @@ public class SecurityControllerThirdparty(FileStorageService fileStorageService,
         EmployeeFullDtoHelper employeeFullDtoHelper)
     : SecurityController<string>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper);
 
-[WebhookAccessChecker<WebhookFileEntryAccessChecker>]
 public abstract class SecurityController<T>(FileStorageService fileStorageService,
         SecurityControllerHelper securityControllerHelper,
         FolderDtoHelper folderDtoHelper,
@@ -194,7 +193,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     }
 }
 
-[WebhookAccessChecker<WebhookFileEntryAccessChecker>]
 public class SecurityControllerCommon(FileStorageService fileStorageService,
         SecurityControllerHelper securityControllerHelper,
         FolderDtoHelper folderDtoHelper,

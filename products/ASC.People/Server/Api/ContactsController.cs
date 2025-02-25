@@ -26,7 +26,6 @@
 
 namespace ASC.People.Api;
 
-[WebhookAccessChecker<WebhookPeopleAccessChecker>]
 public class ContactsController(UserManager userManager,
         PermissionContext permissionContext,
         ApiContext apiContext,

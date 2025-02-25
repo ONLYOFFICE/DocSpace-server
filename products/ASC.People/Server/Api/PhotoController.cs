@@ -30,7 +30,6 @@ using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatExcepti
 
 namespace ASC.People.Api;
 
-[WebhookAccessChecker<WebhookPeopleAccessChecker>]
 public class PhotoController(
     UserManager userManager,
     PermissionContext permissionContext,

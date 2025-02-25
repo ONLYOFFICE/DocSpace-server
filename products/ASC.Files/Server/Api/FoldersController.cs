@@ -103,7 +103,6 @@ public class FoldersControllerThirdparty(
         permissionContext,
         fileShareDtoHelper);
 
-[WebhookAccessChecker<WebhookFileEntryAccessChecker>]
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,

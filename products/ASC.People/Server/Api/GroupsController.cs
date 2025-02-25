@@ -34,7 +34,6 @@ namespace ASC.People.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("group")]
-[WebhookAccessChecker<WebhookPeopleAccessChecker>]
 public class GroupController(
     GroupSummaryDtoHelper groupSummaryDtoHelper,
     UserManager userManager,
