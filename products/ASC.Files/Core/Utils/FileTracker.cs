@@ -231,7 +231,7 @@ public class FileTrackerHelper
 
     private Action<object, object, EvictionReason, object> EvictionCallback()
     {
-        return (cacheFileId, fileTracker, reason, _) =>
+        return (cacheFileId, fileTracker, reason, state) =>
         {
             if (reason != EvictionReason.Expired || cacheFileId == null)
             {
@@ -240,11 +240,9 @@ public class FileTrackerHelper
 
             var fId = cacheFileId.ToString()?[Tracker.Length..];
             
-            var t = int.TryParse(fId, out var internalFileId) ? 
+            _ = int.TryParse(fId, out var internalFileId) ? 
                 Callback(internalFileId, fileTracker as FileTracker).ConfigureAwait(false) : 
                 Callback(fId, fileTracker as FileTracker).ConfigureAwait(false);
-
-            t.GetAwaiter().GetResult();
         };
 
         async Task Callback<T>(T fileId, FileTracker fileTracker)

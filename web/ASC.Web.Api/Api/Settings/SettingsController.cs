@@ -221,9 +221,9 @@ public partial class SettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/maildomainsettings</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Message about the result of saving the mail domain settings", typeof(object))]
+    [SwaggerResponse(200, "Message about the result of saving the mail domain settings", typeof(string))]
     [HttpPost("maildomainsettings")]
-    public async Task<object> SaveMailDomainSettingsAsync(MailDomainSettingsRequestsDto inDto)
+    public async Task<string> SaveMailDomainSettingsAsync(MailDomainSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -340,9 +340,9 @@ public partial class SettingsController(MessageService messageService,
     /// </summary>
     /// <path>api/2.0/settings/userquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Ok", typeof(object))]
+    [SwaggerResponse(200, "Ok", typeof(TenantUserQuotaSettings))]
     [HttpGet("userquotasettings")]
-    public async Task<object> GetUserQuotaSettings()
+    public async Task<TenantUserQuotaSettings> GetUserQuotaSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -533,12 +533,12 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Save the DNS settings</short>
     /// <path>api/2.0/settings/dns</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Message about changing DNS", typeof(object))]
+    [SwaggerResponse(200, "Message about changing DNS", typeof(string))]
     [SwaggerResponse(400, "Invalid domain name/incorrect length of doman name")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [SwaggerResponse(405, "Method not allowed")]
     [HttpPut("dns")]
-    public async Task<object> SaveDnsSettingsAsync(DnsSettingsRequestsDto inDto)
+    public async Task<string> SaveDnsSettingsAsync(DnsSettingsRequestsDto inDto)
     {
         return await dnsSettings.SaveDnsSettingsAsync(inDto.DnsName, inDto.Enable);
     }
@@ -587,9 +587,9 @@ public partial class SettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/logo</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Portal logo image URL", typeof(object))]
+    [SwaggerResponse(200, "Portal logo image URL", typeof(string))]
     [HttpGet("logo")]
-    public async Task<object> GetLogoAsync()
+    public async Task<string> GetLogoAsync()
     {
         return await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(await settingsManager.LoadAsync<TenantInfoSettings>());
     }
@@ -788,7 +788,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
     [HttpPut("timeandlanguage")]
-    public async Task<object> TimaAndLanguageAsync(TimeZoneRequestDto inDto)
+    public async Task<string> TimaAndLanguageAsync(TimeZoneRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -836,7 +836,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
     [HttpPut("defaultpage")]
-    public async Task<object> SaveDefaultPageSettingAsync(DefaultProductRequestDto inDto)
+    public async Task<string> SaveDefaultPageSettingAsync(DefaultProductRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1022,11 +1022,11 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Get the payment settings</short>
     /// <path>api/2.0/settings/payment</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity", typeof(object))]
+    [SwaggerResponse(200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity", typeof(PaymentSettingsDto))]
     [AllowNotPayment]
     [HttpGet("payment")]
-    public async Task<object> PaymentSettingsAsync()
-    {        
+    public async Task<PaymentSettingsDto> PaymentSettingsAsync()
+    {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
         var currentTariff = await tenantExtra.GetCurrentTariffAsync();
@@ -1036,19 +1036,14 @@ public partial class SettingsController(MessageService messageService,
             maxQuotaQuantity = 999;
         }
 
-        return
-            new
-            {
-                salesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail"),
-                buyUrl = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("buy" + (configuration["license:type"] ?? "enterprise")),
-                coreBaseSettings.Standalone,
-                currentLicense = new
-                {
-                    currentQuota.Trial,
-                    currentTariff.DueDate.Date
-                },
-                max = maxQuotaQuantity
-            };
+        return new PaymentSettingsDto
+        {
+            SalesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail"),
+            BuyUrl = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("buy" + (configuration["license:type"] ?? "enterprise")),
+            Standalone = coreBaseSettings.Standalone,
+            CurrentLicense = new CurrentLicenseInfo { Trial = currentQuota.Trial, DueDate = currentTariff.DueDate.Date },
+            Max = maxQuotaQuantity
+        };
     }
 
     /// <summary>
@@ -1060,7 +1055,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Telegram")]
     [SwaggerResponse(200, "Telegram link", typeof(object))]
     [HttpGet("telegramlink")]
-    public async Task<object> TelegramLink()
+    public async Task<string> TelegramLink()
     {
         var tenant = tenantManager.GetCurrentTenant();
         var currentLink = telegramHelper.CurrentRegistrationLink(authContext.CurrentAccount.ID, tenant.Id);
@@ -1081,12 +1076,12 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramisconnected</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
-    [SwaggerResponse(200, "Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation", typeof(object))]
+    [SwaggerResponse(200, "Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation", typeof(TelegramHelper.RegStatus))]
     [HttpGet("telegramisconnected")]
-    public async Task<object> TelegramIsConnectedAsync()
+    public async Task<TelegramHelper.RegStatus> TelegramIsConnectedAsync()
     {
         var tenant = tenantManager.GetCurrentTenant();
-        return (int)await telegramHelper.UserIsConnectedAsync(authContext.CurrentAccount.ID, tenant.Id);
+        return await telegramHelper.UserIsConnectedAsync(authContext.CurrentAccount.ID, tenant.Id);
     }
 
     /// <summary>

@@ -43,11 +43,11 @@ public class NotificationController    : ApiControllerBase
     /// </short>
     /// <path>api/2.0/people/phone</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Notification", typeof(object))]
+    [SwaggerResponse(200, "Notification", typeof(string))]
     [SwaggerResponse(501, "Not Implemented")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [HttpPost("phone")]
-    public Task<object> SendNotificationToChangeAsync(UpdateMemberSimpleRequestDto inDto)
+    public Task<string> SendNotificationToChangeAsync(UpdateMemberSimpleRequestDto inDto)
     {
         throw new NotImplementedException();
         // var user = await userManager.GetUsersAsync(string.IsNullOrEmpty(inDto.UserId)
