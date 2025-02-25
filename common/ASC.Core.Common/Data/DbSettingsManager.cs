@@ -207,8 +207,6 @@ public class SettingsManager(
                 {
                     context.WebstudioSettings.Remove(s);
                 }
-
-                await context.SaveChangesAsync();
             }
             else
             {
@@ -221,9 +219,9 @@ public class SettingsManager(
                 };
 
                 await context.AddOrUpdateAsync(q => q.WebstudioSettings, s);
-
-                await context.SaveChangesAsync();
             }
+
+            await context.SaveChangesAsync();
 
             await dbSettingsManagerCache.RemoveAsync(key);
 

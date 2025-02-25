@@ -50,7 +50,8 @@ public class NextcloudWorkspaceMigrator : Migrator
         MigrationLogger migrationLogger,
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
+        UserManagerWrapper userManagerWrapper,
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
@@ -239,7 +240,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         foreach (var g in groupList)
         {
-            var group = new MigrationGroup { Info = new(), UserKeys = [] };
+            var group = new MigrationGroup { Info = new GroupInfo(), UserKeys = [] };
             group.Info.Name = g.Split(',').First().Trim('\'');
             MigrationInfo.Groups.Add(group.Info.Name, group);
         }

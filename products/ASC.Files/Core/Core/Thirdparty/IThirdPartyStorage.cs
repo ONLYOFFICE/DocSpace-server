@@ -34,7 +34,7 @@ public interface IThirdPartyStorage
     public void Close();
     public Task<long> GetMaxUploadSizeAsync();
     public Task<bool> CheckAccessAsync();
-    public Task<Stream> GetThumbnailAsync(string fileId, int width, int height);
+    public Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height);
 }
 
 public interface IThirdPartyItemStorage<TItem> : IThirdPartyStorage

@@ -132,6 +132,9 @@
   <data name="TariffPerMonth" xml:space="preserve">
     <value>ամիս</value>
   </data>
+  <data name="TariffPerYear" xml:space="preserve">
+    <value>տարին</value>
+  </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Անուն</value>
   </data>

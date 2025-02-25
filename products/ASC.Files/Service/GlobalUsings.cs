@@ -51,6 +51,7 @@ global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;
 global using ASC.Files.Core.Log;
 global using ASC.Files.Core.Resources;
+global using ASC.Files.Core.RoomTemplates.Events;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.DocumentBuilderService;
 global using ASC.Files.Core.VirtualRooms;
@@ -74,8 +75,5 @@ global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Logging;
-
-global using SixLabors.ImageSharp;
-global using SixLabors.ImageSharp.Processing;
 
 global using static ASC.Files.Core.Helpers.DocumentService;

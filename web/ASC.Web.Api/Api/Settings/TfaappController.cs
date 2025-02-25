@@ -59,7 +59,7 @@ public class TfaappController(
     ///<path>api/2.0/settings/tfaapp</path>
     ///<collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "TFA settings", typeof(TfaSettingsDto))]
+    [SwaggerResponse(200, "TFA settings", typeof(IEnumerable<TfaSettingsDto>))]
     [HttpGet("tfaapp")]
     public async Task<IEnumerable<TfaSettingsDto>> GetTfaSettingsAsync()
     {
@@ -134,9 +134,9 @@ public class TfaappController(
     /// <short>Get confirmation email</short>
     ///<path>api/2.0/settings/tfaapp/confirm</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Confirmation email URL", typeof(object))]
+    [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
     [HttpGet("tfaapp/confirm")]
-    public async Task<object> TfaConfirmUrlAsync()
+    public async Task<string> TfaConfirmUrlAsync()
     {
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
@@ -270,9 +270,9 @@ public class TfaappController(
     /// <short>Get confirmation email for updating TFA settings</short>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Confirmation email URL", typeof(object))]
+    [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
     [HttpPut("tfaappwithlink")]
-    public async Task<object> TfaSettingsLink(TfaRequestsDto inDto)
+    public async Task<string> TfaSettingsLink(TfaRequestsDto inDto)
     {
         if (await TfaSettingsAsync(inDto))
         {
@@ -319,7 +319,7 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "List of TFA application codes", typeof(object))]
+    [SwaggerResponse(200, "List of TFA application codes", typeof(IEnumerable<object>))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaappcodes")]
     public async Task<IEnumerable<object>> TfaAppGetCodesAsync()
@@ -348,7 +348,7 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappnewcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "New backup codes", typeof(object))]
+    [SwaggerResponse(200, "New backup codes", typeof(IEnumerable<object>))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewcodes")]
     public async Task<IEnumerable<object>> TfaAppRequestNewCodesAsync()
@@ -376,11 +376,11 @@ public class TfaappController(
     /// <short>Unlink the TFA application</short>
     /// <path>api/2.0/settings/tfaappnewapp</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Login URL", typeof(object))]
+    [SwaggerResponse(200, "Login URL", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewapp")]
-    public async Task<object> TfaAppNewAppAsync(TfaRequestsDto inDto)
+    public async Task<string> TfaAppNewAppAsync(TfaRequestsDto inDto)
     {
         var id = inDto?.Id ?? Guid.Empty;
         var isMe = id.Equals(Guid.Empty) || id.Equals(authContext.CurrentAccount.ID);

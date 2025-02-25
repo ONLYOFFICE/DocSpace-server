@@ -38,9 +38,10 @@ public class Startup : BaseWorkerStartup
         }
     }
 
-    public override async Task ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        await base.ConfigureServices(services);
+        var services = builder.Services;
+        await base.ConfigureServices(builder);
         
         services.AddActivePassiveHostedService<NotifySenderService>(Configuration);
         services.AddActivePassiveHostedService<NotifyCleanerService>(Configuration);

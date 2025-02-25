@@ -119,9 +119,9 @@ public class PortalController(
     /// </short>
     /// <path>api/2.0/portal/users/invite/{employeeType}</path>
     [Tags("Portal / Users")]
-    [SwaggerResponse(200, "Invitation link", typeof(object))]
+    [SwaggerResponse(200, "Invitation link", typeof(string))]
     [HttpGet("users/invite/{employeeType}")]
-    public async Task<object> GeInviteLinkAsync(InvitationLinkRequestDto inDto)
+    public async Task<string> GeInviteLinkAsync(InvitationLinkRequestDto inDto)
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
@@ -235,20 +235,26 @@ public class PortalController(
 
         var result = new TariffDto
         {
-            Id = source.Id,
             State = source.State,
-            DueDate = source.DueDate,
-            DelayDueDate = source.DelayDueDate,
-            LicenseDate = source.LicenseDate,
-            CustomerId = source.CustomerId,
-            Quotas = source.Quotas
         };
 
+        var currentUserType = await userManager.GetUserTypeAsync(securityContext.CurrentAccount.ID);
+
+        if (currentUserType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
+        {
+            result.DueDate = source.DueDate;
+            result.DelayDueDate = source.DelayDueDate;
+        }
+        
         if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
         {
+            result.Id = source.Id;
             result.OpenSource = tenantExtra.Opensource;
             result.Enterprise = tenantExtra.Enterprise;
             result.Developer = tenantExtra.Developer;
+            result.CustomerId = source.CustomerId;
+            result.LicenseDate = source.LicenseDate;
+            result.Quotas = source.Quotas;
         }
         
         return result;
@@ -302,7 +308,8 @@ public class PortalController(
         return (await tenantManager.GetTenantQuotasAsync()).OrderBy(r => r.Price)
                             .FirstOrDefault(quota =>
                                             quota.CountUser > needUsersCount
-                                            && quota.MaxTotalSize > usedSpace);
+                                            && quota.MaxTotalSize > usedSpace
+                                            && !quota.Year);
     }
 
 
@@ -417,11 +424,11 @@ public class PortalController(
     /// <path>api/2.0/portal/portalrename</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "Confirmation email about authentication to the portal with a new name", typeof(object))]
+    [SwaggerResponse(200, "Confirmation email about authentication to the portal with a new name", typeof(string))]
     [SwaggerResponse(400, "Alias is empty")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("portalrename")]
-    public async Task<object> UpdatePortalName(PortalRenameRequestsDto inDto)
+    public async Task<string> UpdatePortalName(PortalRenameRequestsDto inDto)
     {
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.PortalSecurity)))
         {
@@ -638,11 +645,11 @@ public class PortalController(
     /// <short>Delete a portal</short>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "URL to the feedback form about removing a portal", typeof(object))]
+    [SwaggerResponse(200, "URL to the feedback form about removing a portal", typeof(string))]
     [AllowNotPayment]
     [HttpDelete("delete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]
-    public async Task<object> DeletePortalAsync()
+    public async Task<string> DeletePortalAsync()
     {
         var tenant = tenantManager.GetCurrentTenant();
 

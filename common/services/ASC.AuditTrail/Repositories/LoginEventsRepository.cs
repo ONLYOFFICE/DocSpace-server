@@ -117,7 +117,7 @@ public class LoginEventsRepository(TenantManager tenantManager,
             (int)MessageAction.LoginSuccesViaTfaApp,
             (int)MessageAction.LoginSuccessViaApiTfa,
 
-            (int)MessageAction.Logout,
+            (int)MessageAction.Logout
         };
 
         return await auditTrailContext.LoginEvents

@@ -316,6 +316,33 @@ internal class ProviderFileDao(
     {
         await DeleteFileAsync(fileId, Guid.Empty);
     }
+
+    public async Task DeleteFileVersionAsync(File<string> file, int version)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        if (file.Id == null)
+        {
+            throw new ArgumentException("No file id or folder id toFolderId determine provider");
+        }
+
+        var fileId = file.Id;
+        var folderId = file.ParentId;
+
+        //Convert
+        var selector = _selectorFactory.GetSelector(fileId);
+
+        file.Id = selector.ConvertId(fileId);
+        if (folderId != null)
+        {
+            file.ParentId = selector.ConvertId(folderId);
+        }
+
+        var fileDao = selector.GetFileDao(fileId);
+
+        await fileDao.DeleteFileVersionAsync(file, version);
+    }
+
     public async Task DeleteFileAsync(string fileId, Guid ownerId)
     {
         var selector = _selectorFactory.GetSelector(fileId);
@@ -520,14 +547,14 @@ internal class ProviderFileDao(
         return file;
     }
 
-    public override Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public override Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
         return fileDao.GetThumbnailAsync(selector.ConvertId(fileId), width, height);
     }
 
-    public override Task<Stream> GetThumbnailAsync(File<string> file, int width, int height)
+    public override Task<Stream> GetThumbnailAsync(File<string> file, uint width, uint height)
     {
         var fileDao = GetFileDao(file);
         return fileDao.GetThumbnailAsync(file, width, height);

@@ -51,11 +51,17 @@ public class FilesSettings : ISettings<FilesSettings>
     [JsonPropertyName("DefaultSortedAsc")]
     public bool DefaultSortedAscSetting { get; set; }
 
+    [JsonPropertyName("HideConfirmCancelOperation")]
+    public bool HideConfirmCancelOperationSetting { get; set; }
+
     [JsonPropertyName("HideConfirmConvertSave")]
     public bool HideConfirmConvertSaveSetting { get; set; }
 
     [JsonPropertyName("HideConfirmConvertOpen")]
     public bool HideConfirmConvertOpenSetting { get; set; }
+
+    [JsonPropertyName("HideConfirmRoomLifetime")]
+    public bool HideConfirmRoomLifetimeSetting { get; set; }
 
     [JsonPropertyName("Forcesave")]
     public bool ForcesaveSetting { get; set; }
@@ -102,6 +108,7 @@ public class FilesSettings : ISettings<FilesSettings>
             DefaultSortedAscSetting = false,
             HideConfirmConvertSaveSetting = false,
             HideConfirmConvertOpenSetting = false,
+            HideConfirmRoomLifetimeSetting = false,
             ForcesaveSetting = true,
             StoreForcesaveSetting = false,
             HideRecentSetting = false,
@@ -259,6 +266,21 @@ public class FilesSettingsHelper(
         await SaveForCurrentUser(setting);
     }
 
+    public async Task<bool> GetHideConfirmCancelOperation() => (await LoadForCurrentUser()).HideConfirmCancelOperationSetting;
+
+    public async Task<bool> SetHideConfirmCancelOperation(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+
+        if (setting.HideConfirmCancelOperationSetting != value)
+        {
+            setting.HideConfirmCancelOperationSetting = value;
+            await SaveForCurrentUser(setting);
+        }
+
+        return setting.HideConfirmCancelOperationSetting;
+    }
+    
     public async Task<bool> GetHideConfirmConvertSave() => (await LoadForCurrentUser()).HideConfirmConvertSaveSetting;
 
     private async Task SetHideConfirmConvertSave(bool value)
@@ -290,7 +312,22 @@ public class FilesSettingsHelper(
 
         return true;
     }
-    
+
+    public async Task<bool> GetHideConfirmRoomLifetime() => (await LoadForCurrentUser()).HideConfirmRoomLifetimeSetting;
+
+    public async Task<bool> SetHideConfirmRoomLifetime(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+
+        if (setting.HideConfirmRoomLifetimeSetting != value)
+        {
+            setting.HideConfirmRoomLifetimeSetting = value;
+            await SaveForCurrentUser(setting);
+        }
+
+        return setting.HideConfirmRoomLifetimeSetting;
+    }
+
     public async Task<OrderBy> GetDefaultOrder()
     {
         var setting = await LoadForCurrentUser();

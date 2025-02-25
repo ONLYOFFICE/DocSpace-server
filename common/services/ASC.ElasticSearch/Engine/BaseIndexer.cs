@@ -484,9 +484,8 @@ public abstract class BaseIndexer<T>(Client client,
         var source = new StringBuilder();
         var parameters = new Dictionary<string, object>();
 
-        for (var i = 0; i < fields.Length; i++)
+        foreach (var field in fields)
         {
-            var field = fields[i];
             var func = field.Compile();
             var newValue = func(data);
             string name;

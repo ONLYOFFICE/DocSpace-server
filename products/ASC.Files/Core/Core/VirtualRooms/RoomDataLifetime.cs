@@ -80,7 +80,12 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
 [EnumExtensions]
 public enum RoomDataLifetimePeriod
 {
+    [SwaggerEnum("Day")]
     Day = 0,
+
+    [SwaggerEnum("Month")]
     Month = 1,
+
+    [SwaggerEnum("Year")]
     Year = 2
 }

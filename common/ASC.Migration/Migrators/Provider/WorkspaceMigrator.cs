@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Core;
-
-using Constants = ASC.Core.Users.Constants;
-
 namespace ASC.Migration.Core.Migrators.Provider;
 
 [Transient(typeof(Migrator))]
@@ -49,7 +45,8 @@ public class WorkspaceMigrator : Migrator
         MigrationLogger migrationLogger,
         AuthContext authContext, 
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
+        UserManagerWrapper userManagerWrapper,
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "Workspace" };
     }
@@ -259,8 +256,8 @@ public class WorkspaceMigrator : Migrator
                     if (rowPhoto["userId"].ToString() == key)
                     {
                         var bytes = rowPhoto["photo"] as byte[];
-                        var img = SixLabors.ImageSharp.Image.Load(bytes);
-                        var format = img.Metadata.DecodedImageFormat;
+                        var img = new MagickImage(bytes);
+                        var format = img.Format;
 
                         u.PathToPhoto = Path.Combine(_dataReader.GetFolder(), $"{key}.{CommonPhotoManager.GetImgFormatName(format)}");
                         u.HasPhoto = true;
@@ -577,7 +574,7 @@ public class WorkspaceMigrator : Migrator
             }
             var group = new MigrationGroup
             {
-                Info = new()
+                Info = new GroupInfo
                 {
                     Name = row["name"].ToString()
                 },

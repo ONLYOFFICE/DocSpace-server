@@ -103,11 +103,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Start file editing</short>
     /// <path>api/2.0/files/file/{fileId}/startedit</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File key for Document Service", typeof(object))]
+    [SwaggerResponse(200, "File key for Document Service", typeof(string))]
     [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
-    public async Task<object> StartEditAsync(StartEditRequestDto<T> inDto)
+    public async Task<string> StartEditAsync(StartEditRequestDto<T> inDto)
     {
         return await fileStorageService.StartEditAsync(inDto.FileId, inDto.File.EditingAlone);
     }
@@ -228,7 +228,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                                 inDto.EditorType = inDto.EditorType == EditorType.Mobile ? inDto.EditorType : EditorType.Embedded;
 
                                 file = formDraft;
-                                fillingSessionId = string.Format("{0}_{1}", formDraft.Id, securityContext.CurrentAccount.ID);
+                                fillingSessionId = $"{formDraft.Id}_{securityContext.CurrentAccount.ID}";
                             }
                             else
                             {

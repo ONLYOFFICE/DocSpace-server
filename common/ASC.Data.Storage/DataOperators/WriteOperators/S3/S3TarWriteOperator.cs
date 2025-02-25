@@ -188,6 +188,7 @@ public class S3TarWriteOperator : IDataWriteOperator
         }
 
         StoragePath = await _sessionHolder.FinalizeAsync(_chunkedUploadSession);
-        
+
+        _cts?.Dispose();
     }
 }

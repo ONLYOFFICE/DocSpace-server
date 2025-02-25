@@ -73,21 +73,45 @@ public class DocumentServiceLicense(ICache cache,
         return commandResponse;
     }
 
-    public async Task<bool> ValidateLicense()
+    public async Task<(bool, string)> ValidateLicense(License license)
     {
-        var commandResponse = await GetDocumentServiceLicenseAsync(false);
+        var attempt = 0;
 
-        if (commandResponse == null)
+        while (attempt < 3)
         {
-            return true;
+            var commandResponse = await GetDocumentServiceLicenseAsync(false);
+
+            if (commandResponse == null)
+            {
+                return (true, null);
+            }
+
+            if (commandResponse.Error != ErrorTypes.NoError)
+            {
+                return (false, commandResponse.ErrorString);
+            }
+
+            if (commandResponse.License.ResourceKey == license.ResourceKey ||
+                commandResponse.License.CustomerId == license.CustomerId)
+            {
+                if (commandResponse.Server == null)
+                {
+                    return (false, "Server is null");
+                }
+
+                return commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
+                    commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit
+                    ? (true, null)
+                    : (false, $"ResultType is {commandResponse.Server.ResultType}");
+            }
+            else
+            {
+                await Task.Delay(1000);
+                attempt += 1;
+            }
         }
 
-        if (commandResponse.Error != ErrorTypes.NoError)
-        {
-            return false;
-        }
-
-        return commandResponse.Server is { ResultType: CommandResponse.ServerInfo.ResultTypes.Success or CommandResponse.ServerInfo.ResultTypes.SuccessLimit };
+        return (false,  $"{attempt} failed attempts");
     }
 
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()

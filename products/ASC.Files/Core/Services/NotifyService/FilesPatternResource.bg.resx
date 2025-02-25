@@ -125,9 +125,6 @@ $__AuthorName изтри стаята: $RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpace известие. Споменато в документа</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Споменато в документа</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Изпращането по пощата приключи.</value>
   </data>

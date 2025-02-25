@@ -44,7 +44,7 @@ public class OperationController(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "You don't have enough permission to download")]
     [AllowAnonymous]
     [HttpPut("bulkdownload")]
@@ -55,7 +55,7 @@ public class OperationController(
 
         await fileOperationsManager.PublishDownload(inDto.FolderIds, files, commonLinkUtility.ServerRootPath);
 
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r=> r.OperationType == FileOperationType.Download))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -68,14 +68,14 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/copy</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "You don't have enough permission to copy")]
     [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
         await fileOperationsManager.PublishMoveOrCopyAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, true, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
         
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r=> r.OperationType == FileOperationType.Copy))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -88,14 +88,27 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/delete</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "You don't have enough permission to delete")]
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
         await fileOperationsManager.PublishDelete(inDto.FolderIds, inDto.FileIds, false, !inDto.DeleteAfter, inDto.Immediately);
         
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.Delete))
+        {
+            yield return await fileOperationDtoHelper.GetAsync(e);
+        }
+    }
+    
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [HttpPut("deleteversion")]
+    public async IAsyncEnumerable<FileOperationDto> DeleteFileVersions(DeleteVersionBatchRequestDto inDto)
+    {
+        await fileOperationsManager.PublishDelete([], [inDto.FileId], false, !inDto.DeleteAfter, true, versions: inDto.Versions);
+        
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.Delete))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -108,7 +121,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/emptytrash</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
@@ -116,7 +129,7 @@ public class OperationController(
         
         await fileOperationsManager.PublishDelete(foldersId, filesId, false, true, false, true);
 
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.Delete))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -130,12 +143,31 @@ public class OperationController(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [AllowAnonymous]
     [HttpGet("")]
     public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses()
     {
         foreach (var e in await fileOperationsManager.GetOperationResults())
+        {
+            yield return await fileOperationDtoHelper.GetAsync(e);
+        }
+    }
+
+    /// <summary>
+    /// Retrieves the statuses of operations filtered by the specified operation type.
+    /// </summary>
+    /// <param name="inDto">The data transfer object containing the operation type for which statuses are retrieved.</param>
+    /// <path>api/2.0/files/fileops/{operationType}</path>
+    /// <collection>list</collection>
+    /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [AllowAnonymous]
+    [HttpGet("{operationType}")]
+    public async IAsyncEnumerable<FileOperationDto> GetOperationStatusesByType(FileOperationResultRequestDto inDto)
+    {
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == inDto.OperationType))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -148,13 +180,13 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/markasread</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [HttpPut("markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
         await fileOperationsManager.PublishMarkAsRead(inDto.FolderIds, inDto.FileIds);
         
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.MarkAsRead))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -167,14 +199,14 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "You don't have enough permission to move")]
     [HttpPut("move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
         await fileOperationsManager.PublishMoveOrCopyAsync(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, false, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
         
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.Move))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -185,14 +217,14 @@ public class OperationController(
     /// </summary>
     /// <path>api/2.0/files/fileops/duplicate</path>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "You don't have enough permission to duplicate")]
     [HttpPut("duplicate")]
     public async IAsyncEnumerable<FileOperationDto> DuplicateBatchItems(DuplicateRequestDto inDto)
     {
         await fileOperationsManager.DuplicateAsync(inDto.FolderIds, inDto.FileIds);
         
-        foreach (var e in await fileOperationsManager.GetOperationResults())
+        foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.Duplicate))
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -249,7 +281,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpGet("move")]
     public async IAsyncEnumerable<FileEntryDto> MoveOrCopyBatchCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
@@ -283,7 +315,7 @@ public class OperationController(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [AllowAnonymous]
     [HttpPut("terminate/{id?}")]
     public async IAsyncEnumerable<FileOperationDto> TerminateTasks(OperationIdRequestDto inDto)

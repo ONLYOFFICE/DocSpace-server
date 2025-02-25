@@ -32,6 +32,7 @@ global using System.Text.Json;
 global using System.Web;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
+global using ASC.Api.Core.Socket;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Model;
@@ -96,8 +97,6 @@ global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.Hosting.WindowsServices;
-global using SixLabors.ImageSharp;
-global using SixLabors.ImageSharp.Formats;
 
 global using Swashbuckle.AspNetCore.Annotations;
 

@@ -48,7 +48,8 @@ public class ThirdpartyController(
     TenantManager tenantManager,
     InvitationService invitationService,
     LoginProfileTransport loginProfileTransport,
-    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper,
+    UserSocketManager socketManager)
     : ApiControllerBase
     {
 
@@ -61,13 +62,13 @@ public class ThirdpartyController(
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("People / Third-party accounts")]
-    [SwaggerResponse(200, "List of third-party accounts", typeof(AccountInfoDto))]
+    [SwaggerResponse(200, "List of third-party accounts", typeof(ICollection<AccountInfoDto>))]
     [AllowAnonymous, AllowNotPayment]
     [HttpGet("providers")]
     public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(AuthProvidersRequestDto inDto)
     {
         var infos = new List<AccountInfoDto>();
-        IEnumerable<LoginProfile> linkedAccounts = new List<LoginProfile>();
+        var linkedAccounts = new List<LoginProfile>();
 
         if (authContext.IsAuthenticated)
         {
@@ -297,11 +298,20 @@ public class ThirdpartyController(
         try
         {
             user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
+            if (employeeType is EmployeeType.Guest)
+            {
+                await socketManager.AddGuestAsync(user);
+            }
+            else
+            {
+                await socketManager.AddUserAsync(user);
+            }
         }
         catch (TenantQuotaException)
         {
             quotaLimit = true;
             user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, EmployeeType.User, fromInviteLink, updateExising: inviteByEmail);
+            await socketManager.AddUserAsync(user);
         }
 
         return (user, quotaLimit);

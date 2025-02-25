@@ -38,5 +38,8 @@ public enum SearchArea
     Any,
 
     [SwaggerEnum("Recent by links")]
-    RecentByLinks
+    RecentByLinks,
+
+    [SwaggerEnum("Template")]
+    Templates
 }

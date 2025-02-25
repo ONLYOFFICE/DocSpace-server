@@ -70,6 +70,7 @@ public class AuthenticationController(
     BruteForceLoginManager bruteForceLoginManager,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
     InvitationService invitationService,
+    UserSocketManager socketManager,
     LoginProfileTransport loginProfileTransport,
     IMapper mapper)
     : ControllerBase
@@ -289,10 +290,10 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/logout</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [SwaggerResponse(200, "Ok", typeof(object))]
+    [SwaggerResponse(200, "Ok", typeof(string))]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("logout")]
-    public async Task<object> LogoutAsync()
+    public async Task<string> LogoutAsync()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
@@ -600,6 +601,7 @@ public class AuthenticationController(
             {
                 await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
                 userInfo = await userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword());
+                await socketManager.AddGuestAsync(userInfo);
             }
             finally
             {

@@ -113,10 +113,10 @@ public static class DbTenantPartnerExtension
     {
         modelBuilder.Entity<DbTenantPartner>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId })
-                .HasName("tenants_partners_pkey");
+            entity.HasKey(e => e.TenantId)
+                .HasName("tenant_partner_pkey");
 
-            entity.ToTable("tenants_partners", "onlyoffice");
+            entity.ToTable("tenants_partners");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id")
@@ -124,15 +124,19 @@ public static class DbTenantPartnerExtension
 
             entity.Property(e => e.AffiliateId)
                 .HasColumnName("affiliate_id")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("character varying")
+                .HasMaxLength(50);
 
             entity.Property(e => e.Campaign)
                 .HasColumnName("campaign")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("character varying")
+                .HasMaxLength(50);
 
             entity.Property(e => e.PartnerId)
                 .HasColumnName("partner_id")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("character varying")
+                .HasMaxLength(36);
         });
+        
     }
 }

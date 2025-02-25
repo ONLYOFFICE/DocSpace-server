@@ -209,24 +209,49 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(Module))]
     [HttpGet("info")]
-    public Module GetModule()
+    public Module GetFilesModule()
     {
         productEntryPoint.Init();
         return new Module(productEntryPoint);
     }
 
     /// <summary>
+    /// Hide confirmation dialog when canceling operation.
+    /// </summary>
+    /// <short>Hide confirmation dialog when canceling operation</short>
+    /// <path>api/2.0/files/hideconfirmroomlifetime</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [HttpPut("hideconfirmcanceloperation")]
+    public async Task<bool> HideConfirmCancelOperation(SettingsRequestDto inDto)
+    {
+        return await filesSettingsHelper.SetHideConfirmCancelOperation(inDto.Set);
+    }
+    
+    /// <summary>
     /// Hides the confirmation dialog for saving the file copy in the original format when converting a file.
     /// </summary>
     /// <short>Hide the confirmation dialog when converting</short>
     /// <path>api/2.0/files/hideconfirmconvert</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(Module))]
     [HttpPut("hideconfirmconvert")]
     public async Task<bool> HideConfirmConvert(HideConfirmConvertRequestDto inDto)
     {
         return await filesSettingsHelper.HideConfirmConvert(inDto.Save);
+    }
+
+    /// <summary>
+    /// Hide confirmation dialog when changing room lifetime settings.
+    /// </summary>
+    /// <short>Hide confirmation dialog when changing room lifetime settings</short>
+    /// <path>api/2.0/files/hideconfirmroomlifetime</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [HttpPut("hideconfirmroomlifetime")]
+    public async Task<bool> HideConfirmRoomLifetime(SettingsRequestDto inDto)
+    {
+        return await filesSettingsHelper.SetHideConfirmRoomLifetime(inDto.Set);
     }
 
     /// <summary>

@@ -57,7 +57,8 @@ public class GoogleWorkspaceMigrator : Migrator
         MigrationLogger migrationLogger,
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
+        UserManagerWrapper userManagerWrapper,
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
@@ -237,7 +238,7 @@ public class GoogleWorkspaceMigrator : Migrator
 
     private MigrationUser ParseUser(string tmpFolder)
     {
-        var user = new MigrationUser(DisplayUserSettingsHelper) { Info = new() };
+        var user = new MigrationUser(DisplayUserSettingsHelper) { Info = new UserInfo() };
 
         ParseRootHtml(tmpFolder, user);
         ParseProfile(tmpFolder, user);

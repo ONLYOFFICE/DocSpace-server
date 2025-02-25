@@ -61,6 +61,7 @@ public class TransferProgressItem : BaseBackupProgressItem
         bool notify)
     {
         Init();
+        BackupProgressItemType = BackupProgressItemType.Transfer;
         TenantId = tenantId;
         TargetRegion = targetRegion;
         Notify = notify;

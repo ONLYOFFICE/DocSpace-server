@@ -150,6 +150,16 @@ public static class DbQuotaExtension
                     Price = 20,
                     ProductId = "1006",
                     Visible = true
+                },
+                new DbQuota
+                {
+                    TenantId = -10,
+                    Name = "adminyear",
+                    Description = "since 10.02.2025",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
+                    Price = 200,
+                    ProductId = "1009",
+                    Visible = true
                 }
                 );
         return modelBuilder;
@@ -206,10 +216,9 @@ public static class DbQuotaExtension
     {
         modelBuilder.Entity<DbQuota>(entity =>
         {
-            entity.HasKey(e => e.TenantId)
-                .HasName("tenants_quota_pkey");
+            entity.HasKey(e => e.TenantId);
 
-            entity.ToTable("tenants_quota", "onlyoffice");
+            entity.ToTable("tenants_quota");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant")
@@ -217,24 +226,30 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.ProductId)
                 .HasColumnName("product_id")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar(128)");
 
             entity.Property(e => e.Description)
                 .HasColumnName("description")
-                .HasColumnType("character varying");
+                .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.Features).HasColumnName("features");
+            entity.Property(e => e.Features)
+                .HasColumnName("features")
+                .HasColumnType("text");
 
             entity.Property(e => e.Name)
                 .HasColumnName("name")
-                .HasColumnType("character varying");
+                .HasColumnType("varchar(128)");
 
             entity.Property(e => e.Price)
                 .HasColumnName("price")
-                .HasColumnType("numeric(10,2)")
-                .HasDefaultValueSql("0.00");
+                .HasDefaultValue(0.00m)
+                .HasColumnType("decimal(10,2)");
 
-            entity.Property(e => e.Visible).HasColumnName("visible");
+            entity.Property(e => e.Visible)
+                .HasColumnName("visible")
+                .HasColumnType("boolean")
+                .HasDefaultValue(false);
         });
+        
     }
 }
