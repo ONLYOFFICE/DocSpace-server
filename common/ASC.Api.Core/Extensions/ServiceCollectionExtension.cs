@@ -29,6 +29,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
 
 namespace ASC.Api.Core.Extensions;
 
@@ -62,12 +63,14 @@ public static class ServiceCollectionExtension
         return services;
     }
 
-    public static IServiceCollection AddDistributedCache(this IServiceCollection services, IConnectionMultiplexer connection)
+    public static IServiceCollection AddHybridCache(this IServiceCollection services, IConnectionMultiplexer connection)
     {       
-        var cacheBuilder = services.AddFusionCache()
+        var cacheBuilder = services
+            .AddFusionCache()
             .WithSystemTextJsonSerializer()
             .WithDistributedCache(new RedisCache(new RedisCacheOptions {ConnectionMultiplexerFactory = () => Task.FromResult(connection)}))
             .WithMemoryCache(new MemoryCache(new MemoryCacheOptions()))
+            .WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection)}))
             .AsHybridCache();
         
         if (connection != null)
