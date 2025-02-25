@@ -27,22 +27,23 @@
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class MoveOrCopyIntegrationEventHandler(
-    ILogger<MoveOrCopyIntegrationEventHandler> logger,
+public class DuplicateIntegrationEventConsumer(
+    ILogger<DuplicateIntegrationEventConsumer> logger,
     FileOperationsManager fileOperationsManager,
     TenantManager tenantManager,
     SecurityContext securityContext)
-    : IIntegrationEventHandler<MoveOrCopyIntegrationEvent>
+    : IConsumer<DuplicateIntegrationEvent>
 {
-    public async Task Handle(MoveOrCopyIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<DuplicateIntegrationEvent> context)
     {
+        var @event = context.Message;
         CustomSynchronizationContext.CreateContext();
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileMoveCopyOperation, FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await fileOperationsManager.Enqueue<FileDuplicateOperation, FileOperationData<string>, FileOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

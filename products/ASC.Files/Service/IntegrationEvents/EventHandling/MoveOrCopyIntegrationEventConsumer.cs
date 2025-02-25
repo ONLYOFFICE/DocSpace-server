@@ -27,23 +27,23 @@
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class BulkDownloadIntegrationEventHandler(
-    ILogger<BulkDownloadIntegrationEvent> logger,
+public class MoveOrCopyIntegrationEventConsumer(
+    ILogger<MoveOrCopyIntegrationEventConsumer> logger,
     FileOperationsManager fileOperationsManager,
     TenantManager tenantManager,
-    SecurityContext securityContext,
-    AuthManager authManager)
-    : IIntegrationEventHandler<BulkDownloadIntegrationEvent>
+    SecurityContext securityContext)
+    : IConsumer<MoveOrCopyIntegrationEvent>
 {
-    public async Task Handle(BulkDownloadIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<MoveOrCopyIntegrationEvent> context)
     {
+        var @event = context.Message;
         CustomSynchronizationContext.CreateContext();
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy), session: @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileDownloadOperation, FileDownloadOperationData<string>, FileDownloadOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
+            await fileOperationsManager.Enqueue<FileMoveCopyOperation, FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

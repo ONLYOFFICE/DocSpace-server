@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using MassTransit;
+
 namespace ASC.Api.Core.Extensions;
 
 public static class ServiceCollectionExtension
@@ -198,7 +200,37 @@ public static class ServiceCollectionExtension
 
                 return new DefaultRabbitMQPersistentConnection(connectionFactory, logger, retryCount);
             });
-
+            
+            services.AddMassTransit(r =>
+            {
+                r.AddConsumers(Assembly.GetEntryAssembly());
+                
+                r.UsingRabbitMq((context, configurator) =>
+                {                
+                    var connectionFactory = rabbitMqConfiguration.GetConnectionFactory();
+                    configurator.Host(connectionFactory.HostName, (ushort)connectionFactory.Port, connectionFactory.VirtualHost, h =>
+                    {
+                        h.Username(connectionFactory.UserName);
+                        h.Password(connectionFactory.Password);
+                        
+                        if (connectionFactory.Ssl is { Enabled: true })
+                        {
+                            h.UseSsl(a =>
+                            {
+                                a.ServerName = connectionFactory.Ssl.ServerName;
+                                a.CertificatePath = connectionFactory.Ssl.CertPath;
+                                
+                                if (!string.IsNullOrEmpty(connectionFactory.Ssl.CertPassphrase))
+                                {
+                                    a.CertificatePassphrase = connectionFactory.Ssl.CertPassphrase;
+                                }
+                            });
+                        }
+                    });
+                    configurator.ConfigureEndpoints(context);
+                });
+            });
+            
             services.AddSingleton<IEventBus, EventBusRabbitMQ>(sp =>
             {
                 var cfg = sp.GetRequiredService<IConfiguration>();

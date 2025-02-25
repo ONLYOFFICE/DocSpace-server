@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using MassTransit;
+
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Singleton]
@@ -122,7 +124,7 @@ public class FileOperationsManagerHolder
 [Scope]
 public class FileOperationsManager(
     IHttpContextAccessor httpContextAccessor,
-    IEventBus eventBus,
+    IPublishEndpoint bus,
     AuthContext authContext,
     TenantManager tenantManager,
     UserManager userManager,
@@ -174,7 +176,7 @@ public class FileOperationsManager(
         var data = new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         
-        await eventBus.PublishAsync(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        await bus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -207,7 +209,7 @@ public class FileOperationsManager(
         var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
         var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
         
-        await eventBus.PublishAsync(new BulkDownloadIntegrationEvent(await GetUserIdAsync(), tenantId)
+        await bus.Publish(new BulkDownloadIntegrationEvent(await GetUserIdAsync(), tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -257,7 +259,7 @@ public class FileOperationsManager(
         var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot); 
         var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot);
         
-        await eventBus.PublishAsync(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        await bus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -311,7 +313,7 @@ public class FileOperationsManager(
         var data = new FileOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot); 
         var thirdPartyData = new FileOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         
-        await eventBus.PublishAsync(new DuplicateIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        await bus.Publish(new DuplicateIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -383,27 +385,24 @@ public class FileOperationsManager(
         var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, versions, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
         var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, versions, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
         
-        IntegrationEvent toPublish;
         if (isEmptyTrash)
         {
-            toPublish = new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+            await bus.Publish(new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
             {
                 TaskId = taskId, 
                 Data = data,
                 ThirdPartyData = thirdPartyData
-            };
+            });
         }
         else
         {
-            toPublish = new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+            await bus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
             {
                 TaskId = taskId, 
                 Data = data,
                 ThirdPartyData = thirdPartyData
-            };
+            });
         }
-        
-        await eventBus.PublishAsync(toPublish);
     }
 
     public static (List<int>, List<string>) GetIds(IEnumerable<JsonElement> items)

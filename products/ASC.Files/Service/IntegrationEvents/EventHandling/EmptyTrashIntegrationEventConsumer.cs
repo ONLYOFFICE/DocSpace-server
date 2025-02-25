@@ -27,14 +27,16 @@
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class DeleteIntegrationEventHandler(
-    ILogger<DeleteIntegrationEventHandler> logger,
+public class EmptyTrashIntegrationEventConsumer(
+    ILogger<EmptyTrashIntegrationEventConsumer> logger,
     FileOperationsManager fileOperationsManager,
     TenantManager tenantManager,
-    SecurityContext securityContext) : IIntegrationEventHandler<DeleteIntegrationEvent>
+    SecurityContext securityContext) : IConsumer<EmptyTrashIntegrationEvent>
 {
-    public async Task Handle(DeleteIntegrationEvent @event)
+
+    public async Task Consume(ConsumeContext<EmptyTrashIntegrationEvent> context)
     {
+        var @event = context.Message;
         CustomSynchronizationContext.CreateContext();
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
@@ -45,3 +47,4 @@ public class DeleteIntegrationEventHandler(
         }
     }
 }
+

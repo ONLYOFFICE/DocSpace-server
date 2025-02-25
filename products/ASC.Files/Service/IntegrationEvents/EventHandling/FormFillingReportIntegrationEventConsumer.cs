@@ -27,23 +27,49 @@
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class EmptyTrashIntegrationEventHandler(
-    ILogger<DeleteIntegrationEventHandler> logger,
-    FileOperationsManager fileOperationsManager,
+public class FormFillingReportIntegrationEventConsumer(
+    ILogger<FormFillingReportIntegrationEventConsumer> logger,
+    CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
-    SecurityContext securityContext) : IIntegrationEventHandler<EmptyTrashIntegrationEvent>
+    DocumentBuilderTaskManager documentBuilderTaskManager,
+    IServiceProvider serviceProvider)
+    : IConsumer<FormFillingReportIntegrationEvent>
 {
-
-    public async Task Handle(EmptyTrashIntegrationEvent @event)
+    
+    public async Task Consume(ConsumeContext<FormFillingReportIntegrationEvent> context)
     {
+        var @event = context.Message;
         CustomSynchronizationContext.CreateContext();
+
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileDeleteOperation, FileDeleteOperationData<string>, FileDeleteOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+
+            try
+            {
+                if (@event.Terminate)
+                {
+                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(@event.BaseUri))
+                {
+                    commonLinkUtility.ServerUri = @event.BaseUri;
+                }
+
+                await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+
+                var task = serviceProvider.GetService<FormFillingReportTask>();
+
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new FormFillingReportTaskData(@event.RoomId, @event.OriginalFormId, @event.Headers));
+
+                await documentBuilderTaskManager.StartTask(task);
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorWithException(ex);
+            }
         }
     }
 }
-

@@ -30,39 +30,45 @@ using ASC.Files.Service.Services.Thumbnail;
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandler<ThumbnailRequestedIntegrationEvent>
+public class ThumbnailRequestedIntegrationEventConsumer(
+    ILogger<ThumbnailRequestedIntegrationEventConsumer> logger,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    ITariffService tariffService,
+    TenantManager tenantManager,
+    ChannelWriter<FileData<int>> channelWriter,
+    BaseCommonLinkUtility baseCommonLinkUtility)
+    : IConsumer<ThumbnailRequestedIntegrationEvent>
 {
-    private readonly ILogger _logger;
-    private readonly ChannelWriter<FileData<int>> _channelWriter;
-    private readonly ITariffService _tariffService;
-    private readonly TenantManager _tenantManager;
-    private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    private readonly BaseCommonLinkUtility _baseCommonLinkUtility;
-
-    private ThumbnailRequestedIntegrationEventHandler()
+    public async Task Consume(ConsumeContext<ThumbnailRequestedIntegrationEvent> context)
     {
+        var @event = context.Message;
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
+            var freezingThumbnails = await GetFreezingThumbnailsAsync();
+
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            var tariff = await tariffService.GetTariffAsync(@event.TenantId);
+
+            var data = @event.FileIds.Select(fileId => new FileData<int>(@event.TenantId, @event.CreateBy, Convert.ToInt32(fileId), @event.BaseUrl, tariff.State))
+                          .Union(freezingThumbnails);
+
+
+            if (await channelWriter.WaitToWriteAsync())
+            {
+                foreach (var item in data)
+                {
+                    await channelWriter.WriteAsync(item);
+                }
+            }
+        }
     }
-
-    public ThumbnailRequestedIntegrationEventHandler(
-        ILogger<ThumbnailRequestedIntegrationEventHandler> logger,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        ITariffService tariffService,
-        TenantManager tenantManager,
-        ChannelWriter<FileData<int>> channelWriter,
-        BaseCommonLinkUtility baseCommonLinkUtility)
-    {
-        _logger = logger;
-        _channelWriter = channelWriter;
-        _tariffService = tariffService;
-        _tenantManager = tenantManager;
-        _dbContextFactory = dbContextFactory;
-        _baseCommonLinkUtility = baseCommonLinkUtility;
-    }
-
+    
     private async Task<IEnumerable<FileData<int>>> GetFreezingThumbnailsAsync()
     {
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var files = await Queries.DbFilesAsync(filesDbContext).ToListAsync();
 
@@ -81,41 +87,14 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
 
         return await files.ToAsyncEnumerable().SelectAwait(async r =>
         {
-            _ = await _tenantManager.SetCurrentTenantAsync(r.TenantId);
-            var tariff = await _tariffService.GetTariffAsync(r.TenantId);
-            var baseUrl = _baseCommonLinkUtility.GetFullAbsolutePath(string.Empty);
+            _ = await tenantManager.SetCurrentTenantAsync(r.TenantId);
+            var tariff = await tariffService.GetTariffAsync(r.TenantId);
+            var baseUrl = baseCommonLinkUtility.GetFullAbsolutePath(string.Empty);
             
             var fileData = new FileData<int>(r.TenantId, r.ModifiedBy, r.Id, baseUrl, tariff.State);
 
             return fileData;
         }).ToListAsync();
-    }
-
-
-    public async Task Handle(ThumbnailRequestedIntegrationEvent @event)
-    {
-        CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
-        {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-
-            var freezingThumbnails = await GetFreezingThumbnailsAsync();
-
-            await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            var tariff = await _tariffService.GetTariffAsync(@event.TenantId);
-
-            var data = @event.FileIds.Select(fileId => new FileData<int>(@event.TenantId, @event.CreateBy, Convert.ToInt32(fileId), @event.BaseUrl, tariff.State))
-                          .Union(freezingThumbnails);
-
-
-            if (await _channelWriter.WaitToWriteAsync())
-            {
-                foreach (var item in data)
-                {
-                    await _channelWriter.WriteAsync(item);
-                }
-            }
-        }
     }
 }
 

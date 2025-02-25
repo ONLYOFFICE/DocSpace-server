@@ -24,51 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Services.NotifyService;
-
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
-[Singleton]
-public class RoomNotifyIntegrationEventHandler(
-    ILogger<RoomNotifyIntegrationEventHandler> logger,
-    IServiceScopeFactory serviceScopeFactory)
-    : IIntegrationEventHandler<RoomNotifyIntegrationEvent>
+[Scope]
+public class DeleteIntegrationEventConsumer(
+    ILogger<DeleteIntegrationEventConsumer> logger,
+    FileOperationsManager fileOperationsManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext) : IConsumer<DeleteIntegrationEvent>
 {
-    
-    public async Task Handle(RoomNotifyIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<DeleteIntegrationEvent> context)
     {
+        var @event = context.Message;
         CustomSynchronizationContext.CreateContext();
-
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-
-            using var scope = serviceScopeFactory.CreateScope();
-            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-
-            if (@event.Data != null)
-            {
-                await AddMessage(@event.Data.RoomId, @event.Data.FileId, @event.CreateBy, @event.TenantId, scope);
-            }
-            if (@event.ThirdPartyData != null)
-            {
-                await AddMessage(@event.ThirdPartyData.RoomId, @event.ThirdPartyData.FileId, @event.CreateBy, @event.TenantId, scope);
-            }
-
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
+            await fileOperationsManager.Enqueue<FileDeleteOperation, FileDeleteOperationData<string>, FileDeleteOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
-    }
-
-    private async Task AddMessage<T>(T roomId, T fileId, Guid createBy, int tenantId, IServiceScope scope)
-    {
-        var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-        var roomNotifyEventQueue = scope.ServiceProvider.GetRequiredService<INotifyQueueManager<T>>();
-
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var fileDao = daoFactory.GetFileDao<T>();
-
-        var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantId, await folderDao.GetFolderAsync(roomId), createBy);
-        queue.AddMessage(await fileDao.GetFileAsync(fileId));
     }
 }

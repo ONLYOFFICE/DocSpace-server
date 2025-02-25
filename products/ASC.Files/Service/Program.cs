@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Service.IntegrationEvents.EventHandling;
-
 using NLog;
 
 var options = new WebApplicationOptions
@@ -68,22 +66,6 @@ try
     startup.Configure(app);
 
     var sp = ((IApplicationBuilder)app).ApplicationServices;
-
-    var eventBus = sp.GetRequiredService<IEventBus>();
-
-    await eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent, ThumbnailRequestedIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent, RoomIndexExportIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<DeleteIntegrationEvent, DeleteIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<MoveOrCopyIntegrationEvent, MoveOrCopyIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<DuplicateIntegrationEvent, DuplicateIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<FormFillingReportIntegrationEvent, FormFillingReportIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<RoomNotifyIntegrationEvent, RoomNotifyIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
-    
     sp.GetRequiredService<FileTrackerHelper>().Subscribe();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);

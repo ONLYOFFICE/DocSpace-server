@@ -27,23 +27,52 @@
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class DuplicateIntegrationEventHandler(
-    ILogger<DuplicateIntegrationEventHandler> logger,
-    FileOperationsManager fileOperationsManager,
+public class RoomIndexExportIntegrationEventConsumer(
+    ILogger<RoomIndexExportIntegrationEventConsumer> logger,
+    CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
-    SecurityContext securityContext)
-    : IIntegrationEventHandler<DuplicateIntegrationEvent>
+    SecurityContext securityContext,
+    DocumentBuilderTaskManager documentBuilderTaskManager,
+    IServiceProvider serviceProvider)
+    : IConsumer<RoomIndexExportIntegrationEvent>
 {
-    public async Task Handle(DuplicateIntegrationEvent @event)
+
+    public async Task Consume(ConsumeContext<RoomIndexExportIntegrationEvent> context)
     {
+        var @event = context.Message;
         CustomSynchronizationContext.CreateContext();
+
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileDuplicateOperation, FileOperationData<string>, FileOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+
+            try
+            {
+                if (@event.Terminate)
+                {
+                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(@event.BaseUri))
+                {
+                    commonLinkUtility.ServerUri = @event.BaseUri;
+                }
+
+                await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+
+                await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
+
+                var task = serviceProvider.GetService<RoomIndexExportTask>();
+
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new RoomIndexExportTaskData(@event.RoomId, @event.Headers));
+
+                await documentBuilderTaskManager.StartTask(task);
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorWithException(ex);
+            }
         }
     }
 }
-
