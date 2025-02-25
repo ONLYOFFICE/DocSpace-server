@@ -68,14 +68,14 @@ public static class ServiceCollectionExtension
         var cacheBuilder = services
             .AddFusionCache()
             .WithSystemTextJsonSerializer()
-            .WithDistributedCache(new RedisCache(new RedisCacheOptions {ConnectionMultiplexerFactory = () => Task.FromResult(connection)}))
             .WithMemoryCache(new MemoryCache(new MemoryCacheOptions()))
-            .WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection)}))
+            .WithRegisteredLogger()
             .AsHybridCache();
         
         if (connection != null)
         {
             cacheBuilder.WithDistributedCache(new RedisCache(new RedisCacheOptions {ConnectionMultiplexerFactory = () => Task.FromResult(connection)}));
+            cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection)}));
         }
         else
         {
