@@ -678,7 +678,7 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
     [HttpGet]
-    public IAsyncEnumerable<EmployeeFullDto> GetAll()
+    public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles()
     {
         var status = new GetByStatusRequestDto { Status = EmployeeStatus.Active };
         return GetByStatus(status);
