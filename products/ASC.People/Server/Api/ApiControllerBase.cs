@@ -27,7 +27,6 @@
 using System.Text.Json.Nodes;
 
 using ASC.Common.Security;
-using ASC.Webhooks.Core;
 
 namespace ASC.People.Api;
 
@@ -151,6 +150,70 @@ public class WebhookPeopleAccessChecker(
             {
                 return user.CreatedBy == userId;
             }
+        }
+
+        var account = await authentication.GetAccountByIDAsync(targetUser.TenantId, targetUser.Id);
+
+        return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
+    }
+}
+
+[Scope]
+public class WebhookGroupAccessChecker(
+    AuthManager authentication,
+    UserManager userManager,
+    SecurityContext securityContext,
+    IPermissionResolver permissionResolver) : IWebhookAccessChecker<GroupInfo>
+{
+    public async Task<bool> CheckAccessAsync(GroupInfo data, Guid userId)
+    {
+        if (securityContext.CurrentAccount.ID == userId)
+        {
+            return true;
+        }
+
+        var targetUser = await userManager.GetUsersAsync(userId);
+
+        if (await userManager.IsGuestAsync(targetUser))
+        {
+            return false;
+        }
+
+        var account = await authentication.GetAccountByIDAsync(targetUser.TenantId, targetUser.Id);
+
+        return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
+    }
+}
+
+[Scope]
+public class WebhookUserAccessChecker(
+    AuthManager authentication,
+    UserManager userManager,
+    SecurityContext securityContext,
+    IPermissionResolver permissionResolver) : IWebhookAccessChecker<UserInfo>
+{
+    public async Task<bool> CheckAccessAsync(UserInfo data, Guid userId)
+    {
+        if (securityContext.CurrentAccount.ID == userId)
+        {
+            return true;
+        }
+
+        var targetUser = await userManager.GetUsersAsync(userId);
+
+        if (await userManager.IsGuestAsync(targetUser))
+        {
+            return false;
+        }
+
+        if (await userManager.IsDocSpaceAdminAsync(targetUser))
+        {
+            return true;
+        }
+
+        if (await userManager.IsGuestAsync(data))
+        {
+            return data.CreatedBy == userId;
         }
 
         var account = await authentication.GetAccountByIDAsync(targetUser.TenantId, targetUser.Id);

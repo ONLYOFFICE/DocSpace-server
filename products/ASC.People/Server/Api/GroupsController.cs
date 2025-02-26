@@ -42,7 +42,9 @@ public class GroupController(
     MessageService messageService,
     PermissionContext permissionContext,
     FileSecurity fileSecurity,
-    UserSocketManager socketManager)
+    UserSocketManager socketManager,
+    IWebhookPublisher webhookPublisher,
+    WebhookGroupAccessChecker webhookGroupAccessChecker)
     : ControllerBase
 {
     /// <summary>
@@ -162,6 +164,9 @@ public class GroupController(
         var dto = await groupFullDtoHelper.Get(group, true);
 
         await socketManager.AddGroupAsync(dto);
+
+        _ = webhookPublisher.PublishAsync(WebhookTrigger.GroupCreated, webhookGroupAccessChecker, group);
+
         return dto;
     }
 
@@ -206,7 +211,11 @@ public class GroupController(
         messageService.Send(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
 
         var dto = await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
+
         await socketManager.UpdateGroupAsync(dto);
+
+        _ = webhookPublisher.PublishAsync(WebhookTrigger.GroupUpdated, webhookGroupAccessChecker, group);
+
         return dto;
     }
 
@@ -231,8 +240,11 @@ public class GroupController(
         await fileSecurity.RemoveSubjectAsync(inDto.Id, false);
 
         messageService.Send(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
+
         await socketManager.DeleteGroupAsync(inDto.Id);
-        
+
+        _ = webhookPublisher.PublishAsync(WebhookTrigger.GroupDeleted, webhookGroupAccessChecker, group);
+
         return NoContent();
     }
 

@@ -92,6 +92,7 @@ global using ASC.Web.Files;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
+global using ASC.Webhooks.Core;
 global using Autofac;
 global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.Mvc;
