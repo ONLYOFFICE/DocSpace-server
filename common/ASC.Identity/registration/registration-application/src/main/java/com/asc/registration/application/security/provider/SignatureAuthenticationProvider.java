@@ -27,6 +27,7 @@
 
 package com.asc.registration.application.security.provider;
 
+import com.asc.common.core.domain.value.Role;
 import com.asc.registration.application.security.authentication.BasicSignature;
 import com.asc.registration.application.security.authentication.BasicSignatureToken;
 import com.asc.registration.application.security.authentication.BasicSignatureTokenPrincipal;
@@ -75,7 +76,12 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
     var signature = signatureService.validate(token.toString(), BasicSignature.class);
     validateSignature(signature);
 
-    var role = signature.isAdmin() ? "ROLE_ADMIN" : "ROLE_USER";
+    var role =
+        signature.isAdmin()
+            ? Role.ROLE_ADMIN
+            : signature.isGuest()
+                ? Role.ROLE_GUEST
+                : signature.isPublic() ? Role.ROLE_USER : Role.ROLE_GUEST;
     return new BasicSignatureToken(
         new BasicSignatureTokenPrincipal(
             signature.getUserId(),
@@ -83,9 +89,9 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
             signature.getUserEmail(),
             signature.getTenantId(),
             signature.getTenantUrl(),
-            signature.isAdmin()),
+            role),
         token.toString(),
-        List.of(new SimpleGrantedAuthority(role)));
+        List.of(new SimpleGrantedAuthority(role.name())));
   }
 
   /**
