@@ -33,64 +33,109 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * DynamoDB repository interface for performing operations on {@link ClientDynamoEntity} objects.
+ * DynamoDB repository interface for managing {@link ClientDynamoEntity} objects. Provides methods
+ * for saving, updating, retrieving, and deleting client entities in DynamoDB.
  */
 public interface DynamoClientRepository {
 
   /**
-   * Saves a client entity to DynamoDB.
+   * Persists a new client entity to DynamoDB.
    *
-   * @param entity the client entity to save
-   * @return a CompletableFuture indicating the operation result
+   * @param entity the {@link ClientDynamoEntity} to be saved
    */
   void save(ClientDynamoEntity entity);
 
   /**
    * Updates an existing client entity in DynamoDB.
    *
-   * @param entity the client entity to update
-   * @return a CompletableFuture indicating the operation result
+   * @param entity the {@link ClientDynamoEntity} with updated information
+   * @return the updated {@link ClientDynamoEntity}
    */
   ClientDynamoEntity update(ClientDynamoEntity entity);
 
   /**
-   * Finds a client by its ID, provided it is not invalidated.
+   * Retrieves a client entity by its unique identifier.
    *
-   * @param clientId the ID of the client entity.
-   * @return a CompletableFuture containing the found client entity, or empty if not found.
+   * <p>This method returns the client entity if it exists and is valid; otherwise, it may return
+   * {@code null}.
+   *
+   * @param clientId the unique identifier of the client
+   * @return the corresponding {@link ClientDynamoEntity} if found, or {@code null} if not found
    */
   ClientDynamoEntity findById(String clientId);
 
   /**
-   * Finds a client entity by its ID and visibility status.
+   * Retrieves a client entity by its unique identifier and accessibility status.
    *
-   * @param clientId the ID of the client entity.
-   * @param accessible the visibility status of the client entity.
-   * @return a CompletableFuture containing the found client entity, or empty if not found.
+   * @param clientId the unique identifier of the client
+   * @param accessible the desired visibility status (true for accessible, false otherwise)
+   * @return an {@link Optional} containing the matching {@link ClientDynamoEntity} if found, or an
+   *     empty {@link Optional} otherwise
    */
   Optional<ClientDynamoEntity> findByIdAndVisibility(String clientId, boolean accessible);
 
+  /**
+   * Retrieves all client entities that match any of the provided client identifiers.
+   *
+   * @param clientIds a list of client identifiers to search for
+   * @return a list of matching {@link ClientDynamoEntity} objects
+   */
   List<ClientDynamoEntity> findAllByClientIds(List<String> clientIds);
 
   /**
-   * Finds all client entities for a specific tenant.
+   * Retrieves a paginated list of client entities for a specific tenant.
    *
-   * @param tenantId the tenant ID.
-   * @return a Stream of client entities belonging to the tenant.
+   * <p>Results are limited by the specified {@code limit} and use {@code nextClientId} and {@code
+   * nextCreatedOn} as cursor parameters for pagination.
+   *
+   * @param tenantId the tenant identifier
+   * @param limit the maximum number of client entities to return
+   * @param nextClientId the client ID to start pagination (cursor), or {@code null} for the first
+   *     page
+   * @param nextCreatedOn the creation timestamp to start pagination (cursor), or {@code null} for
+   *     the first page
+   * @return a list of {@link ClientDynamoEntity} objects for the specified tenant
    */
   List<ClientDynamoEntity> findAllByTenantId(
       long tenantId, int limit, String nextClientId, ZonedDateTime nextCreatedOn);
 
+  /**
+   * Retrieves a paginated list of client entities created by a specific creator.
+   *
+   * <p>Results are limited by the specified {@code limit} and use {@code nextClientId} and {@code
+   * nextCreatedOn} as cursor parameters for pagination.
+   *
+   * @param creatorId the identifier of the creator
+   * @param limit the maximum number of client entities to return
+   * @param nextClientId the client ID to start pagination (cursor), or {@code null} for the first
+   *     page
+   * @param nextCreatedOn the creation timestamp to start pagination (cursor), or {@code null} for
+   *     the first page
+   * @return a list of {@link ClientDynamoEntity} objects created by the specified creator
+   */
+  List<ClientDynamoEntity> findAllByCreatorId(
+      String creatorId, int limit, String nextClientId, ZonedDateTime nextCreatedOn);
+
+  /**
+   * Retrieves a client entity by its unique identifier and tenant identifier.
+   *
+   * @param clientId the unique identifier of the client
+   * @param tenantId the tenant identifier
+   * @return an {@link Optional} containing the matching {@link ClientDynamoEntity} if found, or an
+   *     empty {@link Optional} otherwise
+   */
   Optional<ClientDynamoEntity> findByClientIdAndTenantId(String clientId, long tenantId);
 
   /**
-   * Updates the client secret for a specific client.
+   * Updates the client secret for a specific client entity.
    *
-   * @param clientId the ID of the client.
-   * @param tenantId the tenant ID.
-   * @param secret the new client secret.
-   * @param modifiedOn the date and time of modification.
-   * @return a CompletableFuture indicating the completion of the update.
+   * <p>The operation updates the client secret and the modification timestamp.
+   *
+   * @param clientId the unique identifier of the client
+   * @param tenantId the tenant identifier
+   * @param secret the new client secret
+   * @param modifiedOn the timestamp indicating when the update occurred
+   * @return the updated {@link ClientDynamoEntity}
    */
   ClientDynamoEntity updateClientSecret(
       String clientId, long tenantId, String secret, ZonedDateTime modifiedOn);
@@ -98,11 +143,13 @@ public interface DynamoClientRepository {
   /**
    * Updates the visibility status of a client entity.
    *
-   * @param clientId the ID of the client.
-   * @param tenantId the tenant ID.
-   * @param accessible the new visibility status.
-   * @param modifiedOn the date and time of modification.
-   * @return a CompletableFuture indicating the completion of the update.
+   * <p>The operation updates the accessibility flag and the modification timestamp.
+   *
+   * @param clientId the unique identifier of the client
+   * @param tenantId the tenant identifier
+   * @param accessible the new visibility status (true for accessible, false otherwise)
+   * @param modifiedOn the timestamp indicating when the update occurred
+   * @return the updated {@link ClientDynamoEntity}
    */
   ClientDynamoEntity updateVisibility(
       String clientId, long tenantId, boolean accessible, ZonedDateTime modifiedOn);
@@ -110,21 +157,24 @@ public interface DynamoClientRepository {
   /**
    * Updates the activation status of a client entity.
    *
-   * @param clientId the ID of the client.
-   * @param tenantId the tenant ID.
-   * @param enabled the new activation status.
-   * @param modifiedOn the date and time of modification.
-   * @return a CompletableFuture indicating the completion of the update.
+   * <p>The operation updates the enabled flag and the modification timestamp.
+   *
+   * @param clientId the unique identifier of the client
+   * @param tenantId the tenant identifier
+   * @param enabled the new activation status (true if enabled, false otherwise)
+   * @param modifiedOn the timestamp indicating when the update occurred
+   * @return the updated {@link ClientDynamoEntity}
    */
   ClientDynamoEntity updateActivation(
       String clientId, long tenantId, boolean enabled, ZonedDateTime modifiedOn);
 
   /**
-   * Deletes a client entity by its ID and tenant ID.
+   * Deletes a client entity by its unique identifier and tenant identifier.
    *
-   * @param clientId the ID of the client entity.
-   * @param tenantId the tenant ID.
-   * @return a CompletableFuture indicating the completion of the deletion.
+   * @param clientId the unique identifier of the client to be deleted
+   * @param tenantId the tenant identifier
+   * @return the deleted {@link ClientDynamoEntity} if the deletion was successful, or {@code null}
+   *     otherwise
    */
   ClientDynamoEntity deleteByIdAndTenantId(String clientId, long tenantId);
 }
