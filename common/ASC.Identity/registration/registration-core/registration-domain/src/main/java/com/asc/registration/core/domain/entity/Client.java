@@ -30,6 +30,7 @@ package com.asc.registration.core.domain.entity;
 import com.asc.common.core.domain.entity.AggregateRoot;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientStatus;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
@@ -92,7 +93,7 @@ public class Client extends AggregateRoot<ClientId> {
    * @param createdBy the identifier of the creator
    * @throws ClientDomainException if the client has already been initialized
    */
-  public void initialize(String createdBy) {
+  public void initialize(UserId createdBy) {
     if (clientStatus != null)
       throw new ClientDomainException("Client has already been initialized");
     this.id = new ClientId(UUID.randomUUID());
@@ -112,7 +113,7 @@ public class Client extends AggregateRoot<ClientId> {
    * @param visibility the new visibility status
    * @param modifiedBy the identifier of the modifier
    */
-  public void changeVisibility(ClientVisibility visibility, String modifiedBy) {
+  public void changeVisibility(ClientVisibility visibility, UserId modifiedBy) {
     validateStatus();
     this.clientVisibility = visibility;
     updateModificationInfo(modifiedBy);
@@ -124,7 +125,7 @@ public class Client extends AggregateRoot<ClientId> {
    *
    * @param modifiedBy the identifier of the modifier
    */
-  public void disable(String modifiedBy) {
+  public void disable(UserId modifiedBy) {
     changeStatus(ClientStatus.DISABLED, modifiedBy);
   }
 
@@ -133,7 +134,7 @@ public class Client extends AggregateRoot<ClientId> {
    *
    * @param modifiedBy the identifier of the modifier
    */
-  public void enable(String modifiedBy) {
+  public void enable(UserId modifiedBy) {
     changeStatus(ClientStatus.ENABLED, modifiedBy);
   }
 
@@ -142,7 +143,7 @@ public class Client extends AggregateRoot<ClientId> {
    *
    * @param modifiedBy the identifier of the modifier
    */
-  public void regenerateSecret(String modifiedBy) {
+  public void regenerateSecret(UserId modifiedBy) {
     validateStatus();
     this.secret = new ClientSecret(UUID.randomUUID().toString());
     updateModificationInfo(modifiedBy);
@@ -166,7 +167,7 @@ public class Client extends AggregateRoot<ClientId> {
    * @param scope the scope to add
    * @param modifiedBy the identifier of the modifier
    */
-  public void addScope(String scope, String modifiedBy) {
+  public void addScope(String scope, UserId modifiedBy) {
     validateStatus();
     validateScope(scope);
     this.scopes.add(scope);
@@ -181,7 +182,7 @@ public class Client extends AggregateRoot<ClientId> {
    * @param modifiedBy the identifier of the modifier
    * @throws ClientDomainException if there is only one scope
    */
-  public void removeScope(String scope, String modifiedBy) {
+  public void removeScope(String scope, UserId modifiedBy) {
     validateStatus();
     validateScope(scope);
     if (this.scopes.size() == 1)
@@ -197,7 +198,7 @@ public class Client extends AggregateRoot<ClientId> {
    * @param newClientInfo the new client information
    * @param modifiedBy the identifier of the modifier
    */
-  public void updateClientInfo(ClientInfo newClientInfo, String modifiedBy) {
+  public void updateClientInfo(ClientInfo newClientInfo, UserId modifiedBy) {
     validateStatus();
     if (newClientInfo == null) throw new ClientDomainException("New client info cannot be null");
     this.clientInfo = newClientInfo;
@@ -211,7 +212,7 @@ public class Client extends AggregateRoot<ClientId> {
    * @param newClientWebsiteInfo the new client website information
    * @param modifiedBy the identifier of the modifier
    */
-  public void updateClientWebsiteInfo(ClientWebsiteInfo newClientWebsiteInfo, String modifiedBy) {
+  public void updateClientWebsiteInfo(ClientWebsiteInfo newClientWebsiteInfo, UserId modifiedBy) {
     validateStatus();
     if (newClientWebsiteInfo == null)
       throw new ClientDomainException("New client website info cannot be null");
@@ -227,7 +228,7 @@ public class Client extends AggregateRoot<ClientId> {
    * @param modifiedBy the identifier of the modifier
    */
   public void updateClientRedirectInfo(
-      ClientRedirectInfo newClientRedirectInfo, String modifiedBy) {
+      ClientRedirectInfo newClientRedirectInfo, UserId modifiedBy) {
     validateStatus();
     if (newClientRedirectInfo == null)
       throw new ClientDomainException("New client redirect info cannot be null");
@@ -242,7 +243,7 @@ public class Client extends AggregateRoot<ClientId> {
    * @param method the authentication method to add
    * @param modifiedBy the identifier of the modifier
    */
-  public void addAuthenticationMethod(AuthenticationMethod method, String modifiedBy) {
+  public void addAuthenticationMethod(AuthenticationMethod method, UserId modifiedBy) {
     validateStatus();
     if (method == null) throw new ClientDomainException("Authentication method cannot be null");
     this.authenticationMethods.add(method);
@@ -257,7 +258,7 @@ public class Client extends AggregateRoot<ClientId> {
    * @param modifiedBy the identifier of the modifier
    * @throws ClientDomainException if there is only one authentication method
    */
-  public void removeAuthenticationMethod(AuthenticationMethod method, String modifiedBy) {
+  public void removeAuthenticationMethod(AuthenticationMethod method, UserId modifiedBy) {
     validateStatus();
     if (method == null) throw new ClientDomainException("Authentication method cannot be null");
     if (this.authenticationMethods.size() == 1 && this.authenticationMethods.contains(method))
@@ -274,7 +275,7 @@ public class Client extends AggregateRoot<ClientId> {
    * @param newStatus the new client status
    * @param modifiedBy the identifier of the modifier
    */
-  private void changeStatus(ClientStatus newStatus, String modifiedBy) {
+  private void changeStatus(ClientStatus newStatus, UserId modifiedBy) {
     validateStatus();
     this.clientStatus = newStatus;
     updateModificationInfo(modifiedBy);
@@ -304,9 +305,7 @@ public class Client extends AggregateRoot<ClientId> {
     if (this.clientRedirectInfo == null)
       throw new ClientDomainException(
           "Client is in invalid state due to missing client redirect info");
-    if (this.clientCreationInfo == null
-        || this.clientCreationInfo.getCreatedBy() == null
-        || this.clientCreationInfo.getCreatedBy().isBlank())
+    if (this.clientCreationInfo == null || this.clientCreationInfo.getCreatedBy() == null)
       throw new ClientDomainException("Client is in invalid state due to invalid creator name");
     if (this.clientCreationInfo.getCreatedOn() == null)
       throw new ClientDomainException("Client is in invalid state due to missing creation date");
@@ -340,7 +339,7 @@ public class Client extends AggregateRoot<ClientId> {
    *
    * @param modifiedBy the identifier of the modifier
    */
-  private void updateModificationInfo(String modifiedBy) {
+  private void updateModificationInfo(UserId modifiedBy) {
     this.clientModificationInfo =
         ClientModificationInfo.Builder.builder()
             .modifiedOn(ZonedDateTime.now(ZoneId.of(UTC)))
