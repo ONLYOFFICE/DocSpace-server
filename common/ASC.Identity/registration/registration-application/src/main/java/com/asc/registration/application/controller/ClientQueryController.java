@@ -56,6 +56,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -120,6 +121,7 @@ public class ClientQueryController {
             description = "Internal server error",
             content = @Content)
       })
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<ClientResponse> getClient(
       @PathVariable @NotBlank String clientId,
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal) {
@@ -127,9 +129,11 @@ public class ClientQueryController {
       setLoggingParameters(principal);
       return ResponseEntity.ok(
           clientApplicationService.getClient(
+              principal.getRole(),
               TenantClientQuery.builder()
-                  .clientId(clientId)
+                  .userId(principal.getUserId())
                   .tenantId(principal.getTenantId())
+                  .clientId(clientId)
                   .build()));
     } finally {
       MDC.clear();
@@ -166,6 +170,7 @@ public class ClientQueryController {
             description = "Internal server error",
             content = @Content)
       })
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<PageableResponse<ClientResponse>> getClients(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
       @RequestParam(value = "limit") @Min(value = 1) @Max(value = 50) int limit,
@@ -175,7 +180,9 @@ public class ClientQueryController {
       setLoggingParameters(principal);
       return ResponseEntity.ok(
           clientApplicationService.getClients(
+              principal.getRole(),
               TenantClientsPaginationQuery.builder()
+                  .userId(principal.getUserId())
                   .limit(limit)
                   .lastClientId(lastClientId)
                   .lastCreatedOn(lastCreatedOn)
@@ -214,6 +221,7 @@ public class ClientQueryController {
             description = "Internal server error",
             content = @Content)
       })
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<ClientInfoResponse> getClientInfo(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
       @PathVariable @NotBlank String clientId) {
@@ -221,7 +229,9 @@ public class ClientQueryController {
       setLoggingParameters(principal);
       return ResponseEntity.ok(
           clientApplicationService.getClientInfo(
+              principal.getRole(),
               ClientInfoQuery.builder()
+                  .userId(principal.getUserId())
                   .tenantId(principal.getTenantId())
                   .clientId(clientId)
                   .build()));
@@ -297,6 +307,7 @@ public class ClientQueryController {
             description = "Internal server error",
             content = @Content)
       })
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<PageableResponse<ClientInfoResponse>> getClientsInfo(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
       @RequestParam(value = "limit") @Min(value = 1) @Max(value = 50) int limit,
@@ -306,7 +317,9 @@ public class ClientQueryController {
       setLoggingParameters(principal);
       return ResponseEntity.ok(
           clientApplicationService.getClientsInfo(
+              principal.getRole(),
               ClientInfoPaginationQuery.builder()
+                  .userId(principal.getUserId())
                   .tenantId(principal.getTenantId())
                   .lastClientId(lastClientId)
                   .lastCreatedOn(lastCreatedOn)
