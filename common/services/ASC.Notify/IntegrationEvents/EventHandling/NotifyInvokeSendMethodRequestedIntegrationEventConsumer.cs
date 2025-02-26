@@ -27,12 +27,27 @@
 namespace ASC.Notify.IntegrationEvents.EventHandling;
 
 [Scope]
-public class NotifyInvokeSendMethodRequestedIntegrationEventHandler(ILoggerProvider options,
-        IServiceScopeFactory serviceScopeFactory)
-    : IIntegrationEventHandler<NotifyInvokeSendMethodRequestedIntegrationEvent>
+public class NotifyInvokeSendMethodRequestedIntegrationEventConsumer(
+    ILoggerProvider options, 
+    IServiceScopeFactory serviceScopeFactory)
+    : IConsumer<NotifyInvokeSendMethodRequestedIntegrationEvent>
 {
     private readonly ILogger _logger = options.CreateLogger("ASC.NotifyService");
+    
+    public async Task Consume(ConsumeContext<NotifyInvokeSendMethodRequestedIntegrationEvent> context)
+    {
+        var @event = context.Message;
+        CustomSynchronizationContext.CreateContext();
+        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
+            await InvokeSendMethodAsync(@event.NotifyInvoke);
+
+            await Task.CompletedTask;
+        }
+    }
+    
     private async Task InvokeSendMethodAsync(NotifyInvoke notifyInvoke)
     {
         var service = notifyInvoke.Service;
@@ -61,19 +76,5 @@ public class NotifyInvokeSendMethodRequestedIntegrationEventHandler(ILoggerProvi
         await tenantManager.SetCurrentTenantAsync(tenant);
 
         methodInfo.Invoke(instance, parameters.ToArray());
-    }
-
-
-    public async Task Handle(NotifyInvokeSendMethodRequestedIntegrationEvent @event)
-    {
-        CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
-        {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-
-            await InvokeSendMethodAsync(@event.NotifyInvoke);
-
-            await Task.CompletedTask;
-        }
     }
 }

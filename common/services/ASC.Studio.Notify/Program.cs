@@ -68,10 +68,6 @@ try
 
     startup.Configure(app);
 
-    var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
-
-    await eventBus.SubscribeAsync<NotifyItemIntegrationEvent, NotifyItemIntegrationEventHandler>();
-
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();
 }

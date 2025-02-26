@@ -24,28 +24,37 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core;
-
-using ILogger = Microsoft.Extensions.Logging.ILogger;
-
-namespace ASC.Web.Studio.IntegrationEvents;
+namespace ASC.Notify.IntegrationEvents.EventHandling;
 
 [Scope]
-public class NotifyItemIntegrationEventHandler(StudioNotifyWorker studioNotifyWorker,
-        ILogger<NotifyItemIntegrationEventHandler> logger)
-    : IIntegrationEventHandler<NotifyItemIntegrationEvent>
+public class NotifySendMessageRequestedIntegrationEventConsumer(
+        ILogger<NotifySendMessageRequestedIntegrationEventConsumer> logger,
+        DbWorker db)
+    : IConsumer<NotifySendMessageRequestedIntegrationEvent>
 {
-    private readonly ILogger _logger = logger;
-
-    public async Task Handle(NotifyItemIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<NotifySendMessageRequestedIntegrationEvent> context)
     {
+        var @event = context.Message;
         CustomSynchronizationContext.CreateContext();
-
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            await studioNotifyWorker.OnMessageAsync(@event);
+            await SendNotifyMessageAsync(@event.NotifyMessage);
+
+            await Task.CompletedTask;
+        }
+    }
+    
+    private async Task SendNotifyMessageAsync(NotifyMessage notifyMessage)
+    {
+        try
+        {
+            await db.SaveMessageAsync(notifyMessage);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
         }
     }
 }

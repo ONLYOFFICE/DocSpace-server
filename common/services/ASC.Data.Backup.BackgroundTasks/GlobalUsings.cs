@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Text.Json;
 global using System.Text.RegularExpressions;
 
 global using ASC.Api.Core;
@@ -40,6 +41,7 @@ global using ASC.Data.Backup.BackgroundTasks.Log;
 global using ASC.Data.Backup.Contracts;
 global using ASC.Data.Backup.Core.IntegrationEvents.Events;
 global using ASC.Data.Backup.EF.Context;
+global using ASC.Data.Backup.EF.Model;
 global using ASC.Data.Backup.Extension;
 global using ASC.Data.Backup.IntegrationEvents.EventHandling;
 global using ASC.Data.Backup.Services;
@@ -53,5 +55,7 @@ global using ASC.Files.Core.EF;
 global using ASC.Web.Studio.Core.Notify;
 
 global using Autofac;
+
+global using MassTransit;
 
 global using Microsoft.Extensions.Hosting.WindowsServices;

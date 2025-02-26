@@ -27,12 +27,14 @@
 namespace ASC.Web.Studio.IntegrationEvents.EventHandling;
 
 [Scope]
-public class WebhookRequestIntegrationEventHandler(
-    ILogger<WebhookRequestIntegrationEventHandler> logger,
-    ConcurrentQueue<WebhookRequestIntegrationEvent> concurrentQueue) : IIntegrationEventHandler<WebhookRequestIntegrationEvent>
+public class WebhookRequestIntegrationEventConsumer(
+    ILogger<WebhookRequestIntegrationEventConsumer> logger,
+    ConcurrentQueue<WebhookRequestIntegrationEvent> concurrentQueue) : 
+    IConsumer<WebhookRequestIntegrationEvent>
 {
-    public async Task Handle(WebhookRequestIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<WebhookRequestIntegrationEvent> context)
     {
+        var @event = context.Message;
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);

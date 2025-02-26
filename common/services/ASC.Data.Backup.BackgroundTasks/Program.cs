@@ -64,12 +64,6 @@ try
 
     startup.Configure(app, app.Environment);
 
-    var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
-
-    await eventBus.SubscribeAsync<BackupRequestIntegrationEvent, BackupRequestedIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<BackupRestoreRequestIntegrationEvent, BackupRestoreRequestedIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<IntegrationEvent, BackupDeleteScheldureRequestedIntegrationEventHandler>();
-
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();
 }

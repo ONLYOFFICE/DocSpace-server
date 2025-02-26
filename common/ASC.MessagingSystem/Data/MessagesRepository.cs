@@ -126,48 +126,6 @@ public class MessagesRepository(
     }
 }
 
-public class EventDataIntegrationEventHandler : IIntegrationEventHandler<EventDataIntegrationEvent>
-{
-    private readonly ILogger _logger;
-    private readonly ChannelWriter<EventData> _channelWriter;
-    private readonly ITariffService _tariffService;
-    private readonly TenantManager _tenantManager;
-
-    private EventDataIntegrationEventHandler()
-    {
-
-    }
-
-    public EventDataIntegrationEventHandler(
-        ILogger<EventDataIntegrationEventHandler> logger,
-        ITariffService tariffService,
-        TenantManager tenantManager,
-        ChannelWriter<EventData> channelWriter)
-    {
-        _logger = logger;
-        _channelWriter = channelWriter;
-        _tariffService = tariffService;
-        _tenantManager = tenantManager;
-    }
-    
-
-    public async Task Handle(EventDataIntegrationEvent @event)
-    {
-        CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}") }))
-        {
-            
-            await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            var tariff = await _tariffService.GetTariffAsync(@event.TenantId);
-            
-            if (await _channelWriter.WaitToWriteAsync())
-            {
-                await _channelWriter.WriteAsync(new EventData(@event.RequestMessage, tariff.State));
-            }
-        }
-    }
-}
-
 public class MessageSenderService(
     IServiceScopeFactory serviceScopeFactory, 
     ILogger<MessagesRepository> logger, 

@@ -24,20 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.EventBus.Log;
-
 namespace ASC.Migration.Core.Core;
 
 [Scope]
-public class MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<MigrationIntegrationEventHandler> logger)
-    :
-        IIntegrationEventHandler<MigrationParseIntegrationEvent>,
-        IIntegrationEventHandler<MigrationIntegrationEvent>,
-        IIntegrationEventHandler<MigrationCancelIntegrationEvent>,
-        IIntegrationEventHandler<MigrationClearIntegrationEvent>
+public class MigrationIntegrationEventConsumer(MigrationWorker worker, ILogger<MigrationIntegrationEventConsumer> logger) :
+        IConsumer<MigrationParseIntegrationEvent>,
+        IConsumer<MigrationIntegrationEvent>,
+        IConsumer<MigrationCancelIntegrationEvent>,
+        IConsumer<MigrationClearIntegrationEvent>
 {
-    public async Task Handle(MigrationParseIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<MigrationParseIntegrationEvent> context)
     {
+        var @event = context.Message;
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration-parse") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, "migration-parse", @event);
@@ -46,8 +44,9 @@ public class MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<Mi
         }
     }
 
-    public async Task Handle(MigrationIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<MigrationIntegrationEvent> context)
     {
+        var @event = context.Message;
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);
@@ -56,8 +55,9 @@ public class MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<Mi
         }
     }
 
-    public async Task Handle(MigrationCancelIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<MigrationCancelIntegrationEvent> context)
     {
+        var @event = context.Message;
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);
@@ -66,8 +66,9 @@ public class MigrationIntegrationEventHandler(MigrationWorker worker, ILogger<Mi
         }
     }
 
-    public async Task Handle(MigrationClearIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<MigrationClearIntegrationEvent> context)
     {
+        var @event = context.Message;
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-migration") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, "migration", @event);

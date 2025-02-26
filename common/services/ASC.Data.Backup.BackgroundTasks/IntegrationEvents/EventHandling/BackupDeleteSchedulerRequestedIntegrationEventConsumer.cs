@@ -24,36 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Notify.IntegrationEvents.EventHandling;
+namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
-public class NotifySendMessageRequestedIntegrationEventHandler(
-        ILogger<NotifySendMessageRequestedIntegrationEventHandler> logger,
-        DbWorker db)
-    : IIntegrationEventHandler<NotifySendMessageRequestedIntegrationEvent>
+public class BackupDeleteSchedulerRequestedIntegrationEventConsumer(
+        ILogger<BackupDeleteSchedulerRequestedIntegrationEventConsumer> logger,
+        BackupService backupService)
+    : IConsumer<IntegrationEvent>
 {
-    private async Task SendNotifyMessageAsync(NotifyMessage notifyMessage)
+    public async Task Consume(ConsumeContext<IntegrationEvent> context)
     {
-        try
-        {
-            await db.SaveMessageAsync(notifyMessage);
-        }
-        catch (Exception e)
-        {
-            logger.ErrorWithException(e);
-        }
-    }
-
-    public async Task Handle(NotifySendMessageRequestedIntegrationEvent @event)
-    {
+        var @event = context.Message;
         CustomSynchronizationContext.CreateContext();
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            await SendNotifyMessageAsync(@event.NotifyMessage);
-
-            await Task.CompletedTask;
+            await backupService.DeleteScheduleAsync(@event.TenantId);
         }
     }
 }

@@ -29,6 +29,7 @@ global using ASC.Api.Core.Extensions;
 global using ASC.Common;
 global using ASC.Common.DependencyInjection;
 global using ASC.Common.IntegrationEvents.Events;
+global using ASC.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Notify.Engine;
 global using ASC.EventBus.Abstractions;
@@ -48,3 +49,5 @@ global using Microsoft.AspNetCore.Builder;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using NLog;
+
+global using ILogger = Microsoft.Extensions.Logging.ILogger;

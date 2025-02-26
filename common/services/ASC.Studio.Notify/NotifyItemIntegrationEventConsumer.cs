@@ -24,42 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
+using MassTransit;
+
+namespace ASC.Web.Studio.IntegrationEvents;
 
 [Scope]
-public class BackupRestoreRequestedIntegrationEventHandler(
-        BackupAjaxHandler backupAjaxHandler,
-        ILogger<BackupRestoreRequestedIntegrationEventHandler> logger,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        BackupWorker backupWorker)
-    : IIntegrationEventHandler<BackupRestoreRequestIntegrationEvent>
+public class NotifyItemIntegrationEventConsumer(
+    StudioNotifyWorker studioNotifyWorker,
+    ILogger<NotifyItemIntegrationEventConsumer> logger)
+    : IConsumer<NotifyItemIntegrationEvent>
 {
-    public async Task Handle(BackupRestoreRequestIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<NotifyItemIntegrationEvent> context)
     {
+        var @event = context.Message;
         CustomSynchronizationContext.CreateContext();
+
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered && await backupWorker.IsInstanceTooBusy())
-            {
-                throw new IntegrationEventRejectExeption(@event.Id);
-            }
-
-            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-
-            await backupAjaxHandler.StartRestoreAsync(@event.BackupId,
-                                            @event.StorageType,
-                                            @event.StorageParams,
-                                            @event.Notify,
-                                            @event.ServerBaseUri,
-                                            @event.Dump,
-                                            true,
-                                            @event.TaskId);
-
-            await Task.CompletedTask;
+            await studioNotifyWorker.OnMessageAsync(@event);
         }
     }
 }

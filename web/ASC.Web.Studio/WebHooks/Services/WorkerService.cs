@@ -31,7 +31,6 @@ public class WorkerService(
     WebhookSender webhookSender,
     ILogger<WorkerService> logger,
     Settings settings,
-    IEventBus eventBus,
     ConcurrentQueue<WebhookRequestIntegrationEvent> concurrentQueue)
     : BackgroundService
 {
@@ -40,10 +39,6 @@ public class WorkerService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await eventBus.SubscribeAsync<WebhookRequestIntegrationEvent, WebhookRequestIntegrationEventHandler>();
-
-        stoppingToken.Register(eventBus.Unsubscribe<WebhookRequestIntegrationEvent, WebhookRequestIntegrationEventHandler>);
-
         while (!stoppingToken.IsCancellationRequested)
         {
             var queueSize = concurrentQueue.Count;

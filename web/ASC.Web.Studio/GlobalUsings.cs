@@ -30,11 +30,14 @@ global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using System.Threading.Channels;
 
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
 global using ASC.Common.Log;
+global using ASC.Core;
+global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
 global using ASC.Data.Storage;
 global using ASC.EventBus.Abstractions;
@@ -42,6 +45,8 @@ global using ASC.EventBus.Log;
 global using ASC.FederatedLogin;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
+global using ASC.MessagingSystem;
+global using ASC.MessagingSystem.Data;
 global using ASC.Migration.Core;
 global using ASC.Migration.Core.Core;
 global using ASC.Web.Core.HttpHandlers;
@@ -57,6 +62,8 @@ global using ASC.Webhooks.Service.Log;
 global using ASC.Webhooks.Service.Services;
 
 global using Autofac;
+
+global using MassTransit;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Hosting;

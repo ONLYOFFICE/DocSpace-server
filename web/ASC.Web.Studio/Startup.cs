@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Threading.Channels;
-
-using ASC.MessagingSystem.Data;
-
 namespace ASC.Web.Studio;
 
 public class Startup : BaseStartup
@@ -91,7 +87,6 @@ public class Startup : BaseStartup
         services.AddSingleton(Channel.CreateUnbounded<EventData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Writer);
-        services.AddScoped<EventDataIntegrationEventHandler>();
         services.AddSingleton<MessageSenderService>();
         services.AddHostedService<MessageSenderService>();
         

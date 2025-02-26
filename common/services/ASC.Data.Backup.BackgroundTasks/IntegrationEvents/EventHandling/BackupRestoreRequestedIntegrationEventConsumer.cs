@@ -24,23 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json;
-
-using ASC.Data.Backup.EF.Model;
-
 namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
-public class BackupRequestedIntegrationEventHandler(
+public class BackupRestoreRequestedIntegrationEventConsumer(
         BackupAjaxHandler backupAjaxHandler,
-        ILogger<BackupRequestedIntegrationEventHandler> logger,
+        ILogger<BackupRestoreRequestedIntegrationEventConsumer> logger,
         TenantManager tenantManager,
         SecurityContext securityContext,
         BackupWorker backupWorker)
-    : IIntegrationEventHandler<BackupRequestIntegrationEvent>
+    : IConsumer<BackupRestoreRequestIntegrationEvent>
 {
-    public async Task Handle(BackupRequestIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<BackupRestoreRequestIntegrationEvent> context)
     {
+        var @event = context.Message;
         CustomSynchronizationContext.CreateContext();
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
@@ -54,22 +51,16 @@ public class BackupRequestedIntegrationEventHandler(
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
 
-            if (@event.IsScheduled)
-            {
-                await backupWorker.StartScheduledBackupAsync(new BackupSchedule
-                {
-                    BackupsStored = @event.BackupsStored,
-                    StorageBasePath = @event.StorageBasePath,
-                    StorageParams = JsonSerializer.Serialize(@event.StorageParams),
-                    StorageType = @event.StorageType,
-                    TenantId = @event.TenantId,
-                    Dump = @event.Dump
-                });
-            }
-            else
-            {
-                await backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.ServerBaseUri, @event.Dump, true, @event.TaskId);
-            }
+            await backupAjaxHandler.StartRestoreAsync(@event.BackupId,
+                                            @event.StorageType,
+                                            @event.StorageParams,
+                                            @event.Notify,
+                                            @event.ServerBaseUri,
+                                            @event.Dump,
+                                            true,
+                                            @event.TaskId);
+
+            await Task.CompletedTask;
         }
     }
 }

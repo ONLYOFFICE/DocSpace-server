@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Studio.IntegrationEvents;
+namespace ASC.Web.Studio.IntegrationEvents.EventHandling;
 
-[Scope]
-public class RemovePortalIntegrationEventHandler(RemovePortalWorker worker, ILogger<RemovePortalIntegrationEventHandler> logger) : IIntegrationEventHandler<RemovePortalIntegrationEvent>
+public class EventDataIntegrationEventConsumer(
+    ILogger<EventDataIntegrationEventConsumer> logger,
+    ITariffService tariffService,
+    TenantManager tenantManager,
+    ChannelWriter<EventData> channelWriter)
+    : IConsumer<EventDataIntegrationEvent>
 {
-    public async Task Handle(RemovePortalIntegrationEvent @event)
+    public async Task Consume(ConsumeContext<EventDataIntegrationEvent> context)
     {
-        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        var @event = context.Message;
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}") }))
         {
-            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-
-            await worker.StartAsync(@event.TenantId);
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            var tariff = await tariffService.GetTariffAsync(@event.TenantId);
+            
+            if (await channelWriter.WaitToWriteAsync())
+            {
+                await channelWriter.WriteAsync(new EventData(@event.RequestMessage, tariff.State));
+            }
         }
     }
 }
