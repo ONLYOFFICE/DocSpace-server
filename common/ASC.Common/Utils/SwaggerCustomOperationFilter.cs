@@ -47,11 +47,11 @@ public class ContentTypeOperationFilter : IOperationFilter
     {
         if (operation.RequestBody != null)
         {
-            var applicationJsonContent = operation.RequestBody.Content
-                .Where(c => c.Key.Equals("application/json"))
+            var content = operation.RequestBody.Content
+                .Where(c => c.Key != "text/json" && !c.Key.EndsWith("+json"))
                 .ToDictionary(c => c.Key, c => c.Value);
 
-            operation.RequestBody.Content = applicationJsonContent;
+            operation.RequestBody.Content = content;
         }
 
         if (operation.Responses != null)
