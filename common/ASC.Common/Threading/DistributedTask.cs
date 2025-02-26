@@ -33,10 +33,12 @@ namespace ASC.Common.Threading;
 public class DistributedTask
 {
     [ProtoMember(10)]
+    [JsonInclude]
     protected string _exeption = String.Empty;
 
     [ProtoMember(11)]
-    protected readonly Dictionary<string, string> _props = new();
+    [JsonInclude]
+    protected Dictionary<string, string> _props = new();
 
     [JsonIgnore]
     public Func<DistributedTask, Task> Publication { get; set; }
