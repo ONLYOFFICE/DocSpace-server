@@ -643,7 +643,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
 
     private void SetFolderType(Folder<string> folder, bool isRoot)
     {
-        if (isRoot && RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        if (isRoot && RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates)
         {
             folder.FolderType = RootFolderType;
         }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,10 @@ import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 
-/** Entity class representing a key pair. */
+/**
+ * Entity class representing a cryptographic key pair. This class is mapped to the `identity_certs`
+ * table and stores data related to public-private key pairs.
+ */
 @Entity
 @Getter
 @Setter
@@ -43,28 +46,38 @@ import org.springframework.data.annotation.CreatedDate;
 @AllArgsConstructor
 @Table(name = "identity_certs")
 public class KeyPair {
-  /** The unique identifier for the key pair. */
+
+  /** The unique identifier for the key pair. Automatically generated as a UUID. */
   @Id @UuidGenerator private String id;
 
-  /** The public key. */
+  /** The public key component of the key pair. This field is required and cannot be null. */
   @Column(name = "public_key", nullable = false)
   private String publicKey;
 
-  /** The private key. */
+  /** The private key component of the key pair. This field is required and cannot be null. */
   @Column(name = "private_key", nullable = false)
   private String privateKey;
 
-  /** The type of the key pair. */
+  /**
+   * The type of the key pair, represented as an enumerated value. Stored in the database as an
+   * ordinal value.
+   */
   @Column(name = "pair_type", nullable = false)
   @Enumerated(EnumType.ORDINAL)
   private KeyPairType pairType;
 
-  /** The timestamp when the key pair was created. */
+  /**
+   * The timestamp indicating when the key pair was created. Automatically set at the time of entity
+   * creation.
+   */
   @Column(name = "created_at")
   @CreatedDate
   private ZonedDateTime createdAt;
 
-  /** Sets the createdAt timestamp to the current time before persisting the entity. */
+  /**
+   * Lifecycle callback method invoked before persisting the entity. Ensures the `createdAt`
+   * timestamp is set to the current time.
+   */
   @PrePersist
   void fillAction() {
     createdAt = ZonedDateTime.now();

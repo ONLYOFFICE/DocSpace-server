@@ -72,7 +72,8 @@ public class UserController(
     CustomQuota customQuota,
     AuditEventsRepository auditEventsRepository,
     EmailValidationKeyModelHelper emailValidationKeyModelHelper,
-    CountPaidUserStatistic countPaidUserStatistic)
+    CountPaidUserStatistic countPaidUserStatistic,
+    UserSocketManager socketManager)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -152,6 +153,14 @@ public class UserController(
         cache.Insert("REWRITE_URL" + tenantManager.GetCurrentTenantId(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
         user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, false, false, inDto.Type,
             false, true, true);
+        if (inDto.Type is EmployeeType.Guest)
+        {
+            await socketManager.AddGuestAsync(user);
+        }
+        else
+        {
+            await socketManager.AddUserAsync(user);
+        }
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
@@ -277,12 +286,21 @@ public class UserController(
         {
             user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
                 inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
+            if(inDto.Type is EmployeeType.Guest)
+            {
+                await socketManager.AddGuestAsync(user);
+            }
+            else
+            {
+                await socketManager.AddUserAsync(user);
+            }
         }
         catch (TenantQuotaException)
         {
             quotaLimit = true;
             user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, EmployeeType.User,
                 inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
+            await socketManager.AddUserAsync(user);
         }
 
         await UpdateDepartmentsAsync(inDto.Department, user);
@@ -394,6 +412,7 @@ public class UserController(
 
             await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
             messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+            await socketManager.AddUserAsync(user);
         }
 
         var result = new List<EmployeeDto>();
@@ -540,6 +559,14 @@ public class UserController(
         await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
 
         messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(user.Id), userName);
+        if (isGuest) 
+        {
+            await socketManager.DeleteGuestAsync(user.Id);
+        }
+        else
+        {
+            await socketManager.DeleteUserAsync(user.Id);
+        }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -583,6 +610,7 @@ public class UserController(
         user.Status = EmployeeStatus.Terminated;
 
         await _userManager.UpdateUserInfoAsync(user);
+        await socketManager.UpdateUserAsync(user);
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         messageService.Send(MessageAction.UsersUpdatedStatus, MessageTarget.Create(user.Id), userName);
 
@@ -848,7 +876,7 @@ public class UserController(
     [Tags("People / Module")]
     [SwaggerResponse(200, "Module information", typeof(Module))]
     [HttpGet("info")]
-    public Module GetModule()
+    public Module GetPeopleModule()
     {
         var product = new PeopleProduct();
         product.Init();
@@ -1201,14 +1229,14 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Message text", typeof(object))]
+    [SwaggerResponse(200, "Message text", typeof(string))]
     [SwaggerResponse(400, "Incorrect userId or email")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "User not found")]
     [AllowNotPayment]
     [HttpPost("email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<object> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
+    public async Task<string> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
     {
         Guid.TryParse(inDto.UserId, out var userid);
 
@@ -1280,6 +1308,15 @@ public class UserController(
             messageService.Send(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
 
+        if (await _userManager.IsGuestAsync(user))
+        {
+            await socketManager.UpdateGuestAsync(user);
+        }
+        else
+        {
+            await socketManager.UpdateUserAsync(user);
+        }
+        
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
 
@@ -1292,13 +1329,13 @@ public class UserController(
     /// <path>api/2.0/people/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
-    [SwaggerResponse(200, "Email with the password", typeof(object))]
+    [SwaggerResponse(200, "Email with the password", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<object> SendUserPasswordAsync(EmailMemberRequestDto inDto)
+    public async Task<string> SendUserPasswordAsync(EmailMemberRequestDto inDto)
     {
         if (authContext.IsAuthenticated)
         {
@@ -1448,7 +1485,7 @@ public class UserController(
 
                 if (!userFormatter.IsValidUserName(firstName, lastName))
                 {
-                    throw new Exception(Resource.ErrorIncorrectUserName);
+                    throw new ArgumentException(Resource.ErrorIncorrectUserName);
                 }
 
                 user.FirstName = firstName;
@@ -1550,7 +1587,15 @@ public class UserController(
 
         if (changed)
         {
-            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user); 
+            if (await _userManager.IsGuestAsync(user))
+            {
+                await socketManager.UpdateGuestAsync(user);
+            }
+            else
+            {
+                await socketManager.UpdateUserAsync(user);
+            }
 
             messageService.Send(MessageAction.UserUpdated, MessageTarget.Create(user.Id),
                 user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
@@ -1629,6 +1674,14 @@ public class UserController(
                             }
 
                             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+                            if (await _userManager.IsGuestAsync(user)) 
+                            {
+                                await socketManager.UpdateGuestAsync(user);
+                            }
+                            else
+                            {
+                                await socketManager.UpdateUserAsync(user);
+                            }
                         }
                         finally
                         {
@@ -1645,7 +1698,16 @@ public class UserController(
                     await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
                     await cookiesManager.ResetUserCookieAsync(user.Id);
-                    messageService.Send(MessageAction.CookieSettingsUpdated);
+                    messageService.Send(MessageAction.CookieSettingsUpdated); 
+                    if (await _userManager.IsGuestAsync(user))
+                    {
+                        await socketManager.UpdateGuestAsync(user);
+                    }
+                    else
+                    {
+                        await socketManager.UpdateUserAsync(user);
+                    }
+
                     break;
             }
         }
@@ -1682,7 +1744,17 @@ public class UserController(
 
         foreach (var user in users)
         {
+            var isGuest = await _userManager.IsGuestAsync(user);
             await userManagerWrapper.UpdateUserTypeAsync(user, inDto.Type);
+            if (isGuest && !await _userManager.IsGuestAsync(user)) 
+            {
+                await socketManager.AddUserAsync(user);
+                await socketManager.DeleteGuestAsync(user.Id);
+            }
+            else
+            {
+                await socketManager.UpdateUserAsync(user);
+            }
         }
 
         messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),
@@ -2160,7 +2232,8 @@ public class UserControllerAdditional<T>(
             includeStrangers,
             inDto.Area,
             inDto.InvitedByMe,
-            inDto.InviterId);
+            inDto.InviterId,
+            inDto.EmployeeTypes);
 
         apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
 
@@ -2174,6 +2247,7 @@ public class UserControllerAdditional<T>(
                            inDto.Area,
                            inDto.InvitedByMe,
                            inDto.InviterId,
+                           inDto.EmployeeTypes,
                            offset,
                            count))
         {

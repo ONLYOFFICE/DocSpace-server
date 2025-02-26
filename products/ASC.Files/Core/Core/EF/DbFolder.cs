@@ -155,10 +155,13 @@ public static class DbFolderExtension
         {
             entity.ToTable("files_folder");
 
+            entity.HasKey(e => e.Id)
+                .HasName("PK_files_folder");
+            
             entity.Ignore(r => r.IndexName);
 
             entity.HasIndex(e => e.ModifiedOn)
-                .HasDatabaseName("modified_on");
+                .HasDatabaseName("IX_files_folder_modified_on");
 
             entity.HasIndex(e => new { e.TenantId, e.ParentId })
                 .HasDatabaseName("parent_id");

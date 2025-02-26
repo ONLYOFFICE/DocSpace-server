@@ -148,9 +148,9 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutallchangepassword</path>
     [Tags("Security / Active connections")]
-    [SwaggerResponse(200, "URL to the confirmation message for changing a password", typeof(object))]
+    [SwaggerResponse(200, "URL to the confirmation message for changing a password", typeof(string))]
     [HttpPut("logoutallchangepassword")]
-    public async Task<object> LogOutAllActiveConnectionsChangePassword()
+    public async Task<string> LogOutAllActiveConnectionsChangePassword()
     {
         try
         {
@@ -210,9 +210,9 @@ public class ConnectionsController(
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
     [Tags("Security / Active connections")]
-    [SwaggerResponse(200, "Current user name", typeof(object))]
+    [SwaggerResponse(200, "Current user name", typeof(string))]
     [HttpPut("logoutallexceptthis")]
-    public async Task<object> LogOutAllExceptThisConnection()
+    public async Task<string> LogOutAllExceptThisConnection()
     {
         try
         {

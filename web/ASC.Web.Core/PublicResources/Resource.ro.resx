@@ -222,6 +222,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
   <data name="ButtonTfaAppEnable" xml:space="preserve">
     <value>Prin aplicația de autentificare</value>
   </data>
