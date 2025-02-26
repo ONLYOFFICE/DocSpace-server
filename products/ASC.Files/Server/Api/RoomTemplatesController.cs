@@ -89,7 +89,7 @@ public class RoomTemplatesController(IEventBus eventBus,
             Cover = dto.Cover,
             Color = dto.Color
         });
-        return await Status();
+        return await GetTemplateCreatingStatus();
     }
 
     /// <summary>
@@ -100,7 +100,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
     [HttpGet("status")]
-    public async Task<RoomTemplateStatusDto> Status()
+    public async Task<RoomTemplateStatusDto> GetTemplateCreatingStatus()
     {
         try
         {

@@ -104,7 +104,7 @@ public class OperationController(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpPut("deleteversion")]
-    public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteVersionBatchRequestDto inDto)
+    public async IAsyncEnumerable<FileOperationDto> DeleteFileVersions(DeleteVersionBatchRequestDto inDto)
     {
         await fileOperationsManager.PublishDelete([], [inDto.FileId], false, !inDto.DeleteAfter, true, versions: inDto.Versions);
         
@@ -165,7 +165,7 @@ public class OperationController(
     [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [AllowAnonymous]
     [HttpGet("{operationType}")]
-    public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses(FileOperationResultRequestDto inDto)
+    public async IAsyncEnumerable<FileOperationDto> GetOperationStatusesByType(FileOperationResultRequestDto inDto)
     {
         foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == inDto.OperationType))
         {

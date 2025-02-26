@@ -351,6 +351,7 @@ public class TariffService(
     private async Task ClearCacheAsync(int tenantId)
     {
         await hybridCache.RemoveAsync(GetTariffCacheKey(tenantId));
+        await distributedCache.RemoveAsync(GetBillingPaymentCacheKey(tenantId));
     }
 
     public async Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId)

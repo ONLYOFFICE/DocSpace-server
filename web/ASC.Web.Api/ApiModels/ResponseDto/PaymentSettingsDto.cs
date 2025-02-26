@@ -24,26 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#if (DEBUG)
-using System;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-using ASC.Common.Utils;
-
-using NUnit.Framework;
-
-namespace ASC.Core.Common.Tests
+public class PaymentSettingsDto
 {
-    [TestFixture]
-    public class SignatureTest
-    {
-        [Test]
-        public void TestSignature()
-        {
-            var validObject = new { expire = DateTime.UtcNow.AddMinutes(15), key = "345jhndfg", ip = "192.168.1.1" };
-            var encoded = Signature.Create(validObject, "ThE SeCret Key!");
-            Assert.IsNotNull(Signature.Read<object>(encoded, "ThE SeCret Key!"));
-            Assert.IsNull(Signature.Read<object>(encoded, "ThE SeCret Key"));
-        }
-    }
+    public string SalesEmail { get; set; }
+    public string FeedbackAndSupportUrl { get; set; }
+    public string BuyUrl { get; set; }
+    public bool Standalone { get; set; }
+    public CurrentLicenseInfo CurrentLicense { get; set; }
+    public int Max { get; set; }
 }
-#endif
+
+public class CurrentLicenseInfo
+{
+    public bool Trial { get; set; }
+    public DateTime DueDate { get; set; }
+}

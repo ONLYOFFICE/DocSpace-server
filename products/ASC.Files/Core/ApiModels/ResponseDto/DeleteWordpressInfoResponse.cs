@@ -24,30 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#if DEBUG
-using System;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-using Microsoft.Extensions.DependencyInjection;
-
-using NUnit.Framework;
-
-namespace ASC.Core.Common.Tests
+public class DeleteWordpressInfoResponse(bool success)
 {
-    [TestFixture]
-    public class ClientPaymentManagerTest
-    {
-        private readonly PaymentManager paymentManager = new PaymentManager(null, null, null, null);
-        private readonly IServiceProvider serviceProvider;
+    public bool Success { get; set; } = success;
 
-        [Test]
-        public void ActivateCuponTest()
-        {
-            using var scope = serviceProvider.CreateScope();
-            var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-            tenantManager.SetCurrentTenant(0);
-
-            paymentManager.ActivateKey("IAALKCPBRY9ZSDLJZ4E2");
-        }
-    }
+    // Convenience factory methods
+    public static DeleteWordpressInfoResponse Succeeded() => new(true);
+    public static DeleteWordpressInfoResponse Failed() => new(false);
 }
-#endif
