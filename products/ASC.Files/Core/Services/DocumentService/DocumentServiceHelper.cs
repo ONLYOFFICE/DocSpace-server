@@ -600,22 +600,20 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var result = new FormOpenSetup<T>
         {
-            CanEdit = currentStep == -1,
-            CanFill = false
+            CanEdit = false,
+            CanFill = true
         };
 
         if (currentStep != -1)
         {
             if (!myRoles.Any())
             {
-                result.CanEdit = false;
                 return result;
             }
 
             var role = myRoles.FirstOrDefault(role => !role.Submitted && currentStep == role.Sequence);
             if (role != null)
             {
-                result.CanFill = true;
                 result.RoleName = role.RoleName;
                 if (role.OpenedAt.Equals(DateTime.MinValue))
                 {
@@ -625,11 +623,16 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             }
             else
             {
-                result.CanEdit = false;
+                role = myRoles.LastOrDefault();
+                result.RoleName = role.RoleName;
             }
             result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
         }
-
+        else
+        {
+            result.CanEdit = true;
+            result.CanFill = false;
+        }
         return result;
     }
 

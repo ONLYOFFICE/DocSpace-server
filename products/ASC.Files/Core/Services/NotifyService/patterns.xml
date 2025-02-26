@@ -183,5 +183,10 @@ $DocumentURL
     <subject resource="|subject_FormStartedFilling|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_FormStartedFilling|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
   </pattern>
+
+  <pattern id="YourTurnFormFilling" sender="email.sender">
+    <subject resource="|subject_YourTurnFormFilling|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_YourTurnFormFilling|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+  </pattern>
   
 </patterns>

@@ -1156,7 +1156,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         var fileDao = daoFactory.GetFileDao<T>();
                         var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, userId);
-                        var role = await roles.FirstOrDefaultAsync(r => !r.Submitted);
+                        var myRoles = await roles.ToListAsync();
+                        var role = myRoles.Where(r => !r.Submitted).FirstOrDefault();
                         var properties = await fileDao.GetProperties(file.Id);
                         var formFilling = properties?.FormFilling;
 
@@ -1175,9 +1176,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                                 hasFullAccessToForm && formFilling?.StartFilling == false,
 
                             FilesSecurityActions.FillForms =>
-                                !IsFillingStoped &&
-                                currentStep != -1 &&
-                                role?.Sequence == currentStep,
+                                !IsFillingStoped && myRoles.Any(),
 
                             FilesSecurityActions.Edit =>
                                 currentStep == -1 && (hasFullAccessToForm || e.Access is FileShare.Editing),

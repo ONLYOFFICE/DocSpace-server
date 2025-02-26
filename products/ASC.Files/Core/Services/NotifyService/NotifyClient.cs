@@ -605,6 +605,32 @@ public class NotifyClient(WorkContext notifyContext,
 
         }
     }
+
+    public async Task SendYourTurnFormFilling<T>(FileEntry<T> room, File<T> file, IEnumerable<Guid> aces)
+    {
+        var client = notifyContext.RegisterClient(serviceProvider, notifySource);
+        var recipientsProvider = notifySource.GetRecipientsProvider();
+
+        var folderId = room.Id.ToString();
+        var roomUrl = pathProvider.GetRoomsUrl(folderId, false);
+
+        foreach (var ace in aces)
+        {
+            var recipient = await notifySource.GetRecipientsProvider().GetRecipientAsync(ace.ToString());
+
+            await client.SendNoticeAsync(
+                NotifyConstants.EventYourTurnFormFilling,
+                room.UniqID,
+                recipient,
+                ConfigurationConstants.NotifyEMailSenderSysName,
+                new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id))),
+                new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
+                new TagValue(NotifyConstants.RoomTitle, room.Title),
+                new TagValue(NotifyConstants.RoomUrl, roomUrl)
+                );
+        }
+    }
+
     private async Task<bool> CanNotifyRoom<T>(FileEntry<T> room, UserInfo user)
     {
         if (room is not { FileEntryType: FileEntryType.Folder })

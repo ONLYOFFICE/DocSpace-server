@@ -4470,7 +4470,10 @@ public class FileStorageService //: IFileStorageService
         properties.FormFilling.StartFilling = true;
         await fileDao.SaveProperties(formId, properties);
 
-        await notifyClient.SendFormStartedFilling(currentRoom, form, roles.Select(role => role.UserId).Distinct(), authContext.CurrentAccount.ID);
+        var roleUserIds = roles.Where(role => !role.UserId.Equals(authContext.CurrentAccount.ID)).Select(role => role.UserId).Distinct();
+        var aces = await fileSharing.GetPureSharesAsync(currentRoom, roleUserIds).Where(ace => ace is not { Access: FileShare.FillForms }).Select(role => role.Id).ToListAsync();
+
+        await notifyClient.SendFormStartedFilling(currentRoom, form, aces, authContext.CurrentAccount.ID);
     }
 
     public async Task<FormRole> ReassignFormRoleToUser<T>(T formId, string roleName, Guid userId, Guid toUserId)

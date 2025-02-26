@@ -215,4 +215,12 @@ $OrangeButton</value>
       Activity notification. "$FromUserName":"$FromUserLink" started the form filling process:  "$DocumentTitle":"$DocumentURL" in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace notification.</value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Activity notification. It’s your turn! Form filling is required: "$DocumentTitle":"$DocumentURL" in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
 </root>

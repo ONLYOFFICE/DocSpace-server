@@ -1522,7 +1522,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
                 else if (room.FolderType == FolderType.VirtualDataRoom)
                 {
-                    return await SubmitVDRFormAsync(fileDao, file);
+                    return await SubmitVDRFormAsync(room, file, fileDao);
                 }
             }
             file.ContentLength = tmpStream.Length;
@@ -2187,22 +2187,96 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
-    private async Task<File<T>> SubmitVDRFormAsync<T>(IFileDao<T> fileDao, File<T> form)
+    private async Task<File<T>> SubmitVDRFormAsync<T>(Folder<T> room, File<T> form, IFileDao<T> fileDao)
     {
-        var (currentStep, roles) = await fileDao.GetUserFormRoles(form.Id, securityContext.CurrentAccount.ID);
-        var myRoles = await roles.ToListAsync();
-        if (currentStep != -1 || myRoles.Any())
+        var allRoles = await fileDao.GetFormRoles(form.Id).Select(r => new FormRole
         {
-            var firstRole = myRoles.FirstOrDefault(fr => fr.Submitted == false);
-            if (currentStep == firstRole.Sequence)
+            UserId = r.UserId,
+            RoleName = r.RoleName,
+            RoleColor = r.RoleColor,
+            Sequence = r.Sequence,
+            Submitted = r.Submitted
+        }).ToListAsync();
+
+        var currentStep = GetCurrentFillingStep(allRoles);
+        if (currentStep != -1)
+        {
+            var myRole = GetCurrentUserRole(allRoles, securityContext.CurrentAccount.ID);
+            if (myRole != null && currentStep == myRole.Sequence)
             {
-                firstRole.Submitted = true;
-                firstRole.SubmissionDate = DateTime.UtcNow;
-                await fileDao.ChangeUserFormRoleAsync(form.Id, firstRole);
+                myRole.Submitted = true;
+                myRole.SubmissionDate = DateTime.UtcNow;
+                await fileDao.ChangeUserFormRoleAsync(form.Id, myRole);
+            }
+            var (nextRoleSequence, nextRoleUserIds) = GetNextRoleUserIds(allRoles, myRole, securityContext.CurrentAccount.ID);
+
+            if(nextRoleSequence != -1)
+            {
+                if(nextRoleSequence == 0)
+                {
+                    //complete
+
+                }else if (nextRoleUserIds.Any())
+                {
+                    await notifyClient.SendYourTurnFormFilling(room, form, nextRoleUserIds);
+                }
             }
         }
         return form;
+
     }
+
+    private int GetCurrentFillingStep(List<FormRole> roles)
+    {
+        if (roles?.Count == 0)
+        { 
+            return -1; 
+        }
+
+        return roles?
+            .Where(r => !r.Submitted)
+            .Min(r => (int?)r.Sequence)
+            ?? 0;
+    }
+    private FormRole GetCurrentUserRole(List<FormRole> roles, Guid userId)
+    {
+        return roles?.FirstOrDefault(r => r.UserId == userId && !r.Submitted);
+    }
+
+    private (int, List<Guid>) GetNextRoleUserIds(List<FormRole> formRoles, FormRole currentRole, Guid userId)
+    {
+        if (formRoles == null || !formRoles.Any()) 
+        {
+            return (-1, new List<Guid>());
+        }
+
+        var allOthersSubmitted = formRoles
+            .Where(fr => fr.Sequence == currentRole.Sequence &&
+                        fr.RoleName == currentRole.RoleName &&
+                        fr.UserId != userId)
+            .All(fr => fr.Submitted);
+
+        if (!allOthersSubmitted)
+        {
+            return (-1, new List<Guid>());
+        }
+        var nextSequence = formRoles
+            .Where(fr => fr.Sequence > currentRole.Sequence)
+            .Select(fr => fr.Sequence)
+            .FirstOrDefault();
+
+        if (nextSequence == 0)
+        {
+            return (0, new List<Guid>());
+        }
+
+        return (nextSequence, formRoles
+            .Where(fr => fr.Sequence == nextSequence)
+            .Select(fr => fr.UserId)
+            .Distinct()
+            .ToList());
+    }
+
     private async Task SetOriginsAsync<T>(Folder<T> parent, IEnumerable<FileEntry> entries)
     {
         if (parent.FolderType != FolderType.TRASH || !entries.Any())
@@ -2234,4 +2308,4 @@ public class EntryManager(IDaoFactory daoFactory,
             fileEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.MyFiles : data.OriginFolder.Title;
         }
     }
-        }
+}

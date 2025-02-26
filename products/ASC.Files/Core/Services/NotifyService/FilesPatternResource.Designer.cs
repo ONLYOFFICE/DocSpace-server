@@ -277,6 +277,17 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 
+        ///      Activity notification. It’s your turn! Form filling is required: &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///    .
+        /// </summary>
+        public static string pattern_YourTurnFormFilling {
+            get {
+                return ResourceManager.GetString("pattern_YourTurnFormFilling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;patterns&gt;
         ///  &lt;formatter type=&quot;ASC.Notify.Patterns.NVelocityPatternFormatter, ASC.Core.Common&quot; /&gt;
         ///
@@ -460,6 +471,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string subject_ShareFolder_tg {
             get {
                 return ResourceManager.GetString("subject_ShareFolder_tg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DocSpace notification..
+        /// </summary>
+        public static string subject_YourTurnFormFilling {
+            get {
+                return ResourceManager.GetString("subject_YourTurnFormFilling", resourceCulture);
             }
         }
     }
