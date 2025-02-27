@@ -376,11 +376,11 @@ public class TfaappController(
     /// <short>Unlink the TFA application</short>
     /// <path>api/2.0/settings/tfaappnewapp</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Login URL", typeof(object))]
+    [SwaggerResponse(200, "Login URL", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewapp")]
-    public async Task<object> TfaAppNewAppAsync(TfaRequestsDto inDto)
+    public async Task<string> TfaAppNewAppAsync(TfaRequestsDto inDto)
     {
         var id = inDto?.Id ?? Guid.Empty;
         var isMe = id.Equals(Guid.Empty) || id.Equals(authContext.CurrentAccount.ID);

@@ -24,37 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#if DEBUG
-namespace ASC.Core.Common.Tests
+namespace ASC.Files.Core.ApiModels.ResponseDto;
+
+public class PrivacyRoomKeysResponse
 {
-    using System;
-
-    using ASC.Common.Utils;
-
-    public class DbBaseTest<TDbService>
-    {
-        protected TDbService Service
-        {
-            get;
-            private set;
-        }
-
-        protected int Tenant
-        {
-            get;
-            private set;
-        }
-
-        internal ConfigurationExtension Configuration { get; set; }
-
-        protected DbBaseTest()
-        {
-            Service = (TDbService)Activator.CreateInstance(typeof(TDbService), Configuration.GetConnectionStrings("core"));
-            Tenant = 1024;
-
-            //var pattern = "%message (%property{duration} ms)     %property{sql}    %property{sqlParams}%newline";
-            //BasicConfigurator.Configure(new DebugAppender { Layout = new PatternLayout(pattern) });
-        }
-    }
+    public bool IsSet { get; set; }
 }
-#endif

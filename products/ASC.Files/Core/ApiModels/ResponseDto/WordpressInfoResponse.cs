@@ -24,36 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#if DEBUG
-using ASC.Geolocation;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-using NUnit.Framework;
-
-namespace ASC.Common.Tests.Geolocation
+public class WordpressInfoResponse
 {
-    [TestFixture]
-    public class GeolocationTest
-    {
-        [Test]
-        public void GetIPGeolocationTest()
-        {
-            var helper = new GeolocationHelper(null, null);
-            var info = helper.GetIPGeolocation("62.213.10.13");
-            Assert.AreEqual("Nizhny Novgorod", info.City);
-            Assert.AreEqual("062.213.011.127", info.IPEnd);
-            Assert.AreEqual("062.213.008.240", info.IPStart);
-            Assert.AreEqual("RU", info.Key);
-            Assert.AreEqual("Europe/Moscow", info.TimezoneName);
-            Assert.AreEqual(4d, info.TimezoneOffset);
-
-            info = helper.GetIPGeolocation("");
-            Assert.AreEqual(IPGeolocationInfo.Default.City, info.City);
-            Assert.AreEqual(IPGeolocationInfo.Default.IPEnd, info.IPEnd);
-            Assert.AreEqual(IPGeolocationInfo.Default.IPStart, info.IPStart);
-            Assert.AreEqual(IPGeolocationInfo.Default.Key, info.Key);
-            Assert.AreEqual(IPGeolocationInfo.Default.TimezoneName, info.TimezoneName);
-            Assert.AreEqual(IPGeolocationInfo.Default.TimezoneOffset, info.TimezoneOffset);
-        }
-    }
+    public bool Success { get; set; }
+    public string Data { get; set; }
 }
-#endif

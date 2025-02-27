@@ -344,9 +344,9 @@ public partial class SettingsController(MessageService messageService,
     /// </summary>
     /// <path>api/2.0/settings/userquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Ok", typeof(object))]
+    [SwaggerResponse(200, "Ok", typeof(TenantUserQuotaSettings))]
     [HttpGet("userquotasettings")]
-    public async Task<object> GetUserQuotaSettings()
+    public async Task<TenantUserQuotaSettings> GetUserQuotaSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1026,10 +1026,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>Get the payment settings</short>
     /// <path>api/2.0/settings/payment</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity", typeof(object))]
+    [SwaggerResponse(200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity", typeof(PaymentSettingsDto))]
     [AllowNotPayment]
     [HttpGet("payment")]
-    public async Task<object> PaymentSettingsAsync()
+    public async Task<PaymentSettingsDto> PaymentSettingsAsync()
     {        
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
@@ -1041,20 +1041,15 @@ public partial class SettingsController(MessageService messageService,
             maxQuotaQuantity = 999;
         }
 
-        return
-            new
-            {
-                settings.SalesEmail,
-                settings.FeedbackAndSupportUrl,
-                settings.BuyUrl,
-                coreBaseSettings.Standalone,
-                currentLicense = new
-                {
-                    currentQuota.Trial,
-                    currentTariff.DueDate.Date
-                },
-                max = maxQuotaQuantity
-            };
+        return new PaymentSettingsDto
+        {
+            SalesEmail = settings.SalesEmail,
+            FeedbackAndSupportUrl = settings.FeedbackAndSupportUrl,
+            BuyUrl = settings.BuyUrl,
+            Standalone = coreBaseSettings.Standalone,
+            CurrentLicense = new CurrentLicenseInfo { Trial = currentQuota.Trial, DueDate = currentTariff.DueDate.Date },
+            Max = maxQuotaQuantity
+        };
     }
 
     /// <summary>
