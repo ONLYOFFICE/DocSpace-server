@@ -419,6 +419,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         var currentDocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl();
         var currentDocServiceSecretValue = filesLinkUtility.GetDocServiceSignatureSecret();
         var currentDocServiceSecretHeader = filesLinkUtility.GetDocServiceSignatureHeader();
+        var currentDocServiceSslVerification = filesLinkUtility.GetDocServiceSslVerification();
 
         if (!ValidateUrl(inDto.DocServiceUrl) ||
             !ValidateUrl(inDto.DocServiceUrlInternal) ||
@@ -438,6 +439,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         await filesLinkUtility.SetDocServicePortalUrlAsync(inDto.DocServiceUrlPortal);
         await filesLinkUtility.SetDocServiceSignatureSecretAsync(inDto.DocServiceSignatureSecret);
         await filesLinkUtility.SetDocServiceSignatureHeaderAsync(inDto.DocServiceSignatureHeader);
+        await filesLinkUtility.SetDocServiceSslVerificationAsync(inDto.DocServiceSslVerification.HasValue ? inDto.DocServiceSslVerification.Value : true);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
@@ -463,6 +465,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             await filesLinkUtility.SetDocServicePortalUrlAsync(currentDocServicePortalUrl);
             await filesLinkUtility.SetDocServiceSignatureSecretAsync(currentDocServiceSecretValue);
             await filesLinkUtility.SetDocServiceSignatureHeaderAsync(currentDocServiceSecretHeader);
+            await filesLinkUtility.SetDocServiceSslVerificationAsync(currentDocServiceSslVerification);
 
             throw new Exception("Unable to establish a connection with the Document Server.");
         }
@@ -518,6 +521,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
             DocServiceSignatureHeader = filesLinkUtility.GetDocServiceSignatureHeader(),
             DocServiceSignatureSecret = "",
+            DocServiceSslVerification = filesLinkUtility.GetDocServiceSslVerification(),
             IsDefault = filesLinkUtility.IsDefault
         };
     }

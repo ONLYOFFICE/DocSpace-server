@@ -272,6 +272,14 @@ public class FilesLinkUtility
         }
     }
 
+    public bool DocServiceSslVerification
+    {
+        get
+        {
+            return GetSslVerificationSetting( out _);
+        }
+    }
+
     private const string PortalUrlKey = "portal";
 
     public string GetDocServicePortalUrl()
@@ -318,6 +326,18 @@ public class FilesLinkUtility
         await SetSignatureSettingAsync(SignatureHeaderKey, value);
     }
 
+    private const string SslVerificationKey = "sslverification";
+
+    public bool GetDocServiceSslVerification()
+    {
+        return GetSslVerificationSetting(out _);
+    }
+
+    public async Task SetDocServiceSslVerificationAsync(bool value)
+    {
+        await SetSslVerificationSettingAsync(value);
+    }
+
     public bool IsDefault
     {
         get
@@ -347,6 +367,12 @@ public class FilesLinkUtility
             }
 
             GetSignatureSetting(SignatureHeaderKey, out isDefault);
+            if (!isDefault)
+            {
+                return false;
+            }
+
+            GetSslVerificationSetting(out isDefault);
             if (!isDefault)
             {
                 return false;
@@ -581,6 +607,43 @@ public class FilesLinkUtility
         {
             await _coreSettings.SaveSettingAsync(GetSettingsKey(key), value);
         }
+    }
+
+    private bool GetSslVerificationSetting(out bool isDefault)
+    {
+        isDefault = false;
+
+        if (_coreBaseSettings.Standalone)
+        {
+            var value = _coreSettings.GetSetting(GetSettingsKey(SslVerificationKey));
+
+            if (bool.TryParse(value, out var result))
+            {
+                return result;
+            }
+        }
+
+        isDefault = true;
+        return GetDefaultSslVerificationSetting();
+    }
+
+    private bool GetDefaultSslVerificationSetting()
+    {
+        var value = _configuration[$"files:docservice:{SslVerificationKey}"];
+
+        return bool.TryParse(value, out var result) ? result : true;
+    }
+
+    private async Task SetSslVerificationSettingAsync(bool value)
+    {
+        if (!_coreBaseSettings.Standalone)
+        {
+            throw new NotSupportedException("Method for server edition only.");
+        }
+
+        var def = GetDefaultSslVerificationSetting();
+
+        await _coreSettings.SaveSettingAsync(GetSettingsKey(SslVerificationKey), def == value ? null : value.ToString());
     }
 
     private string GetSettingsKey(string key)

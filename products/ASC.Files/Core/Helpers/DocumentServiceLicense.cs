@@ -30,7 +30,6 @@ namespace ASC.Files.Core.Helpers;
 public class DocumentServiceLicense(ICache cache,
     CoreBaseSettings coreBaseSettings,
     FilesLinkUtility filesLinkUtility,
-    FileUtility fileUtility,
     IHttpClientFactory clientFactory)
 {
     private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(15);
@@ -53,7 +52,6 @@ public class DocumentServiceLicense(ICache cache,
         if (commandResponse == null)
         {
             commandResponse = await CommandRequestAsync(
-                   fileUtility,
                    filesLinkUtility.DocServiceCommandUrl,
                    CommandMethod.License,
                    null,
@@ -62,6 +60,7 @@ public class DocumentServiceLicense(ICache cache,
                    null,
                    filesLinkUtility.DocServiceSignatureSecret,
                    filesLinkUtility.DocServiceSignatureHeader,
+                   filesLinkUtility.DocServiceSslVerification,
                    clientFactory
                    );
 

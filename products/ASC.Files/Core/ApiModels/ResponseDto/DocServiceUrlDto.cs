@@ -64,6 +64,11 @@ public class DocServiceUrlDto
     public string DocServiceSignatureHeader { get; set; }
 
     /// <summary>
+    /// Enable SSL verification
+    /// </summary>
+    public bool DocServiceSslVerification { get; set; }
+
+    /// <summary>
     /// Is default
     /// </summary>
     public required bool IsDefault { get; set; }
