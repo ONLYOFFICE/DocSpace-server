@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -64,11 +64,11 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/people/self/delete</path>
     [Tags("People / User data")]
-    [OpenApiResponse(typeof(object), 200, "Information message")]
+    [OpenApiResponse(typeof(string), 200, "Information message")]
     [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpPut("self/delete")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<object> SendInstructionsToDeleteAsync()
+    public async Task<string> SendInstructionsToDeleteAsync()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var tenant = tenantManager.GetCurrentTenant();

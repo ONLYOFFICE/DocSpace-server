@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -56,10 +56,10 @@ public class OwnerController(
     [Tags("Settings / Owner")]
     [EndpointSummary("Send the owner change instructions")]
     [EndpointDescription("Sends the instructions to change the DocSpace owner.")]
-    [OpenApiResponse(typeof(object), 200, "Message about changing the portal owner")]
+    [OpenApiResponse(typeof(OwnerChangeInstructionsDto), 200, "Message about changing the portal owner")]
     [OpenApiResponse(403, "Collaborator can not be an owner")]
     [HttpPost("")]
-    public async Task<object> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
+    public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -76,7 +76,7 @@ public class OwnerController(
             Guid.Empty.Equals(newOwner.Id) || 
             newOwner.Status != EmployeeStatus.Active)
         {
-            return new { Status = 0, Message = Resource.ErrorAccessDenied };
+            return new OwnerChangeInstructionsDto { Status = 0, Message = Resource.ErrorAccessDenied };
         }
 
         var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
@@ -85,7 +85,7 @@ public class OwnerController(
         messageService.Send(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
 
         var emailLink = $"<a href=\"mailto:{owner.Email}\">{owner.Email}</a>";
-        return new { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
+        return new OwnerChangeInstructionsDto { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -152,9 +152,9 @@ public class ConnectionsController(
     [Tags("Security / Active connections")]
     [EndpointSummary("Log out and change password")]
     [EndpointDescription("Logs out from all the active connections of the current user and changes their password.")]
-    [OpenApiResponse(typeof(object), 200, "URL to the confirmation message for changing a password")]
+    [OpenApiResponse(typeof(string), 200, "URL to the confirmation message for changing a password")]
     [HttpPut("logoutallchangepassword")]
-    public async Task<object> LogOutAllActiveConnectionsChangePassword()
+    public async Task<string> LogOutAllActiveConnectionsChangePassword()
     {
         try
         {
@@ -218,9 +218,9 @@ public class ConnectionsController(
     [Tags("Security / Active connections")]
     [EndpointSummary("Log out from all connections")]
     [EndpointDescription("Logs out from all the active connections except the current connection.")]
-    [OpenApiResponse(typeof(object), 200, "Current user name")]
+    [OpenApiResponse(typeof(string), 200, "Current user name")]
     [HttpPut("logoutallexceptthis")]
-    public async Task<object> LogOutAllExceptThisConnection()
+    public async Task<string> LogOutAllExceptThisConnection()
     {
         try
         {

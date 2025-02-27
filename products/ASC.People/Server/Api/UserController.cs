@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -907,7 +907,7 @@ public class UserController(
     [EndpointDescription("Returns the information about the People module.")]
     [OpenApiResponse(typeof(Module), 200, "Module information")]
     [HttpGet("info")]
-    public Module GetModule()
+    public Module GetPeopleModule()
     {
         var product = new PeopleProduct();
         product.Init();
@@ -1278,14 +1278,14 @@ public class UserController(
     [Tags("People / Profiles")]
     [EndpointSummary("Send instructions to change email")]
     [EndpointDescription("Sends a message to the user email with the instructions to change the email address connected to the portal.")]
-    [OpenApiResponse(typeof(object), 200, "Message text")]
+    [OpenApiResponse(typeof(string), 200, "Message text")]
     [OpenApiResponse(400, "Incorrect userId or email")]
     [OpenApiResponse(403, "No permissions to perform this action")]
     [OpenApiResponse(404, "User not found")]
     [AllowNotPayment]
     [HttpPost("email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<object> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
+    public async Task<string> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
     {
         Guid.TryParse(inDto.UserId, out var userid);
 
@@ -1365,6 +1365,7 @@ public class UserController(
         {
             await socketManager.UpdateUserAsync(user);
         }
+        
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
 
@@ -1379,13 +1380,13 @@ public class UserController(
     [Tags("People / Password")]
     [EndpointSummary("Remind a user password")]
     [EndpointDescription("Reminds a password to the user using the email address specified in the request.")]
-    [OpenApiResponse(typeof(object), 200, "Email with the password")]
+    [OpenApiResponse(typeof(string), 200, "Email with the password")]
     [OpenApiResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<object> SendUserPasswordAsync(EmailMemberRequestDto inDto)
+    public async Task<string> SendUserPasswordAsync(EmailMemberRequestDto inDto)
     {
         if (authContext.IsAuthenticated)
         {

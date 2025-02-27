@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,9 +54,9 @@ public class MessageSettingsController(MessageService messageService,
     [Tags("Settings / Messages")]
     [EndpointSummary("Enable the administrator message settings")]
     [EndpointDescription("Displays the contact form on the \"Sign In\" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.")]
-    [OpenApiResponse(typeof(object), 200, "Message about the result of saving new settings")]
+    [OpenApiResponse(typeof(string), 200, "Message about the result of saving new settings")]
     [HttpPost("messagesettings")]
-    public async Task<object> EnableAdminMessageSettingsAsync(TurnOnAdminMessageSettingsRequestDto inDto)
+    public async Task<string> EnableAdminMessageSettingsAsync(TurnOnAdminMessageSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -100,10 +100,10 @@ public class MessageSettingsController(MessageService messageService,
     [Tags("Settings / Cookies")]
     [EndpointSummary("Update cookies lifetime")]
     [EndpointDescription("Updates the cookies lifetime value in minutes.")]
-    [OpenApiResponse(typeof(object), 200, "Message about the result of saving new settings")]
+    [OpenApiResponse(typeof(string), 200, "Message about the result of saving new settings")]
     [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("cookiesettings")]
-    public async Task<object> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
+    public async Task<string> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -130,12 +130,12 @@ public class MessageSettingsController(MessageService messageService,
     [Tags("Settings / Messages")]
     [EndpointSummary("Send a message to the administrator")]
     [EndpointDescription("Sends a message to the administrator email when unauthorized users encounter issues accessing DocSpace.")]
-    [OpenApiResponse(typeof(object), 200, "Message about the result of sending a message")]
+    [OpenApiResponse(typeof(string), 200, "Message about the result of sending a message")]
     [OpenApiResponse(400, "Incorrect email or message text is empty")]
     [OpenApiResponse(429, "Request limit is exceeded")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
-    public async Task<object> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
+    public async Task<string> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var enableAdmMess = studioAdminMessageSettings.Enable || (await tenantExtra.IsNotPaidAsync());
@@ -176,13 +176,13 @@ public class MessageSettingsController(MessageService messageService,
     [Tags("Settings / Messages")]
     [EndpointSummary("Sends an invitation email")]
     [EndpointDescription("Sends an invitation email with a link to the DocSpace.")]
-    [OpenApiResponse(typeof(object), 200, "Message about sending a link to confirm joining the DocSpace")]
+    [OpenApiResponse(typeof(string), 200, "Message about sending a link to confirm joining the DocSpace")]
     [OpenApiResponse(400, "Incorrect email or email already exists")]
     [OpenApiResponse(403, "No permissions to perform this action")]
     [OpenApiResponse(429, "Request limit is exceeded")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
-    public async Task<object> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)
+    public async Task<string> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)
     {
         try
         {

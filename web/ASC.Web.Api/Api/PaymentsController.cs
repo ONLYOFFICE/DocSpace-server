@@ -143,9 +143,9 @@ public class PaymentController(UserManager userManager,
     [Tags("Portal / Payment")]
     [EndpointSummary("Get the payment account")]
     [EndpointDescription("Returns the URL to the payment account.")]
-    [OpenApiResponse(typeof(object), 200, "The URL to the payment account")]
+    [OpenApiResponse(typeof(string), 200, "The URL to the payment account")]
     [HttpGet("account")]
-    public async Task<object> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
+    public async Task<string> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {

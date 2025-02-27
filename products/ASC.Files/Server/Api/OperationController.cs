@@ -114,7 +114,7 @@ public class OperationController(
     [OpenApiResponse(403, "You don't have enough permission to delete")]
     [HttpPut("delete")]
     [HttpPut("deleteversion")]
-    public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteVersionBatchRequestDto inDto)
+    public async IAsyncEnumerable<FileOperationDto> DeleteFileVersions(DeleteVersionBatchRequestDto inDto)
     {
         await fileOperationsManager.PublishDelete([], [inDto.FileId], false, !inDto.DeleteAfter, true, versions: inDto.Versions);
         
@@ -180,7 +180,7 @@ public class OperationController(
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations statuses")]
     [AllowAnonymous]
     [HttpGet("{operationType}")]
-    public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses(FileOperationResultRequestDto inDto)
+    public async IAsyncEnumerable<FileOperationDto> GetOperationStatusesByType(FileOperationResultRequestDto inDto)
     {
         foreach (var e in (await fileOperationsManager.GetOperationResults()).Where(r => r.OperationType == inDto.OperationType))
         {

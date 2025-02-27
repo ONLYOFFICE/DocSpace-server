@@ -65,7 +65,7 @@ public class FoldersControllerInternal(
     [OpenApiResponse(403, "You don't have enough permission to perform the operation")]
     [OpenApiResponse(404, "The required folder was not found")]
     [HttpGet("folder/{folderId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetActivityHistoryAsync(HistoryFolderRequestDto inDto)
+    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(HistoryFolderRequestDto inDto)
     {
         return historyApiHelper.GetFolderHistoryAsync(inDto.FolderId, inDto.FromDate, inDto.ToDate);
     }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -140,9 +140,9 @@ public class TfaappController(
     [Tags("Settings / TFA settings")]
     [EndpointSummary("Get confirmation email")]
     [EndpointDescription("Returns the confirmation email URL for authorization via SMS or TFA application.")]
-    [OpenApiResponse(typeof(object), 200, "Confirmation email URL")]
+    [OpenApiResponse(typeof(string), 200, "Confirmation email URL")]
     [HttpGet("tfaapp/confirm")]
-    public async Task<object> TfaConfirmUrlAsync()
+    public async Task<string> TfaConfirmUrlAsync()
     {
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
@@ -280,9 +280,9 @@ public class TfaappController(
     [Tags("Settings / TFA settings")]
     [EndpointSummary("Get confirmation email for updating TFA settings")]
     [EndpointDescription("Returns the confirmation email URL for updating TFA settings.")]
-    [OpenApiResponse(typeof(object), 200, "Confirmation email URL")]
+    [OpenApiResponse(typeof(str), 200, "Confirmation email URL")]
     [HttpPut("tfaappwithlink")]
-    public async Task<object> TfaSettingsLink(TfaRequestsDto inDto)
+    public async Task<string> TfaSettingsLink(TfaRequestsDto inDto)
     {
         if (await TfaSettingsAsync(inDto))
         {
@@ -394,11 +394,11 @@ public class TfaappController(
     [Tags("Settings / TFA settings")]
     [EndpointSummary("Unlink the TFA application")]
     [EndpointDescription("Unlinks the current two-factor authentication application from the user account specified in the request.")]
-    [OpenApiResponse(typeof(object), 200, "Login URL")]
+    [OpenApiResponse(typeof(string), 200, "Login URL")]
     [OpenApiResponse(403, "No permissions to perform this action")]
     [OpenApiResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewapp")]
-    public async Task<object> TfaAppNewAppAsync(TfaRequestsDto inDto)
+    public async Task<string> TfaAppNewAppAsync(TfaRequestsDto inDto)
     {
         var id = inDto?.Id ?? Guid.Empty;
         var isMe = id.Equals(Guid.Empty) || id.Equals(authContext.CurrentAccount.ID);

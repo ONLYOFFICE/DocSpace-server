@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -340,12 +340,12 @@ public class SecurityController(
     [Tags("Settings / Security")]
     [EndpointSummary("Check a product administrator")]
     [EndpointDescription("Checks if the selected user is a product administrator with the ID specified in the request.")]
-    [OpenApiResponse(typeof(object), 200, "Object with the user security information: product ID, user ID, administrator or not")]
+    [OpenApiResponse(typeof(ProductAdministratorDto), 200, "Object with the user security information: product ID, user ID, administrator or not")]
     [HttpGet("administrator")]
-    public async Task<object> IsProductAdministratorAsync(UserProductIdsRequestDto inDto)
+    public async Task<ProductAdministratorDto> IsProductAdministratorAsync(UserProductIdsRequestDto inDto)
     {
         var result = await webItemSecurity.IsProductAdministratorAsync(inDto.ProductId, inDto.UserId);
-        return new { inDto.ProductId, inDto.UserId, Administrator = result };
+        return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = result };
     }
 
     /// <summary>
@@ -358,10 +358,10 @@ public class SecurityController(
     [Tags("Settings / Security")]
     [EndpointSummary("Set a product administrator")]
     [EndpointDescription("Sets the selected user as a product administrator with the ID specified in the request.")]
-    [OpenApiResponse(typeof(object), 200, "Object with the user security information: product ID, user ID, administrator or not")]
+    [OpenApiResponse(typeof(ProductAdministratorDto), 200, "Object with the user security information: product ID, user ID, administrator or not")]
     [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("administrator")]
-    public async Task<object> SetProductAdministrator(SecurityRequestsDto inDto)
+    public async Task<ProductAdministratorDto> SetProductAdministrator(SecurityRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -393,7 +393,7 @@ public class SecurityController(
                 GetProductName(inDto.ProductId), admin.DisplayUserName(false, displayUserSettingsHelper));
         }
 
-        return new { inDto.ProductId, inDto.UserId, inDto.Administrator };
+        return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = inDto.Administrator };
     }
 
     /// <summary>

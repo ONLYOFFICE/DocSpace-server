@@ -428,10 +428,10 @@ public class WhitelabelController(ApiContext apiContext,
     [Tags("Settings / Rebranding")]
     [EndpointSummary("Get the white label logo text")]
     [EndpointDescription("Returns the white label logo text.")]
-    [OpenApiResponse(typeof(object), 200, "Logo text")]
+    [OpenApiResponse(typeof(string), 200, "Logo text")]
     [AllowNotPayment]
     [HttpGet("whitelabel/logotext")]
-    public async Task<object> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    public async Task<string> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

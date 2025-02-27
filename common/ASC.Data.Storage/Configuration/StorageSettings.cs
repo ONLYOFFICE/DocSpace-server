@@ -88,13 +88,11 @@ public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>>
     /// </summary>
     [OpenApiDescription("Storage properties")]
     public Dictionary<string, string> Props { get; set; }
-
-    /// <summary>
-    /// Switch
-    /// </summary>
-    [OpenApiDescription("Switch")]
+    
+    [JsonIgnore]
     public virtual Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d;
     public abstract Guid ID { get; }
+    
     internal ICacheNotify<DataStoreCacheItem> Cache { get; set; }
 
     public BaseStorageSettings<T> GetDefault()

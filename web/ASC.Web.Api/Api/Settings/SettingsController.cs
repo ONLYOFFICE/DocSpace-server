@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -229,9 +229,9 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Save the mail domain settings")]
     [EndpointDescription("Saves the mail domain settings specified in the request to the portal.")]
-    [OpenApiResponse(typeof(object), 200, "Message about the result of saving the mail domain settings")]
+    [OpenApiResponse(typeof(string), 200, "Message about the result of saving the mail domain settings")]
     [HttpPost("maildomainsettings")]
-    public async Task<object> SaveMailDomainSettingsAsync(MailDomainSettingsRequestsDto inDto)
+    public async Task<string> SaveMailDomainSettingsAsync(MailDomainSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -354,9 +354,9 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Quota")]
     [EndpointSummary("Get user quota")]
     [EndpointDescription("Gets user quota settings for the current portal.")]
-    [OpenApiResponse(typeof(object), 200, "Ok")]
+    [OpenApiResponse(typeof(TenantUserQuotaSettings), 200, "Ok")]
     [HttpGet("userquotasettings")]
-    public async Task<object> GetUserQuotaSettings()
+    public async Task<TenantUserQuotaSettings> GetUserQuotaSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -542,7 +542,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Get hostname")]
     [EndpointDescription("Returns the portal hostname.")]
-    [OpenApiResponse(typeof(string), 200, "Portal hostname")]
+    [OpenApiResponse(typeof(object), 200, "Portal hostname")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     [HttpGet("machine")]
     [AllowNotPayment]
@@ -559,12 +559,12 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Save the DNS settings")]
     [EndpointDescription("Saves the DNS settings specified in the request to the current portal.")]
-    [OpenApiResponse(typeof(object), 200, "Message about changing DNS")]
+    [OpenApiResponse(typeof(string), 200, "Message about changing DNS")]
     [OpenApiResponse(400, "Invalid domain name/incorrect length of doman name")]
     [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [OpenApiResponse(405, "Method not allowed")]
     [HttpPut("dns")]
-    public async Task<object> SaveDnsSettingsAsync(DnsSettingsRequestsDto inDto)
+    public async Task<string> SaveDnsSettingsAsync(DnsSettingsRequestsDto inDto)
     {
         return await dnsSettings.SaveDnsSettingsAsync(inDto.DnsName, inDto.Enable);
     }
@@ -580,7 +580,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Quota")]
     [EndpointSummary("Recalculate quota")]
     [EndpointDescription("Starts the process of quota recalculation.")]
-    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(200, "Ok")]
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -600,7 +600,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Quota")]
     [EndpointSummary("Check quota recalculation")]
     [EndpointDescription("Checks the process of quota recalculation.")]
-    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true - quota recalculation process is enabled, false - quota recalculation process is disabled")]
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
@@ -620,9 +620,9 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Get a portal logo")]
     [EndpointDescription("Returns the portal logo image URL.")]
-    [OpenApiResponse(typeof(string), 200, "Portal logo URL")]
+    [OpenApiResponse(typeof(string), 200, "Portal logo image URL")]
     [HttpGet("logo")]
-    public async Task<object> GetLogoAsync()
+    public async Task<string> GetLogoAsync()
     {
         return await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(await settingsManager.LoadAsync<TenantInfoSettings>());
     }
@@ -635,7 +635,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Complete the Wizard settings")]
     [EndpointDescription("Completes the Wizard settings.")]
-    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(typeof(WizardSettings), 200, "Wizard settings")]
     [OpenApiResponse(400, "Incorrect email address/The password is empty")]
     [OpenApiResponse(402, "You must enter a license key or license key is not correct or license expired or user quota does not match the license")]
     [AllowNotPayment]
@@ -659,7 +659,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Close the welcome pop-up notification")]
     [EndpointDescription("Closes the welcome pop-up notification.")]
-    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(200, "Ok")]
     [OpenApiResponse(405, "Not available")]
     [HttpPut("welcome/close")]
     public async Task CloseWelcomePopupAsync()
@@ -686,7 +686,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Get a color theme")]
     [EndpointDescription("Returns the portal color theme.")]
-    [OpenApiResponse(typeof(CustomColorThemesSettingsDto), 200, "Portal color theme")]
+    [OpenApiResponse(typeof(CustomColorThemesSettingsDto), 200, "Settings of the portal themes")]
     [AllowAnonymous, AllowNotPayment, AllowSuspended]
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
@@ -702,7 +702,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Save a color theme")]
     [EndpointDescription("Saves the portal color theme specified in the request.")]
-    [OpenApiResponse(typeof(CustomColorThemesSettingsDto), 200, "Saved color theme")]
+    [OpenApiResponse(typeof(CustomColorThemesSettingsDto), 200, "Portal theme settings")]
     [HttpPut("colortheme")]
     public async Task<CustomColorThemesSettingsDto> SaveColorThemeAsync(CustomColorThemesSettingsRequestsDto inDto)
     {
@@ -776,7 +776,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Delete a color theme")]
     [EndpointDescription("Deletes the portal color theme with the ID specified in the request.")]
-    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(typeof(CustomColorThemesSettingsDto), 200, "Portal theme settings: custom color theme settings, selected or not, limit")]
     [HttpDelete("colortheme")]
     public async Task<CustomColorThemesSettingsDto> DeleteColorThemeAsync(DeleteColorThemeRequestDto inDto)
     {
@@ -810,7 +810,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Close the admin helper notification")]
     [EndpointDescription("Closes the admin helper notification.")]
-    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(200, "Ok")]
     [OpenApiResponse(405, "Not available")]
     [HttpPut("closeadminhelper")]
     public async Task CloseAdminHelperAsync()
@@ -834,9 +834,9 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Set time zone and language")]
     [EndpointDescription("Sets the portal time zone and language specified in the request.")]
-    [OpenApiResponse(typeof(object), 200, "Message about saving settings successfully")]
+    [OpenApiResponse(typeof(string), 200, "Message about saving settings successfully")]
     [HttpPut("timeandlanguage")]
-    public async Task<object> TimaAndLanguageAsync(TimeZoneRequestDto inDto)
+    public async Task<string> TimaAndLanguageAsync(TimeZoneRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -884,9 +884,9 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Set the default product page")]
     [EndpointDescription("Sets the default product page.")]
-    [OpenApiResponse(typeof(object), 200, "Message about saving settings successfully")]
+    [OpenApiResponse(typeof(string), 200, "Message about saving settings successfully")]
     [HttpPut("defaultpage")]
-    public async Task<object> SaveDefaultPageSettingAsync(DefaultProductRequestDto inDto)
+    public async Task<string> SaveDefaultPageSettingAsync(DefaultProductRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -959,7 +959,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Get the socket settings")]
     [EndpointDescription("Returns the socket settings.")]
-    [OpenApiResponse(typeof(object), 200, "Socket settings")]
+    [OpenApiResponse(typeof(object), 200, "Socket settings: hub URL")]
     [HttpGet("socket")]
     public object GetSocketSettings()
     {
@@ -1020,7 +1020,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Authorization")]
     [EndpointSummary("Save the authorization keys")]
     [EndpointDescription("Saves the authorization keys.")]
-    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the authorization keys are changed")]
     [OpenApiResponse(400, "Bad keys")]
     [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("authservice")]
@@ -1084,10 +1084,10 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [EndpointSummary("Get the payment settings")]
     [EndpointDescription("Returns the portal payment settings.")]
-    [OpenApiResponse(typeof(object), 200, "Payment settings")]
+    [OpenApiResponse(typeof(PaymentSettingsDto), 200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity")]
     [AllowNotPayment]
     [HttpGet("payment")]
-    public async Task<object> PaymentSettingsAsync()
+    public async Task<PaymentSettingsDto> PaymentSettingsAsync()
     {        
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
@@ -1099,20 +1099,15 @@ public partial class SettingsController(MessageService messageService,
             maxQuotaQuantity = 999;
         }
 
-        return
-            new
-            {
-                settings.SalesEmail,
-                settings.FeedbackAndSupportUrl,
-                settings.BuyUrl,
-                coreBaseSettings.Standalone,
-                currentLicense = new
-                {
-                    currentQuota.Trial,
-                    currentTariff.DueDate.Date
-                },
-                max = maxQuotaQuantity
-            };
+        return new PaymentSettingsDto
+        {
+            SalesEmail = settings.SalesEmail,
+            FeedbackAndSupportUrl = settings.FeedbackAndSupportUrl,
+            BuyUrl = settings.BuyUrl,
+            Standalone = coreBaseSettings.Standalone,
+            CurrentLicense = new CurrentLicenseInfo { Trial = currentQuota.Trial, DueDate = currentTariff.DueDate.Date },
+            Max = maxQuotaQuantity
+        };
     }
 
     /// <summary>
@@ -1126,7 +1121,7 @@ public partial class SettingsController(MessageService messageService,
     [EndpointDescription("Returns a link that will connect TelegramBot to your account.")]
     [OpenApiResponse(typeof(string), 200, "Telegram link")]
     [HttpGet("telegramlink")]
-    public async Task<object> TelegramLink()
+    public async Task<string> TelegramLink()
     {
         var tenant = tenantManager.GetCurrentTenant();
         var currentLink = telegramHelper.CurrentRegistrationLink(authContext.CurrentAccount.ID, tenant.Id);
@@ -1149,12 +1144,12 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Telegram")]
     [EndpointSummary("Check the Telegram connection")]
     [EndpointDescription("Checks if the user has connected to TelegramBot.")]
-    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the user is connected to TelegramBot")]
+    [OpenApiResponse(typeof(TelegramHelper.RegStatus), 200, "Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation")]
     [HttpGet("telegramisconnected")]
-    public async Task<object> TelegramIsConnectedAsync()
+    public async Task<TelegramHelper.RegStatus> TelegramIsConnectedAsync()
     {
         var tenant = tenantManager.GetCurrentTenant();
-        return (int)await telegramHelper.UserIsConnectedAsync(authContext.CurrentAccount.ID, tenant.Id);
+        return await telegramHelper.UserIsConnectedAsync(authContext.CurrentAccount.ID, tenant.Id);
     }
 
     /// <summary>
@@ -1166,7 +1161,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Telegram")]
     [EndpointSummary("Unlink Telegram")]
     [EndpointDescription("Unlinks TelegramBot from your account.")]
-    [OpenApiResponse(typeof(bool), 200, "Boolean value: true if the operation is successful")]
+    [OpenApiResponse(200, "Ok")]
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()
     {

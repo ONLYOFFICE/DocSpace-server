@@ -125,9 +125,9 @@ public class PortalController(
     [Tags("Portal / Users")]
     [EndpointSummary("Get an invitation link")]
     [EndpointDescription("Returns an invitation link for joining the portal.")]
-    [OpenApiResponse(typeof(object), 200, "Invitation link")]
+    [OpenApiResponse(typeof(string), 200, "Invitation link")]
     [HttpGet("users/invite/{employeeType}")]
-    public async Task<object> GeInviteLinkAsync(InvitationLinkRequestDto inDto)
+    public async Task<string> GeInviteLinkAsync(InvitationLinkRequestDto inDto)
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
@@ -457,11 +457,11 @@ public class PortalController(
     [Tags("Portal / Settings")]
     [EndpointSummary("Update a portal name")]
     [EndpointDescription("Updates a portal name with a new one specified in the request.")]
-    [OpenApiResponse(typeof(object), 200, "Confirmation email about authentication to the portal with a new name")]
+    [OpenApiResponse(typeof(string), 200, "Confirmation email about authentication to the portal with a new name")]
     [OpenApiResponse(400, "Alias is empty")]
     [OpenApiResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("portalrename")]
-    public async Task<object> UpdatePortalName(PortalRenameRequestsDto inDto)
+    public async Task<string> UpdatePortalName(PortalRenameRequestsDto inDto)
     {
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.PortalSecurity)))
         {
@@ -695,11 +695,11 @@ public class PortalController(
     [Tags("Portal / Settings")]
     [EndpointSummary("Delete a portal")]
     [EndpointDescription("Deletes the current portal.")]
-    [OpenApiResponse(typeof(object), 200, "URL to the feedback form about removing a portal")]
+    [OpenApiResponse(typeof(string), 200, "URL to the feedback form about removing a portal")]
     [AllowNotPayment]
     [HttpDelete("delete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]
-    public async Task<object> DeletePortalAsync()
+    public async Task<string> DeletePortalAsync()
     {
         var tenant = tenantManager.GetCurrentTenant();
 

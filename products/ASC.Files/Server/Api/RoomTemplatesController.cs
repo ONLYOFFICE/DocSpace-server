@@ -91,7 +91,7 @@ public class RoomTemplatesController(IEventBus eventBus,
             Cover = dto.Cover,
             Color = dto.Color
         });
-        return await Status();
+        return await GetTemplateCreatingStatus();
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     [EndpointDescription("Get progress creating room template.")]
     [OpenApiResponse(typeof(IEnumerable<RoomTemplateStatusDto>), 200, "Room template status")]
     [HttpGet("status")]
-    public async Task<RoomTemplateStatusDto> Status()
+    public async Task<RoomTemplateStatusDto> GetTemplateCreatingStatus()
     {
         try
         {

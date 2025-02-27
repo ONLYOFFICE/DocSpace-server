@@ -96,7 +96,7 @@ public class VirtualRoomsInternalController(
     [EndpointDescription("Start create a room in the \"Rooms\" section based on a template.")]
     [OpenApiResponse(typeof(RoomFromTemplateStatusDto), 200, "Room based on template")]
     [HttpPost("fromTemplate")]
-    public async Task<RoomFromTemplateStatusDto> CreateRoomAsync(CreateRoomFromTempateDto dto)
+    public async Task<RoomFromTemplateStatusDto> CreateRoomFromTemplateAsync(CreateRoomFromTemplateDto dto)
     {
         LogoSettings logo = null;
         if (dto.Logo != null)
@@ -132,7 +132,7 @@ public class VirtualRoomsInternalController(
             Color = dto.Color,
             TaskId = taskId
         });
-        return await Status();
+        return await GetRoomCreatingStatus();
     }
 
     /// <summary>
@@ -145,7 +145,7 @@ public class VirtualRoomsInternalController(
     [EndpointDescription("Get progress creating room based a template.")]
     [OpenApiResponse(typeof(RoomFromTemplateStatusDto), 200, "Ok")]
     [HttpGet("fromTemplate/status")]
-    public async Task<RoomFromTemplateStatusDto> Status()
+    public async Task<RoomFromTemplateStatusDto> GetRoomCreatingStatus()
     {
         try
         {
@@ -753,7 +753,7 @@ public abstract class VirtualRoomsController<T>(
     [EndpointDescription("Returns a list of all the new items from a room with the ID specified in the request.")]
     [OpenApiResponse(typeof(List<NewItemsDto<FileEntryDto>>), 200, "List of file entry information")]
     [HttpGet("{id}/news")]
-    public async Task<List<NewItemsDto<FileEntryDto>>> GetNewItemsFromRoomAsync(RoomIdRequestDto<T> inDto)
+    public async Task<List<NewItemsDto<FileEntryDto>>> GetNewRoomItemsAsync(RoomIdRequestDto<T> inDto)
     {
         var newItems = await _fileStorageService.GetNewRoomFilesAsync(inDto.Id);
         var result = new List<NewItemsDto<FileEntryDto>>();

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -79,10 +79,10 @@ public class LicenseController(ILoggerProvider option,
     [Tags("Settings / License")]
     [EndpointSummary("Activate a license")]
     [EndpointDescription("Activates a license for the portal.")]
-    [OpenApiResponse(typeof(object), 200, "Message about the result of activating license")]
+    [OpenApiResponse(typeof(string), 200, "Message about the result of activating license")]
     [AllowNotPayment]
     [HttpPost("accept")]
-    public async Task<object> AcceptLicenseAsync()
+    public async Task<string> AcceptLicenseAsync()
     {
         if (!tenantExtra.Enterprise)
         {
@@ -217,14 +217,14 @@ public class LicenseController(ILoggerProvider option,
     [Tags("Settings / License")]
     [EndpointSummary("Upload a license")]
     [EndpointDescription("Uploads a portal license specified in the request.")]
-    [OpenApiResponse(typeof(object), 200, "License")]
+    [OpenApiResponse(typeof(string), 200, "License")]
     [OpenApiResponse(400, "The uploaded file could not be found")]
     [OpenApiResponse(403, "Portal Access")]
     [OpenApiResponse(405, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]
-    public async Task<object> UploadLicenseAsync([FromForm] UploadLicenseRequestsDto inDto)
+    public async Task<string> UploadLicenseAsync([FromForm] UploadLicenseRequestsDto inDto)
     {
         try
         {

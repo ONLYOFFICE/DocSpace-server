@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -107,11 +107,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [EndpointSummary("Start file editing")]
     [EndpointDescription("Informs about opening a file with the ID specified in the request for editing, locking it from being deleted or moved (this method is called by the mobile editors).")]
-    [OpenApiResponse(typeof(object), 200, "File key for Document Service")]
+    [OpenApiResponse(typeof(string), 200, "File key for Document Service")]
     [OpenApiResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
-    public async Task<object> StartEditAsync(StartEditRequestDto<T> inDto)
+    public async Task<string> StartEditAsync(StartEditRequestDto<T> inDto)
     {
         return await fileStorageService.StartEditAsync(inDto.FileId, inDto.File.EditingAlone);
     }

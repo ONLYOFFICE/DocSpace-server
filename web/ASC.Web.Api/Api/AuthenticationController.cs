@@ -296,10 +296,10 @@ public class AuthenticationController(
     [Tags("Authentication")]
     [EndpointSummary("Log out")]
     [EndpointDescription("Logs out of the current user account.")]
-    [OpenApiResponse(typeof(object), 200, "Ok")]
+    [OpenApiResponse(typeof(string), 200, "Ok")]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("logout")]
-    public async Task<object> LogoutAsync()
+    public async Task<string> LogoutAsync()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);

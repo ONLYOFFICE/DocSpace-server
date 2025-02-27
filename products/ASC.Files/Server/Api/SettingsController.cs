@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -233,7 +233,7 @@ public class SettingsController(
     [EndpointDescription("Returns the information about the Documents module.")]
     [OpenApiResponse(typeof(Module), 200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL")]
     [HttpGet("info")]
-    public Module GetModule()
+    public Module GetFilesModule()
     {
         productEntryPoint.Init();
         return new Module(productEntryPoint);

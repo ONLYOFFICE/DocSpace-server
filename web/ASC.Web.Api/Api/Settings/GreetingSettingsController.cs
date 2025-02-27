@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -78,9 +78,9 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     [Tags("Settings / Greeting settings")]
     [EndpointSummary("Save the greeting settings")]
     [EndpointDescription("Saves the greeting settings specified in the request to the current portal.")]
-    [OpenApiResponse(typeof(object), 200, "Message about saving greeting settings successfully")]
+    [OpenApiResponse(typeof(string), 200, "Message about saving greeting settings successfully")]
     [HttpPost("")]
-    public async Task<object> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
+    public async Task<string> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -111,9 +111,9 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     [Tags("Settings / Greeting settings")]
     [EndpointSummary("Restore the greeting settings")]
     [EndpointDescription("Restores the current portal greeting settings.")]
-    [OpenApiResponse(typeof(object), 200, "Greeting settings: tenant name")]
+    [OpenApiResponse(typeof(string), 200, "Greeting settings: tenant name")]
     [HttpPost("restore")]
-    public async Task<object> RestoreGreetingSettingsAsync()
+    public async Task<string> RestoreGreetingSettingsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
