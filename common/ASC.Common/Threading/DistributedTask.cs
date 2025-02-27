@@ -30,6 +30,8 @@ namespace ASC.Common.Threading;
 /// </summary>
 [ProtoContract(IgnoreUnknownSubTypes = true)]
 [ProtoInclude(100, typeof(DistributedTaskProgress))]
+[JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType)]
+[JsonDerivedType(typeof(DistributedTaskProgress))]
 public class DistributedTask
 {
     [ProtoMember(10)]

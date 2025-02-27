@@ -32,6 +32,7 @@ namespace ASC.Common.Threading;
 public class DistributedTaskProgress : DistributedTask
 {
     [ProtoMember(1)]
+    [JsonInclude]
     private double _percentage;
 
     /// <summary>Progress percentage</summary>
