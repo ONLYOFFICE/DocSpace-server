@@ -48,7 +48,7 @@ public class OpenApiCustomOperationTransformer : IOpenApiOperationTransformer
     }
 }
 
-public class OapenApiTagOpeartionTrnsformer : IOpenApiOperationTransformer
+public class OpenApiOperationIdTransformer : IOpenApiOperationTransformer
 {
     public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
     {
@@ -57,6 +57,30 @@ public class OapenApiTagOpeartionTrnsformer : IOpenApiOperationTransformer
         var actionName = routeValues.ContainsKey("action") ? routeValues["action"] : "UnknownAction";
         var operationId = $"{controllerName.ToLower()}{actionName}";
         operation.OperationId = operationId;
+        return Task.CompletedTask;
+    }
+}
+public class OpenApiContentTypesTransformer : IOpenApiOperationTransformer
+{
+    public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
+    {
+        if (operation.RequestBody != null)
+        {
+            operation.RequestBody.Content = operation.RequestBody.Content
+                .Where(c => c.Key != "text/json" && !c.Key.EndsWith("+json"))
+                .ToDictionary(c => c.Key, c => c.Value);
+        }
+        if (operation.Responses != null)
+        {
+            foreach (var response in operation.Responses)
+            {
+                var content = response.Value.Content
+                    .Where(c => c.Key != "text/json" && !c.Key.EndsWith("plain"))
+                    .ToDictionary(c => c.Key, c => c.Value);
+
+                response.Value.Content = content;
+            }
+        }
         return Task.CompletedTask;
     }
 }

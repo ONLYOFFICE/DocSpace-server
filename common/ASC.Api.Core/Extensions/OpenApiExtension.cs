@@ -50,7 +50,9 @@ public static class OpenApiExtension
 
             c.CreateSchemaReferenceId = NestedSchemaReferenceId.Fun;
 
+            c.AddOperationTransformer<OpenApiContentTypesTransformer>();
             c.AddSchemaTransformer<OpenApiDescriptionSchemaTransformer>();
+            c.AddOperationTransformer<OpenApiDescriptionSchemaTransformer>();
             c.AddDocumentTransformer<LowercaseDocumentTransformer>();
             c.AddDocumentTransformer((document, _, _) =>
             {
@@ -60,7 +62,7 @@ public static class OpenApiExtension
             c.AddDocumentTransformer<TagDescriptionsDocumentFilter>();
             c.AddDocumentTransformer<OpenApiResponseDescriptionTransformer>();
             c.AddOperationTransformer<OpenApiCustomOperationTransformer>();
-            c.AddOperationTransformer<OapenApiTagOpeartionTrnsformer>();
+            c.AddOperationTransformer<OpenApiOperationIdTransformer>();
             var serverUrls = configuration.GetSection("openApi:servers").Get<List<string>>() ?? [];
             var serverDescription = configuration.GetSection("openApi:serversDescription").Get<List<string>>() ?? [];
 

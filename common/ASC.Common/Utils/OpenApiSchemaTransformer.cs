@@ -48,8 +48,48 @@ public class OpenApiDescriptionAttribute : DescriptionAttribute
     public object Example { get; set; }
 }
 
-public class OpenApiDescriptionSchemaTransformer : IOpenApiSchemaTransformer
+public class OpenApiDescriptionSchemaTransformer : IOpenApiSchemaTransformer, IOpenApiOperationTransformer
 {
+    public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
+    {
+        if (operation.Parameters == null)
+        {
+            return Task.CompletedTask;
+        }
+        foreach (var parameter in operation.Parameters)
+        {
+            var parameterDescriptor = context.Description.ParameterDescriptions?.FirstOrDefault(p => p.Name.Equals(parameter.Name));
+            if (parameterDescriptor == null)
+            {
+                continue;
+            }
+            var propertyInfo = parameterDescriptor?.ModelMetadata;
+            var modelType = propertyInfo?.UnderlyingOrModelType;
+            if (modelType != null)
+            {
+                UpdateSchema(modelType, parameter.Schema);
+            }
+            var propertyName = propertyInfo?.Name;
+            var attr = propertyInfo?.ContainerType?.GetMembers()?.FirstOrDefault(m => m.Name.Equals(propertyName))?.GetCustomAttribute<OpenApiDescriptionAttribute>();
+            if (attr != null)
+            {
+                parameter.Description = attr.Description;
+                if (attr.Example != null)
+                {
+                    parameter.Example = GetExample(attr.Example);
+                }
+            }
+            else
+            {
+                var example = GenerateFakeData(parameter.Name, parameter.GetType());
+                if (example != null)
+                {
+                    parameter.Example = example;
+                }
+            }
+        }
+        return Task.CompletedTask;
+    }
     public Task TransformAsync(OpenApiSchema schema, OpenApiSchemaTransformerContext context, CancellationToken cancellationToken)
     {
         if (schema.Enum is { Count: > 0 })
@@ -75,7 +115,7 @@ public class OpenApiDescriptionSchemaTransformer : IOpenApiSchemaTransformer
         }
         else
         {
-            var example = GenerateFakeData(propertyInfo);
+            var example = GenerateFakeData(propertyInfo.Name, propertyInfo.PropertyType);
             if (example != null)
             {
                 schema.Example = example;
@@ -258,53 +298,55 @@ public class OpenApiDescriptionSchemaTransformer : IOpenApiSchemaTransformer
         };
     }
 
-    private IOpenApiAny GenerateFakeData(JsonPropertyInfo propertyInfo)
+    private IOpenApiAny GenerateFakeData(string name, Type type)
     {
         var faker = new Faker();
+        Randomizer.Seed = new Random(123);
         var fileExtension = ".txt";
-        switch (propertyInfo.Name)
+        switch (name)
         {
-            case "Name":
+            case "name":
                 return new OpenApiString(faker.Name.FullName());
-            case "Email":
+            case "email":
                 return new OpenApiString(faker.Internet.Email());
-            case "FirstName":
+            case "firstName":
                 return new OpenApiString(faker.Name.FirstName());
-            case "LastName":
+            case "lastName":
                 return new OpenApiString(faker.Name.LastName());
-            case "Location":
+            case "location":
                 return new OpenApiString(faker.Address.FullAddress());
-            case "Password":
+            case "password":
                 return new OpenApiString(faker.Internet.Password());
-            case "Extension":
-            case "Ext":
-            case "FileExtension":
+            case "extension":
+            case "ext":
+            case "fileExtension":
                 return new OpenApiString(fileExtension);
             case "Title":
                 var fileName = faker.System.FileName();
                 return new OpenApiString(fileName.Substring(0, fileName.LastIndexOf('.')));
-            case "Id":
-            case "FileId":
-            case "FolderId":
-            case "RoomId":
-            case "InstanceId":
-            case "UserId":
-            case "ProductId":
-                if (propertyInfo.PropertyType == typeof(string))
+            case "id":
+            case "fileId":
+            case "folderId":
+            case "roomId":
+            case "instanceId":
+            case "userId":
+            case "productId":
+                if (type == typeof(string))
                 {
                     return new OpenApiString(faker.Random.Int(1, 10000).ToString());
                 }
 
-                if (propertyInfo.PropertyType == typeof(int))
+                if (type == typeof(int))
                 {
                     return new OpenApiInteger(faker.Random.Int(1, 10000));
                 }
 
-                return new OpenApiString(Guid.NewGuid().ToString());
+                return new OpenApiString(faker.Random.Guid().ToString());
             default:
                 return null;
         }
     }
+
     private static bool IsSimpleType(Type type)
     {
         return type.IsPrimitive ||
