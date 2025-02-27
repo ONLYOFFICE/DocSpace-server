@@ -27,12 +27,13 @@
 using ASC.Files.Core.Services.DocumentBuilderService;
 
 namespace ASC.Web.Files.Utils;
+
 [Transient]
 public class ExportToXLSX(
     ILogger<AuditReportUploader> logger,
     IServiceProvider serviceProvider,
     TenantManager tenantManager,
-    IEventBus eventBus,
+    IPublishEndpoint eventBus,
     DocumentBuilderTaskManager documentBuilderTaskManager,
     IHttpContextAccessor httpContextAccessor,
     AuthContext authContext)
@@ -58,7 +59,7 @@ public class ExportToXLSX(
                 ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
                 : []);
 
-            await eventBus.PublishAsync(evt);
+            await eventBus.Publish(evt);
         }
         catch (Exception ex)
         {

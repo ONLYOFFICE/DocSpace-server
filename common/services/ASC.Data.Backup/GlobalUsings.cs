@@ -28,6 +28,7 @@ global using System.Text.Json.Serialization;
 
 global using ASC.Api.Collections;
 global using ASC.Api.Core;
+global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
 global using ASC.Core;
@@ -38,7 +39,6 @@ global using ASC.Data.Backup.Contracts;
 global using ASC.Data.Backup.Core.IntegrationEvents.Events;
 global using ASC.Data.Backup.EF.Context;
 global using ASC.Data.Backup.Extension;
-global using ASC.EventBus.Abstractions;
 global using ASC.Files.Core.EF;
 global using ASC.Web.Api.Routing;
 global using ASC.Web.Studio.Core.Backup;
@@ -46,10 +46,14 @@ global using ASC.Web.Studio.Utility;
 
 global using Autofac;
 
+global using MassTransit;
+
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Http.Features;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Server.Kestrel.Core;
 global using Microsoft.Extensions.Hosting.WindowsServices;
+
+global using Swashbuckle.AspNetCore.Annotations;
 
 global using static ASC.Data.Backup.BackupAjaxHandler;

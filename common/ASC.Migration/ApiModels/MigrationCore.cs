@@ -29,7 +29,7 @@ namespace ASC.Migration.Core.Models.Api;
 [Scope]
 public class MigrationCore(
     IServiceProvider serviceProvider,
-    IEventBus eventBus,
+    IPublishEndpoint eventBus,
     AuthContext authContext,
     TenantManager tenantManager,
     MigrationWorker migrationWorker)
@@ -43,7 +43,7 @@ public class MigrationCore(
 
     public async Task StartParseAsync(string migrationName)
     {
-       await eventBus.PublishAsync(new MigrationParseIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
+       await eventBus.Publish(new MigrationParseIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             MigratorName = migrationName
         });
@@ -51,7 +51,7 @@ public class MigrationCore(
 
     public async Task StartAsync(MigrationApiInfo info)
     {
-       await  eventBus.PublishAsync(new MigrationIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
+       await  eventBus.Publish(new MigrationIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             ApiInfo = info
         });
@@ -59,12 +59,12 @@ public class MigrationCore(
 
     public async Task StopAsync()
     {
-        await eventBus.PublishAsync(new MigrationCancelIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()));
+        await eventBus.Publish(new MigrationCancelIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()));
     }
 
     public async Task ClearAsync()
     {
-        await eventBus.PublishAsync(new MigrationClearIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()));
+        await eventBus.Publish(new MigrationClearIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()));
     }
 
     public async Task<MigrationOperation> GetStatusAsync()

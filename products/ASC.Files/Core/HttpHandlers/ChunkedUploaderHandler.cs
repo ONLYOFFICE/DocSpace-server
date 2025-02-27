@@ -41,7 +41,8 @@ public class ChunkedUploaderHandler
 }
 
 [Scope]
-public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService> logger,
+public class ChunkedUploaderHandlerService(
+    ILogger<ChunkedUploaderHandlerService> logger,
     TenantManager tenantManager,
     FileUploader fileUploader,
     FilesMessageService filesMessageService,
@@ -51,7 +52,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
     FileDtoHelper filesWrapperHelper,
     AuthContext authContext,
     IDaoFactory daoFactory,
-    IEventBus eventBus)
+    IPublishEndpoint eventBus)
 {
     public async Task Invoke(HttpContext context)
     {
@@ -148,7 +149,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                         ThirdPartyData = thirdPartyData
                                     };
 
-                                    await eventBus.PublishAsync(evt);
+                                    await eventBus.Publish(evt);
 
                                 }
                             }
@@ -218,7 +219,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 ThirdPartyData = thirdPartyData
                             };
 
-                            await eventBus.PublishAsync(evt);
+                            await eventBus.Publish(evt);
                         }
                     }
                     return;

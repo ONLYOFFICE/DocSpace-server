@@ -67,7 +67,7 @@ public class FileStorageService //: IFileStorageService
     FileOperationsManager fileOperationsManager,
     TenantManager tenantManager,
     FileTrackerHelper fileTracker,
-    IEventBus eventBus,
+    IPublishEndpoint eventBus,
     EntryStatusManager entryStatusManager,
     OFormRequestManager oFormRequestManager,
     ThumbnailSettings thumbnailSettings,
@@ -4279,7 +4279,7 @@ public class FileStorageService //: IFileStorageService
         {
             var (fileIntIds, _) = FileOperationsManager.GetIds(fileIds);
 
-            await eventBus.PublishAsync(new ThumbnailRequestedIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()) { BaseUrl = baseCommonLinkUtility.GetFullAbsolutePath(""), FileIds = fileIntIds });
+            await eventBus.Publish(new ThumbnailRequestedIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()) { BaseUrl = baseCommonLinkUtility.GetFullAbsolutePath(""), FileIds = fileIntIds });
         }
         catch (Exception e)
         {

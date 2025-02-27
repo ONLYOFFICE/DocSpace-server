@@ -69,6 +69,8 @@ global using HtmlAgilityPack;
 
 global using ImageMagick;
 
+global using MassTransit;
+
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Caching.Distributed;

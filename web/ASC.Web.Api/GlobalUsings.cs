@@ -159,6 +159,8 @@ global using Google.Authenticator;
 
 global using MailKit.Security;
 
+global using MassTransit;
+
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.WebUtilities;

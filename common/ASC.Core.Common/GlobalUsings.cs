@@ -106,7 +106,6 @@ global using ASC.Core.Notify.Socket;
 global using ASC.Core.Security.Authentication;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
-global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
 global using ASC.Geolocation;
 global using ASC.MessagingSystem.Core;
@@ -130,6 +129,9 @@ global using AutoMapper;
 global using AutoMapper.QueryableExtensions;
 global using Google.Apis.Auth.OAuth2;
 global using MailKit.Security;
+
+global using MassTransit;
+
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;

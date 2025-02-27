@@ -29,7 +29,7 @@ namespace ASC.Webhooks.Core;
 [Scope(typeof(IWebhookPublisher))]
 public class WebhookPublisher(
     DbWorker dbWorker,
-    IEventBus eventBus,
+    IPublishEndpoint eventBus,
     SecurityContext securityContext,
     TenantManager tenantManager)
     : IWebhookPublisher
@@ -66,9 +66,7 @@ public class WebhookPublisher(
 
         var webhook = await dbWorker.WriteToJournal(webhooksLog);
 
-        await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(
-            securityContext.CurrentAccount.ID,
-            (tenantManager.GetCurrentTenant()).Id)
+        await eventBus.Publish(new WebhookRequestIntegrationEvent(securityContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
         {
             WebhookId = webhook.Id
         });

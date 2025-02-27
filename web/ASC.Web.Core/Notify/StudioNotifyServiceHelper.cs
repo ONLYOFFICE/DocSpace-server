@@ -26,14 +26,17 @@
 
 using ASC.Common.IntegrationEvents.Events;
 
+using MassTransit;
+
 namespace ASC.Web.Core.Notify;
 
 [Scope]
-public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
+public class StudioNotifyServiceHelper(
+    StudioNotifyHelper studioNotifyHelper,
     AuthContext authContext,
     TenantManager tenantManager,
     CommonLinkUtility commonLinkUtility,
-    IEventBus eventBus)
+    IPublishEndpoint eventBus)
 {
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, params ITagValue[] args)
     {
@@ -96,7 +99,7 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
             item.Tags = args.Where(r => r.Value != null).Select(r => new Tag { Key = r.Tag, Value = r.Value.ToString() }).ToList();
         }
 
-        await eventBus.PublishAsync(item);
+        await eventBus.Publish(item);
     }
     
     public async Task SendNoticeAsync(INotifyAction action, params ITagValue[] args)

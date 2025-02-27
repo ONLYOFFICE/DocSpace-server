@@ -34,11 +34,11 @@ public sealed class BackupSchedulerService(
     IServiceScopeFactory scopeFactory,
     IConfiguration configuration,
     CoreBaseSettings coreBaseSettings,
-    IEventBus eventBus)
+    IPublishEndpoint eventBus)
      : ActivePassiveBackgroundService<BackupSchedulerService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
-    private readonly IEventBus _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+    private readonly IPublishEndpoint _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSection("backup").Get<BackupSettings>().Scheduler.Period;
 
@@ -81,7 +81,7 @@ public sealed class BackupSchedulerService(
 
                         logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
 
-                        await _eventBus.PublishAsync(new BackupRequestIntegrationEvent(
+                        await _eventBus.Publish(new BackupRequestIntegrationEvent(
                                                  tenantId: schedule.TenantId,
                                                  storageBasePath: schedule.StorageBasePath,
                                                  storageParams: JsonSerializer.Deserialize<Dictionary<string, string>>(schedule.StorageParams),
@@ -89,7 +89,7 @@ public sealed class BackupSchedulerService(
                                                  createBy: Constants.CoreSystem.ID,
                                                  isScheduled: true,
                                                  backupsStored: schedule.BackupsStored
-                                          ));
+                                          ), stoppingToken);
                     }
                     else
                     {

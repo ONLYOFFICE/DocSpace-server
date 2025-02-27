@@ -37,7 +37,6 @@ global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Messaging;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Users;
-global using ASC.EventBus.Abstractions;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.Core.Sender;
 global using ASC.MessagingSystem.Data;
@@ -46,6 +45,9 @@ global using ASC.MessagingSystem.EF.Model;
 global using ASC.MessagingSystem.Log;
 global using ASC.Security.Cryptography;
 global using AutoMapper;
+
+global using MassTransit;
+
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;

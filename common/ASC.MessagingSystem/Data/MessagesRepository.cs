@@ -31,7 +31,7 @@ public class MessagesRepository(
     IServiceScopeFactory serviceScopeFactory,
     ILogger<MessagesRepository> logger,
     IMapper mapper,
-    IEventBus eventBus)
+    IPublishEndpoint eventBus)
 {
     private static readonly HashSet<MessageAction> _forceSaveAuditActions = 
     [
@@ -53,7 +53,7 @@ public class MessagesRepository(
             return await ForceSave(message);
         }
 
-        await eventBus.PublishAsync(new EventDataIntegrationEvent(message.UserId, message.TenantId)
+        await eventBus.Publish(new EventDataIntegrationEvent(message.UserId, message.TenantId)
         {
              RequestMessage = message
         });

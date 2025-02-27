@@ -69,7 +69,7 @@ public class PortalController(
     IMapper mapper,
     IHttpContextAccessor httpContextAccessor,
     QuotaHelper quotaHelper,
-    IEventBus eventBus,
+    IPublishEndpoint eventBus,
     CspSettingsHelper cspSettingsHelper)
     : ControllerBase
 {
@@ -541,7 +541,7 @@ public class PortalController(
         }
         finally
         {
-            await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
+            await eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
             securityContext.Logout();
         }
     }
@@ -676,7 +676,7 @@ public class PortalController(
         messageService.Send(MessageAction.PortalDeleted);
 
         await cspSettingsHelper.UpdateBaseDomain();
-        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
+        await eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
 
         return redirectLink;
     }

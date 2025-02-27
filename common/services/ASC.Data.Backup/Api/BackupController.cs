@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Convention;
-
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace ASC.Data.Backup.Controllers;
 
 /// <summary>
@@ -44,7 +40,7 @@ public class BackupController(
     AuthContext authContext,
     CoreBaseSettings coreBaseSettings,
     TenantExtra tenantExtra,
-    IEventBus eventBus,
+    IPublishEndpoint eventBus,
     CommonLinkUtility commonLinkUtility,
     CoreSettings coreSettings)
     : ControllerBase
@@ -194,7 +190,7 @@ public class BackupController(
         var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
         var tenantId = tenantManager.GetCurrentTenantId();
         
-        await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
+        await eventBus.Publish(new BackupRequestIntegrationEvent(
              tenantId: tenantId,
              storageParams: storageParams,
              storageType: storageType,
@@ -309,7 +305,7 @@ public class BackupController(
         }
 
         var taskId = await backupAjaxHandler.StartRestoreAsync(inDto.BackupId, storageType, storageParams, inDto.Notify, serverBaseUri, inDto.Dump, false);
-        await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(
+        await eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
                              createBy: CurrentUserId,
                              storageParams: storageParams,

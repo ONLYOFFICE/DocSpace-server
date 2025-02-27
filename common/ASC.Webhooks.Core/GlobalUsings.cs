@@ -41,4 +41,6 @@ global using ASC.Webhooks.Core.EF.Model;
 global using ASC.Webhooks.Core.IntegrationEvents.Events;
 global using ASC.Webhooks.Core.Resources;
 
+global using MassTransit;
+
 global using Microsoft.EntityFrameworkCore;

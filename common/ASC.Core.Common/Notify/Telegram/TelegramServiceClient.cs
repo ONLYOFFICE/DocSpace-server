@@ -27,16 +27,17 @@
 namespace ASC.Core.Common.Notify;
 
 [Singleton]
-public class TelegramServiceClient(IEventBus eventBus,
-        ICacheNotify<RegisterUserProto> cacheRegisterUser,
-        ICacheNotify<CreateClientProto> cacheCreateClient,
-        ICacheNotify<DisableClientProto> cacheDisableClient,
-        ICache cache)
+public class TelegramServiceClient(
+    IPublishEndpoint eventBus,
+    ICacheNotify<RegisterUserProto> cacheRegisterUser,
+    ICacheNotify<CreateClientProto> cacheCreateClient,
+    ICacheNotify<DisableClientProto> cacheDisableClient,
+    ICache cache)
     : ITelegramService
 {
     public async Task SendMessage(NotifyMessage m)
     {
-        await eventBus.PublishAsync(new NotifySendTelegramMessageRequestedIntegrationEvent(Guid.Empty, m.TenantId)
+        await eventBus.Publish(new NotifySendTelegramMessageRequestedIntegrationEvent(Guid.Empty, m.TenantId)
         {
             NotifyMessage = m
         });

@@ -45,7 +45,7 @@ public class VirtualRoomsInternalController(
     ApiDateTimeHelper apiDateTimeHelper,
     AuthContext authContext,
     TenantManager tenantManager,
-    IEventBus eventBus,
+    IPublishEndpoint eventBus,
     RoomTemplatesWorker roomTemplatesWorker)
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
@@ -117,7 +117,7 @@ public class VirtualRoomsInternalController(
           dto.Color,
           false);
 
-        await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
+        await eventBus.Publish(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             TemplateId = dto.TemplateId,
             Logo = logo,
@@ -721,7 +721,8 @@ public abstract class VirtualRoomsController<T>(
     }
 }
 
-public class VirtualRoomsCommonController(FileStorageService fileStorageService,
+public class VirtualRoomsCommonController(
+    FileStorageService fileStorageService,
         FolderContentDtoHelper folderContentDtoHelper,
         GlobalFolderHelper globalFolderHelper,
         ApiContext apiContext,
@@ -732,7 +733,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         AuthContext authContext,
         DocumentBuilderTaskManager documentBuilderTaskManager,
         TenantManager tenantManager,
-        IEventBus eventBus,
+        IPublishEndpoint eventBus,
         UserManager userManager,
         IServiceProvider serviceProvider,
         ApiDateTimeHelper apiDateTimeHelper,
@@ -941,7 +942,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
             : []);
 
-        await eventBus.PublishAsync(evt);
+        await eventBus.Publish(evt);
 
         return DocumentBuilderTaskDto.Get(taskProgress);
     }
@@ -977,7 +978,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, 0, null, true);
 
-        await eventBus.PublishAsync(evt);
+        await eventBus.Publish(evt);
     }
 
     /// <summary>

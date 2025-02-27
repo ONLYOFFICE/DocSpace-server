@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using MassTransit;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
@@ -47,7 +49,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         AuditEventsRepository auditEventsRepository,
         LoginEventsRepository loginEventsRepository,
         IDistributedCache distributedCache,
-        IEventBus eventBus)
+        IPublishEndpoint eventBus)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
 
@@ -294,7 +296,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                                 {
                                     await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                                 }
-                                await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                                await eventBus.Publish(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                             }
                         }
                     }
@@ -388,7 +390,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         {
                             await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                         }
-                        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                        await eventBus.Publish(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
 
                     #endregion

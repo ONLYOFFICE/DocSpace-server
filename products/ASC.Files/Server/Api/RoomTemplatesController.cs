@@ -27,7 +27,8 @@
 namespace ASC.Files.Api;
 
 [DefaultRoute("roomtemplate")]
-public class RoomTemplatesController(IEventBus eventBus,
+public class RoomTemplatesController(
+    IPublishEndpoint eventBus,
     AuthContext authContext, 
     TenantManager tenantManager, 
     FolderDtoHelper folderDtoHelper,
@@ -76,7 +77,7 @@ public class RoomTemplatesController(IEventBus eventBus,
             dto.Color,
             false);
 
-        await eventBus.PublishAsync(new CreateRoomTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
+        await eventBus.Publish(new CreateRoomTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             RoomId = dto.RoomId,
             Title = dto.Title,

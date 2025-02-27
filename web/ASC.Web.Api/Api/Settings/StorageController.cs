@@ -46,7 +46,7 @@ public class StorageController(ILoggerProvider option,
         IWebHostEnvironment webHostEnvironment,
         ConsumerFactory consumerFactory,
         IMemoryCache memoryCache,
-        IEventBus eventBus,
+        IPublishEndpoint eventBus,
         EncryptionSettingsHelper encryptionSettingsHelper,
         BackupAjaxHandler backupAjaxHandler,
         ICacheNotify<DeleteSchedule> cacheDeleteSchedule,
@@ -223,7 +223,7 @@ public class StorageController(ILoggerProvider option,
 
         await encryptionSettingsHelper.SaveAsync(settings);
 
-        await eventBus.PublishAsync(new EncryptionDataStorageRequestedIntegrationEvent
+        await eventBus.Publish(new EncryptionDataStorageRequestedIntegrationEvent
         (
               encryptionSettings: new EncryptionSettings
               {
