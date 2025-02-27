@@ -31,23 +31,23 @@ namespace ASC.Webhooks.Core;
 [EnumExtensions]
 public enum WebhookTrigger
 {
-    [SwaggerEnum("None")]
+    [SwaggerEnum("All")]
     None = 0,
 
 
     #region User
 
     [SwaggerEnum("User created")]
-    UserCreated = 100,
+    UserCreated = 1,
 
     [SwaggerEnum("User invited")]
-    UserInvited = 101,
+    UserInvited = 2,
 
     [SwaggerEnum("User updated")]
-    UserUpdated = 102,
+    UserUpdated = 4,
 
     [SwaggerEnum("User deleted")]
-    UserDeleted = 103,
+    UserDeleted = 8,
 
     #endregion User
 
@@ -55,13 +55,13 @@ public enum WebhookTrigger
     #region Group
 
     [SwaggerEnum("Group created")]
-    GroupCreated = 200,
+    GroupCreated = 16,
 
     [SwaggerEnum("Group updated")]
-    GroupUpdated = 201,
+    GroupUpdated = 32,
 
     [SwaggerEnum("Group deleted")]
-    GroupDeleted = 203,
+    GroupDeleted = 64,
 
     #endregion
 
@@ -69,28 +69,28 @@ public enum WebhookTrigger
     #region File
 
     [SwaggerEnum("File created")]
-    FileCreated = 300,
+    FileCreated = 128,
 
     [SwaggerEnum("File uploaded")]
-    FileUploaded = 301,
+    FileUploaded = 256,
 
     [SwaggerEnum("File updated")]
-    FileUpdated = 302,
+    FileUpdated = 512,
 
     [SwaggerEnum("File moved to trash")]
-    FileTrashed = 303,
+    FileTrashed = 1024,
 
     [SwaggerEnum("File permanently deleted")]
-    FileDeleted = 304,
+    FileDeleted = 2048,
 
     [SwaggerEnum("File restored from trash")]
-    FileRestored = 305,
+    FileRestored = 4096,
 
     [SwaggerEnum("File copied")]
-    FileCopied = 306,
+    FileCopied = 8192,
 
     [SwaggerEnum("File moved from one folder to another")]
-    FileMoved = 307,
+    FileMoved = 16384,
 
     #endregion
 
@@ -98,25 +98,25 @@ public enum WebhookTrigger
     #region Folder
 
     [SwaggerEnum("Folder created")]
-    FolderCreated = 400,
+    FolderCreated = 32768,
 
     [SwaggerEnum("Folder updated")]
-    FolderUpdated = 401,
+    FolderUpdated = 65536,
 
     [SwaggerEnum("Folder moved to trash")]
-    FolderTrashed = 402,
+    FolderTrashed = 131072,
 
     [SwaggerEnum("Folder permanently deleted")]
-    FolderDeleted = 403,
+    FolderDeleted = 262144,
 
     [SwaggerEnum("Folder restored from trash")]
-    FolderRestored = 404,
+    FolderRestored = 524288,
 
     [SwaggerEnum("Folder copied")]
-    FolderCopied = 405,
+    FolderCopied = 1048576,
 
     [SwaggerEnum("Folder moved from one folder to another")]
-    FolderMoved = 406,
+    FolderMoved = 2097152,
 
     #endregion
 
@@ -124,19 +124,21 @@ public enum WebhookTrigger
     #region Room
 
     [SwaggerEnum("Room created")]
-    RoomCreated = 500,
+    RoomCreated = 4194304,
 
     [SwaggerEnum("Room updated")]
-    RoomUpdated = 501,
+    RoomUpdated = 8388608,
 
     [SwaggerEnum("Room moved to archive")]
-    RoomArchived = 502,
+    RoomArchived = 16777216,
 
     [SwaggerEnum("Room permanently deleted")]
-    RoomDeleted = 503,
+    RoomDeleted = 33554432,
 
     [SwaggerEnum("Room restored from archive")]
-    RoomRestored = 504
+    RoomRestored = 67108864
 
     #endregion
+
+    //remaining possible values: 134217728, 268435456, 536870912, 1073741824
 }
