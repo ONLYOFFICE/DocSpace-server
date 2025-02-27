@@ -205,7 +205,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.StartFilling,
                     FilesSecurityActions.FillingStatus,
                     FilesSecurityActions.ResetFilling,
-                    FilesSecurityActions.StopFilling
+                    FilesSecurityActions.StopFilling,
+                    FilesSecurityActions.OpenForm
 
                 }
             },
@@ -1086,7 +1087,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return false;
                 }
-                
+
                 if (isDocSpaceAdmin)
                 {
                     if (action == FilesSecurityActions.Download)
@@ -1127,22 +1128,25 @@ public class FileSecurity(IDaoFactory daoFactory,
                             return true;
                     }
 
-                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.ChangeOwner or 
+                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.ChangeOwner or
                             FilesSecurityActions.IndexExport)
                     {
                         return true;
                     }
                 }
-                
 
 
-                if (file != null && file.IsForm && (action is 
-                    FilesSecurityActions.FillForms or 
+
+                if (file != null && file.IsForm && (action is
+                    FilesSecurityActions.FillForms or
                     FilesSecurityActions.Edit or
                     FilesSecurityActions.StartFilling or
                     FilesSecurityActions.FillingStatus or
                     FilesSecurityActions.ResetFilling or
-                    FilesSecurityActions.StopFilling))
+                    FilesSecurityActions.StopFilling or
+                    FilesSecurityActions.SubmitToFormGallery or
+                    FilesSecurityActions.CopyLink or
+                    FilesSecurityActions.OpenForm))
                 {
                     var parentFolders = await GetFileParentFolders(e.ParentId);
                     var fileFolder = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
@@ -1163,7 +1167,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                         var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
                         var hasFullAccessToForm = userHasFullAccess || e.Access is FileShare.RoomManager or FileShare.ContentCreator;
-                        var IsFillingStoped = !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);
+                        var IsFillingStoped = formFilling?.FillingStopedDate != null && !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);
                         return action switch
                         {
                             FilesSecurityActions.ResetFilling =>
@@ -1173,7 +1177,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                                 hasFullAccessToForm && formFilling?.StartFilling == true && !IsFillingStoped && currentStep > 0,
 
                             FilesSecurityActions.StartFilling =>
-                                hasFullAccessToForm && formFilling?.StartFilling == false,
+                                hasFullAccessToForm && formFilling?.StartFilling == false || formFilling?.StartFilling == null,
 
                             FilesSecurityActions.FillForms =>
                                 !IsFillingStoped && myRoles.Any(),
@@ -1184,9 +1188,15 @@ public class FileSecurity(IDaoFactory daoFactory,
                             FilesSecurityActions.FillingStatus =>
                                 formFilling?.StartFilling == true,
 
+                            FilesSecurityActions.OpenForm =>
+                                (formFilling?.StartFilling == true && role == null) || currentStep == 0 || IsFillingStoped,
+
                             _ => false
                         };
                     }
+                } else if ((file == null || !file.IsForm) && action is FilesSecurityActions.OpenForm)
+                {
+                    return false;
                 }
 
                 if (action is 
@@ -2855,6 +2865,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         ResetFilling,
 
         [SwaggerEnum("Start filling")]
-        StopFilling
+        StopFilling,
+
+        [SwaggerEnum("Open form")]
+        OpenForm
     }
 }
