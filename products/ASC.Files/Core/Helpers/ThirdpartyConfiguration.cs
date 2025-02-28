@@ -52,6 +52,9 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
     private GoogleLoginProvider _googleLoginProvider;
     private GoogleLoginProvider GoogleLoginProvider =>  _googleLoginProvider ??= consumerFactory.Get<GoogleLoginProvider>();
 
+    private NextcloudLoginProvider _nextcloudLoginProvider;
+    private NextcloudLoginProvider NextcloudLoginProvider => _nextcloudLoginProvider ??= consumerFactory.Get<NextcloudLoginProvider>();
+
     private HashSet<string> ThirdPartyProviders => configuration.ThirdPartyProviders;
 
     public bool SupportInclusion(IDaoFactory daoFactory)
@@ -82,7 +85,7 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
     public bool SupportkDriveInclusion => ThirdPartyProviders.Contains(KDriveKey);
 
     public bool SupportYandexInclusion => ThirdPartyProviders.Contains(YandexKey);
-    
+
     public bool SupportDocuSignInclusion => ThirdPartyProviders.Contains(DocuSignKey) && DocuSignLoginProvider.IsEnabled;
 
     public bool SupportGoogleDriveInclusion => ThirdPartyProviders.Contains(GoogleDriveKey) && GoogleLoginProvider.IsEnabled;
@@ -94,11 +97,12 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
     private static string SharePointKey => "sharepoint";
     private static string WebDavKey => "webdav";
     private static string NextcloudKey => "nextcloud";
+    private static string Nextcloud2Key => "nextcloud2";
     private static string OwncloudKey => "owncloud";
     private static string KDriveKey => "kdrive";
     private static string YandexKey => "yandex";
     private static string DocuSignKey => "docusign";
-    
+
     public List<ProviderDto> GetAllProviders()
     {
         var webDavKey = ProviderTypes.WebDav.ToStringFast();
@@ -107,48 +111,50 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
 
         if (ThirdPartyProviders.Contains(BoxKey))
         {
-            providers.Add(new ProviderDto("Box", ProviderTypes.Box.ToStringFast(), BoxLoginProvider.IsEnabled, true, BoxLoginProvider.RedirectUri, 
+            providers.Add(new ProviderDto("Box", ProviderTypes.Box.ToStringFast(), BoxLoginProvider.IsEnabled, true, BoxLoginProvider.RedirectUri,
                 ClientId: BoxLoginProvider.ClientID));
         }
-        
+
         if (ThirdPartyProviders.Contains(DropboxKey))
         {
-            providers.Add(new ProviderDto("Dropbox", ProviderTypes.DropboxV2.ToStringFast(), DropboxLoginProvider.IsEnabled, true, DropboxLoginProvider.RedirectUri, 
+            providers.Add(new ProviderDto("Dropbox", ProviderTypes.DropboxV2.ToStringFast(), DropboxLoginProvider.IsEnabled, true, DropboxLoginProvider.RedirectUri,
                 ClientId: DropboxLoginProvider.ClientID));
         }
-        
+
         if (ThirdPartyProviders.Contains(GoogleDriveKey))
         {
-            providers.Add(new ProviderDto("GoogleDrive", ProviderTypes.GoogleDrive.ToStringFast(), GoogleLoginProvider.IsEnabled, true, GoogleLoginProvider.RedirectUri, 
+            providers.Add(new ProviderDto("GoogleDrive", ProviderTypes.GoogleDrive.ToStringFast(), GoogleLoginProvider.IsEnabled, true, GoogleLoginProvider.RedirectUri,
                 ClientId: GoogleLoginProvider.ClientID));
         }
-        
+
         if (ThirdPartyProviders.Contains(OneDriveKey))
         {
-            providers.Add(new ProviderDto("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri, 
+            providers.Add(new ProviderDto("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri,
                 ClientId: OneDriveLoginProvider.ClientID));
         }
-        
+
         if (ThirdPartyProviders.Contains(KDriveKey))
         {
             providers.Add(new ProviderDto("kDrive", webDavKey, true));
         }
-        
+
         if (ThirdPartyProviders.Contains(YandexKey))
         {
             providers.Add(new ProviderDto("Yandex", webDavKey, true));
         }
-        
+
         if (ThirdPartyProviders.Contains(WebDavKey))
         {
             providers.Add(new ProviderDto("WebDav", webDavKey, true, RequiredConnectionUrl: true));
         }
-        
+
         if (ThirdPartyProviders.Contains(NextcloudKey))
         {
             providers.Add(new ProviderDto("Nextcloud", webDavKey, true, RequiredConnectionUrl: true));
+            providers.Add(new ProviderDto("Nextcloud2", ProviderTypes.Nextcloud2.ToStringFast(), NextcloudLoginProvider.IsEnabled, true, NextcloudLoginProvider.RedirectUri,
+                ClientId: NextcloudLoginProvider.ClientID));
         }
-        
+
         if (ThirdPartyProviders.Contains(OwncloudKey))
         {
             providers.Add(new ProviderDto("ownCloud", webDavKey, true, RequiredConnectionUrl: true));
@@ -156,7 +162,7 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
 
         return providers;
     }
-    
+
     public List<List<string>> GetProviders()
     {
         var result = new List<List<string>>();
@@ -180,6 +186,8 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
         {
             result.Add(["OneDrive", OneDriveLoginProvider.ClientID, OneDriveLoginProvider.RedirectUri]);
         }
+
+        result.Add(["Nextcloud2", NextcloudLoginProvider.ClientID, NextcloudLoginProvider.RedirectUri]);
 
         if (SupportSharePointInclusion)
         {

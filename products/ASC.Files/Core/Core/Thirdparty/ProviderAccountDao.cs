@@ -38,7 +38,8 @@ public enum ProviderTypes
     kDrive,
     Yandex,
     NextCloud,
-    OwnCloud
+    OwnCloud,
+    Nextcloud2
 }
 
 [Scope(typeof(IProviderDao))]
@@ -684,6 +685,17 @@ internal class ProviderAccountDao(
                 }
 
                 return new AuthData(token: token.ToJson());
+
+            case ProviderTypes.Nextcloud2:
+                code = authData.RawToken;
+                token = oAuth20TokenHelper.GetAccessToken<NextcloudLoginProvider>(code);
+                if (token == null)
+                {
+                    throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, provider));
+                }
+
+                return new AuthData(token: token.ToJson());
+
             case ProviderTypes.SharePoint:
             case ProviderTypes.WebDav:
             case ProviderTypes.NextCloud:
