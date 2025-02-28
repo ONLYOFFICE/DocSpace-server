@@ -280,7 +280,7 @@ public class TfaappController(
     [Tags("Settings / TFA settings")]
     [EndpointSummary("Get confirmation email for updating TFA settings")]
     [EndpointDescription("Returns the confirmation email URL for updating TFA settings.")]
-    [OpenApiResponse(typeof(str), 200, "Confirmation email URL")]
+    [OpenApiResponse(typeof(string), 200, "Confirmation email URL")]
     [HttpPut("tfaappwithlink")]
     public async Task<string> TfaSettingsLink(TfaRequestsDto inDto)
     {

@@ -442,8 +442,11 @@ public class SecurityController(PermissionContext permissionContext,
     /// </summary>
     /// <path>api/2.0/security/oauth2/token</path>
     [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Security / CSP")]
+    [EndpointSummary("Generate Jwt Token")]
+    [EndpointDescription("Generate Jwt Token for communication between login (client) and identity services")]
+    [OpenApiResponse(typeof(string), 200, "Jwt Token")]
     [HttpGet("oauth2/token")]
-    [SwaggerResponse(200, "Jwt Token", typeof(string))]
     public async Task<string> GenerateJwtToken()
     {
         var key = new SymmetricSecurityKey(machinePseudoKeys.GetMachineConstant(256));

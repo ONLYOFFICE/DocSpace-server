@@ -200,6 +200,10 @@ public class OpenApiDescriptionSchemaTransformer : IOpenApiSchemaTransformer, IO
                     ?.GetGenericArguments()
                     .FirstOrDefault() ?? typeof(object);
             }
+            else if (checkType.IsGenericType && checkType.GetGenericTypeDefinition() == typeof(IEnumerable<>) && checkType.GetGenericArguments().FirstOrDefault().IsEnum)
+            {
+                checkType = checkType.GetGenericArguments().FirstOrDefault();
+            }
             else
             {
                 return result;
@@ -220,6 +224,10 @@ public class OpenApiDescriptionSchemaTransformer : IOpenApiSchemaTransformer, IO
             else if (checkType == typeof(object))
             {
                 result.Items = new OpenApiSchema { Type = "object" };
+            }
+            else if (checkType.IsEnum) 
+            {
+                result.Items = new OpenApiSchema { Type = arraySchema.Type, Enum = arraySchema.Enum, Description = arraySchema.Description, Example = arraySchema.Example };
             }
 
         }
