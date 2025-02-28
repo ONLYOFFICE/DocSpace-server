@@ -40,7 +40,7 @@ public class TenantLogoManager(
     {
         get
         {
-            var hideSettings = (configuration["web:hide-settings"] ?? "").Split(',', ';', ' ');
+            var hideSettings = configuration.GetSection("web:hide-settings").Get<string[]>() ?? [];
             return !hideSettings.Contains("WhiteLabel", StringComparer.CurrentCultureIgnoreCase);
         }
     }

@@ -43,3 +43,29 @@ public class SwaggerCustomOperationFilter : IOperationFilter
     }
 }
 
+public class ContentTypeOperationFilter : IOperationFilter
+{
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        if (operation.RequestBody != null)
+        {
+            var content = operation.RequestBody.Content
+                .Where(c => c.Key != "text/json" && !c.Key.EndsWith("+json"))
+                .ToDictionary(c => c.Key, c => c.Value);
+
+            operation.RequestBody.Content = content;
+        }
+
+        if (operation.Responses != null)
+        {
+            foreach (var response in operation.Responses)
+            {
+                var content = response.Value.Content
+                    .Where(c => c.Key.Equals("application/json"))
+                    .ToDictionary(c => c.Key, c => c.Value);
+
+                response.Value.Content = content;
+            }
+        }
+    }
+}

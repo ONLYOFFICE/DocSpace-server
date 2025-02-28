@@ -74,15 +74,8 @@ public class DistributedTaskQueue(
         }
     }
 
-    public async Task EnqueueTask(DistributedTaskProgress taskProgress)
+    public async Task EnqueueTask(DistributedTask distributedTask)
     {
-        await EnqueueTask(taskProgress.RunJob, taskProgress);
-    }
-
-    public async Task EnqueueTask(Func<DistributedTask, CancellationToken, Task> action, DistributedTask distributedTask = null)
-    {
-        distributedTask ??= new DistributedTask();
-
         distributedTask.InstanceId = INSTANCE_ID;
 
         if (distributedTask.LastModifiedOn.Equals(DateTime.MinValue))
@@ -108,11 +101,11 @@ public class DistributedTaskQueue(
         }
 
         var task = new Task(() =>
-    {
-        var t = action(distributedTask, token);
-        t.ContinueWith(async a => await OnCompleted(a, distributedTask.Id), token).ConfigureAwait(false);
-        t.ConfigureAwait(false);
-    }, token, TaskCreationOptions.LongRunning);
+        {
+            var t = distributedTask.RunJob(token);
+            t.ContinueWith(async a => await OnCompleted(a, distributedTask.Id), token).ConfigureAwait(false);
+            t.ConfigureAwait(false);
+        }, token, TaskCreationOptions.LongRunning);
 
         _ = task.ConfigureAwait(false);
 

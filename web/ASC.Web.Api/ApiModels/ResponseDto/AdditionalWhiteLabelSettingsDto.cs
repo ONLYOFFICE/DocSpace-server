@@ -44,40 +44,14 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     public bool FeedbackAndSupportEnabled { get; set; }
 
     /// <summary>
-    /// Feedback and support URL
-    /// </summary>
-    public string FeedbackAndSupportUrl { get; set; }
-
-    /// <summary>
     /// Specifies if the user forum is enabled or not
     /// </summary>
     public bool UserForumEnabled { get; set; }
 
     /// <summary>
-    /// User forum URL
-    /// </summary>
-    public string UserForumUrl { get; set; }
-
-    /// <summary>
     /// Specifies if the video guides are enabled or not
     /// </summary>
     public bool VideoGuidesEnabled { get; set; }
-
-    /// <summary>
-    /// Video guides URL
-    /// </summary>
-    public string VideoGuidesUrl { get; set; }
-
-    /// <summary>
-    /// Sales email
-    /// </summary>
-    [EmailAddress]
-    public string SalesEmail { get; set; }
-
-    /// <summary>
-    /// URL to pay for the portal
-    /// </summary>
-    public string BuyUrl { get; set; }
 
     /// <summary>
     /// Specifies if the license agreements are enabled or not
@@ -88,11 +62,6 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     /// Specifies if these settings are default or not
     /// </summary>
     public bool IsDefault { get; set; }
-
-    /// <summary>
-    /// License agreements URL
-    /// </summary>
-    public string LicenseAgreementsUrl { get; set; }
 
     public void Mapping(Profile profile)
     {

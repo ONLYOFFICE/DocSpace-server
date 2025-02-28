@@ -57,7 +57,6 @@ public static class Tags
     public const string Price = "Price";
     public const string PricePeriod = "PricePeriod";
     public const string PortalUrl = "PortalUrl";
-    public const string ControlPanelUrl = "ControlPanelUrl";
     public const string UserDisplayName = "UserDisplayName";
     public const string PricingPage = "PricingPage";
     public const string BlogLink = "TagBlogLink";

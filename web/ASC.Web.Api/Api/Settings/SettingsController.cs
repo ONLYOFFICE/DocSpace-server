@@ -42,6 +42,8 @@ public partial class SettingsController(MessageService messageService,
         CommonLinkUtility commonLinkUtility,
         IConfiguration configuration,
         SetupInfo setupInfo,
+        ExternalResourceSettings externalResourceSettings,
+        ExternalResourceSettingsHelper externalResourceSettingsHelper,
         GeolocationHelper geolocationHelper,
         ConsumerFactory consumerFactory,
         TimeZoneConverter timeZoneConverter,
@@ -86,6 +88,8 @@ public partial class SettingsController(MessageService messageService,
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
+        var additionalWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
+
         var tenant = tenantManager.GetCurrentTenant();
 
         var settings = new SettingsDto
@@ -100,11 +104,8 @@ public partial class SettingsController(MessageService messageService,
             TenantStatus = tenant.Status,
             TenantAlias = tenant.Alias,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
-            LegalTerms = setupInfo.LegalTerms,
-            LicenseUrl = setupInfo.LicenseUrl,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
-            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager),
             DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !(await tenantManager.GetCurrentTenantQuotaAsync()).Branding,
             DeepLink = new DeepLinkDto
             {
@@ -112,7 +113,8 @@ public partial class SettingsController(MessageService messageService,
                 Url = configuration["deeplink:url"] ?? "",
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
             },
-            LogoText = await tenantLogoManager.GetLogoTextAsync()
+            LogoText = await tenantLogoManager.GetLogoTextAsync(),
+            ExternalResources = externalResourceSettings.GetCultureSpecificExternalResources(whiteLabelSettings: additionalWhiteLabelSettings)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
@@ -133,8 +135,6 @@ public partial class SettingsController(MessageService messageService,
             settings.DomainValidator = tenantDomainValidator;
             settings.ZendeskKey = setupInfo.ZendeskKey;
             settings.TagManagerId = setupInfo.TagManagerId;
-            settings.BookTrainingEmail = setupInfo.BookTrainingEmail;
-            settings.DocumentationEmail = setupInfo.DocumentationEmail;
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
 
@@ -149,10 +149,6 @@ public partial class SettingsController(MessageService messageService,
                 MeasurementId = configuration["firebase:measurementId"] ?? "",
                 DatabaseURL = configuration["firebase:databaseURL"] ?? ""
             };
-
-            settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
-            settings.FeedbackAndSupportLink = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
-            settings.ApiDocsLink = configuration["web:api-docs"];
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
             {
@@ -1030,9 +1026,8 @@ public partial class SettingsController(MessageService messageService,
     [AllowNotPayment]
     [HttpGet("payment")]
     public async Task<PaymentSettingsDto> PaymentSettingsAsync()
-    {        
+    {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
         var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
         var currentTariff = await tenantExtra.GetCurrentTariffAsync();
 
@@ -1043,9 +1038,8 @@ public partial class SettingsController(MessageService messageService,
 
         return new PaymentSettingsDto
         {
-            SalesEmail = settings.SalesEmail,
-            FeedbackAndSupportUrl = settings.FeedbackAndSupportUrl,
-            BuyUrl = settings.BuyUrl,
+            SalesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail"),
+            BuyUrl = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("buy" + (configuration["license:type"] ?? "enterprise")),
             Standalone = coreBaseSettings.Standalone,
             CurrentLicense = new CurrentLicenseInfo { Trial = currentQuota.Trial, DueDate = currentTariff.DueDate.Date },
             Max = maxQuotaQuantity

@@ -35,11 +35,9 @@
     <Compile Remove="Notify\Jabber\IReverseJabberService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Notify\Stylers\Resources\master.htm" />
     <None Remove="Notify\Stylers\Resources\style.css" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Notify\Stylers\Resources\master.htm" />
     <EmbeddedResource Include="Notify\Stylers\Resources\style.css" />
   </ItemGroup>
   <ItemGroup>
