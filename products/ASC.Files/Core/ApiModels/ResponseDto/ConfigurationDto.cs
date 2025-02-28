@@ -78,11 +78,19 @@ public class ConfigurationDto<T>
     /// Specifies if the filling has started or not
     /// </summary>
     public bool? StartFilling { get; set; }
+    public StartFillingMode StartFillingMode { get; set; }
 
     /// <summary>
     /// Filling session Id
     /// </summary>
     public string FillingSessionId { get; set; }
+}
+
+public enum StartFillingMode
+{
+    None,
+    ShareToFillOut,
+    StartFilling
 }
 
 public class EditorConfigurationDto
@@ -204,8 +212,16 @@ public class CustomizationConfigDto
     /// Submit form
     /// </summary>
     public bool SubmitForm { get; set; }
+    public StartFillingForm StartFillingForm { get; set; }
 }
 
+public class StartFillingForm
+{
+    /// <summary>
+    /// Text
+    /// </summary>
+    public string Text { get; set; }
+}
 public class LogoConfigDto
 {
     /// <summary>

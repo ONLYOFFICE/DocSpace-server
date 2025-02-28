@@ -36,5 +36,6 @@ public class FormOpenSetup<T>
     public EditorType EditorType { get; set; }
     public File<T> Draft { get; set; }
     public string RoleName { get; set; }
+    public Folder<T> RootFolder { get; set; }
 
 }

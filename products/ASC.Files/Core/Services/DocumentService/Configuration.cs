@@ -725,6 +725,11 @@ public class FileReferenceData
     /// Instance ID
     /// </summary>
     public string InstanceId { get; set; }
+
+    /// <summary>
+    /// Room ID
+    /// </summary>
+    public string RoomId { get; set; }
 }
 
 #endregion Nested Classes

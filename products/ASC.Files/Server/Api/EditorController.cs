@@ -168,6 +168,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     CanFill = inDto.Fill,
                 }
             };
+            formOpenSetup.RootFolder = rootFolder;
         }
 
         var docParams = await documentServiceHelper.GetParamsAsync(
@@ -212,16 +213,31 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
         
-        if (formOpenSetup != null && file.IsForm)
+        if (formOpenSetup != null)
         {
-            if (result.Document.Permissions.Copy && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+
+            if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
-                result.StartFilling = formOpenSetup.CanStartFilling;
+                result.StartFilling = result.Document.Permissions.Rename;
+                result.StartFillingMode = StartFillingMode.StartFilling;
+                result.Document.ReferenceData.RoomId = formOpenSetup.RootFolder.Id.ToString();
+
+                result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_StartFilling };
+                if (!string.IsNullOrEmpty(formOpenSetup.RoleName))
+                {
+                    result.EditorConfig.User.Roles = new List<string> { formOpenSetup.RoleName };
+                }
             }
-            if (!string.IsNullOrEmpty(formOpenSetup.RoleName))
+            else
             {
-                result.EditorConfig.User.Roles = new List<string> { formOpenSetup.RoleName };
+                if (result.Document.Permissions.Copy && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+                {
+                    result.StartFillingMode = StartFillingMode.ShareToFillOut;
+                    result.StartFilling = formOpenSetup.CanStartFilling;
+                    result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
+                }
             }
+
         }
 
         if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))

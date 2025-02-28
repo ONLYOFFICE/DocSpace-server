@@ -1366,6 +1366,24 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Share to fill out.
+        /// </summary>
+        public static string StartFillingModeEnum_ShareToFillOut {
+            get {
+                return ResourceManager.GetString("StartFillingModeEnum_ShareToFillOut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start filling.
+        /// </summary>
+        public static string StartFillingModeEnum_StartFilling {
+            get {
+                return ResourceManager.GetString("StartFillingModeEnum_StartFilling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to First Name.
         /// </summary>
         public static string UnknownFirstName {

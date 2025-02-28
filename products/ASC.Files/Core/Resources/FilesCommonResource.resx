@@ -565,4 +565,10 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
     <value>Cannot delete current version of file</value>
   </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Share to fill out</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Start filling</value>
+  </data>
 </root>
