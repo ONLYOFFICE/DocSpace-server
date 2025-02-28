@@ -543,7 +543,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///A backup file containing data from your &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal has been created.
         ///
-        ///To learn more on the backup procedure please refer to our &quot;Data backup&quot;:&quot;${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block&quot; user guide.
+        ///To learn more on the backup procedure please refer to our &quot;Data backup&quot;:&quot;$URL1&quot; user guide.
         ///
         ///
         ///If you have any questions or need assistance please feel free to contact us at &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
@@ -563,13 +563,13 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///A backup file containing data from your [${__VirtualRootPath}](${__VirtualRootPath}) portal has been created.
         ///
-        ///To learn more on the backup procedure please refer to our [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) user guide.
+        ///To learn more on the backup procedure please refer to our [Data backup](${URL1}) user guide.
         ///
         ///If you have any questions or need assistance please feel free to contact us at [${__SupportLink}](${__SupportLink})
         ///
         ///Best regards,
         ///ONLYOFFICE Support Team
-        ///[www.onlyoff [rest of string was truncated]&quot;;.
+        ///[${__SiteLink}](${__SiteLink}).
         /// </summary>
         public static string pattern_backup_created_tg {
             get {
@@ -731,6 +731,17 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 44px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
+        ///
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_docs_tips {
+            get {
+                return ResourceManager.GetString("pattern_docs_tips", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
@@ -857,17 +868,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_enterprise_admin_user_apps_tips_v1 {
             get {
                 return ResourceManager.GetString("pattern_enterprise_admin_user_apps_tips_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 44px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_admin_user_docs_tips_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_admin_user_docs_tips_v1", resourceCulture);
             }
         }
         
@@ -1228,17 +1228,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 44px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_opensource_admin_docs_tips_v1 {
-            get {
-                return ResourceManager.GetString("pattern_opensource_admin_docs_tips_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font- [rest of string was truncated]&quot;;.
@@ -1288,17 +1277,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_opensource_user_activation_v1 {
             get {
                 return ResourceManager.GetString("pattern_opensource_user_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 44px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_opensource_user_docs_tips_v1 {
-            get {
-                return ResourceManager.GetString("pattern_opensource_user_docs_tips_v1", resourceCulture);
             }
         }
         
@@ -1363,7 +1341,10 @@ namespace ASC.Web.Core.PublicResources {
         ///*Important! All the data stored in your space, as well as your registration details will be lost and cannot be recovered.*
         ///
         ///#if($AutoRenew == &quot;True&quot;)
-        ///Before you delete the space, please make sure that automatic billing is turned off. You may check the status of automatic billing in your &quot;Avangate account&quot;:&quot;https [rest of string was truncated]&quot;;.
+        ///Before you delete the space, please make sure that automatic billing is turned off. You may check the status of automatic billing in your Stripe account.
+        ///#end
+        ///
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_delete {
             get {
@@ -1392,7 +1373,10 @@ namespace ASC.Web.Core.PublicResources {
         ///_Important! All the data stored on your portal, as well as your registration details will be lost and cannot be recovered._
         ///
         ///#if($AutoRenew == &quot;True&quot;)
-        ///Before you delete the portal, please make sure that automatic billing is turned off. You may check the status of automatic billing in your [Avangate account](https:/ [rest of string was truncated]&quot;;.
+        ///Before you delete the portal, please make sure that automatic billing is turned off. You may check the status of automatic billing in your Stripe account.
+        ///#end
+        ///
+        ///I [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_delete_tg {
             get {
@@ -1665,17 +1649,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_admin_activation_v3 {
-            get {
-                return ResourceManager.GetString("pattern_saas_admin_activation_v3", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;&quot;&gt;ONLYOFFICE DocSpace: Explore useful &lt;span style=&quot;color: #FF6F3D;&quot;&gt;integrations&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Ar [rest of string was truncated]&quot;;.
@@ -1687,17 +1660,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;&quot;&gt;ONLYOFFICE DocSpace: Explore useful &lt;span style=&quot;color: #FF6F3D;&quot;&gt;integrations&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Ar [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_admin_integrations_v3 {
-            get {
-                return ResourceManager.GetString("pattern_saas_admin_integrations_v3", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Configure your &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-siz [rest of string was truncated]&quot;;.
@@ -1705,17 +1667,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_saas_admin_modules_v1 {
             get {
                 return ResourceManager.GetString("pattern_saas_admin_modules_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Configure your &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-siz [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_admin_modules_v3 {
-            get {
-                return ResourceManager.GetString("pattern_saas_admin_modules_v3", resourceCulture);
             }
         }
         
@@ -1753,46 +1704,13 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 44px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_admin_user_docs_tips_v1 {
-            get {
-                return ResourceManager.GetString("pattern_saas_admin_user_docs_tips_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 44px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_admin_user_docs_tips_v3 {
-            get {
-                return ResourceManager.GetString("pattern_saas_admin_user_docs_tips_v3", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font- [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_saas_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;&quot;&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 4 [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_welcome_v3 {
+        public static string pattern_saas_admin_welcome_v1 {
             get {
-                return ResourceManager.GetString("pattern_saas_admin_welcome_v3", resourceCulture);
+                return ResourceManager.GetString("pattern_saas_admin_welcome_v1", resourceCulture);
             }
         }
         
@@ -2071,7 +1989,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///The file decryption process on your portal &quot;${PortalUrl}&quot;:&quot;${PortalUrl}&quot; has been failed.
         ///
-        ///Some files could not be decrypted. Find more details in the &quot;Control Panel&quot;:&quot;${ControlPanelUrl}/storage&quot;..
+        ///Some files could not be decrypted. Find more details in the &quot;Control Panel&quot;:&quot;${PortalUrl}/management/settings&quot;..
         /// </summary>
         public static string pattern_storage_decryption_error {
             get {
@@ -2110,7 +2028,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///The file encryption process on the &quot;${PortalUrl}&quot;:&quot;${PortalUrl}&quot; portal has been failed.
         ///
-        ///Some files could not be encrypted. Find more details in the &quot;Control Panel&quot;:&quot;${ControlPanelUrl}/storage&quot;..
+        ///Some files could not be encrypted. Find more details in the &quot;Control Panel&quot;:&quot;${PortalUrl}/management/settings&quot;..
         /// </summary>
         public static string pattern_storage_encryption_error {
             get {
@@ -2312,6 +2230,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 5 tips for effective work on your docs.
+        /// </summary>
+        public static string subject_docs_tips {
+            get {
+                return ResourceManager.GetString("subject_docs_tips", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
         public static string subject_enterprise_admin_activation_v1 {
@@ -2380,15 +2307,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_enterprise_admin_user_apps_tips_v1 {
             get {
                 return ResourceManager.GetString("subject_enterprise_admin_user_apps_tips_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 5 tips for effective work on your docs.
-        /// </summary>
-        public static string subject_enterprise_admin_user_docs_tips_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_admin_user_docs_tips_v1", resourceCulture);
             }
         }
         
@@ -2582,15 +2500,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 5 tips for effective work on your docs.
-        /// </summary>
-        public static string subject_opensource_admin_docs_tips_v1 {
-            get {
-                return ResourceManager.GetString("subject_opensource_admin_docs_tips_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Discover business subscription of ONLYOFFICE DocSpace.
         /// </summary>
         public static string subject_opensource_admin_welcome_v1 {
@@ -2623,15 +2532,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_opensource_user_activation_v1 {
             get {
                 return ResourceManager.GetString("subject_opensource_user_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 5 tips for effective work on your docs.
-        /// </summary>
-        public static string subject_opensource_user_docs_tips_v1 {
-            get {
-                return ResourceManager.GetString("subject_opensource_user_docs_tips_v1", resourceCulture);
             }
         }
         
@@ -2839,15 +2739,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_saas_admin_user_apps_tips_v1 {
             get {
                 return ResourceManager.GetString("subject_saas_admin_user_apps_tips_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 5 tips for effective work on your docs.
-        /// </summary>
-        public static string subject_saas_admin_user_docs_tips_v1 {
-            get {
-                return ResourceManager.GetString("subject_saas_admin_user_docs_tips_v1", resourceCulture);
             }
         }
         
