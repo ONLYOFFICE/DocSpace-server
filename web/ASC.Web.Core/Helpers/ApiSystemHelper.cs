@@ -52,6 +52,7 @@ public class ApiSystemHelper
     private const string TenantRegionKey = "tenant_region";
     private const string TenantDomainKey = "tenant_domain";
     private readonly string _regionTableName;
+    private readonly Dictionary<string, string> _regions = new Dictionary<string, string> { { "us-west-2", "US" }, { "eu-central-1", "DEU" } };
 
     public ApiSystemHelper(
         IConfiguration configuration,
@@ -196,17 +197,9 @@ public class ApiSystemHelper
 
         if (getItemResponse.Item.TryGetValue(TenantRegionKey, out var region))
         {
-            if (region.S == "us-west-2")
+            if(_regions.TryGetValue(region.S, out var value))
             {
-                return "US";
-            }
-            else if (region.S == "eu-central-1")
-            {
-                return "DEU";
-            }
-            else 
-            {
-                return region.S;
+                return value;
             }
         }
 
