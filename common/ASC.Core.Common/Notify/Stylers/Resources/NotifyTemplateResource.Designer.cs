@@ -103,7 +103,7 @@ namespace ASC.Core.Common.Notify.Stylers.Resources {
         ///    &lt;tbody&gt;
         ///        &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
         ///            &lt;td style=&quot;margin: 0; padding: 0; vertical-align: bottom;&quot;&gt;
-        ///                &lt;a href=&quot;https://www.facebook.com/pages/Onl [rest of string was truncated]&quot;;.
+        ///                &lt;a href=&quot;%SOCIALNETWORKFACEBOOK%&quot; style=&quot;bo [rest of string was truncated]&quot;;.
         /// </summary>
         public static string SocialNetworksFooter {
             get {

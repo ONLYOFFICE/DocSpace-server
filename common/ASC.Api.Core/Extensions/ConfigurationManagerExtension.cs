@@ -50,6 +50,8 @@ public static class ConfigurationManagerExtension
         config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
             .AddJsonFile("storage.json", optional: false, reloadOnChange: true)
+            .AddJsonFile("externalresources.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"externalresources.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
             .AddJsonFile("kafka.json", optional: true, reloadOnChange: true)
             .AddJsonFile($"kafka.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
             .AddJsonFile("rabbitmq.json", optional: true, reloadOnChange: true)

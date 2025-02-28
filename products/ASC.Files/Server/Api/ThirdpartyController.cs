@@ -99,9 +99,9 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/{providerId}</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "Third-party folder ID", typeof(object))]
+    [SwaggerResponse(200, "Third-party folder ID", typeof(string))]
     [HttpDelete("thirdparty/{providerId:int}")]
-    public async Task<object> DeleteThirdPartyAsync(ProviderIdRequestDto inDto)
+    public async Task<string> DeleteThirdPartyAsync(ProviderIdRequestDto inDto)
     {
         return await fileStorageService.DeleteThirdPartyAsync(inDto.ProviderId.ToString(CultureInfo.InvariantCulture));
     }
@@ -113,23 +113,18 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-delete</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [SwaggerResponse(200, "Object with the \"success\" field: true if the operation is successful", typeof(object))]
+    [SwaggerResponse(200, "Object with the \"success\" field: true if the operation is successful", typeof(DeleteWordpressInfoResponse))]
     [HttpGet("wordpress-delete")]
-    public async Task<object> DeleteWordpressInfoAsync()
+    public async Task<DeleteWordpressInfoResponse> DeleteWordpressInfoAsync()
     {
         var token = await wordpressToken.GetTokenAsync();
         if (token != null)
         {
             await wordpressToken.DeleteTokenAsync(token);
-            return new
-            {
-                success = true
-            };
+            return DeleteWordpressInfoResponse.Succeeded();
         }
-        return new
-        {
-            success = false
-        };
+
+        return DeleteWordpressInfoResponse.Failed();
     }
 
     /// <summary>
@@ -193,9 +188,9 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-info</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(object))]
+    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(WordpressInfoResponse))]
     [HttpGet("wordpress-info")]
-    public async Task<object> GetWordpressInfoAsync()
+    public async Task<WordpressInfoResponse> GetWordpressInfoAsync()
     {
         var token = await wordpressToken.GetTokenAsync();
         if (token != null)
@@ -208,17 +203,10 @@ public class ThirdpartyController(
             var jsonBlogInfo = JObject.Parse(blogInfo);
             jsonBlogInfo.Add("username", wordpressUserName);
 
-            blogInfo = jsonBlogInfo.ToString();
-            return new
-            {
-                success = true,
-                data = blogInfo
-            };
+            return new WordpressInfoResponse { Success = true, Data = jsonBlogInfo.ToString() };
         }
-        return new
-        {
-            success = false
-        };
+
+        return new WordpressInfoResponse { Success = false, Data = null };
     }
 
     /// <summary>
@@ -283,16 +271,13 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-save</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(object))]
+    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(WordpressInfoResponse))]
     [HttpPost("wordpress-save")]
-    public async Task<object> WordpressSaveAsync(WordpressSaveRequestDto inDto)
+    public async Task<WordpressInfoResponse> WordpressSaveAsync(WordpressSaveRequestDto inDto)
     {
         if (inDto.Code.Length == 0)
         {
-            return new
-            {
-                success = false
-            };
+            return new WordpressInfoResponse();
         }
         try
         {
@@ -307,18 +292,15 @@ public class ThirdpartyController(
             jsonBlogInfo.Add("username", wordpressUserName);
 
             blogInfo = jsonBlogInfo.ToString();
-            return new
+            return new WordpressInfoResponse
             {
-                success = true,
-                data = blogInfo
+                Success = true,
+                Data = blogInfo
             };
         }
         catch (Exception)
         {
-            return new
-            {
-                success = false
-            };
+            return new WordpressInfoResponse();
         }
     }
 

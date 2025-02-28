@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.WhiteLabel;
 using ASC.Notify.Recipients;
 using ASC.Web.Core.Utility;
 
@@ -37,6 +38,7 @@ public class NotifyHelper(UserManager userManager,
     TenantManager tenantManager,
     AuthManager authManager,
     WorkContext workContext,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
     CommonLinkUtility commonLinkUtility,
     TenantLogoManager tenantLogoManager,
     IUrlShortener urlShortener,
@@ -73,13 +75,16 @@ public class NotifyHelper(UserManager userManager,
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
 
-        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", user.GetCulture());
+        var culture = user.GetCulture();
+
+        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
 
         await client.SendNoticeToAsync(
             Actions.BackupCreated,
             user,
             StudioNotifyService.EMailSenderName,
             new TagValue(Tags.OwnerName, user.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue("URL1", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("creatingbackup", culture)),
             TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
     }
 
