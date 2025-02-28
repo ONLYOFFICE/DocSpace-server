@@ -24,44 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#if DEBUG
-namespace ASC.Core.Common.Tests
+namespace ASC.Web.Api.ApiModels.ResponseDto;
+
+public class OwnerChangeInstructionsDto
 {
-    using System.Linq;
-
-    using ASC.Core.Tenants;
-
-    using NUnit.Framework;
-
-    [TestFixture]
-    public class HostedSolutionTest
-    {
-        [Test]
-        public void FindTenants()
-        {
-            var h = new HostedSolution();
-            var tenants = h.FindTenants("76ff727b-f987-4871-9834-e63d4420d6e9");
-            Assert.AreNotEqual(0, tenants.Count);
-        }
-
-        [Test]
-        public void TenantUtilTest()
-        {
-            var date = TenantUtil.DateTimeNow(System.TimeZoneInfo.GetSystemTimeZones().First());
-            Assert.IsNotNull(date);
-        }
-
-        [Test]
-        public void RegionsTest()
-        {
-            //var regionSerice = new MultiRegionHostedSolution("site", null, null, null, null);
-
-            //var t1 = regionSerice.GetTenant("teamlab.com", 50001);
-            //Assert.AreEqual("alias_test2.teamlab.com", t1.GetTenantDomain(null));
-
-            //var t2 = regionSerice.GetTenant("teamlab.eu.com", 50001);
-            //Assert.AreEqual("tscherb.teamlab.eu.com", t2.GetTenantDomain(null));
-        }
-    }
+    public int Status { get; set; }
+    public string Message { get; set; }
 }
-#endif

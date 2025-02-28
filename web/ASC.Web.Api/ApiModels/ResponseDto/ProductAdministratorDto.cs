@@ -24,41 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-//#if DEBUG
-//namespace ASC.Core.Common.Tests
-//{
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-//    using ASC.Core.Security.Authentication;
-
-//    using NUnit.Framework;
-
-//    [TestFixture]
-//    public class CookieStorageTest
-//    {
-//        [Test]
-//        public void Validate(CookieStorage cookieStorage)
-//        {
-//            //var t1 = 1;
-//            //var id1 = Guid.NewGuid();
-//            //var login1 = "l1";
-//            //var pwd1 = "p1";
-//            //var it1 = 1;
-//            //var expire1 = DateTime.UtcNow;
-//            //var iu1 = 1;
-
-//            //var cookie = cookieStorage.EncryptCookie(t1, id1, login1, pwd1, it1, expire1, iu1);
-
-
-//            //cookieStorage.DecryptCookie(cookie, out var t2, out var id2, out var login2, out var pwd2, out var it2, out var expire2, out var iu2);
-
-//            //Assert.AreEqual(t1, t2);
-//            //Assert.AreEqual(id1, id2);
-//            //Assert.AreEqual(login1, login2);
-//            //Assert.AreEqual(pwd1, pwd2);
-//            //Assert.AreEqual(it1, it2);
-//            //Assert.AreEqual(expire1, expire2);
-//            //Assert.AreEqual(iu1, iu2);
-//        }
-//    }
-//}
-//#endif
+public class ProductAdministratorDto
+{
+    public Guid ProductId { get; set; }
+    public Guid UserId { get; set; }
+    public bool Administrator { get; set; }
+}

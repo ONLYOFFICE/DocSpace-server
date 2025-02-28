@@ -290,10 +290,10 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/logout</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [SwaggerResponse(200, "Ok", typeof(object))]
+    [SwaggerResponse(200, "Ok", typeof(string))]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("logout")]
-    public async Task<object> LogoutAsync()
+    public async Task<string> LogoutAsync()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
