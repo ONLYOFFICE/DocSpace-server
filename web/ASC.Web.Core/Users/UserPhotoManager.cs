@@ -185,20 +185,15 @@ public class UserPhotoManager(UserManager userManager,
     StorageFactory storageFactory,
     UserPhotoManagerCache userPhotoManagerCache,
     ILogger<UserPhotoManager> logger,
-    IDistributedTaskQueueFactory queueFactory,
+    UserPhotoResizeManager userPhotoResizeManager,
     SettingsManager settingsManager)
 {
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "user_photo_manager";
-
     //Regex for parsing filenames into groups with id's
     private static readonly Regex _parseFile =
             new(@"^(?'module'\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1}){0,1}" +
                 @"(?'user'\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1}){1}" +
                 @"_(?'kind'orig|size){1}_(?'size'(?'width'[0-9]{1,5})-{1}(?'height'[0-9]{1,5})){0,1}\..*", RegexOptions.Compiled);
-
-    //note: using auto stop queue
-    private readonly DistributedTaskQueue _resizeQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);//TODO: configure
-
+    
     private string _defaultAbsoluteWebPath;
     public string GetDefaultPhotoAbsoluteWebPath()
     {
@@ -606,55 +601,16 @@ public class UserPhotoManager(UserManager userManager,
         if (now)
         {
             //Resize synchronously
-            await ResizeImage(resizeTask);
+            await userPhotoResizeManager.ResizeImage(resizeTask);
             return await GetSizedPhotoAbsoluteWebPath(userID, size);
         }
-
-        if ((await _resizeQueue.GetAllTasks<ResizeWorkerItem>()).All(r => r["key"] != key))
-        {
-            //Add
-            await _resizeQueue.EnqueueTask(async (_, _) => await ResizeImage(resizeTask), resizeTask);
-        }
+        
+        await userPhotoResizeManager.EnqueueTaskAsync(key, resizeTask);
         return GetDefaultPhotoAbsoluteWebPath(size);
         //NOTE: return default photo here. Since task will update cache
     }
 
-    private async Task ResizeImage(ResizeWorkerItem item)
-    {
-        try
-        {
-            await tenantManager.SetCurrentTenantAsync(item.TenantId);
-
-            var data = item.Data;
-            using var stream = new MemoryStream(data);
-            using var img = new MagickImage(stream);
-            var imgFormat = img.Format;
-
-            if (item.Size.CompareTo(new MagickGeometry(img.Width, img.Height)) != 0)
-            {
-                using var img2 = item.Settings.IsDefault ?
-                    CommonPhotoManager.DoThumbnail(img, item.Size) :
-                    UserPhotoThumbnailManager.GetImage(img, item.Size, item.Settings);
-                data = await CommonPhotoManager.SaveToBytes(img2);
-            }
-            else
-            {
-                data = await CommonPhotoManager.SaveToBytes(img);
-            }
-
-            var widening = CommonPhotoManager.GetImgFormatName(imgFormat);
-            var fileName = $"{item.UserId}_size_{item.Size.Width}-{item.Size.Height}.{widening}";
-
-            using var stream2 = new MemoryStream(data);
-            await item.DataStore.SaveAsync(fileName, stream2);
-
-            await userPhotoManagerCache.AddToCache(item.UserId, item.Size, fileName, item.TenantId);
-        }
-        catch (ArgumentException error)
-        {
-            throw new UnknownImageFormatException(error);
-        }
-    }
+   
 
     public async Task<string> SaveTempPhoto(byte[] data, long maxFileSize, uint maxWidth, uint maxHeight)
     {
@@ -803,6 +759,65 @@ public class UserPhotoManager(UserManager userManager,
             _ when size.Width == MediumFotoSize.Width && size.Height == MediumFotoSize.Height => CacheSize.Medium,
             _ => CacheSize.Original
         };
+    }
+}
+
+[Singleton]
+public class UserPhotoResizeManager(
+    IServiceProvider serviceProvider,
+    UserPhotoManagerCache userPhotoManagerCache,
+    IDistributedTaskQueueFactory queueFactory)
+{
+    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "user_photo_manager";
+    //note: using auto stop queue
+    private readonly DistributedTaskQueue _resizeQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);//TODO: configure
+
+    public async Task EnqueueTaskAsync(string key, ResizeWorkerItem resizeTask)
+    {
+        if ((await _resizeQueue.GetAllTasks<ResizeWorkerItem>()).All(r => r["key"] != key))
+        {
+            //Add
+            await _resizeQueue.EnqueueTask(async (_, _) => await ResizeImage(resizeTask), resizeTask);
+        }
+    }
+    
+    public async Task ResizeImage(ResizeWorkerItem item)
+    {
+        try
+        {
+            await using var scope = serviceProvider.CreateAsyncScope();
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            await tenantManager.SetCurrentTenantAsync(item.TenantId);
+
+            var data = item.Data;
+            using var stream = new MemoryStream(data);
+            using var img = new MagickImage(stream);
+            var imgFormat = img.Format;
+
+            if (item.Size.CompareTo(new MagickGeometry(img.Width, img.Height)) != 0)
+            {
+                using var img2 = item.Settings.IsDefault ?
+                    CommonPhotoManager.DoThumbnail(img, item.Size) :
+                    UserPhotoThumbnailManager.GetImage(img, item.Size, item.Settings);
+                data = await CommonPhotoManager.SaveToBytes(img2);
+            }
+            else
+            {
+                data = await CommonPhotoManager.SaveToBytes(img);
+            }
+
+            var widening = CommonPhotoManager.GetImgFormatName(imgFormat);
+            var fileName = $"{item.UserId}_size_{item.Size.Width}-{item.Size.Height}.{widening}";
+
+            using var stream2 = new MemoryStream(data);
+            await item.DataStore.SaveAsync(fileName, stream2);
+
+            await userPhotoManagerCache.AddToCache(item.UserId, item.Size, fileName, item.TenantId);
+        }
+        catch (ArgumentException error)
+        {
+            throw new UnknownImageFormatException(error);
+        }
     }
 }
 
