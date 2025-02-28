@@ -638,7 +638,7 @@ public class UserPhotoManager(
         if (now)
         {
             //Resize synchronously
-            await resizeTask.RunJob(resizeTask, CancellationToken.None);
+            await resizeTask.RunJob(CancellationToken.None);
             return await GetSizedPhotoAbsoluteWebPath(userID, size);
         }
         

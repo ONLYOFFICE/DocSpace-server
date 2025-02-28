@@ -52,11 +52,11 @@ public class DistributedTaskProgress : DistributedTask
     [ProtoMember(3)]
     protected int StepCount { get; set; }
 
-    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override async Task RunJob(CancellationToken cancellationToken)
     {
         Percentage = 0;
 
-        await base.RunJob(distributedTask, cancellationToken);
+        await base.RunJob(cancellationToken);
     }
 
     protected async Task StepDone()

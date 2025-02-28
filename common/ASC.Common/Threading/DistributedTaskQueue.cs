@@ -101,7 +101,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
         var task = new Task(() =>
         {
-            var t = distributedTask.RunJob(distributedTask, token);
+            var t = distributedTask.RunJob(token);
             t.ContinueWith(async a => await OnCompleted(a, distributedTask.Id), token).ConfigureAwait(false);
             t.ConfigureAwait(false);
         }, token, TaskCreationOptions.LongRunning);

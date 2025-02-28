@@ -96,7 +96,7 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distr
         TenantId = tenant.Id;
     }
 
-    public override async Task RunJob(DistributedTask _, CancellationToken cancellationToken)
+    public override async Task RunJob(CancellationToken cancellationToken)
     {
         try
         {

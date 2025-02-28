@@ -70,7 +70,7 @@ public class DistributedTask
 
     protected CancellationToken CancellationToken { get; set; }
 
-    public virtual async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public virtual async Task RunJob(CancellationToken cancellationToken)
     {
         Status = DistributedTaskStatus.Running;
         CancellationToken = cancellationToken;
