@@ -276,6 +276,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
     private IOpenApiAny GenerateFakeData(PropertyInfo propertyInfo)
     {
         var faker = new Faker();
+        Randomizer.Seed = new Random(123);
         var fileExtension = ".txt";
         switch (propertyInfo.Name)
         {
@@ -315,7 +316,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                     return new OpenApiInteger(faker.Random.Int(1, 10000));
                 }
 
-                return new OpenApiString(Guid.NewGuid().ToString());
+                    return new OpenApiString(faker.Random.Guid().ToString());
             default:
                 return null;
         }
