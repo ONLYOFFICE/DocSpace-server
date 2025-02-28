@@ -47,7 +47,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
         {
             item = serviceProvider.GetRequiredService<UsersQuotaSyncJob>();
             item.InitJob(tenant);
-            await _progressQueue.EnqueueTask(item.RunJobAsync, item);
+            await _progressQueue.EnqueueTask(item);
         }
     }
     public async Task<TaskProgressDto> CheckRecalculateQuota(Tenant tenant)
@@ -75,7 +75,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
 }
 
 [Transient]
-public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSpaceUsageStatManager filesSpaceUsageStatManager) : DistributedTaskProgress
+public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
 {
     private int? _tenantId;
     public int TenantId
@@ -96,20 +96,21 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
         TenantId = tenant.Id;
     }
 
-    public async Task RunJobAsync(DistributedTask _, CancellationToken cancellationToken)
+    public override async Task RunJob(DistributedTask _, CancellationToken cancellationToken)
     {
         try
         {
             await using var scope = serviceScopeFactory.CreateAsyncScope();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            var tenant = await tenantManager.SetCurrentTenantAsync(TenantId);
+            
             var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
             var authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-
-            var tenant = await tenantManager.SetCurrentTenantAsync(TenantId);
-
+            var filesSpaceUsageStatManager = scope.ServiceProvider.GetRequiredService<FilesSpaceUsageStatManager>();
+            
             await filesSpaceUsageStatManager.RecalculateQuota(tenant.Id);
 
             var tenantQuotaSettings = await settingsManager.LoadAsync<TenantQuotaSettings>();
