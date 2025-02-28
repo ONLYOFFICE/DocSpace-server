@@ -493,6 +493,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Yritys</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Yritys</value>
+  </data>
   <data name="Tariffs_startup" xml:space="preserve">
     <value>Aloitus</value>
   </data>

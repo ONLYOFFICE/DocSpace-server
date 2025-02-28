@@ -908,13 +908,22 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         if (room.FolderType == FolderType.FillingFormsRoom)
                         {
                             var fileType = FileUtility.GetFileTypeByFileName(file.Title);
-                            if (fileType != FileType.Pdf || !await fileChecker.CheckExtendedPDF(file))
+                            try
                             {
-                                var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
-                                var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-                                this[Err] = string.Format(_copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom, logoText);
 
+                                if (fileType != FileType.Pdf || !await fileChecker.CheckExtendedPDF(file))
+                                {
+                                    var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
+                                    var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+                                    this[Err] = string.Format(_copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom, logoText);
+                                    continue;
+                                }
+                            }
+                            catch
+                            {
+                                this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
                                 continue;
                             }
 

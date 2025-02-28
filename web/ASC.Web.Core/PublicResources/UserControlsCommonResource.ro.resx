@@ -117,25 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Nume</value>
-  </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Prenume</value>
-  </data>
   <data name="LicenseException" xml:space="preserve">
     <value>Licență expirată sau cotă de utilizatori nu corespunde cotei prevăzute de licență</value>
   </data>
   <data name="LicenseKeyNotCorrect" xml:space="preserve">
     <value>Cheia de licența este nevalabilă</value>
   </data>
-  <data name="TariffPerMonth" xml:space="preserve">
-    <value>lună</value>
+  <data name="LicenseKeyNotFound" xml:space="preserve">
+    <value>Trebuie introdusă o cheie de licență</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Document nou</value>
   </data>
-  <data name="LicenseKeyNotFound" xml:space="preserve">
-    <value>Trebuie introdusă o cheie de licență</value>
+  <data name="TariffPerMonth" xml:space="preserve">
+    <value>lună</value>
+  </data>
+  <data name="TariffPerYear" xml:space="preserve">
+    <value>an</value>
+  </data>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Prenume</value>
+  </data>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Nume</value>
   </data>
 </root>

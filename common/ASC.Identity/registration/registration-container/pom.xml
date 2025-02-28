@@ -43,6 +43,18 @@
             <artifactId>registration-service</artifactId>
         </dependency>
 
+        <!-- Grpc Server Dependencies -->
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-client-spring-boot-starter</artifactId>
+            <version>${grpc.starter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-server-spring-boot-starter</artifactId>
+            <version>${grpc.starter.version}</version>
+        </dependency>
+
         <!-- Spring Boot Dependencies -->
         <dependency>
             <groupId>com.github.jpmsilva.jsystemd</groupId>
@@ -58,11 +70,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
 
-        <!-- Hazelcast -->
+        <!-- Spring Caching -->
         <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast-spring</artifactId>
-            <version>${hazelcast.version}</version>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>${caffeine.caching.version}</version>
         </dependency>
 
         <!-- Logging Dependencies -->

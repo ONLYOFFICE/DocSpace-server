@@ -481,7 +481,15 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         {
             try
             {
-                var nameInEditor = JsonConvert.DeserializeObject<History>(fileData.History.ToString()).Changes
+                var serializerOptions = new JsonSerializerOptions
+                {
+                    Converters = { new CustomFormatDateTimeJsonConverter("yyyy-MM-dd HH:mm:ss") },
+                    PropertyNameCaseInsensitive = true
+                };
+
+                var history = JsonSerializer.Deserialize<History>(fileData.History.ToString(), serializerOptions);
+
+                var nameInEditor = history.Changes
                     .OrderByDescending(x => x.Created)
                     .Select(x => x.User.Name)
                     .FirstOrDefault();

@@ -50,6 +50,20 @@ internal sealed class BackupCleanerService(
 
         foreach (var scheduledBackups in (await backupRepository.GetScheduledBackupRecordsAsync()).GroupBy(r => r.TenantId))
         {
+            foreach (var record in await backupRepository.GetBackupRecordsByTenantIdAsync(scheduledBackups.Key))
+            {
+                var storage = await backupStorageFactory.GetBackupStorageAsync(record);
+                if (storage == null)
+                {
+                    continue;
+                }
+
+                if (!await storage.IsExistsAsync(record.StoragePath))
+                {
+                    await backupRepository.DeleteBackupRecordAsync(record.Id);
+                }
+            }
+
             if (stoppingToken.IsCancellationRequested)
             {
                 return;

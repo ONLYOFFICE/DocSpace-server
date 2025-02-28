@@ -850,6 +850,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
     <value>Habilite este aplicativo para permitir que seus usuários recebam notificações sobre as mensagens, mesmo offline. {0}Vá ao console Firebase e adicione um novo projeto para integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
   </data>

@@ -934,6 +934,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
     <value>Activez l'application pour publier les documents facilement vers votre site web WordPress. {0}Sur la page des développeurs Wordpress, créez une nouvelle application d'intégration pour {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
   </data>

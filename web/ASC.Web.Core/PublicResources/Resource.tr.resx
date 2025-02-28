@@ -601,6 +601,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Üçüncü taraf entegrasyonları</value>
   </data>

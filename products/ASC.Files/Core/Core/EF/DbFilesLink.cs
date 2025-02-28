@@ -96,7 +96,7 @@ public static class DbFilesLinkExtension
         {
             // Define composite primary key
             entity.HasKey(e => new { e.TenantId, e.SourceId, e.LinkedId })
-                .HasName("PRIMARY");
+                .HasName("PK_files_link");
 
             // Map entity to "files_link" table
             entity.ToTable("files_link");

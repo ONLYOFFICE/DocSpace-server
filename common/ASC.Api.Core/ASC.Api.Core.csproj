@@ -20,12 +20,21 @@
     <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="9.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.5.0" />
     <PackageReference Include="NLog.Targets.ElasticSearch" Version="7.7.0" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.4.0" />
+	<PackageReference Include="OpenTelemetry" Version="1.11.1" />
+	<PackageReference Include="OpenTelemetry.Api" Version="1.11.1" />
+	<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.1" />
+	<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.11.1" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.11.0" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.11.0" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.11.0" />
+	<PackageReference Include="OpenTelemetry.Exporter.InfluxDB" Version="1.0.0-alpha.4" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.10.0-beta.1" />
     <PackageReference Include="RedisRateLimiting" Version="1.2.0" />
     <PackageReference Include="RedisRateLimiting.AspNetCore" Version="1.2.0" />
     <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />

@@ -226,6 +226,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>비즈니스</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>비즈니스</value>
+  </data>
   <data name="FirstName" xml:space="preserve">
     <value>이름</value>
   </data>

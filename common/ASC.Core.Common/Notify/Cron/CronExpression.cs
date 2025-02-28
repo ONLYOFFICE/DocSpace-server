@@ -1195,7 +1195,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
     private DateTime ProcessDayOfWeek(DateTime d, int day, int mon)
     {
         var dow = (int)_daysOfWeek.First();
-        var cDow = (int)d.DayOfWeek;
+        var cDow = ((int)d.DayOfWeek) == 7 ? 1 : (int)d.DayOfWeek + 1;
         var daysToAdd = cDow < dow ? dow - cDow : dow + (7 - cDow);
         var lDay = GetLastDayOfMonth(mon, d.Year);
 
@@ -1225,17 +1225,12 @@ public class CronExpression : ICloneable, IDeserializationCallback
                 {
                     d = new DateTime(d.Year, mon + 1, 1, d.Hour, d.Minute, d.Second);
                 }
-
+                daysToAdd = day + daysToAdd - lDay - 1;
             }
 
-            while ((day + daysToAdd + 7) <= lDay)
-            {
-                daysToAdd += 7;
-            }
-            day += daysToAdd;
             if (daysToAdd > 0)
             {
-                d = new DateTime(d.Year, mon, day, d.Hour, d.Minute, d.Second);
+                d = new DateTime(d.Year, d.Month, d.Day + daysToAdd, d.Hour, d.Minute, d.Second);
             }
         }
         else if (_nthdayOfWeek != 0)
@@ -1277,7 +1272,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
             if (daysToAdd > 0 || dayShifted)
             {
-                d = new DateTime(d.Year, mon, day, d.Hour, d.Minute, d.Second);
+                d = new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
             }
         }
         else
@@ -1311,11 +1306,12 @@ public class CronExpression : ICloneable, IDeserializationCallback
                 {
                     d = new DateTime(d.Year, mon + 1, 1, d.Hour, d.Minute, d.Second);
                 }
+                daysToAdd = day + daysToAdd - lDay - 1;
             }
 
             if (daysToAdd > 0)
             {
-                d = new DateTime(d.Year, mon, day + daysToAdd, d.Hour, d.Minute, d.Second);
+                d = new DateTime(d.Year, d.Month, d.Day + daysToAdd, d.Hour, d.Minute, d.Second);
             }
         }
         return d;

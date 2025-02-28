@@ -39,6 +39,7 @@ namespace ASC.Web.Api.Controllers;
 public class PaymentController(UserManager userManager,
         TenantManager tenantManager,
         ITariffService tariffService,
+        IQuotaService quotaService,
         SecurityContext securityContext,
         RegionHelper regionHelper,
         QuotaHelper tariffHelper,
@@ -68,6 +69,16 @@ public class PaymentController(UserManager userManager,
         
         if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
             !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        {
+            return null;
+        }
+
+        var monthQuotas = (await quotaService.GetTenantQuotasAsync())
+            .Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Year)
+            .ToList();
+
+        // TODO: Temporary restriction. Only monthly tariff available for purchase
+        if (inDto.Quantity.Count != 1 || !monthQuotas.Any(q => q.Name == inDto.Quantity.First().Key))
         {
             return null;
         }
@@ -107,6 +118,14 @@ public class PaymentController(UserManager userManager,
             return false;
         }
 
+        var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+
+        // TODO: Temporary restriction. Only changing the quota for the current tariff is available
+        if (inDto.Quantity.Count != 1 || quota.Name != inDto.Quantity.First().Key)
+        {
+            return false;
+        }
+
         return await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity);
     }
 
@@ -118,9 +137,9 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/account</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The URL to the payment account", typeof(object))]
+    [SwaggerResponse(200, "The URL to the payment account", typeof(string))]
     [HttpGet("account")]
-    public async Task<object> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
+    public async Task<string> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {

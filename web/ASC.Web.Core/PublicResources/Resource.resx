@@ -1134,4 +1134,7 @@
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>Add at least 1 allowed IP address.</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
 </root>

@@ -1,0 +1,87 @@
+server:
+  servlet:
+    session:
+      tracking-modes: cookie
+  host: ${SERVER_HOST:127.0.0.1}
+  port: ${SERVER_PORT:9090}
+  shutdown: graceful
+springdoc:
+  api-docs:
+    path: /docs
+  use-management-port: false
+spring:
+  main:
+    banner-mode: off
+  application:
+    name: ${SPRING_APPLICATION_NAME:ASC.Identity.Authorization}
+    region: ${SPRING_APPLICATION_REGION:local} # eu/us/local
+    encryption:
+      type: ${SPRING_APPLICATION_ENCRYPTION_TYPE:aes} # aes/noop
+      secret: ${SPRING_APPLICATION_ENCRYPTION_SECRET:}
+    signature:
+      jwks: ${SPRING_APPLICATION_SIGNATURE_JWKS_TYPE:ec} # ec/rsa
+      secret: ${SPRING_APPLICATION_SIGNATURE_SECRET:}
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  cache:
+    type: caffeine
+  config:
+    import:
+      - "classpath:application-datasource.yml"
+      - "classpath:application-resilience.yml"
+      - "classpath:application-rabbitmq.yml"
+      - "classpath:application-security.yml"
+      - "classpath:application-service.yml"
+  threads:
+    virtual:
+      enabled: true
+management:
+  endpoint:
+    env:
+      post:
+        enabled: true
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      base-path: null
+      exposure:
+        include: health
+      path-mapping:
+        health: /health
+  health:
+    diskspace:
+      enabled: false
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+    refresh:
+      enabled: false
+---
+logging:
+  level:
+    com:
+      asc: DEBUG
+    org:
+      hibernate:
+        SQL: DEBUG
+        stat: DEBUG
+    root: INFO
+spring:
+  application:
+    encryption:
+      secret: secret
+    signature:
+      secret: 1123askdasjklasbnd
+  config:
+    activate:
+      on-profile:
+        - development
+        - dev
+        - d
+  output:
+    ansi:
+      enabled: always
