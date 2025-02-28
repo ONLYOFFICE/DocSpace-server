@@ -61,12 +61,12 @@ public class WebhooksConfigRequestsDto
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// SSL
+    /// SSL Verification
     /// </summary>
     public bool SSL { get; set;}
 
     /// <summary>
-    /// Target user ID
+    /// Trigger
     /// </summary>
-    public Guid? TargetUserId { get; set; }
+    public WebhookTrigger Trigger { get; set; }
 }

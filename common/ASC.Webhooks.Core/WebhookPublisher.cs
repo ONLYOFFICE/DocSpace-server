@@ -38,7 +38,7 @@ public class WebhookPublisher(
     IServiceProvider serviceProvider,
     DbWorker dbWorker,
     IEventBus eventBus,
-    SecurityContext securityContext,
+    AuthContext authContext,
     TenantManager tenantManager,
     TenantUtil tenantUtil)
     : IWebhookPublisher
@@ -55,53 +55,50 @@ public class WebhookPublisher(
             return;
         }
 
-        var webhookConfigs = await dbWorker.GetWebhookConfigs().Where(r => r.Enabled).ToListAsync();
+        var webhookConfigs = await dbWorker.GetWebhookConfigs(enabled: true).ToListAsync();
 
         var requestPayload = JsonSerializer.Serialize(data, _serializerOptions);
 
         foreach (var config in webhookConfigs)
         {
-            if (config.TargetUserId.HasValue)
+            if (config.Trigger != WebhookTrigger.All && !config.Trigger.HasFlag(trigger))
             {
-                if (securityContext.CurrentAccount.ID != config.TargetUserId.Value)
-                {
-                    if (checher == null)
-                    {
-                        continue;
-                    }
+                continue;
+            }
 
-                    if (!await checher.CheckAccessAsync(data, config.TargetUserId.Value))
-                    {
-                        continue;
-                    }
+            if (checher != null && config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
+            {
+                if (!await checher.CheckAccessAsync(data, config.CreatedBy.Value))
+                {
+                    continue;
                 }
             }
 
-            await PublishAsync((int)trigger, requestPayload, config.Id);
+            await PublishAsync(0, requestPayload, config.Id, trigger); //TODO: webhookId
         }
     }
 
-    public async Task PublishAsync(Webhook webhook, string requestPayload, WebhookData webhookData)
+    public async Task PublishAsync(Webhook webhook, string requestPayload, WebhookData webhookData, WebhookTrigger trigger)
     {
         if (string.IsNullOrEmpty(requestPayload))
         {
             return;
         }
 
-        var webhookConfigs = await dbWorker.GetWebhookConfigs().Where(r => r.Enabled).ToListAsync();
+        var webhookConfigs = await dbWorker.GetWebhookConfigs(enabled: true).ToListAsync();
 
         foreach (var config in webhookConfigs)
         {
-            if (config.TargetUserId.HasValue)
+            if (config.CreatedBy.HasValue)
             {
-                if (securityContext.CurrentAccount.ID != config.TargetUserId.Value)
+                if (authContext.CurrentAccount.ID != config.CreatedBy.Value)
                 {
                     if (webhookData?.AccessCheckerType == null)
                     {
                         continue;
                     }
 
-                    webhookData.TargetUserId = config.TargetUserId.Value;
+                    webhookData.TargetUserId = config.CreatedBy.Value;
                     webhookData.ResponseString = requestPayload;
 
                     var accessChecker = (IWebhookAccessChecker)serviceProvider.GetRequiredService(webhookData.AccessCheckerType);
@@ -112,11 +109,11 @@ public class WebhookPublisher(
                 }
             }
 
-            await PublishAsync(webhook.Id, requestPayload, config.Id);
+            await PublishAsync(webhook.Id, requestPayload, config.Id, trigger);
         }
     }
 
-    public async Task<DbWebhooksLog> PublishAsync(int webhookId, string requestResponse, int configId)
+    public async Task<DbWebhooksLog> PublishAsync(int webhookId, string requestResponse, int configId, WebhookTrigger trigger)
     {
         if (string.IsNullOrEmpty(requestResponse))
         {
@@ -124,20 +121,22 @@ public class WebhookPublisher(
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
-            
+
         var webhooksLog = new DbWebhooksLog
         {
             WebhookId = webhookId,
             CreationTime = DateTime.UtcNow,
             RequestPayload = requestResponse,
             ConfigId = configId,
-            TenantId = tenantId
+            TenantId = tenantId,
+            Trigger = trigger,
+            Uid = authContext.CurrentAccount.ID
         };
 
         webhooksLog = await PreProcessWebHookLog(webhooksLog);
         var webhook = await dbWorker.WriteToJournal(webhooksLog);
 
-        var @event = new WebhookRequestIntegrationEvent(securityContext.CurrentAccount.ID, tenantId)
+        var @event = new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             WebhookId = webhook.Id
         };
@@ -162,7 +161,7 @@ public class WebhookPublisher(
             {
                 //                Id = entry.Id,
                 CreateOn = dbWebhooksLog.CreationTime,
-                CreateBy = securityContext.CurrentAccount.ID,
+                CreateBy = authContext.CurrentAccount.ID,
                 Trigger = "*"
             },
             Data = data,

@@ -42,6 +42,11 @@ public class WebhooksLogDto : IMapFrom<DbWebhooksLog>
     public string ConfigName { get; set; }
 
     /// <summary>
+    /// Trigger
+    /// </summary>
+    public WebhookTrigger Trigger { get; set; }
+
+    /// <summary>
     /// Creation time
     /// </summary>
     public DateTime CreationTime { get; set; }
@@ -106,7 +111,8 @@ public class WebhooksLogConverter(TenantUtil tenantUtil) : ITypeConverter<DbWebh
              RequestHeaders = source.RequestHeaders,
              RequestPayload = source.RequestPayload,
              ResponseHeaders = source.ResponseHeaders,
-             ResponsePayload = source.ResponsePayload            
+             ResponsePayload = source.ResponsePayload,
+             Trigger = source.Trigger
         };
 
         if (source.Delivery.HasValue)

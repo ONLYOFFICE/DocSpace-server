@@ -32,7 +32,7 @@ namespace ASC.Webhooks.Core;
 public enum WebhookTrigger
 {
     [SwaggerEnum("All")]
-    None = 0,
+    All = 0,
 
 
     #region User

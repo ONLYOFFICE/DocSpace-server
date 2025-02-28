@@ -30,6 +30,7 @@ public class DbWebhooksLog
 {
     public int Id { get; set; }
     public int ConfigId { get; set; }
+    public WebhookTrigger Trigger { get; set; }
     public DateTime CreationTime { get; set; }
     public int WebhookId { get; set; }
     public string RequestHeaders { get; set; }
@@ -78,6 +79,11 @@ public static class WebhooksPayloadExtension
             entity.Property(e => e.ConfigId)
                 .HasColumnType("int")
                 .HasColumnName("config_id");
+
+            entity.Property(e => e.Trigger)
+                .HasColumnName("trigger")
+                .IsRequired()
+                .HasDefaultValueSql("'0'");
 
             entity.Property(e => e.Uid)
                 .HasColumnName("uid")
@@ -144,6 +150,11 @@ public static class WebhooksPayloadExtension
 
             entity.Property(e => e.ConfigId)
                 .HasColumnName("config_id");
+
+            entity.Property(e => e.Trigger)
+                .HasColumnName("trigger")
+                .IsRequired()
+                .HasDefaultValueSql("0");
 
             entity.Property(e => e.Uid)
                 .HasColumnName("uid");

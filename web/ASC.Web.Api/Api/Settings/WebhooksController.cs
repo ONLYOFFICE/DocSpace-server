@@ -56,9 +56,9 @@ public class WebhooksController(ApiContext context,
     [HttpGet("webhook")]
     public async IAsyncEnumerable<WebhooksConfigWithStatusDto> GetTenantWebhooks()
     {
-        Guid? targetUserId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
+        Guid? userId = await CheckAdminPermissionsAsync() ? null : authContext.CurrentAccount.ID;
 
-        await foreach (var webhook in dbWorker.GetTenantWebhooksWithStatus(targetUserId))
+        await foreach (var webhook in dbWorker.GetTenantWebhooksWithStatus(userId))
         {
             yield return mapper.Map<WebhooksConfigWithStatusDto>(webhook);
         }
@@ -76,10 +76,7 @@ public class WebhooksController(ApiContext context,
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        if (!await CheckAdminPermissionsAsync())
-        {
-            inDto.TargetUserId = authContext.CurrentAccount.ID;
-        }
+        _ = await CheckAdminPermissionsAsync();
 
         ArgumentNullException.ThrowIfNull(inDto.SecretKey);
 
@@ -87,7 +84,9 @@ public class WebhooksController(ApiContext context,
 
         passwordSettingsManager.CheckPassword(inDto.SecretKey, passwordSettings);
 
-        var webhook = await dbWorker.AddWebhookConfig(inDto.Uri, inDto.Name, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.TargetUserId);
+        var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Trigger);
+
+        //TODO: audit messageService.SendWebhookCreatedMessage(webhook);
 
         return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
@@ -116,9 +115,7 @@ public class WebhooksController(ApiContext context,
 
         if (!await CheckAdminPermissionsAsync())
         {
-            inDto.TargetUserId = authContext.CurrentAccount.ID;
-
-            if (existingWebhook.TargetUserId != inDto.TargetUserId)
+            if (existingWebhook.CreatedBy != authContext.CurrentAccount.ID)
             {
                 throw new SecurityException();
             }
@@ -129,7 +126,7 @@ public class WebhooksController(ApiContext context,
         existingWebhook.SecretKey = inDto.SecretKey;
         existingWebhook.Enabled = inDto.Enabled;
         existingWebhook.SSL = inDto.SSL;
-        existingWebhook.TargetUserId = inDto.TargetUserId;
+        existingWebhook.Trigger = inDto.Trigger;
 
         var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
 
@@ -157,7 +154,7 @@ public class WebhooksController(ApiContext context,
 
         if (!await CheckAdminPermissionsAsync())
         {
-            if (existingWebhook.TargetUserId != authContext.CurrentAccount.ID)
+            if (existingWebhook.CreatedBy != authContext.CurrentAccount.ID)
             {
                 throw new SecurityException();
             }
@@ -183,15 +180,15 @@ public class WebhooksController(ApiContext context,
     {
         if (!await CheckAdminPermissionsAsync())
         {
-            inDto.TargetUserId = authContext.CurrentAccount.ID;
+            inDto.UserId = authContext.CurrentAccount.ID;
         }
 
-        context.SetTotalCount(await dbWorker.GetTotalByQuery(inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.TargetUserId));
+        context.SetTotalCount(await dbWorker.GetTotalByQuery(inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.UserId, inDto.Trigger));
 
         var startIndex = Convert.ToInt32(context.StartIndex);
         var count = Convert.ToInt32(context.Count);
 
-        await foreach (var j in dbWorker.ReadJournal(startIndex, count, inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.TargetUserId))
+        await foreach (var j in dbWorker.ReadJournal(startIndex, count, inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.UserId, inDto.Trigger))
         {
             j.Log.Config = j.Config;
             yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(j.Log);
@@ -226,13 +223,13 @@ public class WebhooksController(ApiContext context,
 
         if (!await CheckAdminPermissionsAsync())
         {
-            if (item.Config.TargetUserId != authContext.CurrentAccount.ID)
+            if (item.Config.CreatedBy != authContext.CurrentAccount.ID)
             {
                 throw new SecurityException();
             }
         }
 
-        var result = await webhookPublisher.PublishAsync(item.Id, item.RequestPayload, item.ConfigId);
+        var result = await webhookPublisher.PublishAsync(item.Id, item.RequestPayload, item.ConfigId, item.Trigger);
 
         return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
     }
@@ -261,12 +258,12 @@ public class WebhooksController(ApiContext context,
                 continue;
             }
 
-            if (!isAdmin && item.Config.TargetUserId != authContext.CurrentAccount.ID)
+            if (!isAdmin && item.Config.CreatedBy != authContext.CurrentAccount.ID)
             {
                 continue;
             }
 
-            var result = await webhookPublisher.PublishAsync(item.Id, item.RequestPayload, item.ConfigId);
+            var result = await webhookPublisher.PublishAsync(item.Id, item.RequestPayload, item.ConfigId, item.Trigger);
 
             yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
         }
@@ -329,12 +326,12 @@ public class WebhooksController(ApiContext context,
 
     private async Task<bool> CheckAdminPermissionsAsync()
     {
-        if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (await userManager.IsDocSpaceAdminAsync(currentUser))
         {
             return true;
         }
-
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
         if (await userManager.IsGuestAsync(currentUser))
         {

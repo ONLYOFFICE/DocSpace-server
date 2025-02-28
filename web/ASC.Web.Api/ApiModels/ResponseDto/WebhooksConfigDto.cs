@@ -56,21 +56,54 @@ public class WebhooksConfigDto : IMapFrom<DbWebhooksConfig>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// SSL
+    /// SSL Verification
     /// </summary>
     public bool SSL { get; set; }
 
     /// <summary>
-    /// Target user
+    /// Trigger
     /// </summary>
-    public EmployeeDto TargetUser { get; set; }
+    public WebhookTrigger Trigger { get; set; }
+
+    /// <summary>
+    /// Create by
+    /// </summary>
+    public EmployeeDto CreatedBy { get; set; }
+
+    /// <summary>
+    /// Create on
+    /// </summary>
+    public DateTime? CreatedOn { get; set; }
+
+    /// <summary>
+    /// Modified by
+    /// </summary>
+    public EmployeeDto ModifiedBy { get; set; }
+
+    /// <summary>
+    /// Modified on
+    /// </summary>
+    public DateTime? ModifiedOn { get; set; }
+
+    /// <summary>
+    /// Last failure on
+    /// </summary>
+    public DateTime? LastFailureOn { get; set; }
+
+    /// <summary>
+    /// Last failure content
+    /// </summary>
+    public string LastFailureContent { get; set; }
+
+    /// <summary>
+    /// Last success on
+    /// </summary>
+    public DateTime? LastSuccessOn { get; set; }
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<Guid?, EmployeeDto>().ConvertUsing<WebhookMappingConverter>();
-
         profile.CreateMap<DbWebhooksConfig, WebhooksConfigDto>()
-            .ForMember(src => src.TargetUser, ex => ex.MapFrom(map => map.TargetUserId));
+            .ConvertUsing<WebhooksConfigConverter>();
     }
 }
 
@@ -89,7 +122,33 @@ public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<WebhooksConfigWithStatus, WebhooksConfigWithStatusDto>()
-            .ForMember(src => src.Configs, ex => ex
-                .MapFrom(map => map.WebhooksConfig));
+            .ForMember(src => src.Configs, ex => ex.MapFrom(map => map.WebhooksConfig));
+    }
+}
+
+[Scope]
+public class WebhooksConfigConverter(TenantUtil tenantUtil, EmployeeDtoHelper employeeDtoHelper) : ITypeConverter<DbWebhooksConfig, WebhooksConfigDto>
+{
+    public WebhooksConfigDto Convert(DbWebhooksConfig source, WebhooksConfigDto destination, ResolutionContext context)
+    {
+        var result = new WebhooksConfigDto
+        {
+            Id = source.Id,
+            Name = source.Name,
+            Uri = source.Uri,
+            SecretKey = source.SecretKey,
+            Enabled = source.Enabled,
+            SSL = source.SSL,
+            Trigger = source.Trigger,
+            CreatedBy = source.CreatedBy.HasValue ? employeeDtoHelper.GetAsync(source.CreatedBy.Value).Result : null, // TODO
+            CreatedOn = source.CreatedOn.HasValue? tenantUtil.DateTimeFromUtc(source.CreatedOn.Value) : null,
+            ModifiedBy = source.ModifiedBy.HasValue ? employeeDtoHelper.GetAsync(source.ModifiedBy.Value).Result : null, // TODO
+            ModifiedOn = source.ModifiedOn.HasValue ? tenantUtil.DateTimeFromUtc(source.ModifiedOn.Value) : null,
+            LastFailureOn = source.LastFailureOn.HasValue ? tenantUtil.DateTimeFromUtc(source.LastFailureOn.Value) : null,
+            LastFailureContent = source.LastFailureContent,
+            LastSuccessOn = source.LastSuccessOn.HasValue ? tenantUtil.DateTimeFromUtc(source.LastSuccessOn.Value) : null
+        };
+
+        return result;
     }
 }

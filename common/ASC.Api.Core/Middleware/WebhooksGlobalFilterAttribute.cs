@@ -69,7 +69,7 @@ public class WebhooksGlobalFilterAttribute(
             {
                 var requestPayload = Encoding.UTF8.GetString(_stream.ToArray());
 
-                await webhookPublisher.PublishAsync(webhook, requestPayload, webhookData);
+                await webhookPublisher.PublishAsync(webhook, requestPayload, webhookData, WebhookTrigger.All);
             }
             catch (Exception e)
             {

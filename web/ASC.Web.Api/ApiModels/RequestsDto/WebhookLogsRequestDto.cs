@@ -72,8 +72,14 @@ public class WebhookLogsRequestDto
     public WebhookGroupStatus? GroupStatus { get; set; }
 
     /// <summary>
-    /// Target user ID
+    /// User ID
     /// </summary>
-    [FromQuery(Name = "targetUserId")]
-    public Guid? TargetUserId { get; set; }
+    [FromQuery(Name = "userId")]
+    public Guid? UserId { get; set; }
+
+    /// <summary>
+    /// Trigger
+    /// </summary>
+    [FromQuery(Name = "trigger")]
+    public WebhookTrigger? Trigger { get; set; }
 }

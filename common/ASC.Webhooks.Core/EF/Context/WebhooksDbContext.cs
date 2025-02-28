@@ -35,11 +35,11 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ModelBuilderWrapper
-        .From(modelBuilder, Database)
-        .AddDbWebhooks()
-        .AddWebhooksConfig()
-        .AddWebhooksLog()
-        .AddDbTenant();
+            .From(modelBuilder, Database)
+            .AddDbWebhooks()
+            .AddWebhooksConfig()
+            .AddWebhooksLog()
+            .AddDbTenant();
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
@@ -49,15 +49,15 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<WebhooksConfigWithStatus> WebhooksConfigWithStatusAsync(int tenantId, Guid? targetUserId)
+    public IAsyncEnumerable<WebhooksConfigWithStatus> WebhooksConfigWithStatusAsync(int tenantId, Guid? userId)
     {
-        return Queries.WebhooksConfigWithStatusAsync(this, tenantId, targetUserId);
+        return Queries.WebhooksConfigWithStatusAsync(this, tenantId, userId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<DbWebhooksConfig> WebhooksConfigsAsync(int tenantId)
+    public IAsyncEnumerable<DbWebhooksConfig> WebhooksConfigsAsync(int tenantId, bool? enabled)
     {
-        return Queries.WebhooksConfigsAsync(this, tenantId);
+        return Queries.WebhooksConfigsAsync(this, tenantId, enabled);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
@@ -100,20 +100,19 @@ static file class Queries
 
     public static readonly Func<WebhooksDbContext, int, Guid?, IAsyncEnumerable<WebhooksConfigWithStatus>> WebhooksConfigWithStatusAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx, int tenantId, Guid? targetUserId) =>
-                ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId && (targetUserId == null || it.TargetUserId == targetUserId))
-             .GroupJoin(ctx.WebhooksLogs, c => c.Id, l => l.ConfigId, (configs, logs) => new { configs, logs })
-            .Select(it =>
-                new WebhooksConfigWithStatus
-                {
-                    WebhooksConfig = it.configs,
-                    Status = it.logs.OrderBy(webhooksLog => webhooksLog.Delivery).LastOrDefault().Status
-                }));
+            (WebhooksDbContext ctx, int tenantId, Guid? userId) =>
+                ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId && (userId == null || it.CreatedBy == userId))
+                .GroupJoin(ctx.WebhooksLogs, c => c.Id, l => l.ConfigId, (configs, logs) => new { configs, logs })
+                .Select(it => new WebhooksConfigWithStatus
+                    {
+                        WebhooksConfig = it.configs,
+                        Status = it.logs.OrderByDescending(webhooksLog => webhooksLog.Delivery).FirstOrDefault().Status
+                    }));
 
-    public static readonly Func<WebhooksDbContext, int, IAsyncEnumerable<DbWebhooksConfig>> WebhooksConfigsAsync =
+    public static readonly Func<WebhooksDbContext, int, bool?, IAsyncEnumerable<DbWebhooksConfig>> WebhooksConfigsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx, int tenantId) =>
-                ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId));
+            (WebhooksDbContext ctx, int tenantId, bool? enabled) =>
+                ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId && (enabled == null || it.Enabled == enabled)));
 
     public static readonly Func<WebhooksDbContext, int, int, Task<DbWebhooksConfig>> WebhooksConfigAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
