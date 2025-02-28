@@ -844,6 +844,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Nextcloud.
+        /// </summary>
+        public static string ConsumersNextcloud {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloud", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nextcloud description.
+        /// </summary>
+        public static string ConsumersNextcloudDescription {
+            get {
+                return ResourceManager.GetString("ConsumersNextcloudDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Rackspace Cloud Storage.
         /// </summary>
         public static string ConsumersRackspace {

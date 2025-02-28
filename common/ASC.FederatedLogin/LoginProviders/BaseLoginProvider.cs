@@ -42,7 +42,8 @@ public enum LoginProvider
     VK,
     Wordpress,
     Yahoo,
-    Yandex
+    Yandex,
+    Nextcloud2
 }
 
 public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : Consumer, ILoginProvider, new()

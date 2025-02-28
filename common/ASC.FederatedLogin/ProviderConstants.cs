@@ -41,4 +41,5 @@ public static class ProviderConstants
     public const string AppleId = "appleid";
     public const string Microsoft = "microsoft";
     public const string Zoom = "zoom";
+    public const string Nextcloud = "nextcloud";
 }

@@ -75,6 +75,8 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
                 OneDriveLoginProvider.OneDriveLoginProviderScopes, additionalStateArgs: additionals),
             LoginProvider.Wordpress => oAuth20TokenHelper.RequestCode<WordpressLoginProvider>(
                 additionalStateArgs: additionals),
+            LoginProvider.Nextcloud2 => oAuth20TokenHelper.RequestCode<NextcloudLoginProvider>(
+                additionalStateArgs: additionals),
             _ => null
         };
     }
