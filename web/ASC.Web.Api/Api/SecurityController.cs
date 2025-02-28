@@ -442,7 +442,8 @@ public class SecurityController(PermissionContext permissionContext,
                 new Claim("tenant_id", tenant.Id.ToString()),
                 new Claim("tenant_url", serverRootPath),
                 new Claim("is_admin", isAdmin.ToString().ToLower()),
-                new Claim("is_guest", isGuest.ToString().ToLower())
+                new Claim("is_guest", isGuest.ToString().ToLower()),
+                new Claim("is_public", "true") // TODO: check OAuth enable for non-admin users
             },
             expires: DateTime.Now.AddHours(1),
             signingCredentials: creds);
