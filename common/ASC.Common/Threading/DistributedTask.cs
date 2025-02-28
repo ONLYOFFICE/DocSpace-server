@@ -30,7 +30,7 @@ namespace ASC.Common.Threading;
 /// </summary>
 [ProtoContract(IgnoreUnknownSubTypes = true)]
 [ProtoInclude(100, typeof(DistributedTaskProgress))]
-[JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType)]
+[JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToNearestAncestor)]
 [JsonDerivedType(typeof(DistributedTaskProgress))]
 public class DistributedTask
 {
@@ -67,6 +67,7 @@ public class DistributedTask
 
     /// <summary>Exception</summary>
     /// <type>System.Object, System</type>
+    [JsonIgnore]
     public Exception Exception
     {
         get => new(_exeption);
