@@ -270,58 +270,19 @@ public class WebhooksController(ApiContext context,
     }
 
     /// <summary>
-    /// Returns settings of all webhooks.
+    /// Returns a list of triggers for a webhook.
     /// </summary>
     /// <short>
-    /// Get webhook settings
+    /// Get triggers for a webhook
     /// </short>
-    /// <path>api/2.0/settings/webhooks</path>
+    /// <path>api/2.0/settings/webhook/triggers</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "List of webhook settings", typeof(IAsyncEnumerable<Webhook>))]
-    [HttpGet("webhooks")]
-    public async IAsyncEnumerable<Webhook> Settings()
+    [SwaggerResponse(200, "List of triggers for a webhook", typeof(IAsyncEnumerable<Webhook>))]
+    [HttpGet("webhook/triggers")]
+    public Dictionary<string, int> Triggers()
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        var settings = await settingsManager.LoadAsync<WebHooksSettings>();
-
-        foreach (var w in await dbWorker.GetWebhooksAsync())
-        {
-            w.Disable = settings.Ids.Contains(w.Id);
-            yield return w;
-        }
-    }
-
-    /// <summary>
-    /// Disables a webhook with the ID specified in the request.
-    /// </summary>
-    /// <short>
-    /// Disable a webhook
-    /// </short>
-    /// <path>api/2.0/settings/webhook/{id}</path>
-    [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "Webhook settings", typeof(Webhook))]
-    [HttpPut("webhook/{id:int}")]
-    public async Task<Webhook> DisableWebHook(IdRequestDto<int> inDto)
-    {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        var settings = await settingsManager.LoadAsync<WebHooksSettings>();
-
-        Webhook result = null;
-
-        if (!settings.Ids.Contains(inDto.Id) && (result = await dbWorker.GetWebhookAsync(inDto.Id)) != null)
-        {
-            settings.Ids.Add(inDto.Id);
-        }
-
-        if (result != null)
-        {
-            await settingsManager.SaveAsync(settings);
-        }
-
-        return result;
+        return Enum.GetValues<WebhookTrigger>().ToDictionary(item => item.ToStringFast(), item => (int)item);
     }
 
     private async Task<bool> CheckAdminPermissionsAsync()

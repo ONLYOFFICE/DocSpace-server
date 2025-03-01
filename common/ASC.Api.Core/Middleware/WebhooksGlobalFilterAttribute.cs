@@ -116,11 +116,6 @@ public class WebhooksGlobalFilterAttribute(
             }
         }
 
-        if (webhook == null || (await settingsManager.LoadAsync<WebHooksSettings>()).Ids.Contains(webhook.Id))
-        {
-            return (null, null);
-        }
-
         var webhookData = GetWebhookDataAsync(context, endpoint);
 
         return (webhook, webhookData);
