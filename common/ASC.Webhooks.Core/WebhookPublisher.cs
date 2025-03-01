@@ -57,11 +57,9 @@ public class WebhookPublisher(
 
         var webhookConfigs = await dbWorker.GetWebhookConfigs(enabled: true).ToListAsync();
 
-        var requestPayload = JsonSerializer.Serialize(data, _serializerOptions);
-
         foreach (var config in webhookConfigs)
         {
-            if (config.Trigger != WebhookTrigger.All && !config.Trigger.HasFlag(trigger))
+            if (config.Triggers != WebhookTrigger.All && !config.Triggers.HasFlag(trigger))
             {
                 continue;
             }
@@ -74,8 +72,40 @@ public class WebhookPublisher(
                 }
             }
 
-            await PublishAsync(0, requestPayload, config.Id, trigger); //TODO: webhookId
+            _ = await PublishAsync(trigger, config, data);
         }
+    }
+
+    private async Task<DbWebhooksLog> PublishAsync<T>(WebhookTrigger trigger, DbWebhooksConfig webhookConfig, T data)
+    {
+        var payload = new WebhookPayload<T>(trigger, webhookConfig, data, authContext.CurrentAccount.ID);
+
+        var payloadStr = JsonSerializer.Serialize(payload, _serializerOptions);
+
+        var webhooksLog = new DbWebhooksLog
+        {
+            CreationTime = DateTime.UtcNow,
+            RequestPayload = payloadStr,
+            ConfigId = webhookConfig.Id,
+            TenantId = webhookConfig.TenantId,
+            Trigger = trigger,
+            Uid = authContext.CurrentAccount.ID
+        };
+
+        return await PublishAsync(webhooksLog);
+    }
+
+    public async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog)
+    {
+        webhookLog.Id = default; // create new when retry publish
+
+        var newWebhooksLog = await dbWorker.WriteToJournal(webhookLog);
+
+        var @event = new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, newWebhooksLog.TenantId, newWebhooksLog.Id);
+
+        await eventBus.PublishAsync(@event);
+
+        return newWebhooksLog;
     }
 
     public async Task PublishAsync(Webhook webhook, string requestPayload, WebhookData webhookData, WebhookTrigger trigger)
@@ -134,16 +164,13 @@ public class WebhookPublisher(
         };
 
         webhooksLog = await PreProcessWebHookLog(webhooksLog);
-        var webhook = await dbWorker.WriteToJournal(webhooksLog);
+        webhooksLog = await dbWorker.WriteToJournal(webhooksLog);
 
-        var @event = new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-        {
-            WebhookId = webhook.Id
-        };
+        var @event = new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, tenantId, webhooksLog.Id);
 
         await eventBus.PublishAsync(@event);
 
-        return webhook;
+        return webhooksLog;
     }
 
     private async Task<DbWebhooksLog> PreProcessWebHookLog(DbWebhooksLog dbWebhooksLog)

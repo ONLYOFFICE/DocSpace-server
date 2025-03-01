@@ -43,7 +43,7 @@ public class DbWorker(
 {
     public static readonly IReadOnlyList<string> MethodList = ["POST", "PUT", "DELETE"];
 
-    public async Task<DbWebhooksConfig> AddWebhookConfig(string name, string uri, string secretKey, bool enabled, bool ssl, WebhookTrigger trigger)
+    public async Task<DbWebhooksConfig> AddWebhookConfig(string name, string uri, string secretKey, bool enabled, bool ssl, WebhookTrigger triggers)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -88,7 +88,7 @@ public class DbWorker(
             Name = name,
             Enabled = enabled,
             SSL = ssl,
-            Trigger = trigger,
+            Triggers = triggers,
             CreatedBy = authContext.CurrentAccount.ID,
             CreatedOn = DateTime.UtcNow
         };
@@ -147,7 +147,7 @@ public class DbWorker(
         updateObj.SecretKey = dbWebhooksConfig.SecretKey;
         updateObj.Enabled = dbWebhooksConfig.Enabled;
         updateObj.SSL = dbWebhooksConfig.SSL;
-        updateObj.Trigger = dbWebhooksConfig.Trigger;
+        updateObj.Triggers = dbWebhooksConfig.Triggers;
 
         updateObj.ModifiedBy = dbWebhooksConfig.ModifiedBy ?? authContext.CurrentAccount.ID;
         updateObj.ModifiedOn = DateTime.UtcNow;

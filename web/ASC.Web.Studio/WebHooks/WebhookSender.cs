@@ -56,8 +56,7 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
 
         await tenantManager.SetCurrentTenantAsync(webhookRequest.TenantId);
 
-
-        var entry = await dbWorker.ReadJournal(webhookRequest.WebhookId);
+        var entry = await dbWorker.ReadJournal(webhookRequest.WebhookLogId);
         var webhooksConfig = await dbWorker.GetWebhookConfig(webhookRequest.TenantId, entry.ConfigId);
         var ssl = entry.Config.SSL;
 

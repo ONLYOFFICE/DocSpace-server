@@ -61,9 +61,9 @@ public class WebhooksConfigDto : IMapFrom<DbWebhooksConfig>
     public bool SSL { get; set; }
 
     /// <summary>
-    /// Trigger
+    /// Triggers
     /// </summary>
-    public WebhookTrigger Trigger { get; set; }
+    public WebhookTrigger Triggers { get; set; }
 
     /// <summary>
     /// Create by
@@ -139,7 +139,7 @@ public class WebhooksConfigConverter(TenantUtil tenantUtil, EmployeeDtoHelper em
             SecretKey = source.SecretKey,
             Enabled = source.Enabled,
             SSL = source.SSL,
-            Trigger = source.Trigger,
+            Triggers = source.Triggers,
             CreatedBy = source.CreatedBy.HasValue ? employeeDtoHelper.GetAsync(source.CreatedBy.Value).Result : null, // TODO
             CreatedOn = source.CreatedOn.HasValue? tenantUtil.DateTimeFromUtc(source.CreatedOn.Value) : null,
             ModifiedBy = source.ModifiedBy.HasValue ? employeeDtoHelper.GetAsync(source.ModifiedBy.Value).Result : null, // TODO

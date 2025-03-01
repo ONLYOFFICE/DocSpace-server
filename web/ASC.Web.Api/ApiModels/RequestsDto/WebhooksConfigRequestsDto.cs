@@ -66,7 +66,7 @@ public class WebhooksConfigRequestsDto
     public bool SSL { get; set;}
 
     /// <summary>
-    /// Trigger
+    /// Triggers
     /// </summary>
-    public WebhookTrigger Trigger { get; set; }
+    public WebhookTrigger Triggers { get; set; }
 }

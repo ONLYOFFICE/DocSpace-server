@@ -82,8 +82,7 @@ public static class WebhooksPayloadExtension
 
             entity.Property(e => e.Trigger)
                 .HasColumnName("trigger")
-                .IsRequired()
-                .HasDefaultValueSql("'0'");
+                .IsRequired();
 
             entity.Property(e => e.Uid)
                 .HasColumnName("uid")
@@ -153,8 +152,7 @@ public static class WebhooksPayloadExtension
 
             entity.Property(e => e.Trigger)
                 .HasColumnName("trigger")
-                .IsRequired()
-                .HasDefaultValueSql("0");
+                .IsRequired();
 
             entity.Property(e => e.Uid)
                 .HasColumnName("uid");

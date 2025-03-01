@@ -38,7 +38,7 @@ public class WebhooksController(ApiContext context,
         UserManager userManager,
         IHttpContextAccessor httpContextAccessor,
         IMapper mapper,
-        WebhookPublisher webhookPublisher,
+        IWebhookPublisher webhookPublisher,
         SettingsManager settingsManager,
         PasswordSettingsManager passwordSettingsManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
@@ -84,7 +84,7 @@ public class WebhooksController(ApiContext context,
 
         passwordSettingsManager.CheckPassword(inDto.SecretKey, passwordSettings);
 
-        var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Trigger);
+        var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers);
 
         //TODO: audit messageService.SendWebhookCreatedMessage(webhook);
 
@@ -126,7 +126,7 @@ public class WebhooksController(ApiContext context,
         existingWebhook.SecretKey = inDto.SecretKey;
         existingWebhook.Enabled = inDto.Enabled;
         existingWebhook.SSL = inDto.SSL;
-        existingWebhook.Trigger = inDto.Trigger;
+        existingWebhook.Triggers = inDto.Triggers;
 
         var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
 
@@ -229,7 +229,7 @@ public class WebhooksController(ApiContext context,
             }
         }
 
-        var result = await webhookPublisher.PublishAsync(item.Id, item.RequestPayload, item.ConfigId, item.Trigger);
+        var result = await webhookPublisher.PublishAsync(item);
 
         return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
     }
@@ -263,7 +263,7 @@ public class WebhooksController(ApiContext context,
                 continue;
             }
 
-            var result = await webhookPublisher.PublishAsync(item.Id, item.RequestPayload, item.ConfigId, item.Trigger);
+            var result = await webhookPublisher.PublishAsync(item);
 
             yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
         }

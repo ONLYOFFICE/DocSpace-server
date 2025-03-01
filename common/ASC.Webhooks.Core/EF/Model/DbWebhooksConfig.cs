@@ -37,7 +37,7 @@ public class DbWebhooksConfig : BaseEntity
     public string SecretKey { get; set; }
     public bool Enabled { get; set; }
     public bool SSL { get; set; }
-    public WebhookTrigger Trigger { get; set; }
+    public WebhookTrigger Triggers { get; set; }
 
     public Guid? CreatedBy { get; set; }
     public DateTime? CreatedOn { get; set; }
@@ -111,10 +111,9 @@ public static class WebhooksConfigExtension
                 .HasDefaultValueSql("'1'")
                 .HasColumnType("tinyint(1)");
 
-            entity.Property(e => e.Trigger)
-                .HasColumnName("trigger")
-                .IsRequired()
-                .HasDefaultValueSql("'0'");
+            entity.Property(e => e.Triggers)
+                .HasColumnName("triggers")
+                .IsRequired();
 
             entity.Property(e => e.CreatedBy)
                 .IsRequired(false)
@@ -148,7 +147,7 @@ public static class WebhooksConfigExtension
             entity.Property(e => e.LastFailureContent)
                 .IsRequired(false)
                 .HasColumnName("last_failure_content")
-                .HasColumnType("varchar")
+                .HasColumnType("varchar(200)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -205,10 +204,9 @@ public static class WebhooksConfigExtension
                 .HasDefaultValueSql("true")
                 .HasColumnType("boolean");
 
-            entity.Property(e => e.Trigger)
-                .HasColumnName("trigger")
-                .IsRequired()
-                .HasDefaultValueSql("0");
+            entity.Property(e => e.Triggers)
+                .HasColumnName("triggers")
+                .IsRequired();
 
             entity.Property(e => e.CreatedBy)
                 .IsRequired(false)
