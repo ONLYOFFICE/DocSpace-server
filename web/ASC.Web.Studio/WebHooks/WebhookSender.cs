@@ -32,15 +32,14 @@ using ASC.Core.Tenants;
 namespace ASC.Webhooks;
 
 [Singleton]
-public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFactory, IHttpClientFactory clientFactory)
+public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory scopeFactory, IHttpClientFactory clientFactory, Settings settings)
 {
-    private readonly ILogger _log = options.CreateLogger("ASC.Webhooks.Core");
-
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         IgnoreReadOnlyProperties = true
     };
+
     private const string SignatureHeader = "x-docspace-signature-256";
 
     public const string WEBHOOK = "webhook";
@@ -68,7 +67,6 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
 
         var clientName = ssl ? WEBHOOK : WEBHOOK_SKIP_SSL;
         var httpClient = clientFactory.CreateClient(clientName);
-        var settings = scope.ServiceProvider.GetRequiredService<Settings>();
         var policy = HttpPolicyExtensions.HandleTransientHttpError()
                                           .OrResult(x => x.StatusCode != HttpStatusCode.OK)
                                           .WaitAndRetryAsync(settings.RepeatCount ?? 5,
@@ -79,7 +77,7 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
 
                                                              });
         try
-        {        
+        {
             var response = await policy.ExecuteAsync(async (context) =>
             {
                 var request = new HttpRequestMessage(HttpMethod.Post, entry.Config.Uri);
@@ -117,7 +115,7 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
 
             webhooksConfig.LastSuccessOn = DateTime.UtcNow;
 
-            _log.DebugResponse(response);
+            logger.DebugResponse(response);
         }
         catch (HttpRequestException e)
         {
@@ -136,7 +134,7 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
             var lastFailureOn = DateTime.UtcNow;
             var lastFailureContent = e.Message;
 
-            if ((webhooksConfig.LastSuccessOn.HasValue) &&
+            if (webhooksConfig.LastSuccessOn.HasValue &&
                 (lastFailureOn - webhooksConfig.LastSuccessOn.Value > TimeSpan.FromDays(3)))
             {
                 await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
@@ -148,7 +146,7 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
             webhooksConfig.LastFailureOn = lastFailureOn;
             responsePayload = e.Message;
 
-            _log.ErrorWithException(e);
+            logger.ErrorWithException(e);
         }
         catch (Exception e)
         {
@@ -156,7 +154,7 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
             webhooksConfig.LastFailureOn = DateTime.UtcNow;
 
             status = (int)HttpStatusCode.InternalServerError;
-            _log.ErrorWithException(e);
+            logger.ErrorWithException(e);
         }
 
         var delivery = DateTime.UtcNow;
