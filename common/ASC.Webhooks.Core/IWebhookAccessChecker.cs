@@ -28,20 +28,6 @@ namespace ASC.Webhooks.Core
 {
     public interface IWebhookAccessChecker<T>
     {
-        public Task<bool> CheckAccessAsync(T data, Guid targetUserId);
-    }
-
-    public interface IWebhookAccessChecker
-    {
-        public Task<bool> CheckAccessAsync(WebhookData webhookData);
-    }
-
-    public class WebhookData
-    {
-        public Guid TargetUserId { get; set; }
-        public Type AccessCheckerType { get; set; }
-        public Type ResponseType { get; set; }
-        public string ResponseString { get; set; }
-        public Dictionary<string, string> RouteData { get; set; }
+        public Task<bool> CheckAccessAsync(T data, Guid userId);
     }
 }

@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json.Nodes;
-
-using ASC.Webhooks.Core;
-
 namespace ASC.Files.Api;
 
 /// <summary>
@@ -76,86 +72,24 @@ public abstract class ApiControllerBase(FolderDtoHelper folderDtoHelper, FileDto
 
 
 [Scope]
-public class WebhookFileEntryAccessChecker(
-    SecurityContext securityContext,
-    FileSecurity fileSecurity,
-    IDaoFactory daoFactory) : IWebhookAccessChecker
+public class WebhookFileEntryAccessChecker<T>(
+    AuthContext authContext,
+    UserManager userManager,
+    FileSecurity fileSecurity) : IWebhookAccessChecker<FileEntry<T>>
 {
-    public async Task<bool> CheckAccessAsync(WebhookData webhookData)
+    public async Task<bool> CheckAccessAsync(FileEntry<T> fileEntry, Guid userId)
     {
-        if (securityContext.CurrentAccount.ID == webhookData.TargetUserId)
+        if (authContext.CurrentAccount.ID == userId) //TODO:  || userManager.IsSystemUser(authContext.CurrentAccount.ID) ?
         {
             return true;
         }
 
-        if (typeof(FileEntryDto).IsAssignableFrom(webhookData.ResponseType))
-        {
-            var entryNode = JsonNode.Parse(webhookData.ResponseString)["response"];
-            return await CheckAccessByResponse(entryNode, webhookData.TargetUserId);
-        }
+        var currentUserType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
 
-        if (typeof(IEnumerable<FileEntryDto>).IsAssignableFrom(webhookData.ResponseType) ||
-            typeof(IAsyncEnumerable<FileEntryDto>).IsAssignableFrom(webhookData.ResponseType))
+        if (currentUserType is EmployeeType.DocSpaceAdmin)
         {
-            var entryNodes = JsonNode.Parse(webhookData.ResponseString)["response"].AsArray();
-            foreach (var entryNode in entryNodes)
-            {
-                if (!await CheckAccessByResponse(entryNode, webhookData.TargetUserId))
-                {
-                    return false;
-                }
-            }
-
             return true;
         }
-
-        var accessByFolderId = await CheckAccessByRouteAsync(webhookData.RouteData, "folderId", FileEntryType.Folder, webhookData.TargetUserId);
-        if (accessByFolderId.HasValue)
-        {
-            return accessByFolderId.Value;
-        }
-
-        var accessByFileId = await CheckAccessByRouteAsync(webhookData.RouteData, "fileId", FileEntryType.File, webhookData.TargetUserId);
-        if (accessByFileId.HasValue)
-        {
-            return accessByFileId.Value;
-        }
-
-        return false;
-    }
-
-    private async Task<bool?> CheckAccessByRouteAsync(Dictionary<string, string> routeData, string param, FileEntryType fileEntryType, Guid userId)
-    {
-        if (routeData.TryGetValue(param, out var fileEntryIdStr) && !string.IsNullOrEmpty(fileEntryIdStr))
-        {
-            return int.TryParse(fileEntryIdStr, out var fileEntryIdInt)
-                ? await CheckAccessAsync(fileEntryIdInt, fileEntryType, userId)
-                : await CheckAccessAsync(fileEntryIdStr, fileEntryType, userId);
-        }
-
-        return null;
-    }
-
-    private async Task<bool> CheckAccessByResponse(JsonNode entryNode, Guid userId)
-    {
-        if (entryNode == null)
-        {
-            return false;
-        }
-
-        var entryType = (FileEntryType)entryNode["fileEntryType"].GetValue<int>();
-        var entryIdNode = entryNode["id"];
-
-        return entryIdNode.GetValueKind() == JsonValueKind.Number
-            ? await CheckAccessAsync(entryIdNode.GetValue<int>(), entryType, userId)
-            : await CheckAccessAsync(entryIdNode.GetValue<string>(), entryType, userId);
-    }
-
-    async Task<bool> CheckAccessAsync<T>(T fileEntryId, FileEntryType fileEntryType, Guid userId)
-    {
-        FileEntry<T> fileEntry = fileEntryType == FileEntryType.File
-            ? await daoFactory.GetFileDao<T>().GetFileAsync(fileEntryId)
-            : await daoFactory.GetCacheFolderDao<T>().GetFolderAsync(fileEntryId);
 
         return await fileSecurity.CanReadAsync(fileEntry, userId);
     }

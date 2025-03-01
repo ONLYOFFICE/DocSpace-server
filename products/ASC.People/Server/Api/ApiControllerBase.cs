@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json.Nodes;
-
 using ASC.Common.Security;
 
 namespace ASC.People.Api;
@@ -42,141 +40,24 @@ public abstract class ApiControllerBase : ControllerBase;
 
 
 [Scope]
-public class WebhookPeopleAccessChecker(
+public class WebhookGroupAccessChecker(
+    AuthContext authContext,
     AuthManager authentication,
     UserManager userManager,
-    SecurityContext securityContext,
-    IPermissionResolver permissionResolver) : IWebhookAccessChecker
+    IPermissionResolver permissionResolver) : IWebhookAccessChecker<GroupInfo>
 {
-    public async Task<bool> CheckAccessAsync(WebhookData webhookData)
+    public async Task<bool> CheckAccessAsync(GroupInfo data, Guid userId)
     {
-        if (securityContext.CurrentAccount.ID == webhookData.TargetUserId)
+        if (authContext.CurrentAccount.ID == userId) //TODO:  || userManager.IsSystemUser(authContext.CurrentAccount.ID) ?
         {
             return true;
         }
 
-        if (typeof(EmployeeDto).IsAssignableFrom(webhookData.ResponseType))
-        {
-            var entryNode = JsonNode.Parse(webhookData.ResponseString)["response"];
-            return await CheckAccessByResponse(entryNode, false, webhookData.TargetUserId);
-        }
-
-        if (typeof(IEnumerable<EmployeeDto>).IsAssignableFrom(webhookData.ResponseType) ||
-            typeof(IAsyncEnumerable<EmployeeDto>).IsAssignableFrom(webhookData.ResponseType))
-        {
-            var entryNodes = JsonNode.Parse(webhookData.ResponseString)["response"].AsArray();
-            foreach (var entryNode in entryNodes)
-            {
-                if (!await CheckAccessByResponse(entryNode, false, webhookData.TargetUserId))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        if (typeof(GroupDto).IsAssignableFrom(webhookData.ResponseType))
-        {
-            var entryNode = JsonNode.Parse(webhookData.ResponseString)["response"];
-            return await CheckAccessByResponse(entryNode, true, webhookData.TargetUserId);
-        }
-
-        if (typeof(IEnumerable<GroupDto>).IsAssignableFrom(webhookData.ResponseType) ||
-            typeof(IAsyncEnumerable<GroupDto>).IsAssignableFrom(webhookData.ResponseType))
-        {
-            var entryNodes = JsonNode.Parse(webhookData.ResponseString)["response"].AsArray();
-            foreach (var entryNode in entryNodes)
-            {
-                if (!await CheckAccessByResponse(entryNode, true, webhookData.TargetUserId))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        var accessByFileId = await CheckAccessByRouteAsync(webhookData.RouteData, "userid", false, webhookData.TargetUserId);
-        if (accessByFileId.HasValue)
-        {
-            return accessByFileId.Value;
-        }
-
-        return false;
-    }
-
-    private async Task<bool?> CheckAccessByRouteAsync(Dictionary<string, string> routeData, string param, bool isGroup, Guid userId)
-    {
-        if (routeData.TryGetValue(param, out var idStr) && Guid.TryParse(idStr, out var id))
-        {
-            return await CheckAccessAsync(id, isGroup, userId);
-        }
-
-        return null;
-    }
-
-    private async Task<bool> CheckAccessByResponse(JsonNode entryNode, bool isGroup, Guid userId)
-    {
-        if (entryNode == null)
-        {
-            return false;
-        }
-
-        var entryIdNode = entryNode["id"];
-
-        if (Guid.TryParse(entryIdNode.GetValue<string>(), out var id))
-        {
-            return await CheckAccessAsync(id, isGroup, userId);
-        }
-
-        return false;
-    }
-
-    async Task<bool> CheckAccessAsync(Guid id, bool isGroup, Guid userId)
-    {
         var targetUser = await userManager.GetUsersAsync(userId);
 
         if (await userManager.IsDocSpaceAdminAsync(targetUser))
         {
             return true;
-        }
-
-        if (!isGroup)
-        {
-            var user = await userManager.GetUsersAsync(id);
-
-            if (await userManager.IsGuestAsync(user))
-            {
-                return user.CreatedBy == userId;
-            }
-        }
-
-        var account = await authentication.GetAccountByIDAsync(targetUser.TenantId, targetUser.Id);
-
-        return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
-    }
-}
-
-[Scope]
-public class WebhookGroupAccessChecker(
-    AuthManager authentication,
-    UserManager userManager,
-    SecurityContext securityContext,
-    IPermissionResolver permissionResolver) : IWebhookAccessChecker<GroupInfo>
-{
-    public async Task<bool> CheckAccessAsync(GroupInfo data, Guid userId)
-    {
-        if (securityContext.CurrentAccount.ID == userId)
-        {
-            return true;
-        }
-
-        var targetUser = await userManager.GetUsersAsync(userId);
-
-        if (await userManager.IsGuestAsync(targetUser))
-        {
-            return false;
         }
 
         var account = await authentication.GetAccountByIDAsync(targetUser.TenantId, targetUser.Id);
@@ -187,37 +68,43 @@ public class WebhookGroupAccessChecker(
 
 [Scope]
 public class WebhookUserAccessChecker(
-    AuthManager authentication,
-    UserManager userManager,
-    SecurityContext securityContext,
-    IPermissionResolver permissionResolver) : IWebhookAccessChecker<UserInfo>
+    AuthContext authContext,
+    UserManager userManager) : IWebhookAccessChecker<UserInfo>
 {
     public async Task<bool> CheckAccessAsync(UserInfo data, Guid userId)
     {
-        if (securityContext.CurrentAccount.ID == userId)
+        if (authContext.CurrentAccount.ID == userId) //TODO:  || userManager.IsSystemUser(authContext.CurrentAccount.ID) ?
         {
             return true;
         }
 
-        var targetUser = await userManager.GetUsersAsync(userId);
+        var currentUserType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
 
-        if (await userManager.IsGuestAsync(targetUser))
+        if (currentUserType is EmployeeType.DocSpaceAdmin)
+        {
+            return true;
+        }
+
+        if (currentUserType is EmployeeType.User or EmployeeType.Guest)
         {
             return false;
         }
 
-        if (await userManager.IsDocSpaceAdminAsync(targetUser))
+        var targetUser = await userManager.GetUsersAsync(userId);
+        var targetUserType = await userManager.GetUserTypeAsync(targetUser);
+
+        if (targetUserType is EmployeeType.Guest)
         {
-            return true;
+            if (targetUser.CreatedBy.HasValue && targetUser.CreatedBy.Value == authContext.CurrentAccount.ID)
+            {
+                return true;
+            }
+
+            var userRelations = await userManager.GetUserRelationsAsync(authContext.CurrentAccount.ID);
+
+            return userRelations.ContainsKey(targetUser.Id);
         }
 
-        if (await userManager.IsGuestAsync(data))
-        {
-            return data.CreatedBy == userId;
-        }
-
-        var account = await authentication.GetAccountByIDAsync(targetUser.TenantId, targetUser.Id);
-
-        return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
+        return true;
     }
 }
