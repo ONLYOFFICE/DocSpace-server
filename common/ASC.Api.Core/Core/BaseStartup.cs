@@ -46,8 +46,8 @@ public abstract class BaseStartup
     private static readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     protected bool AddAndUseSession { get; }
+
     protected DIHelper DIHelper { get; }
-    protected bool WebhooksEnabled { get; init; }
 
     protected bool OpenApiEnabled { get; init; }
 
@@ -568,7 +568,7 @@ public abstract class BaseStartup
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices).Wait();
+            endpoints.MapCustomAsync();
 
             endpoints.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => true, ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }).ShortCircuit();
 

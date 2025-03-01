@@ -41,8 +41,6 @@ public class DbWorker(
     IHttpClientFactory clientFactory,
     IConfiguration configuration)
 {
-    public static readonly IReadOnlyList<string> MethodList = ["POST", "PUT", "DELETE"];
-
     public async Task<DbWebhooksConfig> AddWebhookConfig(string name, string uri, string secretKey, bool enabled, bool ssl, WebhookTrigger triggers)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
@@ -256,29 +254,6 @@ public class DbWorker(
         }
 
         return webhook;
-    }
-
-    public async Task Register(List<Webhook> webhooks)
-    {
-        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
-
-        var dbWebhooks = await webhooksDbContext.DbWebhooksAsync().ToListAsync();
-
-        foreach (var webhook in webhooks)
-        {
-            if (!dbWebhooks.Exists(r => r.Route == webhook.Route && r.Method == webhook.Method))
-            {
-                try
-                {
-                    await webhooksDbContext.Webhooks.AddAsync(mapper.Map<DbWebhook>(webhook));
-                    await webhooksDbContext.SaveChangesAsync();
-                }
-                catch (Exception)
-                {
-
-                }
-            }
-        }
     }
 
     public async Task<List<Webhook>> GetWebhooksAsync()
