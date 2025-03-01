@@ -78,31 +78,31 @@ public class WebhookUserAccessChecker(
             return true;
         }
 
-        var currentUserType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        var targetUser = await userManager.GetUsersAsync(userId);
+        var targetUserType = await userManager.GetUserTypeAsync(targetUser);
 
-        if (currentUserType is EmployeeType.DocSpaceAdmin)
+        if (targetUserType is EmployeeType.DocSpaceAdmin)
         {
             return true;
         }
 
-        if (currentUserType is EmployeeType.User or EmployeeType.Guest)
+        if (targetUserType is EmployeeType.User or EmployeeType.Guest)
         {
             return false;
         }
 
-        var targetUser = await userManager.GetUsersAsync(userId);
-        var targetUserType = await userManager.GetUserTypeAsync(targetUser);
+        var dataUserType = await userManager.GetUserTypeAsync(data);
 
-        if (targetUserType is EmployeeType.Guest)
+        if (dataUserType is EmployeeType.Guest)
         {
-            if (targetUser.CreatedBy.HasValue && targetUser.CreatedBy.Value == authContext.CurrentAccount.ID)
+            if (data.CreatedBy.HasValue && data.CreatedBy.Value == userId)
             {
                 return true;
             }
 
-            var userRelations = await userManager.GetUserRelationsAsync(authContext.CurrentAccount.ID);
+            var userRelations = await userManager.GetUserRelationsAsync(userId);
 
-            return userRelations.ContainsKey(targetUser.Id);
+            return userRelations.ContainsKey(data.Id);
         }
 
         return true;
