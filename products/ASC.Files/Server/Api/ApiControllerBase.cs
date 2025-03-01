@@ -69,28 +69,3 @@ public abstract class ApiControllerBase(FolderDtoHelper folderDtoHelper, FileDto
         return wrapper;
     }
 }
-
-
-[Scope]
-public class WebhookFileEntryAccessChecker<T>(
-    AuthContext authContext,
-    UserManager userManager,
-    FileSecurity fileSecurity) : IWebhookAccessChecker<FileEntry<T>>
-{
-    public async Task<bool> CheckAccessAsync(FileEntry<T> fileEntry, Guid userId)
-    {
-        if (authContext.CurrentAccount.ID == userId) //TODO:  || userManager.IsSystemUser(authContext.CurrentAccount.ID) ?
-        {
-            return true;
-        }
-
-        var currentUserType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-
-        if (currentUserType is EmployeeType.DocSpaceAdmin)
-        {
-            return true;
-        }
-
-        return await fileSecurity.CanReadAsync(fileEntry, userId);
-    }
-}
