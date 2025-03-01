@@ -30,7 +30,4 @@ public interface IWebhookPublisher
 {
     public Task PublishAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checher, T data);
     public Task<DbWebhooksLog> RetryPublishAsync(DbWebhooksLog webhookLog);
-
-    public Task PublishAsync(Webhook webhook, string requestPayload, WebhookData webhookData, WebhookTrigger trigger);
-    public Task<DbWebhooksLog> PublishAsync(int webhookId, string requestPayload, int configId, WebhookTrigger trigger);
 }

@@ -25,22 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Text.Json;
-using System.Text.Json.Nodes;
-
-using ASC.Core.Tenants;
-
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ASC.Webhooks.Core;
 
 [Scope(typeof(IWebhookPublisher))]
 public class WebhookPublisher(
-    IServiceProvider serviceProvider,
     DbWorker dbWorker,
     IEventBus eventBus,
-    AuthContext authContext,
-    TenantManager tenantManager,
-    TenantUtil tenantUtil)
+    AuthContext authContext)
     : IWebhookPublisher
 {
     private static readonly JsonSerializerOptions _serializerOptions = new()
@@ -121,113 +113,5 @@ public class WebhookPublisher(
         await eventBus.PublishAsync(@event);
 
         return newWebhooksLog;
-    }
-
-    public async Task PublishAsync(Webhook webhook, string requestPayload, WebhookData webhookData, WebhookTrigger trigger)
-    {
-        if (string.IsNullOrEmpty(requestPayload))
-        {
-            return;
-        }
-
-        var webhookConfigs = await dbWorker.GetWebhookConfigs(enabled: true).ToListAsync();
-
-        foreach (var config in webhookConfigs)
-        {
-            if (config.CreatedBy.HasValue)
-            {
-                if (authContext.CurrentAccount.ID != config.CreatedBy.Value)
-                {
-                    if (webhookData?.AccessCheckerType == null)
-                    {
-                        continue;
-                    }
-
-                    webhookData.TargetUserId = config.CreatedBy.Value;
-                    webhookData.ResponseString = requestPayload;
-
-                    var accessChecker = (IWebhookAccessChecker)serviceProvider.GetRequiredService(webhookData.AccessCheckerType);
-                    if (!await accessChecker.CheckAccessAsync(webhookData))
-                    {
-                        continue;
-                    }
-                }
-            }
-
-            await PublishAsync(webhook.Id, requestPayload, config.Id, trigger);
-        }
-    }
-
-    public async Task<DbWebhooksLog> PublishAsync(int webhookId, string requestResponse, int configId, WebhookTrigger trigger)
-    {
-        if (string.IsNullOrEmpty(requestResponse))
-        {
-            return null;
-        }
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var webhooksLog = new DbWebhooksLog
-        {
-            WebhookId = webhookId,
-            CreationTime = DateTime.UtcNow,
-            RequestPayload = requestResponse,
-            ConfigId = configId,
-            TenantId = tenantId,
-            Trigger = trigger,
-            Uid = authContext.CurrentAccount.ID
-        };
-
-        webhooksLog = await PreProcessWebHookLog(webhooksLog);
-        webhooksLog = await dbWorker.WriteToJournal(webhooksLog);
-
-        var @event = new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, tenantId, webhooksLog.Id);
-
-        await eventBus.PublishAsync(@event);
-
-        return webhooksLog;
-    }
-
-    private async Task<DbWebhooksLog> PreProcessWebHookLog(DbWebhooksLog dbWebhooksLog)
-    {
-        var requestResponse = dbWebhooksLog.RequestPayload;
-       
-        var webhooksConfig = await dbWorker.GetWebhookConfig(dbWebhooksLog.TenantId, dbWebhooksLog.ConfigId);
-
-        var jsonNode = JsonNode.Parse(requestResponse);
-        var data = (jsonNode["response"] ?? jsonNode["data"] ?? jsonNode.Root);
-
-        var requestPayload = new
-        {
-            Action = new
-            {
-                //                Id = entry.Id,
-                CreateOn = dbWebhooksLog.CreationTime,
-                CreateBy = authContext.CurrentAccount.ID,
-                Trigger = "*"
-            },
-            Data = data,
-            Webhook = new
-            {
-                Id = webhooksConfig.Id,
-                Name = webhooksConfig.Name,
-                PayloadUrl = webhooksConfig.Uri,
-                LastSuccessOn = webhooksConfig.LastSuccessOn.HasValue ? tenantUtil.DateTimeFromUtc(webhooksConfig.LastSuccessOn.Value) : new DateTime?(),
-                LastFailureOn = webhooksConfig.LastFailureOn.HasValue ? tenantUtil.DateTimeFromUtc(webhooksConfig.LastFailureOn.Value) : new DateTime?(),
-                LastFailureContent = webhooksConfig.LastFailureContent,
-                RetryOn = new DateTime?(),
-                RetryCount = 0,
-
-                //Target = new {
-                //  Type = "room", //  room | folder | file,
-                //  Id = 111
-                //},
-                Triggers = "[*]"
-            }
-        };
-
-        dbWebhooksLog.RequestPayload = JsonSerializer.Serialize(requestPayload, _serializerOptions);
-
-        return dbWebhooksLog;
     }
 }

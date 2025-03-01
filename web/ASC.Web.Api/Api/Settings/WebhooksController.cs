@@ -28,7 +28,6 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [WebhookDisable]
 public class WebhooksController(ApiContext context,
-        PermissionContext permissionContext,
         ApiContext apiContext,
         AuthContext authContext,
         WebItemManager webItemManager,
