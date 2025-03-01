@@ -48,12 +48,6 @@ public class WebhookLogsRequestDto
     public string HookUri { get; set; }
 
     /// <summary>
-    /// Webhook ID
-    /// </summary>
-    [FromQuery(Name = "webhookId")]
-    public int? WebhookId {  get; set; }
-
-    /// <summary>
     /// Config ID
     /// </summary>
     [FromQuery(Name = "configId")]

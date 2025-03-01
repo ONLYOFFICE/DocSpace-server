@@ -26,8 +26,6 @@
 
 using System.Security;
 
-using AutoMapper;
-
 using Microsoft.Extensions.Configuration;
 
 namespace ASC.Webhooks.Core;
@@ -37,7 +35,6 @@ public class DbWorker(
     IDbContextFactory<WebhooksDbContext> dbContextFactory,
     TenantManager tenantManager,
     AuthContext authContext,
-    IMapper mapper,
     IHttpClientFactory clientFactory,
     IConfiguration configuration)
 {
@@ -178,10 +175,10 @@ public class DbWorker(
         return removeObj;
     }
 
-    public async IAsyncEnumerable<DbWebhooks> ReadJournal(int startIndex, int limit, DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? hookId, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus, Guid? userId, WebhookTrigger? trigger)
+    public async IAsyncEnumerable<DbWebhooks> ReadJournal(int startIndex, int limit, DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus, Guid? userId, WebhookTrigger? trigger)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
-        var q = await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, hookId, configId, eventId, webhookGroupStatus, userId, trigger);
+        var q = await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger);
 
         if (startIndex != 0)
         {
@@ -199,9 +196,9 @@ public class DbWorker(
         }
     }
 
-    public async Task<int> GetTotalByQuery(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? hookId, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus, Guid? userId, WebhookTrigger? trigger)
+    public async Task<int> GetTotalByQuery(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus, Guid? userId, WebhookTrigger? trigger)
     {
-        return await (await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, hookId, configId, eventId, webhookGroupStatus, userId, trigger)).CountAsync();
+        return await (await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger)).CountAsync();
     }
 
     public async Task<DbWebhooksLog> ReadJournal(int id)
@@ -256,33 +253,10 @@ public class DbWorker(
         return webhook;
     }
 
-    public async Task<List<Webhook>> GetWebhooksAsync()
-    {
-        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
-        var webHooks = await webhooksDbContext.DbWebhooksAsync().ToListAsync();
-        return mapper.Map<List<DbWebhook>, List<Webhook>>(webHooks);
-    }
-
-    public async Task<Webhook> GetWebhookAsync(int id)
-    {
-        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
-        var webHook = await webhooksDbContext.DbWebhookAsync(id);
-        return mapper.Map<DbWebhook, Webhook>(webHook);
-    }
-
-    public async Task<Webhook> GetWebhookAsync(string method, string routePattern)
-    {
-        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
-
-        var webHook = await webhooksDbContext.DbWebhookByMethodAsync(method, routePattern);
-
-        return mapper.Map<DbWebhook, Webhook>(webHook);
-    }
-
-    private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? hookId, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus, Guid? userId, WebhookTrigger? trigger)
+    private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus, Guid? userId, WebhookTrigger? trigger)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        
+
         var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = webhooksDbContext.WebhooksLogs
@@ -315,11 +289,6 @@ public class DbWorker(
         if (!string.IsNullOrEmpty(hookUri))
         {
             q = q.Where(r => r.Config.Uri == hookUri);
-        }
-
-        if (hookId != null)
-        {
-            q = q.Where(r => r.Log.WebhookId == hookId);
         }
 
         if (configId != null)

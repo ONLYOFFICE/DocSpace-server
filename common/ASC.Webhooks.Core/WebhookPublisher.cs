@@ -81,7 +81,6 @@ public class WebhookPublisher(
             Uid = authContext.CurrentAccount.ID,
             Trigger = trigger,
             CreationTime = DateTime.UtcNow,
-            WebhookId = 0,
             RequestPayload = payloadStr
         };
 
@@ -97,7 +96,6 @@ public class WebhookPublisher(
             Uid = authContext.CurrentAccount.ID,
             Trigger = webhookLog.Trigger,
             CreationTime = DateTime.UtcNow,
-            WebhookId = webhookLog.WebhookId,
             RequestPayload = webhookLog.RequestPayload
         };
 
