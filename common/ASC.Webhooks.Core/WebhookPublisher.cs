@@ -84,21 +84,36 @@ public class WebhookPublisher(
 
         var webhooksLog = new DbWebhooksLog
         {
-            CreationTime = DateTime.UtcNow,
-            RequestPayload = payloadStr,
-            ConfigId = webhookConfig.Id,
             TenantId = webhookConfig.TenantId,
+            ConfigId = webhookConfig.Id,
+            Uid = authContext.CurrentAccount.ID,
             Trigger = trigger,
-            Uid = authContext.CurrentAccount.ID
+            CreationTime = DateTime.UtcNow,
+            WebhookId = 0,
+            RequestPayload = payloadStr
         };
 
         return await PublishAsync(webhooksLog);
     }
 
-    public async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog)
+    public async Task<DbWebhooksLog> RetryPublishAsync(DbWebhooksLog webhookLog)
     {
-        webhookLog.Id = default; // create new when retry publish
+        var webhooksLog = new DbWebhooksLog
+        {
+            TenantId = webhookLog.TenantId,
+            ConfigId = webhookLog.ConfigId,
+            Uid = authContext.CurrentAccount.ID,
+            Trigger = webhookLog.Trigger,
+            CreationTime = DateTime.UtcNow,
+            WebhookId = webhookLog.WebhookId,
+            RequestPayload = webhookLog.RequestPayload
+        };
 
+        return await PublishAsync(webhooksLog);
+    }
+
+    private async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog)
+    {
         var newWebhooksLog = await dbWorker.WriteToJournal(webhookLog);
 
         var @event = new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, newWebhooksLog.TenantId, newWebhooksLog.Id);

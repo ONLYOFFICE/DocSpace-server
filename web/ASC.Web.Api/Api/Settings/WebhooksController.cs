@@ -229,7 +229,7 @@ public class WebhooksController(ApiContext context,
             }
         }
 
-        var result = await webhookPublisher.PublishAsync(item);
+        var result = await webhookPublisher.RetryPublishAsync(item);
 
         return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
     }
@@ -263,7 +263,7 @@ public class WebhooksController(ApiContext context,
                 continue;
             }
 
-            var result = await webhookPublisher.PublishAsync(item);
+            var result = await webhookPublisher.RetryPublishAsync(item);
 
             yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
         }
