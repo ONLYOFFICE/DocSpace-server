@@ -136,9 +136,12 @@ public enum WebhookTrigger
     RoomDeleted = 33554432,
 
     [SwaggerEnum("Room restored from archive")]
-    RoomRestored = 67108864
+    RoomRestored = 67108864,
+
+    [SwaggerEnum("Room copied")]
+    RoomCopied = 134217728
 
     #endregion
 
-    //remaining possible values: 134217728, 268435456, 536870912, 1073741824
+    //remaining possible values: 268435456, 536870912, 1073741824
 }

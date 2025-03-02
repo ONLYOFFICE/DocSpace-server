@@ -40,11 +40,13 @@ public class WebhookPublisher(
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checher, T data)
+    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checher, T data)
     {
+        var result = new List<DbWebhooksConfig>();
+
         if (data == null)
         {
-            return;
+            return result;
         }
 
         var webhookConfigs = await dbWorker.GetWebhookConfigs(enabled: true).ToListAsync();
@@ -64,6 +66,31 @@ public class WebhookPublisher(
                 }
             }
 
+            result.Add(config);
+        }
+
+        return result;
+    }
+
+    public async Task PublishAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checher, T data)
+    {
+        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checher, data);
+
+        foreach (var config in webhookConfigs)
+        {
+            _ = await PublishAsync(trigger, config, data);
+        }
+    }
+
+    public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T data)
+    {
+        if (data == null)
+        {
+            return;
+        }
+
+        foreach (var config in webhookConfigs)
+        {
             _ = await PublishAsync(trigger, config, data);
         }
     }
