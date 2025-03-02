@@ -318,7 +318,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
 
         var scopeClass = scope.ServiceProvider.GetService<FileMoveCopyOperationScope>();
-        var (filesMessageService, fileMarker, _, _, _, _) = scopeClass;
+        var (filesMessageService, fileMarker, _, _, _, _, webhookPublisher, webhookFileEntryAccessChecker) = scopeClass;
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
         var countRoomChecker = scope.ServiceProvider.GetRequiredService<CountRoomChecker>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
@@ -491,6 +491,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                             await filesMessageService.SendCopyMessageAsync(newFolder, await parentFolderTask, toFolder, toFolderParents, false, _headers, [newFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
 
+                            _ = webhookPublisher.PublishAsync(WebhookTrigger.FolderCopied, webhookFileEntryAccessChecker, newFolder);
+
                             if (isToFolder)
                             {
                                 needToMark.Add(conflictFolder);
@@ -555,10 +557,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             if (isRoomCopying)
                             {
                                 await filesMessageService.SendAsync(MessageAction.RoomCopied, newFolder, _headers, newFolder.Title);
+                                _ = webhookPublisher.PublishAsync(WebhookTrigger.RoomCopied, webhookFileEntryAccessChecker, newFolder);
                             }
                             else
                             { 
                                 await filesMessageService.SendCopyMessageAsync(newFolder, await parentFolderTask, toFolder, toFolderParents, false, _headers, [newFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
+                                _ = webhookPublisher.PublishAsync(WebhookTrigger.FolderCopied, webhookFileEntryAccessChecker, newFolder);
                             }
 
                             if (isToFolder)
@@ -635,6 +639,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     newFolderId = newFolder.Id;
 
                                     await filesMessageService.SendCopyMessageAsync(newFolder, await parentFolderTask, toFolder, toFolderParents, true, _headers, [newFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
+                                    _ = webhookPublisher.PublishAsync(WebhookTrigger.FolderCopied, webhookFileEntryAccessChecker, newFolder);
 
                                     if (isToFolder)
                                     {
@@ -661,6 +666,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                     newFolder = await folderDao.GetFolderAsync(newFolderId);
                                     await filesMessageService.SendMoveMessageAsync(newFolder, await parentFolderTask, toFolder, toFolderParents, true, _headers, [newFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
+                                    _ = webhookPublisher.PublishAsync(WebhookTrigger.FolderMoved, webhookFileEntryAccessChecker, newFolder);
 
                                     if (isToFolder)
                                     {
@@ -779,10 +785,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     }
 
                                     await filesMessageService.SendAsync(MessageAction.RoomArchived, folder, _headers, folder.Title);
+                                    _ = webhookPublisher.PublishAsync(WebhookTrigger.RoomArchived, webhookFileEntryAccessChecker, folder);
                                 }
                                 else
                                 {
                                     await filesMessageService.SendAsync(MessageAction.RoomUnarchived, folder, _headers, folder.Title);
+                                    _ = webhookPublisher.PublishAsync(WebhookTrigger.RoomRestored, webhookFileEntryAccessChecker, folder);
                                 }
                             }
                             else
@@ -792,6 +800,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 if (newFolder != null)
                                 {
                                     await filesMessageService.SendMoveMessageAsync(newFolder, parentFolder, toFolder, toFolderParents, true, _headers, [folder.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
+                                    _ = webhookPublisher.PublishAsync(WebhookTrigger.FolderMoved, webhookFileEntryAccessChecker, folder);
                                 }
                             }
 
@@ -834,7 +843,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
 
         var scopeClass = scope.ServiceProvider.GetService<FileMoveCopyOperationScope>();
-        var (filesMessageService, fileMarker, fileUtility, global, lockerManager, thumbnailSettings) = scopeClass;
+        var (filesMessageService, fileMarker, fileUtility, global, lockerManager, thumbnailSettings, webhookPublisher, webhookFileEntryAccessChecker) = scopeClass;
         var linkDao = scope.ServiceProvider.GetService<ILinkDao<TTo>>();
         var fileDao = scope.ServiceProvider.GetService<IFileDao<TTo>>();
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
@@ -955,6 +964,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 }
                                 
                                 await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
+                                _ = webhookPublisher.PublishAsync(WebhookTrigger.FileCopied, webhookFileEntryAccessChecker, newFile);
 
                                 needToMark.Add(newFile);
 
@@ -990,6 +1000,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 newFile = await fileDao.GetFileAsync(newFileId);
 
                                 await filesMessageService.SendMoveMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [file.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
+                                _ = webhookPublisher.PublishAsync(WebhookTrigger.FileMoved, webhookFileEntryAccessChecker, newFile);
 
                                 if (file.RootFolderType == FolderType.TRASH && newFile.ThumbnailStatus == Thumbnail.NotRequired)
                                 {
@@ -1123,6 +1134,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 if (copy)
                                 {
                                     await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders.ToList(), true, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
+                                    _ = webhookPublisher.PublishAsync(WebhookTrigger.FileCopied, webhookFileEntryAccessChecker, newFile);
                                     if (ProcessedFile(fileId))
                                     {
                                         sb.Append($"file_{newFile.Id}{SplitChar}");
@@ -1153,6 +1165,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                             });
 
                                             await filesMessageService.SendMoveMessageAsync(newFile, parentFolder, toFolder, toParentFolders, true, _headers, [file.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
+                                            _ = webhookPublisher.PublishAsync(WebhookTrigger.FileMoved, webhookFileEntryAccessChecker, newFile);
 
                                             if (ProcessedFile(fileId))
                                             {
@@ -1251,4 +1264,6 @@ public record FileMoveCopyOperationScope(
     FileUtility FileUtility, 
     Global Global, 
     LockerManager LockerManager,
-    ThumbnailSettings ThumbnailSettings);
+    ThumbnailSettings ThumbnailSettings,
+    IWebhookPublisher WebhookPublisher,
+    WebhookFileEntryAccessChecker WebhookFileEntryAccessChecker);

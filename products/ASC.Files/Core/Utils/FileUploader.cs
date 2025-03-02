@@ -47,7 +47,9 @@ public class FileUploader(
     FileTrackerHelper fileTracker,
     SocketManager socketManager,
     FileChecker fileChecker,
-    TempStream tempStream )
+    TempStream tempStream,
+    IWebhookPublisher webhookPublisher,
+    WebhookFileEntryAccessChecker webhookFileEntryAccessChecker)
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
@@ -70,6 +72,8 @@ public class FileUploader(
         {
             await fileConverter.ExecAsynchronouslyAsync(file, deleteConvertStatus, !createNewIfExist);
         }
+
+        _ = webhookPublisher.PublishAsync(WebhookTrigger.FileCreated, webhookFileEntryAccessChecker, file);
 
         return file;
     }

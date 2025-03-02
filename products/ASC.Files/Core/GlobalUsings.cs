@@ -173,6 +173,7 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
+global using ASC.Webhooks.Core;
 
 global using AutoMapper;
 

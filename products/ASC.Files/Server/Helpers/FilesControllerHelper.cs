@@ -41,14 +41,18 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         FileConverter fileConverter,
         PathProvider pathProvider,
         FileChecker fileChecker,
-        FillingFormResultDtoHelper fillingFormResultDtoHelper)
+        FillingFormResultDtoHelper fillingFormResultDtoHelper,
+        IWebhookPublisher webhookPublisher,
+        WebhookFileEntryAccessChecker webhookFileEntryAccessChecker)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
             fileDtoHelper,
             fileStorageService,
             fileChecker,
-            httpContextAccessor)
+            httpContextAccessor,
+            webhookPublisher,
+            webhookFileEntryAccessChecker)
     {
     private readonly ILogger _logger = logger;
 
