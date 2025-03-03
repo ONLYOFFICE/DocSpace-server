@@ -160,8 +160,8 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         {
             return null;
         }
-
-        var path = $"{parent.ParentReference.Path.Replace(RootPath, string.Empty)}/{parent.Name}/{title}";
+        var parentPath = parent.ParentReference.Path == null ? "" : parent.ParentReference.Path.Replace(RootPath, string.Empty) + $"/{parent.Name}";
+        var path = $"{parentPath}/{title}";
 
         return await OnedriveClient.Drive.Root.ItemWithPath(path)
             .Content.Request().PutAsync<Item>(fileStream);

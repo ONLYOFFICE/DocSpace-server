@@ -60,12 +60,12 @@ public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFi
 {    
     protected override FileOperationType FileOperationType { get => FileOperationType.Download; }
     
-    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override async Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileDownloadOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, ThirdPartyData);
 
-        await base.RunJob(distributedTask, cancellationToken);
+        await base.RunJob(cancellationToken);
 
         await using var scope = await ThirdPartyOperation.CreateScopeAsync();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
