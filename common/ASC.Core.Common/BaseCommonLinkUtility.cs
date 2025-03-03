@@ -200,28 +200,17 @@ public class BaseCommonLinkUtility
         }
         else
         {
-            foreach (var match in matches.Select(r=> r.Value))
+            foreach (var match in matches.Select(r => r.Value))
             {
                 var values = match.TrimStart('{').TrimEnd('}').Split('|');
                 url = url.Replace(match, values.Contains(lang) ? lang : string.Empty);
             }
         }
-        //-
 
-        //--remove redundant slashes
-        var uri = new Uri(url);
+        //remove redundant slashes
+        url = Regex.Replace(url, @"(?<!:)//+", "/");
 
-        if (uri.Scheme == "mailto")
-        {
-            return uri.OriginalString;
-        }
-
-        var baseUri = new UriBuilder(uri.Scheme, uri.Host, uri.Port).Uri;
-        baseUri = uri.Segments.Aggregate(baseUri, (current, segment) => new Uri(current, segment));
-        //--
-        //todo: lost query string!!!
-
-        return baseUri.ToString().TrimEnd('/');
+        return url.TrimEnd('/');
     }
 
     public void Initialize(string serverUri, bool localhost = true)

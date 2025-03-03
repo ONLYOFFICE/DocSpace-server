@@ -68,6 +68,17 @@ public class DistributedTask
         set => _exeption = value?.Message ?? "";
     }
 
+    protected CancellationToken CancellationToken { get; set; }
+
+    public virtual async Task RunJob(CancellationToken cancellationToken)
+    {
+        Status = DistributedTaskStatus.Running;
+        CancellationToken = cancellationToken;
+
+        await DoJob();
+    }
+
+    protected virtual Task DoJob() { return Task.CompletedTask; }
 
     public async Task PublishChanges()
     {
