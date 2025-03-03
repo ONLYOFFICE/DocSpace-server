@@ -201,11 +201,11 @@ public static class ServiceCollectionExtension
                 return new DefaultRabbitMQPersistentConnection(connectionFactory, logger, retryCount);
             });
             
-            services.AddMassTransit(r =>
+            services.AddMassTransit(registrationConfigurator =>
             {
-                r.AddConsumers(Assembly.GetEntryAssembly());
+                registrationConfigurator.AddConsumers(Assembly.GetEntryAssembly());
                 
-                r.UsingRabbitMq((context, configurator) =>
+                registrationConfigurator.UsingRabbitMq((context, configurator) =>
                 {                
                     var connectionFactory = rabbitMqConfiguration.GetConnectionFactory();
                     configurator.Host(connectionFactory.HostName, (ushort)connectionFactory.Port, connectionFactory.VirtualHost, h =>
@@ -227,7 +227,8 @@ public static class ServiceCollectionExtension
                             });
                         }
                     });
-                    configurator.ConfigureEndpoints(context);
+                    
+                    configurator.ConfigureEndpoints(context, new KebabCaseEndpointNameFormatter("asc-event-bus"));
                 });
             });
             
