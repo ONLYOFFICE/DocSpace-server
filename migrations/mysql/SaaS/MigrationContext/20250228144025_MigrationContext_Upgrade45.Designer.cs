@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20250228144025_MigrationContext_Upgrade45")]
+    partial class MigrationContext_Upgrade45
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -610,7 +613,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Subject = "88f11e7c-7407-4bea-b4cb-070010cdbb6b",
                             Action = "3e74aff2-7c0c-4089-b209-6495b8643471",
                             Object = "",
-                            AceType = 1
+                            AceType = 0
                         });
                 });
 

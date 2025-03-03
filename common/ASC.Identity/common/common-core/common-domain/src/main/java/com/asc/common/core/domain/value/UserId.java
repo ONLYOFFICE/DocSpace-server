@@ -25,42 +25,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.service.transfer.request.fetch;
+package com.asc.common.core.domain.value;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import java.time.ZonedDateTime;
-import lombok.*;
+/** This class represents a user ID. */
+public class UserId extends BaseId<String> {
 
-/**
- * TenantClientsPaginationQuery is a Data Transfer Object (DTO) used to query paginated information
- * about tenant clients. It contains validation annotations to ensure data integrity.
- */
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class TenantClientsPaginationQuery {
-  /** The user identifier */
-  @NotBlank(message = "user id must not be blank")
-  @JsonProperty("user_id")
-  private String userId;
-
-  /** The ID of the tenant. Must be greater than or equal to 1. */
-  @Min(value = 1, message = "tenant id must be greater than or equal to 1")
-  @JsonProperty("tenant_id")
-  private long tenantId;
-
-  /** The page number to retrieve. Must be greater than or equal to 0. */
-  @JsonProperty("last_client_id")
-  private String lastClientId;
-
-  @JsonProperty("last_created_on")
-  private ZonedDateTime lastCreatedOn;
-
-  /** The number of clients per page. Must be greater than or equal to 1. */
-  @Min(value = 1, message = "limit must be greater than or equal to 1")
-  private int limit;
+  /**
+   * Constructs a new UserID with the specified value.
+   *
+   * @param value the value of the user ID
+   */
+  public UserId(String value) {
+    super(value);
+  }
 }

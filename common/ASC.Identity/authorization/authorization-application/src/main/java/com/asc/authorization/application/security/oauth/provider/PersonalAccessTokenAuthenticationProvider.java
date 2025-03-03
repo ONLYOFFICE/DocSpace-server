@@ -27,7 +27,9 @@
 
 package com.asc.authorization.application.security.oauth.provider;
 
+import com.asc.authorization.application.configuration.properties.SecurityConfigurationProperties;
 import com.asc.authorization.application.exception.authentication.AuthenticationProcessingException;
+import com.asc.authorization.application.security.authentication.BasicSignature;
 import com.asc.authorization.application.security.authentication.TenantAuthority;
 import com.asc.authorization.application.security.oauth.authentication.PersonalAccessTokenAuthenticationToken;
 import com.asc.authorization.application.security.oauth.error.AuthenticationError;
@@ -74,6 +76,7 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
   @Value("${spring.application.name}")
   private String serviceName;
 
+  private final SecurityConfigurationProperties configurationProperties;
   private static final String ERROR_URI =
       "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
@@ -99,6 +102,14 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
       if (ctx == null)
         throw new BadCredentialsException("Authentication failed due to missing request context");
       var request = ctx.getRequest();
+
+      var sig = request.getAttribute(configurationProperties.getSignatureHeader());
+      if (sig instanceof BasicSignature signature && signature.isGuest())
+        throw new OAuth2AuthenticationException(
+            new OAuth2Error(
+                OAuth2ErrorCodes.ACCESS_DENIED,
+                "Guests are not allowed to generate personal access tokens",
+                null));
 
       var clientPrincipal = getAuthenticatedClientElseThrowInvalidClient(patAuthentication);
       var registeredClient = clientPrincipal.getRegisteredClient();

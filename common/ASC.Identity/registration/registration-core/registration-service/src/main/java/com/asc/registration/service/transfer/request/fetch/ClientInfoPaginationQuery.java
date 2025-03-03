@@ -29,6 +29,7 @@ package com.asc.registration.service.transfer.request.fetch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import java.time.ZonedDateTime;
 import lombok.*;
 
@@ -42,6 +43,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClientInfoPaginationQuery {
+  /** The user identifier */
+  @NotBlank(message = "user id must not be blank")
+  @JsonProperty("user_id")
+  private String userId;
+
   /** The tenant ID to fetch private applications for. Does not affect public apps */
   @Min(value = 1, message = "tenant id must be greater than or equal to 1")
   @JsonProperty("tenant_id")

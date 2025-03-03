@@ -25,42 +25,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.service.transfer.request.fetch;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import java.time.ZonedDateTime;
-import lombok.*;
+package com.asc.common.core.domain.value;
 
 /**
- * TenantClientsPaginationQuery is a Data Transfer Object (DTO) used to query paginated information
- * about tenant clients. It contains validation annotations to ensure data integrity.
+ * The {@code Role} enum represents the different security roles available in the system.
+ *
+ * <p>It defines the following roles:
+ *
+ * <ul>
+ *   <li>{@link #ROLE_ADMIN} - Represents an administrator with full permissions.
+ *   <li>{@link #ROLE_USER} - Represents a regular user with standard access rights.
+ *   <li>{@link #ROLE_GUEST} - Represents a guest with limited access.
+ * </ul>
  */
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class TenantClientsPaginationQuery {
-  /** The user identifier */
-  @NotBlank(message = "user id must not be blank")
-  @JsonProperty("user_id")
-  private String userId;
+public enum Role {
+  /** Represents an administrator role with full permissions. */
+  ROLE_ADMIN,
 
-  /** The ID of the tenant. Must be greater than or equal to 1. */
-  @Min(value = 1, message = "tenant id must be greater than or equal to 1")
-  @JsonProperty("tenant_id")
-  private long tenantId;
+  /** Represents a standard user role with limited permissions. */
+  ROLE_USER,
 
-  /** The page number to retrieve. Must be greater than or equal to 0. */
-  @JsonProperty("last_client_id")
-  private String lastClientId;
-
-  @JsonProperty("last_created_on")
-  private ZonedDateTime lastCreatedOn;
-
-  /** The number of clients per page. Must be greater than or equal to 1. */
-  @Min(value = 1, message = "limit must be greater than or equal to 1")
-  private int limit;
+  /** Represents a guest role with minimal permissions. */
+  ROLE_GUEST
 }

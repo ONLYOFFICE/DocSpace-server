@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -45,6 +46,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 /** The SecurityConfiguration class provides security configuration for the application. */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
   @Value("${server.port}")
@@ -74,15 +76,8 @@ public class SecurityConfiguration {
                     .requestMatchers(
                         String.format("%s/clients/*/public/info", webApi), "/docs", "/health/**")
                     .permitAll()
-                    .requestMatchers(
-                        String.format("%s/scopes", webApi),
-                        String.format("%s/clients/.*?/info", webApi),
-                        String.format("%s/clients/info", webApi),
-                        String.format("%s/clients/consents", webApi),
-                        String.format("%s/clients/*/revoke", webApi))
-                    .hasAnyRole("ADMIN", "USER")
                     .anyRequest()
-                    .hasRole("ADMIN"))
+                    .authenticated())
         .addFilterAt(basicSignatureAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterAfter(rateLimiterFilter, UsernamePasswordAuthenticationFilter.class)
         .authenticationProvider(signatureAuthenticationProvider)
