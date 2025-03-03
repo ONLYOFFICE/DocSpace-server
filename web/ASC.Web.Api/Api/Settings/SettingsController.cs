@@ -435,6 +435,20 @@ public partial class SettingsController(MessageService messageService,
     }
 
     /// <summary>
+    /// Gets deeplink settings
+    /// </summary>
+    /// <path>api/2.0/settings/deeplink</path>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Ok", typeof(TenantDeepLinkSettings))]
+    [HttpGet("deeplink")]
+    public async Task<TenantDeepLinkSettings> GettDeepLinkSettings()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        return await settingsManager.LoadAsync<TenantDeepLinkSettings>();
+    }
+
+    /// <summary>
     /// Saves the tenant quota settings specified in the request to the current portal.
     /// </summary>
     /// <short>
