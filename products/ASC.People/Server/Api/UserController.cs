@@ -1766,6 +1766,8 @@ public class UserController(
 
         foreach (var user in users)
         {
+            _ = webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, user);
+
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
@@ -1812,6 +1814,8 @@ public class UserController(
 
         foreach (var user in users)
         {
+            _ = webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, user);
+
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
