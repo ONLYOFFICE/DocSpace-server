@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -182,22 +182,20 @@ public static class ServiceCollectionExtension
         var activeMqConfiguration = configuration.GetSection("ActiveMQ").Get<ActiveMQSettings>();
 
         if (rabbitMqConfiguration != null)
-        {
+        {                
+            var retryCount = 5;
+
+            if (!string.IsNullOrEmpty(configuration["core:eventBus:connectRetryCount"]))
+            {
+                retryCount = int.Parse(configuration["core:eventBus:connectRetryCount"]);
+            }
+            
             services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
             {
-                var cfg = sp.GetRequiredService<IConfiguration>();
-
                 var logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
 
                 var connectionFactory = rabbitMqConfiguration.GetConnectionFactory();
-
-                var retryCount = 5;
-
-                if (!string.IsNullOrEmpty(cfg["core:eventBus:connectRetryCount"]))
-                {
-                    retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
-                }
-
+                
                 return new DefaultRabbitMQPersistentConnection(connectionFactory, logger, retryCount);
             });
             
@@ -212,6 +210,7 @@ public static class ServiceCollectionExtension
                     {
                         h.Username(connectionFactory.UserName);
                         h.Password(connectionFactory.Password);
+                        h.ConnectionName(configuration["RabbitMQ:ClientProvidedName"]);
                         
                         if (connectionFactory.Ssl is { Enabled: true })
                         {
@@ -229,6 +228,7 @@ public static class ServiceCollectionExtension
                     });
                     
                     configurator.ConfigureEndpoints(context, new KebabCaseEndpointNameFormatter("asc-event-bus"));
+                    configurator.UseMessageRetry(r => r.Exponential(retryCount, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(1), TimeSpan.FromSeconds(10)));
                 });
             });
             
