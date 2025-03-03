@@ -440,8 +440,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         var tagDao = daoFactory.GetTagDao<T>();
                         var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
                         var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
+                        var hasHeaders = _headers is { Count: > 0 };
 
-                        if (isNeedSendActions)
+                        if (isNeedSendActions || !hasHeaders)
                         {
                             webhookTrigger = WebhookTrigger.FileDeleted;
                             webhookConfigs = await webhookPublisher.GetWebhookConfigsAsync(webhookTrigger, webhookFileEntryAccessChecker, file);
@@ -461,13 +462,10 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             await folderDao.ChangeTreeFolderSizeAsync(_trashId, (-1) * file.ContentLength);
                         }
 
-                        if (_headers is { Count: > 0 })
+                        if (hasHeaders && isNeedSendActions)
                         {
-                            if (isNeedSendActions)
-                            {
-                                await filesMessageService.SendAsync(MessageAction.FileDeleted, file, _headers, file.Title);
-                                _ = webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, file);
-                            }
+                            await filesMessageService.SendAsync(MessageAction.FileDeleted, file, _headers, file.Title);
+                            _ = webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, file);
                         }
                         else
                         {
