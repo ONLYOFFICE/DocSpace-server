@@ -39,7 +39,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
         var item = (await _progressQueue.GetAllTasks<UsersQuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            await _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask<UsersQuotaSyncJob>(item.Id);
             item = null;
         }
 
@@ -66,7 +66,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
 
         if (item.IsCompleted)
         {
-            await _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask<UsersQuotaSyncJob>(item.Id);
         }
 
         return progress;

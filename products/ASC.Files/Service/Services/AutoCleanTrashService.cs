@@ -78,7 +78,7 @@ public class AutoCleanTrashService(
             var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-            var fileOperationsManager = scope.ServiceProvider.GetRequiredService<FileOperationsManager>();
+            var fileOperationsManager = scope.ServiceProvider.GetRequiredService<FileDeleteOperationsManager>();
             var fileDateTime = scope.ServiceProvider.GetRequiredService<FileDateTime>();
 
             var userAccount = await authManager.GetAccountByIDAsync(tenantUser.TenantId, tenantUser.UserId);
@@ -117,7 +117,7 @@ public class AutoCleanTrashService(
 
             logger.InfoCleanUp(tenantUser.TenantId, trashId);
 
-            await fileOperationsManager.PublishDelete(foldersList, filesList, true, true, true);
+            await fileOperationsManager.Publish(foldersList, filesList, true, true, true);
 
             logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
 

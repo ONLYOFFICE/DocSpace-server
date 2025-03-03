@@ -27,7 +27,8 @@
 namespace ASC.Data.Storage;
 
 [Scope]
-public class StaticUploader(IServiceProvider serviceProvider,
+public class StaticUploader(
+    IServiceProvider serviceProvider,
     TenantManager tenantManager,
     SettingsManager settingsManager,
     StorageSettingsHelper storageSettingsHelper,
@@ -107,7 +108,7 @@ public class StaticUploader(IServiceProvider serviceProvider,
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
-            if ((await _queue.GetAllTasks()).Any(x => x.Id != key))
+            if ((await _queue.GetAllTasks<UploadOperationProgress>()).Any(x => x.Id != key))
             {
                 return;
             }

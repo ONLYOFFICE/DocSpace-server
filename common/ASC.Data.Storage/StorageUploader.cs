@@ -36,7 +36,7 @@ public class StorageUploader(
     IDistributedLockProvider distributedLockProvider,
     AscHybridCache cache)
 {
-    protected readonly DistributedTaskQueue _queue = queueFactory.CreateQueue();
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue();
 
     public async Task StartAsync(int tenantId, StorageSettings newStorageSettings, StorageFactoryConfig storageFactoryConfig)
     {
@@ -44,7 +44,7 @@ public class StorageUploader(
         {
             var id = GetCacheKey(tenantId);
 
-            if ((await _queue.GetAllTasks()).Any(x => x.Id == id))
+            if ((await _queue.GetAllTasks<MigrateOperation>()).Any(x => x.Id == id))
             {
                 return;
             }
@@ -64,9 +64,9 @@ public class StorageUploader(
 
     public async Task Stop()
     {
-        foreach (var task in (await _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID)).Where(r => r.Status == DistributedTaskStatus.Running))
+        foreach (var task in (await _queue.GetAllTasks<MigrateOperation>(DistributedTaskQueue.INSTANCE_ID)).Where(r => r.Status == DistributedTaskStatus.Running))
         {
-            await _queue.DequeueTask(task.Id);
+            await _queue.DequeueTask<MigrateOperation>(task.Id);
         }
     }
 

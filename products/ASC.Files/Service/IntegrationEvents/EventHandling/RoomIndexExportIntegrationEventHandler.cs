@@ -49,7 +49,7 @@ public class RoomIndexExportIntegrationEventHandler(
             {
                 if (@event.Terminate)
                 {
-                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
+                    await documentBuilderTaskManager.TerminateTask<int, RoomIndexExportTask>(@event.TenantId, @event.CreateBy);
                     return;
                 }
 

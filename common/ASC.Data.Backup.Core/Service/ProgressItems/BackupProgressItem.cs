@@ -29,12 +29,13 @@ using System.Text.Json;
 namespace ASC.Data.Backup.Services;
 
 [Transient]
-public class BackupProgressItem(ILogger<BackupProgressItem> logger,
-        IServiceScopeFactory serviceProvider,
-        CoreBaseSettings coreBaseSettings,
-        NotifyHelper notifyHelper)
-    : BaseBackupProgressItem(serviceProvider)
+public class BackupProgressItem : BaseBackupProgressItem
 {
+    public BackupProgressItem()
+    {
+        
+    }
+    
     private Dictionary<string, string> _storageParams;
     private string _tempFolder;
 
@@ -45,6 +46,19 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
     private int _limit;
     private string _serverBaseUri;
     private bool _dump;
+    private readonly ILogger<BackupProgressItem> _logger;
+    private readonly CoreBaseSettings _coreBaseSettings;
+    private readonly NotifyHelper _notifyHelper;
+
+    public BackupProgressItem(ILogger<BackupProgressItem> logger,
+        IServiceScopeFactory serviceProvider,
+        CoreBaseSettings coreBaseSettings,
+        NotifyHelper notifyHelper) : base(serviceProvider)
+    {
+        _logger = logger;
+        _coreBaseSettings = coreBaseSettings;
+        _notifyHelper = notifyHelper;
+    }
 
     public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit)
     {
@@ -90,7 +104,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         await tenantManager.SetCurrentTenantAsync(TenantId);
         await socketManager.BackupProgressAsync(0);
 
-        var dateTime = coreBaseSettings.Standalone ? DateTime.Now : DateTime.UtcNow;
+        var dateTime = _coreBaseSettings.Standalone ? DateTime.Now : DateTime.UtcNow;
         var tempFile = "";
         var storagePath = "";
 
@@ -152,9 +166,9 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
 
             if (_userId != Guid.Empty && !_isScheduled)
             {
-                notifyHelper.SetServerBaseUri(_serverBaseUri);
+                _notifyHelper.SetServerBaseUri(_serverBaseUri);
 
-                await notifyHelper.SendAboutBackupCompletedAsync(TenantId, _userId);
+                await _notifyHelper.SendAboutBackupCompletedAsync(TenantId, _userId);
             }
 
 
@@ -163,7 +177,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         }
         catch (Exception error)
         {
-            logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
+            _logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
             Exception = error;
             IsCompleted = true;
         }
@@ -176,7 +190,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
             }
             catch (Exception error)
             {
-                logger.ErrorPublish(error);
+                _logger.ErrorPublish(error);
             }
 
             try
@@ -188,7 +202,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
             }
             catch (Exception error)
             {
-                logger.ErrorCantDeleteFile(error);
+                _logger.ErrorCantDeleteFile(error);
             }
         }
     }

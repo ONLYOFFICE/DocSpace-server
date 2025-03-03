@@ -43,7 +43,7 @@ public class EncryptionWorker(
 
             if (item is { IsCompleted: true })
             {
-                await _queue.DequeueTask(item.Id);
+                await _queue.DequeueTask<EncryptionOperation>(item.Id);
                 item = null;
             }
 
@@ -59,7 +59,7 @@ public class EncryptionWorker(
 
     public async Task Stop()
     {
-        await _queue.DequeueTask(GetCacheId());
+        await _queue.DequeueTask<EncryptionOperation>(GetCacheId());
     }
 
     private string GetCacheId()

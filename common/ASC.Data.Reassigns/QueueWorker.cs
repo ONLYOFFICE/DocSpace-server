@@ -55,7 +55,7 @@ public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
 
         if (item != null)
         {
-            await _queue.DequeueTask(item.Id);
+            await _queue.DequeueTask<T>(item.Id);
         }
     }
 
@@ -67,7 +67,7 @@ public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
 
             if (task is { IsCompleted: true })
             {
-                await _queue.DequeueTask(task.Id);
+                await _queue.DequeueTask<T>(task.Id);
                 task = null;
             }
 

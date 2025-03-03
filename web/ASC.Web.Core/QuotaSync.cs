@@ -39,7 +39,7 @@ public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTa
         var item = (await _progressQueue.GetAllTasks<QuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            await _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask<QuotaSyncJob>(item.Id);
             item = null;
         }
         
@@ -58,7 +58,7 @@ public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTa
         var item = (await _progressQueue.GetAllTasks<QuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            await _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask<QuotaSyncJob>(item.Id);
             return false;
         }
 

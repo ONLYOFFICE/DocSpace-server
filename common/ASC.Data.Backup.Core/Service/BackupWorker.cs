@@ -62,11 +62,11 @@ public class BackupWorker(
                 return;
             }
 
-            var tasks = await _progressQueue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
+            var tasks = await _progressQueue.GetAllTasks<BackupProgressItem>(DistributedTaskQueue.INSTANCE_ID);
 
             foreach (var t in tasks)
             {
-                await _progressQueue.DequeueTask(t.Id);
+                await _progressQueue.DequeueTask<BackupProgressItem>(t.Id);
             }
 
             _progressQueue = null;
@@ -81,7 +81,7 @@ public class BackupWorker(
 
             if (item is { IsCompleted: true })
             {
-                await _progressQueue.DequeueTask(item.Id);
+                await _progressQueue.DequeueTask<BackupProgressItem>(item.Id);
                 item = null;
             }
             if (item == null || (enqueueTask && item.Id == taskId && item.Status == DistributedTaskStatus.Created))
@@ -118,7 +118,7 @@ public class BackupWorker(
 
             if (item is { IsCompleted: true })
             {
-                await _progressQueue.DequeueTask(item.Id);
+                await _progressQueue.DequeueTask<BackupProgressItem>(item.Id);
                 item = null;
             }
             if (item == null)
@@ -187,7 +187,7 @@ public class BackupWorker(
             var item = (await _progressQueue.GetAllTasks<RestoreProgressItem>()).FirstOrDefault(t => t.TenantId == request.TenantId);
             if (item is { IsCompleted: true })
             {
-                await _progressQueue.DequeueTask(item.Id);
+                await _progressQueue.DequeueTask<RestoreProgressItem>(item.Id);
                 item = null;
             }
 
@@ -223,7 +223,7 @@ public class BackupWorker(
             var item = (await _progressQueue.GetAllTasks<TransferProgressItem>()).FirstOrDefault(t => t.TenantId == tenantId);
             if (item is { IsCompleted: true })
             {
-                await _progressQueue.DequeueTask(item.Id);
+                await _progressQueue.DequeueTask<TransferProgressItem>(item.Id);
                 item = null;
             }
 
@@ -292,9 +292,9 @@ public class BackupWorker(
         return progressItem.ToBackupProgress();
     }
 
-    public async Task<bool> IsInstanceTooBusy()
+    public async Task<bool> IsInstanceTooBusy<T>() where T : BaseBackupProgressItem
     {
-        var instanceTasks = await _progressQueue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
+        var instanceTasks = await _progressQueue.GetAllTasks<T>(DistributedTaskQueue.INSTANCE_ID);
 
         return _progressQueue.MaxThreadsCount < instanceTasks.Count;
     }

@@ -97,7 +97,7 @@ internal class CleanupLifetimeExpiredService(
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-            var fileOperationsManager = scope.ServiceProvider.GetRequiredService<FileOperationsManager>();
+            var fileOperationsManager = scope.ServiceProvider.GetRequiredService<FileDeleteOperationsManager>();
 
             var tenant = await tenantManager.SetCurrentTenantAsync(data.TenantId);
 
@@ -111,7 +111,7 @@ internal class CleanupLifetimeExpiredService(
 
             logger.InfoCleanupLifetimeExpiredStart(data.TenantId, data.RoomId, userAccount.ID, string.Join(',', data.ExipiredFiles));
 
-            await fileOperationsManager.PublishDelete([], data.ExipiredFiles, true, true, data.Lifetime.DeletePermanently);
+            await fileOperationsManager.Publish([], data.ExipiredFiles, true, true, data.Lifetime.DeletePermanently);
 
             logger.InfoCleanupLifetimeExpiredWait(data.TenantId, data.RoomId, userAccount.ID);
 

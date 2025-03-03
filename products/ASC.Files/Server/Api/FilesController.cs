@@ -30,7 +30,7 @@ namespace ASC.Files.Api;
 public class FilesControllerInternal(
     FilesControllerHelper filesControllerHelper,
     FileStorageService fileStorageService,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -70,7 +70,7 @@ public class FilesControllerInternal(
 public class FilesControllerThirdparty(
     FilesControllerHelper filesControllerHelper,
     FileStorageService fileStorageService,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -90,7 +90,7 @@ public class FilesControllerThirdparty(
 public abstract class FilesController<T>(
     FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
+        FileDeleteOperationsManager fileOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
@@ -239,7 +239,7 @@ public abstract class FilesController<T>(
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(DeleteRequestDto<T> inDto)
     {
-        await fileOperationsManager.PublishDelete(new List<T>(), new List<T> { inDto.FileId }, false, !inDto.File.DeleteAfter, inDto.File.Immediately);
+        await fileOperationsManager.Publish(new List<T>(), new List<T> { inDto.FileId }, false, !inDto.File.DeleteAfter, inDto.File.Immediately);
         
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {

@@ -44,7 +44,7 @@ public class RemovePortalWorker(
 
             if (item is { IsCompleted: true })
             {
-                await _queue.DequeueTask(item.Id);
+                await _queue.DequeueTask<RemovePortalOperation>(item.Id);
                 item = null;
             }
             if (item == null)
@@ -62,11 +62,11 @@ public class RemovePortalWorker(
 
     public async Task Stop()
     {
-        var tasks = await _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
+        var tasks = await _queue.GetAllTasks<RemovePortalOperation>(DistributedTaskQueue.INSTANCE_ID);
 
         foreach (var t in tasks)
         {
-            await _queue.DequeueTask(t.Id);
+            await _queue.DequeueTask<RemovePortalOperation>(t.Id);
         }
     }
 }

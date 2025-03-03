@@ -39,7 +39,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         var item = (await _progressQueue.GetAllTasks<LdapOperationJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            await _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask<LdapOperationJob>(item.Id);
             item = null;
         }
         if (item == null)
@@ -151,7 +151,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
             }
 
             o[LdapTaskProperty.PROGRESS] = 100;
-            await _progressQueue.DequeueTask(o.Id);
+            await _progressQueue.DequeueTask<LdapOperationJob>(o.Id);
         }
 
         var operation =
@@ -166,7 +166,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         if (DistributedTaskStatus.Running < operation.Status)
         {
             operation[LdapTaskProperty.PROGRESS] = 100;
-            await _progressQueue.DequeueTask(operation.Id);
+            await _progressQueue.DequeueTask<LdapOperationJob>(operation.Id);
         }
 
         var result = new LdapOperationStatus

@@ -48,7 +48,7 @@ public class FormFillingReportIntegrationEventHandler(
             {
                 if (@event.Terminate)
                 {
-                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
+                    await documentBuilderTaskManager.TerminateTask<int, FormFillingReportTaskData>(@event.TenantId, @event.CreateBy);
                     return;
                 }
 

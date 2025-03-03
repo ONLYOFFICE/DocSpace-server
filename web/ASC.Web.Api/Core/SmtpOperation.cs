@@ -38,7 +38,7 @@ public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQue
 
         if (item is { IsCompleted: true })
         {
-            await _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask<SmtpJob>(item.Id);
             item = null;
         }
 
@@ -63,7 +63,7 @@ public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQue
 
         if (item.IsCompleted)
         {
-            await _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask<SmtpJob>(item.Id);
         }
 
         var result = new SmtpOperationStatusRequestsDto

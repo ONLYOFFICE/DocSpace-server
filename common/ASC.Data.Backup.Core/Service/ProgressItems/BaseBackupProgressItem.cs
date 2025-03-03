@@ -28,13 +28,23 @@ using ASC.Common.Threading.Progress;
 
 namespace ASC.Data.Backup.Services;
 
-public abstract class BaseBackupProgressItem(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public abstract class BaseBackupProgressItem : DistributedTaskProgress
 {
-    protected readonly IServiceScopeFactory _serviceScopeProvider = serviceScopeFactory;
+    protected readonly IServiceScopeFactory _serviceScopeProvider;
     private int? _tenantId;
     private BackupProgressItemType? _backupProgressItemEnum;
     private string _link;
     private int? _newTenantId;
+
+    public BaseBackupProgressItem()
+    {
+        
+    }
+
+    protected BaseBackupProgressItem(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeProvider = serviceScopeFactory;
+    }
 
     public int NewTenantId
     {

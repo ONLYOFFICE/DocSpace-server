@@ -58,7 +58,7 @@ public class RoomTemplatesWorker(
 
             if (item is { IsCompleted: true })
             {
-                await _queue.DequeueTask(item.Id);
+                await _queue.DequeueTask<CreateRoomTemplateOperation>(item.Id);
                 item = null;
             }
             if (item == null || (enqueueTask && item.Id == taskId && item.Status == DistributedTaskStatus.Created))
@@ -105,7 +105,7 @@ public class RoomTemplatesWorker(
 
             if (item is { IsCompleted: true })
             {
-                await _queue.DequeueTask(item.Id);
+                await _queue.DequeueTask<CreateRoomTemplateOperation>(item.Id);
                 item = null;
             }
             if (item == null || (enqueueTask && item.Id == taskId && item.Status == DistributedTaskStatus.Created))

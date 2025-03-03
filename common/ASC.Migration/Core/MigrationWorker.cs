@@ -56,7 +56,7 @@ public class MigrationWorker(
 
             if (item is { IsCompleted: true })
             {
-                await _queue.DequeueTask(item.Id);
+                await _queue.DequeueTask<MigrationOperation>(item.Id);
                 item = null;
             }
 
@@ -83,7 +83,7 @@ public class MigrationWorker(
 
         foreach (var t in tasks)
         {
-            await _queue.DequeueTask(t.Id);
+            await _queue.DequeueTask<MigrationOperation>(t.Id);
         }
     }
 
@@ -93,7 +93,7 @@ public class MigrationWorker(
 
         foreach (var t in tasks)
         {
-            await _queue.DequeueTask(t.Id);
+            await _queue.DequeueTask<MigrationOperation>(t.Id);
         }
     }
 

@@ -46,7 +46,7 @@ public class BackupRequestedIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered && await backupWorker.IsInstanceTooBusy())
+            if (!@event.Redelivered && await backupWorker.IsInstanceTooBusy<BackupProgressItem>())
             {
                 throw new IntegrationEventRejectExeption(@event.Id);
             }

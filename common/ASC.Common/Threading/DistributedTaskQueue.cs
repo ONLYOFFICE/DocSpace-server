@@ -74,7 +74,7 @@ public class DistributedTaskQueue(
         }
     }
 
-    public async Task EnqueueTask(DistributedTask distributedTask)
+    public async Task EnqueueTask<T>(T distributedTask) where T : DistributedTask
     {
         distributedTask.InstanceId = INSTANCE_ID;
 
@@ -103,7 +103,7 @@ public class DistributedTaskQueue(
         var task = new Task(() =>
         {
             var t = distributedTask.RunJob(token);
-            t.ContinueWith(async a => await OnCompleted(a, distributedTask.Id), token).ConfigureAwait(false);
+            t.ContinueWith(async a => await OnCompleted<T>(a, distributedTask.Id), token).ConfigureAwait(false);
             t.ConfigureAwait(false);
         }, token, TaskCreationOptions.LongRunning);
 
@@ -118,10 +118,10 @@ public class DistributedTaskQueue(
         logger.TraceEnqueueTask(distributedTask.Id, INSTANCE_ID);
 
     }
-
-    public async Task<List<DistributedTask>> GetAllTasks(int? instanceId = null)
+    
+    public async Task<List<T>> GetAllTasks<T>(int? instanceId = null)  where T : DistributedTask
     {
-        var queueTasks = await LoadFromCache();
+        var queueTasks = await LoadFromCache<T>();
 
         queueTasks = await DeleteOrphanCacheItem(queueTasks);
 
@@ -132,27 +132,23 @@ public class DistributedTaskQueue(
 
         foreach (var task in queueTasks)
         {
-            task.Publication ??= GetPublication();
+            task.Publication ??= GetPublication<T>();
         }
 
         return queueTasks;
     }
-
-    public async Task<IEnumerable<T>> GetAllTasks<T>() where T : DistributedTask
-    {
-        return (await GetAllTasks()).Select(x => Map(x, serviceProvider.GetService<T>())).ToList();
-    }
+    
 
     public async Task<T> PeekTask<T>(string id) where T : DistributedTask
     {
-        var taskById = (await GetAllTasks()).FirstOrDefault(x => x.Id == id);
+        var taskById = (await GetAllTasks<T>()).FirstOrDefault(x => x.Id == id);
 
         return taskById == null ? null : Map(taskById, serviceProvider.GetService<T>());
     }
 
-    public async Task DequeueTask(string id)
+    public async Task DequeueTask<T>(string id)  where T : DistributedTask
     {
-        var queueTasks = (await GetAllTasks()).ToList();
+        var queueTasks = (await GetAllTasks<T>()).ToList();
 
         if (!queueTasks.Exists(x => x.Id == id))
         {
@@ -176,17 +172,17 @@ public class DistributedTaskQueue(
 
     }
 
-    public async Task<string> PublishTask(DistributedTask distributedTask)
+    public async Task<string> PublishTask<T>(T distributedTask) where T : DistributedTask
     {
-        distributedTask.Publication ??= GetPublication();
+        distributedTask.Publication ??= GetPublication<T>();
         await distributedTask.PublishChanges();
 
         return distributedTask.Id;
     }
 
-    private async Task OnCompleted(Task task, string id)
+    private async Task OnCompleted<T>(Task task, string id) where T : DistributedTask
     {
-        var distributedTask = (await GetAllTasks()).FirstOrDefault(x => x.Id == id);
+        var distributedTask = (await GetAllTasks<T>()).FirstOrDefault(x => x.Id == id);
         if (distributedTask != null)
         {
             distributedTask.Status = DistributedTaskStatus.Completed;
@@ -210,16 +206,16 @@ public class DistributedTaskQueue(
         }
     }
 
-    private Func<DistributedTask, Task> GetPublication()
+    private Func<DistributedTask, Task> GetPublication<T>() where T : DistributedTask
     {
         return async task =>
         {
-            var allTasks = (await GetAllTasks()).ToList();
+            var allTasks = (await GetAllTasks<T>()).ToList();
             var queueTasks = allTasks.FindAll(x => x.Id != task.Id);
 
             task.LastModifiedOn = DateTime.UtcNow;
 
-            queueTasks.Add(task);
+            queueTasks.Add((T)task);
 
             await SaveToCache(queueTasks);
             logger.TracePublicationDistributedTask(task.Id, task.InstanceId);
@@ -227,7 +223,7 @@ public class DistributedTaskQueue(
     }
 
 
-    private async Task SaveToCache(List<DistributedTask> queueTasks)
+    private async Task SaveToCache<T>(List<T> queueTasks)  where T : DistributedTask
     {
         if (queueTasks.Count == 0)
         {
@@ -239,13 +235,13 @@ public class DistributedTaskQueue(
         await hybridCache.SetAsync(_name, queueTasks, TimeSpan.FromDays(1));
 
     }
-
-    private async Task<List<DistributedTask>> LoadFromCache()
+    
+    private async Task<List<T>> LoadFromCache<T>() where T: DistributedTask
     {
-        return await hybridCache.GetOrDefaultAsync<List<DistributedTask>>(_name) ?? [];
+        return await hybridCache.GetOrDefaultAsync<List<T>>(_name) ?? [];
     }
 
-    private async Task<List<DistributedTask>> DeleteOrphanCacheItem(IEnumerable<DistributedTask> queueTasks)
+    private async Task<List<T>> DeleteOrphanCacheItem<T>(IEnumerable<T> queueTasks)  where T : DistributedTask
     {
         var listTasks = queueTasks.ToList();
 
@@ -257,7 +253,7 @@ public class DistributedTaskQueue(
         return listTasks;
     }
 
-    private bool IsOrphanCacheItem(DistributedTask obj)
+    private bool IsOrphanCacheItem<T>(T obj) where T : DistributedTask
     {
         return obj.LastModifiedOn.AddSeconds(TimeUntilUnregisterInSeconds) < DateTime.UtcNow;
     }
