@@ -24,19 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Security;
-
-using Microsoft.Extensions.Configuration;
-
 namespace ASC.Webhooks.Core;
 
 [Scope]
 public class DbWorker(
     IDbContextFactory<WebhooksDbContext> dbContextFactory,
     TenantManager tenantManager,
-    AuthContext authContext,
-    IHttpClientFactory clientFactory,
-    IConfiguration configuration)
+    AuthContext authContext)
 {
     public async Task<DbWebhooksConfig> AddWebhookConfig(string name, string uri, string secretKey, bool enabled, bool ssl, WebhookTrigger triggers)
     {
@@ -48,31 +42,6 @@ public class DbWorker(
         if (existingConfig != null)
         {
             return existingConfig;
-        }
-
-        var restrictions = configuration.GetSection("webhooks:blacklist").Get<List<string>>() ?? [];
-
-        if (Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) &&
-            System.Net.IPAddress.TryParse(parsedUri.Host, out _) &&
-            restrictions.Any(r => IPAddressRange.MatchIPs(parsedUri.Host, r)))
-        {
-            throw new SecurityException();
-        }
-
-        var httpClientName = "";
-
-        if (Uri.UriSchemeHttps.Equals(parsedUri.Scheme.ToLower(), StringComparison.OrdinalIgnoreCase) && !ssl)
-        {
-            httpClientName = "defaultHttpClientSslIgnore";
-        }
-
-        using var httpClient = clientFactory.CreateClient(httpClientName);
-        using var request = new HttpRequestMessage(HttpMethod.Head, uri);
-        using var response = await httpClient.SendAsync(request);
-
-        if (response.StatusCode != System.Net.HttpStatusCode.OK)
-        {
-            throw new ArgumentException($"Webhook with {uri} is not avaliable. HEAD request is not responce 200 http status.");
         }
 
         var toAdd = new DbWebhooksConfig

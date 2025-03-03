@@ -90,12 +90,13 @@ internal class ProductsActionMapper : IModuleActionMapper
                     MessageAction.PrivacyRoomDisable, 
                     MessageAction.QuotaPerRoomChanged, MessageAction.QuotaPerRoomDisabled, MessageAction.QuotaPerUserChanged, MessageAction.QuotaPerUserDisabled, MessageAction.QuotaPerPortalChanged, MessageAction.QuotaPerPortalDisabled,
                     MessageAction.CustomQuotaPerRoomDefault, MessageAction.CustomQuotaPerRoomChanged, MessageAction.CustomQuotaPerRoomDisabled, MessageAction.CustomQuotaPerUserDefault, MessageAction.CustomQuotaPerUserChanged, MessageAction.CustomQuotaPerUserDisabled,
-                    MessageAction.DevToolsAccessSettingsChanged
+                    MessageAction.DevToolsAccessSettingsChanged,
+                    MessageAction.WebhookUpdated
                 ]
             },
             {
                 ActionType.Create, [
-                    MessageAction.AdministratorAdded, MessageAction.ProductAddedAdministrator
+                    MessageAction.AdministratorAdded, MessageAction.ProductAddedAdministrator, MessageAction.WebhookCreated
                 ]
             },
             {
@@ -105,7 +106,7 @@ internal class ProductsActionMapper : IModuleActionMapper
             },
             {
                 ActionType.Delete, [
-                    MessageAction.ProductDeletedAdministrator,MessageAction.PortalDeleted
+                    MessageAction.ProductDeletedAdministrator,MessageAction.PortalDeleted, MessageAction.WebhookDeleted
                 ]
             },
             {

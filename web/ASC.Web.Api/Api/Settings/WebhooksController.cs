@@ -38,8 +38,11 @@ public class WebhooksController(ApiContext context,
         IHttpContextAccessor httpContextAccessor,
         IMapper mapper,
         IWebhookPublisher webhookPublisher,
+        MessageService messageService,
         SettingsManager settingsManager,
-        PasswordSettingsManager passwordSettingsManager)
+        PasswordSettingsManager passwordSettingsManager,
+        IHttpClientFactory clientFactory,
+        IConfiguration configuration)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -77,15 +80,11 @@ public class WebhooksController(ApiContext context,
     {
         _ = await CheckAdminPermissionsAsync();
 
-        ArgumentNullException.ThrowIfNull(inDto.SecretKey);
-
-        var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
-
-        passwordSettingsManager.CheckPassword(inDto.SecretKey, passwordSettings);
+        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL);
 
         var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers);
 
-        //TODO: audit messageService.SendWebhookCreatedMessage(webhook);
+        messageService.Send(MessageAction.WebhookCreated, MessageTarget.Create(webhook.Id), webhook.Name);
 
         return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
@@ -102,8 +101,7 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        ArgumentNullException.ThrowIfNull(inDto.Uri);
-        ArgumentNullException.ThrowIfNull(inDto.Name);
+        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL);
 
         var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
 
@@ -128,6 +126,8 @@ public class WebhooksController(ApiContext context,
         existingWebhook.Triggers = inDto.Triggers;
 
         var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
+
+        messageService.Send(MessageAction.WebhookUpdated, MessageTarget.Create(webhook.Id), webhook.Name);
 
         return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
@@ -160,6 +160,8 @@ public class WebhooksController(ApiContext context,
         }
 
         var webhook = await dbWorker.RemoveWebhookConfigAsync(inDto.Id);
+
+        messageService.Send(MessageAction.WebhookDeleted, MessageTarget.Create(webhook.Id), webhook.Name);
 
         return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
     }
@@ -306,5 +308,41 @@ public class WebhooksController(ApiContext context,
         }
 
         return false;
+    }
+
+    private async Task CheckWebhook(string name, string uri, string secret, bool ssl)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        ArgumentNullException.ThrowIfNull(secret);
+        ArgumentNullException.ThrowIfNull(uri);
+
+        var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
+
+        passwordSettingsManager.CheckPassword(secret, passwordSettings);
+
+        var restrictions = configuration.GetSection("webhooks:blacklist").Get<List<string>>() ?? [];
+
+        if (Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) &&
+            IPAddress.TryParse(parsedUri.Host, out _) &&
+            restrictions.Any(r => IPAddressRange.MatchIPs(parsedUri.Host, r)))
+        {
+            throw new SecurityException();
+        }
+
+        var httpClientName = "";
+
+        if (Uri.UriSchemeHttps.Equals(parsedUri.Scheme.ToLower(), StringComparison.OrdinalIgnoreCase) && !ssl)
+        {
+            httpClientName = "defaultHttpClientSslIgnore";
+        }
+
+        using var httpClient = clientFactory.CreateClient(httpClientName);
+        using var request = new HttpRequestMessage(HttpMethod.Head, uri);
+        using var response = await httpClient.SendAsync(request);
+
+        if (response.StatusCode != HttpStatusCode.OK)
+        {
+            throw new ArgumentException($"Webhook with {uri} is not avaliable. HEAD request is not responce 200 http status.");
+        }
     }
 }
