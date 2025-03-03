@@ -48,7 +48,7 @@ public class WebhookGroupAccessChecker(
 {
     public async Task<bool> CheckAccessAsync(GroupInfo data, Guid userId)
     {
-        if (authContext.CurrentAccount.ID == userId) //TODO:  || userManager.IsSystemUser(authContext.CurrentAccount.ID) ?
+        if (authContext.CurrentAccount.ID == userId)
         {
             return true;
         }
@@ -73,7 +73,7 @@ public class WebhookUserAccessChecker(
 {
     public async Task<bool> CheckAccessAsync(UserInfo data, Guid userId)
     {
-        if (authContext.CurrentAccount.ID == userId) //TODO:  || userManager.IsSystemUser(authContext.CurrentAccount.ID) ?
+        if (authContext.CurrentAccount.ID == userId)
         {
             return true;
         }

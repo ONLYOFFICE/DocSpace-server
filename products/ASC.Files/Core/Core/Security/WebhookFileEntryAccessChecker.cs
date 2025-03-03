@@ -34,7 +34,7 @@ public class WebhookFileEntryAccessChecker(
 {
     public async Task<bool> CheckAccessAsync(FileEntry fileEntry, Guid userId)
     {
-        if (authContext.CurrentAccount.ID == userId) //TODO:  || userManager.IsSystemUser(authContext.CurrentAccount.ID) ?
+        if (authContext.CurrentAccount.ID == userId)
         {
             return true;
         }

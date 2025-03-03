@@ -144,7 +144,17 @@ public class DbWorker(
         return removeObj;
     }
 
-    public async IAsyncEnumerable<DbWebhooks> ReadJournal(int startIndex, int limit, DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus, Guid? userId, WebhookTrigger? trigger)
+    public async IAsyncEnumerable<DbWebhooks> ReadJournal(
+        int startIndex,
+        int limit,
+        DateTime? deliveryFrom,
+        DateTime? deliveryTo,
+        string hookUri,
+        int? configId,
+        int? eventId,
+        WebhookGroupStatus? webhookGroupStatus,
+        Guid? userId,
+        WebhookTrigger? trigger)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
         var q = await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger);
@@ -165,7 +175,14 @@ public class DbWorker(
         }
     }
 
-    public async Task<int> GetTotalByQuery(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus, Guid? userId, WebhookTrigger? trigger)
+    public async Task<int> GetTotalByQuery(DateTime? deliveryFrom,
+        DateTime? deliveryTo,
+        string hookUri,
+        int? configId,
+        int? eventId,
+        WebhookGroupStatus? webhookGroupStatus,
+        Guid? userId,
+        WebhookTrigger? trigger)
     {
         return await (await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger)).CountAsync();
     }
@@ -194,13 +211,14 @@ public class DbWorker(
         return entity.Entity;
     }
 
-    public async Task<DbWebhooksLog> UpdateWebhookJournal(int id,
-                                                          int status,
-                                                          DateTime delivery,
-                                                          string requestPayload,
-                                                          string requestHeaders,
-                                                          string responsePayload,
-                                                          string responseHeaders)
+    public async Task<DbWebhooksLog> UpdateWebhookJournal(
+        int id,
+        int status,
+        DateTime delivery,
+        string requestPayload,
+        string requestHeaders,
+        string responsePayload,
+        string responseHeaders)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -222,7 +240,15 @@ public class DbWorker(
         return webhook;
     }
 
-    private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? configId, int? eventId, WebhookGroupStatus? webhookGroupStatus, Guid? userId, WebhookTrigger? trigger)
+    private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(
+        DateTime? deliveryFrom,
+        DateTime? deliveryTo,
+        string hookUri,
+        int? configId,
+        int? eventId,
+        WebhookGroupStatus? webhookGroupStatus,
+        Guid? userId,
+        WebhookTrigger? trigger)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
