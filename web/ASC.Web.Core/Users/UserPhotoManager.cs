@@ -27,14 +27,20 @@
 namespace ASC.Web.Core.Users;
 
 [Transient]
-public sealed class ResizeWorkerItem : DistributedTask
+public sealed class ResizeWorkerItem(IServiceScopeFactory serviceScopeFactory, UserPhotoManagerCache userPhotoManagerCache) : DistributedTask
 {
-    public ResizeWorkerItem()
-    {
+    public IMagickGeometry Size { get; set; }
 
-    }
+    public IDataStore DataStore { get; set; }
 
-    public ResizeWorkerItem(int tenantId, Guid userId, byte[] data, long maxFileSize, IMagickGeometry size, IDataStore dataStore, UserPhotoThumbnailSettings settings)
+    public long MaxFileSize { get;set;  }
+
+    public byte[] Data { get; set; }
+    public int TenantId { get; set; }
+    public Guid UserId { get; set; }
+    public UserPhotoThumbnailSettings Settings { get; set; }
+
+    public void Init(int tenantId, Guid userId, byte[] data, long maxFileSize, IMagickGeometry size, IDataStore dataStore, UserPhotoThumbnailSettings settings)
     {
         TenantId = tenantId;
         UserId = userId;
@@ -44,19 +50,7 @@ public sealed class ResizeWorkerItem : DistributedTask
         DataStore = dataStore;
         Settings = settings;
     }
-
-    public IMagickGeometry Size { get; }
-
-    public IDataStore DataStore { get; }
-
-    public long MaxFileSize { get; }
-
-    public byte[] Data { get; }
-    public int TenantId { get; }
-    public Guid UserId { get; }
-
-    public UserPhotoThumbnailSettings Settings { get; }
-
+    
     public override bool Equals(object obj)
     {
         if (obj is null)
@@ -95,6 +89,45 @@ public sealed class ResizeWorkerItem : DistributedTask
     public override int GetHashCode()
     {
         return HashCode.Combine(UserId, MaxFileSize, Size);
+    }
+    
+    protected override async Task DoJob()
+    {
+        try
+        {
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            await tenantManager.SetCurrentTenantAsync(TenantId);
+
+            var data = Data;
+            using var stream = new MemoryStream(data);
+            using var img = new MagickImage(stream);
+            var imgFormat = img.Format;
+
+            if (Size.CompareTo(new MagickGeometry(img.Width, img.Height)) != 0)
+            {
+                using var img2 = Settings.IsDefault ?
+                    CommonPhotoManager.DoThumbnail(img, Size) :
+                    UserPhotoThumbnailManager.GetImage(img, Size, Settings);
+                data = await CommonPhotoManager.SaveToBytes(img2);
+            }
+            else
+            {
+                data = await CommonPhotoManager.SaveToBytes(img);
+            }
+
+            var widening = CommonPhotoManager.GetImgFormatName(imgFormat);
+            var fileName = $"{UserId}_size_{Size.Width}-{Size.Height}.{widening}";
+
+            using var stream2 = new MemoryStream(data);
+            await DataStore.SaveAsync(fileName, stream2);
+
+            await userPhotoManagerCache.AddToCache(UserId, Size, fileName, TenantId);
+        }
+        catch (ArgumentException error)
+        {
+            throw new UnknownImageFormatException(error);
+        }
     }
 }
 
@@ -179,26 +212,23 @@ public class UserPhotoManagerCache
 }
 
 [Scope]
-public class UserPhotoManager(UserManager userManager,
+public class UserPhotoManager(
+    UserManager userManager,
     WebImageSupplier webImageSupplier,
     TenantManager tenantManager,
     StorageFactory storageFactory,
     UserPhotoManagerCache userPhotoManagerCache,
     ILogger<UserPhotoManager> logger,
-    IDistributedTaskQueueFactory queueFactory,
-    SettingsManager settingsManager)
+    UserPhotoResizeManager userPhotoResizeManager,
+    SettingsManager settingsManager,
+    IServiceProvider serviceProvider)
 {
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "user_photo_manager";
-
     //Regex for parsing filenames into groups with id's
     private static readonly Regex _parseFile =
             new(@"^(?'module'\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1}){0,1}" +
                 @"(?'user'\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1}){1}" +
                 @"_(?'kind'orig|size){1}_(?'size'(?'width'[0-9]{1,5})-{1}(?'height'[0-9]{1,5})){0,1}\..*", RegexOptions.Compiled);
-
-    //note: using auto stop queue
-    private readonly DistributedTaskQueue _resizeQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);//TODO: configure
-
+    
     private string _defaultAbsoluteWebPath;
     public string GetDefaultPhotoAbsoluteWebPath()
     {
@@ -599,62 +629,25 @@ public class UserPhotoManager(UserManager userManager,
             throw new ImageWeightLimitException();
         }
 
-        var resizeTask = new ResizeWorkerItem(tenantManager.GetCurrentTenantId(), userID, data, maxFileSize, size, await GetDataStoreAsync(), await settingsManager.LoadAsync<UserPhotoThumbnailSettings>(userID));
+        var resizeTask = serviceProvider.GetRequiredService<ResizeWorkerItem>();
+        resizeTask.Init(tenantManager.GetCurrentTenantId(), userID, data, maxFileSize, size, await GetDataStoreAsync(), await settingsManager.LoadAsync<UserPhotoThumbnailSettings>(userID));
+        
         var key = $"{userID}{size}";
         resizeTask["key"] = key;
 
         if (now)
         {
             //Resize synchronously
-            await ResizeImage(resizeTask);
+            await resizeTask.RunJob(CancellationToken.None);
             return await GetSizedPhotoAbsoluteWebPath(userID, size);
         }
-
-        if ((await _resizeQueue.GetAllTasks<ResizeWorkerItem>()).All(r => r["key"] != key))
-        {
-            //Add
-            await _resizeQueue.EnqueueTask(async (_, _) => await ResizeImage(resizeTask), resizeTask);
-        }
+        
+        await userPhotoResizeManager.EnqueueTaskAsync(key, resizeTask);
         return GetDefaultPhotoAbsoluteWebPath(size);
         //NOTE: return default photo here. Since task will update cache
     }
 
-    private async Task ResizeImage(ResizeWorkerItem item)
-    {
-        try
-        {
-            await tenantManager.SetCurrentTenantAsync(item.TenantId);
-
-            var data = item.Data;
-            using var stream = new MemoryStream(data);
-            using var img = new MagickImage(stream);
-            var imgFormat = img.Format;
-
-            if (item.Size.CompareTo(new MagickGeometry(img.Width, img.Height)) != 0)
-            {
-                using var img2 = item.Settings.IsDefault ?
-                    CommonPhotoManager.DoThumbnail(img, item.Size) :
-                    UserPhotoThumbnailManager.GetImage(img, item.Size, item.Settings);
-                data = await CommonPhotoManager.SaveToBytes(img2);
-            }
-            else
-            {
-                data = await CommonPhotoManager.SaveToBytes(img);
-            }
-
-            var widening = CommonPhotoManager.GetImgFormatName(imgFormat);
-            var fileName = $"{item.UserId}_size_{item.Size.Width}-{item.Size.Height}.{widening}";
-
-            using var stream2 = new MemoryStream(data);
-            await item.DataStore.SaveAsync(fileName, stream2);
-
-            await userPhotoManagerCache.AddToCache(item.UserId, item.Size, fileName, item.TenantId);
-        }
-        catch (ArgumentException error)
-        {
-            throw new UnknownImageFormatException(error);
-        }
-    }
+   
 
     public async Task<string> SaveTempPhoto(byte[] data, long maxFileSize, uint maxWidth, uint maxHeight)
     {
@@ -803,6 +796,23 @@ public class UserPhotoManager(UserManager userManager,
             _ when size.Width == MediumFotoSize.Width && size.Height == MediumFotoSize.Height => CacheSize.Medium,
             _ => CacheSize.Original
         };
+    }
+}
+
+[Singleton]
+public class UserPhotoResizeManager(IDistributedTaskQueueFactory queueFactory)
+{
+    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "user_photo_manager";
+    //note: using auto stop queue
+    private readonly DistributedTaskQueue _resizeQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);//TODO: configure
+
+    public async Task EnqueueTaskAsync(string key, ResizeWorkerItem resizeTask)
+    {
+        if ((await _resizeQueue.GetAllTasks<ResizeWorkerItem>()).All(r => r["key"] != key))
+        {
+            //Add
+            await _resizeQueue.EnqueueTask(resizeTask);
+        }
     }
 }
 

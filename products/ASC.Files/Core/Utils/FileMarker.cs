@@ -62,33 +62,14 @@ public class FileMarkerCache
 }
 
 [Singleton]
-public class FileMarkerHelper(
-    IServiceProvider serviceProvider,
-    ILogger<FileMarkerHelper> logger,
-    IDistributedTaskQueueFactory queueFactory)
+public class FileMarkerHelper(IDistributedTaskQueueFactory queueFactory)
 {
     private const string CustomDistributedTaskQueueName = "file_marker";
-    private readonly ILogger _logger = logger;
     private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CustomDistributedTaskQueueName);
 
     internal async Task Add<T>(AsyncTaskData<T> taskData)
     {
-        await _tasks.EnqueueTask(async (_, _) => await ExecMarkFileAsNewAsync(taskData), taskData);
-    }
-
-    private async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj)
-    {
-        try
-        {
-            await using var scope = serviceProvider.CreateAsyncScope();
-            var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
-            var socketManager = scope.ServiceProvider.GetService<SocketManager>();
-            await fileMarker.ExecMarkFileAsNewAsync(obj, socketManager);
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorExecMarkFileAsNew(e);
-        }
+        await _tasks.EnqueueTask(taskData);
     }
 }
 
@@ -483,13 +464,12 @@ public class FileMarker(
 
         userIDs ??= [];
 
-        var taskData = new AsyncTaskData<T>
-        {
-            TenantId = tenantManager.GetCurrentTenantId(),
-            CurrentAccountId = authContext.CurrentAccount.ID,
-            FileEntry = (FileEntry<T>)fileEntry.Clone(),
-            UserIDs = userIDs
-        };
+        var taskData = serviceProvider.GetService<AsyncTaskData<T>>();
+
+        taskData.TenantId = tenantManager.GetCurrentTenantId();
+        taskData.CurrentAccountId = authContext.CurrentAccount.ID;
+        taskData.FileEntry = (FileEntry<T>)fileEntry.Clone();
+        taskData.UserIDs = userIDs;
 
         if (fileEntry.RootFolderType == FolderType.BUNCH && userIDs.Count == 0)
         {
@@ -1259,12 +1239,29 @@ public class FileMarker(
     }
 }
 
-public class AsyncTaskData<T> : DistributedTask
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
+public class AsyncTaskData<T>(IServiceScopeFactory serviceScopeFactory, ILogger<AsyncTaskData<T>> logger) : DistributedTask
 {
-    public int TenantId { get; init; }
-    public FileEntry<T> FileEntry { get; init; }
+    public int TenantId { get; set; }
+    public FileEntry<T> FileEntry { get; set; }
     public List<Guid> UserIDs { get; set; }
-    public Guid CurrentAccountId { get; init; }
+    public Guid CurrentAccountId { get; set; }
+    
+    protected override async Task DoJob()
+    {
+        try
+        {
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
+            var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+            await fileMarker.ExecMarkFileAsNewAsync(this, socketManager);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorExecMarkFileAsNew(e);
+        }
+    }
 }
 
 public enum MarkResult
