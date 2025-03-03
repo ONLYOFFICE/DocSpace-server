@@ -1042,6 +1042,17 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
             }
         }
+        if (file == null || (file != null && !file.IsForm) || (file != null && file.IsForm && e.RootFolderType != FolderType.VirtualRooms))
+        {
+            switch (action)
+            {
+                case FilesSecurityActions.ResetFilling:
+                case FilesSecurityActions.StopFilling:
+                case FilesSecurityActions.StartFilling:
+                case FilesSecurityActions.FillingStatus:
+                    return false;
+            }
+        }
 
         switch (e.RootFolderType)
         {
