@@ -149,7 +149,7 @@
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Ողջույն, $UserName!
 
-Բարի գալուստ ONLYOFFICE DocSpace: Ձեր օգտվողի պրոֆիլը հաջողությամբ ավելացվել է "${__VirtualRootPath}":"${__VirtualRootPath}". Այժմ դուք կարող եք: 
+Բարի գալուստ ${LetterLogoText} DocSpace: Ձեր օգտվողի պրոֆիլը հաջողությամբ ավելացվել է "${__VirtualRootPath}":"${__VirtualRootPath}". Այժմ դուք կարող եք: 
 
 * Աշխատեք այլ օգտատերերի հետ այն սենյակում, որտեղ հրավիրված եք *: Համագործակցության սենյակներ իրական ժամանակի համահեղինակության համար կամ հատուկ սենյակներ՝ ցանկացած նպատակով ճկուն կարգավորումներով*. 
 

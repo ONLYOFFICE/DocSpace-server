@@ -120,7 +120,7 @@
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
 
-ONLYOFFICE DocSpace에 오신 것을 환영합니다! 고객님의 사용자 프로필이 "${__VirtualRootPath}":"${__VirtualRootPath}"에 성공적으로 추가되었으며 이제 다음과 같은 작업을 하실 수 있습니다.
+${LetterLogoText} DocSpace에 오신 것을 환영합니다! 고객님의 사용자 프로필이 "${__VirtualRootPath}":"${__VirtualRootPath}"에 성공적으로 추가되었으며 이제 다음과 같은 작업을 하실 수 있습니다.
 
 * 초대 받은 방에서 다른 사용자와 작업하세요. *실시간 공동 저작을 위한 공동 작업실 또는 다양한 목적을 위해 유연한 설정이 가능한 사용자 지정 방에서 공동으로 작업하세요*.
 

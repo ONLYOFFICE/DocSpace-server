@@ -139,7 +139,7 @@ Brisanje ličnih podataka je oslobodilo $DocsSpace</value>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Dobrodošli na ONLYOFFICE DocSpace! Vaš korisnički profil je uspešno dodat na "${__VirtualRootPath}":"${__VirtualRootPath}". Sada možete:
+Dobrodošli na ${LetterLogoText} DocSpace! Vaš korisnički profil je uspešno dodat na "${__VirtualRootPath}":"${__VirtualRootPath}". Sada možete:
 
 * Radite sa drugim korisnicima u sobi u koju ste pozvani: *sobe za saradnju za koautorstvo u realnom vremenu ili prilagođene sobe sa fleksibilnim postavkama za bilo koju svrhu*.
 

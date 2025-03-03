@@ -90,7 +90,7 @@ Beim Entfernen persönlicher Daten es wurde freigegeben $DocsSpace</value>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Willkommen bei ONLYOFFICE DocSpace! Ihr Benutzerprofil wurde erfolgreich zu "${__VirtualRootPath}":"${__VirtualRootPath}" hinzugefügt. Jetzt können Sie:
+Willkommen bei ${LetterLogoText} DocSpace! Ihr Benutzerprofil wurde erfolgreich zu "${__VirtualRootPath}":"${__VirtualRootPath}" hinzugefügt. Jetzt können Sie:
 
 * Mit anderen Benutzern in dem Raum arbeiten, zu dem Sie eingeladen sind: *Kollaborationsräume für die Zusammenarbeit in Echtzeit oder benutzerdefinierte Räume mit flexiblen Einstellungen für jeden Zweck*.
 
