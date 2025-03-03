@@ -334,8 +334,6 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection AddDistributedTaskQueue(this IServiceCollection services)
     {
-        services.AddTransient<DistributedTaskQueue>();
-
         services.AddSingleton<IDistributedTaskQueueFactory, DefaultDistributedTaskQueueFactory>();
 
         return services;

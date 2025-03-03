@@ -31,15 +31,15 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "userQuotaOperation";
 
-    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly DistributedTaskQueue<UsersQuotaSyncJob> _progressQueue = queueFactory.CreateQueue<UsersQuotaSyncJob>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
 
     public async Task RecalculateQuota(Tenant tenant)
     {
-        var item = (await _progressQueue.GetAllTasks<UsersQuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            await _progressQueue.DequeueTask<UsersQuotaSyncJob>(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
             item = null;
         }
 
@@ -52,7 +52,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
     }
     public async Task<TaskProgressDto> CheckRecalculateQuota(Tenant tenant)
     {
-        var item = (await _progressQueue.GetAllTasks<UsersQuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
         var progress = new TaskProgressDto();
 
         if (item == null)
@@ -66,7 +66,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
 
         if (item.IsCompleted)
         {
-            await _progressQueue.DequeueTask<UsersQuotaSyncJob>(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
         }
 
         return progress;

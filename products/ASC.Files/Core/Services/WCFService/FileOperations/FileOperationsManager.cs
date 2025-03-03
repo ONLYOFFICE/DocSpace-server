@@ -34,20 +34,20 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 public class FileOperationsManagerHolder<T> where T : FileOperation
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly DistributedTaskQueue _tasks;
+    private readonly DistributedTaskQueue<T> _tasks;
 
     public static string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation" + typeof(T).Name;
 
     public FileOperationsManagerHolder(IDistributedTaskQueueFactory queueFactory, NotifyConfiguration notifyConfiguration, IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME );
+        _tasks = queueFactory.CreateQueue<T>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME );
         notifyConfiguration.Configure();
     }
     
     public async Task<List<FileOperationResult>> GetOperationResults(Guid userId)
     {
-        var operations = (await _tasks.GetAllTasks<T>())
+        var operations = (await _tasks.GetAllTasks())
             .Where(t => new Guid(t[FileOperation.Owner]) == userId)
             .ToList();
         
@@ -55,7 +55,7 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
         {
             o[FileOperation.Progress] = 100;
 
-            await _tasks.DequeueTask<T>(o.Id);
+            await _tasks.DequeueTask(o.Id);
         }
 
         var results = operations
@@ -78,12 +78,12 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
 
     public async Task<List<FileOperationResult>> CancelOperations(Guid userId, string id = null)
     {
-        var operations = (await _tasks.GetAllTasks<T>())
+        var operations = (await _tasks.GetAllTasks())
             .Where(t => (string.IsNullOrEmpty(id) || t.Id == id) && new Guid(t[FileOperation.Owner]) == userId);
 
         foreach (var o in operations)
         {
-            await _tasks.DequeueTask<T>(o.Id);
+            await _tasks.DequeueTask(o.Id);
         }
 
         return await GetOperationResults(userId);
@@ -101,7 +101,7 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
 
     public async Task CheckRunning(Guid userId, FileOperationType fileOperationType)
     {
-        var operations = (await _tasks.GetAllTasks<T>())
+        var operations = (await _tasks.GetAllTasks())
             .Where(t => new Guid(t[FileOperation.Owner]) == userId)
             .Where(t => (FileOperationType)t[FileOperation.OpType] == fileOperationType);
         

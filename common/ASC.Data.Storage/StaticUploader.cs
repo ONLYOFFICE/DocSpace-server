@@ -37,7 +37,7 @@ public class StaticUploader(
     IDistributedTaskQueueFactory queueFactory,
     IDistributedLockProvider distributedLockProvider)
 {
-    protected readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    protected readonly DistributedTaskQueue<UploadOperationProgress> _queue = queueFactory.CreateQueue<UploadOperationProgress>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "static_upload"; 
     private static readonly CancellationTokenSource _tokenSource;
     private static readonly object _locker;
@@ -108,7 +108,7 @@ public class StaticUploader(
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
-            if ((await _queue.GetAllTasks<UploadOperationProgress>()).Any(x => x.Id != key))
+            if ((await _queue.GetAllTasks()).Any(x => x.Id != key))
             {
                 return;
             }
@@ -141,7 +141,7 @@ public class StaticUploader(
         {
             var key = typeof(UploadOperationProgress).FullName + tenantId;
 
-            return await _queue.PeekTask<UploadOperationProgress>(key);
+            return await _queue.PeekTask(key);
         }
     }
 

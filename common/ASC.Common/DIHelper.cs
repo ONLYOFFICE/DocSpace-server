@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
 namespace ASC.Common;
 
 public enum DIAttributeType
@@ -402,8 +404,9 @@ public class DIHelper
 
     private bool Register(DIAttribute c, Type service, Type implementation = null)
     {
-        if (service.IsSubclassOf(typeof(ControllerBase)) || service.GetInterfaces().Contains(typeof(IResourceFilter))
-            || service.GetInterfaces().Contains(typeof(IDictionary<string, string>)))
+        if (service.IsSubclassOf(typeof(ControllerBase)) || 
+            service.GetInterfaces().Contains(typeof(IResourceFilter)) || 
+            service.GetInterfaces().Contains(typeof(IDictionary<string, string>)))
         {
             return true;
         }
@@ -412,6 +415,11 @@ public class DIHelper
 
         if (!_services[c.DiAttributeType].Contains(serviceName))
         {
+            if (service.IsSubclassOf(typeof(DistributedTask)))
+            {
+                _serviceCollection.TryAddTransient(typeof(DistributedTaskQueue<>).MakeGenericType(service));
+            }
+            
             c.TryAdd(_serviceCollection, service, implementation);
             _services[c.DiAttributeType].Add(serviceName);
 

@@ -36,7 +36,7 @@ public class StorageUploader(
     IDistributedLockProvider distributedLockProvider,
     AscHybridCache cache)
 {
-    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue();
+    private readonly DistributedTaskQueue<MigrateOperation> _queue = queueFactory.CreateQueue<MigrateOperation>();
 
     public async Task StartAsync(int tenantId, StorageSettings newStorageSettings, StorageFactoryConfig storageFactoryConfig)
     {
@@ -44,7 +44,7 @@ public class StorageUploader(
         {
             var id = GetCacheKey(tenantId);
 
-            if ((await _queue.GetAllTasks<MigrateOperation>()).Any(x => x.Id == id))
+            if ((await _queue.GetAllTasks()).Any(x => x.Id == id))
             {
                 return;
             }
@@ -58,15 +58,15 @@ public class StorageUploader(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}"))
         {
-            return await _queue.PeekTask<MigrateOperation>(GetCacheKey(tenantId));
+            return await _queue.PeekTask(GetCacheKey(tenantId));
         }
     }
 
     public async Task Stop()
     {
-        foreach (var task in (await _queue.GetAllTasks<MigrateOperation>(DistributedTaskQueue.INSTANCE_ID)).Where(r => r.Status == DistributedTaskStatus.Running))
+        foreach (var task in (await _queue.GetAllTasks(DistributedTaskQueue<MigrateOperation>.INSTANCE_ID)).Where(r => r.Status == DistributedTaskStatus.Running))
         {
-            await _queue.DequeueTask<MigrateOperation>(task.Id);
+            await _queue.DequeueTask(task.Id);
         }
     }
 

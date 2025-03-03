@@ -31,7 +31,7 @@ public class FormFillingReportIntegrationEventHandler(
     ILogger<FormFillingReportIntegrationEventHandler> logger,
     CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
-    DocumentBuilderTaskManager documentBuilderTaskManager,
+    DocumentBuilderTaskManager<FormFillingReportTask, int, FormFillingReportTaskData> documentBuilderTaskManager,
     IServiceProvider serviceProvider)
     : IIntegrationEventHandler<FormFillingReportIntegrationEvent>
 {
@@ -48,7 +48,7 @@ public class FormFillingReportIntegrationEventHandler(
             {
                 if (@event.Terminate)
                 {
-                    await documentBuilderTaskManager.TerminateTask<int, FormFillingReportTaskData>(@event.TenantId, @event.CreateBy);
+                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
                     return;
                 }
 

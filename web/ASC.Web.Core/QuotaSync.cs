@@ -32,21 +32,21 @@ public class QuotaSyncOperation
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "quotaOperation";
 
-    private readonly DistributedTaskQueue _progressQueue;
+    private readonly DistributedTaskQueue<QuotaSyncJob> _progressQueue;
     private readonly IServiceProvider _serviceProvider;
 
     public QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
     {
         _serviceProvider = serviceProvider;
-        _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+        _progressQueue = queueFactory.CreateQueue<QuotaSyncJob>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
     }
 
     public async Task RecalculateQuota(Tenant tenant)
     {
-        var item = (await _progressQueue.GetAllTasks<QuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            await _progressQueue.DequeueTask<QuotaSyncJob>(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
             item = null;
         }
         
@@ -62,10 +62,10 @@ public class QuotaSyncOperation
 
     public async Task<bool> CheckRecalculateQuota(Tenant tenant)
     {
-        var item = (await _progressQueue.GetAllTasks<QuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            await _progressQueue.DequeueTask<QuotaSyncJob>(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
             return false;
         }
 

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#nullable enable
-
 using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
@@ -45,7 +43,7 @@ public class SmtpJob : DistributedTaskProgress
         }
     }
 
-    private string? _currentOperation;
+    private string _currentOperation;
     public string CurrentOperation
     {
         get => _currentOperation ?? this[nameof(_currentOperation)];
@@ -195,7 +193,7 @@ public class SmtpJob : DistributedTaskProgress
         }
     }
 
-    private async Task SetProgress(int percentage, string? status = null)
+    private async Task SetProgress(int percentage, string status = null)
     {
         Percentage = percentage;
         CurrentOperation = status ?? CurrentOperation;

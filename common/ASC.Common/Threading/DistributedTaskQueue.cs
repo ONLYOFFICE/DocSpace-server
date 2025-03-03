@@ -27,11 +27,10 @@
 namespace ASC.Common.Threading;
 
 [Transient]
-public class DistributedTaskQueue(
-    IServiceProvider serviceProvider,
+public class DistributedTaskQueue<T>(
     ICacheNotify<DistributedTaskCancelation> cancelTaskNotify,
     IFusionCache hybridCache,
-    ILogger<DistributedTaskQueue> logger)
+    ILogger<DistributedTaskQueue<T>> logger)  where T : DistributedTask
 {
     public const string QUEUE_DEFAULT_PREFIX = "asc_distributed_task_queue_";
     public static readonly int INSTANCE_ID = Environment.ProcessId;
@@ -74,7 +73,7 @@ public class DistributedTaskQueue(
         }
     }
 
-    public async Task EnqueueTask<T>(T distributedTask) where T : DistributedTask
+    public async Task EnqueueTask(T distributedTask)
     {
         distributedTask.InstanceId = INSTANCE_ID;
 
@@ -103,7 +102,7 @@ public class DistributedTaskQueue(
         var task = new Task(() =>
         {
             var t = distributedTask.RunJob(token);
-            t.ContinueWith(async a => await OnCompleted<T>(a, distributedTask.Id), token).ConfigureAwait(false);
+            t.ContinueWith(async a => await OnCompleted(a, distributedTask.Id), token).ConfigureAwait(false);
             t.ConfigureAwait(false);
         }, token, TaskCreationOptions.LongRunning);
 
@@ -119,9 +118,9 @@ public class DistributedTaskQueue(
 
     }
     
-    public async Task<List<T>> GetAllTasks<T>(int? instanceId = null)  where T : DistributedTask
+    public async Task<List<T>> GetAllTasks(int? instanceId = null)
     {
-        var queueTasks = await LoadFromCache<T>();
+        var queueTasks = await LoadFromCache();
 
         queueTasks = await DeleteOrphanCacheItem(queueTasks);
 
@@ -132,23 +131,23 @@ public class DistributedTaskQueue(
 
         foreach (var task in queueTasks)
         {
-            task.Publication ??= GetPublication<T>();
+            task.Publication ??= GetPublication();
         }
 
         return queueTasks;
     }
     
 
-    public async Task<T> PeekTask<T>(string id) where T : DistributedTask
+    public async Task<T> PeekTask(string id)
     {
-        var taskById = (await GetAllTasks<T>()).FirstOrDefault(x => x.Id == id);
+        var taskById = (await GetAllTasks()).FirstOrDefault(x => x.Id == id);
 
-        return taskById == null ? null : Map(taskById, serviceProvider.GetService<T>());
+        return taskById;
     }
 
-    public async Task DequeueTask<T>(string id)  where T : DistributedTask
+    public async Task DequeueTask(string id)
     {
-        var queueTasks = (await GetAllTasks<T>()).ToList();
+        var queueTasks = (await GetAllTasks()).ToList();
 
         if (!queueTasks.Exists(x => x.Id == id))
         {
@@ -172,17 +171,17 @@ public class DistributedTaskQueue(
 
     }
 
-    public async Task<string> PublishTask<T>(T distributedTask) where T : DistributedTask
+    public async Task<string> PublishTask(T distributedTask)
     {
-        distributedTask.Publication ??= GetPublication<T>();
+        distributedTask.Publication ??= GetPublication();
         await distributedTask.PublishChanges();
 
         return distributedTask.Id;
     }
 
-    private async Task OnCompleted<T>(Task task, string id) where T : DistributedTask
+    private async Task OnCompleted(Task task, string id)
     {
-        var distributedTask = (await GetAllTasks<T>()).FirstOrDefault(x => x.Id == id);
+        var distributedTask = (await GetAllTasks()).FirstOrDefault(x => x.Id == id);
         if (distributedTask != null)
         {
             distributedTask.Status = DistributedTaskStatus.Completed;
@@ -206,11 +205,11 @@ public class DistributedTaskQueue(
         }
     }
 
-    private Func<DistributedTask, Task> GetPublication<T>() where T : DistributedTask
+    private Func<DistributedTask, Task> GetPublication()
     {
         return async task =>
         {
-            var allTasks = (await GetAllTasks<T>()).ToList();
+            var allTasks = (await GetAllTasks()).ToList();
             var queueTasks = allTasks.FindAll(x => x.Id != task.Id);
 
             task.LastModifiedOn = DateTime.UtcNow;
@@ -223,7 +222,7 @@ public class DistributedTaskQueue(
     }
 
 
-    private async Task SaveToCache<T>(List<T> queueTasks)  where T : DistributedTask
+    private async Task SaveToCache(List<T> queueTasks)
     {
         if (queueTasks.Count == 0)
         {
@@ -236,12 +235,12 @@ public class DistributedTaskQueue(
 
     }
     
-    private async Task<List<T>> LoadFromCache<T>() where T: DistributedTask
+    private async Task<List<T>> LoadFromCache()
     {
         return await hybridCache.GetOrDefaultAsync<List<T>>(_name) ?? [];
     }
 
-    private async Task<List<T>> DeleteOrphanCacheItem<T>(IEnumerable<T> queueTasks)  where T : DistributedTask
+    private async Task<List<T>> DeleteOrphanCacheItem(IEnumerable<T> queueTasks)
     {
         var listTasks = queueTasks.ToList();
 
@@ -253,49 +252,8 @@ public class DistributedTaskQueue(
         return listTasks;
     }
 
-    private bool IsOrphanCacheItem<T>(T obj) where T : DistributedTask
+    private bool IsOrphanCacheItem(T obj)
     {
         return obj.LastModifiedOn.AddSeconds(TimeUntilUnregisterInSeconds) < DateTime.UtcNow;
-    }
-
-
-    /// <summary>
-    /// Maps the source object to destination object.
-    /// </summary>
-    /// <typeparam name="T">Type of destination object.</typeparam>
-    /// <typeparam name="TU">Type of source object.</typeparam>
-    /// <param name="destination">Destination object.</param>
-    /// <param name="source">Source object.</param>
-    /// <returns>Updated destination object.</returns>
-    private T Map<T, TU>(TU source, T destination)
-    {
-        destination.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-                    .ToList()
-                    .ForEach(field =>
-                    {
-                        var sf = source.GetType().GetField(field.Name, BindingFlags.NonPublic | BindingFlags.Instance);
-
-                        if (sf != null)
-                        {
-                            var value = sf.GetValue(source);
-                            destination.GetType().GetField(field.Name, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(destination, value);
-                        }
-                    });
-
-        destination.GetType().GetProperties().Where(p => p.CanWrite && p.GetIndexParameters().Length == 0)
-                    .ToList()
-                    .ForEach(prop =>
-                    {
-                        var sp = source.GetType().GetProperty(prop.Name);
-                        if (sp != null)
-                        {
-                            var value = sp.GetValue(source, null);
-                            destination.GetType().GetProperty(prop.Name).SetValue(destination, value, null);
-                        }
-                    });
-
-
-
-        return destination;
     }
 }

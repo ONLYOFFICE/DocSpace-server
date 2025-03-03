@@ -32,18 +32,18 @@ public class EncryptionWorker(
     IServiceProvider serviceProvider,
     IDistributedLockProvider distributedLockProvider)
 {
-    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly DistributedTaskQueue<EncryptionOperation> _queue = queueFactory.CreateQueue<EncryptionOperation>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "encryption";
 
     public async Task StartAsync(EncryptionSettings encryptionSettings, string serverRootPath)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
-            var item = (await _queue.GetAllTasks<EncryptionOperation>()).SingleOrDefault();
+            var item = (await _queue.GetAllTasks()).SingleOrDefault();
 
             if (item is { IsCompleted: true })
             {
-                await _queue.DequeueTask<EncryptionOperation>(item.Id);
+                await _queue.DequeueTask(item.Id);
                 item = null;
             }
 
@@ -59,7 +59,7 @@ public class EncryptionWorker(
 
     public async Task Stop()
     {
-        await _queue.DequeueTask<EncryptionOperation>(GetCacheId());
+        await _queue.DequeueTask(GetCacheId());
     }
 
     private string GetCacheId()
@@ -69,7 +69,7 @@ public class EncryptionWorker(
 
     public async Task<double?> GetEncryptionProgress()
     {
-        var progress = (await _queue.GetAllTasks<EncryptionOperation>()).FirstOrDefault();
+        var progress = (await _queue.GetAllTasks()).FirstOrDefault();
 
         return progress?.Percentage;
     }

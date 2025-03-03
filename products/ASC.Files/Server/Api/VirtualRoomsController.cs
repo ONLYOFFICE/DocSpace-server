@@ -735,7 +735,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         AuthContext authContext,
-        DocumentBuilderTaskManager documentBuilderTaskManager,
+        DocumentBuilderTaskManager<RoomIndexExportTask, int, RoomIndexExportTaskData> documentBuilderTaskManager,
         TenantManager tenantManager,
         IEventBus eventBus,
         UserManager userManager,
@@ -963,7 +963,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
 
-        var task = await documentBuilderTaskManager.GetTask<int, RoomIndexExportTaskData>(tenantId, userId);
+        var task = await documentBuilderTaskManager.GetTask(tenantId, userId);
 
         return DocumentBuilderTaskDto.Get(task);
     }

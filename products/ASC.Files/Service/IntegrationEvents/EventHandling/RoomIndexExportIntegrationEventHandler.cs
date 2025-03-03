@@ -32,7 +32,7 @@ public class RoomIndexExportIntegrationEventHandler(
     CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
     SecurityContext securityContext,
-    DocumentBuilderTaskManager documentBuilderTaskManager,
+    DocumentBuilderTaskManager<RoomIndexExportTask, int, RoomIndexExportTaskData> documentBuilderTaskManager,
     IServiceProvider serviceProvider)
     : IIntegrationEventHandler<RoomIndexExportIntegrationEvent>
 {
@@ -49,7 +49,7 @@ public class RoomIndexExportIntegrationEventHandler(
             {
                 if (@event.Terminate)
                 {
-                    await documentBuilderTaskManager.TerminateTask<int, RoomIndexExportTask>(@event.TenantId, @event.CreateBy);
+                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
                     return;
                 }
 

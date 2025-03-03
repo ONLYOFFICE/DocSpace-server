@@ -32,7 +32,7 @@ public class RemovePortalWorker(
     IServiceProvider serviceProvider,
     IDistributedLockProvider distributedLockProvider)
 {
-    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly DistributedTaskQueue<RemovePortalOperation> _queue = queueFactory.CreateQueue<RemovePortalOperation>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "removePortal";
 
@@ -40,11 +40,11 @@ public class RemovePortalWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
-            var item = (await _queue.GetAllTasks<RemovePortalOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
+            var item = (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
 
             if (item is { IsCompleted: true })
             {
-                await _queue.DequeueTask<RemovePortalOperation>(item.Id);
+                await _queue.DequeueTask(item.Id);
                 item = null;
             }
             if (item == null)
@@ -62,11 +62,11 @@ public class RemovePortalWorker(
 
     public async Task Stop()
     {
-        var tasks = await _queue.GetAllTasks<RemovePortalOperation>(DistributedTaskQueue.INSTANCE_ID);
+        var tasks = await _queue.GetAllTasks(DistributedTaskQueue<RemovePortalOperation>.INSTANCE_ID);
 
         foreach (var t in tasks)
         {
-            await _queue.DequeueTask<RemovePortalOperation>(t.Id);
+            await _queue.DequeueTask(t.Id);
         }
     }
 }

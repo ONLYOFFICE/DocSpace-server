@@ -26,55 +26,51 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-[Singleton]
-public class DocumentBuilderTaskManager
+[Singleton(GenericArguments = [typeof(FormFillingReportTask), typeof(int), typeof(FormFillingReportTaskData)])]
+[Singleton(GenericArguments = [typeof(RoomIndexExportTask), typeof(int), typeof(RoomIndexExportTaskData)])]
+public class DocumentBuilderTaskManager<T, TId, TData> where T : DocumentBuilderTask<TId, TData>
 {
     private static readonly SemaphoreSlim _semaphore = new(1);
 
-    private readonly DistributedTaskQueue _queue;
+    private readonly DistributedTaskQueue<T> _queue;
 
     public DocumentBuilderTaskManager(IDistributedTaskQueueFactory queueFactory)
     {
-        _queue = queueFactory.CreateQueue(GetType());
+        _queue = queueFactory.CreateQueue<T>();
+    }
+    
+    public async Task<T> GetTask(int tenantId, Guid userId)
+    {
+        var taskId = DocumentBuilderTaskManager.GetTaskId(tenantId, userId);
+
+        return await GetTask(taskId);
     }
 
-    public static string GetTaskId(int tenantId, Guid userId)
+    private async Task<T> GetTask(string taskId)
     {
-        return $"DocumentBuilderTask_{tenantId}_{userId}";
+        return await _queue.PeekTask(taskId);
     }
 
-    public async Task<DistributedTaskProgress> GetTask<T, TData>(int tenantId, Guid userId)
+    public async Task TerminateTask(int tenantId, Guid userId)
     {
-        var taskId = GetTaskId(tenantId, userId);
-
-        return await GetTask<T, TData>(taskId);
-    }
-
-    private async Task<DistributedTaskProgress> GetTask<T, TData>(string taskId)
-    {
-        return await _queue.PeekTask<DocumentBuilderTask<T, TData>>(taskId);
-    }
-
-    public async Task TerminateTask<T, TData>(int tenantId, Guid userId)
-    {
-        var task = await GetTask<T, TData>(tenantId, userId);
+        var task = await GetTask(tenantId, userId);
 
         if (task != null)
         {
-            await _queue.DequeueTask<DocumentBuilderTask<T, TData>>(task.Id);
+            await _queue.DequeueTask(task.Id);
         }
     }
 
-    public async Task<DistributedTaskProgress> StartTask<T, TData>(DocumentBuilderTask<T, TData> newTask, bool enqueueTask = true)
+    public async Task<T> StartTask(T newTask, bool enqueueTask = true)
     {
         try
         {
             await _semaphore.WaitAsync();
-            var task = await GetTask<T, TData>(newTask.Id);
+            var task = await GetTask(newTask.Id);
 
             if (task is { IsCompleted: true })
             {
-                await _queue.DequeueTask<DocumentBuilderTask<T, TData>>(task.Id);
+                await _queue.DequeueTask(task.Id);
                 task = null;
             }
 
@@ -98,5 +94,13 @@ public class DocumentBuilderTaskManager
         {
             _semaphore.Release();
         }
+    }
+}
+
+public static class DocumentBuilderTaskManager
+{
+    public static string GetTaskId(int tenantId, Guid userId)
+    {
+        return $"DocumentBuilderTask_{tenantId}_{userId}";
     }
 }

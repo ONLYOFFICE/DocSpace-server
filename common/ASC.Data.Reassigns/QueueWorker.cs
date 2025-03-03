@@ -34,7 +34,7 @@ public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
     where T : DistributedTaskProgress
 {
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
-    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(queueName);
+    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>(queueName);
     protected readonly IDictionary<string, StringValues> _httpHeaders = httpContextAccessor.HttpContext?.Request.Headers;
 
     public static string GetProgressItemId(int tenantId, Guid userId)
@@ -46,7 +46,7 @@ public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
     {
         var id = GetProgressItemId(tenantId, userId);
 
-        return await _queue.PeekTask<T>(id);
+        return await _queue.PeekTask(id);
     }
 
     public async Task Terminate(int tenantId, Guid userId)
@@ -55,7 +55,7 @@ public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
 
         if (item != null)
         {
-            await _queue.DequeueTask<T>(item.Id);
+            await _queue.DequeueTask(item.Id);
         }
     }
 
@@ -67,7 +67,7 @@ public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
 
             if (task is { IsCompleted: true })
             {
-                await _queue.DequeueTask<T>(task.Id);
+                await _queue.DequeueTask(task.Id);
                 task = null;
             }
 
