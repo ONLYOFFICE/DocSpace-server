@@ -408,6 +408,33 @@ public partial class SettingsController(MessageService messageService,
     }
 
     /// <summary>
+    /// Saves the deep link configuration settings for the portal.
+    /// </summary>
+    /// <short>
+    /// Configure deep link settings
+    /// </short>
+    /// <path>api/2.0/settings/deeplink</path>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Deep link configuration updated", typeof(TenantDeepLinkSettings))]
+    [SwaggerResponse(400, "Invalid deep link configuration")]
+    [HttpPost("deeplink")]
+    public async Task<TenantDeepLinkSettings> SaveConfigureDeepLinkAsync(DeepLinkConfigurationRequestsDto inDto)
+    {
+        await DemandStatisticPermissionAsync();
+        if (!Enum.IsDefined(typeof(DeepLinkHandlingMode), inDto.DeepLinkSettings.HandlingMode))
+        {
+            throw new ArgumentException(nameof(inDto.DeepLinkSettings.HandlingMode));
+        }
+        var tenant = tenantManager.GetCurrentTenant();
+        var tenantDeepLinkSettings = await settingsManager.LoadAsync<TenantDeepLinkSettings>();
+
+        tenantDeepLinkSettings.HandlingMode = inDto.DeepLinkSettings.HandlingMode;
+        await settingsManager.SaveAsync(tenantDeepLinkSettings, tenant.Id);
+
+        return tenantDeepLinkSettings;
+    }
+
+    /// <summary>
     /// Saves the tenant quota settings specified in the request to the current portal.
     /// </summary>
     /// <short>
