@@ -39,13 +39,6 @@ public class WebhookFileEntryAccessChecker(
             return true;
         }
 
-        var targetUserType = await userManager.GetUserTypeAsync(userId);
-
-        if (targetUserType is EmployeeType.DocSpaceAdmin)
-        {
-            return true;
-        }
-
         if (fileEntry is FileEntry<int> fileEntryInt)
         {
             return await fileSecurity.CanReadAsync(fileEntryInt, userId);
