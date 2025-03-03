@@ -29,7 +29,6 @@ namespace ASC.Files.Core.Security;
 [Scope]
 public class WebhookFileEntryAccessChecker(
     AuthContext authContext,
-    UserManager userManager,
     FileSecurity fileSecurity) : IWebhookAccessChecker<FileEntry>
 {
     public async Task<bool> CheckAccessAsync(FileEntry fileEntry, Guid userId)

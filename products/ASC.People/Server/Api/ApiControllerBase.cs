@@ -53,14 +53,14 @@ public class WebhookGroupAccessChecker(
             return true;
         }
 
-        var targetUser = await userManager.GetUsersAsync(userId);
+        var user = await userManager.GetUsersAsync(userId);
 
-        if (await userManager.IsDocSpaceAdminAsync(targetUser))
+        if (await userManager.IsDocSpaceAdminAsync(user))
         {
             return true;
         }
 
-        var account = await authentication.GetAccountByIDAsync(targetUser.TenantId, targetUser.Id);
+        var account = await authentication.GetAccountByIDAsync(user.TenantId, user.Id);
 
         return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
     }
@@ -78,33 +78,8 @@ public class WebhookUserAccessChecker(
             return true;
         }
 
-        var targetUser = await userManager.GetUsersAsync(userId);
-        var targetUserType = await userManager.GetUserTypeAsync(targetUser);
+        var user = await userManager.GetUsersAsync(userId);
 
-        if (targetUserType is EmployeeType.DocSpaceAdmin)
-        {
-            return true;
-        }
-
-        if (targetUserType is EmployeeType.User or EmployeeType.Guest)
-        {
-            return false;
-        }
-
-        var dataUserType = await userManager.GetUserTypeAsync(data);
-
-        if (dataUserType is EmployeeType.Guest)
-        {
-            if (data.CreatedBy.HasValue && data.CreatedBy.Value == userId)
-            {
-                return true;
-            }
-
-            var userRelations = await userManager.GetUserRelationsAsync(userId);
-
-            return userRelations.ContainsKey(data.Id);
-        }
-
-        return true;
+        return await userManager.CanUserViewAnotherUserAsync(user, data);
     }
 }
