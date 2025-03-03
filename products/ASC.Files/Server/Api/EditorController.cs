@@ -226,6 +226,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 if (!string.IsNullOrEmpty(formOpenSetup.RoleName))
                 {
                     result.EditorConfig.User.Roles = new List<string> { formOpenSetup.RoleName };
+                    result.FillingStatus = true;
                 }
             }
             else

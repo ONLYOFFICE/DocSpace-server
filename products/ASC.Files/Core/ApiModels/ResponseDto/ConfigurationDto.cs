@@ -78,6 +78,12 @@ public class ConfigurationDto<T>
     /// Specifies if the filling has started or not
     /// </summary>
     public bool? StartFilling { get; set; }
+
+    /// <summary>
+    /// FillingStatus
+    /// </summary>
+    public bool? FillingStatus { get; set; }
+
     public StartFillingMode StartFillingMode { get; set; }
 
     /// <summary>
