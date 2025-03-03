@@ -27,8 +27,17 @@
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Transient]
-public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : DocumentBuilderTask<int, RoomIndexExportTaskData>(serviceProvider)
+public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskData>
 {
+    public RoomIndexExportTask()
+    {
+        
+    }
+    
+    public RoomIndexExportTask(IServiceScopeFactory serviceProvider) : base(serviceProvider)
+    {
+    }
+
     private const string ScriptName = "RoomIndexExport.docbuilder";
 
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
@@ -284,7 +293,23 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         }
     }
 
-    private record FolderIndex(int ChildFoldersCount, string Order);
+    private record FolderIndex
+    {
+        public FolderIndex(int ChildFoldersCount, string Order)
+        {
+            this.ChildFoldersCount = ChildFoldersCount;
+            this.Order = Order;
+        }
+
+        public int ChildFoldersCount { get; init; }
+        public string Order { get; init; }
+
+        public void Deconstruct(out int ChildFoldersCount, out string Order)
+        {
+            ChildFoldersCount = this.ChildFoldersCount;
+            Order = this.Order;
+        }
+    }
 }
 
 public record RoomIndexExportTaskData(int RoomId, IDictionary<string, string> Headers);

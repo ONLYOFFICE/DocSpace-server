@@ -27,12 +27,19 @@
 namespace ASC.Web.Studio.Core.Quota;
 
 [Singleton]
-public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
+public class QuotaSyncOperation
 {
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "quotaOperation";
 
-    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly DistributedTaskQueue _progressQueue;
+    private readonly IServiceProvider _serviceProvider;
+
+    public QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
+    {
+        _serviceProvider = serviceProvider;
+        _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    }
 
     public async Task RecalculateQuota(Tenant tenant)
     {
@@ -45,7 +52,7 @@ public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTa
         
         if (item == null)
         {
-            item = serviceProvider.GetRequiredService<QuotaSyncJob>();
+            item = _serviceProvider.GetRequiredService<QuotaSyncJob>();
             item.InitJob(tenant);
             await _progressQueue.EnqueueTask(item);
         }
@@ -67,9 +74,21 @@ public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTa
 }
 
 [Transient]
-public class QuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class QuotaSyncJob : DistributedTaskProgress
 {
     private int? _tenantId;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public QuotaSyncJob()
+    {
+        
+    }
+    
+    public QuotaSyncJob(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
+
     public int TenantId
     {
         get
@@ -91,7 +110,7 @@ public class QuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distribute
     {
         try
         {
-            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            await using var scope = _serviceScopeFactory.CreateAsyncScope();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var storageFactoryConfig = scope.ServiceProvider.GetRequiredService<StorageFactoryConfig>();

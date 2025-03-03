@@ -35,6 +35,11 @@ public class TransferProgressItem : BaseBackupProgressItem
     private readonly NotifyHelper _notifyHelper;
     private readonly IConfiguration _configuration;
 
+    public TransferProgressItem()
+    {
+        
+    }
+    
     public TransferProgressItem(
         ILogger<TransferProgressItem> logger,
         IServiceScopeFactory serviceScopeFactory,

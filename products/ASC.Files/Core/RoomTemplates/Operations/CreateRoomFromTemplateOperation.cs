@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.RoomTemplates.Operations;
 
 [Transient]
-public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) : DistributedTaskProgress
+public class CreateRoomFromTemplateOperation : DistributedTaskProgress
 {
     private Guid _userId;
     private string _title;
@@ -42,6 +42,18 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
     private int? _roomId;
 
     private int? _tenantId;
+    private readonly IServiceProvider _serviceProvider;
+
+    public CreateRoomFromTemplateOperation()
+    {
+        
+    }
+    
+    public CreateRoomFromTemplateOperation(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
     public int TenantId
     {
         get => _tenantId ?? this[nameof(_tenantId)];
@@ -86,13 +98,13 @@ public class CreateRoomFromTemplateOperation(IServiceProvider serviceProvider) :
 
     protected override async Task DoJob()
     {
-        var tenantManager = serviceProvider.GetService<TenantManager>();
-        var securityContext = serviceProvider.GetService<SecurityContext>();
-        var globalHelper = serviceProvider.GetService<GlobalFolderHelper>();
-        var fileStorageService = serviceProvider.GetService<FileStorageService>();
-        var dbFactory = serviceProvider.GetService<IDbContextFactory<FilesDbContext>>();
-        var roomLogoManager = serviceProvider.GetService<RoomLogoManager>();
-        var daoFactory = serviceProvider.GetService<IDaoFactory>();
+        var tenantManager = _serviceProvider.GetService<TenantManager>();
+        var securityContext = _serviceProvider.GetService<SecurityContext>();
+        var globalHelper = _serviceProvider.GetService<GlobalFolderHelper>();
+        var fileStorageService = _serviceProvider.GetService<FileStorageService>();
+        var dbFactory = _serviceProvider.GetService<IDbContextFactory<FilesDbContext>>();
+        var roomLogoManager = _serviceProvider.GetService<RoomLogoManager>();
+        var daoFactory = _serviceProvider.GetService<IDaoFactory>();
         var folderDao = daoFactory.GetFolderDao<int>();
 
         try

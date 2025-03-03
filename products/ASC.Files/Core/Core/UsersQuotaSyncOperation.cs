@@ -75,9 +75,21 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
 }
 
 [Transient]
-public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class UsersQuotaSyncJob : DistributedTaskProgress
 {
     private int? _tenantId;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public UsersQuotaSyncJob()
+    {
+        
+    }
+    
+    public UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
+
     public int TenantId
     {
         get
@@ -100,7 +112,7 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distr
     {
         try
         {
-            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            await using var scope = _serviceScopeFactory.CreateAsyncScope();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var tenant = await tenantManager.SetCurrentTenantAsync(TenantId);
