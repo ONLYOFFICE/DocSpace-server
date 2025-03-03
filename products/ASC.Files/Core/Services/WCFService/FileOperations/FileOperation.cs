@@ -106,7 +106,7 @@ public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvi
         Init(data.HoldResult);
     }
 
-    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override async Task RunJob(CancellationToken cancellationToken)
     {
         var daoOperation = DaoOperation.Files.Count != 0 || DaoOperation.Folders.Count != 0;
         var thirdPartyOperation = ThirdPartyOperation.Files.Count != 0 || ThirdPartyOperation.Folders.Count != 0;
@@ -117,13 +117,13 @@ public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvi
         if (daoOperation)
         {
             DaoOperation.Publication = PublishChanges;
-            await DaoOperation.RunJob(distributedTask, cancellationToken);
+            await DaoOperation.RunJob(cancellationToken);
         }
 
         if (thirdPartyOperation)
         {
             ThirdPartyOperation.Publication = PublishChanges;
-            await ThirdPartyOperation.RunJob(distributedTask, cancellationToken);
+            await ThirdPartyOperation.RunJob(cancellationToken);
         }
     }
 
@@ -276,7 +276,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         this[Src] = string.Join(SplitChar, Folders.Select(f => "folder_" + f).Concat(Files.Select(f => "file_" + f)).ToArray());
     }
 
-    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override async Task RunJob(CancellationToken cancellationToken)
     {
         try
         {

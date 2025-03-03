@@ -117,15 +117,15 @@ public class ClientDataMapper {
         .logoutRedirectUri(client.getClientRedirectInfo().logoutRedirectUris())
         .scopes(client.getScopes())
         .createdOn(client.getClientCreationInfo().getCreatedOn())
-        .createdBy(client.getClientCreationInfo().getCreatedBy())
+        .createdBy(client.getClientCreationInfo().getCreatedBy().getValue())
         .modifiedOn(
             modified == null
                 ? client.getClientCreationInfo().getCreatedOn()
                 : modified.getModifiedOn())
         .modifiedBy(
             modified == null
-                ? client.getClientCreationInfo().getCreatedBy()
-                : modified.getModifiedBy())
+                ? client.getClientCreationInfo().getCreatedBy().getValue()
+                : modified.getModifiedBy().getValue())
         .isPublic(client.getVisibility().equals(ClientVisibility.PUBLIC))
         .enabled(client.getStatus().equals(ClientStatus.ENABLED))
         .build();
@@ -169,15 +169,15 @@ public class ClientDataMapper {
         .isPublic(client.getVisibility().equals(ClientVisibility.PUBLIC))
         .scopes(client.getScopes())
         .createdOn(client.getClientCreationInfo().getCreatedOn())
-        .createdBy(client.getClientCreationInfo().getCreatedBy())
+        .createdBy(client.getClientCreationInfo().getCreatedBy().getValue())
         .modifiedOn(
             modified == null
                 ? client.getClientCreationInfo().getCreatedOn()
                 : modified.getModifiedOn())
         .modifiedBy(
             modified == null
-                ? client.getClientCreationInfo().getCreatedBy()
-                : modified.getModifiedBy())
+                ? client.getClientCreationInfo().getCreatedBy().getValue()
+                : modified.getModifiedBy().getValue())
         .build();
   }
 }
