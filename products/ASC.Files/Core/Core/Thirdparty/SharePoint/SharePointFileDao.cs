@@ -546,7 +546,7 @@ internal class SharePointFileDao(
     {
         throw new NotImplementedException();
     }
-    public IAsyncEnumerable<FormRoleDto> GetFormRoles(string formId)
+    public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
     {
         throw new NotImplementedException();
     }

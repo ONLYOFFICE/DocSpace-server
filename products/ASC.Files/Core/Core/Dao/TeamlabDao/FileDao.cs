@@ -65,8 +65,7 @@ internal class FileDao(
     FileChecker fileChecker,
     EntryManager entryManager,
     FileSharing fileSharing,
-    FilesMessageService filesMessageService,
-    FormRoleDtoHelper formRoleDtoHelper)
+    FilesMessageService filesMessageService)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -1500,17 +1499,15 @@ internal class FileDao(
             yield return role;
         }
     }
-    public async IAsyncEnumerable<FormRoleDto> GetFormRoles(int formId)
+    public async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var properties = await daoFactory.GetFileDao<int>().GetProperties(formId);
-
-        await foreach (var e in filesDbContext.DbFormRolesAsync(tenantId, formId))
+        await foreach (var r in filesDbContext.DbFormRolesAsync(tenantId, formId))
         {
-            yield return formRoleDtoHelper.Get(properties, e);
+            yield return r;
         }
     }
     public async Task<FormRole> ChangeUserFormRoleAsync(int formId, FormRole formRole)

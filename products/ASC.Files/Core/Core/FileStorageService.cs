@@ -95,7 +95,8 @@ public class FileStorageService //: IFileStorageService
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
     WatermarkManager watermarkManager,
     CustomTagsService customTagsService,
-    IMapper mapper)
+    IMapper mapper,
+    FormRoleDtoHelper formRoleDtoHelper)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -4514,10 +4515,32 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException();
         }
-        
-        await foreach (var f in fileDao.GetFormRoles(formId))
+        var roles = await fileDao.GetFormRoles(formId).ToListAsync();
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
+        var currentStep = roles.Where(r => !r.Submitted).Min(r => (int?)r.Sequence) ?? 0;
+
+        var roleTasks = roles.Select(r => formRoleDtoHelper.Get(properties, r)).ToList();
+        var processedRoles = await Task.WhenAll(roleTasks);
+
+        foreach (var role in processedRoles)
         {
-            yield return f;
+            if (!DateTime.MinValue.Equals(properties.FormFilling.FillingStopedDate) &&
+                properties.FormFilling.FormFillingInterruption?.RoleName == role.RoleName)
+            {
+                role.RoleStatus = FormFillingStatus.Stoped;
+            }
+            else
+            {
+                role.RoleStatus = currentStep switch
+                {
+                    0 => FormFillingStatus.Complete,
+                    _ when currentStep > role.Sequence => FormFillingStatus.Complete,
+                    _ when currentStep < role.Sequence => FormFillingStatus.InProgress,
+                    _ => role.Submitted ? FormFillingStatus.Complete : FormFillingStatus.YouTurn
+                };
+            }
+
+            yield return role;
         }
     }
     public async Task ManageFormFilling<T>(T formId, FormFillingManageAction action)

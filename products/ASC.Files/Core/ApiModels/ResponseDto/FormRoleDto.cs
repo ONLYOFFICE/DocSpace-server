@@ -32,27 +32,30 @@ public class FormRoleDto
 {
     public string RoleName { get; set; }
     public string RoleColor { get; set; }
-    public Guid UserId { get; set; }
+    public EmployeeFullDto User { get; set; }
     public int Sequence { get; set; }
     public bool Submitted { get; set; }
     public Guid? StopedBy { get; set; }
     public Dictionary<int, DateTime> History { get; set; }
+    public FormFillingStatus RoleStatus { get; set; }
 }
 [Scope]
-public class FormRoleDtoHelper(TenantUtil tenantUtil)
+public class FormRoleDtoHelper(TenantUtil tenantUtil, EmployeeFullDtoHelper employeeFullDtoHelper,
+    UserManager userManager)
 {
-    public FormRoleDto Get<T>(EntryProperties<T> properties, FormRole role)
+    public async Task<FormRoleDto> Get<T>(EntryProperties<T> properties, FormRole role)
     {
         if (role == null)
         {
             return null;
         }
+        var user = await employeeFullDtoHelper.GetFullAsync(await userManager.GetUsersAsync(role.UserId));
         var history = new Dictionary<FormRoleHistory, DateTime>();
         var result = new FormRoleDto
         {
             RoleName = role.RoleName,
             RoleColor = role.RoleColor,
-            UserId = role.UserId,
+            User = user,
             Sequence = role.Sequence,
             Submitted = role.Submitted,
             History = new Dictionary<int, DateTime>()

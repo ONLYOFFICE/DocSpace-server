@@ -2189,14 +2189,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
     private async Task<File<T>> SubmitVDRFormAsync<T>(Folder<T> room, File<T> form, IFileDao<T> fileDao)
     {
-        var allRoles = await fileDao.GetFormRoles(form.Id).Select(r => new FormRole
-        {
-            UserId = r.UserId,
-            RoleName = r.RoleName,
-            RoleColor = r.RoleColor,
-            Sequence = r.Sequence,
-            Submitted = r.Submitted
-        }).ToListAsync();
+        var allRoles = await fileDao.GetFormRoles(form.Id).ToListAsync();
 
         var currentStep = GetCurrentFillingStep(allRoles);
         if (currentStep != -1)
