@@ -227,7 +227,7 @@ public static class ServiceCollectionExtension
                         }
                     });
                     
-                    configurator.ConfigureEndpoints(context, new KebabCaseEndpointNameFormatter("asc-event-bus"));
+                    configurator.ConfigureEndpoints(context, new SnakeCaseEndpointNameFormatter("asc_event_bus"));
                     configurator.UseMessageRetry(r => r.Exponential(retryCount, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(1), TimeSpan.FromSeconds(10)));
                 });
             });
@@ -248,13 +248,6 @@ public static class ServiceCollectionExtension
                 if (!string.IsNullOrEmpty(cfg["core:eventBus:subscriptionClientName"]))
                 {
                     subscriptionClientName = cfg["core:eventBus:subscriptionClientName"];
-                }
-
-                var retryCount = 5;
-
-                if (!string.IsNullOrEmpty(cfg["core:eventBus:connectRetryCount"]))
-                {
-                    retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
                 }
 
                 return new EventBusRabbitMQ(rabbitMqPersistentConnection, logger, iLifetimeScope, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
