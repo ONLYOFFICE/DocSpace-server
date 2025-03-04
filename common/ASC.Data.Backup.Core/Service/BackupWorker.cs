@@ -34,11 +34,16 @@ public class BackupWorker(
     IDistributedLockProvider distributedLockProvider)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "backup";
+    public const string BACKUP_DISTRIBUTED_TASK_QUEUE_NAME = CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME + nameof(BackupProgressItem);
+    public const string RESTORE_DISTRIBUTED_TASK_QUEUE_NAME =  CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME + nameof(RestoreProgressItem);
+    public const string TRANSFER_DISTRIBUTED_TASK_QUEUE_NAME =  CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME + nameof(TransferProgressItem);
     public const string LockKey = $"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}";
 
     public string TempFolder { get; } = Path.Combine(tempPath.GetTempPath(), "backup");
 
-    private DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
+    private DistributedTaskQueue<BackupProgressItem> _backupProgressQueue = queueFactory.CreateQueue<BackupProgressItem>(BACKUP_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
+    private DistributedTaskQueue<RestoreProgressItem> _restoreProgressQueue = queueFactory.CreateQueue<RestoreProgressItem>(RESTORE_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
+    private DistributedTaskQueue<TransferProgressItem> _transferProgressQueue = queueFactory.CreateQueue<TransferProgressItem>(TRANSFER_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
     private int _limit;
     private string _upgradesPath;
     
@@ -57,19 +62,41 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            if (_progressQueue == null)
+            if (_backupProgressQueue != null)
             {
-                return;
+                var tasks = await _backupProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
+
+                foreach (var t in tasks)
+                {
+                    await _backupProgressQueue.DequeueTask(t.Id);
+                }
+
+                _backupProgressQueue = null;
             }
-
-            var tasks = await _progressQueue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
-
-            foreach (var t in tasks)
+            
+            if (_restoreProgressQueue != null)
             {
-                await _progressQueue.DequeueTask(t.Id);
-            }
+                var tasks = await _restoreProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
 
-            _progressQueue = null;
+                foreach (var t in tasks)
+                {
+                    await _restoreProgressQueue.DequeueTask(t.Id);
+                }
+
+                _restoreProgressQueue = null;
+            }
+            
+            if (_transferProgressQueue != null)
+            {
+                var tasks = await _transferProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
+
+                foreach (var t in tasks)
+                {
+                    await _transferProgressQueue.DequeueTask(t.Id);
+                }
+
+                _transferProgressQueue = null;
+            }
         }
     }
 
@@ -77,11 +104,11 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var item = (await _progressQueue.GetAllTasks<BackupProgressItem>()).FirstOrDefault(t => t.TenantId == request.TenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
+            var item = (await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == request.TenantId);
 
             if (item is { IsCompleted: true })
             {
-                await _progressQueue.DequeueTask(item.Id);
+                await _backupProgressQueue.DequeueTask(item.Id);
                 item = null;
             }
             if (item == null || (enqueueTask && item.Id == taskId && item.Status == DistributedTaskStatus.Created))
@@ -98,11 +125,11 @@ public class BackupWorker(
 
                 if (enqueueTask)
                 {
-                    await _progressQueue.EnqueueTask(item);
+                    await _backupProgressQueue.EnqueueTask(item);
                 }
                 else
                 {
-                    await _progressQueue.PublishTask(item);
+                    await _backupProgressQueue.PublishTask(item);
                 }
             }
 
@@ -114,11 +141,11 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var item = (await _progressQueue.GetAllTasks<BackupProgressItem>()).FirstOrDefault(t => t.TenantId == schedule.TenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
+            var item = (await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == schedule.TenantId);
 
             if (item is { IsCompleted: true })
             {
-                await _progressQueue.DequeueTask(item.Id);
+                await _backupProgressQueue.DequeueTask(item.Id);
                 item = null;
             }
             if (item == null)
@@ -127,7 +154,7 @@ public class BackupWorker(
 
                 item.Init(schedule, true, TempFolder, _limit);
 
-                await _progressQueue.EnqueueTask(item);
+                await _backupProgressQueue.EnqueueTask(item);
             }
         }
     }
@@ -136,7 +163,7 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            return ToBackupProgress((await _progressQueue.GetAllTasks<BackupProgressItem>()).FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Backup));
+            return ToBackupProgress((await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId));
         }
     }
 
@@ -144,7 +171,7 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            return ToBackupProgress((await _progressQueue.GetAllTasks<TransferProgressItem>()).FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Transfer));
+            return ToBackupProgress((await _transferProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId));
         }
     }
 
@@ -152,7 +179,7 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            return ToBackupProgress((await _progressQueue.GetAllTasks<RestoreProgressItem>()).FirstOrDefault(t => (t.TenantId == tenantId || t.NewTenantId == tenantId) && t.BackupProgressItemType == BackupProgressItemType.Restore));
+            return ToBackupProgress((await _restoreProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId || t.NewTenantId == tenantId));
         }
     }
 
@@ -160,7 +187,7 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var progress = (await _progressQueue.GetAllTasks<BackupProgressItem>()).FirstOrDefault(t => t.TenantId == tenantId);
+            var progress = (await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
             if (progress != null)
             {
                 progress.Exception = null;
@@ -172,7 +199,7 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var progress = (await _progressQueue.GetAllTasks<RestoreProgressItem>()).FirstOrDefault(t => t.TenantId == tenantId);
+            var progress = (await _restoreProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
             if (progress != null)
             {
                 progress.Exception = null;
@@ -184,10 +211,10 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var item = (await _progressQueue.GetAllTasks<RestoreProgressItem>()).FirstOrDefault(t => t.TenantId == request.TenantId);
+            var item = (await _restoreProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == request.TenantId);
             if (item is { IsCompleted: true })
             {
-                await _progressQueue.DequeueTask(item.Id);
+                await _restoreProgressQueue.DequeueTask(item.Id);
                 item = null;
             }
 
@@ -205,11 +232,11 @@ public class BackupWorker(
 
                 if (enqueueTask)
                 {
-                    await _progressQueue.EnqueueTask(item);
+                    await _restoreProgressQueue.EnqueueTask(item);
                 }
                 else
                 {
-                    await _progressQueue.PublishTask(item);
+                    await _restoreProgressQueue.PublishTask(item);
                 }
             }
             return ToBackupProgress(item);
@@ -220,10 +247,10 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var item = (await _progressQueue.GetAllTasks<TransferProgressItem>()).FirstOrDefault(t => t.TenantId == tenantId);
+            var item = (await _transferProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
             if (item is { IsCompleted: true })
             {
-                await _progressQueue.DequeueTask(item.Id);
+                await _transferProgressQueue.DequeueTask(item.Id);
                 item = null;
             }
 
@@ -232,7 +259,7 @@ public class BackupWorker(
                 item = serviceProvider.GetService<TransferProgressItem>();
                 item.Init(targetRegion, tenantId, TempFolder, _limit, notify);
 
-                await _progressQueue.EnqueueTask(item);
+                await _transferProgressQueue.EnqueueTask(item);
             }
 
             return ToBackupProgress(item);
@@ -292,10 +319,17 @@ public class BackupWorker(
         return progressItem.ToBackupProgress();
     }
 
-    public async Task<bool> IsInstanceTooBusy()
+    public async Task<bool> IsBackupInstanceTooBusy()
     {
-        var instanceTasks = await _progressQueue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
+        var instanceTasks = await _backupProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
 
-        return _progressQueue.MaxThreadsCount < instanceTasks.Count;
+        return _backupProgressQueue.MaxThreadsCount < instanceTasks.Count;
+    }
+
+    public async Task<bool> IsRestoreInstanceTooBusy()
+    {
+        var instanceTasks = await _restoreProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
+
+        return _restoreProgressQueue.MaxThreadsCount < instanceTasks.Count;
     }
 }

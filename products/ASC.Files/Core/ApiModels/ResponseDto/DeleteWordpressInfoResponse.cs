@@ -24,26 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#if (DEBUG)
-using System;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-using ASC.Common.Utils;
-
-using NUnit.Framework;
-
-namespace ASC.Core.Common.Tests
+public class DeleteWordpressInfoResponse(bool success)
 {
-    [TestFixture]
-    public class SignatureTest
-    {
-        [Test]
-        public void TestSignature()
-        {
-            var validObject = new { expire = DateTime.UtcNow.AddMinutes(15), key = "345jhndfg", ip = "192.168.1.1" };
-            var encoded = Signature.Create(validObject, "ThE SeCret Key!");
-            Assert.IsNotNull(Signature.Read<object>(encoded, "ThE SeCret Key!"));
-            Assert.IsNull(Signature.Read<object>(encoded, "ThE SeCret Key"));
-        }
-    }
+    public bool Success { get; set; } = success;
+
+    // Convenience factory methods
+    public static DeleteWordpressInfoResponse Succeeded() => new(true);
+    public static DeleteWordpressInfoResponse Failed() => new(false);
 }
-#endif

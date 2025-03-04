@@ -344,7 +344,7 @@
     <value>アプリケーションがApple IDを使用してポータルにサインインできるようにする。</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、ユーザーはApple IDを使ってONLYOFFICEにサインインできるようになります。{0}Apple Developersポータルにアクセスし、新規アプリONLYOFFICE integrationを作成します。以下、受け取ったデータを挿入してください：</value>
+    <value>このアプリを有効にすると、ユーザーはApple IDを使って{LogoText}にサインインできるようになります。{0}Apple Developersポータルにアクセスし、新規アプリ{LogoText} integrationを作成します。以下、受け取ったデータを挿入してください：</value>
   </data>
   <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
     <value>Apple Developerからダウンロードした秘密キー</value>
@@ -368,7 +368,7 @@
     <value>Boxファイルとフォルダを管理するように、アプリを接続します。</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、Boxアカウントを文書モジュールに接続して、Boxの文書を管理・編集・別のONLYOFFICEユーザと共有できます。{0}Box開発者ページでサインインし、ONLYOFFICE統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
+    <value>このアプリを有効にすると、Boxアカウントを文書モジュールに接続して、Boxの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0}Box開発者ページでサインインし、{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersClickatell" xml:space="preserve">
     <value>Clickatell</value>
@@ -380,7 +380,7 @@
     <value>Clickatellを介して二要素認証のアプリを有効します。</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>このアプリを使用して、Clickatellサービスでの二要素認証を有効にしてください。{0}SMSプラットフォームアカウントにサインインし、ONLYOFFICE用の新しいインテグレーションを作成します。apiKeyをコピーして、下に挿入してください:</value>
+    <value>このアプリを使用して、Clickatellサービスでの二要素認証を有効にしてください。{0}SMSプラットフォームアカウントにサインインし、{LogoText}用の新しいインテグレーションを作成します。apiKeyをコピーして、下に挿入してください:</value>
   </data>
   <data name="ConsumersDocuSign" xml:space="preserve">
     <value>DocuSign</value>
@@ -395,13 +395,13 @@
     <value>DocuSign認証端点</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、DocuSignを使用してデジタル的に文書を署名します。{0}DocuSign管理者コンソールでONLYOFFICE統合を追加してください。その後、データを以下に入力してください：</value>
+    <value>このアプリを有効にすると、DocuSignを使用してデジタル的に文書を署名します。{0}DocuSign管理者コンソールで{LogoText}統合を追加してください。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
     <value>Dropboxファイルとフォルダを管理するように、アプリを接続します。</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、Dropboxアカウントを文書モジュールに接続して、Dropboxの文書を管理・編集・別のONLYOFFICEユーザと共有できます。{0}Dropbox開発者ページでサインインし、ONLYOFFICE統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
+    <value>このアプリを有効にすると、Dropboxアカウントを文書モジュールに接続して、Dropboxの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0}Dropbox開発者ページでサインインし、{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersDropBoxKey" xml:space="preserve">
     <value>DropBox ID</value>
@@ -419,10 +419,10 @@
     <value>Facebook ID</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>アプリをONLYOFFICEに接続すると、Facebookでポータルにサインインし、コンタクトを検索できます。</value>
+    <value>アプリを{LogoText}に接続すると、Facebookでポータルにサインインし、コンタクトを検索できます。</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、Facebookを使用してONLYOFFICEにサインイン、またはCRMモジュールで顧客のFacebookアカウントをリンクできます。{0}Facebook開発者ポータルでONLYOFFICE統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
+    <value>このアプリを有効にすると、Facebookを使用して{LogoText}にサインイン、またはCRMモジュールで顧客のFacebookアカウントをリンクできます。{0}Facebook開発者ポータルで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
@@ -458,13 +458,13 @@
     <value>プロジェクトを接続して、Googleアカウントを介してポータルにサインインしたり、Google Driveファイルとフォルダーを管理したりすることだできます。</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、Google Driveアカウントを文書モジュールに接続して、Google Driveの文書を管理・編集・別のONLYOFFICEユーザと共有できます。{0} Google Drive APIsコンソールでONLYOFFICE統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
+    <value>このアプリを有効にすると、Google Driveアカウントを文書モジュールに接続して、Google Driveの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0} Google Drive APIsコンソールで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersLinkedIn" xml:space="preserve">
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>アプリをONLYOFFICEに接続して、LinkedInでポータルにサインインします。</value>
+    <value>アプリを{LogoText}に接続して、LinkedInでポータルにサインインします。</value>
   </data>
   <data name="ConsumersLinkedInSecret" xml:space="preserve">
     <value>Linkedinキー</value>
@@ -482,7 +482,7 @@
     <value>アプリケーションがMicrosoftアカウントを使用してポータルにサインインできるようにする。</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、ユーザーがMicrosoftを使用してONLYOFFICEにサインインできるようになります。{0}Microsoft Azureにアクセスし、新しいアプリONLYOFFICE integrationを作成します。以下、受け取ったデータを挿入してください：</value>
+    <value>このアプリを有効にすると、ユーザーがMicrosoftを使用して{LogoText}にサインインできるようになります。{0}Microsoft Azureにアクセスし、新しいアプリ{LogoText} integrationを作成します。以下、受け取ったデータを挿入してください：</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspaceクラウド・ストレージ</value>
@@ -545,7 +545,7 @@
     <value>OneDriveファイルとフォルダを管理するように、アプリを接続します。</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、OneDriveアカウントを文書モジュールに接続して、OneDriveの文書を管理・編集・別のONLYOFFICEユーザと共有できます。{0}Microsoft Azureアカウントにサインインし、ONLYOFFICE統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
+    <value>このアプリを有効にすると、OneDriveアカウントを文書モジュールに接続して、OneDriveの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0}Microsoft Azureアカウントにサインインし、{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersSmscDescription" xml:space="preserve">
     <value>SMSセンターを介して二要素認証のアプリを有効します。</value>
@@ -581,7 +581,7 @@
     <value>Twitterアカウントを使用してポータルにサインインするアプリケーションを有効にする。</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>このアプリを接続すると、Twitterを使用してONLYOFFICEにサインイン、またはCRMモジュールでお客様のTwitterアカウントをリンクできます。{0} Twitter開発者ポータルでONLYOFFICE統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
+    <value>このアプリを接続すると、Twitterを使用して{LogoText}にサインイン、またはCRMモジュールでお客様のTwitterアカウントをリンクできます。{0} Twitter開発者ポータルで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>VKアカウントでポータルにサインインするようにアプリを接続します。</value>
@@ -593,7 +593,7 @@
     <value>Yahoo連絡先インポートのアプリを接続します。</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、Yahooの連絡先リストからのユーザをポータルに追加できます。{0}Yahoo!デベロッパーネットワークのアプリ作成というページでONLYOFFICE統合のために新しいアップリを作成してください。その後、データを以下に入力してください：</value>
+    <value>このアプリを有効にすると、Yahooの連絡先リストからのユーザをポータルに追加できます。{0}Yahoo!デベロッパーネットワークのアプリ作成というページで{LogoText}統合のために新しいアップリを作成してください。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersYandexDescription" xml:space="preserve">
     <value>Yandexアカウントでポータルにサインインするようにアプリを接続します。</value>
@@ -830,25 +830,25 @@
     <value>ログイン</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、ONLYOFFICEエディターで書誌を作成できます。{0}EasyBibサインアップページでフォームを入力して、ONLYOFFICE統合を追加してください。その後、アプリキーをを以下に貼り付けてください：</value>
+    <value>このアプリを有効にすると、{LogoText}エディターで書誌を作成できます。{0}EasyBibサインアップページでフォームを入力して、{LogoText}統合を追加してください。その後、アプリキーをを以下に貼り付けてください：</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、オフラインであっても送信されたメッセージ通知を受信できます。{0}FirebaseコンソールでONLYOFFICE統合のために新しいプロジェクトを作成してください。その後、データを以下に入力してください：</value>
+    <value>このアプリを有効にすると、オフラインであっても送信されたメッセージ通知を受信できます。{0}Firebaseコンソールで{LogoText}統合のために新しいプロジェクトを作成してください。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Googleクラウドストーレジを接続すると、ポータルデータのバックアップと保存するように使用できます。{0} Google Cloud PlatformコンソールでONLYOFFICEのために新しいサービスアカウントを作成してください。その後、受けたデータを以下に入力してください：</value>
+    <value>Googleクラウドストーレジを接続すると、ポータルデータのバックアップと保存するように使用できます。{0} Google Cloud Platformコンソールで{LogoText}のために新しいサービスアカウントを作成してください。その後、受けたデータを以下に入力してください：</value>
   </data>
   <data name="ConsumersRackspaceInstruction" xml:space="preserve">
     <value>Rackspace Cloud Storageを接続すると、ポータルデータのバックアップと保存するように使用できます。{0}Rackspace Cloudコントロールパネルのセキュリティ設定でRackspace APIキーの隣に［リンク表示］というオプションをクリックしてください。以下に受けたデータを入力してください：</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>ポータルデータを保存とバックアップするように、Amazon AWS S3を接続してください。{0}AWS マネジメントコンソールでONLYOFFICEのためにアクセスキーを作成してください。以下にそのキーを入力してください：</value>
+    <value>ポータルデータを保存とバックアップするように、Amazon AWS S3を接続してください。{0}AWS マネジメントコンソールで{LogoText}のためにアクセスキーを作成してください。以下にそのキーを入力してください：</value>
   </data>
   <data name="ConsumersSelectelInstruction" xml:space="preserve">
     <value>お選びのクラウドストレージを接続すると、ポータルデータのバックアップと保存ができます。{0}バックアップをする予定のコンテナ用の閲覧のみ/編集権限を持つユーザーのアクセスデータを取得し、以下に入力してください：</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>このアプリを接続すると、WordPressウェブサイトに文書を投稿に使用できます。{0}Wordpress開発者ページでONLYOFFICE統合のために新しいアプリを作成します。その後、データを以下に入力してください：</value>
+    <value>このアプリを接続すると、WordPressウェブサイトに文書を投稿に使用できます。{0}Wordpress開発者ページで{LogoText}統合のために新しいアプリを作成します。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersAppleId" xml:space="preserve">
     <value>Apple ID</value>
@@ -878,7 +878,7 @@
     <value>Facebook キー</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>このアプリを有効にして、ユーザーがLinkedInアカウントを使用してONLYOFFICEにサインインできるようにします。{0}LinkedIn開発者ウェブサイトにアクセスし、新しいアプリONLYOFFICE統合を作成します。受け取ったデータを以下に挿入してください：</value>
+    <value>このアプリを有効にして、ユーザーがLinkedInアカウントを使用して{LogoText}にサインインできるようにします。{0}LinkedIn開発者ウェブサイトにアクセスし、新しいアプリ{LogoText}統合を作成します。受け取ったデータを以下に挿入してください：</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>Linkedin ID</value>
@@ -995,7 +995,7 @@
     <value>Zoomアカウントを使用してポータルにサインインするアプリケーションを有効にします。</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>ユーザーがZoomアカウントを使ってONLYOFFICEにサインインできるように、このアプリを有効にしてください。{0}Zoom開発者向けウェブサイトにアクセスし、新しいアプリONLYOFFICE統合を作成します。以下に受け取ったデータを挿入してください：</value>
+    <value>ユーザーがZoomアカウントを使って{LogoText}にサインインできるように、このアプリを有効にしてください。{0}Zoom開発者向けウェブサイトにアクセスし、新しいアプリ{LogoText}統合を作成します。以下に受け取ったデータを挿入してください：</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>ログイン試行回数が多すぎます。後で再試行してください</value>

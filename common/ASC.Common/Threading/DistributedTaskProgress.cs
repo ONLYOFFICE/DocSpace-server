@@ -32,6 +32,7 @@ namespace ASC.Common.Threading;
 public class DistributedTaskProgress : DistributedTask
 {
     [ProtoMember(1)]
+    [JsonInclude]
     private double _percentage;
 
     /// <summary>Progress percentage</summary>
@@ -52,18 +53,12 @@ public class DistributedTaskProgress : DistributedTask
     [ProtoMember(3)]
     protected int StepCount { get; set; }
 
-    protected CancellationToken CancellationToken { get; set; }
-
-    public virtual async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override async Task RunJob(CancellationToken cancellationToken)
     {
         Percentage = 0;
-        Status = DistributedTaskStatus.Running;
-        CancellationToken = cancellationToken;
 
-        await DoJob();
+        await base.RunJob(cancellationToken);
     }
-
-    protected virtual Task DoJob() { return Task.CompletedTask; }
 
     protected async Task StepDone()
     {

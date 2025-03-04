@@ -346,7 +346,7 @@ public class UserController(
         ArgumentNullException.ThrowIfNull(inDto);
 
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser);
 
         var tenant = tenantManager.GetCurrentTenant();
         
@@ -422,7 +422,10 @@ public class UserController(
 
         foreach (var user in users)
         {
-            result.Add(await employeeDtoHelper.GetAsync(user));
+            if (await _userManager.CanUserViewAnotherUserAsync(currentUser, user))
+            {
+                result.Add(await employeeDtoHelper.GetAsync(user));
+            }
         }
 
         return result;
@@ -674,9 +677,15 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> GetAdvanced(AdvancedSearchDto inDto)
     {
+        if (!await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var list = (await _userManager.GetUsersAsync(inDto.Status)).ToAsyncEnumerable();
 
         if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
@@ -710,7 +719,7 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [HttpGet]
-    public IAsyncEnumerable<EmployeeFullDto> GetAll()
+    public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles()
     {
         var status = new GetByStatusRequestDto { Status = EmployeeStatus.Active };
         return GetByStatus(status);
@@ -744,6 +753,13 @@ public class UserController(
         if (isInvite)
         {
             return await employeeFullDtoHelper.GetSimple(user, false);
+        }
+
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, user))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -791,6 +807,13 @@ public class UserController(
         if (isInvite)
         {
             return await employeeFullDtoHelper.GetSimple(user, false);
+        }
+
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, user))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -877,7 +900,7 @@ public class UserController(
     [Tags("People / Module")]
     [SwaggerResponse(200, "Module information", typeof(Module))]
     [HttpGet("info")]
-    public Module GetModule()
+    public Module GetPeopleModule()
     {
         var product = new PeopleProduct();
         product.Init();
@@ -908,9 +931,15 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("@search/{query}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetSearch(GetMemberByQueryRequestDto inDto)
     {
+        if (!await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var groupId = Guid.Empty;
         if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
         {
@@ -1038,9 +1067,15 @@ public class UserController(
     public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvitesAsync(UpdateMembersRequestDto inDto)
     {
         List<UserInfo> users;
-        
-        var currentUserType = await _userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        
+
+        var currentUser = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        if (currentUser == null || currentUser.Equals(Constants.LostUser))
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser);
+
         var tenant = tenantManager.GetCurrentTenant();
 
         if (inDto.ResendAll)
@@ -1069,12 +1104,6 @@ public class UserController(
             if (user.IsActive)
             {
                 continue;
-            }
-
-            var currentUser = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-            if (currentUser == null || currentUser.Equals(Constants.LostUser))
-            {
-                throw new Exception(Resource.ErrorAccessDenied);
             }
 
             if (currentUserType == EmployeeType.DocSpaceAdmin || currentUser.Id == user.Id)
@@ -1124,7 +1153,10 @@ public class UserController(
 
         foreach (var user in users)
         {
-            yield return await employeeFullDtoHelper.GetFullAsync(user);
+            if (await _userManager.CanUserViewAnotherUserAsync(currentUser, user))
+            {
+                yield return await employeeFullDtoHelper.GetFullAsync(user);
+            }
         }
 
         yield break;
@@ -1230,14 +1262,14 @@ public class UserController(
     /// </short>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Message text", typeof(object))]
+    [SwaggerResponse(200, "Message text", typeof(string))]
     [SwaggerResponse(400, "Incorrect userId or email")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "User not found")]
     [AllowNotPayment]
     [HttpPost("email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<object> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
+    public async Task<string> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
     {
         Guid.TryParse(inDto.UserId, out var userid);
 
@@ -1317,6 +1349,7 @@ public class UserController(
         {
             await socketManager.UpdateUserAsync(user);
         }
+        
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
 
@@ -1329,13 +1362,13 @@ public class UserController(
     /// <path>api/2.0/people/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
-    [SwaggerResponse(200, "Email with the password", typeof(object))]
+    [SwaggerResponse(200, "Email with the password", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<object> SendUserPasswordAsync(EmailMemberRequestDto inDto)
+    public async Task<string> SendUserPasswordAsync(EmailMemberRequestDto inDto)
     {
         if (authContext.IsAuthenticated)
         {

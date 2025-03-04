@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.Extensions.Caching.Distributed;
-
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -62,7 +60,7 @@ public class TariffService(
     IConfiguration configuration,
     IDbContextFactory<CoreDbContext> coreDbContextManager,
     ICache cache,
-    IDistributedCache distributedCache,
+    IFusionCache hybridCache,
     IDistributedLockProvider distributedLockProvider,
     ILogger<TariffService> logger,
     BillingClient billingClient,
@@ -352,7 +350,8 @@ public class TariffService(
 
     private async Task ClearCacheAsync(int tenantId)
     {
-        await distributedCache.RemoveAsync(GetTariffCacheKey(tenantId));
+        await hybridCache.RemoveAsync(GetTariffCacheKey(tenantId));
+        await hybridCache.RemoveAsync(GetBillingPaymentCacheKey(tenantId));
     }
 
     public async Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId)
@@ -369,33 +368,31 @@ public class TariffService(
                     return payments;
                 }
                 
-            payments = [];
-            if (billingClient.Configured)
-            {
-                try
+                payments = [];
+                if (billingClient.Configured)
                 {
-                    var quotas = await quotaService.GetTenantQuotasAsync();
-                    foreach (var pi in await billingClient.GetPaymentsAsync(await coreSettings.GetKeyAsync(tenantId)))
+                    try
                     {
-                        var quota = quotas.SingleOrDefault(q => q.ProductId == pi.ProductRef.ToString());
-                        if (quota != null)
+                        var quotas = await quotaService.GetTenantQuotasAsync();
+                        foreach (var pi in await billingClient.GetPaymentsAsync(await coreSettings.GetKeyAsync(tenantId)))
                         {
-                            pi.QuotaId = quota.TenantId;
-                        }
+                            var quota = quotas.SingleOrDefault(q => q.ProductId == pi.ProductRef.ToString());
+                            if (quota != null)
+                            {
+                                pi.QuotaId = quota.TenantId;
+                            }
 
-                        payments.Add(pi);
+                            payments.Add(pi);
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        LogError(error, tenantId.ToString());
                     }
                 }
-                catch (Exception error)
-                {
-                    LogError(error, tenantId.ToString());
-                }
+                
+                await hybridCache.SetAsync(key, payments, TimeSpan.FromMinutes(10));
             }
-
-                using var ms = new MemoryStream();
-                Serializer.Serialize(ms, payments);
-                await distributedCache.SetAsync(key, ms.ToArray(), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) });
-        }
         }
 
         return payments;
@@ -859,23 +856,12 @@ public class TariffService(
 
     private async Task InsertToCache(int tenantId, Tariff tariff)
     { 
-        using var ms = new MemoryStream();
-        Serializer.Serialize(ms, tariff);
-        await distributedCache.SetAsync(GetTariffCacheKey(tenantId), ms.ToArray(), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = GetCacheExpiration()});
+        await hybridCache.SetAsync(GetTariffCacheKey(tenantId), tariff, GetCacheExpiration());
     }
 
     private async Task<T> GetFromCache<T>(string key)
     {
-        var serializedObject = await distributedCache.GetAsync(key);
-
-        if (serializedObject == null)
-        {
-            return default;
-        }
-
-        using var ms = new MemoryStream(serializedObject);
-
-        return Serializer.Deserialize<T>(ms);
+        return await hybridCache.GetOrDefaultAsync<T>(key);
     }
     
     private void ResetCacheExpiration()

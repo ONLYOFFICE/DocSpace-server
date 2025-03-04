@@ -29,7 +29,7 @@ namespace ASC.Data.Reassigns;
 /// <summary>
 /// </summary>
 [Transient]
-public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class ReassignProgressItem : DistributedTaskProgress
 {
     /// <summary>The user whose data is reassigned</summary>
     /// <type>System.Guid, System</type>
@@ -44,6 +44,19 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
     private Guid _currentUserId;
     private bool _notify;
     private bool _deleteProfile;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public ReassignProgressItem()
+    {
+        
+    }
+    
+    /// <summary>
+    /// </summary>
+    public ReassignProgressItem(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
 
     public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
     {
@@ -63,7 +76,7 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
 
     protected override async Task DoJob()
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
         var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");

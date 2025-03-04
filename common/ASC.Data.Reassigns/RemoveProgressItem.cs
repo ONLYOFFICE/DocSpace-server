@@ -31,7 +31,7 @@ namespace ASC.Data.Reassigns;
 /// <summary>
 /// </summary>
 [Transient]
-public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class RemoveProgressItem : DistributedTaskProgress
 {
     /// <summary>ID of the user whose data is deleted</summary>
     /// <type>System.Guid, System</type>
@@ -51,6 +51,19 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
     private Guid _currentUserId;
     private bool _notify;
     private bool _deleteProfile;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public RemoveProgressItem()
+    {
+        
+    }
+    
+    /// <summary>
+    /// </summary>
+    public RemoveProgressItem(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
 
     //_docService = Web.Files.Classes.Global.FileStorageService;
     //_mailEraser = new MailGarbageEngine();
@@ -74,7 +87,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
 
     protected override async Task DoJob()
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
         var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity,  userFormatter, options) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");

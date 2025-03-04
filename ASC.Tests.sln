@@ -64,6 +64,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Migrations.PostgreSql.S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Files.Service", "products\ASC.Files\Service\ASC.Files.Service.csproj", "{2128B64D-0AA0-4046-89AF-8E9C12501F62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Core.Common.Tests", "common\Tests\ASC.Core.Common.Tests\ASC.Core.Common.Tests.csproj", "{42185FA3-867B-4D8D-81D1-D5D69204C347}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -182,6 +184,10 @@ Global
 		{2128B64D-0AA0-4046-89AF-8E9C12501F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2128B64D-0AA0-4046-89AF-8E9C12501F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2128B64D-0AA0-4046-89AF-8E9C12501F62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42185FA3-867B-4D8D-81D1-D5D69204C347}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42185FA3-867B-4D8D-81D1-D5D69204C347}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42185FA3-867B-4D8D-81D1-D5D69204C347}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42185FA3-867B-4D8D-81D1-D5D69204C347}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

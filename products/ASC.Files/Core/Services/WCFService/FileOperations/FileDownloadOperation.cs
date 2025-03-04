@@ -56,16 +56,20 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
 public record FilesDownloadOperationItem<T>(T Id, string Ext, string Password);
 
 [Transient]
-public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>(serviceProvider)
-{    
+public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
+{
+    public FileDownloadOperation() { }
+    
+    public FileDownloadOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+
     protected override FileOperationType FileOperationType { get => FileOperationType.Download; }
     
-    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override async Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileDownloadOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, ThirdPartyData);
 
-        await base.RunJob(distributedTask, cancellationToken);
+        await base.RunJob(cancellationToken);
 
         await using var scope = await ThirdPartyOperation.CreateScopeAsync();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();

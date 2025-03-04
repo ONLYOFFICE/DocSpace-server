@@ -157,7 +157,7 @@
     <value>Омогућите апликацији да се пријави на портал користећи Apple ID налог.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Омогућите овој апликацији да омогући корисницима да се пријаве на ONLYOFFICE користећи Apple ID. {0}Идите на Apple Developers Portal и креирајте нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+    <value>Омогућите овој апликацији да омогући корисницима да се пријаве на {LogoText} користећи Apple ID. {0}Идите на Apple Developers Portal и креирајте нову апликацију за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>Идентификатор кључа од 10 знакова генерисан за пријаву са Apple приватни кључ</value>
@@ -202,7 +202,7 @@
     <value>Омогућите апликацији управљање Box датотекама и фолдерима.</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Омогућите овој апликацији да повеже ваш Box налог са модулом Документи. Моћи ћете управљати, уређивати и делити датотеке са Box корисницима ONLYOFFICE-а. {0}Пријавите се на свој налог на Box developers страници и креирајте нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+    <value>Омогућите овој апликацији да повеже ваш Box налог са модулом Документи. Моћи ћете управљати, уређивати и делити датотеке са Box корисницима {LogoText}-а. {0}Пријавите се на свој налог на Box developers страници и креирајте нову апликацију за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
   </data>
   <data name="ConsumersClickatell" xml:space="preserve">
     <value>Clickatell</value>
@@ -214,7 +214,7 @@
     <value>Омогући апликацију за двофакторску аутентификацију путем Clickatell-а.</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Користите ову апликацију како бисте омогућили двофакторску аутентификацију са Clickatell сервисом. {0}Пријавите се на свој SMS Platform налог и креирајте нову интеграцију за ONLYOFFICE. Копирајте apiKey и унесите га испод:</value>
+    <value>Користите ову апликацију како бисте омогућили двофакторску аутентификацију са Clickatell сервисом. {0}Пријавите се на свој SMS Platform налог и креирајте нову интеграцију за {LogoText}. Копирајте apiKey и унесите га испод:</value>
   </data>
   <data name="ConsumersDocuSign" xml:space="preserve">
     <value>DocuSign</value>
@@ -232,7 +232,7 @@
     <value>DocuSign крајња тачка аутентификације</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Омогући ову апликацију да дигитално потписујеш документа користећи DocuSign. {0}Иди на своју DocuSign Admin конзолу и додај ONLYOFFICE интеграцију. Унеси податке које си примио испод:</value>
+    <value>Омогући ову апликацију да дигитално потписујеш документа користећи DocuSign. {0}Иди на своју DocuSign Admin конзолу и додај {LogoText} интеграцију. Унеси податке које си примио испод:</value>
   </data>
   <data name="ConsumersDropBox" xml:space="preserve">
     <value>DropBox</value>
@@ -241,7 +241,7 @@
     <value>Омогући апликацију да управљаш DropBox датотекама и фолдерима.</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Омогућите овој апликацији да повеже ваш DropBox налог са модулом Документи. Моћи ћете управљати, уређивати и делити датотеке са DropBox корисницима ONLYOFFICE-а. {0}Пријавите се на свој налог на Dropbox Developers веб сајту и креирајте нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+    <value>Омогућите овој апликацији да повеже ваш DropBox налог са модулом Документи. Моћи ћете управљати, уређивати и делити датотеке са DropBox корисницима {LogoText}-а. {0}Пријавите се на свој налог на Dropbox Developers веб сајту и креирајте нову апликацију за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
   </data>
   <data name="ConsumersDropBoxKey" xml:space="preserve">
     <value>DropBox ID</value>
@@ -259,7 +259,7 @@
     <value>Омогућите овој апликацији да креира библиографске листе у документима са EasyBib-ом.</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Омогућите овој апликацији да креира библиографије у ONLYOFFICE уређивачима. {0}Идите на страницу за пријаву на EasyBib и попуните образац како бисте додали интеграцију са ONLYOFFICE-ом. Након што добијете кључ апликације, налепите га испод:</value>
+    <value>Омогућите овој апликацији да креира библиографије у {LogoText} уређивачима. {0}Идите на страницу за пријаву на EasyBib и попуните образац како бисте додали интеграцију са {LogoText}-ом. Након што добијете кључ апликације, налепите га испод:</value>
   </data>
   <data name="ConsumersFacebook" xml:space="preserve">
     <value>Facebook</value>
@@ -277,7 +277,7 @@
     <value>Омогућите апликацији да се пријави на портал користећи Facebook налог.</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Омогућите овој апликацији да омогући вашим корисницима да се пријаве на ONLYOFFICE користећи Facebook и повежу своје Facebook налоге купаца са CRM модулом. {0}Идите на Facebook Developers Portal и креирајте нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+    <value>Омогућите овој апликацији да омогући вашим корисницима да се пријаве на {LogoText} користећи Facebook и повежу своје Facebook налоге купаца са CRM модулом. {0}Идите на Facebook Developers Portal и креирајте нову апликацију за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
   </data>
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
@@ -298,7 +298,7 @@
     <value>Омогуц́ите ову апликацију да прима обавештења о порукама које су вам послате помоц́у Firebase Cloud Messaging.</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да примају обавештења о порукама чак и ван мреже. {0}Идите на Firebase конзолу и додајте нови пројекат за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да примају обавештења о порукама чак и ван мреже. {0}Идите на Firebase конзолу и додајте нови пројекат за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
   </data>
   <data name="ConsumersGoogle" xml:space="preserve">
     <value>Google</value>
@@ -322,7 +322,7 @@
     <value>Повежите услугу Google Cloud Storage за прављење резервних копија и складиштење података са вашег портала.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Повежите услугу Google Cloud Storage за прављење резервних копија и складиштење података са вашег портала. {0}Идите на конзолу Google Cloud Platform и направите нови налог услуге за ONLYOFFICE. Налепите податке које сте добили у наставку:</value>
+    <value>Повежите услугу Google Cloud Storage за прављење резервних копија и складиштење података са вашег портала. {0}Идите на конзолу Google Cloud Platform и направите нови налог услуге за {LogoText}. Налепите податке које сте добили у наставку:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
@@ -331,7 +331,7 @@
     <value>Повежите пројекат да бисте се пријавили на портал помоц́у Google налога и управљали датотекама и фолдерима Google Drive-а.</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Омогуц́ите ову апликацију да повежете свој налог на Google Drive са модулом Документи. Моц́и ц́ете да управљате, мењате и делите датотеке са Google Drive-а са ONLYOFFICE корисницима. {0}Идите на конзолу Google API-ја и направите нови пројекат за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+    <value>Омогуц́ите ову апликацију да повежете свој налог на Google Drive са модулом Документи. Моц́и ц́ете да управљате, мењате и делите датотеке са Google Drive-а са {LogoText} корисницима. {0}Идите на конзолу Google API-ја и направите нови пројекат за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
   </data>
   <data name="ConsumersLinkedIn" xml:space="preserve">
     <value>LinkedIn</value>
@@ -340,7 +340,7 @@
     <value>Омогуц́ите апликацији да се пријави на портал помоц́у LinkedIn налога.</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на ONLYOFFICE користец́и своје LinkedIn налоге. {0}Идите на веб локацију LinkedIn Developers и направите нову интеграцију апликације ONLYOFFICE. Унесите податке које сте добили испод:</value>
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на {LogoText} користец́и своје LinkedIn налоге. {0}Идите на веб локацију LinkedIn Developers и направите нову интеграцију апликације {LogoText}. Унесите податке које сте добили испод:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>Linkedin ID</value>
@@ -376,7 +376,7 @@
     <value>Омогуц́ите апликацији да се пријави на портал помоц́у Microsoft налога.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на ONLYOFFICE користец́и Microsoft.{0}Идите на Microsoft Azure и направите нову интеграцију апликације ONLYOFFICE. Унесите податке које сте добили испод:</value>
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на {LogoText} користец́и Microsoft.{0}Идите на Microsoft Azure и направите нову интеграцију апликације {LogoText}. Унесите податке које сте добили испод:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace Cloud Storage</value>
@@ -418,7 +418,7 @@
     <value>Повежите Amazon AVS S3 за прављење резервних копија и складиштење података са вашег портала.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Повежите Amazon AVS S3 за прављење резервних копија и складиштење података са вашег портала. {0}Идите на AVS управљачку конзолу и направите приступне кључеве за ONLYOFFICE. Налепите податке које сте добили у наставку:</value>
+    <value>Повежите Amazon AVS S3 за прављење резервних копија и складиштење података са вашег портала. {0}Идите на AVS управљачку конзолу и направите приступне кључеве за {LogoText}. Налепите податке које сте добили у наставку:</value>
   </data>
   <data name="ConsumersS3region" xml:space="preserve">
     <value>Регион</value>
@@ -469,7 +469,7 @@
     <value>Омогуц́ите апликацији да управља OneDrive датотекама и фолдерима.</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Омогуц́ите ову апликацију да повежете свој OneDrive налог са модулом Документи. Моц́и ц́ете да управљате, мењате и делите датотеке са OneDrive-а са ONLYOFFICE корисницима. {0}Пријавите се на свој Microsoft Azure налог и направите нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+    <value>Омогуц́ите ову апликацију да повежете свој OneDrive налог са модулом Документи. Моц́и ц́ете да управљате, мењате и делите датотеке са OneDrive-а са {LogoText} корисницима. {0}Пријавите се на свој Microsoft Azure налог и направите нову апликацију за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
   </data>
   <data name="ConsumersSmsc" xml:space="preserve">
     <value>SMS центар</value>
@@ -532,7 +532,7 @@
     <value>Омогућите апликацију да бисте се пријавили на портал користећи Twitter налог.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на ONLYOFFICE користец́и свој Тwиттер и повежу Twitter налоге својих клијената са CRM модулом. {0}Идите на Twitter Developers портал и направите нову интеграцију апликације ONLYOFFICE. Унесите податке које сте примили испод:</value>
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на {LogoText} користец́и свој Тwиттер и повежу Twitter налоге својих клијената са CRM модулом. {0}Идите на Twitter Developers портал и направите нову интеграцију апликације {LogoText}. Унесите податке које сте примили испод:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API кључ</value>
@@ -565,7 +565,7 @@
     <value>Омогуц́ите апликацију за објављивање докумената директно у WordPress.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Омогуц́ите апликацију за лако објављивање докумената на ваш WordPress веб сајт. {0}На WordPress Developers страници, креирајте нову апликацију за ONLYOFFICE интеграцију. Налепите податке које сте добили испод:</value>
+    <value>Омогуц́ите апликацију за лако објављивање докумената на ваш WordPress веб сајт. {0}На WordPress Developers страници, креирајте нову апликацију за {LogoText} интеграцију. Налепите податке које сте добили испод:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>WordPress кључ</value>
@@ -586,7 +586,7 @@
     <value>Омогућите апликацији увоз корисника са Yahoo сервиса.</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Омогуц́ите ову апликацију да бисте додали нове кориснике портала са своје Yahoo листе контаката. {0}Идите на страницу Креирај апликацију у Yahoo Developer Network-у и направите нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+    <value>Омогуц́ите ову апликацију да бисте додали нове кориснике портала са своје Yahoo листе контаката. {0}Идите на страницу Креирај апликацију у Yahoo Developer Network-у и направите нову апликацију за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
   </data>
   <data name="ConsumersYandex" xml:space="preserve">
     <value>Yandex</value>
@@ -616,7 +616,7 @@
     <value>Омогућите апликацију да се пријави на портал користећи Zoom налог.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на ONLYOFFICE користец́и своје Zoom налоге. {0}Идите на веб сајт Zoom Developers и направите нову интеграцију апликације ONLYOFFICE. Унесите податке које сте добили испод:</value>
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на {LogoText} користец́и своје Zoom налоге. {0}Идите на веб сајт Zoom Developers и направите нову интеграцију апликације {LogoText}. Унесите податке које сте добили испод:</value>
   </data>
   <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
     <value>Операција повратка лозинке је забрањена за LDAP корисника</value>

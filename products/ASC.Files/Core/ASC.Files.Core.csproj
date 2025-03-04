@@ -472,6 +472,9 @@
     <EmbeddedResource Update="Resources\FilesCommonResource.ro.resx">
       <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesCommonResource.si.resx">
+      <DependentUpon>FilesCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesCommonResource.sk.resx">
       <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>

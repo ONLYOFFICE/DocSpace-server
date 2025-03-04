@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Swashbuckle.AspNetCore.Annotations;
+
 namespace ASC.Data.Storage.Configuration;
 
 [Singleton]
@@ -84,8 +86,11 @@ public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>>
     /// Storage properties
     /// </summary>
     public Dictionary<string, string> Props { get; set; }
+    
+    [JsonIgnore]
     public virtual Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d;
     public abstract Guid ID { get; }
+    
     internal ICacheNotify<DataStoreCacheItem> Cache { get; set; }
 
     public BaseStorageSettings<T> GetDefault()

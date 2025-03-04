@@ -62,11 +62,11 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </short>
     /// <path>api/2.0/people/self/delete</path>
     [Tags("People / User data")]
-    [SwaggerResponse(200, "Information message", typeof(object))]
+    [SwaggerResponse(200, "Information message", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("self/delete")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<object> SendInstructionsToDeleteAsync()
+    public async Task<string> SendInstructionsToDeleteAsync()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var tenant = tenantManager.GetCurrentTenant();

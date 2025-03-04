@@ -322,12 +322,12 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(object))]
+    [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
     [HttpGet("administrator")]
-    public async Task<object> IsProductAdministratorAsync(UserProductIdsRequestDto inDto)
+    public async Task<ProductAdministratorDto> IsProductAdministratorAsync(UserProductIdsRequestDto inDto)
     {
         var result = await webItemSecurity.IsProductAdministratorAsync(inDto.ProductId, inDto.UserId);
-        return new { inDto.ProductId, inDto.UserId, Administrator = result };
+        return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = result };
     }
 
     /// <summary>
@@ -338,10 +338,10 @@ public class SecurityController(
     /// </short>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(object))]
+    [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("administrator")]
-    public async Task<object> SetProductAdministrator(SecurityRequestsDto inDto)
+    public async Task<ProductAdministratorDto> SetProductAdministrator(SecurityRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -373,7 +373,7 @@ public class SecurityController(
                 GetProductName(inDto.ProductId), admin.DisplayUserName(false, displayUserSettingsHelper));
         }
 
-        return new { inDto.ProductId, inDto.UserId, inDto.Administrator };
+        return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = inDto.Administrator };
     }
 
     /// <summary>

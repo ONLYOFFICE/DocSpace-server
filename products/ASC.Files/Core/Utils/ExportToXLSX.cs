@@ -27,13 +27,14 @@
 using ASC.Files.Core.Services.DocumentBuilderService;
 
 namespace ASC.Web.Files.Utils;
+
 [Transient]
 public class ExportToXLSX(
     ILogger<AuditReportUploader> logger,
     IServiceProvider serviceProvider,
     TenantManager tenantManager,
     IEventBus eventBus,
-    DocumentBuilderTaskManager documentBuilderTaskManager,
+    DocumentBuilderTaskManager<FormFillingReportTask, int, FormFillingReportTaskData> documentBuilderTaskManager,
     IHttpContextAccessor httpContextAccessor,
     AuthContext authContext)
 {

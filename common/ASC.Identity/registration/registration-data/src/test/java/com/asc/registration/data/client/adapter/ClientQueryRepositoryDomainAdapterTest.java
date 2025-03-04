@@ -96,16 +96,15 @@ class ClientQueryRepositoryDomainAdapterTest {
   @Test
   void whenClientsAreQueriedForPublicAndPrivateByTenantId_thenReturnPaginatedResponse() {
     List<ClientEntity> entities = List.of(clientEntity);
-    when(jpaClientRepository.findAllPublicAndPrivateByTenantWithCursor(anyLong(), any(), anyInt()))
+    when(jpaClientRepository.findAllByTenantIdWithCursor(anyLong(), any(), anyInt()))
         .thenReturn(entities);
 
     var result =
-        clientQueryRepositoryDomainAdapter.findAllPublicAndPrivateByTenantId(
+        clientQueryRepositoryDomainAdapter.findAllByTenantId(
             tenantId, 10, null, ZonedDateTime.now());
 
     assertEquals(client, result.getData().iterator().next());
-    verify(jpaClientRepository)
-        .findAllPublicAndPrivateByTenantWithCursor(eq(tenantId.getValue()), any(), eq(11));
+    verify(jpaClientRepository).findAllByTenantIdWithCursor(eq(tenantId.getValue()), any(), eq(11));
     verify(clientDataAccessMapper).toDomain(clientEntity);
   }
 

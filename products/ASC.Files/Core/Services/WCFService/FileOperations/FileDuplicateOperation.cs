@@ -27,16 +27,19 @@
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Transient]
-public class FileDuplicateOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileOperationData<string>, FileOperationData<int>>(serviceProvider)
+public class FileDuplicateOperation : ComposeFileOperation<FileOperationData<string>, FileOperationData<int>>
 {
+    public FileDuplicateOperation() { }
+    public FileDuplicateOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+
     protected override FileOperationType FileOperationType => FileOperationType.Duplicate;
 
-    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileDuplicateOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileDuplicateOperation<string>(_serviceProvider, ThirdPartyData);
 
-        return base.RunJob(distributedTask, cancellationToken);
+        return base.RunJob(cancellationToken);
 
     }
 }
@@ -44,13 +47,11 @@ public class FileDuplicateOperation(IServiceProvider serviceProvider) : ComposeF
 class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationData<T> data) : FileOperation<FileOperationData<T>, T>(serviceProvider, data)
 {
     private readonly IDictionary<string, string> _headers = data.Headers;
-    private DistributedTask _distributedTask;
     private CancellationToken _cancellationToken;
-    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override Task RunJob(CancellationToken cancellationToken)
     {
-        _distributedTask = distributedTask;
         _cancellationToken = cancellationToken;
-        return base.RunJob(distributedTask, cancellationToken);
+        return base.RunJob(cancellationToken);
     }
 
     protected override async Task DoJob(AsyncServiceScope serviceScope)
@@ -74,7 +75,7 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
         { 
             Publication = FileMoveCopyOperationPublishChanges
         };
-        await copyOperation.RunJob(_distributedTask, _cancellationToken);
+        await copyOperation.RunJob(_cancellationToken);
     }
 
     private async Task DoFolderAsync(AsyncServiceScope scope, T id)
@@ -86,7 +87,7 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
         { 
             Publication = FileMoveCopyOperationPublishChanges
         };
-        await copyOperation.RunJob(_distributedTask, _cancellationToken);
+        await copyOperation.RunJob(_cancellationToken);
     }
 
     private readonly Dictionary<string, Dictionary<string, dynamic>> _tasksProps = new();

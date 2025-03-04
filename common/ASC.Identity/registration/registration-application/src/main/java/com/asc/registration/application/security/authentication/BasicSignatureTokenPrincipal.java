@@ -27,6 +27,7 @@
 
 package com.asc.registration.application.security.authentication;
 
+import com.asc.common.core.domain.value.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -48,6 +49,5 @@ public class BasicSignatureTokenPrincipal {
   /** The URL of the tenant associated with the user. */
   private String tenantUrl;
 
-  /** Indicates whether the user has administrative privileges. */
-  private boolean isAdmin;
+  private Role role;
 }

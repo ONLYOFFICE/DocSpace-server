@@ -27,10 +27,10 @@
 namespace ASC.Common.Threading;
 
 [Transient]
-public class DistributedTaskQueue(IServiceProvider serviceProvider,
+public class DistributedTaskQueue<T>(
     ICacheNotify<DistributedTaskCancelation> cancelTaskNotify,
-    IDistributedCache distributedCache,
-    ILogger<DistributedTaskQueue> logger)
+    IFusionCache hybridCache,
+    ILogger<DistributedTaskQueue<T>> logger)  where T : DistributedTask
 {
     public const string QUEUE_DEFAULT_PREFIX = "asc_distributed_task_queue_";
     public static readonly int INSTANCE_ID = Environment.ProcessId;
@@ -73,15 +73,8 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         }
     }
 
-    public async Task EnqueueTask(DistributedTaskProgress taskProgress)
+    public async Task EnqueueTask(T distributedTask)
     {
-        await EnqueueTask(taskProgress.RunJob, taskProgress);
-    }
-
-    public async Task EnqueueTask(Func<DistributedTask, CancellationToken, Task> action, DistributedTask distributedTask = null)
-    {
-        distributedTask ??= new DistributedTask();
-
         distributedTask.InstanceId = INSTANCE_ID;
 
         if (distributedTask.LastModifiedOn.Equals(DateTime.MinValue))
@@ -107,11 +100,11 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         }
 
         var task = new Task(() =>
-    {
-        var t = action(distributedTask, token);
-        t.ContinueWith(async a => await OnCompleted(a, distributedTask.Id), token).ConfigureAwait(false);
-        t.ConfigureAwait(false);
-    }, token, TaskCreationOptions.LongRunning);
+        {
+            var t = distributedTask.RunJob(token);
+            t.ContinueWith(async a => await OnCompleted(a, distributedTask.Id), token).ConfigureAwait(false);
+            t.ConfigureAwait(false);
+        }, token, TaskCreationOptions.LongRunning);
 
         _ = task.ConfigureAwait(false);
 
@@ -124,8 +117,8 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         logger.TraceEnqueueTask(distributedTask.Id, INSTANCE_ID);
 
     }
-
-    public async Task<List<DistributedTask>> GetAllTasks(int? instanceId = null)
+    
+    public async Task<List<T>> GetAllTasks(int? instanceId = null)
     {
         var queueTasks = await LoadFromCache();
 
@@ -143,17 +136,13 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
         return queueTasks;
     }
+    
 
-    public async Task<IEnumerable<T>> GetAllTasks<T>() where T : DistributedTask
-    {
-        return (await GetAllTasks()).Select(x => Map(x, serviceProvider.GetService<T>())).ToList();
-    }
-
-    public async Task<T> PeekTask<T>(string id) where T : DistributedTask
+    public async Task<T> PeekTask(string id)
     {
         var taskById = (await GetAllTasks()).FirstOrDefault(x => x.Id == id);
 
-        return taskById == null ? null : Map(taskById, serviceProvider.GetService<T>());
+        return taskById;
     }
 
     public async Task DequeueTask(string id)
@@ -171,7 +160,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
         if (queueTasks.Count == 0)
         {
-            await distributedCache.RemoveAsync(_name);
+            await hybridCache.RemoveAsync(_name);
         }
         else
         {
@@ -182,7 +171,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
     }
 
-    public async Task<string> PublishTask(DistributedTask distributedTask)
+    public async Task<string> PublishTask(T distributedTask)
     {
         distributedTask.Publication ??= GetPublication();
         await distributedTask.PublishChanges();
@@ -225,7 +214,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
             task.LastModifiedOn = DateTime.UtcNow;
 
-            queueTasks.Add(task);
+            queueTasks.Add((T)task);
 
             await SaveToCache(queueTasks);
             logger.TracePublicationDistributedTask(task.Id, task.InstanceId);
@@ -233,41 +222,25 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
     }
 
 
-    private async Task SaveToCache(List<DistributedTask> queueTasks)
+    private async Task SaveToCache(List<T> queueTasks)
     {
         if (queueTasks.Count == 0)
         {
-            await distributedCache.RemoveAsync(_name);
+            await hybridCache.RemoveAsync(_name);
 
             return;
         }
-
-        using var ms = new MemoryStream();
-
-        Serializer.Serialize(ms, queueTasks);
-
-        await distributedCache.SetAsync(_name, ms.ToArray(), new DistributedCacheEntryOptions
-        {
-            AbsoluteExpiration = DateTime.UtcNow.AddDays(1)
-        });
+        
+        await hybridCache.SetAsync(_name, queueTasks, TimeSpan.FromDays(1));
 
     }
-
-    private async Task<List<DistributedTask>> LoadFromCache()
+    
+    private async Task<List<T>> LoadFromCache()
     {
-        var serializedObject = await distributedCache.GetAsync(_name);
-
-        if (serializedObject == null)
-        {
-            return [];
-        }
-
-        using var ms = new MemoryStream(serializedObject);
-
-        return Serializer.Deserialize<List<DistributedTask>>(ms);
+        return await hybridCache.GetOrDefaultAsync<List<T>>(_name) ?? [];
     }
 
-    private async Task<List<DistributedTask>> DeleteOrphanCacheItem(IEnumerable<DistributedTask> queueTasks)
+    private async Task<List<T>> DeleteOrphanCacheItem(IEnumerable<T> queueTasks)
     {
         var listTasks = queueTasks.ToList();
 
@@ -279,49 +252,8 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         return listTasks;
     }
 
-    private bool IsOrphanCacheItem(DistributedTask obj)
+    private bool IsOrphanCacheItem(T obj)
     {
         return obj.LastModifiedOn.AddSeconds(TimeUntilUnregisterInSeconds) < DateTime.UtcNow;
-    }
-
-
-    /// <summary>
-    /// Maps the source object to destination object.
-    /// </summary>
-    /// <typeparam name="T">Type of destination object.</typeparam>
-    /// <typeparam name="TU">Type of source object.</typeparam>
-    /// <param name="destination">Destination object.</param>
-    /// <param name="source">Source object.</param>
-    /// <returns>Updated destination object.</returns>
-    private T Map<T, TU>(TU source, T destination)
-    {
-        destination.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-                    .ToList()
-                    .ForEach(field =>
-                    {
-                        var sf = source.GetType().GetField(field.Name, BindingFlags.NonPublic | BindingFlags.Instance);
-
-                        if (sf != null)
-                        {
-                            var value = sf.GetValue(source);
-                            destination.GetType().GetField(field.Name, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(destination, value);
-                        }
-                    });
-
-        destination.GetType().GetProperties().Where(p => p.CanWrite && p.GetIndexParameters().Length == 0)
-                    .ToList()
-                    .ForEach(prop =>
-                    {
-                        var sp = source.GetType().GetProperty(prop.Name);
-                        if (sp != null)
-                        {
-                            var value = sp.GetValue(source, null);
-                            destination.GetType().GetProperty(prop.Name).SetValue(destination, value, null);
-                        }
-                    });
-
-
-
-        return destination;
     }
 }

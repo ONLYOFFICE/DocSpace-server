@@ -34,6 +34,7 @@ public class FirstTimeTenantSettings(
     SettingsManager settingsManager,
     UserManager userManager,
     SetupInfo setupInfo,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
     SecurityContext securityContext,
     MessageService messageService,
     LicenseReader licenseReader,
@@ -237,14 +238,13 @@ public class FirstTimeTenantSettings(
     {
         try
         {
-            var url = (setupInfo.TeamlabSiteRedirect ?? "").Trim().TrimEnd('/');
+            var url = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("subscribe");
 
             if (string.IsNullOrEmpty(url))
             {
                 return;
             }
 
-            url += "/post.ashx";
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(url)

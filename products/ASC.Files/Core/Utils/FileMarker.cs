@@ -62,33 +62,19 @@ public class FileMarkerCache
 }
 
 [Singleton]
-public class FileMarkerHelper(
-    IServiceProvider serviceProvider,
-    ILogger<FileMarkerHelper> logger,
-    IDistributedTaskQueueFactory queueFactory)
+public class FileMarkerHelper<T>
 {
     private const string CustomDistributedTaskQueueName = "file_marker";
-    private readonly ILogger _logger = logger;
-    private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CustomDistributedTaskQueueName);
+    private readonly DistributedTaskQueue<AsyncTaskData<T>> _tasks;
 
-    internal async Task Add<T>(AsyncTaskData<T> taskData)
+    public FileMarkerHelper(IDistributedTaskQueueFactory queueFactory)
     {
-        await _tasks.EnqueueTask(async (_, _) => await ExecMarkFileAsNewAsync(taskData), taskData);
+        _tasks = queueFactory.CreateQueue<AsyncTaskData<T>>(CustomDistributedTaskQueueName);
     }
 
-    private async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj)
+    internal async Task Add(AsyncTaskData<T> taskData)
     {
-        try
-        {
-            await using var scope = serviceProvider.CreateAsyncScope();
-            var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
-            var socketManager = scope.ServiceProvider.GetService<SocketManager>();
-            await fileMarker.ExecMarkFileAsNewAsync(obj, socketManager);
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorExecMarkFileAsNew(e);
-        }
+        await _tasks.EnqueueTask(taskData);
     }
 }
 
@@ -105,7 +91,6 @@ public class FileMarker(
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     FileMarkerCache fileMarkerCache,
     IDistributedLockProvider distributedLockProvider,
-    FileMarkerHelper fileMarkerHelper,
     EntryStatusManager entryStatusManager)
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
@@ -483,13 +468,12 @@ public class FileMarker(
 
         userIDs ??= [];
 
-        var taskData = new AsyncTaskData<T>
-        {
-            TenantId = tenantManager.GetCurrentTenantId(),
-            CurrentAccountId = authContext.CurrentAccount.ID,
-            FileEntry = (FileEntry<T>)fileEntry.Clone(),
-            UserIDs = userIDs
-        };
+        var taskData = serviceProvider.GetService<AsyncTaskData<T>>();
+
+        taskData.TenantId = tenantManager.GetCurrentTenantId();
+        taskData.CurrentAccountId = authContext.CurrentAccount.ID;
+        taskData.FileEntry = (FileEntry<T>)fileEntry.Clone();
+        taskData.UserIDs = userIDs;
 
         if (fileEntry.RootFolderType == FolderType.BUNCH && userIDs.Count == 0)
         {
@@ -513,6 +497,7 @@ public class FileMarker(
             taskData.UserIDs = projectTeam;
         }
 
+        var fileMarkerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
         await fileMarkerHelper.Add(taskData);
     }
 
@@ -1259,12 +1244,43 @@ public class FileMarker(
     }
 }
 
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class AsyncTaskData<T> : DistributedTask
 {
-    public int TenantId { get; init; }
-    public FileEntry<T> FileEntry { get; init; }
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ILogger<AsyncTaskData<T>> _logger;
+
+    public AsyncTaskData()
+    {
+        
+    }
+    
+    public AsyncTaskData(IServiceScopeFactory serviceScopeFactory, ILogger<AsyncTaskData<T>> logger)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+        _logger = logger;
+    }
+
+    public int TenantId { get; set; }
+    public FileEntry<T> FileEntry { get; set; }
     public List<Guid> UserIDs { get; set; }
-    public Guid CurrentAccountId { get; init; }
+    public Guid CurrentAccountId { get; set; }
+    
+    protected override async Task DoJob()
+    {
+        try
+        {
+            await using var scope = _serviceScopeFactory.CreateAsyncScope();
+            var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
+            var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+            await fileMarker.ExecMarkFileAsNewAsync(this, socketManager);
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorExecMarkFileAsNew(e);
+        }
+    }
 }
 
 public enum MarkResult

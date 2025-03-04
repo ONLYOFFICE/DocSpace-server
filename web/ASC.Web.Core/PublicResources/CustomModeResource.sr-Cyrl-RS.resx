@@ -120,7 +120,7 @@
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Здраво, $UserName!
 
-Добродошли на ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат на "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+Добродошли на ${LetterLogoText} DocSpace! Ваш кориснички профил је успешно додат на "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
 
 * Радите са другим корисницима у соби у коју сте позвани: *собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним поставкама за било коју сврху*.
 

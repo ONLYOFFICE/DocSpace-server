@@ -29,15 +29,35 @@ using ASC.ElasticSearch;
 namespace ASC.Web.Core.RemovePortal;
 
 [Transient]
-public class RemovePortalOperation(
-    StorageFactory storageFactory,
-    StorageFactoryConfig storageFactoryConfig,
-    ITenantService tenantService,
-    TenantManager tenantManager,
-    IEnumerable<IFactoryIndexer> factoryIndexers,
-    ILogger<RemovePortalOperation> logger)
-    : DistributedTaskProgress
+public class RemovePortalOperation : DistributedTaskProgress
 {
+    private readonly StorageFactory _storageFactory;
+    private readonly StorageFactoryConfig _storageFactoryConfig;
+    private readonly ITenantService _tenantService;
+    private readonly TenantManager _tenantManager;
+    private readonly IEnumerable<IFactoryIndexer> _factoryIndexers;
+    private readonly ILogger<RemovePortalOperation> _logger;
+
+    public RemovePortalOperation()
+    {
+        
+    }
+    
+    public RemovePortalOperation(StorageFactory storageFactory,
+        StorageFactoryConfig storageFactoryConfig,
+        ITenantService tenantService,
+        TenantManager tenantManager,
+        IEnumerable<IFactoryIndexer> factoryIndexers,
+        ILogger<RemovePortalOperation> logger)
+    {
+        _storageFactory = storageFactory;
+        _storageFactoryConfig = storageFactoryConfig;
+        _tenantService = tenantService;
+        _tenantManager = tenantManager;
+        _factoryIndexers = factoryIndexers;
+        _logger = logger;
+    }
+
     public int TenantId { get; set; }
 
 
@@ -52,40 +72,40 @@ public class RemovePortalOperation(
         {
             CustomSynchronizationContext.CreateContext();
 
-            logger.DebugStartRemoveTenant(TenantId);
+            _logger.DebugStartRemoveTenant(TenantId);
 
-            var tenant = await tenantManager.GetTenantAsync(TenantId);
-            tenantManager.SetCurrentTenant(tenant);
+            var tenant = await _tenantManager.GetTenantAsync(TenantId);
+            _tenantManager.SetCurrentTenant(tenant);
 
-            var modules = storageFactoryConfig.GetModuleList();
+            var modules = _storageFactoryConfig.GetModuleList();
             foreach (var module in modules)
             {
                 Percentage += 100 / (modules.Count() + 1);
                 await PublishChanges();
-                logger.DebugRemoveModule(module);
-                var storage = await storageFactory.GetStorageAsync(TenantId, module);
-                foreach (var domain in storageFactoryConfig.GetDomainList(module))
+                _logger.DebugRemoveModule(module);
+                var storage = await _storageFactory.GetStorageAsync(TenantId, module);
+                foreach (var domain in _storageFactoryConfig.GetDomainList(module))
                 {
                     await storage.DeleteDirectoryAsync(domain, "");
                 }
                 await storage.DeleteDirectoryAsync("");
             }
 
-            logger.DebugRemoveTenantFromDb();
-            await tenantService.PermanentlyRemoveTenantAsync(TenantId);
+            _logger.DebugRemoveTenantFromDb();
+            await _tenantService.PermanentlyRemoveTenantAsync(TenantId);
 
-            foreach (var indexer in factoryIndexers)
+            foreach (var indexer in _factoryIndexers)
             {
                 await indexer.DeleteAsync(tenant.Id);
             }
             
-            logger.DebugEndRemoveTenant(TenantId);
+            _logger.DebugEndRemoveTenant(TenantId);
             Percentage = 100;
         }
         catch (Exception e)
         {
             Exception = e;
-            logger.ErrorRemoveTenant(TenantId, e);
+            _logger.ErrorRemoveTenant(TenantId, e);
         }
         finally
         {

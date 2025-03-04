@@ -24,37 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#if DEBUG
-namespace ASC.Core.Common.Tests
+namespace ASC.Web.Api.ApiModels.ResponseDto;
+
+public class PaymentSettingsDto
 {
-    using System;
-
-    using ASC.Common.Utils;
-
-    public class DbBaseTest<TDbService>
-    {
-        protected TDbService Service
-        {
-            get;
-            private set;
-        }
-
-        protected int Tenant
-        {
-            get;
-            private set;
-        }
-
-        internal ConfigurationExtension Configuration { get; set; }
-
-        protected DbBaseTest()
-        {
-            Service = (TDbService)Activator.CreateInstance(typeof(TDbService), Configuration.GetConnectionStrings("core"));
-            Tenant = 1024;
-
-            //var pattern = "%message (%property{duration} ms)     %property{sql}    %property{sqlParams}%newline";
-            //BasicConfigurator.Configure(new DebugAppender { Layout = new PatternLayout(pattern) });
-        }
-    }
+    public string SalesEmail { get; set; }
+    public string FeedbackAndSupportUrl { get; set; }
+    public string BuyUrl { get; set; }
+    public bool Standalone { get; set; }
+    public CurrentLicenseInfo CurrentLicense { get; set; }
+    public int Max { get; set; }
 }
-#endif
+
+public class CurrentLicenseInfo
+{
+    public bool Trial { get; set; }
+    public DateTime DueDate { get; set; }
+}
