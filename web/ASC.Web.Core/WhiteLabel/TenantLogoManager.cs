@@ -119,9 +119,20 @@ public class TenantLogoManager(
         {
             var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-            return await tenantWhiteLabelSettings.GetLogoTextAsync(settingsManager) ?? TenantWhiteLabelSettings.DefaultLogoText;
+            return await tenantWhiteLabelSettings.GetLogoTextAsync(settingsManager);
         }
         return TenantWhiteLabelSettings.DefaultLogoText;
+    }
+
+    public async Task<bool> IsDefaultLogoSettingsAsync()
+    {
+        if (WhiteLabelEnabled)
+        {
+            var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+
+            return await tenantWhiteLabelSettings.GetIsDefault(settingsManager);
+        }
+        return true;
     }
 
     public bool IsRetina(HttpRequest request)

@@ -41,6 +41,7 @@ public class LdapOperationJob : DistributedTaskProgress
     private string _warning;
 
     private int? _tenantId;
+
     public int TenantId
     {
         get
@@ -55,68 +56,53 @@ public class LdapOperationJob : DistributedTaskProgress
     }
 
     private LdapOperationType _operationType;
-    private static LdapLocalization _resource;
+    private LdapLocalization _resource;
 
-    private static TenantManager _tenantManager;
-    private static SettingsManager _settingsManager;
-    private static UserManager _userManager;
-    private static LdapUserManager _ldapUserManager;
-    private static NovellLdapUserImporter _novellLdapUserImporter;
+    private SettingsManager _settingsManager;
+    private UserManager _userManager;
+    private LdapUserManager _ldapUserManager;
+    private NovellLdapUserImporter _novellLdapUserImporter;
+
+    private SecurityContext _securityContext;
+    private NovellLdapHelper _novellLdapHelper;
+    private LdapChangeCollection _ldapChanges;
+    private UserFormatter _userFormatter;
+    private UserPhotoManager _userPhotoManager;
+    private WebItemSecurity _webItemSecurity;
+    private DisplayUserSettingsHelper _displayUserSettingsHelper;
+    private NovellLdapSettingsChecker _novellLdapSettingsChecker;
+    private ILogger<LdapOperationJob> _logger;
 
     private UserInfo _currentUser;
-    private readonly SecurityContext _securityContext;
-    private readonly LdapUserManager _ldapUserManager1;
-    private readonly NovellLdapHelper _novellLdapHelper;
-    private readonly LdapChangeCollection _ldapChanges;
-    private readonly UserFormatter _userFormatter;
-    private readonly UserPhotoManager _userPhotoManager;
-    private readonly WebItemSecurity _webItemSecurity;
-    private readonly UserManager _userManager1;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly NovellLdapSettingsChecker _novellLdapSettingsChecker;
-    private readonly ILogger<LdapOperationJob> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private TenantManager _tenantManager;
+    private IServiceScopeFactory _serviceScopeFactory;
 
     public LdapOperationJob()
     {
         
     }
     
-    public LdapOperationJob(SecurityContext securityContext,
-        LdapUserManager ldapUserManager,
-        NovellLdapHelper novellLdapHelper,
-        LdapChangeCollection ldapChanges,
-        UserFormatter userFormatter,
-        UserPhotoManager userPhotoManager,
-        WebItemSecurity webItemSecurity,
+    public LdapOperationJob(LdapUserManager ldapUserManager,
         UserManager userManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        NovellLdapSettingsChecker novellLdapSettingsChecker,
-        ILogger<LdapOperationJob> logger,
+        TenantManager tenantManager,
         IServiceScopeFactory serviceScopeFactory)
     {
-        _securityContext = securityContext;
-        _ldapUserManager1 = ldapUserManager;
-        _novellLdapHelper = novellLdapHelper;
-        _ldapChanges = ldapChanges;
-        _userFormatter = userFormatter;
-        _userPhotoManager = userPhotoManager;
-        _webItemSecurity = webItemSecurity;
-        _userManager1 = userManager;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _novellLdapSettingsChecker = novellLdapSettingsChecker;
-        _logger = logger;
+        _ldapUserManager = ldapUserManager;
+        _userManager = userManager;
+        _tenantManager = tenantManager;
         _serviceScopeFactory = serviceScopeFactory;
     }
 
     public async Task InitJobAsync(
-       LdapSettings settings,
-       Tenant tenant,
-       LdapOperationType operationType,
-       LdapLocalization resource,
-       string userId)
+        LdapSettings settings,
+        Tenant tenant,
+        LdapOperationType operationType,
+        LdapLocalization resource,
+        string userId)
     {
-        _currentUser = userId != null ? await _userManager1.GetUsersAsync(Guid.Parse(userId)) : null;
+        _tenantManager.SetCurrentTenant(tenant);
+
+        _currentUser = userId != null ? await _userManager.GetUsersAsync(Guid.Parse(userId)) : null;
 
         TenantId = tenant.Id;
 
@@ -133,7 +119,7 @@ public class LdapOperationJob : DistributedTaskProgress
         _warning = "";
 
         _resource = resource ?? new LdapLocalization();
-        _ldapUserManager1.Init(_resource);
+        _ldapUserManager.Init(_resource);
 
         InitDisturbedTask();
     }
@@ -141,13 +127,25 @@ public class LdapOperationJob : DistributedTaskProgress
     protected override async Task DoJob()
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
-        _tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+
         _settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
         _userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
         _ldapUserManager = scope.ServiceProvider.GetRequiredService<LdapUserManager>();
         _novellLdapUserImporter = scope.ServiceProvider.GetRequiredService<NovellLdapUserImporter>();
 
-        await _tenantManager.SetCurrentTenantAsync(TenantId);
+        _securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+        _novellLdapHelper = scope.ServiceProvider.GetRequiredService<NovellLdapHelper>();
+        _ldapChanges = scope.ServiceProvider.GetRequiredService<LdapChangeCollection>();
+        _userFormatter = scope.ServiceProvider.GetRequiredService<UserFormatter>();
+        _userPhotoManager = scope.ServiceProvider.GetRequiredService<UserPhotoManager>();
+        _webItemSecurity = scope.ServiceProvider.GetRequiredService<WebItemSecurity>();
+        _displayUserSettingsHelper = scope.ServiceProvider.GetRequiredService<DisplayUserSettingsHelper>();
+        _novellLdapSettingsChecker = scope.ServiceProvider.GetRequiredService<NovellLdapSettingsChecker>();
+        _logger = scope.ServiceProvider.GetRequiredService<ILogger<LdapOperationJob>>();
+
+        _tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+        _serviceScopeFactory = scope.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
+
         try
         {
             await _tenantManager.SetCurrentTenantAsync(TenantId);
@@ -218,6 +216,7 @@ public class LdapOperationJob : DistributedTaskProgress
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
             await Do();
         }
         catch (AuthorizingException authError)
@@ -622,6 +621,7 @@ public class LdapOperationJob : DistributedTaskProgress
                         {
                             currentAccessRights.Add(access.Key, []);
                         }
+
                         currentAccessRights[access.Key].Add(user.Id.ToString());
 
                         await SetProgress((int)currentPercent, string.Format(_resource.LdapSettingsStatusGivingRights, _userFormatter.GetUserName(user), access.Key));
@@ -768,8 +768,8 @@ public class LdapOperationJob : DistributedTaskProgress
         }
 
         var groupMembersToAdd = await ldapGroupUsers.ToAsyncEnumerable().SelectAwait(async ldapGroupUser => await SearchDbUserBySidAsync(ldapGroupUser.Sid))
-                .Where(userBySid => !Equals(userBySid, Core.Users.Constants.LostUser))
-                .ToListAsync();
+            .Where(userBySid => !Equals(userBySid, Core.Users.Constants.LostUser))
+            .ToListAsync();
 
         if (groupMembersToAdd.Count != 0)
         {
@@ -788,6 +788,7 @@ public class LdapOperationJob : DistributedTaskProgress
 
                         await _userManager.AddUserIntoGroupAsync(userBySid.Id, ldapGroup.ID);
                     }
+
                     break;
                 case LdapOperationType.SaveTest:
                 case LdapOperationType.SyncTest:
@@ -821,9 +822,9 @@ public class LdapOperationJob : DistributedTaskProgress
         await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}");
 
         var dbGroupMembers =
-                    (await _userManager.GetUsersByGroupAsync(dbLdapGroup.ID, EmployeeStatus.All))
-                        .Where(u => u.Sid != null)
-                        .ToList();
+            (await _userManager.GetUsersByGroupAsync(dbLdapGroup.ID, EmployeeStatus.All))
+            .Where(u => u.Sid != null)
+            .ToList();
 
         var groupMembersToRemove = dbGroupMembers.Where(dbUser => ldapGroupUsers.FirstOrDefault(lu => dbUser.Sid.Equals(lu.Sid)) == null).ToList();
 
@@ -860,7 +861,8 @@ public class LdapOperationJob : DistributedTaskProgress
                 {
                     await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}, {_resource.LdapSettingsStatusAddingGroupUser} ({++index}/{count}): {_userFormatter.GetUserName(userInfo)}");
 
-                    await _userManager.AddUserIntoGroupAsync(userInfo.Id, dbLdapGroup.ID); }
+                    await _userManager.AddUserIntoGroupAsync(userInfo.Id, dbLdapGroup.ID);
+                }
 
                 if (dbGroupMembers.All(dbUser => groupMembersToRemove.Exists(u => u.Id.Equals(dbUser.Id)))
                     && groupMembersToAdd.Count == 0)
@@ -1031,9 +1033,9 @@ public class LdapOperationJob : DistributedTaskProgress
         var percentage = GetProgress();
 
         var removedDbLdapGroups =
-           (await _userManager.GetGroupsAsync())
-                .Where(g => g.Sid != null && ldapGroups.FirstOrDefault(lg => g.Sid.Equals(lg.Sid)) == null)
-                .ToList();
+            (await _userManager.GetGroupsAsync())
+            .Where(g => g.Sid != null && ldapGroups.FirstOrDefault(lg => g.Sid.Equals(lg.Sid)) == null)
+            .ToList();
 
         if (removedDbLdapGroups.Count == 0)
         {
@@ -1097,21 +1099,23 @@ public class LdapOperationJob : DistributedTaskProgress
             {
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
-                    user = await _ldapUserManager1.SyncLDAPUserAsync(ldapGroupUser, uniqueLdapGroupUsers);
+                    user = await _ldapUserManager.SyncLDAPUserAsync(ldapGroupUser, uniqueLdapGroupUsers);
                     if (!Equals(user, Core.Users.Constants.LostUser))
                     {
                         newUniqueLdapGroupUsers.Add(user);
                     }
+
                     break;
                 case LdapOperationType.SaveTest:
                 case LdapOperationType.SyncTest:
-                    var wrapper = await _ldapUserManager1.GetLDAPSyncUserChangeAsync(ldapGroupUser, uniqueLdapGroupUsers);
+                    var wrapper = await _ldapUserManager.GetLDAPSyncUserChangeAsync(ldapGroupUser, uniqueLdapGroupUsers);
                     user = wrapper.UserInfo;
                     var changes = wrapper.LdapChangeCollection;
                     if (!Equals(user, Core.Users.Constants.LostUser))
                     {
                         newUniqueLdapGroupUsers.Add(user);
                     }
+
                     _ldapChanges.AddRange(changes);
                     break;
                 default:
@@ -1179,7 +1183,7 @@ public class LdapOperationJob : DistributedTaskProgress
 
         await PublishTaskInfo();
     }
-    
+
     private async Task PublishTaskInfo()
     {
         FillDistributedTask();
@@ -1370,7 +1374,7 @@ public class LdapOperationJob : DistributedTaskProgress
         settings.Password = string.Empty;
     }
 
-    private static string GetError(LdapSettingsStatus result)
+    private string GetError(LdapSettingsStatus result)
     {
         return result switch
         {

@@ -96,6 +96,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var settingsManager = serviceProvider.GetService<SettingsManager>();
         var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
+        var tenantLogoManager = serviceProvider.GetService<TenantLogoManager>();
         var tenantWhiteLabelSettingsHelper = serviceProvider.GetService<TenantWhiteLabelSettingsHelper>();
         var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
         var tenantUtil = serviceProvider.GetService<TenantUtil>();
@@ -113,6 +114,8 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
         var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
 
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
+
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
         var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
@@ -152,7 +155,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
 
             info = new
             {
-                company = tenantWhiteLabelSettings.LogoText ?? TenantWhiteLabelSettings.DefaultLogoText,
+                company = logoText,
                 room = room.Title,
                 exportAuthor = user.DisplayUserName(false, displayUserSettingsHelper),
                 dateGenerated = tenantUtil.DateTimeNow().ConvertNumerals("g")

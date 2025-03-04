@@ -187,13 +187,19 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 if (Folders.Count > 0)
                 {
-                    this[Err] = FilesCommonResource.ErrorMessage_FolderMoveFormFillingError;
+                    var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
+                    var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+                    this[Err] = string.Format(FilesCommonResource.ErrorMessage_FolderMoveFormFillingError, logoText);
 
                     return;
                 }
                 if (Files.Count > 1)
                 {
-                    this[Err] = FilesCommonResource.ErrorMessage_FilesMoveFormFillingError;
+                    var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
+                    var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+                    this[Err] = string.Format(FilesCommonResource.ErrorMessage_FilesMoveFormFillingError, logoText);
 
                     return;
                 }
@@ -907,9 +913,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             var fileType = FileUtility.GetFileTypeByFileName(file.Title);
                             try
                             {
+
+
                                 if (fileType != FileType.Pdf || !await fileChecker.CheckExtendedPDF(file))
                                 {
-                                    this[Err] = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
+                                    var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
+                                    var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+                                    this[Err] = string.Format(_copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom, logoText);
                                     continue;
                                 }
                             }

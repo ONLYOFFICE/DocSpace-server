@@ -35,6 +35,7 @@ import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuditCode;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
@@ -114,12 +115,12 @@ public class ClientCreateCommandHandlerTest {
                     Set.of("http://logout.url")))
             .clientCreationInfo(
                 ClientCreationInfo.Builder.builder()
-                    .createdBy("creator")
+                    .createdBy(new UserId("creator"))
                     .createdOn(ZonedDateTime.now(ZoneId.of("UTC")))
                     .build())
             .clientVisibility(ClientVisibility.PRIVATE)
             .build();
-    client.initialize("creator");
+    client.initialize(new UserId("creator"));
     client.encryptSecret(s -> "encryptedSecret");
     clientResponse =
         ClientResponse.builder()

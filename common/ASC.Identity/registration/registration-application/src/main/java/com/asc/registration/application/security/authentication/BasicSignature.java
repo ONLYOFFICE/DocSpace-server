@@ -69,4 +69,12 @@ public class BasicSignature {
   /** Indicates whether the user has administrative privileges. */
   @JsonProperty("is_admin")
   private boolean isAdmin;
+
+  /** Indicates whether the user is a guest. */
+  @JsonProperty("is_guest")
+  private boolean isGuest;
+
+  /** Indicates whether the user has public access (not for admins). */
+  @JsonProperty("is_public")
+  private boolean isPublic;
 }

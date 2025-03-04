@@ -85,6 +85,8 @@ public static class CommonTags
 {
     public const string VirtualRootPath = "__VirtualRootPath";
 
+    public const string VirtualRootHost = "__VirtualRootHost";
+
     public const string ProductID = "__ProductID";
 
     public const string DateTime = "__DateTime";
