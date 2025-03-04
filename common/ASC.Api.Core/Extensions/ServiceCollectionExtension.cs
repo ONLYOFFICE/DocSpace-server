@@ -201,14 +201,14 @@ public static class ServiceCollectionExtension
                 retryCount = int.Parse(configuration["core:eventBus:connectRetryCount"]);
             }
             
-            services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
-            {
-                var logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
-
-                var connectionFactory = rabbitMqConfiguration.GetConnectionFactory();
-                
-                return new DefaultRabbitMQPersistentConnection(connectionFactory, logger, retryCount);
-            });
+            // services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
+            // {
+            //     var logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
+            //
+            //     var connectionFactory = rabbitMqConfiguration.GetConnectionFactory();
+            //     
+            //     return new DefaultRabbitMQPersistentConnection(connectionFactory, logger, retryCount);
+            // });
             
             services.AddMassTransit(registrationConfigurator =>
             {
@@ -243,26 +243,26 @@ public static class ServiceCollectionExtension
                 });
             });
             
-            services.AddSingleton<IEventBus, EventBusRabbitMQ>(sp =>
-            {
-                var cfg = sp.GetRequiredService<IConfiguration>();
-
-                var rabbitMqPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
-                var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
-                var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ>>();
-                var eventBusSubscriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
-
-                var serializer = new ProtobufSerializer();
-
-                var subscriptionClientName = "asc_event_bus_default_queue";
-
-                if (!string.IsNullOrEmpty(cfg["core:eventBus:subscriptionClientName"]))
-                {
-                    subscriptionClientName = cfg["core:eventBus:subscriptionClientName"];
-                }
-
-                return new EventBusRabbitMQ(rabbitMqPersistentConnection, logger, iLifetimeScope, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
-            });
+            // services.AddSingleton<IEventBus, EventBusRabbitMQ>(sp =>
+            // {
+            //     var cfg = sp.GetRequiredService<IConfiguration>();
+            //
+            //     var rabbitMqPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
+            //     var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
+            //     var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ>>();
+            //     var eventBusSubscriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
+            //
+            //     var serializer = new ProtobufSerializer();
+            //
+            //     var subscriptionClientName = "asc_event_bus_default_queue";
+            //
+            //     if (!string.IsNullOrEmpty(cfg["core:eventBus:subscriptionClientName"]))
+            //     {
+            //         subscriptionClientName = cfg["core:eventBus:subscriptionClientName"];
+            //     }
+            //
+            //     return new EventBusRabbitMQ(rabbitMqPersistentConnection, logger, iLifetimeScope, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
+            // });
         }
         else if (activeMqConfiguration != null)
         {
