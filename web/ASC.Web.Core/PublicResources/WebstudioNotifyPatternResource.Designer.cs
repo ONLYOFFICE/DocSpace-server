@@ -187,7 +187,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Best regards, ONLYOFFICE Support Team.
+        ///   Looks up a localized string similar to Best regards, ${LetterLogoText} Support Team.
         /// </summary>
         public static string BestRegardsText {
             get {
@@ -568,7 +568,7 @@ namespace ASC.Web.Core.PublicResources {
         ///If you have any questions or need assistance please feel free to contact us at [${__SupportLink}](${__SupportLink})
         ///
         ///Best regards,
-        ///ONLYOFFICE Support Team
+        ///${LetterLogoText} Support Team
         ///[${__SiteLink}](${__SiteLink}).
         /// </summary>
         public static string pattern_backup_created_tg {
@@ -597,7 +597,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Want to change the password on your ONLYOFFICE account? Click the button below to confirm.
+        ///   Looks up a localized string similar to Want to change the password on your ${LetterLogoText} account? Click the button below to confirm.
         ///
         ///$OrangeButton
         ///
@@ -665,13 +665,13 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ONLYOFFICE DocSpace Developer expires today.
+        ///Your license for ${LetterLogoText} DocSpace Developer expires today.
         ///
         ///We have activated a grace period of $PaymentDelay days for you. During this time, access to document editing is limited to 20 simultaneous connections (support and updates are no longer provided).
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
-        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. [rest of string was truncated]&quot;;.
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesE [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_developer_admin_payment_warning_grace_period_activation {
             get {
@@ -682,7 +682,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ONLYOFFICE DocSpace Developer will expire in 7 days.
+        ///Your license for ${LetterLogoText} DocSpace Developer will expire in 7 days.
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
@@ -699,7 +699,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ONLYOFFICE DocSpace Developer license will expire in 7 days. It means DocSpace will become unavailable.
+        ///The grace period for your ${LetterLogoText} DocSpace Developer license will expire in 7 days. It means DocSpace will become unavailable.
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
@@ -716,7 +716,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ONLYOFFICE DocSpace Developer license expires today. It means DocSpace will be no longer available.
+        ///The grace period for your ${LetterLogoText} DocSpace Developer license expires today. It means DocSpace will be no longer available.
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
@@ -731,7 +731,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 44px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
@@ -742,9 +742,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_activation_v1 {
             get {
@@ -755,13 +755,11 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ONLYOFFICE DocSpace Enterprise expires today.
+        ///Your license for ${LetterLogoText} DocSpace Enterprise expires today.
         ///
         ///We have activated *a grace period of $PaymentDelay‎ days* for you. During this time, access to DocSpace is provided for 3 named users* (support and updates are no longer provided).
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ONLYOFFICE DocSpace Enterprise (with 3 years of support and updates included):
-        ///
-        /// [rest of string was truncated]&quot;;.
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_activation {
             get {
@@ -772,15 +770,15 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ONLYOFFICE DocSpace Enterprise will expire in 7 days.
+        ///Your license for ${LetterLogoText} DocSpace Enterprise will expire in 7 days.
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ONLYOFFICE DocSpace Enterprise (with 3 years of support and updates included).
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates included).
         ///
         ///$OrangeButton
         ///
         ///You are also welcome to contact your dedicated sales manager directly for the license update.
         ///
-        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto [rest of string was truncated]&quot;;.
+        ///For payment questions, contact us at &quot;${__SalesE [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_before_activation {
             get {
@@ -791,15 +789,13 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ONLYOFFICE DocSpace Enterprise license will expire in 7 days. It means DocSpace will become unavailable.
+        ///The grace period for your ${LetterLogoText} DocSpace Enterprise license will expire in 7 days. It means DocSpace will become unavailable.
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ONLYOFFICE DocSpace Enterprise (with 3 years of support and updates included):
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates included):
         ///
         ///$OrangeButton
         ///
-        ///You are also welcome to contact your dedicated sales manager directly for the license update.
-        ///
-        ///Fo [rest of string was truncated]&quot;;.
+        ///You are also welcome to contact your dedicated sales manager directly for the license [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_before_expiration {
             get {
@@ -810,15 +806,13 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ONLYOFFICE DocSpace Enterprise license expires today. It means DocSpace will be no longer available.
+        ///The grace period for your ${LetterLogoText} DocSpace Enterprise license expires today. It means DocSpace will be no longer available.
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ONLYOFFICE DocSpace Enterprise (with 3 years of support and updates included):
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates included):
         ///
         ///$OrangeButton
         ///
-        ///You are also welcome to contact your dedicated sales manager directly for the license update. 
-        ///
-        ///For p [rest of string was truncated]&quot;;.
+        ///You are also welcome to contact your dedicated sales manager directly for the license upd [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_expiration {
             get {
@@ -829,13 +823,13 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ONLYOFFICE DocSpace Enterprise will expire in 7 days. It means updates and support will be no longer available.*
+        ///Your license for ${LetterLogoText} DocSpace Enterprise will expire in 7 days. It means updates and support will be no longer available.*
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
         ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
         ///
-        ///*You can use all the features available at the mo [rest of string was truncated]&quot;;.
+        ///*You can use all the features available at [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_lifetime_before_expiration {
             get {
@@ -846,13 +840,13 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ONLYOFFICE DocSpace Enterprise expires today. It means updates and support are no longer available.*
+        ///Your license for ${LetterLogoText} DocSpace Enterprise expires today. It means updates and support are no longer available.*
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
         ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
         ///
-        ///*You can use all the features available at the moment of the  [rest of string was truncated]&quot;;.
+        ///*You can use all the features available at the moment  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_lifetime_expiration {
             get {
@@ -861,9 +855,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Get &lt;span style=&quot;color: #FF6F3D;&quot;&gt;free&lt;/span&gt; ONLYOFFICE apps&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Get &lt;span style=&quot;color: #FF6F3D;&quot;&gt;free&lt;/span&gt; ${LetterLogoText} apps&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_user_apps_tips_v1 {
             get {
@@ -872,9 +866,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font- [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-se [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_welcome_v1 {
             get {
@@ -883,7 +877,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
         ///
         ///
         ///Hello, $UserName!
@@ -903,9 +897,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_guest_welcome_v1 {
             get {
@@ -914,9 +908,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_user_activation_v1 {
             get {
@@ -925,9 +919,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_user_welcome_v1 {
             get {
@@ -936,9 +930,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_whitelabel_admin_activation_v1 {
             get {
@@ -947,9 +941,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font- [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-se [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_whitelabel_admin_welcome_v1 {
             get {
@@ -958,7 +952,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
         ///
         ///
         ///Hello, $UserName!
@@ -978,9 +972,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_whitelabel_guest_welcome_v1 {
             get {
@@ -989,9 +983,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_whitelabel_user_activation_v1 {
             get {
@@ -1000,9 +994,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_whitelabel_user_welcome_v1 {
             get {
@@ -1141,7 +1135,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///The data migration process from ONLYOFFICE Personal to your new ONLYOFFICE DocSpace is successfully completed.
+        ///The data migration process from ${LetterLogoText} Personal to your new ${LetterLogoText} DocSpace is successfully completed.
         ///
         ///To access your DocSpace with the imported data, just click the button below:
         ///
@@ -1217,9 +1211,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_opensource_admin_activation_v1 {
             get {
@@ -1228,9 +1222,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font- [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-se [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_opensource_admin_welcome_v1 {
             get {
@@ -1239,7 +1233,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
         ///
         ///
         ///Hello!
@@ -1259,9 +1253,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_opensource_guest_welcome_v1 {
             get {
@@ -1270,9 +1264,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_opensource_user_activation_v1 {
             get {
@@ -1281,9 +1275,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_opensource_user_welcome_v1 {
             get {
@@ -1353,9 +1347,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;ONLYOFFICE DocSpace has been &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deactivated&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;${LetterLogoText} DocSpace has been &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deactivated&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; l [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-siz [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_delete_success_v1 {
             get {
@@ -1638,9 +1632,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_activation_v1 {
             get {
@@ -1649,9 +1643,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;&quot;&gt;ONLYOFFICE DocSpace: Explore useful &lt;span style=&quot;color: #FF6F3D;&quot;&gt;integrations&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;${LetterLogoText} DocSpace: Explore useful &lt;span style=&quot;color: #FF6F3D;&quot;&gt;integrations&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Ar [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvet [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_integrations_v1 {
             get {
@@ -1660,9 +1654,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Configure your &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Configure your &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-siz [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_modules_v1 {
             get {
@@ -1671,9 +1665,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Your ONLYOFFICE DocSpace will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} DocSpace will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; l [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-siz [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_startup_warning_after_year_v1 {
             get {
@@ -1682,9 +1676,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Your ONLYOFFICE DocSpace will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} DocSpace will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; l [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-siz [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_trial_warning_after_half_year_v1 {
             get {
@@ -1693,9 +1687,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Get &lt;span style=&quot;color: #FF6F3D;&quot;&gt;free&lt;/span&gt; ONLYOFFICE apps&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Get &lt;span style=&quot;color: #FF6F3D;&quot;&gt;free&lt;/span&gt; ${LetterLogoText} apps&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_user_apps_tips_v1 {
             get {
@@ -1704,9 +1698,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;&quot;&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding: 32px 40px 8px; text-align: center;&quot;&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 4 [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_welcome_v1 {
             get {
@@ -1715,9 +1709,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_docspace_invite {
             get {
@@ -1726,12 +1720,12 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. ONLYOFFICE DocSpace: complete registration
+        ///   Looks up a localized string similar to h1. ${LetterLogoText} DocSpace: complete registration
         ///
         ///
         ///Hello!
         ///
-        ///You are invited to complete registration for ONLYOFFICE DocSpace at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Enter your name and set a password by clicking the link:
+        ///You are invited to complete registration for ${LetterLogoText} DocSpace at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Enter your name and set a password by clicking the link:
         ///
         ///$OrangeButton
         ///
@@ -1744,7 +1738,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
         ///
         ///
         ///Hello!
@@ -1753,7 +1747,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$OrangeButton
         ///
-        ///We will also send you useful tips and latest ONLYOFFICE news once in a while. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them.
+        ///We will also send you useful tips and latest ${LetterLogoText} news once in a while. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them.
         ///
         ///$TrulyYours.
         /// </summary>
@@ -1764,9 +1758,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_guest_welcome_v1 {
             get {
@@ -1777,9 +1771,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that the grace period of $PaymentDelay‎ days for your ONLYOFFICE DocSpace is activated.
+        ///Please take into consideration that the grace period of $PaymentDelay‎ days for your ${LetterLogoText} DocSpace is activated.
         ///
-        ///Make sure to pay your Business subscription before the grace period is due. Thus, you will be able to further use all the benefits of your ONLYOFFICE DocSpace.
+        ///Make sure to pay your Business subscription before the grace period is due. Thus, you will be able to further use all the benefits of your ${LetterLogoText} DocSpace.
         ///
         ///$OrangeButton
         ///
@@ -1794,9 +1788,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that your ONLYOFFICE DocSpace subscription expires in three days. After that, the grace period of $PaymentDelay days will be activated.
+        ///Please take into consideration that your ${LetterLogoText} DocSpace subscription expires in three days. After that, the grace period of $PaymentDelay days will be activated.
         ///
-        ///We recommend paying your Business subscription now and continue to use all the benefits of your ONLYOFFICE DocSpace.
+        ///We recommend paying your Business subscription now and continue to use all the benefits of your ${LetterLogoText} DocSpace.
         ///
         ///$OrangeButton
         ///
@@ -1811,9 +1805,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that the grace period of $PaymentDelay days for your ONLYOFFICE DocSpace is over.
+        ///Please take into consideration that the grace period of $PaymentDelay days for your ${LetterLogoText} DocSpace is over.
         ///
-        ///Make sure to pay your Business subscription as soon as possible. Thus, you will be able to use all the benefits of your ONLYOFFICE DocSpace as before.
+        ///Make sure to pay your Business subscription as soon as possible. Thus, you will be able to use all the benefits of your ${LetterLogoText} DocSpace as before.
         ///
         ///$OrangeButton
         ///
@@ -1828,9 +1822,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that the grace period of $PaymentDelay days for your ONLYOFFICE DocSpace will expire tomorrow.
+        ///Please take into consideration that the grace period of $PaymentDelay days for your ${LetterLogoText} DocSpace will expire tomorrow.
         ///
-        ///Make sure to pay your Business subscription today. Thus, you will be able to further use all the benefits of your ONLYOFFICE DocSpace.
+        ///Make sure to pay your Business subscription today. Thus, you will be able to further use all the benefits of your ${LetterLogoText} DocSpace.
         ///
         ///$OrangeButton
         ///
@@ -1875,9 +1869,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_user_activation_v1 {
             get {
@@ -1886,9 +1880,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_user_welcome_v1 {
             get {
@@ -1897,9 +1891,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_user_welcome_v3 {
             get {
@@ -1908,9 +1902,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;Master ONLYOFFICE DocSpace with &lt;span style=&quot;color: #FF6F3D;&quot;&gt;video guides&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Master ${LetterLogoText} DocSpace with &lt;span style=&quot;color: #FF6F3D;&quot;&gt;video guides&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14p [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_video_guides_v1 {
             get {
@@ -1958,7 +1952,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hello! Please set up a password for your ONLYOFFICE DocSpace account. Just click the button below:
+        ///   Looks up a localized string similar to Hello! Please set up a password for your ${LetterLogoText} DocSpace account. Just click the button below:
         ///
         ///$OrangeButton
         ///
@@ -2104,16 +2098,16 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+        ///   Looks up a localized string similar to h1. Welcome to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!
         ///
         ///
         ///Hello, $UserName!
         ///
-        ///You have just created ONLYOFFICE DocSpace, a document hub where you can boost collaboration with your team, customers, partners, and more. Its address is &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///You have just created ${LetterLogoText} DocSpace, a document hub where you can boost collaboration with your team, customers, partners, and more. Its address is &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
         ///
         ///Your current tariff plan is STARTUP. It is absolutely free and includes:
         ///
-        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;#ffffff&quot; style=&quot;background-color: #ffffff; border: 0 none; border-collapse: collapse; borde [rest of string was truncated]&quot;;.
+        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;#ffffff&quot; style=&quot;background-color: #ffffff; border: 0 none; border-col [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_zoom_welcome {
             get {
@@ -2131,7 +2125,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText}. ${__VirtualRootPath} portal backup created.
+        ///   Looks up a localized string similar to ${LetterLogoText}. ${__VirtualRootHost} portal backup created.
         /// </summary>
         public static string subject_backup_created {
             get {
@@ -2194,7 +2188,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace Developer activated.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Developer activated.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_activation {
             get {
@@ -2203,7 +2197,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Developer license will expire soon.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Developer license will expire soon.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_before_activation {
             get {
@@ -2212,7 +2206,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace Developer will expire soon.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Developer will expire soon.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_before_expiration {
             get {
@@ -2221,7 +2215,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Developer no longer available.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Developer no longer available.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_expiration {
             get {
@@ -2239,7 +2233,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_enterprise_admin_activation_v1 {
             get {
@@ -2248,7 +2242,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace Enterprise activated.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Enterprise activated.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_activation {
             get {
@@ -2257,7 +2251,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Enterprise license will expire soon.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise license will expire soon.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_before_activation {
             get {
@@ -2266,7 +2260,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace Enterprise will expire soon.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Enterprise will expire soon.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_before_expiration {
             get {
@@ -2275,7 +2269,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Enterprise no longer available.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise no longer available.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_expiration {
             get {
@@ -2284,7 +2278,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Enterprise license will expire soon.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise license will expire soon.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_lifetime_before_expiration {
             get {
@@ -2293,7 +2287,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Enterprise license expires today.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise license expires today.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_lifetime_expiration {
             get {
@@ -2302,7 +2296,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Get free ONLYOFFICE apps.
+        ///   Looks up a localized string similar to Get free ${LetterLogoText} apps.
         /// </summary>
         public static string subject_enterprise_admin_user_apps_tips_v1 {
             get {
@@ -2311,7 +2305,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_enterprise_admin_welcome_v1 {
             get {
@@ -2320,7 +2314,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
         /// </summary>
         public static string subject_enterprise_guest_activation_v10 {
             get {
@@ -2329,7 +2323,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_enterprise_guest_welcome_v1 {
             get {
@@ -2338,7 +2332,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_enterprise_user_activation_v1 {
             get {
@@ -2347,7 +2341,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_enterprise_user_welcome_v1 {
             get {
@@ -2356,7 +2350,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_enterprise_whitelabel_admin_activation_v1 {
             get {
@@ -2365,7 +2359,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_enterprise_whitelabel_admin_welcome_v1 {
             get {
@@ -2374,7 +2368,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
         /// </summary>
         public static string subject_enterprise_whitelabel_guest_activation_v10 {
             get {
@@ -2383,7 +2377,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_enterprise_whitelabel_guest_welcome_v1 {
             get {
@@ -2392,7 +2386,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_enterprise_whitelabel_user_activation_v1 {
             get {
@@ -2401,7 +2395,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_enterprise_whitelabel_user_welcome_v1 {
             get {
@@ -2428,7 +2422,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invitation to join ${__VirtualRootPath} portal.
+        ///   Looks up a localized string similar to Invitation to join ${__VirtualRootHost} portal.
         /// </summary>
         public static string subject_join {
             get {
@@ -2464,7 +2458,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data migration to ONLYOFFICE DocSpace successfully completed.
+        ///   Looks up a localized string similar to Data migration to ${LetterLogoText} DocSpace successfully completed.
         /// </summary>
         public static string subject_migration_personal_to_docspace {
             get {
@@ -2491,7 +2485,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_opensource_admin_activation_v1 {
             get {
@@ -2500,7 +2494,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_opensource_admin_welcome_v1 {
             get {
@@ -2509,7 +2503,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
         /// </summary>
         public static string subject_opensource_guest_activation_v11 {
             get {
@@ -2518,7 +2512,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_opensource_guest_welcome_v1 {
             get {
@@ -2527,7 +2521,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_opensource_user_activation_v1 {
             get {
@@ -2536,7 +2530,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_opensource_user_welcome_v1 {
             get {
@@ -2545,7 +2539,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deactivation of the ${__VirtualRootPath} portal.
+        ///   Looks up a localized string similar to Deactivation of the ${__VirtualRootHost} portal.
         /// </summary>
         public static string subject_portal_deactivate {
             get {
@@ -2554,7 +2548,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deletion of the ${__VirtualRootPath} portal.
+        ///   Looks up a localized string similar to Deletion of the ${__VirtualRootHost} portal.
         /// </summary>
         public static string subject_portal_delete {
             get {
@@ -2563,7 +2557,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ONLYOFFICE DocSpace has been deactivated.
+        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace has been deactivated.
         /// </summary>
         public static string subject_portal_delete_success_v1 {
             get {
@@ -2581,7 +2575,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disabling account on ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to Disabling account on ${__VirtualRootHost}.
         /// </summary>
         public static string subject_profile_delete {
             get {
@@ -2599,7 +2593,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your profile at ${__VirtualRootPath} has been changed.
+        ///   Looks up a localized string similar to Your profile at ${__VirtualRootHost} has been changed.
         /// </summary>
         public static string subject_profile_updated {
             get {
@@ -2680,7 +2674,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to What&apos;s new on your portal ${__VirtualRootPath} for the last hour.
+        ///   Looks up a localized string similar to What&apos;s new on your portal ${__VirtualRootHost} for the last hour.
         /// </summary>
         public static string subject_rooms_activity {
             get {
@@ -2689,7 +2683,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_saas_admin_activation_v1 {
             get {
@@ -2698,7 +2692,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Explore useful integrations for ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Explore useful integrations for ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_saas_admin_integrations_v1 {
             get {
@@ -2707,7 +2701,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Configure your ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Configure your ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_saas_admin_modules_v1 {
             get {
@@ -2716,7 +2710,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace will be deleted.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace will be deleted.
         /// </summary>
         public static string subject_saas_admin_startup_warning_after_year_v1 {
             get {
@@ -2725,7 +2719,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace will be deleted.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace will be deleted.
         /// </summary>
         public static string subject_saas_admin_trial_warning_after_half_year_v1 {
             get {
@@ -2734,7 +2728,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Get free ONLYOFFICE apps.
+        ///   Looks up a localized string similar to Get free ${LetterLogoText} apps.
         /// </summary>
         public static string subject_saas_admin_user_apps_tips_v1 {
             get {
@@ -2743,7 +2737,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_saas_admin_welcome_v1 {
             get {
@@ -2752,7 +2746,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_saas_docspace_invite {
             get {
@@ -2761,7 +2755,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ONLYOFFICE DocSpace: complete registration.
+        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace: complete registration.
         /// </summary>
         public static string subject_saas_docspace_registration {
             get {
@@ -2770,7 +2764,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
         /// </summary>
         public static string subject_saas_guest_activation_v115 {
             get {
@@ -2779,7 +2773,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_saas_guest_welcome_v1 {
             get {
@@ -2788,7 +2782,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace activated.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace activated.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_activation {
             get {
@@ -2797,7 +2791,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace subscription is about to expire.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace subscription is about to expire.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_before_activation {
             get {
@@ -2806,7 +2800,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace expired.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace expired.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_expired {
             get {
@@ -2815,7 +2809,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace expires tomorrow.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace expires tomorrow.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_last_day {
             get {
@@ -2824,7 +2818,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_saas_room_invite {
             get {
@@ -2833,7 +2827,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You&apos;re invited to the ONLYOFFICE DocSpace room.
+        ///   Looks up a localized string similar to You&apos;re invited to the ${LetterLogoText} DocSpace room.
         /// </summary>
         public static string subject_saas_room_invite_existing_user {
             get {
@@ -2842,7 +2836,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_saas_user_activation_v1 {
             get {
@@ -2851,7 +2845,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_saas_user_welcome_v1 {
             get {
@@ -2860,7 +2854,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Master ONLYOFFICE DocSpace with video guides.
+        ///   Looks up a localized string similar to Master ${LetterLogoText} DocSpace with video guides.
         /// </summary>
         public static string subject_saas_video_guides_v1 {
             get {
@@ -2869,7 +2863,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${__VirtualRootPath} portal profile change notification.
+        ///   Looks up a localized string similar to ${__VirtualRootHost} portal profile change notification.
         /// </summary>
         public static string subject_self_profile_updated {
             get {
@@ -2878,7 +2872,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to What&apos;s new on your portal ${__VirtualRootPath} for $Date.
+        ///   Looks up a localized string similar to What&apos;s new on your portal ${__VirtualRootHost} for $Date.
         /// </summary>
         public static string subject_send_whats_new {
             get {
@@ -2887,7 +2881,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Set up a password for ONLYOFFICE DocSpace.
+        ///   Looks up a localized string similar to Set up a password for ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_set_password {
             get {
@@ -2968,7 +2962,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You’re invited to join ${__VirtualRootPath}.
+        ///   Looks up a localized string similar to You’re invited to join ${__VirtualRootHost}.
         /// </summary>
         public static string subject_user_ldap_activation {
             get {
@@ -2977,7 +2971,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_zoom_welcome {
             get {
@@ -2986,7 +2980,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Truly Yours, ONLYOFFICE Team.
+        ///   Looks up a localized string similar to Truly Yours, ${LetterLogoText} Team.
         /// </summary>
         public static string TrulyYoursText {
             get {

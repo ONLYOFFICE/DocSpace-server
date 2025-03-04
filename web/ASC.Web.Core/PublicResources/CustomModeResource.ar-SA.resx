@@ -132,7 +132,7 @@
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>مرحبا، $UserName!
 
-مرحبا بكم في ONLYOFFICE DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
+مرحبا بكم في ${LetterLogoText} DocSpace! تمت إضافة ملف تعريف المستخدم الخاص بك بنجاح إلى "${__VirtualRootPath}":"${__VirtualRootPath}" الان بإمكانك:
 
 * العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: * غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض *.
 

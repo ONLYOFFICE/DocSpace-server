@@ -946,11 +946,13 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
+
         return await consumerFactory.GetAll<Consumer>()
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)
             .ToAsyncEnumerable()
-            .SelectAwait(async r => await AuthServiceRequestsDto.From(r))
+            .SelectAwait(async r => await AuthServiceRequestsDto.From(r, logoText))
             .ToListAsync();
     }
 

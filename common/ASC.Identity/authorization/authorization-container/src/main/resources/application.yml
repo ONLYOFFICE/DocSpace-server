@@ -73,9 +73,9 @@ logging:
 spring:
   application:
     encryption:
-      secret: secret
+      secret: ${SPRING_APPLICATION_ENCRYPTION_SECRET:secret}
     signature:
-      secret: 1123askdasjklasbnd
+      secret: ${SPRING_APPLICATION_SIGNATURE_SECRET:1123askdasjklasbnd}
   config:
     activate:
       on-profile:
