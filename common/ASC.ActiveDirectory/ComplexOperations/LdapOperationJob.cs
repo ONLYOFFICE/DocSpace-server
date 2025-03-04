@@ -31,17 +31,9 @@ namespace ASC.ActiveDirectory.ComplexOperations;
 
 [Transient]
 public class LdapOperationJob(
-    SecurityContext securityContext,
     LdapUserManager ldapUserManager,
-    NovellLdapHelper novellLdapHelper,
-    LdapChangeCollection ldapChanges,
-        UserFormatter userFormatter,
-        UserPhotoManager userPhotoManager,
-        WebItemSecurity webItemSecurity,
         UserManager userManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        NovellLdapSettingsChecker novellLdapSettingsChecker,
-        ILogger<LdapOperationJob> logger,
+        TenantManager tenantManager,
         IServiceScopeFactory serviceScopeFactory)
     : DistributedTaskProgress
 {
@@ -68,13 +60,22 @@ public class LdapOperationJob(
     }
 
     private LdapOperationType _operationType;
-    private static LdapLocalization _resource;
+    private LdapLocalization _resource;
 
-    private static TenantManager _tenantManager;
-    private static SettingsManager _settingsManager;
-    private static UserManager _userManager;
-    private static LdapUserManager _ldapUserManager;
-    private static NovellLdapUserImporter _novellLdapUserImporter;
+    private SettingsManager _settingsManager;
+    private UserManager _userManager;
+    private LdapUserManager _ldapUserManager;
+    private NovellLdapUserImporter _novellLdapUserImporter;
+
+    private SecurityContext _securityContext;
+    private NovellLdapHelper _novellLdapHelper;
+    private LdapChangeCollection _ldapChanges;
+    private UserFormatter _userFormatter;
+    private UserPhotoManager _userPhotoManager;
+    private WebItemSecurity _webItemSecurity;
+    private DisplayUserSettingsHelper _displayUserSettingsHelper;
+    private NovellLdapSettingsChecker _novellLdapSettingsChecker;
+    private ILogger<LdapOperationJob> _logger;
 
     private UserInfo _currentUser;
 
@@ -85,6 +86,8 @@ public class LdapOperationJob(
        LdapLocalization resource,
        string userId)
     {
+        tenantManager.SetCurrentTenant(tenant);
+
         _currentUser = userId != null ? await userManager.GetUsersAsync(Guid.Parse(userId)) : null;
 
         TenantId = tenant.Id;
@@ -110,18 +113,32 @@ public class LdapOperationJob(
     protected override async Task DoJob()
     {
         await using var scope = serviceScopeFactory.CreateAsyncScope();
-        _tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+
         _settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
         _userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
         _ldapUserManager = scope.ServiceProvider.GetRequiredService<LdapUserManager>();
         _novellLdapUserImporter = scope.ServiceProvider.GetRequiredService<NovellLdapUserImporter>();
 
-        await _tenantManager.SetCurrentTenantAsync(TenantId);
+        _securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+        _novellLdapHelper = scope.ServiceProvider.GetRequiredService<NovellLdapHelper>();
+        _ldapChanges = scope.ServiceProvider.GetRequiredService<LdapChangeCollection>();
+        _userFormatter = scope.ServiceProvider.GetRequiredService<UserFormatter>();
+        _userPhotoManager = scope.ServiceProvider.GetRequiredService<UserPhotoManager>();
+        _webItemSecurity = scope.ServiceProvider.GetRequiredService<WebItemSecurity>();
+        _displayUserSettingsHelper = scope.ServiceProvider.GetRequiredService<DisplayUserSettingsHelper>();
+        _novellLdapSettingsChecker = scope.ServiceProvider.GetRequiredService<NovellLdapSettingsChecker>();
+        _logger = scope.ServiceProvider.GetRequiredService<ILogger<LdapOperationJob>>();
+
+        tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+        serviceScopeFactory = scope.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
+        ldapUserManager = scope.ServiceProvider.GetRequiredService<LdapUserManager>();
+        userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+
         try
         {
-            await _tenantManager.SetCurrentTenantAsync(TenantId);
+            await tenantManager.SetCurrentTenantAsync(TenantId);
 
-            await securityContext.AuthenticateMeAsync(Constants.CoreSystem);
+            await _securityContext.AuthenticateMeAsync(Constants.CoreSystem);
 
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(_culture);
             CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(_culture);
@@ -129,7 +146,7 @@ public class LdapOperationJob(
             if (_ldapSettings == null)
             {
                 _error = _resource.LdapSettingsErrorCantGetLdapSettings;
-                logger.ErrorSaveDefaultLdapSettings();
+                _logger.ErrorSaveDefaultLdapSettings();
                 return;
             }
 
@@ -138,17 +155,17 @@ public class LdapOperationJob(
                 case LdapOperationType.Save:
                 case LdapOperationType.SaveTest:
 
-                    logger.InfoStartOperation(Enum.GetName(_operationType));
+                    _logger.InfoStartOperation(Enum.GetName(_operationType));
 
                     await SetProgress(1, _resource.LdapSettingsStatusCheckingLdapSettings);
 
-                    logger.DebugPrepareSettings();
+                    _logger.DebugPrepareSettings();
 
                     await PrepareSettingsAsync(_ldapSettings);
 
                     if (!string.IsNullOrEmpty(_error))
                     {
-                        logger.DebugPrepareSettingsError(_error);
+                        _logger.DebugPrepareSettingsError(_error);
                         return;
                     }
 
@@ -156,22 +173,22 @@ public class LdapOperationJob(
 
                     if (_ldapSettings.EnableLdapAuthentication)
                     {
-                        novellLdapSettingsChecker.Init(_novellLdapUserImporter);
+                        _novellLdapSettingsChecker.Init(_novellLdapUserImporter);
 
                         await SetProgress(5, _resource.LdapSettingsStatusLoadingBaseInfo);
 
-                        var result = await novellLdapSettingsChecker.CheckSettings();
+                        var result = await _novellLdapSettingsChecker.CheckSettings();
 
                         if (result != LdapSettingsStatus.Ok)
                         {
                             if (result == LdapSettingsStatus.CertificateRequest)
                             {
-                                this[LdapTaskProperty.CERT_REQUEST] = novellLdapSettingsChecker.CertificateConfirmRequest;
+                                this[LdapTaskProperty.CERT_REQUEST] = _novellLdapSettingsChecker.CertificateConfirmRequest;
                             }
 
                             _error = GetError(result);
 
-                            logger.DebugCheckSettingsError(_error);
+                            _logger.DebugCheckSettingsError(_error);
 
                             return;
                         }
@@ -180,7 +197,7 @@ public class LdapOperationJob(
                     break;
                 case LdapOperationType.Sync:
                 case LdapOperationType.SyncTest:
-                    logger.InfoStartOperation(Enum.GetName(_operationType));
+                    _logger.InfoStartOperation(Enum.GetName(_operationType));
 
                     _novellLdapUserImporter.Init(_ldapSettings, _resource);
                     break;
@@ -192,7 +209,7 @@ public class LdapOperationJob(
         catch (AuthorizingException authError)
         {
             _error = _resource.ErrorAccessDenied;
-            logger.ErrorAuthorizing(_error, new SecurityException(_error, authError));
+            _logger.ErrorAuthorizing(_error, new SecurityException(_error, authError));
         }
         catch (AggregateException ae)
         {
@@ -201,17 +218,17 @@ public class LdapOperationJob(
         catch (TenantQuotaException e)
         {
             _error = _resource.LdapSettingsTenantQuotaSettled;
-            logger.ErrorTenantQuota(e);
+            _logger.ErrorTenantQuota(e);
         }
         catch (FormatException e)
         {
             _error = _resource.LdapSettingsErrorCantCreateUsers;
-            logger.ErrorFormatException(e);
+            _logger.ErrorFormatException(e);
         }
         catch (Exception e)
         {
             _error = _resource.LdapSettingsInternalServerError;
-            logger.ErrorInternal(e);
+            _logger.ErrorInternal(e);
         }
         finally
         {
@@ -219,11 +236,11 @@ public class LdapOperationJob(
             {
                 this[LdapTaskProperty.FINISHED] = true;
                 await PublishTaskInfo();
-                securityContext.Logout();
+                _securityContext.Logout();
             }
             catch (Exception ex)
             {
-                logger.ErrorLdapOperationFinalizationlProblem(ex);
+                _logger.ErrorLdapOperationFinalizationlProblem(ex);
             }
         }
     }
@@ -240,7 +257,7 @@ public class LdapOperationJob(
 
                 if (!await _settingsManager.SaveAsync(_ldapSettings))
                 {
-                    logger.ErrorSaveLdapSettings();
+                    _logger.ErrorSaveLdapSettings();
                     _error = _resource.LdapSettingsErrorCantSaveLdapSettings;
                     return;
                 }
@@ -248,7 +265,7 @@ public class LdapOperationJob(
 
             if (_ldapSettings.EnableLdapAuthentication)
             {
-                if (logger.IsEnabled(LogLevel.Debug))
+                if (_logger.IsEnabled(LogLevel.Debug))
                 {
                     var sb = new StringBuilder();
                     sb.AppendLine("SyncLDAP()");
@@ -266,7 +283,7 @@ public class LdapOperationJob(
                         sb.AppendLine("GroupMember: " + _ldapSettings.GroupAttribute);
                     }
 
-                    logger.DebugLdapSettings(sb.ToString());
+                    _logger.DebugLdapSettings(sb.ToString());
                 }
 
                 await SyncLDAPAsync();
@@ -278,7 +295,7 @@ public class LdapOperationJob(
             }
             else
             {
-                logger.DebugTurnOffLDAP();
+                _logger.DebugTurnOffLDAP();
 
                 await TurnOffLDAPAsync();
                 var ldapCurrentUserPhotos = (await _settingsManager.LoadAsync<LdapCurrentUserPhotos>()).GetDefault();
@@ -298,7 +315,7 @@ public class LdapOperationJob(
         }
         catch (NovellLdapTlsCertificateRequestedException ex)
         {
-            logger.ErrorCheckSettings(
+            _logger.ErrorCheckSettings(
                 _ldapSettings.AcceptCertificate, _ldapSettings.AcceptCertificateHash, ex);
             _error = _resource.LdapSettingsStatusCertificateVerification;
 
@@ -306,17 +323,17 @@ public class LdapOperationJob(
         }
         catch (TenantQuotaException e)
         {
-            logger.ErrorTenantQuota(e);
+            _logger.ErrorTenantQuota(e);
             _error = _resource.LdapSettingsTenantQuotaSettled;
         }
         catch (FormatException e)
         {
-            logger.ErrorFormatException(e);
+            _logger.ErrorFormatException(e);
             _error = _resource.LdapSettingsErrorCantCreateUsers;
         }
         catch (Exception e)
         {
-            logger.ErrorInternal(e);
+            _logger.ErrorInternal(e);
             _error = _resource.LdapSettingsInternalServerError;
         }
         finally
@@ -325,7 +342,7 @@ public class LdapOperationJob(
         }
 
         await SetProgress(100, _operationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest
-            ? JsonSerializer.Serialize(ldapChanges)
+            ? JsonSerializer.Serialize(_ldapChanges)
             : "", "");
     }
 
@@ -346,7 +363,7 @@ public class LdapOperationJob(
 
         foreach (var existingLDAPUser in existingLDAPUsers)
         {
-            await SetProgress(Convert.ToInt32(percentage), currentSource: $"({++index}/{count}): {userFormatter.GetUserName(existingLDAPUser)}");
+            await SetProgress(Convert.ToInt32(percentage), currentSource: $"({++index}/{count}): {_userFormatter.GetUserName(existingLDAPUser)}");
 
             switch (_operationType)
             {
@@ -355,13 +372,13 @@ public class LdapOperationJob(
                     existingLDAPUser.Sid = null;
                     existingLDAPUser.ConvertExternalContactsToOrdinary();
 
-                    logger.DebugSaveUserInfo(existingLDAPUser.GetUserInfoString());
+                    _logger.DebugSaveUserInfo(existingLDAPUser.GetUserInfoString());
 
                     await _userManager.UpdateUserInfoAsync(existingLDAPUser);
                     break;
                 case LdapOperationType.SaveTest:
                 case LdapOperationType.SyncTest:
-                    ldapChanges.SetSaveAsPortalUserChange(existingLDAPUser);
+                    _ldapChanges.SetSaveAsPortalUserChange(existingLDAPUser);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -383,13 +400,13 @@ public class LdapOperationJob(
 
         if (!_ldapSettings.GroupMembership)
         {
-            logger.DebugSyncLDAPUsers();
+            _logger.DebugSyncLDAPUsers();
 
             await SyncLDAPUsersAsync();
         }
         else
         {
-            logger.DebugSyncLDAPUsersInGroups();
+            _logger.DebugSyncLDAPUsersInGroups();
 
             await SyncLDAPUsersInGroupsAsync();
         }
@@ -414,9 +431,9 @@ public class LdapOperationJob(
 
             foreach (var guid in ph.CurrentPhotos.Keys)
             {
-                logger.InfoSyncLdapAvatarsRemovingPhoto(guid);
-                await userPhotoManager.RemovePhotoAsync(guid);
-                await userPhotoManager.ResetThumbnailSettingsAsync(guid);
+                _logger.InfoSyncLdapAvatarsRemovingPhoto(guid);
+                await _userPhotoManager.RemovePhotoAsync(guid);
+                await _userPhotoManager.ResetThumbnailSettingsAsync(guid);
             }
 
             ph.CurrentPhotos = null;
@@ -444,25 +461,25 @@ public class LdapOperationJob(
 
             var user = await _userManager.GetUserBySidAsync(ldapUser.Sid);
 
-            logger.DebugSyncLdapAvatarsFoundPhoto(ldapUser.Sid);
+            _logger.DebugSyncLdapAvatarsFoundPhoto(ldapUser.Sid);
 
             if (photoSettings.CurrentPhotos.ContainsKey(user.Id) && photoSettings.CurrentPhotos[user.Id] == hash)
             {
-                logger.DebugSyncLdapAvatarsSkipping();
+                _logger.DebugSyncLdapAvatarsSkipping();
                 continue;
             }
 
             try
             {
-                await SetProgress((int)(currentPercent += step), $"{_resource.LdapSettingsStatusSavingUserPhoto}: {userFormatter.GetUserName(user)}");
+                await SetProgress((int)(currentPercent += step), $"{_resource.LdapSettingsStatusSavingUserPhoto}: {_userFormatter.GetUserName(user)}");
 
-                await userPhotoManager.SyncPhotoAsync(user.Id, (byte[])image);
+                await _userPhotoManager.SyncPhotoAsync(user.Id, (byte[])image);
 
                 photoSettings.CurrentPhotos[user.Id] = hash;
             }
             catch
             {
-                logger.DebugSyncLdapAvatarsCouldNotSavePhoto(user.Id);
+                _logger.DebugSyncLdapAvatarsCouldNotSavePhoto(user.Id);
                 if (photoSettings.CurrentPhotos.ContainsKey(user.Id))
                 {
                     photoSettings.CurrentPhotos.Remove(user.Id);
@@ -499,7 +516,7 @@ public class LdapOperationJob(
 
         if (current.CurrentAccessRights == null || current.CurrentAccessRights.Count == 0)
         {
-            logger.DebugAccessRightsIsEmpty();
+            _logger.DebugAccessRightsIsEmpty();
             return;
         }
 
@@ -511,13 +528,13 @@ public class LdapOperationJob(
                 var userId = Guid.Parse(user);
                 if (_currentUser != null && _currentUser.Id == userId)
                 {
-                    logger.DebugAttemptingTakeAdminRights(user);
+                    _logger.DebugAttemptingTakeAdminRights(user);
                     currentUserRights?.Add(right.Key);
                 }
                 else
                 {
-                    logger.DebugTakingAdminRights(right.Key, user);
-                    await webItemSecurity.SetProductAdministrator(LdapSettings.AccessRightsGuids[right.Key], userId, false);
+                    _logger.DebugTakingAdminRights(right.Key, user);
+                    await _webItemSecurity.SetProductAdministrator(LdapSettings.AccessRightsGuids[right.Key], userId, false);
                 }
             }
         }
@@ -541,7 +558,7 @@ public class LdapOperationJob(
 
             if (ldapGroups.Count == 0)
             {
-                logger.DebugGiveUsersRightsNoLdapGroups(access.Key);
+                _logger.DebugGiveUsersRightsNoLdapGroups(access.Key);
                 continue;
             }
 
@@ -551,13 +568,13 @@ public class LdapOperationJob(
 
                 if (gr == null)
                 {
-                    logger.DebugGiveUsersRightsCouldNotFindPortalGroup(ldapGr.Sid);
+                    _logger.DebugGiveUsersRightsCouldNotFindPortalGroup(ldapGr.Sid);
                     continue;
                 }
 
                 var users = await _userManager.GetUsersByGroupAsync(gr.ID);
 
-                logger.DebugGiveUsersRightsFoundUsersForGroup(users.Length, gr.Name, gr.ID);
+                _logger.DebugGiveUsersRightsFoundUsersForGroup(users.Length, gr.Name, gr.ID);
 
 
                 foreach (var user in users)
@@ -574,16 +591,16 @@ public class LdapOperationJob(
                             {
                                 var prodId = LdapSettings.AccessRightsGuids[r];
 
-                                if (await webItemSecurity.IsProductAdministratorAsync(prodId, user.Id))
+                                if (await _webItemSecurity.IsProductAdministratorAsync(prodId, user.Id))
                                 {
                                     cleared = true;
-                                    await webItemSecurity.SetProductAdministrator(prodId, user.Id, false);
+                                    await _webItemSecurity.SetProductAdministrator(prodId, user.Id, false);
                                 }
                             }
 
                             if (cleared)
                             {
-                                logger.DebugGiveUsersRightsClearedAndAddedRights(user.DisplayUserName(displayUserSettingsHelper));
+                                _logger.DebugGiveUsersRightsClearedAndAddedRights(user.DisplayUserName(_displayUserSettingsHelper));
                             }
                         }
 
@@ -593,8 +610,8 @@ public class LdapOperationJob(
                         }
                         currentAccessRights[access.Key].Add(user.Id.ToString());
 
-                        await SetProgress((int)currentPercent, string.Format(_resource.LdapSettingsStatusGivingRights, userFormatter.GetUserName(user), access.Key));
-                        await webItemSecurity.SetProductAdministrator(LdapSettings.AccessRightsGuids[access.Key], user.Id, true);
+                        await SetProgress((int)currentPercent, string.Format(_resource.LdapSettingsStatusGivingRights, _userFormatter.GetUserName(user), access.Key));
+                        await _webItemSecurity.SetProductAdministrator(LdapSettings.AccessRightsGuids[access.Key], user.Id, true);
 
                         if (currentUserRights != null && currentUserRights.Contains(access.Key))
                         {
@@ -621,7 +638,7 @@ public class LdapOperationJob(
             return;
         }
 
-        logger.DebugGetDiscoveredUsersByAttributes(_novellLdapUserImporter.AllDomainUsers.Count);
+        _logger.DebugGetDiscoveredUsersByAttributes(_novellLdapUserImporter.AllDomainUsers.Count);
 
         await SetProgress(20, _resource.LdapSettingsStatusRemovingOldUsers, "");
 
@@ -652,7 +669,7 @@ public class LdapOperationJob(
             return;
         }
 
-        logger.DebugGetDiscoveredGroupsByAttributes(_novellLdapUserImporter.AllDomainGroups.Count);
+        _logger.DebugGetDiscoveredGroupsByAttributes(_novellLdapUserImporter.AllDomainGroups.Count);
 
         await SetProgress(20, _resource.LdapSettingsStatusGettingUsersFromLdap);
 
@@ -664,7 +681,7 @@ public class LdapOperationJob(
             return;
         }
 
-        logger.DebugGetGroupsUsers(_novellLdapUserImporter.AllDomainUsers.Count);
+        _logger.DebugGetGroupsUsers(_novellLdapUserImporter.AllDomainUsers.Count);
 
         await SetProgress(30,
             _operationType is LdapOperationType.Save or LdapOperationType.SaveTest
@@ -730,7 +747,7 @@ public class LdapOperationJob(
         {
             if (_operationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest)
             {
-                ldapChanges.SetSkipGroupChange(ldapGroup);
+                _ldapChanges.SetSkipGroupChange(ldapGroup);
             }
 
             return;
@@ -753,15 +770,15 @@ public class LdapOperationJob(
 
                     foreach (var userBySid in groupMembersToAdd)
                     {
-                        await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}, {_resource.LdapSettingsStatusAddingGroupUser} ({++index}/{count}): {userFormatter.GetUserName(userBySid)}");
+                        await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}, {_resource.LdapSettingsStatusAddingGroupUser} ({++index}/{count}): {_userFormatter.GetUserName(userBySid)}");
 
                         await _userManager.AddUserIntoGroupAsync(userBySid.Id, ldapGroup.ID);
                     }
                     break;
                 case LdapOperationType.SaveTest:
                 case LdapOperationType.SyncTest:
-                    ldapChanges.SetAddGroupChange(ldapGroup);
-                    ldapChanges.SetAddGroupMembersChange(ldapGroup, groupMembersToAdd);
+                    _ldapChanges.SetAddGroupChange(ldapGroup);
+                    _ldapChanges.SetAddGroupMembersChange(ldapGroup, groupMembersToAdd);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -771,7 +788,7 @@ public class LdapOperationJob(
         {
             if (_operationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest)
             {
-                ldapChanges.SetSkipGroupChange(ldapGroup);
+                _ldapChanges.SetSkipGroupChange(ldapGroup);
             }
         }
     }
@@ -817,7 +834,7 @@ public class LdapOperationJob(
 
                 foreach (var dbUser in groupMembersToRemove)
                 {
-                    await SetProgress(currentSource: $"({gIndex}/{gCount}): {dbLdapGroup.Name}, {_resource.LdapSettingsStatusRemovingGroupUser} ({++index}/{count}): {userFormatter.GetUserName(dbUser)}");
+                    await SetProgress(currentSource: $"({gIndex}/{gCount}): {dbLdapGroup.Name}, {_resource.LdapSettingsStatusRemovingGroupUser} ({++index}/{count}): {_userFormatter.GetUserName(dbUser)}");
 
                     await _userManager.RemoveUserFromGroupAsync(dbUser.Id, dbLdapGroup.ID);
                 }
@@ -827,7 +844,7 @@ public class LdapOperationJob(
 
                 foreach (var userInfo in groupMembersToAdd)
                 {
-                    await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}, {_resource.LdapSettingsStatusAddingGroupUser} ({++index}/{count}): {userFormatter.GetUserName(userInfo)}");
+                    await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}, {_resource.LdapSettingsStatusAddingGroupUser} ({++index}/{count}): {_userFormatter.GetUserName(userInfo)}");
 
                     await _userManager.AddUserIntoGroupAsync(userInfo.Id, dbLdapGroup.ID); }
 
@@ -844,23 +861,23 @@ public class LdapOperationJob(
             case LdapOperationType.SyncTest:
                 if (NeedUpdateGroup(dbLdapGroup, ldapGroup))
                 {
-                    ldapChanges.SetUpdateGroupChange(ldapGroup);
+                    _ldapChanges.SetUpdateGroupChange(ldapGroup);
                 }
 
                 if (groupMembersToRemove.Count != 0)
                 {
-                    ldapChanges.SetRemoveGroupMembersChange(dbLdapGroup, groupMembersToRemove);
+                    _ldapChanges.SetRemoveGroupMembersChange(dbLdapGroup, groupMembersToRemove);
                 }
 
                 if (groupMembersToAdd.Count != 0)
                 {
-                    ldapChanges.SetAddGroupMembersChange(dbLdapGroup, groupMembersToAdd);
+                    _ldapChanges.SetAddGroupMembersChange(dbLdapGroup, groupMembersToAdd);
                 }
 
                 if (dbGroupMembers.All(dbUser => groupMembersToRemove.Exists(u => u.Id.Equals(dbUser.Id)))
                     && groupMembersToAdd.Count == 0)
                 {
-                    ldapChanges.SetRemoveGroupChange(dbLdapGroup, logger);
+                    _ldapChanges.SetRemoveGroupChange(dbLdapGroup, _logger);
                 }
 
                 break;
@@ -899,7 +916,7 @@ public class LdapOperationJob(
 
         foreach (var userInfo in ldapUsers)
         {
-            await SetProgress(Convert.ToInt32(percentage), currentSource: $"({++index}/{count}): {userFormatter.GetUserName(userInfo)}");
+            await SetProgress(Convert.ToInt32(percentage), currentSource: $"({++index}/{count}): {_userFormatter.GetUserName(userInfo)}");
 
             switch (_operationType)
             {
@@ -910,7 +927,7 @@ public class LdapOperationJob(
                 case LdapOperationType.SaveTest:
                 case LdapOperationType.SyncTest:
                     var changes = (await _ldapUserManager.GetLDAPSyncUserChangeAsync(userInfo, ldapUsers)).LdapChangeCollection;
-                    ldapChanges.AddRange(changes);
+                    _ldapChanges.AddRange(changes);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -954,32 +971,32 @@ public class LdapOperationJob(
         {
             await SetProgress(Convert.ToInt32(percentage),
                 currentSource:
-                $"({++index}/{count}): {userFormatter.GetUserName(removedUser)}");
+                $"({++index}/{count}): {_userFormatter.GetUserName(removedUser)}");
 
             switch (_operationType)
             {
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
                     removedUser.Sid = null;
-                    if (!removedUser.IsOwner(_tenantManager.GetCurrentTenant()) && !(_currentUser != null && _currentUser.Id == removedUser.Id && await _userManager.IsDocSpaceAdminAsync(removedUser)))
+                    if (!removedUser.IsOwner(tenantManager.GetCurrentTenant()) && !(_currentUser != null && _currentUser.Id == removedUser.Id && await _userManager.IsDocSpaceAdminAsync(removedUser)))
                     {
                         removedUser.Status = EmployeeStatus.Terminated; // Disable user on portal
                     }
                     else
                     {
                         _warning = _resource.LdapSettingsErrorRemovedYourself;
-                        logger.DebugRemoveOldDbUsersAttemptingExcludeYourself(removedUser.Id);
+                        _logger.DebugRemoveOldDbUsersAttemptingExcludeYourself(removedUser.Id);
                     }
 
                     removedUser.ConvertExternalContactsToOrdinary();
 
-                    logger.DebugSaveUserInfo(removedUser.GetUserInfoString());
+                    _logger.DebugSaveUserInfo(removedUser.GetUserInfoString());
 
                     await _userManager.UpdateUserInfoAsync(removedUser);
                     break;
                 case LdapOperationType.SaveTest:
                 case LdapOperationType.SyncTest:
-                    ldapChanges.SetSaveAsPortalUserChange(removedUser);
+                    _ldapChanges.SetSaveAsPortalUserChange(removedUser);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -1029,7 +1046,7 @@ public class LdapOperationJob(
                     break;
                 case LdapOperationType.SaveTest:
                 case LdapOperationType.SyncTest:
-                    ldapChanges.SetRemoveGroupChange(groupInfo);
+                    _ldapChanges.SetRemoveGroupChange(groupInfo);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -1059,7 +1076,7 @@ public class LdapOperationJob(
 
             await SetProgress(Convert.ToInt32(percentage),
                 currentSource:
-                $"({++index}/{count}): {userFormatter.GetUserName(ldapGroupUser)}");
+                $"({++index}/{count}): {_userFormatter.GetUserName(ldapGroupUser)}");
 
             UserInfo user;
             switch (_operationType)
@@ -1081,7 +1098,7 @@ public class LdapOperationJob(
                     {
                         newUniqueLdapGroupUsers.Add(user);
                     }
-                    ldapChanges.AddRange(changes);
+                    _ldapChanges.AddRange(changes);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -1144,7 +1161,7 @@ public class LdapOperationJob(
             _source = currentSource;
         }
 
-        logger.InfoProgress(Percentage, _jobStatus, _source);
+        _logger.InfoProgress(Percentage, _jobStatus, _source);
 
         await PublishTaskInfo();
     }
@@ -1178,7 +1195,7 @@ public class LdapOperationJob(
     {
         if (settings == null)
         {
-            logger.ErrorWrongLdapSettings();
+            _logger.ErrorWrongLdapSettings();
             _error = _resource.LdapSettingsErrorCantGetLdapSettings;
             return;
         }
@@ -1195,7 +1212,7 @@ public class LdapOperationJob(
         }
         else
         {
-            logger.ErrorServerIsNullOrEmpty();
+            _logger.ErrorServerIsNullOrEmpty();
             _error = _resource.LdapSettingsErrorCantGetLdapSettings;
             return;
         }
@@ -1211,7 +1228,7 @@ public class LdapOperationJob(
         }
         else
         {
-            logger.ErrorUserDnIsNullOrEmpty();
+            _logger.ErrorUserDnIsNullOrEmpty();
             _error = _resource.LdapSettingsErrorCantGetLdapSettings;
             return;
         }
@@ -1222,7 +1239,7 @@ public class LdapOperationJob(
         }
         else
         {
-            logger.ErrorLoginAttributeIsNullOrEmpty();
+            _logger.ErrorLoginAttributeIsNullOrEmpty();
             _error = _resource.LdapSettingsErrorCantGetLdapSettings;
             return;
         }
@@ -1265,7 +1282,7 @@ public class LdapOperationJob(
             }
             else
             {
-                logger.ErrorGroupDnIsNullOrEmpty();
+                _logger.ErrorGroupDnIsNullOrEmpty();
                 _error = _resource.LdapSettingsErrorCantGetLdapSettings;
                 return;
             }
@@ -1281,7 +1298,7 @@ public class LdapOperationJob(
             }
             else
             {
-                logger.ErrorGroupAttributeIsNullOrEmpty();
+                _logger.ErrorGroupAttributeIsNullOrEmpty();
                 _error = _resource.LdapSettingsErrorCantGetLdapSettings;
                 return;
             }
@@ -1292,7 +1309,7 @@ public class LdapOperationJob(
             }
             else
             {
-                logger.ErrorUserAttributeIsNullOrEmpty();
+                _logger.ErrorUserAttributeIsNullOrEmpty();
                 _error = _resource.LdapSettingsErrorCantGetLdapSettings;
                 return;
             }
@@ -1310,7 +1327,7 @@ public class LdapOperationJob(
         }
         else
         {
-            logger.ErrorloginIsNullOrEmpty();
+            _logger.ErrorloginIsNullOrEmpty();
             _error = _resource.LdapSettingsErrorCantGetLdapSettings;
             return;
         }
@@ -1319,18 +1336,18 @@ public class LdapOperationJob(
         {
             if (!string.IsNullOrEmpty(settings.Password))
             {
-                settings.PasswordBytes = await novellLdapHelper.GetPasswordBytesAsync(settings.Password);
+                settings.PasswordBytes = await _novellLdapHelper.GetPasswordBytesAsync(settings.Password);
 
                 if (settings.PasswordBytes == null)
                 {
-                    logger.ErrorPasswordBytesIsNullOrEmpty();
+                    _logger.ErrorPasswordBytesIsNullOrEmpty();
                     _error = _resource.LdapSettingsErrorCantGetLdapSettings;
                     return;
                 }
             }
             else
             {
-                logger.ErrorPasswordIsNullOrEmpty();
+                _logger.ErrorPasswordIsNullOrEmpty();
                 _error = _resource.LdapSettingsErrorCantGetLdapSettings;
                 return;
             }
@@ -1339,7 +1356,7 @@ public class LdapOperationJob(
         settings.Password = string.Empty;
     }
 
-    private static string GetError(LdapSettingsStatus result)
+    private string GetError(LdapSettingsStatus result)
     {
         return result switch
         {
