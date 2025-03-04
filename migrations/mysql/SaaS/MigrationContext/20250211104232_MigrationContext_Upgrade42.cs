@@ -10,6 +10,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("SET FOREIGN_KEY_CHECKS=0;");
             migrationBuilder.DropForeignKey(
                 name: "FK_authorization_client_id",
                 table: "identity_authorizations");
@@ -83,6 +84,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.Sql("CREATE EVENT IF NOT EXISTS identity_delete_old_authorizations\r\nON SCHEDULE EVERY 1 DAY\r\nON COMPLETION PRESERVE\r\nDO\r\nDELETE FROM identity_authorizations\r\nWHERE modified_at < NOW() - INTERVAL 30 DAY;");
             migrationBuilder.Sql("CREATE EVENT IF NOT EXISTS identity_delete_old_consents\r\nON SCHEDULE EVERY 1 DAY\r\nON COMPLETION PRESERVE\r\nDO\r\nDELETE FROM identity_consents\r\nWHERE modified_at < NOW() - INTERVAL 30 DAY;");
+            migrationBuilder.Sql("SET FOREIGN_KEY_CHECKS=1;");
         }
 
         /// <inheritdoc />
