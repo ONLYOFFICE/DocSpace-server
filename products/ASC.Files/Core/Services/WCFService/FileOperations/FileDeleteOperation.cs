@@ -238,7 +238,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         if (isNeedSendActions)
                         {
                             await filesMessageService.SendAsync(isRoom ? MessageAction.RoomDeleted : MessageAction.ThirdPartyDeleted, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
-                            _ = webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
+                            await webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
                         }
                     }
 
@@ -279,12 +279,12 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                 {
                                     await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
                                     await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, _headers, folder.Title);
-                                    _ = webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
+                                    await webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
                                 else
                                 {
                                     await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
-                                    _ = webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
+                                    await webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
                             }
 
@@ -337,12 +337,12 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                     {
                                         await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
                                         await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, _headers, folder.Title);
-                                        _ = webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
+                                        await webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                     }
                                     else
                                     {
                                         await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
-                                        _ = webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
+                                        await webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                     }
                                 }
                             }
@@ -359,7 +359,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                 if (isNeedSendActions)
                                 {
                                     await filesMessageService.SendAsync(MessageAction.FolderMovedToTrash, folder, _headers, folder.Title);
-                                    _ = webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
+                                    await webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
                             }
 
@@ -417,7 +417,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         if (isNeedSendActions)
                         {
                             await filesMessageService.SendAsync(MessageAction.FileMovedToTrash, file, _headers, file.Title);
-                            _ = webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, file);
+                            await webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, file);
                         }
 
                         if (file.ThumbnailStatus == Thumbnail.Waiting)
@@ -465,12 +465,12 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         if (hasHeaders && isNeedSendActions)
                         {
                             await filesMessageService.SendAsync(MessageAction.FileDeleted, file, _headers, file.Title);
-                            _ = webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, file);
+                            await webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, file);
                         }
                         else
                         {
                             await filesMessageService.SendAsync(MessageAction.FileDeleted, file, MessageInitiator.AutoCleanUp, file.Title);
-                            _ = webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, file);
+                            await webhookPublisher.PublishAsync(webhookTrigger, webhookConfigs, file);
                         }
                     }
                     catch (Exception ex)
@@ -530,7 +530,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         if (_headers is { Count: > 0 })
                         {
                             await filesMessageService.SendAsync(MessageAction.FileVersionRemoved, file, _headers, file.Title, v.ToString());
-                            _ = webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, file);
+                            await webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, file);
                         }
                     }
                     catch (Exception ex)

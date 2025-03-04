@@ -221,7 +221,7 @@ public class ThirdpartyController(
 
             await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
 
-            _ = webhookPublisher.PublishAsync(WebhookTrigger.UserCreated, webhookUserAccessChecker, newUser);
+            await webhookPublisher.PublishAsync(WebhookTrigger.UserCreated, webhookUserAccessChecker, newUser);
         }
         finally
         {

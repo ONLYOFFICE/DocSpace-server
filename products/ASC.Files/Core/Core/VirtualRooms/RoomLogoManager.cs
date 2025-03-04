@@ -100,7 +100,7 @@ public class RoomLogoManager(
         
         await SaveLogo(tempFile, x, y, width, height, room, folderDao);
 
-        _ = webhookPublisher.PublishAsync(WebhookTrigger.RoomUpdated, webhookFileEntryAccessChecker, room);
+        await webhookPublisher.PublishAsync(WebhookTrigger.RoomUpdated, webhookFileEntryAccessChecker, room);
 
         return room;
     }
@@ -200,7 +200,7 @@ public class RoomLogoManager(
             if (EnableAudit)
             {
                 await filesMessageService.SendAsync(MessageAction.RoomLogoDeleted, room, room.Title);
-                _ = webhookPublisher.PublishAsync(WebhookTrigger.RoomUpdated, webhookFileEntryAccessChecker, room);
+                await webhookPublisher.PublishAsync(WebhookTrigger.RoomUpdated, webhookFileEntryAccessChecker, room);
             }
         }
         catch (Exception e)
@@ -394,7 +394,7 @@ public class RoomLogoManager(
                     await filesMessageService.SendAsync(MessageAction.RoomCoverChanged, room, room.Title);
                 }
 
-                _ = webhookPublisher.PublishAsync(WebhookTrigger.RoomUpdated, webhookFileEntryAccessChecker, room);
+                await webhookPublisher.PublishAsync(WebhookTrigger.RoomUpdated, webhookFileEntryAccessChecker, room);
             }
         }
 

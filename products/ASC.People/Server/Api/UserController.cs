@@ -171,7 +171,7 @@ public class UserController(
             await UpdatePhotoUrlAsync(inDto.Files, user);
         }
 
-        _ = webhookPublisher.PublishAsync(WebhookTrigger.UserCreated, webhookUserAccessChecker, user);
+        await webhookPublisher.PublishAsync(WebhookTrigger.UserCreated, webhookUserAccessChecker, user);
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -323,7 +323,7 @@ public class UserController(
             messageService.Send(MessageAction.UserCreated, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
         }
 
-        _ = webhookPublisher.PublishAsync(WebhookTrigger.UserCreated, webhookUserAccessChecker, user);
+        await webhookPublisher.PublishAsync(WebhookTrigger.UserCreated, webhookUserAccessChecker, user);
 
         if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
@@ -420,7 +420,7 @@ public class UserController(
             messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
             await socketManager.AddUserAsync(user);
 
-            _ = webhookPublisher.PublishAsync(WebhookTrigger.UserInvited, webhookUserAccessChecker, user);
+            await webhookPublisher.PublishAsync(WebhookTrigger.UserInvited, webhookUserAccessChecker, user);
         }
 
         var result = new List<EmployeeDto>();
@@ -579,7 +579,7 @@ public class UserController(
             await socketManager.DeleteUserAsync(user.Id);
         }
 
-        _ = webhookPublisher.PublishAsync(WebhookTrigger.UserDeleted, webhookUserAccessChecker, user);
+        await webhookPublisher.PublishAsync(WebhookTrigger.UserDeleted, webhookUserAccessChecker, user);
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -632,7 +632,7 @@ public class UserController(
 
         await studioNotifyService.SendMsgProfileHasDeletedItselfAsync(user);
 
-        _ = webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, user);
+        await webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, user);
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -1052,7 +1052,7 @@ public class UserController(
             await fileSecurity.RemoveSubjectAsync(user.Id, true);
             await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
 
-            _ = webhookPublisher.PublishAsync(WebhookTrigger.UserDeleted, webhookUserAccessChecker, user);
+            await webhookPublisher.PublishAsync(WebhookTrigger.UserDeleted, webhookUserAccessChecker, user);
         }
 
         messageService.Send(MessageAction.UsersDeleted, MessageTarget.Create(users.Select(x => x.Id)), userNames);
@@ -1456,7 +1456,7 @@ public class UserController(
                 }
             }
 
-            _ = webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, u);
+            await webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, u);
 
             yield return await employeeFullDtoHelper.GetFullAsync(u);
         }
@@ -1654,7 +1654,7 @@ public class UserController(
                 messageService.Send(MessageAction.CookieSettingsUpdated);
             }
 
-            _ = webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, user);
+            await webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, user);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -1766,7 +1766,7 @@ public class UserController(
 
         foreach (var user in users)
         {
-            _ = webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, user);
+            await webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, user);
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
@@ -1814,7 +1814,7 @@ public class UserController(
 
         foreach (var user in users)
         {
-            _ = webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, user);
+            await webhookPublisher.PublishAsync(WebhookTrigger.UserUpdated, webhookUserAccessChecker, user);
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }

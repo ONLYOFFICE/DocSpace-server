@@ -53,7 +53,7 @@ public abstract class FilesHelperBase(
 
             await socketManager.CreateFileAsync(resultFile);
 
-            _ = webhookPublisher.PublishAsync(WebhookTrigger.FileUploaded, webhookFileEntryAccessChecker, resultFile);
+            await webhookPublisher.PublishAsync(WebhookTrigger.FileUploaded, webhookFileEntryAccessChecker, resultFile);
 
             return await _fileDtoHelper.GetAsync(resultFile);
         }

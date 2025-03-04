@@ -165,7 +165,7 @@ public class GroupController(
 
         await socketManager.AddGroupAsync(dto);
 
-        _ = webhookPublisher.PublishAsync(WebhookTrigger.GroupCreated, webhookGroupAccessChecker, group);
+        await webhookPublisher.PublishAsync(WebhookTrigger.GroupCreated, webhookGroupAccessChecker, group);
 
         return dto;
     }
@@ -214,7 +214,7 @@ public class GroupController(
 
         await socketManager.UpdateGroupAsync(dto);
 
-        _ = webhookPublisher.PublishAsync(WebhookTrigger.GroupUpdated, webhookGroupAccessChecker, group);
+        await webhookPublisher.PublishAsync(WebhookTrigger.GroupUpdated, webhookGroupAccessChecker, group);
 
         return dto;
     }
@@ -243,7 +243,7 @@ public class GroupController(
 
         await socketManager.DeleteGroupAsync(inDto.Id);
 
-        _ = webhookPublisher.PublishAsync(WebhookTrigger.GroupDeleted, webhookGroupAccessChecker, group);
+        await webhookPublisher.PublishAsync(WebhookTrigger.GroupDeleted, webhookGroupAccessChecker, group);
 
         return NoContent();
     }

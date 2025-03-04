@@ -73,7 +73,7 @@ public class FileUploader(
             await fileConverter.ExecAsynchronouslyAsync(file, deleteConvertStatus, !createNewIfExist);
         }
 
-        _ = webhookPublisher.PublishAsync(WebhookTrigger.FileCreated, webhookFileEntryAccessChecker, file);
+        await webhookPublisher.PublishAsync(WebhookTrigger.FileCreated, webhookFileEntryAccessChecker, file);
 
         return file;
     }
