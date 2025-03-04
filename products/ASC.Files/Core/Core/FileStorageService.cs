@@ -4503,8 +4503,6 @@ public class FileStorageService //: IFileStorageService
     public async IAsyncEnumerable<FormRoleDto> GetAllFormRoles<T>(T formId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        await ValidateChangeRolesPermission(formId, fileDao);
-
         var form = await fileDao.GetFileAsync(formId);
 
         if (form == null)
@@ -4519,11 +4517,10 @@ public class FileStorageService //: IFileStorageService
         var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
         var currentStep = roles.Where(r => !r.Submitted).Min(r => (int?)r.Sequence) ?? 0;
 
-        var roleTasks = roles.Select(r => formRoleDtoHelper.Get(properties, r)).ToList();
-        var processedRoles = await Task.WhenAll(roleTasks);
 
-        foreach (var role in processedRoles)
+        foreach (var r in roles)
         {
+            var role = await formRoleDtoHelper.Get(properties, r);
             if (!DateTime.MinValue.Equals(properties.FormFilling.FillingStopedDate) &&
                 properties.FormFilling.FormFillingInterruption?.RoleName == role.RoleName)
             {
@@ -4535,8 +4532,10 @@ public class FileStorageService //: IFileStorageService
                 {
                     0 => FormFillingStatus.Complete,
                     _ when currentStep > role.Sequence => FormFillingStatus.Complete,
-                    _ when currentStep < role.Sequence => FormFillingStatus.InProgress,
-                    _ => role.Submitted ? FormFillingStatus.Complete : FormFillingStatus.YouTurn
+                    _ when currentStep < role.Sequence => FormFillingStatus.Draft,
+                    _ when currentStep == role.Sequence && !role.Submitted && r.OpenedAt.Equals(DateTime.MinValue) => FormFillingStatus.YouTurn,
+                    _ when currentStep == role.Sequence && !role.Submitted && !r.OpenedAt.Equals(DateTime.MinValue) => FormFillingStatus.InProgress,
+                    _ => FormFillingStatus.Complete
                 };
             }
 
