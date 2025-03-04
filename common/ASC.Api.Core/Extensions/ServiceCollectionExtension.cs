@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,6 +25,12 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+
+using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
 
 namespace ASC.Api.Core.Extensions;
 
@@ -58,18 +64,23 @@ public static class ServiceCollectionExtension
         return services;
     }
 
-    public static IServiceCollection AddDistributedCache(this IServiceCollection services, IConnectionMultiplexer connection)
+    public static IServiceCollection AddHybridCache(this IServiceCollection services, IConnectionMultiplexer connection)
     {        
+        var cacheBuilder = services
+            .AddFusionCache()
+            .WithSystemTextJsonSerializer()
+            .WithMemoryCache(new MemoryCache(new MemoryCacheOptions()))
+            .WithRegisteredLogger()
+            .AsHybridCache();
+        
         if (connection != null)
         {
-            services.AddStackExchangeRedisCache(config =>
-            {
-                config.ConnectionMultiplexerFactory = () => Task.FromResult(connection);
-            });
+            cacheBuilder.WithDistributedCache(new RedisCache(new RedisCacheOptions {ConnectionMultiplexerFactory = () => Task.FromResult(connection)}));
+            cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection)}));
         }
         else
         {
-            services.AddDistributedMemoryCache();
+            cacheBuilder.WithDistributedCache(new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions())));
         }
 
         return services;
@@ -348,8 +359,6 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection AddDistributedTaskQueue(this IServiceCollection services)
     {
-        services.AddTransient<DistributedTaskQueue>();
-
         services.AddSingleton<IDistributedTaskQueueFactory, DefaultDistributedTaskQueueFactory>();
 
         return services;

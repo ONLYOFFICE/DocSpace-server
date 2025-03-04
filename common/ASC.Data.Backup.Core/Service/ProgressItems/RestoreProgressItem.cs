@@ -43,6 +43,11 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private string _upgradesPath;
     private string _serverBaseUri;
     private bool _dump;
+
+    public RestoreProgressItem()
+    {
+        
+    }
     
     public RestoreProgressItem(
         IConfiguration configuration,

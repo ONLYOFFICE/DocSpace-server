@@ -34,7 +34,7 @@ public class ExportToXLSX(
     IServiceProvider serviceProvider,
     TenantManager tenantManager,
     IPublishEndpoint eventBus,
-    DocumentBuilderTaskManager documentBuilderTaskManager,
+    DocumentBuilderTaskManager<FormFillingReportTask, int, FormFillingReportTaskData> documentBuilderTaskManager,
     IHttpContextAccessor httpContextAccessor,
     AuthContext authContext)
 {

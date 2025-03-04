@@ -27,8 +27,17 @@
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Transient]
-public class FormFillingReportTask(IServiceScopeFactory serviceProvider) : DocumentBuilderTask<int, FormFillingReportTaskData>(serviceProvider)
+public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportTaskData>
 {
+    public FormFillingReportTask()
+    {
+        
+    }
+    
+    public FormFillingReportTask(IServiceScopeFactory serviceProvider) : base(serviceProvider)
+    {
+    }
+
     private const string ScriptName = "FormFillingReport.docbuilder";
     
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)

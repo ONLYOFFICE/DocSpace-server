@@ -29,7 +29,7 @@ namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 [Scope]
 public class MoveOrCopyIntegrationEventConsumer(
     ILogger<MoveOrCopyIntegrationEventConsumer> logger,
-    FileOperationsManager fileOperationsManager,
+    FileOperationsManager<FileMoveCopyOperation> fileOperationsManager,
     TenantManager tenantManager,
     SecurityContext securityContext)
     : IConsumer<MoveOrCopyIntegrationEvent>
@@ -43,7 +43,7 @@ public class MoveOrCopyIntegrationEventConsumer(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileMoveCopyOperation, FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await fileOperationsManager.Enqueue(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

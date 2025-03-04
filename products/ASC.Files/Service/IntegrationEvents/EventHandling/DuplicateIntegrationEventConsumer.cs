@@ -29,7 +29,7 @@ namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 [Scope]
 public class DuplicateIntegrationEventConsumer(
     ILogger<DuplicateIntegrationEventConsumer> logger,
-    FileOperationsManager fileOperationsManager,
+    FileOperationsManager<FileDuplicateOperation> fileOperationsManager,
     TenantManager tenantManager,
     SecurityContext securityContext)
     : IConsumer<DuplicateIntegrationEvent>
@@ -43,7 +43,7 @@ public class DuplicateIntegrationEventConsumer(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileDuplicateOperation, FileOperationData<string>, FileOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await fileOperationsManager.Enqueue(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

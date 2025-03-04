@@ -30,14 +30,19 @@ namespace ASC.Common.Threading;
 /// </summary>
 [ProtoContract(IgnoreUnknownSubTypes = true)]
 [ProtoInclude(100, typeof(DistributedTaskProgress))]
+[JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToNearestAncestor)]
+[JsonDerivedType(typeof(DistributedTaskProgress))]
 public class DistributedTask
 {
     [ProtoMember(10)]
+    [JsonInclude]
     protected string _exeption = String.Empty;
 
     [ProtoMember(11)]
-    protected readonly Dictionary<string, string> _props = new();
+    [JsonInclude]
+    protected Dictionary<string, string> _props = new();
 
+    [JsonIgnore]
     public Func<DistributedTask, Task> Publication { get; set; }
 
     /// <summary>Instance ID</summary>
@@ -62,6 +67,7 @@ public class DistributedTask
 
     /// <summary>Exception</summary>
     /// <type>System.Object, System</type>
+    [JsonIgnore]
     public Exception Exception
     {
         get => new(_exeption);

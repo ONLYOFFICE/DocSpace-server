@@ -73,10 +73,11 @@ global using MassTransit;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using ProtoBuf;
+
+global using ZiggyCreatures.Caching.Fusion;
 
 global using Constants = ASC.Core.Users.Constants;

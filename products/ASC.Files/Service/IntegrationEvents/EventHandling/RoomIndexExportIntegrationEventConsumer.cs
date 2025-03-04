@@ -32,7 +32,7 @@ public class RoomIndexExportIntegrationEventConsumer(
     CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
     SecurityContext securityContext,
-    DocumentBuilderTaskManager documentBuilderTaskManager,
+    DocumentBuilderTaskManager<RoomIndexExportTask, int, RoomIndexExportTaskData> documentBuilderTaskManager,
     IServiceProvider serviceProvider)
     : IConsumer<RoomIndexExportIntegrationEvent>
 {

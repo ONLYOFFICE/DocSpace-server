@@ -70,7 +70,6 @@ global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.Filters;
 global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
@@ -89,4 +88,7 @@ global using RabbitMQ.Client.Events;
 global using StackExchange.Redis;
 global using StackExchange.Redis.Extensions.Core;
 global using StackExchange.Redis.Extensions.Core.Abstractions;
+
+global using ZiggyCreatures.Caching.Fusion;
+
 global using ILogger = Microsoft.Extensions.Logging.ILogger;

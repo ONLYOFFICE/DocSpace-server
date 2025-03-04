@@ -27,8 +27,11 @@
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Transient]
-public class FileDuplicateOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileOperationData<string>, FileOperationData<int>>(serviceProvider)
+public class FileDuplicateOperation : ComposeFileOperation<FileOperationData<string>, FileOperationData<int>>
 {
+    public FileDuplicateOperation() { }
+    public FileDuplicateOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+
     protected override FileOperationType FileOperationType => FileOperationType.Duplicate;
 
     public override Task RunJob(CancellationToken cancellationToken)

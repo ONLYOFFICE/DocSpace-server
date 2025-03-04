@@ -34,7 +34,7 @@ public class CspSettingsHelper(
     CoreSettings coreSettings,
     GlobalStore globalStore,
     CoreBaseSettings coreBaseSettings,
-    IDistributedCache distributedCache,
+    IFusionCache hybridCache,
     IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration)
 {
@@ -79,12 +79,12 @@ public class CspSettingsHelper(
                     keys.Add(GetKey(host));
                 }
 
-                await distributedCache.SetStringAsync(domainsKey, string.Join(';', keys));
+                await hybridCache.SetAsync(domainsKey, string.Join(';', keys));
                 headerKeys.UnionWith(keys);
             }
             else
             {
-                var domainsValue = await distributedCache.GetStringAsync(domainsKey);
+                var domainsValue = await hybridCache.GetOrDefaultAsync<string>(domainsKey);
 
                 if (!string.IsNullOrEmpty(domainsValue))
                 {
@@ -97,11 +97,11 @@ public class CspSettingsHelper(
 
         if (!string.IsNullOrEmpty(headerValue))
         {
-            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await distributedCache.SetStringAsync(headerKey, headerValue, cs));
+            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await hybridCache.SetAsync(headerKey, headerValue, token: cs));
         }
         else
         {
-            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await distributedCache.RemoveAsync(headerKey, cs));
+            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await hybridCache.RemoveAsync(headerKey, token: cs));
         }
 
         if (updateInDb)
@@ -123,11 +123,11 @@ public class CspSettingsHelper(
     public async Task RenameDomain(string oldDomain, string newDomain)
     {
         var oldKey = GetKey(oldDomain);
-        var val = await distributedCache.GetStringAsync(oldKey);
+        var val = await hybridCache.GetOrDefaultAsync<string>(oldKey);
         if (!string.IsNullOrEmpty(val))
         {
-            await distributedCache.RemoveAsync(oldKey);
-            await distributedCache.SetStringAsync(GetKey(newDomain), val);
+            await hybridCache.RemoveAsync(oldKey);
+            await hybridCache.SetAsync(GetKey(newDomain), val);
         }
     }
 
@@ -148,9 +148,9 @@ public class CspSettingsHelper(
 
         var domain = tenantWithoutAlias.GetTenantDomain(coreSettings);
 
-        var val = await distributedCache.GetStringAsync(GetKey(domain));
-
-        await distributedCache.SetStringAsync(GetKey(baseDomain), val);
+        var val = await hybridCache.GetOrDefaultAsync<string>(GetKey(domain));
+        
+        await hybridCache.SetAsync(GetKey(baseDomain), val);
     }
 
     public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true)

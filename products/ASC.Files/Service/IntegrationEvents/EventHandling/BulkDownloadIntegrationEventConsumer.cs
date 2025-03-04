@@ -29,7 +29,7 @@ namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 [Scope]
 public class BulkDownloadIntegrationEventConsumer(
     ILogger<BulkDownloadIntegrationEvent> logger,
-    FileOperationsManager fileOperationsManager,
+    FileOperationsManager<FileDownloadOperation> fileOperationsManager,
     TenantManager tenantManager,
     SecurityContext securityContext,
     AuthManager authManager)
@@ -44,7 +44,7 @@ public class BulkDownloadIntegrationEventConsumer(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy), session: @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileDownloadOperation, FileDownloadOperationData<string>, FileDownloadOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await fileOperationsManager.Enqueue(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

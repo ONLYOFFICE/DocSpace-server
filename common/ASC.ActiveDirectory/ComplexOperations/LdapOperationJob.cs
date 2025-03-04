@@ -30,12 +30,7 @@ using SecurityContext = ASC.Core.SecurityContext;
 namespace ASC.ActiveDirectory.ComplexOperations;
 
 [Transient]
-public class LdapOperationJob(
-    LdapUserManager ldapUserManager,
-        UserManager userManager,
-        TenantManager tenantManager,
-        IServiceScopeFactory serviceScopeFactory)
-    : DistributedTaskProgress
+public class LdapOperationJob : DistributedTaskProgress
 {
     private string _culture;
 
@@ -46,6 +41,7 @@ public class LdapOperationJob(
     private string _warning;
 
     private int? _tenantId;
+
     public int TenantId
     {
         get
@@ -78,17 +74,35 @@ public class LdapOperationJob(
     private ILogger<LdapOperationJob> _logger;
 
     private UserInfo _currentUser;
+    private TenantManager _tenantManager;
+    private IServiceScopeFactory _serviceScopeFactory;
+
+    public LdapOperationJob()
+    {
+        
+    }
+    
+    public LdapOperationJob(LdapUserManager ldapUserManager,
+        UserManager userManager,
+        TenantManager tenantManager,
+        IServiceScopeFactory serviceScopeFactory)
+    {
+        _ldapUserManager = ldapUserManager;
+        _userManager = userManager;
+        _tenantManager = tenantManager;
+        _serviceScopeFactory = serviceScopeFactory;
+    }
 
     public async Task InitJobAsync(
-       LdapSettings settings,
-       Tenant tenant,
-       LdapOperationType operationType,
-       LdapLocalization resource,
-       string userId)
+        LdapSettings settings,
+        Tenant tenant,
+        LdapOperationType operationType,
+        LdapLocalization resource,
+        string userId)
     {
-        tenantManager.SetCurrentTenant(tenant);
+        _tenantManager.SetCurrentTenant(tenant);
 
-        _currentUser = userId != null ? await userManager.GetUsersAsync(Guid.Parse(userId)) : null;
+        _currentUser = userId != null ? await _userManager.GetUsersAsync(Guid.Parse(userId)) : null;
 
         TenantId = tenant.Id;
 
@@ -105,14 +119,14 @@ public class LdapOperationJob(
         _warning = "";
 
         _resource = resource ?? new LdapLocalization();
-        ldapUserManager.Init(_resource);
+        _ldapUserManager.Init(_resource);
 
         InitDisturbedTask();
     }
 
     protected override async Task DoJob()
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
 
         _settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
         _userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
@@ -129,14 +143,12 @@ public class LdapOperationJob(
         _novellLdapSettingsChecker = scope.ServiceProvider.GetRequiredService<NovellLdapSettingsChecker>();
         _logger = scope.ServiceProvider.GetRequiredService<ILogger<LdapOperationJob>>();
 
-        tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-        serviceScopeFactory = scope.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
-        ldapUserManager = scope.ServiceProvider.GetRequiredService<LdapUserManager>();
-        userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+        _tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+        _serviceScopeFactory = scope.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
 
         try
         {
-            await tenantManager.SetCurrentTenantAsync(TenantId);
+            await _tenantManager.SetCurrentTenantAsync(TenantId);
 
             await _securityContext.AuthenticateMeAsync(Constants.CoreSystem);
 
@@ -204,6 +216,7 @@ public class LdapOperationJob(
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
             await Do();
         }
         catch (AuthorizingException authError)
@@ -608,6 +621,7 @@ public class LdapOperationJob(
                         {
                             currentAccessRights.Add(access.Key, []);
                         }
+
                         currentAccessRights[access.Key].Add(user.Id.ToString());
 
                         await SetProgress((int)currentPercent, string.Format(_resource.LdapSettingsStatusGivingRights, _userFormatter.GetUserName(user), access.Key));
@@ -754,8 +768,8 @@ public class LdapOperationJob(
         }
 
         var groupMembersToAdd = await ldapGroupUsers.ToAsyncEnumerable().SelectAwait(async ldapGroupUser => await SearchDbUserBySidAsync(ldapGroupUser.Sid))
-                .Where(userBySid => !Equals(userBySid, Core.Users.Constants.LostUser))
-                .ToListAsync();
+            .Where(userBySid => !Equals(userBySid, Core.Users.Constants.LostUser))
+            .ToListAsync();
 
         if (groupMembersToAdd.Count != 0)
         {
@@ -774,6 +788,7 @@ public class LdapOperationJob(
 
                         await _userManager.AddUserIntoGroupAsync(userBySid.Id, ldapGroup.ID);
                     }
+
                     break;
                 case LdapOperationType.SaveTest:
                 case LdapOperationType.SyncTest:
@@ -807,9 +822,9 @@ public class LdapOperationJob(
         await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}");
 
         var dbGroupMembers =
-                    (await _userManager.GetUsersByGroupAsync(dbLdapGroup.ID, EmployeeStatus.All))
-                        .Where(u => u.Sid != null)
-                        .ToList();
+            (await _userManager.GetUsersByGroupAsync(dbLdapGroup.ID, EmployeeStatus.All))
+            .Where(u => u.Sid != null)
+            .ToList();
 
         var groupMembersToRemove = dbGroupMembers.Where(dbUser => ldapGroupUsers.FirstOrDefault(lu => dbUser.Sid.Equals(lu.Sid)) == null).ToList();
 
@@ -846,7 +861,8 @@ public class LdapOperationJob(
                 {
                     await SetProgress(currentSource: $"({gIndex}/{gCount}): {ldapGroup.Name}, {_resource.LdapSettingsStatusAddingGroupUser} ({++index}/{count}): {_userFormatter.GetUserName(userInfo)}");
 
-                    await _userManager.AddUserIntoGroupAsync(userInfo.Id, dbLdapGroup.ID); }
+                    await _userManager.AddUserIntoGroupAsync(userInfo.Id, dbLdapGroup.ID);
+                }
 
                 if (dbGroupMembers.All(dbUser => groupMembersToRemove.Exists(u => u.Id.Equals(dbUser.Id)))
                     && groupMembersToAdd.Count == 0)
@@ -978,7 +994,7 @@ public class LdapOperationJob(
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
                     removedUser.Sid = null;
-                    if (!removedUser.IsOwner(tenantManager.GetCurrentTenant()) && !(_currentUser != null && _currentUser.Id == removedUser.Id && await _userManager.IsDocSpaceAdminAsync(removedUser)))
+                    if (!removedUser.IsOwner(_tenantManager.GetCurrentTenant()) && !(_currentUser != null && _currentUser.Id == removedUser.Id && await _userManager.IsDocSpaceAdminAsync(removedUser)))
                     {
                         removedUser.Status = EmployeeStatus.Terminated; // Disable user on portal
                     }
@@ -1017,9 +1033,9 @@ public class LdapOperationJob(
         var percentage = GetProgress();
 
         var removedDbLdapGroups =
-           (await _userManager.GetGroupsAsync())
-                .Where(g => g.Sid != null && ldapGroups.FirstOrDefault(lg => g.Sid.Equals(lg.Sid)) == null)
-                .ToList();
+            (await _userManager.GetGroupsAsync())
+            .Where(g => g.Sid != null && ldapGroups.FirstOrDefault(lg => g.Sid.Equals(lg.Sid)) == null)
+            .ToList();
 
         if (removedDbLdapGroups.Count == 0)
         {
@@ -1083,21 +1099,23 @@ public class LdapOperationJob(
             {
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
-                    user = await ldapUserManager.SyncLDAPUserAsync(ldapGroupUser, uniqueLdapGroupUsers);
+                    user = await _ldapUserManager.SyncLDAPUserAsync(ldapGroupUser, uniqueLdapGroupUsers);
                     if (!Equals(user, Core.Users.Constants.LostUser))
                     {
                         newUniqueLdapGroupUsers.Add(user);
                     }
+
                     break;
                 case LdapOperationType.SaveTest:
                 case LdapOperationType.SyncTest:
-                    var wrapper = await ldapUserManager.GetLDAPSyncUserChangeAsync(ldapGroupUser, uniqueLdapGroupUsers);
+                    var wrapper = await _ldapUserManager.GetLDAPSyncUserChangeAsync(ldapGroupUser, uniqueLdapGroupUsers);
                     user = wrapper.UserInfo;
                     var changes = wrapper.LdapChangeCollection;
                     if (!Equals(user, Core.Users.Constants.LostUser))
                     {
                         newUniqueLdapGroupUsers.Add(user);
                     }
+
                     _ldapChanges.AddRange(changes);
                     break;
                 default:
@@ -1165,7 +1183,7 @@ public class LdapOperationJob(
 
         await PublishTaskInfo();
     }
-    
+
     private async Task PublishTaskInfo()
     {
         FillDistributedTask();

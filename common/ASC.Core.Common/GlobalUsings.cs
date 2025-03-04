@@ -161,6 +161,8 @@ global using Textile;
 global using Textile.Blocks;
 global using Textile.States;
 
+global using ZiggyCreatures.Caching.Fusion;
+
 global using AppOptions = FirebaseAdmin.AppOptions;
 global using FirebaseAdminMessaging = FirebaseAdmin.Messaging;
 global using FirebaseApp = FirebaseAdmin.FirebaseApp;
