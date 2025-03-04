@@ -121,7 +121,7 @@
     <value>Aseta salasana</value>
   </data>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Varmuuskopiotiedosto on virheellinen. Ole hyvä ja käytä tiedostoa, joka on luotu ONLYOFFICE v11.5:llä tai uudemmalla versiolla.</value>
+    <value>Varmuuskopiotiedosto on virheellinen. Käytä samassa portaalissa luotua tiedostoa.</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Varmuuskopio on suurempi kuin portaalin koko</value>

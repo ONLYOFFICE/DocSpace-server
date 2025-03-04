@@ -10,6 +10,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("SET FOREIGN_KEY_CHECKS=0;");
             migrationBuilder.DropForeignKey(
                 name: "FK_authorization_client_id",
                 table: "identity_authorizations");
@@ -71,10 +72,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "UK_client_secret",
+                name: "idx_client_secret",
                 table: "identity_clients",
-                column: "client_secret",
-                unique: true);
+                column: "client_secret");
 
             migrationBuilder.CreateIndex(
                 name: "idx_identity_authorizations_id",
@@ -83,13 +83,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.Sql("CREATE EVENT IF NOT EXISTS identity_delete_old_authorizations\r\nON SCHEDULE EVERY 1 DAY\r\nON COMPLETION PRESERVE\r\nDO\r\nDELETE FROM identity_authorizations\r\nWHERE modified_at < NOW() - INTERVAL 30 DAY;");
             migrationBuilder.Sql("CREATE EVENT IF NOT EXISTS identity_delete_old_consents\r\nON SCHEDULE EVERY 1 DAY\r\nON COMPLETION PRESERVE\r\nDO\r\nDELETE FROM identity_consents\r\nWHERE modified_at < NOW() - INTERVAL 30 DAY;");
+            migrationBuilder.Sql("SET FOREIGN_KEY_CHECKS=1;");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
-                name: "UK_client_secret",
+                name: "idx_client_secret",
                 table: "identity_clients");
 
             migrationBuilder.DropIndex(

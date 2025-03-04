@@ -62,12 +62,17 @@ public class FileMarkerCache
 }
 
 [Singleton]
-public class FileMarkerHelper(IDistributedTaskQueueFactory queueFactory)
+public class FileMarkerHelper<T>
 {
     private const string CustomDistributedTaskQueueName = "file_marker";
-    private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CustomDistributedTaskQueueName);
+    private readonly DistributedTaskQueue<AsyncTaskData<T>> _tasks;
 
-    internal async Task Add<T>(AsyncTaskData<T> taskData)
+    public FileMarkerHelper(IDistributedTaskQueueFactory queueFactory)
+    {
+        _tasks = queueFactory.CreateQueue<AsyncTaskData<T>>(CustomDistributedTaskQueueName);
+    }
+
+    internal async Task Add(AsyncTaskData<T> taskData)
     {
         await _tasks.EnqueueTask(taskData);
     }
@@ -86,7 +91,6 @@ public class FileMarker(
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     FileMarkerCache fileMarkerCache,
     IDistributedLockProvider distributedLockProvider,
-    FileMarkerHelper fileMarkerHelper,
     EntryStatusManager entryStatusManager)
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
@@ -493,6 +497,7 @@ public class FileMarker(
             taskData.UserIDs = projectTeam;
         }
 
+        var fileMarkerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
         await fileMarkerHelper.Add(taskData);
     }
 
@@ -1241,8 +1246,22 @@ public class FileMarker(
 
 [Transient(GenericArguments = [typeof(int)])]
 [Transient(GenericArguments = [typeof(string)])]
-public class AsyncTaskData<T>(IServiceScopeFactory serviceScopeFactory, ILogger<AsyncTaskData<T>> logger) : DistributedTask
+public class AsyncTaskData<T> : DistributedTask
 {
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ILogger<AsyncTaskData<T>> _logger;
+
+    public AsyncTaskData()
+    {
+        
+    }
+    
+    public AsyncTaskData(IServiceScopeFactory serviceScopeFactory, ILogger<AsyncTaskData<T>> logger)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+        _logger = logger;
+    }
+
     public int TenantId { get; set; }
     public FileEntry<T> FileEntry { get; set; }
     public List<Guid> UserIDs { get; set; }
@@ -1252,14 +1271,14 @@ public class AsyncTaskData<T>(IServiceScopeFactory serviceScopeFactory, ILogger<
     {
         try
         {
-            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            await using var scope = _serviceScopeFactory.CreateAsyncScope();
             var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
             var socketManager = scope.ServiceProvider.GetService<SocketManager>();
             await fileMarker.ExecMarkFileAsNewAsync(this, socketManager);
         }
         catch (Exception e)
         {
-            logger.ErrorExecMarkFileAsNew(e);
+            _logger.ErrorExecMarkFileAsNew(e);
         }
     }
 }

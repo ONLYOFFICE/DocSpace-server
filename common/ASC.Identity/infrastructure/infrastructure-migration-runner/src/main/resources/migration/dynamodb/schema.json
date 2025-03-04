@@ -6,6 +6,7 @@
   "AttributeDefinitions": [
     { "AttributeName": "client_id", "AttributeType": "S" },
     { "AttributeName": "tenant_id", "AttributeType": "N" },
+    { "AttributeName": "created_by", "AttributeType": "S" },
     { "AttributeName": "created_on", "AttributeType": "S" }
   ],
   "ProvisionedThroughput": {
@@ -23,7 +24,21 @@
         "ProjectionType": "ALL"
       },
       "ProvisionedThroughput": {
-        "ReadCapacityUnits": 5,
+        "ReadCapacityUnits": 25,
+        "WriteCapacityUnits": 5
+      }
+    },
+    {
+      "IndexName": "creator-created-index",
+      "KeySchema": [
+        { "AttributeName": "created_by", "KeyType": "HASH" },
+        { "AttributeName": "created_on", "KeyType": "RANGE" }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 25,
         "WriteCapacityUnits": 5
       }
     }

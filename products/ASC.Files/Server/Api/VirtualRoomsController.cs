@@ -32,7 +32,8 @@ public class VirtualRoomsInternalController(
     FileOperationDtoHelper fileOperationDtoHelper,
     CustomTagsService customTagsService,
     RoomLogoManager roomLogoManager,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileDeleteOperationsManager,
+    FileMoveCopyOperationsManager fileMoveCopyOperationsManager,
     FileStorageService fileStorageService,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -51,7 +52,8 @@ public class VirtualRoomsInternalController(
         fileOperationDtoHelper,
         customTagsService,
         roomLogoManager,
-        fileOperationsManager,
+        fileDeleteOperationsManager,
+        fileMoveCopyOperationsManager,
         fileStorageService,
         folderDtoHelper,
         fileDtoHelper,
@@ -169,7 +171,8 @@ public class VirtualRoomsThirdPartyController(
     FileOperationDtoHelper fileOperationDtoHelper,
     CustomTagsService customTagsService,
     RoomLogoManager roomLogoManager,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileDeleteOperationsManager,
+    FileMoveCopyOperationsManager fileMoveCopyOperationsManager,
     FileStorageService fileStorageService,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -184,7 +187,8 @@ public class VirtualRoomsThirdPartyController(
         fileOperationDtoHelper,
         customTagsService,
         roomLogoManager,
-        fileOperationsManager,
+        fileDeleteOperationsManager,
+        fileMoveCopyOperationsManager,
         fileStorageService,
         folderDtoHelper,
         fileDtoHelper,
@@ -218,7 +222,8 @@ public abstract class VirtualRoomsController<T>(
     FileOperationDtoHelper fileOperationDtoHelper,
     CustomTagsService customTagsService,
     RoomLogoManager roomLogoManager,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileDeleteOperationsManager,
+    FileMoveCopyOperationsManager fileMoveCopyOperationsManager,
     FileStorageService fileStorageService,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -342,9 +347,9 @@ public abstract class VirtualRoomsController<T>(
     [HttpDelete("{id}")]
     public async Task<FileOperationDto> DeleteRoomAsync(DeleteRoomRequestDto<T> inDto)
     {
-        await fileOperationsManager.PublishDelete(new List<T> { inDto.Id }, new List<T>(), false, !inDto.DeleteRoom.DeleteAfter, true);
+        await fileDeleteOperationsManager.Publish(new List<T> { inDto.Id }, new List<T>(), false, !inDto.DeleteRoom.DeleteAfter, true);
         
-        return await fileOperationDtoHelper.GetAsync((await fileOperationsManager.GetOperationResults()).FirstOrDefault());
+        return await fileOperationDtoHelper.GetAsync((await fileDeleteOperationsManager.GetOperationResults()).FirstOrDefault());
     }
 
     /// <summary>
@@ -366,9 +371,9 @@ public abstract class VirtualRoomsController<T>(
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
         var movableRoom = JsonSerializer.SerializeToElement(inDto.Id);
         
-        await fileOperationsManager.PublishMoveOrCopyAsync([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter);
+        await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter);
         
-        return await fileOperationDtoHelper.GetAsync((await fileOperationsManager.GetOperationResults()).FirstOrDefault());
+        return await fileOperationDtoHelper.GetAsync((await fileMoveCopyOperationsManager.GetOperationResults()).FirstOrDefault());
     }
 
     /// <summary>
@@ -390,8 +395,8 @@ public abstract class VirtualRoomsController<T>(
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync);
         var movableRoom = JsonSerializer.SerializeToElement(inDto.Id);
 
-        await fileOperationsManager.PublishMoveOrCopyAsync([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter);
-        return await fileOperationDtoHelper.GetAsync((await fileOperationsManager.GetOperationResults()).FirstOrDefault());
+        await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter);
+        return await fileOperationDtoHelper.GetAsync((await fileMoveCopyOperationsManager.GetOperationResults()).FirstOrDefault());
     }
 
     /// <summary>
@@ -730,7 +735,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         AuthContext authContext,
-        DocumentBuilderTaskManager documentBuilderTaskManager,
+        DocumentBuilderTaskManager<RoomIndexExportTask, int, RoomIndexExportTaskData> documentBuilderTaskManager,
         TenantManager tenantManager,
         IEventBus eventBus,
         UserManager userManager,
