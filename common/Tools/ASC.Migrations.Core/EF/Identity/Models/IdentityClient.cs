@@ -63,7 +63,7 @@ public static class IdentityClientExtension
 
             entity.HasIndex(e => e.ClientId, "UK_client_id").IsUnique();
 
-            entity.HasIndex(e => e.ClientSecret, "UK_client_secret").IsUnique();
+            entity.HasIndex(e => e.ClientSecret, "idx_client_secret");
 
             entity.HasIndex(e => e.TenantId, "idx_identity_clients_tenant_id");
 
