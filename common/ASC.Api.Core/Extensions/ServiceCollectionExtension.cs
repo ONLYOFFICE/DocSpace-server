@@ -201,14 +201,14 @@ public static class ServiceCollectionExtension
                 retryCount = int.Parse(configuration["core:eventBus:connectRetryCount"]);
             }
             
-            // services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
-            // {
-            //     var logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
-            //
-            //     var connectionFactory = rabbitMqConfiguration.GetConnectionFactory();
-            //     
-            //     return new DefaultRabbitMQPersistentConnection(connectionFactory, logger, retryCount);
-            // });
+            services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
+            {
+                var logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
+            
+                var connectionFactory = rabbitMqConfiguration.GetConnectionFactory();
+                
+                return new DefaultRabbitMQPersistentConnection(connectionFactory, logger, retryCount);
+            });
             
             services.AddMassTransit(registrationConfigurator =>
             {
