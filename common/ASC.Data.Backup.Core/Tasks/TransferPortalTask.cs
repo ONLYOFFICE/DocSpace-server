@@ -34,7 +34,7 @@ public class TransferPortalTask(DbFactory dbFactory,
         StorageFactoryConfig storageFactoryConfig,
         ModuleProvider moduleProvider,
         TempStream tempStream,
-        AscHybridCache cache)
+        IFusionCache cache)
     : PortalTaskBase(dbFactory, options, storageFactory, storageFactoryConfig, moduleProvider)
 {
     public const string DefaultDirectoryName = "backup";

@@ -62,19 +62,41 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            if (_backupProgressQueue == null)
+            if (_backupProgressQueue != null)
             {
-                return;
+                var tasks = await _backupProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
+
+                foreach (var t in tasks)
+                {
+                    await _backupProgressQueue.DequeueTask(t.Id);
+                }
+
+                _backupProgressQueue = null;
             }
-
-            var tasks = await _backupProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
-
-            foreach (var t in tasks)
+            
+            if (_restoreProgressQueue != null)
             {
-                await _backupProgressQueue.DequeueTask(t.Id);
-            }
+                var tasks = await _restoreProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
 
-            _backupProgressQueue = null;
+                foreach (var t in tasks)
+                {
+                    await _restoreProgressQueue.DequeueTask(t.Id);
+                }
+
+                _restoreProgressQueue = null;
+            }
+            
+            if (_transferProgressQueue != null)
+            {
+                var tasks = await _transferProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
+
+                foreach (var t in tasks)
+                {
+                    await _transferProgressQueue.DequeueTask(t.Id);
+                }
+
+                _transferProgressQueue = null;
+            }
         }
     }
 

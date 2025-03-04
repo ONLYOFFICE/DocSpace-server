@@ -29,7 +29,7 @@ namespace ASC.Core.ChunkedUploader;
 public class CommonChunkedUploadSessionHolder(
     IDataStore dataStore,
     string domain,
-    AscHybridCache cache,
+    IFusionCache cache,
     long maxChunkUploadSize = 10 * 1024 * 1024)
 {
     public IDataStore DataStore { get; set; } = dataStore;
@@ -63,7 +63,7 @@ public class CommonChunkedUploadSessionHolder(
         var dict = new Dictionary<int, Chunk>();
         for (var i = 1; i <= count; i++)
         {
-            var chunk = await cache.GetAsync<Chunk>($"{uploadSession.Id} - {i}");
+            var chunk = await cache.GetOrDefaultAsync<Chunk>($"{uploadSession.Id} - {i}");
             if (chunk == null)
             {
                 break;
@@ -134,6 +134,6 @@ public class CommonChunkedUploadSessionHolder(
             Length = length
         };
 
-        await cache.InsertAsync($"{uploadSession.Id} - {chunkNumber}", chunk, TimeSpan.FromHours(12));
+        await cache.SetAsync($"{uploadSession.Id} - {chunkNumber}", chunk, TimeSpan.FromHours(12));
     }
 }
