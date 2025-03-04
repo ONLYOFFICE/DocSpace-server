@@ -96,8 +96,7 @@ public class FileStorageService //: IFileStorageService
     WatermarkManager watermarkManager,
     CustomTagsService customTagsService,
     IMapper mapper,
-    IWebhookPublisher webhookPublisher,
-    WebhookFileEntryAccessChecker webhookFileEntryAccessChecker)
+    WebhookManager webhookManager)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -471,7 +470,7 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
 
-        await webhookPublisher.PublishAsync(WebhookTrigger.FolderCreated, webhookFileEntryAccessChecker, folder);
+        await webhookManager.PublishAsync(WebhookTrigger.FolderCreated, folder);
 
         return folder;
     }
@@ -646,7 +645,7 @@ public class FileStorageService //: IFileStorageService
         
         await filesMessageService.SendAsync(MessageAction.RoomCreated, folder, folder.Title);
 
-        await webhookPublisher.PublishAsync(WebhookTrigger.RoomCreated, webhookFileEntryAccessChecker, folder);
+        await webhookManager.PublishAsync(WebhookTrigger.RoomCreated, folder);
 
         if (folder.ParentId is int parent && parent == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
@@ -915,7 +914,7 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.UpdateFolderAsync(folder);
 
-        await webhookPublisher.PublishAsync(isRoom ? WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, webhookFileEntryAccessChecker, folder);
+        await webhookManager.PublishAsync(isRoom ? WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, folder);
 
         return folder;
     }
@@ -1158,7 +1157,7 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.UpdateFolderAsync(folder);
 
-        await webhookPublisher.PublishAsync(isRoom ? WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, webhookFileEntryAccessChecker, folder);
+        await webhookManager.PublishAsync(isRoom ? WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, folder);
 
         return folder;
     }
@@ -1223,13 +1222,13 @@ public class FileStorageService //: IFileStorageService
             {
                 await filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, renamedFolder, renamedFolder.Title);
 
-                await webhookPublisher.PublishAsync(WebhookTrigger.RoomUpdated, webhookFileEntryAccessChecker, renamedFolder);
+                await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, renamedFolder);
             }
             else
             {
                 await filesMessageService.SendAsync(MessageAction.FolderRenamed, renamedFolder, renamedFolder.Title, oldTitle);
 
-                await webhookPublisher.PublishAsync(WebhookTrigger.FolderUpdated, webhookFileEntryAccessChecker, renamedFolder);
+                await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, renamedFolder);
             }
 
             //if (!folder.ProviderEntry)
@@ -1546,7 +1545,7 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(MessageAction.FileCreated, file, file.Title);
 
-        await webhookPublisher.PublishAsync(WebhookTrigger.FileCreated, webhookFileEntryAccessChecker, file);
+        await webhookManager.PublishAsync(WebhookTrigger.FileCreated, file);
 
         await fileMarker.MarkAsNewAsync(file);
 
@@ -1612,7 +1611,7 @@ public class FileStorageService //: IFileStorageService
             {
                 await filesMessageService.SendAsync(MessageAction.FileUpdated, file, file.Title);
 
-                await webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, file);
+                await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
             }
 
             return file;
@@ -1646,7 +1645,7 @@ public class FileStorageService //: IFileStorageService
                 await filesMessageService.SendAsync(MessageAction.FileUpdated, file, file.Title);
                 await socketManager.UpdateFileAsync(file);
 
-                await webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, file);
+                await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
             }
 
             return file;
@@ -1761,7 +1760,7 @@ public class FileStorageService //: IFileStorageService
             {
                 await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title, oldTitle);
 
-                await webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, file);
+                await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
 
                 //if (!file.ProviderEntry)
                 //{
@@ -1834,7 +1833,7 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.UpdateFileAsync(file);
 
-        await webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, file);
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
 
         return new KeyValuePair<File<T>, IAsyncEnumerable<File<T>>>(file, GetFileHistoryAsync(fileId));
     }
@@ -1867,7 +1866,7 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(MessageAction.FileUpdatedRevisionComment, file, [file.Title, version.ToString(CultureInfo.InvariantCulture)]);
 
-        await webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, file);
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
 
         return comment;
     }
@@ -1968,7 +1967,7 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.UpdateFileAsync(file);
 
-        await webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, file);
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
 
         return file;
     }
@@ -2089,7 +2088,7 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(MessageAction.FileRestoreVersion, file, file.Title, version.ToString(CultureInfo.InvariantCulture));
 
-        await webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, file);
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
 
         await foreach (var f in daoFactory.GetFileDao<T>().GetEditHistoryAsync(documentServiceHelper, file.Id))
         {
@@ -2122,7 +2121,7 @@ public class FileStorageService //: IFileStorageService
         {
             file.Order = order;
             await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), order.ToString());
-            await webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, file);
+            await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
         }
 
         return file;
@@ -2169,7 +2168,7 @@ public class FileStorageService //: IFileStorageService
                         {
                             entry.Order = item.Order;
                             await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), item.Order.ToString(), contextId);
-                            await webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, file);
+                            await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
                         }
 
                         break;
@@ -2181,7 +2180,7 @@ public class FileStorageService //: IFileStorageService
                         {
                             entry.Order = item.Order;
                             await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), item.Order.ToString(), contextId);
-                            await webhookPublisher.PublishAsync(WebhookTrigger.FolderUpdated, webhookFileEntryAccessChecker, folder);
+                            await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, folder);
                         }
 
                         break;
@@ -2209,7 +2208,7 @@ public class FileStorageService //: IFileStorageService
             folder.Order = order;
             await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), order.ToString());
 
-            await webhookPublisher.PublishAsync(WebhookTrigger.FolderUpdated, webhookFileEntryAccessChecker, folder);
+            await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, folder);
         }
 
         return folder;
@@ -3697,7 +3696,7 @@ public class FileStorageService //: IFileStorageService
                 await filesMessageService.SendAsync(MessageAction.FileCreated, result, result.Title);
                 await fileMarker.MarkAsNewAsync(result);
                 await socketManager.CreateFileAsync(result);
-                await webhookPublisher.PublishAsync(WebhookTrigger.FileCreated, webhookFileEntryAccessChecker, file);
+                await webhookManager.PublishAsync(WebhookTrigger.FileCreated, file);
             }
 
             return result;
@@ -4232,7 +4231,7 @@ public class FileStorageService //: IFileStorageService
                     newFolder.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)
                 ]);
 
-                await webhookPublisher.PublishAsync(WebhookTrigger.FolderUpdated, webhookFileEntryAccessChecker, newFolder);
+                await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, newFolder);
             }
 
             yield return newFolder;
@@ -4314,7 +4313,7 @@ public class FileStorageService //: IFileStorageService
                     newFile.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)
                 ]);
 
-                await webhookPublisher.PublishAsync(WebhookTrigger.FileUpdated, webhookFileEntryAccessChecker, newFile);
+                await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, newFile);
             }
 
             yield return newFile;

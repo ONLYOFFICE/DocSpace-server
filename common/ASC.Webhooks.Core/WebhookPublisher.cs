@@ -25,6 +25,9 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Text.Json;
+using System.Text.Json.Serialization;
+
+using ASC.Core.Tenants;
 
 namespace ASC.Webhooks.Core;
 
@@ -32,22 +35,33 @@ namespace ASC.Webhooks.Core;
 public class WebhookPublisher(
     DbWorker dbWorker,
     IEventBus eventBus,
+    TenantUtil tenantUtil,
     AuthContext authContext)
     : IWebhookPublisher
 {
-    private static readonly JsonSerializerOptions _serializerOptions = new()
+    private readonly JsonSerializerOptions _serializerOptions = new()
     {
+        Converters = { new TenantToUtcDateTimeJsonConverter(tenantUtil) },
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checher, T data)
+    private class TenantToUtcDateTimeJsonConverter(TenantUtil tenantUtil) : JsonConverter<DateTime>
+    {
+        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return reader.GetDateTime();
+        }
+
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.Kind == DateTimeKind.Local ? tenantUtil.DateTimeToUtc(value) : value.ToUniversalTime());
+        }
+    }
+
+
+    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync(WebhookTrigger trigger, Func<Guid, Task<bool>> checher)
     {
         var result = new List<DbWebhooksConfig>();
-
-        if (data == null)
-        {
-            return result;
-        }
 
         var webhookConfigs = await dbWorker.GetWebhookConfigs(enabled: true).ToListAsync();
 
@@ -60,7 +74,7 @@ public class WebhookPublisher(
 
             if (checher != null && config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
             {
-                if (!await checher.CheckAccessAsync(data, config.CreatedBy.Value))
+                if (!await checher(config.CreatedBy.Value))
                 {
                     continue;
                 }
@@ -72,22 +86,17 @@ public class WebhookPublisher(
         return result;
     }
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checher, T data)
+    public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T data)
     {
-        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checher, data);
-
         foreach (var config in webhookConfigs)
         {
             _ = await PublishAsync(trigger, config, data);
         }
     }
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T data)
+    public async Task PublishAsync<T>(WebhookTrigger trigger, Func<Guid, Task<bool>> checher, T data)
     {
-        if (data == null)
-        {
-            return;
-        }
+        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checher);
 
         foreach (var config in webhookConfigs)
         {
@@ -114,6 +123,7 @@ public class WebhookPublisher(
         return await PublishAsync(webhooksLog);
     }
 
+
     public async Task<DbWebhooksLog> RetryPublishAsync(DbWebhooksLog webhookLog)
     {
         var webhooksLog = new DbWebhooksLog
@@ -139,4 +149,5 @@ public class WebhookPublisher(
 
         return newWebhooksLog;
     }
+
 }

@@ -42,8 +42,7 @@ public class UploadControllerHelper(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     FileChecker fileChecker,
-    IWebhookPublisher webhookPublisher,
-    WebhookFileEntryAccessChecker webhookFileEntryAccessChecker)
+    WebhookManager webhookManager)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -52,8 +51,7 @@ public class UploadControllerHelper(
         fileStorageService,
         fileChecker,
         httpContextAccessor,
-        webhookPublisher,
-        webhookFileEntryAccessChecker)
+        webhookManager)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {

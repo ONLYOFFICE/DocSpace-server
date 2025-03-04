@@ -43,8 +43,7 @@ public class GroupController(
     PermissionContext permissionContext,
     FileSecurity fileSecurity,
     UserSocketManager socketManager,
-    IWebhookPublisher webhookPublisher,
-    WebhookGroupAccessChecker webhookGroupAccessChecker)
+    UserWebhookManager webhookManager)
     : ControllerBase
 {
     /// <summary>
@@ -165,7 +164,7 @@ public class GroupController(
 
         await socketManager.AddGroupAsync(dto);
 
-        await webhookPublisher.PublishAsync(WebhookTrigger.GroupCreated, webhookGroupAccessChecker, group);
+        await webhookManager.PublishAsync(WebhookTrigger.GroupCreated, group);
 
         return dto;
     }
@@ -214,7 +213,7 @@ public class GroupController(
 
         await socketManager.UpdateGroupAsync(dto);
 
-        await webhookPublisher.PublishAsync(WebhookTrigger.GroupUpdated, webhookGroupAccessChecker, group);
+        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
 
         return dto;
     }
@@ -243,7 +242,7 @@ public class GroupController(
 
         await socketManager.DeleteGroupAsync(inDto.Id);
 
-        await webhookPublisher.PublishAsync(WebhookTrigger.GroupDeleted, webhookGroupAccessChecker, group);
+        await webhookManager.PublishAsync(WebhookTrigger.GroupDeleted, group);
 
         return NoContent();
     }

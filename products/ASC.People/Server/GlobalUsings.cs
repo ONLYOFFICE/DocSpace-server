@@ -38,6 +38,7 @@ global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Model;
 global using ASC.Api.Core.Routing;
 global using ASC.Api.Core.Security;
+global using ASC.Api.Core.Webhook;
 global using ASC.Api.Utils;
 global using ASC.AuditTrail.Repositories;
 global using ASC.AuditTrail.Types;

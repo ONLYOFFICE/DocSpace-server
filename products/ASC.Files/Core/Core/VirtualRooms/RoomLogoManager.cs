@@ -48,8 +48,7 @@ public class RoomLogoManager(
     CommonLinkUtility commonLinkUtility, 
     ExternalShare externalShare,
     GlobalFolderHelper globalFolderHelper,
-    IWebhookPublisher webhookPublisher,
-    WebhookFileEntryAccessChecker webhookFileEntryAccessChecker)
+    WebhookManager webhookManager)
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
@@ -100,7 +99,7 @@ public class RoomLogoManager(
         
         await SaveLogo(tempFile, x, y, width, height, room, folderDao);
 
-        await webhookPublisher.PublishAsync(WebhookTrigger.RoomUpdated, webhookFileEntryAccessChecker, room);
+        await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, room);
 
         return room;
     }
@@ -200,7 +199,7 @@ public class RoomLogoManager(
             if (EnableAudit)
             {
                 await filesMessageService.SendAsync(MessageAction.RoomLogoDeleted, room, room.Title);
-                await webhookPublisher.PublishAsync(WebhookTrigger.RoomUpdated, webhookFileEntryAccessChecker, room);
+                await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, room);
             }
         }
         catch (Exception e)
@@ -394,7 +393,7 @@ public class RoomLogoManager(
                     await filesMessageService.SendAsync(MessageAction.RoomCoverChanged, room, room.Title);
                 }
 
-                await webhookPublisher.PublishAsync(WebhookTrigger.RoomUpdated, webhookFileEntryAccessChecker, room);
+                await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, room);
             }
         }
 

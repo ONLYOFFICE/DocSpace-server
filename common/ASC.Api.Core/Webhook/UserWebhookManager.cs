@@ -24,10 +24,53 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Webhooks.Core
+
+using ASC.Common.Security;
+
+namespace ASC.Api.Core.Webhook;
+
+[Scope]
+public class UserWebhookManager(
+    UserManager userManager,
+    IWebhookPublisher webhookPublisher,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    GroupFullDtoHelper groupFullDtoHelper,
+    AuthManager authentication,
+    IPermissionResolver permissionResolver)
 {
-    public interface IWebhookAccessChecker<T>
+
+    public async Task PublishAsync(WebhookTrigger trigger, UserInfo userInfo)
     {
-        public Task<bool> CheckAccessAsync(T data, Guid userId);
+        var data = await employeeFullDtoHelper.GetFullAsync(userInfo);
+
+        await webhookPublisher.PublishAsync(trigger, CanRead, data);
+
+        async Task<bool> CanRead(Guid userId)
+        {
+            var sourceUser = await userManager.GetUsersAsync(userId);
+
+            return await userManager.CanUserViewAnotherUserAsync(sourceUser, userInfo);
+        }
+    }
+
+    public async Task PublishAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
+    {
+        var data = await groupFullDtoHelper.Get(groupInfo, true);
+
+        await webhookPublisher.PublishAsync(trigger, CanRead, data);
+
+        async Task<bool> CanRead(Guid userId)
+        {
+            var user = await userManager.GetUsersAsync(userId);
+
+            if (await userManager.IsDocSpaceAdminAsync(user))
+            {
+                return true;
+            }
+
+            var account = await authentication.GetAccountByIDAsync(user.TenantId, user.Id);
+
+            return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
+        }
     }
 }

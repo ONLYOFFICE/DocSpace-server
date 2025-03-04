@@ -50,8 +50,7 @@ public class ThirdpartyController(
     LoginProfileTransport loginProfileTransport,
     EmailValidationKeyModelHelper emailValidationKeyModelHelper,
     UserSocketManager socketManager,
-    IWebhookPublisher webhookPublisher,
-    WebhookUserAccessChecker webhookUserAccessChecker)
+    UserWebhookManager webhookManager)
     : ApiControllerBase
     {
 
@@ -221,7 +220,7 @@ public class ThirdpartyController(
 
             await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
 
-            await webhookPublisher.PublishAsync(WebhookTrigger.UserCreated, webhookUserAccessChecker, newUser);
+            await webhookManager.PublishAsync(WebhookTrigger.UserCreated, newUser);
         }
         finally
         {

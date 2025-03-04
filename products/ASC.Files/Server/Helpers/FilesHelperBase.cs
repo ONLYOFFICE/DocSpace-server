@@ -34,8 +34,7 @@ public abstract class FilesHelperBase(
     FileStorageService fileStorageService,
     FileChecker fileChecker,
     IHttpContextAccessor httpContextAccessor,
-    IWebhookPublisher webhookPublisher,
-    WebhookFileEntryAccessChecker webhookFileEntryAccessChecker)
+    WebhookManager webhookManager)
     {
     protected readonly FilesSettingsHelper _filesSettingsHelper = filesSettingsHelper;
     protected readonly FileUploader _fileUploader = fileUploader;
@@ -53,7 +52,7 @@ public abstract class FilesHelperBase(
 
             await socketManager.CreateFileAsync(resultFile);
 
-            await webhookPublisher.PublishAsync(WebhookTrigger.FileUploaded, webhookFileEntryAccessChecker, resultFile);
+            await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resultFile);
 
             return await _fileDtoHelper.GetAsync(resultFile);
         }

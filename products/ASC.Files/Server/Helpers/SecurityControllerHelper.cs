@@ -37,8 +37,7 @@ public class SecurityControllerHelper(
     FileShareDtoHelper fileShareDtoHelper,
     FileShareParamsHelper fileShareParamsHelper,
     FileChecker fileChecker,
-    IWebhookPublisher webhookPublisher,
-    WebhookFileEntryAccessChecker webhookFileEntryAccessChecker)
+    WebhookManager webhookManager)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -47,8 +46,7 @@ public class SecurityControllerHelper(
         fileStorageService,
         fileChecker,
         httpContextAccessor,
-        webhookPublisher,
-        webhookFileEntryAccessChecker)
+        webhookManager)
 {
     public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)
     {

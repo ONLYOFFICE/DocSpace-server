@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Common.Security;
-
 namespace ASC.People.Api;
 
 /// <summary>
@@ -37,49 +35,3 @@ namespace ASC.People.Api;
 [ApiController]
 [ControllerName("people")]
 public abstract class ApiControllerBase : ControllerBase;
-
-
-[Scope]
-public class WebhookGroupAccessChecker(
-    AuthContext authContext,
-    AuthManager authentication,
-    UserManager userManager,
-    IPermissionResolver permissionResolver) : IWebhookAccessChecker<GroupInfo>
-{
-    public async Task<bool> CheckAccessAsync(GroupInfo data, Guid userId)
-    {
-        if (authContext.CurrentAccount.ID == userId)
-        {
-            return true;
-        }
-
-        var user = await userManager.GetUsersAsync(userId);
-
-        if (await userManager.IsDocSpaceAdminAsync(user))
-        {
-            return true;
-        }
-
-        var account = await authentication.GetAccountByIDAsync(user.TenantId, user.Id);
-
-        return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
-    }
-}
-
-[Scope]
-public class WebhookUserAccessChecker(
-    AuthContext authContext,
-    UserManager userManager) : IWebhookAccessChecker<UserInfo>
-{
-    public async Task<bool> CheckAccessAsync(UserInfo data, Guid userId)
-    {
-        if (authContext.CurrentAccount.ID == userId)
-        {
-            return true;
-        }
-
-        var user = await userManager.GetUsersAsync(userId);
-
-        return await userManager.CanUserViewAnotherUserAsync(user, data);
-    }
-}
