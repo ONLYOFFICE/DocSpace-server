@@ -34,13 +34,16 @@ public class BackupWorker(
     IDistributedLockProvider distributedLockProvider)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "backup";
+    public const string BACKUP_DISTRIBUTED_TASK_QUEUE_NAME = CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME + nameof(BackupProgressItem);
+    public const string RESTORE_DISTRIBUTED_TASK_QUEUE_NAME =  CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME + nameof(RestoreProgressItem);
+    public const string TRANSFER_DISTRIBUTED_TASK_QUEUE_NAME =  CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME + nameof(TransferProgressItem);
     public const string LockKey = $"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}";
 
     public string TempFolder { get; } = Path.Combine(tempPath.GetTempPath(), "backup");
 
-    private DistributedTaskQueue<BackupProgressItem> _backupProgressQueue = queueFactory.CreateQueue<BackupProgressItem>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
-    private DistributedTaskQueue<RestoreProgressItem> _restoreProgressQueue = queueFactory.CreateQueue<RestoreProgressItem>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
-    private DistributedTaskQueue<TransferProgressItem> _transferProgressQueue = queueFactory.CreateQueue<TransferProgressItem>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
+    private DistributedTaskQueue<BackupProgressItem> _backupProgressQueue = queueFactory.CreateQueue<BackupProgressItem>(BACKUP_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
+    private DistributedTaskQueue<RestoreProgressItem> _restoreProgressQueue = queueFactory.CreateQueue<RestoreProgressItem>(RESTORE_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
+    private DistributedTaskQueue<TransferProgressItem> _transferProgressQueue = queueFactory.CreateQueue<TransferProgressItem>(TRANSFER_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
     private int _limit;
     private string _upgradesPath;
     
