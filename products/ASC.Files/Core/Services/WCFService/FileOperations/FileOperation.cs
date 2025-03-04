@@ -26,6 +26,8 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
+[JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToNearestAncestor)]
+[JsonDerivedType(typeof(FileDownloadOperation))]
 public abstract class FileOperation : DistributedTaskProgress
 {
     protected readonly IServiceProvider _serviceProvider;
@@ -46,6 +48,11 @@ public abstract class FileOperation : DistributedTaskProgress
     protected int _processed;
     public int Total { get; set; }
 
+    public FileOperation()
+    {
+        
+    }
+    
     protected FileOperation(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -80,10 +87,19 @@ public abstract class FileOperation : DistributedTaskProgress
     protected abstract Task DoJob(AsyncServiceScope serviceScope);
 }
 
-public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvider) : FileOperation(serviceProvider)
+public abstract class ComposeFileOperation<T1, T2> : FileOperation
     where T1 : FileOperationData<string>
     where T2 : FileOperationData<int>
 {
+    public ComposeFileOperation()
+    {
+        
+    }
+
+    protected ComposeFileOperation(IServiceProvider serviceProvider) : base(serviceProvider)
+    {
+    }
+
     protected abstract FileOperationType FileOperationType { get; }
     protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
     protected FileOperation<T2, int> DaoOperation { get; set; }
