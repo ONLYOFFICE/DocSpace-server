@@ -15,8 +15,8 @@ spring:
     jdbc:
       initialize-schema: always
     processing:
-      pageSize: 100
-      batchSize: 100
+      pageSize: ${SPRING_BATCH_PROCESSING_PAGE_SIZE:5}
+      batchSize: ${SPRING_BATCH_PROCESSING_BATCH_SIZE:5}
   config:
     import:
       - "classpath:application-datasource.yml"
