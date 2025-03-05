@@ -26,6 +26,12 @@
 
 	</Target>
 	<ItemGroup>
+	  <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.2">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	</ItemGroup>
+	<ItemGroup>
 	  <ProjectReference Include="..\..\ASC.Api.Core\ASC.Api.Core.csproj" />
 	  <ProjectReference Include="..\..\ASC.Data.Backup.Core\ASC.Data.Backup.Core.csproj" />
 	</ItemGroup>

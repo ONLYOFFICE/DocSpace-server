@@ -35,47 +35,50 @@ public static class ISetupBuilderExtension
         var conf = new XmlLoggingConfiguration(CrossPlatform.PathCombine(configuration["pathToConf"], "nlog.config"));
 
         var settings = configuration.GetSection("log").Get<NLogSettings>();
-        
-        if (!string.IsNullOrEmpty(settings.Name))
+
+        if (settings != null)
         {
-            conf.Variables["name"] = settings.Name;
-        }
-
-        if (!string.IsNullOrEmpty(settings.Dir))
-        {
-            var dir = Path.IsPathRooted(settings.Dir) ? settings.Dir : CrossPlatform.PathCombine(hostEnvironment.ContentRootPath, settings.Dir);
-            conf.Variables["dir"] = dir.TrimEnd('/').TrimEnd('\\') + Path.DirectorySeparatorChar;
-        }
-
-        foreach (var targetName in new[] { "aws", "aws_sql" })
-        {
-            var awsTarget = conf.FindTargetByName<AWSTarget>(targetName);
-
-            if (awsTarget == null)
-            {
-                continue;
-            }
-
-            //hack
             if (!string.IsNullOrEmpty(settings.Name))
             {
-                awsTarget.LogGroup = awsTarget.LogGroup.Replace("${var:name}", settings.Name);
+                conf.Variables["name"] = settings.Name;
             }
 
-
-            var awsAccessKeyId = string.IsNullOrEmpty(settings.AWSAccessKeyId) ? configuration["aws:cloudWatch:accessKeyId"] : settings.AWSAccessKeyId;
-            var awsSecretAccessKey = string.IsNullOrEmpty(settings.AWSSecretAccessKey) ? configuration["aws:cloudWatch:secretAccessKey"] : settings.AWSSecretAccessKey;
-
-            if (!string.IsNullOrEmpty(awsAccessKeyId))
+            if (!string.IsNullOrEmpty(settings.Dir))
             {
-                awsTarget.Credentials = new BasicAWSCredentials(awsAccessKeyId, awsSecretAccessKey);
+                var dir = Path.IsPathRooted(settings.Dir) ? settings.Dir : CrossPlatform.PathCombine(hostEnvironment.ContentRootPath, settings.Dir);
+                conf.Variables["dir"] = dir.TrimEnd('/').TrimEnd('\\') + Path.DirectorySeparatorChar;
             }
-            else
+
+            foreach (var targetName in new[] { "aws", "aws_sql" })
             {
-                conf.RemoveTarget(targetName);
+                var awsTarget = conf.FindTargetByName<AWSTarget>(targetName);
+
+                if (awsTarget == null)
+                {
+                    continue;
+                }
+
+                //hack
+                if (!string.IsNullOrEmpty(settings.Name))
+                {
+                    awsTarget.LogGroup = awsTarget.LogGroup.Replace("${var:name}", settings.Name);
+                }
+
+
+                var awsAccessKeyId = string.IsNullOrEmpty(settings.AWSAccessKeyId) ? configuration["aws:cloudWatch:accessKeyId"] : settings.AWSAccessKeyId;
+                var awsSecretAccessKey = string.IsNullOrEmpty(settings.AWSSecretAccessKey) ? configuration["aws:cloudWatch:secretAccessKey"] : settings.AWSSecretAccessKey;
+
+                if (!string.IsNullOrEmpty(awsAccessKeyId))
+                {
+                    awsTarget.Credentials = new BasicAWSCredentials(awsAccessKeyId, awsSecretAccessKey);
+                }
+                else
+                {
+                    conf.RemoveTarget(targetName);
+                }
             }
+
         }
-
         return loggingBuilder.LoadConfiguration(conf);
     }
 }

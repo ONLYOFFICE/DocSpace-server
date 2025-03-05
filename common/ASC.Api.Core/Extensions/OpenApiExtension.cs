@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.OpenApi.Models;
+
 namespace ASC.Api.Core.Extensions;
 
 public static class OpenApiExtension
@@ -36,7 +38,7 @@ public static class OpenApiExtension
             
             if (fullName != null)
             {
-                var assemblyName = fullName.Split(',').First();
+                var assemblyName = fullName.Split(',').First().Split(".").Last();
                 c.AddDocumentTransformer((document, _, _) =>
                 {
                     document.Info = new()
@@ -78,10 +80,8 @@ public static class OpenApiExtension
                 }
                 return Task.CompletedTask;
             });
-
-            
-
             c.AddDocumentTransformer<SecurityDocumentTransformer>();
+
         });
     }
 
@@ -94,7 +94,7 @@ public static class OpenApiExtension
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapOpenApi($"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}");
+                endpoints.MapOpenApi($"openapi/{assemblyName.ToLower()}/{{documentName}}.json");
             });
         }
 
@@ -190,7 +190,15 @@ public static class NestedSchemaReferenceId
         }
 
         var name = CustomSchemaId(type);
-        return _generatedSchemas.Add(name) ? name : $"{name}.{Guid.NewGuid()}";
+
+        name = _generatedSchemas.Contains("ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto") ? name : $"{name}.{Guid.NewGuid()}";
+
+        if (!_generatedSchemas.Contains(name)) 
+        { 
+            _generatedSchemas.Add(name);
+            return name;
+        }
+        return null;
     }
 
     private static bool IsEnumerableOfPrimitive(Type type)
