@@ -42,6 +42,9 @@
     <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
     <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" Version="11.0.0" />
 	<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
+	<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.1.0" />
+	<PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.1.0" />
+	<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -82,7 +82,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
     public async Task<string> GetLogoTextAsync(SettingsManager settingsManager)
     {
-        if (!string.IsNullOrEmpty(LogoText) && LogoText != DefaultLogoText)
+        if (!string.IsNullOrEmpty(LogoText))
         {
             return LogoText;
         }
@@ -93,7 +93,18 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
     public void SetLogoText(string val)
     {
-        LogoText = val;
+        LogoText = string.IsNullOrWhiteSpace(val) || val == DefaultLogoText ? null : val;
+    }
+
+    public async Task<bool> GetIsDefault(SettingsManager settingsManager)
+    {
+        if (!IsDefault())
+        {
+            return false;
+        }
+
+        var partnerSettings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+        return partnerSettings.IsDefault();
     }
 
     #endregion
@@ -163,7 +174,6 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             LogoText = null
         };
     }
-    #endregion
 
     [JsonIgnore]
     public Guid ID
@@ -171,7 +181,21 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
         get { return new Guid("{05d35540-c80b-4b17-9277-abd9e543bf93}"); }
     }
 
+    #endregion
+
     #region Get/Set IsDefault and Extension
+
+    private bool IsDefault()
+    {
+        return LogoText == null
+            && IsDefaultLogoLightSmall
+            && IsDefaultLogoDark
+            && IsDefaultLogoFavicon
+            && IsDefaultLogoDocsEditor
+            && IsDefaultLogoDocsEditorEmbed
+            && IsDefaultLogoLeftMenu
+            && IsDefaultLogoAboutPage;
+    }
 
     public bool GetIsDefault(WhiteLabelLogoType type)
     {

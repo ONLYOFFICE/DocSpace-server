@@ -62,6 +62,7 @@
     <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="11.0.0" />
+    <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ASC.EventBus\ASC.EventBus.csproj" />

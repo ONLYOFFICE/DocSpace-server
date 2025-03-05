@@ -466,7 +466,7 @@ public class WhitelabelController(ApiContext apiContext,
         return new IsDefaultWhiteLabelLogosDto
         {
             Name = "logotext",
-            Default = tenantWhiteLabelSettings.LogoText.IsNullOrEmpty() || tenantWhiteLabelSettings.LogoText.Equals(TenantWhiteLabelSettings.DefaultLogoText)
+            Default = string.IsNullOrEmpty(tenantWhiteLabelSettings.LogoText)
         };
     }
 

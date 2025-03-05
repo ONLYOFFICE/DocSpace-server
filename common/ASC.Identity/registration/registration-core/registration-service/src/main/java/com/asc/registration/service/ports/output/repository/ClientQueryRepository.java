@@ -29,6 +29,7 @@ package com.asc.registration.service.ports.output.repository;
 
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.service.transfer.response.PageableResponse;
@@ -64,38 +65,56 @@ public interface ClientQueryRepository {
   Optional<Client> findById(ClientId clientId);
 
   /**
-   * Finds all public and private clients belonging to a specific tenant, with pagination support.
+   * Finds all public and private clients belonging to a specific tenant created by a specific user,
+   * with pagination support.
    *
-   * @param tenant the tenant ID to which the clients belong.
+   * @param tenantId the tenant ID to which the clients belong.
+   * @param creatorId the user ID of the creator.
    * @param limit the maximum number of clients to retrieve.
    * @param lastClientId the client cursor for pagination.
    * @param lastCreatedOn the creation timestamp cursor for pagination.
-   * @return a {@link PageableResponse} containing the clients for the specified tenant.
+   * @return a {@link PageableResponse} containing the clients for the specified tenant and creator.
    */
-  PageableResponse<Client> findAllPublicAndPrivateByTenantId(
-      TenantId tenant, int limit, String lastClientId, ZonedDateTime lastCreatedOn);
+  PageableResponse<Client> findAllByTenantIdAndCreatorId(
+      TenantId tenantId,
+      UserId creatorId,
+      int limit,
+      String lastClientId,
+      ZonedDateTime lastCreatedOn);
 
   /**
    * Finds all clients belonging to a specific tenant, with pagination support.
    *
-   * @param tenant the tenant ID to which the clients belong.
+   * @param tenantId the tenant ID to which the clients belong.
    * @param limit the maximum number of clients to retrieve.
    * @param lastClientId the client cursor for pagination.
    * @param lastCreatedOn the creation timestamp cursor for pagination.
    * @return a {@link PageableResponse} containing the clients for the specified tenant.
    */
   PageableResponse<Client> findAllByTenantId(
-      TenantId tenant, int limit, String lastClientId, ZonedDateTime lastCreatedOn);
+      TenantId tenantId, int limit, String lastClientId, ZonedDateTime lastCreatedOn);
 
   /**
    * Finds a client by its unique client ID and tenant ID.
    *
    * @param clientId the unique client ID.
-   * @param tenant the tenant ID to which the client belongs.
+   * @param tenantId the tenant ID to which the client belongs.
    * @return an {@link Optional} containing the client if found, or an empty {@link Optional} if not
    *     found.
    */
-  Optional<Client> findByClientIdAndTenantId(ClientId clientId, TenantId tenant);
+  Optional<Client> findByClientIdAndTenantId(ClientId clientId, TenantId tenantId);
+
+  /**
+   * Finds a client by its unique client ID, tenant ID, and creator's user ID.
+   *
+   * @param clientId the unique client ID.
+   * @param tenantId the tenant ID to which the client belongs.
+   * @param creatorId the user ID of the creator.
+   * @return an {@link Optional} containing the client if found, or an empty {@link Optional} if not
+   *     found.
+   */
+  Optional<Client> findByClientIdAndTenantIdAndCreatorId(
+      ClientId clientId, TenantId tenantId, UserId creatorId);
 
   /**
    * Finds all clients that match the provided list of client IDs.

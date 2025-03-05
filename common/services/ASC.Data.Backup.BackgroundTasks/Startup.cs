@@ -43,7 +43,15 @@ public class Startup : BaseStartup
         var services = builder.Services;
         await base.ConfigureServices(builder);
 
-        services.Configure<DistributedTaskQueueFactoryOptions>(BackupWorker.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        services.Configure<DistributedTaskQueueFactoryOptions>(BackupWorker.BACKUP_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        {
+            x.MaxThreadsCount = 5;
+        });
+        services.Configure<DistributedTaskQueueFactoryOptions>(BackupWorker.RESTORE_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        {
+            x.MaxThreadsCount = 5;
+        });
+        services.Configure<DistributedTaskQueueFactoryOptions>(BackupWorker.TRANSFER_DISTRIBUTED_TASK_QUEUE_NAME, x =>
         {
             x.MaxThreadsCount = 5;
         });

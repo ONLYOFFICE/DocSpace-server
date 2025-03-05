@@ -27,16 +27,15 @@
 namespace ASC.ActiveDirectory.ComplexOperations;
 
 [Singleton]
-public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
-    IDistributedTaskQueueFactory queueFactory)
+public class LdapSaveSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "ldapOperation";
 
-    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly DistributedTaskQueue<LdapOperationJob> _progressQueue = queueFactory.CreateQueue<LdapOperationJob>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public async Task RunJobAsync(LdapSettings settings, Tenant tenant, LdapOperationType operationType, LdapLocalization resource = null, string userId = null)
     {
-        var item = (await _progressQueue.GetAllTasks<LdapOperationJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
             await _progressQueue.DequeueTask(item.Id);
@@ -141,7 +140,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
 
     public async Task<LdapOperationStatus> ToLdapOperationStatus(int tenantId)
     {
-        var operations = (await _progressQueue.GetAllTasks<LdapOperationJob>()).ToList();
+        var operations = (await _progressQueue.GetAllTasks()).ToList();
 
         foreach (var o in operations)
         {
@@ -223,7 +222,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
 
     private async Task<List<LdapOperationJob>> GetOperationsForTenant(int tenantId)
     {
-        return (await _progressQueue.GetAllTasks<LdapOperationJob>())
+        return (await _progressQueue.GetAllTasks())
             .Where(t => t[LdapTaskProperty.OWNER] == tenantId)
             .ToList();
     }

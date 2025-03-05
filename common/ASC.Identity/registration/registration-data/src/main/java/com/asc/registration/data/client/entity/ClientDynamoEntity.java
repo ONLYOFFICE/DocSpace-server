@@ -231,7 +231,7 @@ public class ClientDynamoEntity {
    * @return the creation timestamp.
    */
   @DynamoDbAttribute("created_on")
-  @DynamoDbSecondarySortKey(indexNames = "tenant-created-index")
+  @DynamoDbSecondarySortKey(indexNames = {"tenant-created-index", "creator-created-index"})
   public String getCreatedOn() {
     return createdOn != null ? createdOn.toString() : null;
   }
@@ -251,6 +251,7 @@ public class ClientDynamoEntity {
    * @return the creator's identifier.
    */
   @DynamoDbAttribute("created_by")
+  @DynamoDbSecondaryPartitionKey(indexNames = "creator-created-index")
   public String getCreatedBy() {
     return createdBy;
   }

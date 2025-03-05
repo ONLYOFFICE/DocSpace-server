@@ -79,6 +79,7 @@ global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Configuration;
 global using ASC.Core.Data;
 global using ASC.Core.Encryption;
@@ -162,11 +163,12 @@ global using MailKit.Security;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using MimeKit;
+
+global using ZiggyCreatures.Caching.Fusion;
 
 global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
 

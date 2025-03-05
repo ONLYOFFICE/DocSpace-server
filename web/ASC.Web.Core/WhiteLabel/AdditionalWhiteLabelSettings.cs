@@ -40,7 +40,7 @@ public class AdditionalWhiteLabelSettingsWrapper
 
 public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettings>
 {
-    public AdditionalWhiteLabelSettingsHelperInit AdditionalWhiteLabelSettingsHelper;
+    public ExternalResourceSettingsHelper ExternalResourceSettingsHelper;
 
     /// <summary>
     /// Specifies if the start document is enabled or not
@@ -61,22 +61,10 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     public bool FeedbackAndSupportEnabled { get; init; }
 
     /// <summary>
-    /// Feedback and support URL
-    /// </summary>
-    [OpenApiDescription("Feedback and support URL")]
-    public string FeedbackAndSupportUrl { get; init; }
-
-    /// <summary>
     /// Specifies if the user forum is enabled or not
     /// </summary>
     [OpenApiDescription("Specifies if the user forum is enabled or not")]
     public bool UserForumEnabled { get; init; }
-
-    /// <summary>
-    /// User forum URL
-    /// </summary>
-    [OpenApiDescription("User forum URL")]
-    public string UserForumUrl { get; init; }
 
     /// <summary>
     /// Specifies if the video guides are enabled or not
@@ -85,34 +73,10 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     public bool VideoGuidesEnabled { get; init; }
 
     /// <summary>
-    /// Video guides URL
-    /// </summary>
-    [OpenApiDescription("Video guides URL")]
-    public string VideoGuidesUrl { get; init; }
-
-    /// <summary>
-    /// Sales email
-    /// </summary>
-    [OpenApiDescription("Sales email")]
-    public string SalesEmail { get; init; }
-
-    /// <summary>
-    /// URL to pay for the portal
-    /// </summary>
-    [OpenApiDescription("URL to pay for the portal")]
-    public string BuyUrl { get; init; }
-
-    /// <summary>
     /// Specifies if the license agreements are enabled or not
     /// </summary>
     [OpenApiDescription("Specifies if the license agreements are enabled or not")]
     public bool LicenseAgreementsEnabled { get; init; }
-
-    /// <summary>
-    /// License agreements URL
-    /// </summary>
-    [OpenApiDescription("License agreements URL")]
-    public string LicenseAgreementsUrl { get; init; }
 
     [JsonIgnore]
     public Guid ID
@@ -120,138 +84,41 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
         get { return new Guid("{0108422F-C05D-488E-B271-30C4032494DA}"); }
     }
 
-    public AdditionalWhiteLabelSettings(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
+    public AdditionalWhiteLabelSettings(ExternalResourceSettingsHelper externalResourceSettingsHelper)
     {
-        this.AdditionalWhiteLabelSettingsHelper = additionalWhiteLabelSettingsHelper;
+        this.ExternalResourceSettingsHelper = externalResourceSettingsHelper;
     }
 
     public AdditionalWhiteLabelSettings() { }
 
     public AdditionalWhiteLabelSettings GetDefault()
     {
-        return new AdditionalWhiteLabelSettings(AdditionalWhiteLabelSettingsHelper)
+        return new AdditionalWhiteLabelSettings(ExternalResourceSettingsHelper)
         {
             StartDocsEnabled = true,
-            HelpCenterEnabled = AdditionalWhiteLabelSettingsHelper?.DefaultHelpCenterUrl != null,
-            FeedbackAndSupportEnabled = AdditionalWhiteLabelSettingsHelper?.DefaultFeedbackAndSupportUrl != null,
-            FeedbackAndSupportUrl = AdditionalWhiteLabelSettingsHelper?.DefaultFeedbackAndSupportUrl,
-            UserForumEnabled = AdditionalWhiteLabelSettingsHelper?.DefaultUserForumUrl != null,
-            UserForumUrl = AdditionalWhiteLabelSettingsHelper?.DefaultUserForumUrl,
-            VideoGuidesEnabled = AdditionalWhiteLabelSettingsHelper?.DefaultVideoGuidesUrl != null,
-            VideoGuidesUrl = AdditionalWhiteLabelSettingsHelper?.DefaultVideoGuidesUrl,
-            SalesEmail = AdditionalWhiteLabelSettingsHelper?.DefaultMailSalesEmail,
-            BuyUrl = AdditionalWhiteLabelSettingsHelper?.DefaultBuyUrl,
-            LicenseAgreementsEnabled = true,
-            LicenseAgreementsUrl = DefaultLicenseAgreements
+            HelpCenterEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Helpcenter.GetDefaultRegionalDomain()),
+            FeedbackAndSupportEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Support.GetDefaultRegionalDomain()),
+            UserForumEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Forum.GetDefaultRegionalDomain()),
+            VideoGuidesEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Videoguides.GetDefaultRegionalDomain()),
+            LicenseAgreementsEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Common.GetDefaultRegionalFullEntry("license"))
         };
-    }
-
-    public static string DefaultLicenseAgreements
-    {
-        get
-        {
-            return "https://help.onlyoffice.com/Products/Files/doceditor.aspx?fileid=6795868&doc=RG5GaVN6azdUQW5kLzZQNzBXbHZ4Rm9QWVZuNjZKUmgya0prWnpCd2dGcz0_IjY3OTU4Njgi0";
-        }
     }
 }
 
 [Scope]
-public class AdditionalWhiteLabelSettingsHelper(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelperInit)
+public class AdditionalWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externalResourceSettingsHelper)
 {
     public bool IsDefault(AdditionalWhiteLabelSettings settings)
     {
-        settings.AdditionalWhiteLabelSettingsHelper ??= additionalWhiteLabelSettingsHelperInit;
-        
+        settings.ExternalResourceSettingsHelper ??= externalResourceSettingsHelper;
+
         var defaultSettings = settings.GetDefault();
 
         return settings.StartDocsEnabled == defaultSettings.StartDocsEnabled &&
                 settings.HelpCenterEnabled == defaultSettings.HelpCenterEnabled &&
                 settings.FeedbackAndSupportEnabled == defaultSettings.FeedbackAndSupportEnabled &&
-                settings.FeedbackAndSupportUrl == defaultSettings.FeedbackAndSupportUrl &&
                 settings.UserForumEnabled == defaultSettings.UserForumEnabled &&
-                settings.UserForumUrl == defaultSettings.UserForumUrl &&
                 settings.VideoGuidesEnabled == defaultSettings.VideoGuidesEnabled &&
-                settings.VideoGuidesUrl == defaultSettings.VideoGuidesUrl &&
-                settings.SalesEmail == defaultSettings.SalesEmail &&
-                settings.BuyUrl == defaultSettings.BuyUrl &&
-                settings.LicenseAgreementsEnabled == defaultSettings.LicenseAgreementsEnabled &&
-                settings.LicenseAgreementsUrl == defaultSettings.LicenseAgreementsUrl;
-    }
-}
-
-[Singleton]
-public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration)
-{
-    /// <summary>
-    /// Default help center URL
-    /// </summary>
-    public string DefaultHelpCenterUrl
-    {
-        get
-        {
-            var url = configuration["web:help-center"];
-            return string.IsNullOrEmpty(url) ? null : url;
-        }
-    }
-
-    /// <summary>
-    /// Default feedback and support URL
-    /// </summary>
-    public string DefaultFeedbackAndSupportUrl
-    {
-        get
-        {
-            var url = configuration["web:support-feedback"];
-            return string.IsNullOrEmpty(url) ? null : url;
-        }
-    }
-
-    /// <summary>
-    /// Default user forum URL
-    /// </summary>
-    public string DefaultUserForumUrl
-    {
-        get
-        {
-            var url = configuration["web:user-forum"];
-            return string.IsNullOrEmpty(url) ? null : url;
-        }
-    }
-
-    /// <summary>
-    /// Default video guides URL
-    /// </summary>
-    public string DefaultVideoGuidesUrl
-    {
-        get
-        {
-            var url = DefaultHelpCenterUrl;
-            return string.IsNullOrEmpty(url) ? null : url + "/video.aspx";
-        }
-    }
-
-    /// <summary>
-    /// Default sales email
-    /// </summary>
-    public string DefaultMailSalesEmail
-    {
-        get
-        {
-            var email = configuration["core:payment:email"];
-            return !string.IsNullOrEmpty(email) ? email : "sales@onlyoffice.com";
-        }
-    }
-
-    /// <summary>
-    /// Default URL to pay for the portal
-    /// </summary>
-    public string DefaultBuyUrl
-    {
-        get
-        {
-            var site = configuration["web:teamlab-site"];
-            var type = configuration["license:type"] ?? "enterprise";
-            return !string.IsNullOrEmpty(site) ? $"{site}/post.ashx?type=buydocspace{type}" : "";
-        }
+                settings.LicenseAgreementsEnabled == defaultSettings.LicenseAgreementsEnabled;
     }
 }

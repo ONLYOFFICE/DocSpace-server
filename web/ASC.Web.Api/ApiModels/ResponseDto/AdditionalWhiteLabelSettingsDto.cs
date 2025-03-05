@@ -47,47 +47,16 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     public bool FeedbackAndSupportEnabled { get; set; }
 
     /// <summary>
-    /// Feedback and support URL
-    /// </summary>
-    [OpenApiDescription("Feedback and support URL")]
-    public string FeedbackAndSupportUrl { get; set; }
-
-    /// <summary>
     /// Specifies if the user forum is enabled or not
     /// </summary>
     [OpenApiDescription("Specifies if the user forum is enabled or not")]
     public bool UserForumEnabled { get; set; }
 
     /// <summary>
-    /// User forum URL
-    /// </summary>
-    [OpenApiDescription("User forum URL")]
-    public string UserForumUrl { get; set; }
-
-    /// <summary>
     /// Specifies if the video guides are enabled or not
     /// </summary>
     [OpenApiDescription("Specifies if the video guides are enabled or not")]
     public bool VideoGuidesEnabled { get; set; }
-
-    /// <summary>
-    /// Video guides URL
-    /// </summary>
-    [OpenApiDescription("Video guides URL")]
-    public string VideoGuidesUrl { get; set; }
-
-    /// <summary>
-    /// Sales email
-    /// </summary>
-    [EmailAddress]
-    [OpenApiDescription("Sales email")]
-    public string SalesEmail { get; set; }
-
-    /// <summary>
-    /// URL to pay for the portal
-    /// </summary>
-    [OpenApiDescription("URL to pay for the portal")]
-    public string BuyUrl { get; set; }
 
     /// <summary>
     /// Specifies if the license agreements are enabled or not
@@ -100,12 +69,6 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     /// </summary>
     [OpenApiDescription("Specifies if these settings are default or not")]
     public bool IsDefault { get; set; }
-
-    /// <summary>
-    /// License agreements URL
-    /// </summary>
-    [OpenApiDescription("License agreements URL")]
-    public string LicenseAgreementsUrl { get; set; }
 
     public void Mapping(Profile profile)
     {

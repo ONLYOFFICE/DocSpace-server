@@ -184,34 +184,10 @@ public class SettingsDto
     public string TenantAlias { get; set; }
 
     /// <summary>
-    /// Link to the help
-    /// </summary>
-    [OpenApiDescription("Link to the help")]
-    public string HelpLink { get; set; }
-    
-    /// <summary>
-    /// Link to the feedback and support
-    /// </summary>
-    [OpenApiDescription("Link to the feedback and support")]
-    public string FeedbackAndSupportLink { get; set; }
-
-    /// <summary>
-    /// Link to the forum
-    /// </summary>
-    [OpenApiDescription("Link to the forum")]
-    public string ForumLink { get; set; }
-
-    /// <summary>
     /// Specifies whether to display the About section
     /// </summary>
     [OpenApiDescription("Specifies whether to display the About section")]
     public bool DisplayAbout { get; set; }
-
-    /// <summary>
-    /// API documentation link
-    /// </summary>
-    [OpenApiDescription("API documentation link")]
-    public string ApiDocsLink { get; set; }
 
     /// <summary>
     /// Domain validator
@@ -230,30 +206,6 @@ public class SettingsDto
     /// </summary>
     [OpenApiDescription("Tag manager ID")]
     public string TagManagerId { get; set; }
-
-    /// <summary>
-    /// Email for training booking
-    /// </summary>
-    [OpenApiDescription("Email for training booking")]
-    public string BookTrainingEmail { get; set; }
-
-    /// <summary>
-    /// Documentation email
-    /// </summary>
-    [OpenApiDescription("Documentation email")]
-    public string DocumentationEmail { get; set; }
-
-    /// <summary>
-    /// Legal terms
-    /// </summary>
-    [OpenApiDescription("Legal terms")]
-    public string LegalTerms { get; set; }
-
-    /// <summary>
-    /// License url
-    /// </summary>
-    [OpenApiDescription("License url")]
-    public string LicenseUrl { get; set; }
 
     /// <summary>
     /// Specifies whether the cookie settings are enabled
@@ -308,4 +260,10 @@ public class SettingsDto
     /// </summary>
     [OpenApiDescription("White label logo text")]
     public string LogoText { get; set; }
+
+    /// <summary>
+    /// External resources
+    /// </summary>
+    [OpenApiDescription("External resources")]
+    public CultureSpecificExternalResources ExternalResources { get; set; }
 }

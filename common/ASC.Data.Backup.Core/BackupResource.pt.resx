@@ -121,7 +121,7 @@
     <value>Definir palavra-passe</value>
   </data>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>O ficheiro da cópia de segurança é inválido. Por favor, utilize um ficheiro criado no ONLYOFFICE v11.5 ou noutra versão mais recente.</value>
+    <value>O ficheiro da cópia de segurança é inválido. Por favor utilize um ficheiro criado no mesmo portal.</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>O backup é maior que o tamanho total do portal</value>

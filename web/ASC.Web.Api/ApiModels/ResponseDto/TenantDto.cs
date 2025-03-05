@@ -166,6 +166,11 @@ public class TenantDto : IMapFrom<Tenant>
     [OpenApiDescription("The date and time when the tenant version was changed")]
     public DateTime VersionChanged { get; set; }
 
+    /// <summary>
+    /// AWS region
+    /// </summary>
+    public string Region { get; set; }
+
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Tenant, TenantDto>()

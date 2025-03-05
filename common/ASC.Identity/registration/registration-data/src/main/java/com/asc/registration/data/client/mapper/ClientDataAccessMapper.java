@@ -30,6 +30,7 @@ package com.asc.registration.data.client.mapper;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientStatus;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
@@ -82,15 +83,15 @@ public class ClientDataAccessMapper {
                 .map(s -> ScopeEntity.builder().name(s).build())
                 .collect(Collectors.toSet()))
         .createdOn(client.getClientCreationInfo().getCreatedOn())
-        .createdBy(client.getClientCreationInfo().getCreatedBy())
+        .createdBy(client.getClientCreationInfo().getCreatedBy().getValue())
         .modifiedOn(
             modified == null
                 ? client.getClientCreationInfo().getCreatedOn()
                 : modified.getModifiedOn())
         .modifiedBy(
             modified == null
-                ? client.getClientCreationInfo().getCreatedBy()
-                : modified.getModifiedBy())
+                ? client.getClientCreationInfo().getCreatedBy().getValue()
+                : modified.getModifiedBy().getValue())
         .version(client.getVersion())
         .build();
   }
@@ -123,12 +124,12 @@ public class ClientDataAccessMapper {
                     .collect(Collectors.toSet())))
         .clientCreationInfo(
             ClientCreationInfo.Builder.builder()
-                .createdBy(entity.getCreatedBy())
+                .createdBy(new UserId(entity.getCreatedBy()))
                 .createdOn(entity.getCreatedOn())
                 .build())
         .clientModificationInfo(
             ClientModificationInfo.Builder.builder()
-                .modifiedBy(entity.getModifiedBy())
+                .modifiedBy(new UserId(entity.getModifiedBy()))
                 .modifiedOn(entity.getModifiedOn())
                 .build())
         .clientStatus(entity.isEnabled() ? ClientStatus.ENABLED : ClientStatus.DISABLED)
@@ -224,15 +225,15 @@ public class ClientDataAccessMapper {
     dynamoEntity.setEnabled(client.getStatus().equals(ClientStatus.ENABLED));
     dynamoEntity.setScopes(client.getScopes());
     dynamoEntity.setCreatedOn(client.getClientCreationInfo().getCreatedOn().toString());
-    dynamoEntity.setCreatedBy(client.getClientCreationInfo().getCreatedBy());
+    dynamoEntity.setCreatedBy(client.getClientCreationInfo().getCreatedBy().getValue());
     dynamoEntity.setModifiedOn(
         modified != null
             ? modified.getModifiedOn().toString()
             : client.getClientCreationInfo().getCreatedOn().toString());
     dynamoEntity.setModifiedBy(
         modified != null
-            ? modified.getModifiedBy()
-            : client.getClientCreationInfo().getCreatedBy());
+            ? modified.getModifiedBy().getValue()
+            : client.getClientCreationInfo().getCreatedBy().getValue());
     return dynamoEntity;
   }
 
@@ -269,12 +270,12 @@ public class ClientDataAccessMapper {
                     .collect(Collectors.toSet())))
         .clientCreationInfo(
             ClientCreationInfo.Builder.builder()
-                .createdBy(dynamoEntity.getCreatedBy())
+                .createdBy(new UserId(dynamoEntity.getCreatedBy()))
                 .createdOn(ZonedDateTime.parse(dynamoEntity.getCreatedOn()))
                 .build())
         .clientModificationInfo(
             ClientModificationInfo.Builder.builder()
-                .modifiedBy(dynamoEntity.getModifiedBy())
+                .modifiedBy(new UserId(dynamoEntity.getModifiedBy()))
                 .modifiedOn(ZonedDateTime.parse(dynamoEntity.getModifiedOn()))
                 .build())
         .clientStatus(dynamoEntity.isEnabled() ? ClientStatus.ENABLED : ClientStatus.DISABLED)

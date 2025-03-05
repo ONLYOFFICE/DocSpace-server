@@ -153,6 +153,13 @@ public class PaymentController(UserManager userManager,
         }
 
         var tenant = tenantManager.GetCurrentTenant();
+        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
+
+        if (!hasPayments)
+        {
+            return null;
+        }
+
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
