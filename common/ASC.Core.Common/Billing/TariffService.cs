@@ -171,7 +171,7 @@ public class TariffService(
                     }
                     catch (BillingNotFoundException billingNotFoundException)
                     {
-                        if (tariff.Id != 0 && tariff.State == TariffState.Paid)
+                        if (tariff.Id != 0 && tariff.State == TariffState.Paid && !await IsFreeTariffAsync(tariff))
                         {
                             LogError(billingNotFoundException, tenantId.ToString());
 
@@ -191,19 +191,9 @@ public class TariffService(
 
                     if (tariff.Id == 0)
                     {
-                        var freeTariff = await tariff.Quotas.ToAsyncEnumerable().FirstOrDefaultAwaitAsync(async tariffRow =>
-                        {
-                            var q = await quotaService.GetTenantQuotaAsync(tariffRow.Id);
-                            return q == null
-                                   || (TrialEnabled && q.Trial)
-                                   || q.Free
-                                   || q.NonProfit
-                                   || q.Custom;
-                        });
-
                         var asynctariff = await CreateDefaultAsync();
 
-                        if (freeTariff == null)
+                        if (!await IsFreeTariffAsync(tariff))
                         {
                             asynctariff.DueDate = DateTime.Today.AddDays(-1);
                             asynctariff.State = TariffState.NotPaid;
@@ -833,6 +823,21 @@ public class TariffService(
         }
 
         return result;
+    }
+
+    private async Task<bool> IsFreeTariffAsync(Tariff tariff)
+    {
+        var freeTariff = await tariff.Quotas.ToAsyncEnumerable().FirstOrDefaultAwaitAsync(async tariffRow =>
+        {
+            var q = await quotaService.GetTenantQuotaAsync(tariffRow.Id);
+            return q == null
+                   || (TrialEnabled && q.Trial)
+                   || q.Free
+                   || q.NonProfit
+                   || q.Custom;
+        });
+
+        return freeTariff != null;
     }
 
     public int GetPaymentDelay()
