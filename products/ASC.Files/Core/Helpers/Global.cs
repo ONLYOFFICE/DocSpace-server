@@ -372,7 +372,7 @@ public class GlobalFolder(
     SettingsManager settingsManager,
     ILogger<GlobalFolder> logger,
     IServiceProvider serviceProvider,
-    AscDistributedCache distributedCache)
+    IFusionCache cache)
 {
     internal static readonly IDictionary<int, int> ProjectsRootFolderCache = new ConcurrentDictionary<int, int>(); /*Use SYNCHRONIZED for cross thread blocks*/
 
@@ -457,7 +457,7 @@ public class GlobalFolder(
     public async Task ClearCacheFolderMyAsync(Guid userId)
     {
         var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{userId}";
-        await distributedCache.RemoveAsync(cacheKey);
+        await cache.RemoveAsync(cacheKey);
     }
 
 
@@ -475,7 +475,7 @@ public class GlobalFolder(
 
         var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{authContext.CurrentAccount.ID}";
 
-        var myFolderId = await distributedCache.GetAsync<int>(cacheKey);
+        var myFolderId = await cache.GetOrDefaultAsync<int>(cacheKey);
         if (myFolderId == 0)
         {
             myFolderId = await GetFolderIdAndProcessFirstVisitAsync(daoFactory, true);
