@@ -26,72 +26,69 @@
 
 using ASC.Webhooks.Core.EF.Model;
 
-using net.openstack.Core;
-
 namespace ASC.Web.Files.Utils;
 
 [Scope]
 public class WebhookManager(
+    IDaoFactory daoFactory,
+    IWebhookPublisher webhookPublisher,
+    WebhookFileEntryAccessChecker webhookFileEntryAccessChecker)
+{
+    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
+    {
+        return await webhookPublisher.GetWebhookConfigsAsync(trigger, webhookFileEntryAccessChecker, fileEntry);
+    }
+
+    public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, FileEntry<T> fileEntry)
+    {
+        if (fileEntry is File<T>)
+        {
+            var cleanFileEntry = await daoFactory.GetFileDao<T>().GetFileAsync(fileEntry.Id);
+            await webhookPublisher.PublishAsync(trigger, webhookConfigs, cleanFileEntry);
+        }
+
+        if (fileEntry is Folder<T>)
+        {
+            var cleanFolderEntry = await daoFactory.GetFolderDao<T>().GetFolderAsync(fileEntry.Id);
+            await webhookPublisher.PublishAsync(trigger, webhookConfigs, cleanFolderEntry);
+        }
+    }
+
+    public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
+    {
+        if (fileEntry is File<T>)
+        {
+            var cleanFileEntry = await daoFactory.GetFileDao<T>().GetFileAsync(fileEntry.Id);
+            await webhookPublisher.PublishAsync(trigger, webhookFileEntryAccessChecker, cleanFileEntry);
+        }
+
+        if (fileEntry is Folder<T>)
+        {
+            var cleanFolderEntry = await daoFactory.GetFolderDao<T>().GetFolderAsync(fileEntry.Id);
+            await webhookPublisher.PublishAsync(trigger, webhookFileEntryAccessChecker, cleanFolderEntry);
+        }
+    }
+}
+
+[Scope]
+public class WebhookFileEntryAccessChecker(
     TenantManager tenantManager,
     UserManager userManager,
-    FileSecurity fileSecurity,
-    IServiceProvider serviceProvider,
-    IWebhookPublisher webhookPublisher)
+    FileSecurity fileSecurity) : IWebhookAccessChecker<object>
 {
-
-    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> entry)
+    public async Task<bool> CheckAccessAsync(object fileEntry, Guid userId)
     {
-        var whoCanRead = await GetWhoCanRead(entry);
-
-        var result = await webhookPublisher.GetWebhookConfigsAsync(trigger, CanRead);
-
-        //async Task<bool> CanRead(Guid userId)
-        //{
-        //    return await fileSecurity.CanReadAsync(entry, userId);
-        //}
-
-        Task<bool> CanRead(Guid userId)
+        if (fileEntry is FileEntry<int> fileEntryInt)
         {
-            return Task.FromResult(whoCanRead.Contains(userId));
+            return await fileSecurity.CanReadAsync(fileEntryInt, userId);
         }
 
-        return result;
-    }
-
-    public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, FileEntry<T> entry)
-    {
-        var data = await Convert(entry);
-
-        await webhookPublisher.PublishAsync(trigger, webhookConfigs, data);
-    }
-
-    public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> entry)
-    {
-        var whoCanRead = await GetWhoCanRead(entry);
-
-        var data = await Convert(entry);
-
-        await webhookPublisher.PublishAsync(trigger, CanRead, data);
-
-        //async Task<bool> CanRead(Guid userId)
-        //{
-        //    return await fileSecurity.CanReadAsync(entry, userId);
-        //}
-
-        Task<bool> CanRead(Guid userId)
+        if (fileEntry is FileEntry<string> fileEntryString)
         {
-            return Task.FromResult(whoCanRead.Contains(userId));
+            return await fileSecurity.CanReadAsync(fileEntryString, userId);
         }
-    }
 
-    private async Task<FileEntryDto<T>> Convert<T>(FileEntry<T> entry)
-    {
-        return entry switch
-        {
-            File<T> file => await serviceProvider.GetRequiredService<FileDtoHelper>().GetAsync(file),
-            Folder<T> folder => await serviceProvider.GetRequiredService<FolderDtoHelper>().GetAsync(folder),
-            _ => null
-        };
+        return false;
     }
 
     private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)

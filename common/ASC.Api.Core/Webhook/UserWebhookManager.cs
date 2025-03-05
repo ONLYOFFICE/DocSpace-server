@@ -31,46 +31,49 @@ namespace ASC.Api.Core.Webhook;
 
 [Scope]
 public class UserWebhookManager(
-    UserManager userManager,
     IWebhookPublisher webhookPublisher,
-    EmployeeFullDtoHelper employeeFullDtoHelper,
-    GroupFullDtoHelper groupFullDtoHelper,
-    AuthManager authentication,
-    IPermissionResolver permissionResolver)
+    WebhookGroupAccessChecker webhookGroupAccessChecker,
+    WebhookUserAccessChecker webhookUserAccessChecker)
 {
-
     public async Task PublishAsync(WebhookTrigger trigger, UserInfo userInfo)
     {
-        var data = await employeeFullDtoHelper.GetFullAsync(userInfo);
-
-        await webhookPublisher.PublishAsync(trigger, CanRead, data);
-
-        async Task<bool> CanRead(Guid userId)
-        {
-            var sourceUser = await userManager.GetUsersAsync(userId);
-
-            return await userManager.CanUserViewAnotherUserAsync(sourceUser, userInfo);
-        }
+        await webhookPublisher.PublishAsync(trigger, webhookUserAccessChecker, userInfo);
     }
 
     public async Task PublishAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
     {
-        var data = await groupFullDtoHelper.Get(groupInfo, true);
+        await webhookPublisher.PublishAsync(trigger, webhookGroupAccessChecker, groupInfo);
+    }
+}
 
-        await webhookPublisher.PublishAsync(trigger, CanRead, data);
+[Scope]
+public class WebhookGroupAccessChecker(
+    AuthManager authentication,
+    UserManager userManager,
+    IPermissionResolver permissionResolver) : IWebhookAccessChecker<ASC.Core.Users.GroupInfo>
+{
+    public async Task<bool> CheckAccessAsync(ASC.Core.Users.GroupInfo data, Guid userId)
+    {
+        var user = await userManager.GetUsersAsync(userId);
 
-        async Task<bool> CanRead(Guid userId)
+        if (await userManager.IsDocSpaceAdminAsync(user))
         {
-            var user = await userManager.GetUsersAsync(userId);
-
-            if (await userManager.IsDocSpaceAdminAsync(user))
-            {
-                return true;
-            }
-
-            var account = await authentication.GetAccountByIDAsync(user.TenantId, user.Id);
-
-            return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
+            return true;
         }
+
+        var account = await authentication.GetAccountByIDAsync(user.TenantId, user.Id);
+
+        return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
+    }
+}
+
+[Scope]
+public class WebhookUserAccessChecker(UserManager userManager) : IWebhookAccessChecker<UserInfo>
+{
+    public async Task<bool> CheckAccessAsync(UserInfo data, Guid userId)
+    {
+        var user = await userManager.GetUsersAsync(userId);
+
+        return await userManager.CanUserViewAnotherUserAsync(user, data);
     }
 }
