@@ -6859,8 +6859,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("client_secret");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("created_by");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -6899,8 +6899,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("logout_redirect_uri");
 
                     b.Property<string>("ModifiedBy")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime?>("ModifiedOn")
@@ -6941,8 +6941,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "ClientId" }, "UK_client_id")
                         .IsUnique();
 
-                    b.HasIndex(new[] { "ClientSecret" }, "UK_client_secret")
-                        .IsUnique();
+                    b.HasIndex(new[] { "ClientSecret" }, "idx_client_secret");
 
                     b.HasIndex(new[] { "TenantId" }, "idx_identity_clients_tenant_id");
 

@@ -47,7 +47,27 @@ public class Startup : BaseStartup
 
         await base.ConfigureServices(builder);
 
-        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder<FileDeleteOperation>.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        {
+            x.MaxThreadsCount = 10;
+        });
+        
+        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder<FileDownloadOperation>.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        {
+            x.MaxThreadsCount = 10;
+        });
+        
+        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder<FileMoveCopyOperation>.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        {
+            x.MaxThreadsCount = 10;
+        });
+        
+        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder<FileMarkAsReadOperation>.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        {
+            x.MaxThreadsCount = 10;
+        });
+        
+        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder<FileDownloadOperation>.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
         {
             x.MaxThreadsCount = 10;
         });

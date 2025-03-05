@@ -28,7 +28,6 @@ global using System.Collections.Concurrent;
 global using System.Collections.Frozen;
 global using System.Collections.Immutable;
 global using System.ComponentModel.DataAnnotations;
-global using System.Data;
 global using System.Diagnostics;
 global using System.Extensions;
 global using System.Globalization;
@@ -58,7 +57,6 @@ global using ASC.Api.Utils;
 global using ASC.AuditTrail;
 global using ASC.AuditTrail.Models;
 global using ASC.AuditTrail.Repositories;
-global using ASC.AuditTrail.Types;
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;
@@ -87,7 +85,6 @@ global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Common.Users;
-global using ASC.Core.Notify.Senders;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
@@ -211,7 +208,6 @@ global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Storage;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
@@ -223,7 +219,6 @@ global using Microsoft.SharePoint.Client;
 
 global using NetEscapades.EnumGenerators;
 
-global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
 
 global using OpenSearch.Client;
@@ -231,6 +226,8 @@ global using OpenSearch.Client;
 global using ProtoBuf;
 
 global using WebDav;
+
+global using ZiggyCreatures.Caching.Fusion;
 
 global using static ASC.Files.Core.Data.AbstractDao;
 global using static ASC.Files.Core.Helpers.DocumentService;

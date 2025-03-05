@@ -45,9 +45,12 @@ public record FileMarkAsReadOperationData<T> : FileOperationData<T>
 }
 
 [Transient]
-public class FileMarkAsReadOperation(IServiceProvider serviceProvider) : 
-    ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(serviceProvider)
+public class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>
 {
+    public FileMarkAsReadOperation() { }
+    
+    public FileMarkAsReadOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+
     protected override FileOperationType FileOperationType { get => FileOperationType.MarkAsRead; }
     
     public override Task RunJob(CancellationToken cancellationToken)

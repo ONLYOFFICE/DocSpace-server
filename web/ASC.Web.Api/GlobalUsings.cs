@@ -163,13 +163,14 @@ global using MailKit.Security;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using MimeKit;
 
 global using Swashbuckle.AspNetCore.Annotations;
+
+global using ZiggyCreatures.Caching.Fusion;
 
 global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
 

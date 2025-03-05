@@ -393,7 +393,7 @@ public abstract class BaseStartup
         }
 
 
-        services.AddDistributedCache(connectionMultiplexer)
+        services.AddHybridCache(connectionMultiplexer)
             .AddEventBus(_configuration)
             .AddDistributedTaskQueue()
             .AddCacheNotify(_configuration)

@@ -524,16 +524,16 @@
     <value>Օգտատեր</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Մի քանի ֆայլ տեղափոխելը Ձևաթղթերի լրացման սենյակ չի աջակցվում: Միանգամից տեղափոխեք մեկ ONLYOFFICE PDF ձև:</value>
+    <value>Մի քանի ֆայլ տեղափոխելը Ձևաթղթերի լրացման սենյակ չի աջակցվում: Միանգամից տեղափոխեք մեկ {0} PDF ձև:</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Թղթապանակների տեղափոխումը Ձևաթղթերի լրացման սենյակ չի աջակցվում: Միանգամից տեղափոխեք մեկ ONLYOFFICE PDF ձև:</value>
+    <value>Թղթապանակների տեղափոխումը Ձևաթղթերի լրացման սենյակ չի աջակցվում: Միանգամից տեղափոխեք մեկ {0} PDF ձև:</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Ֆայլը չի կարող տեղափոխվել այս սենյակ: Խնդրում ենք փորձել տեղափոխել ONLYOFFICE PDF ձևը:</value>
+    <value>Ֆայլը չի կարող տեղափոխվել այս սենյակ: Խնդրում ենք փորձել տեղափոխել {0} PDF ձևը:</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Ֆայլը չի կարող վերբեռնվել այս սենյակ: Խնդրում ենք փորձել վերբեռնել ONLYOFFICE PDF ձևը:</value>
+    <value>Ֆայլը չի կարող վերբեռնվել այս սենյակ: Խնդրում ենք փորձել վերբեռնել {0} PDF ձևը:</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Հղում լրացնելու համար</value>

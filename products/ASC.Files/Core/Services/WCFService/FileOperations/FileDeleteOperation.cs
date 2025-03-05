@@ -68,8 +68,12 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
 }
 
 [Transient]
-public class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>(serviceProvider)
+public class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>
 {
+    public FileDeleteOperation() { }
+    
+    public FileDeleteOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+
     protected override FileOperationType FileOperationType { get => FileOperationType.Delete; }
 
     public override Task RunJob(CancellationToken cancellationToken)

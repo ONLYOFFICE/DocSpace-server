@@ -31,6 +31,7 @@ public class FileUploader(
     FileUtility fileUtility,
     UserManager userManager,
     TenantManager tenantManager,
+    TenantLogoManager tenantLogoManager,
     AuthContext authContext,
     SetupInfo setupInfo,
     MaxTotalSizeStatistic maxTotalSizeStatistic,
@@ -325,7 +326,9 @@ public class FileUploader(
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
                     if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)
                     {
-                        throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                        var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+                        throw new Exception(string.Format(FilesCommonResource.ErrorMessage_UploadToFormRoom, logoText));
                     }
                 }
 

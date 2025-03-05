@@ -69,6 +69,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -86,6 +87,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(
     value = "${spring.application.web.api}/clients",
     produces = {MediaType.APPLICATION_JSON_VALUE})
+@PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
 public class ClientCommandController {
   /** The name of the current service. */
   @Value("${spring.application.name}")
@@ -224,6 +226,7 @@ public class ClientCommandController {
       setLoggingParameters(principal);
       clientApplicationService.updateClient(
           buildAudit(clientId, request, principal, AuditCode.UPDATE_CLIENT),
+          principal.getRole(),
           UpdateTenantClientCommand.builder()
               .name(command.getName())
               .description(command.getDescription())
@@ -278,6 +281,7 @@ public class ClientCommandController {
       return ResponseEntity.ok(
           clientApplicationService.regenerateSecret(
               buildAudit(clientId, request, principal, AuditCode.REGENERATE_SECRET),
+              principal.getRole(),
               RegenerateTenantClientSecretCommand.builder()
                   .clientId(clientId)
                   .tenantId(principal.getTenantId())
@@ -320,6 +324,7 @@ public class ClientCommandController {
             description = "Internal server error",
             content = @Content)
       })
+  @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'GUEST')")
   public ResponseEntity<?> revokeUserClient(
       HttpServletRequest request,
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
@@ -405,6 +410,7 @@ public class ClientCommandController {
       // and consents on a delete attempt no matter the outcome of that delete
       clientApplicationService.deleteClient(
           buildAudit(clientId, request, principal, AuditCode.DELETE_CLIENT),
+          principal.getRole(),
           DeleteTenantClientCommand.builder()
               .clientId(clientId)
               .tenantId(principal.getTenantId())
@@ -457,6 +463,7 @@ public class ClientCommandController {
       setLoggingParameters(principal);
       clientApplicationService.changeActivation(
           buildAudit(clientId, request, principal, AuditCode.CHANGE_CLIENT_ACTIVATION),
+          principal.getRole(),
           ChangeTenantClientActivationCommand.builder()
               .clientId(clientId)
               .tenantId(principal.getTenantId())

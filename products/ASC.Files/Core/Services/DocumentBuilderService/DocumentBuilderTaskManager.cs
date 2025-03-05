@@ -26,33 +26,29 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-[Singleton]
-public class DocumentBuilderTaskManager
+[Singleton(GenericArguments = [typeof(FormFillingReportTask), typeof(int), typeof(FormFillingReportTaskData)])]
+[Singleton(GenericArguments = [typeof(RoomIndexExportTask), typeof(int), typeof(RoomIndexExportTaskData)])]
+public class DocumentBuilderTaskManager<T, TId, TData> where T : DocumentBuilderTask<TId, TData>
 {
     private static readonly SemaphoreSlim _semaphore = new(1);
 
-    private readonly DistributedTaskQueue _queue;
+    private readonly DistributedTaskQueue<T> _queue;
 
     public DocumentBuilderTaskManager(IDistributedTaskQueueFactory queueFactory)
     {
-        _queue = queueFactory.CreateQueue(GetType());
+        _queue = queueFactory.CreateQueue<T>();
     }
-
-    public static string GetTaskId(int tenantId, Guid userId)
+    
+    public async Task<T> GetTask(int tenantId, Guid userId)
     {
-        return $"DocumentBuilderTask_{tenantId}_{userId}";
-    }
-
-    public async Task<DistributedTaskProgress> GetTask(int tenantId, Guid userId)
-    {
-        var taskId = GetTaskId(tenantId, userId);
+        var taskId = DocumentBuilderTaskManager.GetTaskId(tenantId, userId);
 
         return await GetTask(taskId);
     }
 
-    private async Task<DistributedTaskProgress> GetTask(string taskId)
+    private async Task<T> GetTask(string taskId)
     {
-        return await _queue.PeekTask<DistributedTaskProgress>(taskId);
+        return await _queue.PeekTask(taskId);
     }
 
     public async Task TerminateTask(int tenantId, Guid userId)
@@ -65,7 +61,7 @@ public class DocumentBuilderTaskManager
         }
     }
 
-    public async Task<DistributedTaskProgress> StartTask<T, TData>(DocumentBuilderTask<T, TData> newTask, bool enqueueTask = true)
+    public async Task<T> StartTask(T newTask, bool enqueueTask = true)
     {
         try
         {
@@ -98,5 +94,13 @@ public class DocumentBuilderTaskManager
         {
             _semaphore.Release();
         }
+    }
+}
+
+public static class DocumentBuilderTaskManager
+{
+    public static string GetTaskId(int tenantId, Guid userId)
+    {
+        return $"DocumentBuilderTask_{tenantId}_{userId}";
     }
 }

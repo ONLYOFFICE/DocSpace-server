@@ -31,7 +31,7 @@ public class FoldersControllerInternal(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -87,7 +87,7 @@ public class FoldersControllerThirdparty(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -107,7 +107,7 @@ public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -141,7 +141,7 @@ public abstract class FoldersController<T>(
     [HttpDelete("folder/{folderId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolder<T> inDto)
     {
-        await fileOperationsManager.PublishDelete(new List<T> { inDto.FolderId }, new List<T>(), false, !inDto.Delete.DeleteAfter, inDto.Delete.Immediately);
+        await fileOperationsManager.Publish(new List<T> { inDto.FolderId }, new List<T>(), false, !inDto.Delete.DeleteAfter, inDto.Delete.Immediately);
         
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
