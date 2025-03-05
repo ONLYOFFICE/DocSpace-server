@@ -96,3 +96,5 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using MySql.Data.MySqlClient;
 global using ProtoBuf;
+
+global using ZiggyCreatures.Caching.Fusion;

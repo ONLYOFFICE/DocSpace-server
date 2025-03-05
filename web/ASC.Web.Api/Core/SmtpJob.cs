@@ -24,19 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#nullable enable
-
 using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace ASC.Api.Settings.Smtp;
 
 [Transient]
-public class SmtpJob(UserManager userManager,
-        SecurityContext securityContext,
-        TenantManager tenantManager,
-        ILogger<SmtpJob> logger)
-    : DistributedTaskProgress
+public class SmtpJob : DistributedTaskProgress
 {
     private int? _tenantId;
     public int TenantId
@@ -49,7 +43,7 @@ public class SmtpJob(UserManager userManager,
         }
     }
 
-    private string? _currentOperation;
+    private string _currentOperation;
     public string CurrentOperation
     {
         get => _currentOperation ?? this[nameof(_currentOperation)];
@@ -62,6 +56,26 @@ public class SmtpJob(UserManager userManager,
 
     private Guid _currentUser;
     private SmtpSettingsDto _smtpSettings = new();
+    private readonly UserManager _userManager;
+    private readonly SecurityContext _securityContext;
+    private readonly TenantManager _tenantManager;
+    private readonly ILogger<SmtpJob> _logger;
+
+    public SmtpJob()
+    {
+        
+    }
+    
+    public SmtpJob(UserManager userManager,
+        SecurityContext securityContext,
+        TenantManager tenantManager,
+        ILogger<SmtpJob> logger)
+    {
+        _userManager = userManager;
+        _securityContext = securityContext;
+        _tenantManager = tenantManager;
+        _logger = logger;
+    }
 
     public void Init(SmtpSettingsDto smtpSettings, int tenant, Guid user)
     {
@@ -77,15 +91,15 @@ public class SmtpJob(UserManager userManager,
         {
             await SetProgress(5, "Setup tenant");
 
-            await tenantManager.SetCurrentTenantAsync(TenantId);
+            await _tenantManager.SetCurrentTenantAsync(TenantId);
 
             await SetProgress(10, "Setup user");
 
-            await securityContext.AuthenticateMeWithoutCookieAsync(_currentUser);
+            await _securityContext.AuthenticateMeWithoutCookieAsync(_currentUser);
 
             await SetProgress(15, "Find user data");
 
-            var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+            var currentUser = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
 
             await SetProgress(20, "Create mime message");
 
@@ -142,7 +156,7 @@ public class SmtpJob(UserManager userManager,
         catch (AuthorizingException authError)
         {
             Exception = new SecurityException(Resource.ErrorAccessDenied, authError);
-            logger.ErrorWithException(Exception);
+            _logger.ErrorWithException(Exception);
         }
         catch (AggregateException ae)
         {
@@ -151,17 +165,17 @@ public class SmtpJob(UserManager userManager,
         catch (SocketException ex)
         {
             Exception = ex; //TODO: Add translates of ordinary cases
-            logger.ErrorWithException(ex);
+            _logger.ErrorWithException(ex);
         }
         catch (AuthenticationException ex)
         {
             Exception = ex; //TODO: Add translates of ordinary cases
-            logger.ErrorWithException(ex);
+            _logger.ErrorWithException(ex);
         }
         catch (Exception ex)
         {
             Exception = ex; //TODO: Add translates of ordinary cases
-            logger.ErrorWithException(ex);
+            _logger.ErrorWithException(ex);
         }
         finally
         {
@@ -170,16 +184,16 @@ public class SmtpJob(UserManager userManager,
                 IsCompleted = true;
                 await PublishChanges();
 
-                securityContext.Logout();
+                _securityContext.Logout();
             }
             catch (Exception ex)
             {
-                logger.ErrorLdapOperationFinalizationProblem(ex);
+                _logger.ErrorLdapOperationFinalizationProblem(ex);
             }
         }
     }
 
-    private async Task SetProgress(int percentage, string? status = null)
+    private async Task SetProgress(int percentage, string status = null)
     {
         Percentage = percentage;
         CurrentOperation = status ?? CurrentOperation;

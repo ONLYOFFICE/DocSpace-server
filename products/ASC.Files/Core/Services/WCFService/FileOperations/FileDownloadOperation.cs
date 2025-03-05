@@ -56,8 +56,12 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
 public record FilesDownloadOperationItem<T>(T Id, string Ext, string Password);
 
 [Transient]
-public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>(serviceProvider)
-{    
+public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
+{
+    public FileDownloadOperation() { }
+    
+    public FileDownloadOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+
     protected override FileOperationType FileOperationType { get => FileOperationType.Download; }
     
     public override async Task RunJob(CancellationToken cancellationToken)

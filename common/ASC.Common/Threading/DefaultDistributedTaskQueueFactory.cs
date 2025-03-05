@@ -26,24 +26,13 @@
 
 namespace ASC.Common.Threading;
 
-public class DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider,
-                                              IOptionsMonitor<DistributedTaskQueueFactoryOptions> options)
-    : IDistributedTaskQueueFactory
-    {
-    public DistributedTaskQueue CreateQueue<T>(int timeUntilUnregisterInSeconds = 60) where T : DistributedTask
-    {
-        return CreateQueue(typeof(T).FullName, timeUntilUnregisterInSeconds);
-    }
-
-    public DistributedTaskQueue CreateQueue(Type type, int timeUntilUnregisterInSeconds = 60)
-    {
-        return CreateQueue(type.FullName, timeUntilUnregisterInSeconds);
-    }
-
-    public DistributedTaskQueue CreateQueue(string name = null, int timeUntilUnregisterInSeconds = 60)
+public class DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider, IOptionsMonitor<DistributedTaskQueueFactoryOptions> options) : IDistributedTaskQueueFactory 
+{
+        
+    public DistributedTaskQueue<T> CreateQueue<T>(string name = null, int timeUntilUnregisterInSeconds = 60) where T : DistributedTask
     {
         var option = options.Get(name);
-        var queue = serviceProvider.GetRequiredService<DistributedTaskQueue>();
+        var queue = serviceProvider.GetRequiredService<DistributedTaskQueue<T>>();
 
         queue.MaxThreadsCount = option.MaxThreadsCount;
         queue.Name = name;

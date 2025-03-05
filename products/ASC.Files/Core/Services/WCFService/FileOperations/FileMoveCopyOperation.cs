@@ -60,8 +60,11 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
 }
 
 [Transient]
-public class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(serviceProvider)
+public class FileMoveCopyOperation : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>
 {
+    public FileMoveCopyOperation() { }
+    public FileMoveCopyOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+
     protected override FileOperationType FileOperationType => FileOperationType.Copy;
 
     public void Init(bool holdResult, bool copy)
