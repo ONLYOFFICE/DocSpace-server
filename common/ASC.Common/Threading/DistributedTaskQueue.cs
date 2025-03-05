@@ -38,13 +38,8 @@ public class DistributedTaskQueue<T>(
 
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancelations = new();
     private bool _subscribed;
-
-    /// <summary>
-    /// setup -1 for infinity thread counts
-    /// </summary>
     private int _maxThreadsCount = 1;
     private string _name;
-    private TaskScheduler Scheduler { get; set; } = TaskScheduler.Default;
 
     public int TimeUntilUnregisterInSeconds { get; set; }
 
@@ -63,10 +58,6 @@ public class DistributedTaskQueue<T>(
 
         set
         {
-            Scheduler = value <= 0
-                ? TaskScheduler.Default
-                : new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, value).ConcurrentScheduler;
-
             if (value > 0)
             {
                 _maxThreadsCount = value;
@@ -105,8 +96,7 @@ public class DistributedTaskQueue<T>(
         distributedTask.Status = DistributedTaskStatus.Running;
 
         await PublishTask(distributedTask);
-
-
+        
         logger.TraceEnqueueTask(distributedTask.Id, INSTANCE_ID);
 
     }
@@ -226,18 +216,20 @@ public class DistributedTaskQueue<T>(
 }
 
 public class DistributedTaskQueueService<T>(
-    ChannelReader<T> channelReader,
-    IConfiguration configuration
+    IServiceProvider serviceProvider,
+    ChannelReader<T> channelReader
 ) : BackgroundService   where T : DistributedTask
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    { 
-        if(!int.TryParse(configuration["web:hub:maxDegreeOfParallelism"], out var maxDegreeOfParallelism))
+    {
+        int maxDegreeOfParallelism;
+        await using (var scope = serviceProvider.CreateAsyncScope())
         {
-            maxDegreeOfParallelism = 10;
+            var queue = scope.ServiceProvider.GetRequiredService<DistributedTaskQueue<T>>();
+            maxDegreeOfParallelism = queue.MaxThreadsCount;
         }
 
-        var readers = channelReader.Split(maxDegreeOfParallelism);
+        var readers = maxDegreeOfParallelism == 0 ? [channelReader] : channelReader.Split(maxDegreeOfParallelism, cancellationToken: stoppingToken);
         
         var tasks = readers.Select(reader1 => Task.Run(async () =>
         {
@@ -252,7 +244,7 @@ public class DistributedTaskQueueService<T>(
         await Task.WhenAll(tasks);
     }
 
-    private async Task OnCompleted(Task task, DistributedTask distributedTask)
+    private static async Task OnCompleted(Task task, DistributedTask distributedTask)
     {
         distributedTask.Status = DistributedTaskStatus.Completed;
         if (task.Exception != null)
