@@ -61,7 +61,8 @@ public class FileMarkerCache
     }
 }
 
-[Singleton]
+[Singleton(GenericArguments = [typeof(int)])]
+[Singleton(GenericArguments = [typeof(string)])]
 public class FileMarkerHelper<T>
 {
     private const string CustomDistributedTaskQueueName = "file_marker";
