@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,47 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.ResponseDto;
+namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-public class DocServiceUrlDto
+public class DeepLinkConfigurationRequestsDto
 {
-    /// <summary>
-    /// Version
-    /// </summary>
-    public required string Version { get; set; }
-
-    /// <summary>
-    /// Doc service url api
-    /// </summary>
-    public required string DocServiceUrlApi { get; set; }
-
-    /// <summary>
-    /// Doc service url
-    /// </summary>
-    public required string DocServiceUrl { get; set; }
-
-    /// <summary>
-    /// Doc service url internal
-    /// </summary>
-    public required string DocServiceUrlInternal { get; set; }
-
-    /// <summary>
-    /// Doc service portal url
-    /// </summary>
-    public required string DocServicePortalUrl { get; set; }
-
-    /// <summary>
-    /// Doc service signature header
-    /// </summary>
-    public string DocServiceSignatureHeader { get; set; }
-
-    /// <summary>
-    /// Enable SSL verification
-    /// </summary>
-    public bool DocServiceSslVerification { get; set; }
-
-    /// <summary>
-    /// Is default
-    /// </summary>
-    public required bool IsDefault { get; set; }
+    public TenantDeepLinkSettings DeepLinkSettings { get; set; }
 }

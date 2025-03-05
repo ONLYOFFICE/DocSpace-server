@@ -24,47 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.ResponseDto;
+namespace ASC.Core.Tenants;
 
-public class DocServiceUrlDto
+[Serializable]
+public class TenantDeepLinkSettings: ISettings<TenantDeepLinkSettings>
 {
-    /// <summary>
-    /// Version
-    /// </summary>
-    public required string Version { get; set; }
+    [JsonIgnore]
+    public Guid ID
+    {
+        get { return new Guid("{926A6850-7C19-4744-B4AD-813DE3CD55B1}"); }
+    }
 
-    /// <summary>
-    /// Doc service url api
-    /// </summary>
-    public required string DocServiceUrlApi { get; set; }
+    public DeepLinkHandlingMode HandlingMode { get; set; }
 
-    /// <summary>
-    /// Doc service url
-    /// </summary>
-    public required string DocServiceUrl { get; set; }
+    public TenantDeepLinkSettings GetDefault()
+    {
+        return new TenantDeepLinkSettings();
+    }
+}
 
-    /// <summary>
-    /// Doc service url internal
-    /// </summary>
-    public required string DocServiceUrlInternal { get; set; }
-
-    /// <summary>
-    /// Doc service portal url
-    /// </summary>
-    public required string DocServicePortalUrl { get; set; }
-
-    /// <summary>
-    /// Doc service signature header
-    /// </summary>
-    public string DocServiceSignatureHeader { get; set; }
-
-    /// <summary>
-    /// Enable SSL verification
-    /// </summary>
-    public bool DocServiceSslVerification { get; set; }
-
-    /// <summary>
-    /// Is default
-    /// </summary>
-    public required bool IsDefault { get; set; }
+public enum DeepLinkHandlingMode
+{
+    ProvideChoice,
+    Web,
+    App
 }
