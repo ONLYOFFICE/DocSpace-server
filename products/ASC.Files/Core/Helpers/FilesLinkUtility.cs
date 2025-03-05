@@ -302,7 +302,7 @@ public class FilesLinkUtility
         await SetUrlSettingAsync(PortalUrlKey, value);
     }
 
-    private const string SignatureSecretKey = "signaturevalue";
+    private const string SignatureSecretKey = "secret:value";
 
     public string GetDocServiceSignatureSecret()
     {
@@ -314,7 +314,7 @@ public class FilesLinkUtility
         await SetSignatureSettingAsync(SignatureSecretKey, value);
     }
 
-    private const string SignatureHeaderKey = "signatureheader";
+    private const string SignatureHeaderKey = "secret:header";
 
     public string GetDocServiceSignatureHeader()
     {
@@ -579,7 +579,7 @@ public class FilesLinkUtility
 
     private string GetDefaultSignatureSetting(string key)
     {
-        return _configuration[$"files:docservice:secret:{key.Substring(9)}"]; //.Substring("signature".Length)
+        return _configuration[$"files:docservice:{key}"];
     }
 
     private async Task SetSignatureSettingAsync(string key, string value)
