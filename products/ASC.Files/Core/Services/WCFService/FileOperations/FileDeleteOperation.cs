@@ -51,12 +51,13 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
         IEnumerable<T> files,
         IEnumerable<int> versions,
         int tenantId,
+        Guid userId,
         IDictionary<string, string> headers,
         ExternalSessionSnapshot sessionSnapshot,
         bool holdResult = true,
         bool ignoreException = false,
         bool immediately = false,
-        bool isEmptyTrash = false) : base(folders, files, tenantId, headers, sessionSnapshot, holdResult)
+        bool isEmptyTrash = false) : base(folders, files, tenantId, userId, headers, sessionSnapshot, holdResult)
     {
         IgnoreException = ignoreException;
         Immediately = immediately;
@@ -118,8 +119,10 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
         var filesMessageService = serviceScope.ServiceProvider.GetService<FilesMessageService>();
         var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
+        var securityContext = serviceScope.ServiceProvider.GetService<SecurityContext>();
         
         await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
+        await securityContext.AuthenticateMeWithoutCookieAsync(CurrentUserId);
         
         var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
         externalShare.Initialize(SessionSnapshot);

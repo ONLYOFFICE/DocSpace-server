@@ -28,6 +28,7 @@ namespace ASC.Common.Threading;
 
 [Transient]
 public class DistributedTaskQueue<T>(
+    ChannelWriter<T> channelWriter,
     ICacheNotify<DistributedTaskCancelation> cancelTaskNotify,
     IFusionCache hybridCache,
     ILogger<DistributedTaskQueue<T>> logger)  where T : DistributedTask
@@ -99,20 +100,12 @@ public class DistributedTaskQueue<T>(
             _subscribed = true;
         }
 
-        var task = new Task(() =>
-        {
-            var t = distributedTask.RunJob(token);
-            t.ContinueWith(async a => await OnCompleted(a, distributedTask.Id), token).ConfigureAwait(false);
-            t.ConfigureAwait(false);
-        }, token, TaskCreationOptions.LongRunning);
-
-        _ = task.ConfigureAwait(false);
+        await channelWriter.WriteAsync(distributedTask, token);
 
         distributedTask.Status = DistributedTaskStatus.Running;
 
         await PublishTask(distributedTask);
 
-        task.Start(Scheduler);
 
         logger.TraceEnqueueTask(distributedTask.Id, INSTANCE_ID);
 
@@ -179,32 +172,6 @@ public class DistributedTaskQueue<T>(
         return distributedTask.Id;
     }
 
-    private async Task OnCompleted(Task task, string id)
-    {
-        var distributedTask = (await GetAllTasks()).FirstOrDefault(x => x.Id == id);
-        if (distributedTask != null)
-        {
-            distributedTask.Status = DistributedTaskStatus.Completed;
-            if (task.Exception != null)
-            {
-                distributedTask.Exception = task.Exception;
-            }
-            if (task.IsFaulted)
-            {
-                distributedTask.Status = DistributedTaskStatus.Failted;
-            }
-
-            if (task.IsCanceled)
-            {
-                distributedTask.Status = DistributedTaskStatus.Canceled;
-            }
-
-            _cancelations.TryRemove(id, out _);
-
-            await distributedTask.PublishChanges();
-        }
-    }
-
     private Func<DistributedTask, Task> GetPublication()
     {
         return async task =>
@@ -255,5 +222,54 @@ public class DistributedTaskQueue<T>(
     private bool IsOrphanCacheItem(T obj)
     {
         return obj.LastModifiedOn.AddSeconds(TimeUntilUnregisterInSeconds) < DateTime.UtcNow;
+    }
+}
+
+public class DistributedTaskQueueService<T>(
+    ChannelReader<T> channelReader,
+    IConfiguration configuration
+) : BackgroundService   where T : DistributedTask
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    { 
+        if(!int.TryParse(configuration["web:hub:maxDegreeOfParallelism"], out var maxDegreeOfParallelism))
+        {
+            maxDegreeOfParallelism = 10;
+        }
+
+        var readers = channelReader.Split(maxDegreeOfParallelism);
+        
+        var tasks = readers.Select(reader1 => Task.Run(async () =>
+        {
+            await foreach (var distributedTask in reader1.ReadAllAsync(stoppingToken))
+            {        
+                var task = distributedTask.RunJob(stoppingToken);
+                await task.ContinueWith(async t => await OnCompleted(t, distributedTask), stoppingToken);
+                await task.ConfigureAwait(false);
+            }
+        }, stoppingToken)).ToList();
+
+        await Task.WhenAll(tasks);
+    }
+
+    private async Task OnCompleted(Task task, DistributedTask distributedTask)
+    {
+        distributedTask.Status = DistributedTaskStatus.Completed;
+        if (task.Exception != null)
+        {
+            distributedTask.Exception = task.Exception;
+        }
+
+        if (task.IsFaulted)
+        {
+            distributedTask.Status = DistributedTaskStatus.Failted;
+        }
+
+        if (task.IsCanceled)
+        {
+            distributedTask.Status = DistributedTaskStatus.Canceled;
+        }
+
+        await distributedTask.PublishChanges();
     }
 }
