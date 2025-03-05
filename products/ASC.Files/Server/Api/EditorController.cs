@@ -520,7 +520,6 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
             DocServiceSignatureHeader = filesLinkUtility.GetDocServiceSignatureHeader(),
-            DocServiceSignatureSecret = "",
             DocServiceSslVerification = filesLinkUtility.GetDocServiceSslVerification(),
             IsDefault = filesLinkUtility.IsDefault
         };
