@@ -237,8 +237,7 @@ public class DistributedTaskQueueService<T>(
             await foreach (var distributedTask in reader1.ReadAllAsync(stoppingToken))
             {        
                 var task = distributedTask.RunJob(stoppingToken);
-                await task.ContinueWith(async t => await OnCompleted(t, distributedTask), stoppingToken);
-                await task.ConfigureAwait(false);
+                await task.ContinueWith(async t => await OnCompleted(t, distributedTask), stoppingToken).ConfigureAwait(false);
             }
         }, stoppingToken)).ToList();
 
