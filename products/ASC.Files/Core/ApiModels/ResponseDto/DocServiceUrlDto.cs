@@ -59,6 +59,16 @@ public class DocServiceUrlDto
     public required string DocServicePortalUrl { get; set; }
 
     /// <summary>
+    /// Doc service signature header
+    /// </summary>
+    public string DocServiceSignatureHeader { get; set; }
+
+    /// <summary>
+    /// Enable SSL verification
+    /// </summary>
+    public bool DocServiceSslVerification { get; set; }
+
+    /// <summary>
     /// Is default
     /// </summary>
     [OpenApiDescription("Is default")]

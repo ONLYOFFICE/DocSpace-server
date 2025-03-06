@@ -191,7 +191,10 @@ public static class NestedSchemaReferenceId
 
         var name = CustomSchemaId(type);
 
-        name = _generatedSchemas.Contains("ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto") ? name : $"{name}.{Guid.NewGuid()}";
+        if(name == "ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto")
+        {
+            return null;
+        }
 
         if (!_generatedSchemas.Contains(name)) 
         { 
