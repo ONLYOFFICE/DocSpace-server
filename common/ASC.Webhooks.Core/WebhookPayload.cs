@@ -35,11 +35,12 @@ public class WebhookPayload<T>
     public WebhookPayload(WebhookTrigger trigger, DbWebhooksConfig config, T data, Guid userId)
     {
         var now = DateTime.UtcNow;
+        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
 
         Action = new WebhookPayloadActionInfo
         {
             CreateBy = userId,
-            CreateOn = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second),
+            CreateOn = now,
             Id = (int)trigger,
             Trigger = trigger.ToStringFast()
         };
@@ -62,7 +63,8 @@ public class WebhookPayload<T>
             LastFailureOn = config.LastFailureOn,
             LastFailureContent = config.LastFailureContent,
             LastSuccessOn = config.LastSuccessOn,
-            RetryCount = 0
+            RetryCount = 0,
+            RetryOn = now
         };
     }
 }
@@ -87,6 +89,5 @@ public class WebhookPayloadConfigInfo
     public DateTime? LastSuccessOn { get; set; }
 
     public int RetryCount { get; set; }
-
-    //public DateTime RetryOn { get; set; }
+    public DateTime RetryOn { get; set; }
 }

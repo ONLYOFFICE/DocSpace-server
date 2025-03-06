@@ -42,7 +42,8 @@ public class WebhookPublisher(
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
         Converters = { new TenantToUtcDateTimeJsonConverter(tenantUtil) },
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
     private class TenantToUtcDateTimeJsonConverter(TenantUtil tenantUtil) : JsonConverter<DateTime>

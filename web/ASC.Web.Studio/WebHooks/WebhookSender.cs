@@ -27,7 +27,6 @@
 using System.Text.Json.Nodes;
 
 using ASC.Core;
-using ASC.Core.Tenants;
 
 namespace ASC.Webhooks;
 
@@ -41,6 +40,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
     };
 
     private const string SignatureHeader = "x-docspace-signature-256";
+    private const string DateTimeISO8601Format = "yyyy-MM-ddTHH:mm:ssZ";
 
     public const string WEBHOOK = "webhook";
     public const string WEBHOOK_SKIP_SSL = "webhookSkipSSL";
@@ -49,23 +49,19 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
-        var apiDateTimeHelper = scope.ServiceProvider.GetRequiredService<ApiDateTimeHelper>();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-        var tenantUtil = scope.ServiceProvider.GetRequiredService<TenantUtil>();
 
         await tenantManager.SetCurrentTenantAsync(webhookRequest.TenantId);
 
         var entry = await dbWorker.ReadJournal(webhookRequest.WebhookLogId);
-        var webhooksConfig = await dbWorker.GetWebhookConfig(webhookRequest.TenantId, entry.ConfigId);
-        var ssl = entry.Config.SSL;
 
-        int status = 0;
+        var status = 0;
         string responsePayload = null;
         string responseHeaders = null;
         string requestPayload = null;
         string requestHeaders = null;
 
-        var clientName = ssl ? WEBHOOK : WEBHOOK_SKIP_SSL;
+        var clientName = entry.Config.SSL ? WEBHOOK : WEBHOOK_SKIP_SSL;
         var httpClient = clientFactory.CreateClient(clientName);
         var policy = HttpPolicyExtensions.HandleTransientHttpError()
                                           .OrResult(x => x.StatusCode != HttpStatusCode.OK)
@@ -74,7 +70,6 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
                                                              onRetry: (response, delay, retryCount, context) =>
                                                              {
                                                                  context["retryCount"] = retryCount;
-
                                                              });
         try
         {
@@ -87,21 +82,21 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
                 requestPayload = entry.RequestPayload;
                 var retryCount = (int)context["retryCount"];
-                
+
                 if (retryCount > 0)
                 {
                     var jsonNode = JsonNode.Parse(requestPayload);
 
                     jsonNode["webhook"]["retryCount"] = retryCount;
-                    jsonNode["webhook"]["retryOn"] = apiDateTimeHelper.Get(tenantUtil.DateTimeNow()).ToString();
-                                      
+                    jsonNode["webhook"]["retryOn"] = DateTime.UtcNow.ToString(DateTimeISO8601Format);
+
                     requestPayload = jsonNode.ToString();
                 }
 
                 request.Content = new StringContent(requestPayload, Encoding.UTF8, "application/json");
 
                 requestHeaders = JsonSerializer.Serialize(request.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
-               
+
                 var response = await httpClient.SendAsync(request, cancellationToken);
 
                 response.EnsureSuccessStatusCode();
@@ -113,7 +108,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
             responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
             responsePayload = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            webhooksConfig.LastSuccessOn = DateTime.UtcNow;
+            entry.Config.LastSuccessOn = DateTime.UtcNow;
 
             logger.DebugResponse(response);
         }
@@ -127,40 +122,31 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
             if (e.StatusCode == HttpStatusCode.Gone)
             {
                 await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
-
                 return;
             }
 
-            var lastFailureOn = DateTime.UtcNow;
-            var lastFailureContent = e.Message;
+            entry.Config.LastFailureContent = e.Message;
+            entry.Config.LastFailureOn = DateTime.UtcNow;
 
-            if (webhooksConfig.LastSuccessOn.HasValue &&
-                (lastFailureOn - webhooksConfig.LastSuccessOn.Value > TimeSpan.FromDays(3)))
+            if (entry.Config.LastSuccessOn.HasValue &&
+                (entry.Config.LastFailureOn - entry.Config.LastSuccessOn.Value > TimeSpan.FromDays(3)))
             {
-                await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
-
-                return;
+                entry.Config.Enabled = false;
             }
-
-            webhooksConfig.LastFailureContent = lastFailureContent;
-            webhooksConfig.LastFailureOn = lastFailureOn;
-            responsePayload = e.Message;
 
             logger.ErrorWithException(e);
         }
         catch (Exception e)
         {
-            webhooksConfig.LastFailureContent = e.Message;
-            webhooksConfig.LastFailureOn = DateTime.UtcNow;
+            entry.Config.LastFailureContent = e.Message;
+            entry.Config.LastFailureOn = DateTime.UtcNow;
 
             status = (int)HttpStatusCode.InternalServerError;
             logger.ErrorWithException(e);
         }
 
-        var delivery = DateTime.UtcNow;
-
-        await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders);
-        await dbWorker.UpdateWebhookConfig(webhooksConfig);
+        await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery: DateTime.UtcNow, requestPayload, requestHeaders, responsePayload, responseHeaders);
+        await dbWorker.UpdateWebhookConfig(entry.Config);
     }
 
     private string GetSecretHash(string secretKey, string body)
