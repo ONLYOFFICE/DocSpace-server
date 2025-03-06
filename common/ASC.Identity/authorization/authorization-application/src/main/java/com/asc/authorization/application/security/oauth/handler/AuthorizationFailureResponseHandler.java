@@ -102,14 +102,19 @@ public class AuthorizationFailureResponseHandler implements AuthenticationFailur
     var authRequest = authException.getAuthorizationCodeRequestAuthentication();
 
     if (authRequest != null && !StringUtils.hasText(authRequest.getRedirectUri())) {
-      log.debug("Authentication exception: {}. Description: {}", error.getErrorCode(), error.getDescription());
-      securityUtils.redirectWithError(
-          request, response, clientId, error.getErrorCode());
+      log.debug(
+          "Authentication exception: {}. Description: {}",
+          error.getErrorCode(),
+          error.getDescription());
+      securityUtils.redirectWithError(request, response, clientId, error.getErrorCode());
       return;
     }
 
     if (authRequest == null) {
-      log.debug("Authentication request is null: {}. Description: {}", error.getErrorCode(), error.getDescription());
+      log.debug(
+          "Authentication request is null: {}. Description: {}",
+          error.getErrorCode(),
+          error.getDescription());
       securityUtils.redirectWithError(request, response, clientId, error.getErrorCode());
       return;
     }
