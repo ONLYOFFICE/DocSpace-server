@@ -29,7 +29,7 @@ using ASC.Core.Common;
 namespace ASC.Data.Reassigns;
 
 [Transient]
-public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class UpdateUserTypeProgressItem: DistributedTaskProgress
 {
     public Guid User { get; private set; }
     public Guid ToUser { get; private set; }
@@ -37,6 +37,18 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
     private Guid _currentUserId;
     private EmployeeType _employeeType;
     private UserInfo _userInfo;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+
+    public UpdateUserTypeProgressItem()
+    {
+
+    }
+
+    public UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
 
     public void Init(int tenantId, Guid user, Guid toUserId, Guid currentUserId, EmployeeType employeeType)
     {
@@ -54,7 +66,7 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
 
     protected override async Task DoJob()
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
         var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, userFormatter) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
@@ -75,10 +87,10 @@ public class UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory
 
             if (_employeeType == EmployeeType.Guest)
             {
-                await fileStorageService.MoveSharedFilesAsync(User, ToUser);
+                await fileStorageService.MoveWithCopySharedFilesAsync(User, ToUser);
                 await SetPercentageAndCheckCancellationAsync(60, true);
 
-                await fileStorageService.DeletePersonalFolderAsync<int>(User);
+                await fileStorageService.UpdatePersonalFolderModifiedOn(User);
                 await SetPercentageAndCheckCancellationAsync(80, true);
             }
 
