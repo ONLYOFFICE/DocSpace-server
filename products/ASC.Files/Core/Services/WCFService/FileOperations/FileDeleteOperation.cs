@@ -119,10 +119,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
         var filesMessageService = serviceScope.ServiceProvider.GetService<FilesMessageService>();
         var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
-        var securityContext = serviceScope.ServiceProvider.GetService<SecurityContext>();
         
         await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
-        await securityContext.AuthenticateMeWithoutCookieAsync(CurrentUserId);
         
         var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
         externalShare.Initialize(SessionSnapshot);
