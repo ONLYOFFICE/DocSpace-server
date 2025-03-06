@@ -308,9 +308,12 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
             var scopeClass = scope.ServiceProvider.GetService<FileOperationScope>();
             var (tenantManager, daoFactory, fileSecurity, logger) = scopeClass;
             await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
-            
-            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-            await securityContext.AuthenticateMeWithoutCookieAsync(CurrentUserId);
+
+            if (CurrentUserId != ASC.Core.Configuration.Constants.Guest.ID)
+            {
+                var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+                await securityContext.AuthenticateMeWithoutCookieAsync(CurrentUserId);
+            }
 
             var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
             externalShare.Initialize(SessionSnapshot);
