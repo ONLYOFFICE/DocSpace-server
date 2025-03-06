@@ -32,82 +32,42 @@ namespace ASC.Web.Files.Utils;
 public class WebhookManager(
     IDaoFactory daoFactory,
     IWebhookPublisher webhookPublisher,
-    WebhookFileEntryAccessChecker webhookFileEntryAccessChecker)
+    FileSecurity fileSecurity)
 {
     public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
-        return await webhookPublisher.GetWebhookConfigsAsync(trigger, webhookFileEntryAccessChecker, fileEntry);
+        var checker = new WebhookFileEntryAccessChecker<T>(fileSecurity);
+        var cleanFileEntry = await GetCleanFileEntry(fileEntry);
+
+        return await webhookPublisher.GetWebhookConfigsAsync(trigger, checker, cleanFileEntry);
     }
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, FileEntry<T> fileEntry)
     {
-        if (fileEntry is File<T>)
-        {
-            var cleanFileEntry = await daoFactory.GetFileDao<T>().GetFileAsync(fileEntry.Id);
-            await webhookPublisher.PublishAsync(trigger, webhookConfigs, cleanFileEntry);
-        }
-
-        if (fileEntry is Folder<T>)
-        {
-            var cleanFolderEntry = await daoFactory.GetFolderDao<T>().GetFolderAsync(fileEntry.Id);
-            await webhookPublisher.PublishAsync(trigger, webhookConfigs, cleanFolderEntry);
-        }
+        await webhookPublisher.PublishAsync(trigger, webhookConfigs, fileEntry);
     }
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
-        if (fileEntry is File<T>)
-        {
-            var cleanFileEntry = await daoFactory.GetFileDao<T>().GetFileAsync(fileEntry.Id);
-            await webhookPublisher.PublishAsync(trigger, webhookFileEntryAccessChecker, cleanFileEntry);
-        }
+        var checker = new WebhookFileEntryAccessChecker<T>(fileSecurity);
+        var cleanFileEntry = await GetCleanFileEntry(fileEntry);
 
-        if (fileEntry is Folder<T>)
-        {
-            var cleanFolderEntry = await daoFactory.GetFolderDao<T>().GetFolderAsync(fileEntry.Id);
-            await webhookPublisher.PublishAsync(trigger, webhookFileEntryAccessChecker, cleanFolderEntry);
-        }
+        await webhookPublisher.PublishAsync(trigger, checker, cleanFileEntry);
+    }
+
+    private async Task<FileEntry<T>> GetCleanFileEntry<T>(FileEntry<T> fileEntry)
+    {
+        return fileEntry.FileEntryType == FileEntryType.File
+            ? await daoFactory.GetFileDao<T>().GetFileAsync(fileEntry.Id)
+            : await daoFactory.GetFolderDao<T>().GetFolderAsync(fileEntry.Id);
     }
 }
 
 [Scope]
-public class WebhookFileEntryAccessChecker(
-    TenantManager tenantManager,
-    UserManager userManager,
-    FileSecurity fileSecurity) : IWebhookAccessChecker<object>
+public class WebhookFileEntryAccessChecker<T>(FileSecurity fileSecurity) : IWebhookAccessChecker<FileEntry<T>>
 {
-    public async Task<bool> CheckAccessAsync(object fileEntry, Guid userId)
+    public async Task<bool> CheckAccessAsync(FileEntry<T> fileEntry, Guid userId)
     {
-        if (fileEntry is FileEntry<int> fileEntryInt)
-        {
-            return await fileSecurity.CanReadAsync(fileEntryInt, userId);
-        }
-
-        if (fileEntry is FileEntry<string> fileEntryString)
-        {
-            return await fileSecurity.CanReadAsync(fileEntryString, userId);
-        }
-
-        return false;
-    }
-
-    private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
-    {
-        var result = new List<Guid> { entry.CreateBy };
-
-        if (entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.TRASH)
-        {
-            result.Add(tenantManager.GetCurrentTenant().OwnerId);
-
-            var admins = (await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID)).Select(x => x.Id);
-
-            result.AddRange(admins);
-
-            var whoCanRead = await fileSecurity.WhoCanReadAsync(entry);
-
-            result.AddRange(whoCanRead);
-        }
-
-        return result.Distinct();
+        return await fileSecurity.CanReadAsync(fileEntry, userId);
     }
 }
