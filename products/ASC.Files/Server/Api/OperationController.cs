@@ -116,7 +116,6 @@ public class OperationController(
     [EndpointDescription("Deletes the files and folders with the IDs specified in the request.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<FileOperationDto>), 200, "List of file operations")]
     [OpenApiResponse(403, "You don't have enough permission to delete")]
-    [HttpPut("delete")]
     [HttpPut("deleteversion")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFileVersions(DeleteVersionBatchRequestDto inDto)
     {
