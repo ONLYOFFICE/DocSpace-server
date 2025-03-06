@@ -27,19 +27,9 @@
 namespace ASC.Web.Studio.Core.Quota;
 
 [Singleton]
-public class QuotaSyncOperation
+public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
-
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "quotaOperation";
-
-    private readonly DistributedTaskQueue<QuotaSyncJob> _progressQueue;
-    private readonly IServiceProvider _serviceProvider;
-
-    public QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
-    {
-        _serviceProvider = serviceProvider;
-        _progressQueue = queueFactory.CreateQueue<QuotaSyncJob>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
+    private readonly DistributedTaskQueue<QuotaSyncJob> _progressQueue = queueFactory.CreateQueue<QuotaSyncJob>();
 
     public async Task RecalculateQuota(Tenant tenant)
     {
@@ -52,7 +42,7 @@ public class QuotaSyncOperation
         
         if (item == null)
         {
-            item = _serviceProvider.GetRequiredService<QuotaSyncJob>();
+            item = serviceProvider.GetRequiredService<QuotaSyncJob>();
             item.InitJob(tenant);
             await _progressQueue.EnqueueTask(item);
         }

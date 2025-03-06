@@ -33,11 +33,9 @@ public class RoomTemplatesWorker(
     IDistributedLockProvider distributedLockProvider)
 {
     private static readonly SemaphoreSlim _semaphoreSlim = new(1);
-    private readonly DistributedTaskQueue<CreateRoomTemplateOperation> _templateQueue = queueFactory.CreateQueue<CreateRoomTemplateOperation>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME + nameof(CreateRoomTemplateOperation));
-    private readonly DistributedTaskQueue<CreateRoomFromTemplateOperation> _roomQueue = queueFactory.CreateQueue<CreateRoomFromTemplateOperation>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME + nameof(CreateRoomFromTemplateOperation));
-
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "room_templates";
-    public const string LockKey = $"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}";
+    private readonly DistributedTaskQueue<CreateRoomTemplateOperation> _templateQueue = queueFactory.CreateQueue<CreateRoomTemplateOperation>();
+    private readonly DistributedTaskQueue<CreateRoomFromTemplateOperation> _roomQueue = queueFactory.CreateQueue<CreateRoomFromTemplateOperation>();
+    public const string LockKey = $"lock_room_templates";
 
     public async Task<string> StartCreateTemplateAsync(int tenantId,
         Guid userId,
