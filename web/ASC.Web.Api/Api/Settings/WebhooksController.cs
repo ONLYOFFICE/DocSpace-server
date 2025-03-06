@@ -134,6 +134,42 @@ public class WebhooksController(ApiContext context,
     }
 
     /// <summary>
+    /// Enable or disable webhook with the parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Enable a webhook
+    /// </short>
+    /// <path>api/2.0/settings/webhook/enable</path>
+    [Tags("Settings / Webhooks")]
+    [SwaggerResponse(200, "Enable or disable tenant webhook", typeof(WebhooksConfigDto))]
+    [HttpPut("webhook/enable")]
+    public async Task<WebhooksConfigDto> EnableWebhook(WebhooksConfigRequestsDto inDto)
+    {
+        var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
+
+        if (existingWebhook == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        if (!await CheckAdminPermissionsAsync())
+        {
+            if (existingWebhook.CreatedBy != authContext.CurrentAccount.ID)
+            {
+                throw new SecurityException();
+            }
+        }
+
+        existingWebhook.Enabled = inDto.Enabled;
+
+        var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
+
+        messageService.Send(MessageAction.WebhookUpdated, MessageTarget.Create(webhook.Id), webhook.Name);
+
+        return await webhooksConfigDtoHelper.GetAsync(webhook);
+    }
+
+    /// <summary>
     /// Removes the tenant webhook with the ID specified in the request.
     /// </summary>
     /// <short>
