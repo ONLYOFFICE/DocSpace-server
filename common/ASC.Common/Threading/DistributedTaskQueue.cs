@@ -225,7 +225,8 @@ public class DistributedTaskQueueService<T>(
         int maxDegreeOfParallelism;
         await using (var scope = serviceProvider.CreateAsyncScope())
         {
-            var queue = scope.ServiceProvider.GetRequiredService<DistributedTaskQueue<T>>();
+            var queueFactory = scope.ServiceProvider.GetRequiredService<IDistributedTaskQueueFactory>();
+            var queue = queueFactory.CreateQueue<T>();
             maxDegreeOfParallelism = queue.MaxThreadsCount;
         }
 

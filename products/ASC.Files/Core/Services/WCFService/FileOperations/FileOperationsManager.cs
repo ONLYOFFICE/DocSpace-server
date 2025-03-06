@@ -36,12 +36,10 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
     private readonly IServiceProvider _serviceProvider;
     private readonly DistributedTaskQueue<T> _tasks;
 
-    public static string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation" + typeof(T).Name;
-
     public FileOperationsManagerHolder(IDistributedTaskQueueFactory queueFactory, NotifyConfiguration notifyConfiguration, IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _tasks = queueFactory.CreateQueue<T>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME );
+        _tasks = queueFactory.CreateQueue<T>( );
         notifyConfiguration.Configure();
     }
     

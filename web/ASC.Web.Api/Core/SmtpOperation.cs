@@ -29,8 +29,7 @@ namespace ASC.Web.Api.Core;
 [Singleton]
 public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "smtp";
-    private readonly DistributedTaskQueue<SmtpJob> _progressQueue = queueFactory.CreateQueue<SmtpJob>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly DistributedTaskQueue<SmtpJob> _progressQueue = queueFactory.CreateQueue<SmtpJob>();
 
     public async Task StartSmtpJob(SmtpSettingsDto smtpSettings, Tenant tenant, Guid user)
     {

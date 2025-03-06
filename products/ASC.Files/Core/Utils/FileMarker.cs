@@ -65,8 +65,7 @@ public class FileMarkerCache
 [Singleton(GenericArguments = [typeof(string)])]
 public class FileMarkerHelper<T>(IDistributedTaskQueueFactory queueFactory)
 {
-    private const string CustomDistributedTaskQueueName = "file_marker";
-    private readonly DistributedTaskQueue<AsyncTaskData<T>> _tasks = queueFactory.CreateQueue<AsyncTaskData<T>>(CustomDistributedTaskQueueName);
+    private readonly DistributedTaskQueue<AsyncTaskData<T>> _tasks = queueFactory.CreateQueue<AsyncTaskData<T>>();
 
     internal async Task Add(AsyncTaskData<T> taskData)
     {
