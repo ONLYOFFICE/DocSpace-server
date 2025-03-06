@@ -51,12 +51,13 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
         IEnumerable<T> files,
         IEnumerable<int> versions,
         int tenantId,
+        Guid userId,
         IDictionary<string, string> headers,
         ExternalSessionSnapshot sessionSnapshot,
         bool holdResult = true,
         bool ignoreException = false,
         bool immediately = false,
-        bool isEmptyTrash = false) : base(folders, files, tenantId, headers, sessionSnapshot, holdResult)
+        bool isEmptyTrash = false) : base(folders, files, tenantId, userId, headers, sessionSnapshot, holdResult)
     {
         IgnoreException = ignoreException;
         Immediately = immediately;

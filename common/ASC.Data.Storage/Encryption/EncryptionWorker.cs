@@ -32,12 +32,11 @@ public class EncryptionWorker(
     IServiceProvider serviceProvider,
     IDistributedLockProvider distributedLockProvider)
 {
-    private readonly DistributedTaskQueue<EncryptionOperation> _queue = queueFactory.CreateQueue<EncryptionOperation>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "encryption";
+    private readonly DistributedTaskQueue<EncryptionOperation> _queue = queueFactory.CreateQueue<EncryptionOperation>();
 
     public async Task StartAsync(EncryptionSettings encryptionSettings, string serverRootPath)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
+        await using (await distributedLockProvider.TryAcquireLockAsync("lock_encryption"))
         {
             var item = (await _queue.GetAllTasks()).SingleOrDefault();
 

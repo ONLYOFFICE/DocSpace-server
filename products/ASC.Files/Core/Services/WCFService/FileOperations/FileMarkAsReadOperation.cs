@@ -37,9 +37,10 @@ public record FileMarkAsReadOperationData<T> : FileOperationData<T>
     public FileMarkAsReadOperationData(IEnumerable<T> Folders,
         IEnumerable<T> Files,
         int TenantId,
+        Guid UserId,
         IDictionary<string, string> Headers,
         ExternalSessionSnapshot SessionSnapshot,
-        bool HoldResult = true) : base(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult)
+        bool HoldResult = true) : base(Folders, Files, TenantId, UserId, Headers, SessionSnapshot, HoldResult)
     {
     }
 }

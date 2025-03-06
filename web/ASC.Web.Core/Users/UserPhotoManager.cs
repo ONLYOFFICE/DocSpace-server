@@ -836,16 +836,10 @@ public class UserPhotoManager
 }
 
 [Singleton]
-public class UserPhotoResizeManager
+public class UserPhotoResizeManager(IDistributedTaskQueueFactory queueFactory)
 {
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "user_photo_manager";
     //note: using auto stop queue
-    private readonly DistributedTaskQueue<ResizeWorkerItem> _resizeQueue;//TODO: configure
-
-    public UserPhotoResizeManager(IDistributedTaskQueueFactory queueFactory)
-    {
-        _resizeQueue = queueFactory.CreateQueue<ResizeWorkerItem>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
+    private readonly DistributedTaskQueue<ResizeWorkerItem> _resizeQueue = queueFactory.CreateQueue<ResizeWorkerItem>();//TODO: configure
 
     public async Task EnqueueTaskAsync(string key, ResizeWorkerItem resizeTask)
     {

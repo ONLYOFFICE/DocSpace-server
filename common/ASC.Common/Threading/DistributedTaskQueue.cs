@@ -28,6 +28,7 @@ namespace ASC.Common.Threading;
 
 [Transient]
 public class DistributedTaskQueue<T>(
+    ChannelWriter<T> channelWriter,
     ICacheNotify<DistributedTaskCancelation> cancelTaskNotify,
     IFusionCache hybridCache,
     ILogger<DistributedTaskQueue<T>> logger)  where T : DistributedTask
@@ -37,13 +38,8 @@ public class DistributedTaskQueue<T>(
 
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancelations = new();
     private bool _subscribed;
-
-    /// <summary>
-    /// setup -1 for infinity thread counts
-    /// </summary>
     private int _maxThreadsCount = 1;
     private string _name;
-    private TaskScheduler Scheduler { get; set; } = TaskScheduler.Default;
 
     public int TimeUntilUnregisterInSeconds { get; set; }
 
@@ -62,10 +58,6 @@ public class DistributedTaskQueue<T>(
 
         set
         {
-            Scheduler = value <= 0
-                ? TaskScheduler.Default
-                : new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, value).ConcurrentScheduler;
-
             if (value > 0)
             {
                 _maxThreadsCount = value;
@@ -99,21 +91,12 @@ public class DistributedTaskQueue<T>(
             _subscribed = true;
         }
 
-        var task = new Task(() =>
-        {
-            var t = distributedTask.RunJob(token);
-            t.ContinueWith(async a => await OnCompleted(a, distributedTask.Id), token).ConfigureAwait(false);
-            t.ConfigureAwait(false);
-        }, token, TaskCreationOptions.LongRunning);
-
-        _ = task.ConfigureAwait(false);
+        await channelWriter.WriteAsync(distributedTask, token);
 
         distributedTask.Status = DistributedTaskStatus.Running;
 
         await PublishTask(distributedTask);
-
-        task.Start(Scheduler);
-
+        
         logger.TraceEnqueueTask(distributedTask.Id, INSTANCE_ID);
 
     }
@@ -179,32 +162,6 @@ public class DistributedTaskQueue<T>(
         return distributedTask.Id;
     }
 
-    private async Task OnCompleted(Task task, string id)
-    {
-        var distributedTask = (await GetAllTasks()).FirstOrDefault(x => x.Id == id);
-        if (distributedTask != null)
-        {
-            distributedTask.Status = DistributedTaskStatus.Completed;
-            if (task.Exception != null)
-            {
-                distributedTask.Exception = task.Exception;
-            }
-            if (task.IsFaulted)
-            {
-                distributedTask.Status = DistributedTaskStatus.Failted;
-            }
-
-            if (task.IsCanceled)
-            {
-                distributedTask.Status = DistributedTaskStatus.Canceled;
-            }
-
-            _cancelations.TryRemove(id, out _);
-
-            await distributedTask.PublishChanges();
-        }
-    }
-
     private Func<DistributedTask, Task> GetPublication()
     {
         return async task =>
@@ -255,5 +212,56 @@ public class DistributedTaskQueue<T>(
     private bool IsOrphanCacheItem(T obj)
     {
         return obj.LastModifiedOn.AddSeconds(TimeUntilUnregisterInSeconds) < DateTime.UtcNow;
+    }
+}
+
+public class DistributedTaskQueueService<T>(
+    IServiceProvider serviceProvider,
+    ChannelReader<T> channelReader
+) : BackgroundService   where T : DistributedTask
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        int maxDegreeOfParallelism;
+        await using (var scope = serviceProvider.CreateAsyncScope())
+        {
+            var queueFactory = scope.ServiceProvider.GetRequiredService<IDistributedTaskQueueFactory>();
+            var queue = queueFactory.CreateQueue<T>();
+            maxDegreeOfParallelism = queue.MaxThreadsCount;
+        }
+
+        var readers = maxDegreeOfParallelism == 0 ? [channelReader] : channelReader.Split(maxDegreeOfParallelism, cancellationToken: stoppingToken);
+        
+        var tasks = readers.Select(reader1 => Task.Run(async () =>
+        {
+            await foreach (var distributedTask in reader1.ReadAllAsync(stoppingToken))
+            {        
+                var task = distributedTask.RunJob(stoppingToken);
+                await task.ContinueWith(async t => await OnCompleted(t, distributedTask), stoppingToken).ConfigureAwait(false);
+            }
+        }, stoppingToken)).ToList();
+
+        await Task.WhenAll(tasks);
+    }
+
+    private static async Task OnCompleted(Task task, DistributedTask distributedTask)
+    {
+        distributedTask.Status = DistributedTaskStatus.Completed;
+        if (task.Exception != null)
+        {
+            distributedTask.Exception = task.Exception;
+        }
+
+        if (task.IsFaulted)
+        {
+            distributedTask.Status = DistributedTaskStatus.Failted;
+        }
+
+        if (task.IsCanceled)
+        {
+            distributedTask.Status = DistributedTaskStatus.Canceled;
+        }
+
+        await distributedTask.PublishChanges();
     }
 }
