@@ -60,7 +60,7 @@ public class WebhookPublisher(
     }
 
 
-    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checher, T data)
+    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data)
     {
         var result = new List<DbWebhooksConfig>();
 
@@ -73,9 +73,9 @@ public class WebhookPublisher(
                 continue;
             }
 
-            if (checher != null && config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
+            if (checker != null && config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
             {
-                if (!await checher.CheckAccessAsync(data, config.CreatedBy.Value))
+                if (!await checker.CheckAccessAsync(data, config.CreatedBy.Value))
                 {
                     continue;
                 }
@@ -95,9 +95,9 @@ public class WebhookPublisher(
         }
     }
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checher, T data)
+    public async Task PublishAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data)
     {
-        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checher, data);
+        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checker, data);
 
         foreach (var config in webhookConfigs)
         {
