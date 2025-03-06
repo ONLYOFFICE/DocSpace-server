@@ -37,7 +37,9 @@ public class ReassignController(
     TenantManager tenantManager,
     SecurityContext securityContext,
     WebItemSecurity webItemSecurity,
-    FileStorageService fileStorageService)
+    FileStorageService fileStorageService,
+    WebItemManagerSecurity webItemManagerSecurity,
+    FilesSpaceUsageStatManager filesSpaceUsageStatManager)
     : ApiControllerBase
     {
     /// <summary>
@@ -133,7 +135,7 @@ public class ReassignController(
     /// <short>Returns is necessary reassign</short>
     /// <path>api/2.0/people/reassign/necessary</path>
     [Tags("People / User data")]
-    [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(200, "Boolean value: true if neccessary reassign", typeof(bool))]
     [HttpGet("necessary")]
     public async Task<bool> NecessaryReassignAsync([FromQuery] NecessaryReassignDto inDto)
     {
@@ -153,9 +155,35 @@ public class ReassignController(
 
         if (inDto.Type is EmployeeType.Guest && !result)
         {
-            result = await fileStorageService.AnySharedFilesAsync(inDto.UserId);
+            result = (await fileStorageService.GetSharedFilesAsync(inDto.UserId)).Any();
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Returns is necessary reassign rooms and share files.
+    /// </summary>
+    /// <short>Returns is necessary reassign</short>
+    /// <path>api/2.0/people/reassign/can</path>
+    [Tags("People / User data")]
+    [SwaggerResponse(200, "Boolean value: true if can reassign to this user", typeof(bool))]
+    [HttpGet("can")]
+    public async Task<bool> CanReassignAsync([FromQuery] CanReassignDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+
+        var user = await userManager.GetUsersAsync(inDto.FromUserId);
+        var userType = await userManager.GetUserTypeAsync(user);
+
+        if (userType is EmployeeType.Guest)
+        {
+            var avalibalStorage = await filesSpaceUsageStatManager.GetUserSpaceUsageAsync(inDto.ToUserId);
+            var sharedSize = (await fileStorageService.GetSharedFilesAsync(inDto.FromUserId)).Select(q => ((File<int>)q).ContentLength).Sum();
+
+            return avalibalStorage >= sharedSize;
+        }
+
+        return true;
     }
 }

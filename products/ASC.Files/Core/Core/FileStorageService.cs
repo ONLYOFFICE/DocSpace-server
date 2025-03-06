@@ -2988,7 +2988,7 @@ public class FileStorageService //: IFileStorageService
         await ChangeOwnerAsync(thirdIds, [], reassign.HasValue ? reassign.Value : securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
     }
 
-    public async Task<bool> AnySharedFilesAsync(Guid user)
+    public async Task<IEnumerable<FileEntry>> GetSharedFilesAsync(Guid user)
     {
         var initUser = securityContext.CurrentAccount.ID;
 
@@ -2998,9 +2998,9 @@ public class FileStorageService //: IFileStorageService
         if (my == 0)
         {
             await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
-            return false;
+            return [];
         }
-        var any = (await GetFolderItemsAsync(
+        var list = (await GetFolderItemsAsync(
             await globalFolderHelper.FolderMyAsync,
             0,
             -1,
@@ -3012,10 +3012,10 @@ public class FileStorageService //: IFileStorageService
             false,
             false,
             null,
-            SearchArea.Any)).Entries.Where(e => e.Shared).Any();
+            SearchArea.Any)).Entries.Where(e => e.Shared);
 
         await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
-        return any;
+        return list;
     }
 
     public async Task MoveSharedFilesAsync(Guid user, Guid toUser)
