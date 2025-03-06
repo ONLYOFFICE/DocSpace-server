@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
 /// </summary>
-public class WebhooksConfigDto : IMapFrom<DbWebhooksConfig>
+public class WebhooksConfigDto
 {
     /// <summary>
     /// ID
@@ -99,15 +99,9 @@ public class WebhooksConfigDto : IMapFrom<DbWebhooksConfig>
     /// Last success on
     /// </summary>
     public DateTime? LastSuccessOn { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<DbWebhooksConfig, WebhooksConfigDto>()
-            .ConvertUsing<WebhooksConfigConverter>();
-    }
 }
 
-public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
+public class WebhooksConfigWithStatusDto
 {
     /// <summary>
     /// Configs
@@ -118,37 +112,37 @@ public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
     /// Status
     /// </summary>
     public int Status { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<WebhooksConfigWithStatus, WebhooksConfigWithStatusDto>()
-            .ForMember(src => src.Configs, ex => ex.MapFrom(map => map.WebhooksConfig));
-    }
 }
 
 [Scope]
-public class WebhooksConfigConverter(TenantUtil tenantUtil, EmployeeDtoHelper employeeDtoHelper) : ITypeConverter<DbWebhooksConfig, WebhooksConfigDto>
+public class WebhooksConfigDtoHelper(TenantUtil tenantUtil, EmployeeDtoHelper employeeDtoHelper)
 {
-    public WebhooksConfigDto Convert(DbWebhooksConfig source, WebhooksConfigDto destination, ResolutionContext context)
+    public async Task<WebhooksConfigDto> GetAsync(DbWebhooksConfig dbWebhooksConfig)
     {
-        var result = new WebhooksConfigDto
+        return new WebhooksConfigDto
         {
-            Id = source.Id,
-            Name = source.Name,
-            Uri = source.Uri,
-            SecretKey = source.SecretKey,
-            Enabled = source.Enabled,
-            SSL = source.SSL,
-            Triggers = source.Triggers,
-            CreatedBy = source.CreatedBy.HasValue ? employeeDtoHelper.GetAsync(source.CreatedBy.Value).Result : null, // TODO
-            CreatedOn = source.CreatedOn.HasValue? tenantUtil.DateTimeFromUtc(source.CreatedOn.Value) : null,
-            ModifiedBy = source.ModifiedBy.HasValue ? employeeDtoHelper.GetAsync(source.ModifiedBy.Value).Result : null, // TODO
-            ModifiedOn = source.ModifiedOn.HasValue ? tenantUtil.DateTimeFromUtc(source.ModifiedOn.Value) : null,
-            LastFailureOn = source.LastFailureOn.HasValue ? tenantUtil.DateTimeFromUtc(source.LastFailureOn.Value) : null,
-            LastFailureContent = source.LastFailureContent,
-            LastSuccessOn = source.LastSuccessOn.HasValue ? tenantUtil.DateTimeFromUtc(source.LastSuccessOn.Value) : null
+            Id = dbWebhooksConfig.Id,
+            Name = dbWebhooksConfig.Name,
+            Uri = dbWebhooksConfig.Uri,
+            SecretKey = dbWebhooksConfig.SecretKey,
+            Enabled = dbWebhooksConfig.Enabled,
+            SSL = dbWebhooksConfig.SSL,
+            Triggers = dbWebhooksConfig.Triggers,
+            CreatedBy = dbWebhooksConfig.CreatedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.CreatedBy.Value) : null,
+            CreatedOn = dbWebhooksConfig.CreatedOn.HasValue? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.CreatedOn.Value) : null,
+            ModifiedBy = dbWebhooksConfig.ModifiedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.ModifiedBy.Value) : null,
+            ModifiedOn = dbWebhooksConfig.ModifiedOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.ModifiedOn.Value) : null,
+            LastFailureOn = dbWebhooksConfig.LastFailureOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.LastFailureOn.Value) : null,
+            LastFailureContent = dbWebhooksConfig.LastFailureContent,
+            LastSuccessOn = dbWebhooksConfig.LastSuccessOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.LastSuccessOn.Value) : null
         };
+    }
 
-        return result;
+    public async Task<WebhooksConfigWithStatusDto> GetAsync(WebhooksConfigWithStatus webhooksConfigWithStatus)
+    {
+        return new WebhooksConfigWithStatusDto {
+            Configs = await GetAsync(webhooksConfigWithStatus.WebhooksConfig),
+            Status = webhooksConfigWithStatus.Status ?? 0
+        };
     }
 }

@@ -42,7 +42,8 @@ public class WebhooksController(ApiContext context,
         SettingsManager settingsManager,
         PasswordSettingsManager passwordSettingsManager,
         IHttpClientFactory clientFactory,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        WebhooksConfigDtoHelper webhooksConfigDtoHelper)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -62,7 +63,7 @@ public class WebhooksController(ApiContext context,
 
         await foreach (var webhook in dbWorker.GetTenantWebhooksWithStatus(userId))
         {
-            yield return mapper.Map<WebhooksConfigWithStatusDto>(webhook);
+            yield return await webhooksConfigDtoHelper.GetAsync(webhook);
         }
     }
 
@@ -86,7 +87,7 @@ public class WebhooksController(ApiContext context,
 
         messageService.Send(MessageAction.WebhookCreated, MessageTarget.Create(webhook.Id), webhook.Name);
 
-        return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
+        return await webhooksConfigDtoHelper.GetAsync(webhook);
     }
 
     /// <summary>
@@ -129,7 +130,7 @@ public class WebhooksController(ApiContext context,
 
         messageService.Send(MessageAction.WebhookUpdated, MessageTarget.Create(webhook.Id), webhook.Name);
 
-        return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
+        return await webhooksConfigDtoHelper.GetAsync(webhook);
     }
 
     /// <summary>
@@ -163,7 +164,7 @@ public class WebhooksController(ApiContext context,
 
         messageService.Send(MessageAction.WebhookDeleted, MessageTarget.Create(webhook.Id), webhook.Name);
 
-        return mapper.Map<DbWebhooksConfig, WebhooksConfigDto>(webhook);
+        return await webhooksConfigDtoHelper.GetAsync(webhook);
     }
 
     /// <summary>
