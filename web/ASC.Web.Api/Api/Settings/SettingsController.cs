@@ -453,7 +453,7 @@ public partial class SettingsController(MessageService messageService,
     /// </summary>
     /// <path>api/2.0/settings/deeplink</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Ok", typeof(TenantDeepLinkSettings))]
+    [OpenApiResponse(typeof(TenantDeepLinkSettings), 200, "Ok")]
     [HttpGet("deeplink")]
     public async Task<TenantDeepLinkSettings> GettDeepLinkSettings()
     {

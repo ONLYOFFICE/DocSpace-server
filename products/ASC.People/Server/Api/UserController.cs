@@ -695,7 +695,7 @@ public class UserController(
     [EndpointSummary("Search users by status filter")]
     [EndpointDescription("Returns a list of users matching the status filter and search query.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> GetAdvanced(AdvancedSearchDto inDto)
     {
@@ -965,7 +965,7 @@ public class UserController(
     [EndpointSummary("Search users")]
     [EndpointDescription("Returns a list of users matching the search query.")]
     [OpenApiResponse(typeof(IAsyncEnumerable<EmployeeFullDto>), 200, "List of users with the detailed information")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [OpenApiResponse(403, "No permissions to perform this action")]
     [HttpGet("@search/{query}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetSearch(GetMemberByQueryRequestDto inDto)
     {
