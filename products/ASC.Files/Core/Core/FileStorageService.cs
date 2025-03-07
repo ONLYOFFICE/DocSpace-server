@@ -3000,7 +3000,7 @@ public class FileStorageService //: IFileStorageService
         {
             return [];
         }
-         var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true).SelectAwait(async q => await fileDao.GetFileAsync(q)).Where(q => q.Shared).Select(q => q.Id);
+         var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true).Where(q => q.Shared).Select(q => q.Id).ToListAsync();
 
         return shared;
     }
@@ -3018,7 +3018,7 @@ public class FileStorageService //: IFileStorageService
             return;
         }
 
-        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true).SelectAwait(async q => await fileDao.GetFileAsync(q)).Where(q => q.Shared).Select(q => q.Id).ToListAsync();
+        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true).Where(q => q.Shared).Select(q => q.Id).ToListAsync();
 
         await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
         if (shared.Count > 0)
