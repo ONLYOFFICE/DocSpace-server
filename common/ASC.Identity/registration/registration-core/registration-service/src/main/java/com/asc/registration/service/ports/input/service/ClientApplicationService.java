@@ -257,7 +257,8 @@ public interface ClientApplicationService {
    * @param role the role of the user performing the deletion.
    * @param command a {@link DeleteTenantClientCommand} containing the tenant and client identifiers
    *     for deletion.
+   * @return the result of the delete operation, the number of rows affected.
    */
-  void deleteClient(
+  int deleteClient(
       @Valid Audit audit, @NotNull Role role, @Valid DeleteTenantClientCommand command);
 }
