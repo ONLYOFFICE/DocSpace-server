@@ -415,10 +415,13 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         var currentDocServiceUrl = filesLinkUtility.GetDocServiceUrl();
         var currentDocServiceUrlInternal = filesLinkUtility.GetDocServiceUrlInternal();
         var currentDocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl();
+        var currentDocServiceSecretValue = filesLinkUtility.GetDocServiceSignatureSecret();
+        var currentDocServiceSecretHeader = filesLinkUtility.GetDocServiceSignatureHeader();
+        var currentDocServiceSslVerification = filesLinkUtility.GetDocServiceSslVerification();
 
         if (!ValidateUrl(inDto.DocServiceUrl) ||
             !ValidateUrl(inDto.DocServiceUrlInternal) ||
@@ -427,9 +430,18 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             throw new Exception("Invalid input urls");
         }
 
+        if (!string.IsNullOrEmpty(inDto.DocServiceSignatureSecret) &&
+            string.IsNullOrEmpty(inDto.DocServiceSignatureHeader))
+        {
+            throw new Exception("Invalid signature header");
+        }
+
         await filesLinkUtility.SetDocServiceUrlAsync(inDto.DocServiceUrl);
         await filesLinkUtility.SetDocServiceUrlInternalAsync(inDto.DocServiceUrlInternal);
         await filesLinkUtility.SetDocServicePortalUrlAsync(inDto.DocServiceUrlPortal);
+        await filesLinkUtility.SetDocServiceSignatureSecretAsync(inDto.DocServiceSignatureSecret);
+        await filesLinkUtility.SetDocServiceSignatureHeaderAsync(inDto.DocServiceSignatureHeader);
+        await filesLinkUtility.SetDocServiceSslVerificationAsync(inDto.DocServiceSslVerification.HasValue ? inDto.DocServiceSslVerification.Value : true);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
@@ -453,6 +465,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             await filesLinkUtility.SetDocServiceUrlAsync(currentDocServiceUrl);
             await filesLinkUtility.SetDocServiceUrlInternalAsync(currentDocServiceUrlInternal);
             await filesLinkUtility.SetDocServicePortalUrlAsync(currentDocServicePortalUrl);
+            await filesLinkUtility.SetDocServiceSignatureSecretAsync(currentDocServiceSecretValue);
+            await filesLinkUtility.SetDocServiceSignatureHeaderAsync(currentDocServiceSecretHeader);
+            await filesLinkUtility.SetDocServiceSslVerificationAsync(currentDocServiceSslVerification);
 
             throw new Exception("Unable to establish a connection with the Document Server.");
         }
@@ -506,6 +521,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
             DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
+            DocServiceSignatureHeader = filesLinkUtility.GetDocServiceSignatureHeader(),
+            DocServiceSslVerification = filesLinkUtility.GetDocServiceSslVerification(),
             IsDefault = filesLinkUtility.IsDefault
         };
     }

@@ -29,11 +29,8 @@ package com.asc.authorization.application.security.oauth.service;
 
 import com.asc.authorization.application.exception.client.RegisteredClientPermissionException;
 import com.asc.authorization.application.mapper.ClientMapper;
-import io.grpc.Deadline;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.slf4j.MDC;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -51,11 +48,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class RegisteredClientService
     implements RegisteredClientRepository, RegisteredClientAccessibilityService {
-  @GrpcClient("registrationService")
-  com.asc.common.application.proto.ClientRegistrationServiceGrpc
-          .ClientRegistrationServiceBlockingStub
-      registrationService;
-
+  private final GrpcRegisteredClientService grpcRegisteredClientService;
   private final ClientMapper clientMapper;
 
   /**
@@ -86,13 +79,7 @@ public class RegisteredClientService
       MDC.put("client_id", id);
       log.info("Trying to find registered client by id");
 
-      var client =
-          registrationService
-              .withDeadline(Deadline.after(1100, TimeUnit.MILLISECONDS))
-              .getClient(
-                  com.asc.common.application.proto.GetClientRequest.newBuilder()
-                      .setClientId(id)
-                      .build());
+      var client = grpcRegisteredClientService.getClient(id);
 
       if (!client.getEnabled())
         throw new RegisteredClientPermissionException(
@@ -140,11 +127,7 @@ public class RegisteredClientService
    */
   public boolean validateClientAccessibility(String clientId) {
     try {
-      var client =
-          registrationService.getClient(
-              com.asc.common.application.proto.GetClientRequest.newBuilder()
-                  .setClientId(clientId)
-                  .build());
+      var client = grpcRegisteredClientService.getClient(clientId);
       if (!client.getIsPublic()) {
         log.warn("Client {} is not accessible", client.getClientId());
         return false;

@@ -19,27 +19,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.Sql(
                 @"UPDATE identity_clients c
 	                JOIN core_user u ON c.created_by = u.email
-	                SET c.creator_id = u.id;"
+	                SET c.creator_id = u.id
+                    WHERE c.tenant_id = u.tenant;"
             );
 
             migrationBuilder.Sql(
                 @"UPDATE identity_clients c
 	                JOIN core_user u ON c.modified_by = u.email
-	                SET c.modifier_id = u.id;"
+	                SET c.modifier_id = u.id
+                    WHERE c.tenant_id = u.tenant;"
             );
-
-            migrationBuilder.Sql(
-                @"UPDATE identity_clients c
-	                JOIN core_user u ON c.created_by = u.email
-	                SET c.creator_id = u.id;"
-            );
-
-            migrationBuilder.Sql(
-                @"UPDATE identity_clients c
-	                JOIN core_user u ON c.modified_by = u.email
-	                SET c.modifier_id = u.id;"
-            );
-
 
             migrationBuilder.Sql(
                 @"ALTER TABLE identity_clients

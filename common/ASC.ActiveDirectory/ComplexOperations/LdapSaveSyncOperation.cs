@@ -29,9 +29,7 @@ namespace ASC.ActiveDirectory.ComplexOperations;
 [Singleton]
 public class LdapSaveSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "ldapOperation";
-
-    private readonly DistributedTaskQueue<LdapOperationJob> _progressQueue = queueFactory.CreateQueue<LdapOperationJob>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly DistributedTaskQueue<LdapOperationJob> _progressQueue = queueFactory.CreateQueue<LdapOperationJob>();
 
     public async Task RunJobAsync(LdapSettings settings, Tenant tenant, LdapOperationType operationType, LdapLocalization resource = null, string userId = null)
     {
