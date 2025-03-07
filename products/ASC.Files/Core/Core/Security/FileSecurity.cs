@@ -1059,12 +1059,17 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FolderType.USER:
-                if (isOutsider || action == FilesSecurityActions.Lock || (isGuest && !e.Shared))
+                if (isOutsider || action == FilesSecurityActions.Lock)
                 {
                     return false;
                 }
                 if (e.RootCreateBy == userId)
                 {
+                    if(isGuest && action != FilesSecurityActions.Read && action != FilesSecurityActions.Download)
+                    {
+                        return false;
+                    }
+
                     // user has all right in his folder
                     return true;
                 }
