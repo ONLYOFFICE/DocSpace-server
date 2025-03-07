@@ -81,7 +81,8 @@ public class ClientQueryHandler {
     try {
       return new ClientId(UUID.fromString(clientId));
     } catch (IllegalArgumentException e) {
-      throw new ClientNotFoundException(String.format("Client with id %s was not found. Invalid client id format", clientId));
+      throw new ClientNotFoundException(
+          String.format("Client with id %s was not found. Invalid client id format", clientId));
     }
   }
 
