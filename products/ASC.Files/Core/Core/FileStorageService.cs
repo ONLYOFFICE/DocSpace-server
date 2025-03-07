@@ -3050,44 +3050,6 @@ public class FileStorageService //: IFileStorageService
         await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
     }
 
-    public async Task MoveWithCopySharedFilesAsync(Guid user, Guid toUser)
-    {
-        var initUser = securityContext.CurrentAccount.ID;
-
-        var fileDao = daoFactory.GetFileDao<int>();
-        var folderDao = daoFactory.GetFolderDao<int>();
-
-        var my = await folderDao.GetFolderIDUserAsync(false, user);
-        if (my == 0)
-        {
-            return;
-        }
-
-        var shared = await fileDao.GetFilesAsync(my).SelectAwait(async q=> await fileDao.GetFileAsync(q)).Where(q=> q.Shared).ToListAsync();
-
-        await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
-        if (shared.Count > 0)
-        {
-            await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
-            var userInfo = await userManager.GetUsersAsync(user);
-            var folder = await CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
-            var copies = new List<int>();
-            foreach (var file in shared)
-            {
-                var parent = file.ParentId;
-                await fileDao.MoveFileAsync(file.Id, folder.Id);
-                var copy = await fileDao.CopyFileAsync(file.Id, parent);
-                copies.Add(copy.Id);
-            }
-            var sharedIds = shared.Select(f => f.Id).ToList();
-            await DeleteFromRecentAsync([], sharedIds, true);
-            await fileDao.ReassignFilesAsync(toUser, sharedIds);
-            await fileDao.ReassignFilesAsync(user, copies);
-        }
-
-        await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
-    }
-
     public async Task DeletePersonalDataAsync<T>(Guid userFromId, bool checkPermission = false)
     {
         if (checkPermission)
@@ -3135,7 +3097,7 @@ public class FileStorageService //: IFileStorageService
         return;
     }
 
-    public async Task UpdatePersonalFolderModifiedOn(Guid userId)
+    public async Task UpdatePersonalFolderModified(Guid userId)
     {
         await DemandPermissionToDeletePersonalDataAsync(userId);
 

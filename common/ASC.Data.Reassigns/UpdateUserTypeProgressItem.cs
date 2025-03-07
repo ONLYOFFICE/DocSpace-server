@@ -87,11 +87,11 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
 
             if (_employeeType == EmployeeType.Guest)
             {
-                await fileStorageService.MoveWithCopySharedFilesAsync(User, ToUser);
-                await SetPercentageAndCheckCancellationAsync(60, true);
+                await securityContext.AuthenticateMeWithoutCookieAsync(ToUser);
+                await fileStorageService.UpdatePersonalFolderModified(User);
+                await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
-                await fileStorageService.UpdatePersonalFolderModifiedOn(User);
-                await SetPercentageAndCheckCancellationAsync(80, true);
+                await SetPercentageAndCheckCancellationAsync(60, true);
             }
 
             await UpdateUserTypeAsync(userManager, webItemSecurityCache, distributedLockProvider, socketManager);

@@ -104,10 +104,8 @@ public class QueueWorkerUpdateUserType(IHttpContextAccessor httpContextAccessor,
         IServiceProvider serviceProvider,
         IDistributedTaskQueueFactory queueFactory,
         IDistributedLockProvider distributedLockProvider)
-    : QueueWorker<UpdateUserTypeProgressItem>(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, distributedLockProvider)
+    : QueueWorker<UpdateUserTypeProgressItem>(httpContextAccessor, serviceProvider, queueFactory, distributedLockProvider)
 {
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "change_user_type";
-
     public async Task<UpdateUserTypeProgressItem> StartAsync(int tenantId, Guid userId, Guid toUserId, Guid currentUserId, EmployeeType employeeType)
     {
         var result = _serviceProvider.GetService<UpdateUserTypeProgressItem>();
