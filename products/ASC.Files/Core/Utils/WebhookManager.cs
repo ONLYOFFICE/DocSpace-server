@@ -32,11 +32,11 @@ namespace ASC.Web.Files.Utils;
 public class WebhookManager(
     IDaoFactory daoFactory,
     IWebhookPublisher webhookPublisher,
-    FileSecurity fileSecurity)
+    IServiceProvider serviceProvider)
 {
     public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
-        var checker = new WebhookFileEntryAccessChecker<T>(fileSecurity);
+        var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
         var cleanFileEntry = await GetCleanFileEntry(fileEntry);
 
         return await webhookPublisher.GetWebhookConfigsAsync(trigger, checker, cleanFileEntry);
@@ -49,7 +49,7 @@ public class WebhookManager(
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
-        var checker = new WebhookFileEntryAccessChecker<T>(fileSecurity);
+        var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
         var cleanFileEntry = await GetCleanFileEntry(fileEntry);
 
         await webhookPublisher.PublishAsync(trigger, checker, cleanFileEntry);
@@ -63,7 +63,8 @@ public class WebhookManager(
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class WebhookFileEntryAccessChecker<T>(FileSecurity fileSecurity) : IWebhookAccessChecker<FileEntry<T>>
 {
     public async Task<bool> CheckAccessAsync(FileEntry<T> fileEntry, Guid userId)
