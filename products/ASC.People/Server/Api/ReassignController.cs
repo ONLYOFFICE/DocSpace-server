@@ -137,7 +137,7 @@ public class ReassignController(
     [HttpGet("necessary")]
     public async Task<bool> NecessaryReassignAsync([FromQuery] NecessaryReassignDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var user = await userManager.GetUsersAsync(inDto.UserId);
