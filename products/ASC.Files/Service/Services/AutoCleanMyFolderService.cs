@@ -117,6 +117,14 @@ public class AutoCleanMyFolderService(
 
             logger.InfoCleanUp(myId);
 
+            var userTo = my.ModifiedBy;
+
+            if (await userManager.IsGuestAsync(userTo))
+            {
+                userTo = tenantManager.GetCurrentTenant().OwnerId;
+            }
+
+            await fileStorageService.MoveSharedFilesAsync(tenantUser.UserId, my.ModifiedBy);
             await fileStorageService.DeletePersonalFolderAsync<int>(tenantUser.UserId);
 
             logger.InfoCleanUpFinish(myId);
