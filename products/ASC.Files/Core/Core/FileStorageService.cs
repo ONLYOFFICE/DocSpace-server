@@ -2992,30 +2992,17 @@ public class FileStorageService //: IFileStorageService
     {
         var initUser = securityContext.CurrentAccount.ID;
 
-        await securityContext.AuthenticateMeWithoutCookieAsync(user);
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
 
-        var my = await globalFolderHelper.FolderMyAsync;
+        var my = await folderDao.GetFolderIDUserAsync(false, user);
         if (my == 0)
         {
-            await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
             return [];
         }
-        var list = (await GetFolderItemsAsync(
-            await globalFolderHelper.FolderMyAsync,
-            0,
-            -1,
-            new List<FilterType>() { FilterType.FilesOnly },
-            false,
-            user.ToString(),
-            "",
-            [],
-            false,
-            false,
-            null,
-            SearchArea.Any)).Entries.Where(e => e.Shared);
+         var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true).SelectAwait(async q => await fileDao.GetFileAsync(q)).Where(q => q.Shared).Select(q => q.Id);
 
-        await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
-        return list;
+        return shared;
     }
 
     public async Task MoveSharedFilesAsync(Guid user, Guid toUser)
@@ -3031,7 +3018,7 @@ public class FileStorageService //: IFileStorageService
             return;
         }
 
-        var shared = await fileDao.GetFilesAsync(my).SelectAwait(async q => await fileDao.GetFileAsync(q)).Where(q => q.Shared).Select(q => q.Id).ToListAsync();
+        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true).SelectAwait(async q => await fileDao.GetFileAsync(q)).Where(q => q.Shared).Select(q => q.Id).ToListAsync();
 
         await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
         if (shared.Count > 0)
