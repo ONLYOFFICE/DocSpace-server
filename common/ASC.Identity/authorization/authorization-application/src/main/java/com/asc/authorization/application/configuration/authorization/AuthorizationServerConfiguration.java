@@ -160,7 +160,7 @@ public class AuthorizationServerConfiguration {
    * Configures the password encoder.
    *
    * <p>In this implementation, a NoOpPasswordEncoder is used, which does not apply any encoding.
-   * Since we rely on X-Signature instead of users, we do not really need an encoder.
+   * Since we rely on x-signature instead of users, we do not really need an encoder.
    *
    * @return the {@link PasswordEncoder} bean.
    */

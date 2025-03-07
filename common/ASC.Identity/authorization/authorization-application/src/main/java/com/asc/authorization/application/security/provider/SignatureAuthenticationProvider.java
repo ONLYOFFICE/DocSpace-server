@@ -41,6 +41,7 @@ import com.asc.common.utilities.HttpUtils;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.grpc.Deadline;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -120,15 +121,19 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
           AuthenticationError.SOMETHING_WENT_WRONG_ERROR,
           "Authentication failed due to missing client ID in principal");
 
-    var token = request.getHeader(configurationProperties.getSignatureHeader());
-    if (token == null || token.isBlank())
+    var token =
+        Arrays.stream(request.getCookies())
+            .filter(c -> c.getName().equalsIgnoreCase(configurationProperties.getSignatureCookie()))
+            .findFirst()
+            .orElse(null);
+    if (token == null || token.getValue().isBlank())
       throw new AuthenticationProcessingException(
           AuthenticationError.MISSING_ASC_SIGNATURE,
           "Authentication failed due to missing asc signature");
 
     try (var ignored = MDC.putCloseable("client_id", clientId)) {
       var clientFuture = requestClient(clientId);
-      var signature = signatureService.validate(token, BasicSignature.class);
+      var signature = signatureService.validate(token.getValue(), BasicSignature.class);
       var client = clientFuture.get();
 
       validateClient(client);
@@ -193,7 +198,7 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
    * @param signature the {@link BasicSignature} object containing user and tenant details.
    */
   private void setRequestAttributes(HttpServletRequest request, BasicSignature signature) {
-    request.setAttribute(configurationProperties.getSignatureHeader(), signature);
+    request.setAttribute(configurationProperties.getSignatureCookie(), signature);
   }
 
   /**
