@@ -24,47 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.RemovePortal;
+namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-[Singleton]
-public class RemovePortalWorker(
-    IDistributedTaskQueueFactory queueFactory,
-    IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+public class DeepLinkConfigurationRequestsDto
 {
-    private readonly DistributedTaskQueue<RemovePortalOperation> _queue = queueFactory.CreateQueue<RemovePortalOperation>();
-
-    public async Task StartAsync(int tenantId)
-    {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_removePortal"))
-        {
-            var item = (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
-
-            if (item is { IsCompleted: true })
-            {
-                await _queue.DequeueTask(item.Id);
-                item = null;
-            }
-            if (item == null)
-            {
-                item = serviceProvider.GetService<RemovePortalOperation>();
-
-                item.Init(tenantId);
-
-                await _queue.EnqueueTask(item);
-            }
-
-            await item.PublishChanges();
-        }
-    }
-
-    public async Task Stop()
-    {
-        var tasks = await _queue.GetAllTasks(DistributedTaskQueue<RemovePortalOperation>.INSTANCE_ID);
-
-        foreach (var t in tasks)
-        {
-            await _queue.DequeueTask(t.Id);
-        }
-    }
+    public TenantDeepLinkSettings DeepLinkSettings { get; set; }
 }

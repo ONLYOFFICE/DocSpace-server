@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,47 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.RemovePortal;
+namespace ASC.Core.Tenants;
 
-[Singleton]
-public class RemovePortalWorker(
-    IDistributedTaskQueueFactory queueFactory,
-    IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+[Serializable]
+public class TenantDeepLinkSettings: ISettings<TenantDeepLinkSettings>
 {
-    private readonly DistributedTaskQueue<RemovePortalOperation> _queue = queueFactory.CreateQueue<RemovePortalOperation>();
-
-    public async Task StartAsync(int tenantId)
+    [JsonIgnore]
+    public Guid ID
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_removePortal"))
-        {
-            var item = (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
-
-            if (item is { IsCompleted: true })
-            {
-                await _queue.DequeueTask(item.Id);
-                item = null;
-            }
-            if (item == null)
-            {
-                item = serviceProvider.GetService<RemovePortalOperation>();
-
-                item.Init(tenantId);
-
-                await _queue.EnqueueTask(item);
-            }
-
-            await item.PublishChanges();
-        }
+        get { return new Guid("{926A6850-7C19-4744-B4AD-813DE3CD55B1}"); }
     }
 
-    public async Task Stop()
-    {
-        var tasks = await _queue.GetAllTasks(DistributedTaskQueue<RemovePortalOperation>.INSTANCE_ID);
+    public DeepLinkHandlingMode HandlingMode { get; set; }
 
-        foreach (var t in tasks)
-        {
-            await _queue.DequeueTask(t.Id);
-        }
+    public TenantDeepLinkSettings GetDefault()
+    {
+        return new TenantDeepLinkSettings();
     }
+}
+
+public enum DeepLinkHandlingMode
+{
+    ProvideChoice,
+    Web,
+    App
 }

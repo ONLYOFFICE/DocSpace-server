@@ -36,11 +36,12 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
     
     public FileDownloadOperationData(IEnumerable<T> folders,
         IEnumerable<FilesDownloadOperationItem<T>> filesDownload,
-        int tenantId,
+        int tenantId,        
+        Guid userId,
         IDictionary<string, string> headers,
         ExternalSessionSnapshot sessionSnapshot,
         string baseUri =  null,
-        bool holdResult = true) : base(folders, filesDownload.Select(f => f.Id).ToList(), tenantId, headers, sessionSnapshot, holdResult)
+        bool holdResult = true) : base(folders, filesDownload.Select(f => f.Id).ToList(), tenantId, userId, headers, sessionSnapshot, holdResult)
     {
         FilesDownload = filesDownload;
         BaseUri = baseUri;
