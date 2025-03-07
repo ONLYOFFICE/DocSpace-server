@@ -62,10 +62,10 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
    * Performs filtering of incoming HTTP requests to authenticate requests containing the signature
    * header.
    *
-   * <p>If the {@code x-signature} cookie is present in the request, the token is
-   * validated and authenticated using the {@link AuthenticationManager}. On successful
-   * authentication, the security context is updated with the authenticated token. If authentication
-   * fails, the response is set to {@code 403 Forbidden}.
+   * <p>If the {@code x-signature} cookie is present in the request, the token is validated and
+   * authenticated using the {@link AuthenticationManager}. On successful authentication, the
+   * security context is updated with the authenticated token. If authentication fails, the response
+   * is set to {@code 403 Forbidden}.
    *
    * @param request the incoming HTTP request
    * @param response the HTTP response to be sent
