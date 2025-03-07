@@ -40,6 +40,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -108,13 +109,13 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
     response.addCookie(cookie);
 
     var signature =
-        Arrays.stream(request.getCookies())
+        Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
             .filter(
                 c -> c.getName().equalsIgnoreCase(securityConfigProperties.getSignatureCookie()))
             .findFirst()
             .orElse(null);
     if (signature == null || signature.getValue().isBlank()) {
-      log.warn("Missing '{}' signature cookie", securityConfigProperties.getSignatureCookie());
+      log.warn("Missing {} signature cookie", securityConfigProperties.getSignatureCookie());
       securityUtils.redirectWithError(
           request, response, clientId, AuthenticationError.MISSING_ASC_SIGNATURE.getCode());
       return;

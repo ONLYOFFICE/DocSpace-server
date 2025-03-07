@@ -32,10 +32,12 @@ import com.asc.authorization.application.security.authentication.BasicSignature;
 import com.asc.authorization.application.security.oauth.authentication.PersonalAccessTokenAuthenticationToken;
 import com.asc.authorization.application.security.oauth.grant.ExtendedAuthorizationGrantType;
 import com.asc.authorization.application.security.service.SignatureService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -115,7 +117,7 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
         });
 
     var token =
-        Arrays.stream(request.getCookies())
+        Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
             .filter(
                 c ->
                     c.getName()

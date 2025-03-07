@@ -40,9 +40,11 @@ import com.asc.common.service.transfer.message.AuditMessage;
 import com.asc.common.utilities.HttpUtils;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.grpc.Deadline;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -122,7 +124,7 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
           "Authentication failed due to missing client ID in principal");
 
     var token =
-        Arrays.stream(request.getCookies())
+        Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
             .filter(c -> c.getName().equalsIgnoreCase(configurationProperties.getSignatureCookie()))
             .findFirst()
             .orElse(null);

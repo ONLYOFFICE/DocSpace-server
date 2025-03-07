@@ -30,10 +30,12 @@ package com.asc.registration.application.security.filter;
 import com.asc.registration.application.security.authentication.BasicSignatureToken;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -77,11 +79,14 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
     var token =
-        Arrays.stream(request.getCookies())
+        Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
             .filter(c -> c.getName().equalsIgnoreCase(SIGNATURE_COOKIE))
             .findFirst()
             .orElse(null);
     if (token == null || token.getValue().isBlank()) {
+      log.debug(
+          "Authentication signature {} is missing, passing the request down the filter chain",
+          SIGNATURE_COOKIE);
       chain.doFilter(request, response);
       return;
     }
