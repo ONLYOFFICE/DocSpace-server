@@ -70,6 +70,22 @@ public class ClientQueryHandler {
   private final EncryptionService encryptionService;
 
   /**
+   * Helper method to convert a String client id into a {@link ClientId} by wrapping
+   * UUID.fromString.
+   *
+   * @param clientId the client id in String format
+   * @return a {@link ClientId} built from the given string
+   * @throws ClientNotFoundException if the conversion fails
+   */
+  private ClientId toClientId(String clientId) {
+    try {
+      return new ClientId(UUID.fromString(clientId));
+    } catch (IllegalArgumentException e) {
+      throw new ClientNotFoundException(String.format("Client with id %s was not found. Invalid client id format", clientId));
+    }
+  }
+
+  /**
    * Retrieves detailed information about a client using tenant and client identifiers.
    *
    * <p>For tenant admins (ROLE_ADMIN), the method returns client details based solely on the tenant
@@ -101,8 +117,7 @@ public class ClientQueryHandler {
         role.equals(Role.ROLE_ADMIN)
             ? (clientQueryRepository
                 .findByClientIdAndTenantId(
-                    new ClientId(UUID.fromString(query.getClientId())),
-                    new TenantId(query.getTenantId()))
+                    toClientId(query.getClientId()), new TenantId(query.getTenantId()))
                 .orElseThrow(
                     () ->
                         new ClientNotFoundException(
@@ -111,7 +126,7 @@ public class ClientQueryHandler {
                                 query.getClientId(), query.getTenantId()))))
             : (clientQueryRepository
                 .findByClientIdAndTenantIdAndCreatorId(
-                    new ClientId(UUID.fromString(query.getClientId())),
+                    toClientId(query.getClientId()),
                     new TenantId(query.getTenantId()),
                     new UserId(query.getUserId()))
                 .orElseThrow(
@@ -140,7 +155,7 @@ public class ClientQueryHandler {
 
     var client =
         clientQueryRepository
-            .findById(new ClientId(UUID.fromString(clientId)))
+            .findById(toClientId(clientId))
             .orElseThrow(
                 () ->
                     new ClientNotFoundException(
@@ -195,8 +210,7 @@ public class ClientQueryHandler {
         role.equals(Role.ROLE_ADMIN)
             ? (clientQueryRepository
                 .findByClientIdAndTenantId(
-                    new ClientId(UUID.fromString(query.getClientId())),
-                    new TenantId(query.getTenantId()))
+                    toClientId(query.getClientId()), new TenantId(query.getTenantId()))
                 .orElseThrow(
                     () ->
                         new ClientNotFoundException(
@@ -205,7 +219,7 @@ public class ClientQueryHandler {
                                 query.getClientId(), query.getTenantId()))))
             : (clientQueryRepository
                 .findByClientIdAndTenantIdAndCreatorId(
-                    new ClientId(UUID.fromString(query.getClientId())),
+                    toClientId(query.getClientId()),
                     new TenantId(query.getTenantId()),
                     new UserId(query.getUserId()))
                 .orElseThrow(
@@ -299,7 +313,7 @@ public class ClientQueryHandler {
 
     var client =
         clientQueryRepository
-            .findById(new ClientId(UUID.fromString(clientId)))
+            .findById(toClientId(clientId))
             .orElseThrow(
                 () ->
                     new ClientNotFoundException(
