@@ -37,12 +37,13 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
     public FileMoveCopyOperationData(IEnumerable<T> Folders,
         IEnumerable<T> Files,
         int TenantId,
+        Guid UserId,
         JsonElement DestFolderId,
         bool Copy,
         FileConflictResolveType ResolveType,
         bool HoldResult = true,
         IDictionary<string, string> Headers = null,
-        ExternalSessionSnapshot SessionSnapshot = null) : base(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult)
+        ExternalSessionSnapshot SessionSnapshot = null) : base(Folders, Files, TenantId, UserId, Headers, SessionSnapshot, HoldResult)
     {
         this.DestFolderId = DestFolderId.ToString();
         this.Copy = Copy;
@@ -60,8 +61,11 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
 }
 
 [Transient]
-public class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(serviceProvider)
+public class FileMoveCopyOperation : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>
 {
+    public FileMoveCopyOperation() { }
+    public FileMoveCopyOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+
     protected override FileOperationType FileOperationType => FileOperationType.Copy;
 
     public void Init(bool holdResult, bool copy)
@@ -85,12 +89,12 @@ public class FileMoveCopyOperation(IServiceProvider serviceProvider) : ComposeFi
         }
     }
 
-    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileMoveCopyOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileMoveCopyOperation<string>(_serviceProvider, ThirdPartyData);
 
-        return base.RunJob(distributedTask, cancellationToken);
+        return base.RunJob(cancellationToken);
 
     }
 }
@@ -184,13 +188,19 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 if (Folders.Count > 0)
                 {
-                    this[Err] = FilesCommonResource.ErrorMessage_FolderMoveFormFillingError;
+                    var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
+                    var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+                    this[Err] = string.Format(FilesCommonResource.ErrorMessage_FolderMoveFormFillingError, logoText);
 
                     return;
                 }
                 if (Files.Count > 1)
                 {
-                    this[Err] = FilesCommonResource.ErrorMessage_FilesMoveFormFillingError;
+                    var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
+                    var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+                    this[Err] = string.Format(FilesCommonResource.ErrorMessage_FilesMoveFormFillingError, logoText);
 
                     return;
                 }
@@ -904,9 +914,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             var fileType = FileUtility.GetFileTypeByFileName(file.Title);
                             try
                             {
+
+
                                 if (fileType != FileType.Pdf || !await fileChecker.CheckExtendedPDF(file))
                                 {
-                                    this[Err] = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
+                                    var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
+                                    var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+                                    this[Err] = string.Format(_copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom, logoText);
                                     continue;
                                 }
                             }

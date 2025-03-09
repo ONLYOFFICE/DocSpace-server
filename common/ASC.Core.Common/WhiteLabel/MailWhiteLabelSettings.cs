@@ -42,9 +42,6 @@ public class MailWhiteLabelSettingsWrapper
 /// </summary>
 public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 {
-    private readonly MailWhiteLabelSettingsHelper _mailWhiteLabelSettingsHelper;
-    private readonly IConfiguration _configuration;
-
     /// <summary>Specifies if the mail footer is enabled or not</summary>
     /// <type>System.Boolean, System</type>
     public bool FooterEnabled { get; set; }
@@ -53,34 +50,9 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
     /// <type>System.Boolean, System</type>
     public bool FooterSocialEnabled { get; set; }
 
-    /// <summary>Support URL</summary>
-    /// <type>System.String, System</type>
-    public string SupportUrl { get; init; }
-
-    /// <summary>Support email</summary>
-    /// <type>System.String, System</type>
-    public string SupportEmail { get; init; }
-
-    /// <summary>Sales email</summary>
-    /// <type>System.String, System</type>
-    public string SalesEmail { get; init; }
-
-    /// <summary>Demo URL</summary>
-    /// <type>System.String, System</type>
-    public string DemoUrl { get; init; }
-
-    /// <summary>Site URL</summary>
-    /// <type>System.String, System</type>
-    public string SiteUrl { get; init; }
 
     [JsonIgnore]
     public Guid ID => new("{C3602052-5BA2-452A-BD2A-ADD0FAF8EB88}");
-
-    public MailWhiteLabelSettings(IConfiguration configuration)
-    {
-        _mailWhiteLabelSettingsHelper = new MailWhiteLabelSettingsHelper(configuration);
-        _configuration = configuration;
-    }
 
     public MailWhiteLabelSettings()
     {
@@ -89,15 +61,10 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 
     public MailWhiteLabelSettings GetDefault()
     {
-        return new MailWhiteLabelSettings(_configuration)
+        return new MailWhiteLabelSettings()
         {
             FooterEnabled = true,
-            FooterSocialEnabled = true,
-            SupportUrl = _mailWhiteLabelSettingsHelper?.DefaultMailSupportUrl,
-            SupportEmail = _mailWhiteLabelSettingsHelper?.DefaultMailSupportEmail,
-            SalesEmail = _mailWhiteLabelSettingsHelper?.DefaultMailSalesEmail,
-            DemoUrl = _mailWhiteLabelSettingsHelper?.DefaultMailDemoUrl,
-            SiteUrl = _mailWhiteLabelSettingsHelper?.DefaultMailSiteUrl
+            FooterSocialEnabled = true
         };
     }
 
@@ -105,12 +72,7 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
     {
         var defaultSettings = GetDefault();
         return FooterEnabled == defaultSettings.FooterEnabled &&
-                FooterSocialEnabled == defaultSettings.FooterSocialEnabled &&
-                SupportUrl == defaultSettings.SupportUrl &&
-                SupportEmail == defaultSettings.SupportEmail &&
-                SalesEmail == defaultSettings.SalesEmail &&
-                DemoUrl == defaultSettings.DemoUrl &&
-                SiteUrl == defaultSettings.SiteUrl;
+                FooterSocialEnabled == defaultSettings.FooterSocialEnabled;
     }
 
     public static async Task<MailWhiteLabelSettings> InstanceAsync(SettingsManager settingsManager)
@@ -121,59 +83,5 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
     public static async Task<bool> IsDefaultAsync(SettingsManager settingsManager)
     {
         return (await InstanceAsync(settingsManager)).IsDefault();
-    }
-}
-
-[Singleton]
-public class MailWhiteLabelSettingsHelper(IConfiguration configuration)
-{
-    public string DefaultMailSupportUrl
-    {
-        get
-        {
-            var url = BaseCommonLinkUtility.GetRegionalUrl(configuration["web:support-feedback"] ?? string.Empty, null);
-
-            return !string.IsNullOrEmpty(url) ? url : "http://helpdesk.onlyoffice.com";
-        }
-    }
-
-    public string DefaultMailSupportEmail
-    {
-        get
-        {
-            var email = configuration["web:support-email"];
-
-            return !string.IsNullOrEmpty(email) ? email : "support@onlyoffice.com";
-        }
-    }
-
-    public string DefaultMailSalesEmail
-    {
-        get
-        {
-            var email = configuration["core:payment:email"];
-
-            return !string.IsNullOrEmpty(email) ? email : "sales@onlyoffice.com";
-        }
-    }
-
-    public string DefaultMailDemoUrl
-    {
-        get
-        {
-            var url = BaseCommonLinkUtility.GetRegionalUrl(configuration["web:demo-order"] ?? string.Empty, null);
-
-            return !string.IsNullOrEmpty(url) ? url : "https://www.onlyoffice.com/demo-order.aspx";
-        }
-    }
-
-    public string DefaultMailSiteUrl
-    {
-        get
-        {
-            var url = configuration["web:teamlab-site"];
-
-            return !string.IsNullOrEmpty(url) ? url : "https://www.onlyoffice.com";
-        }
     }
 }

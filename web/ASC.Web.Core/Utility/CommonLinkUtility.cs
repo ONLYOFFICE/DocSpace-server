@@ -65,9 +65,8 @@ public class CommonLinkUtility(
         TenantManager tenantManager,
         UserManager userManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
-        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
         ILoggerProvider options,
-        AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
+        ExternalResourceSettingsHelper externalResourceSettingsHelper)
     : BaseCommonLinkUtility(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options)
 {
     public const string ParamName_UserUserID = "uid";
@@ -123,87 +122,63 @@ public class CommonLinkUtility(
 
     #endregion
 
-    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
+    #region links to external resources
+
+    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).UserForumEnabled)
         {
             return string.Empty;
         }
 
-        var url = additionalWhiteLabelSettingsHelper.DefaultUserForumUrl;
+        var url = externalResourceSettingsHelper.Forum.GetDefaultRegionalDomain();
 
-        if (string.IsNullOrEmpty(url))
-        {
-            return string.Empty;
-        }
-
-        return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
-    
-    #region Help Centr
 
-    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
+    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).HelpCenterEnabled)
         {
             return string.Empty;
         }
 
-        var url = additionalWhiteLabelSettingsHelper.DefaultHelpCenterUrl;
+        var url = externalResourceSettingsHelper.Helpcenter.GetDefaultRegionalDomain();
 
-        if (string.IsNullOrEmpty(url))
-        {
-            return string.Empty;
-        }
-
-        return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
-    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
+    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).FeedbackAndSupportEnabled)
         {
             return string.Empty;
         }
 
-        var url = additionalWhiteLabelSettingsHelper.DefaultFeedbackAndSupportUrl;
+        var url = externalResourceSettingsHelper.Support.GetDefaultRegionalDomain();
 
-        if (string.IsNullOrEmpty(url))
-        {
-            return string.Empty;
-        }
-
-        return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
     public string GetSiteLink()
     {
-        var url = mailWhiteLabelSettingsHelper.DefaultMailSiteUrl;
+        var url = externalResourceSettingsHelper.Site.GetDefaultRegionalDomain();
 
         return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
     public string GetSupportEmail()
     {
-        var url = mailWhiteLabelSettingsHelper.DefaultMailSupportEmail;
+        var email = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("supportemail");
 
-        return string.IsNullOrEmpty(url) ? string.Empty : url;
+        return string.IsNullOrEmpty(email) ? string.Empty : email;
     }
 
     public string GetSalesEmail()
     {
-        var mail = additionalWhiteLabelSettingsHelper.DefaultMailSalesEmail;
+        var email = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
 
-        return string.IsNullOrEmpty(mail) ? string.Empty : mail;
-    }
-
-    public async Task<string> GetFeedbackAndSupportLink(SettingsManager settingsManager, bool inCurrentCulture = true)
-    {
-        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
-
-        return !settings.FeedbackAndSupportEnabled || string.IsNullOrEmpty(settings.FeedbackAndSupportUrl)
-            ? string.Empty
-            : GetRegionalUrl(settings.FeedbackAndSupportUrl, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(email) ? string.Empty : email;
     }
 
     #endregion

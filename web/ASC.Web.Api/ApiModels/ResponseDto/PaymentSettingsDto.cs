@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,53 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using JsonSerializer = System.Text.Json.JsonSerializer;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-namespace ASC.Common.Caching;
-
-[Singleton]
-public class AscDistributedCache(IDistributedCache cache)
+public class PaymentSettingsDto
 {
-    public async Task<T> GetAsync<T>(string key)
-    {
-        var serializedObject = await cache.GetAsync(key);
-            
-        if (serializedObject == null)
-        {
-            return default;
-        }
+    public string SalesEmail { get; set; }
+    public string FeedbackAndSupportUrl { get; set; }
+    public string BuyUrl { get; set; }
+    public bool Standalone { get; set; }
+    public CurrentLicenseInfo CurrentLicense { get; set; }
+    public int Max { get; set; }
+}
 
-        using var ms = new MemoryStream(serializedObject);
-
-        return await JsonSerializer.DeserializeAsync<T>(ms);
-    }
-    
-    public async Task InsertAsync<T>(string key, T value, DateTime absoluteExpiration)
-    {
-        using var ms = new MemoryStream();
-
-        await JsonSerializer.SerializeAsync(ms, value);
-
-        await cache.SetAsync(key, ms.ToArray(), new DistributedCacheEntryOptions
-        {
-            AbsoluteExpiration = absoluteExpiration
-        });
-    }
-    
-    public async Task InsertAsync<T>(string key, T value, TimeSpan slidingExpiration)
-    {
-        using var ms = new MemoryStream();
-
-        await JsonSerializer.SerializeAsync(ms, value);
-
-        await cache.SetAsync(key, ms.ToArray(), new DistributedCacheEntryOptions
-        {
-            SlidingExpiration = slidingExpiration
-        });
-    }
-    
-    public async Task RemoveAsync(string key)
-    {
-        await cache.RemoveAsync(key);
-    }
+public class CurrentLicenseInfo
+{
+    public bool Trial { get; set; }
+    public DateTime DueDate { get; set; }
 }

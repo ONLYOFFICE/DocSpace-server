@@ -33,10 +33,9 @@ public class RoomTemplatesWorker(
     IDistributedLockProvider distributedLockProvider)
 {
     private static readonly SemaphoreSlim _semaphoreSlim = new(1);
-    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "room_templates";
-    public const string LockKey = $"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}";
+    private readonly DistributedTaskQueue<CreateRoomTemplateOperation> _templateQueue = queueFactory.CreateQueue<CreateRoomTemplateOperation>();
+    private readonly DistributedTaskQueue<CreateRoomFromTemplateOperation> _roomQueue = queueFactory.CreateQueue<CreateRoomFromTemplateOperation>();
+    public const string LockKey = $"lock_room_templates";
 
     public async Task<string> StartCreateTemplateAsync(int tenantId,
         Guid userId,
@@ -54,11 +53,11 @@ public class RoomTemplatesWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var item = (await _queue.GetAllTasks<CreateRoomTemplateOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
+            var item = (await _templateQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
 
             if (item is { IsCompleted: true })
             {
-                await _queue.DequeueTask(item.Id);
+                await _templateQueue.DequeueTask(item.Id);
                 item = null;
             }
             if (item == null || (enqueueTask && item.Id == taskId && item.Status == DistributedTaskStatus.Created))
@@ -75,11 +74,11 @@ public class RoomTemplatesWorker(
 
                 if (enqueueTask)
                 {
-                    await _queue.EnqueueTask(item);
+                    await _templateQueue.EnqueueTask(item);
                 }
                 else
                 {
-                    await _queue.PublishTask(item);
+                    await _templateQueue.PublishTask(item);
                 }
             }
 
@@ -101,11 +100,11 @@ public class RoomTemplatesWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var item = (await _queue.GetAllTasks<CreateRoomFromTemplateOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
+            var item = (await _roomQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
 
             if (item is { IsCompleted: true })
             {
-                await _queue.DequeueTask(item.Id);
+                await _roomQueue.DequeueTask(item.Id);
                 item = null;
             }
             if (item == null || (enqueueTask && item.Id == taskId && item.Status == DistributedTaskStatus.Created))
@@ -121,11 +120,11 @@ public class RoomTemplatesWorker(
 
                 if (enqueueTask)
                 {
-                    await _queue.EnqueueTask(item);
+                    await _roomQueue.EnqueueTask(item);
                 }
                 else
                 {
-                    await _queue.PublishTask(item);
+                    await _roomQueue.PublishTask(item);
                 }
             }
 
@@ -135,11 +134,11 @@ public class RoomTemplatesWorker(
 
     public async Task<CreateRoomTemplateOperation> GetStatusTemplateCreatingAsync(int tenantId)
     {
-        return (await _queue.GetAllTasks<CreateRoomTemplateOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
+        return (await _templateQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
     }
 
     public async Task<CreateRoomFromTemplateOperation> GetStatusRoomCreatingAsync(int tenantId)
     {
-        return (await _queue.GetAllTasks<CreateRoomFromTemplateOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
+        return (await _roomQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
     }
 }

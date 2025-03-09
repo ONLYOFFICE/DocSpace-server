@@ -416,10 +416,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logotext</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Logo text", typeof(object))]
+    [SwaggerResponse(200, "Logo text", typeof(string))]
     [AllowNotPayment]
     [HttpGet("whitelabel/logotext")]
-    public async Task<object> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    public async Task<string> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -452,7 +452,7 @@ public class WhitelabelController(ApiContext apiContext,
         return new IsDefaultWhiteLabelLogosDto
         {
             Name = "logotext",
-            Default = tenantWhiteLabelSettings.LogoText.IsNullOrEmpty() || tenantWhiteLabelSettings.LogoText.Equals(TenantWhiteLabelSettings.DefaultLogoText)
+            Default = string.IsNullOrEmpty(tenantWhiteLabelSettings.LogoText)
         };
     }
 

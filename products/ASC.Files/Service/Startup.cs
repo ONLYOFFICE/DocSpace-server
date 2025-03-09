@@ -79,7 +79,13 @@ public class Startup : BaseWorkerStartup
                 services.AddActivePassiveHostedService<RefreshLicenseService>(Configuration);
             }
         }
-
+        
+        services.RegisterQueue<FileDeleteOperation>(10);
+        services.RegisterQueue<FileMoveCopyOperation>(10);
+        services.RegisterQueue<FileDuplicateOperation>(10);
+        services.RegisterQueue<FileDownloadOperation>(10);
+        services.RegisterQueue<FileMarkAsReadOperation>(10);
+        
         services.RegisterQuotaFeature();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddScoped<IWebItem, ProductEntryPoint>();

@@ -64,7 +64,7 @@ public class FileStorageService //: IFileStorageService
     ConsumerFactory consumerFactory,
     EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
     SettingsManager settingsManager,
-    FileOperationsManager fileOperationsManager,
+    FileMarkAsReadOperationsManager fileOperationsManager,
     TenantManager tenantManager,
     FileTrackerHelper fileTracker,
     IEventBus eventBus,
@@ -2174,7 +2174,7 @@ public class FileStorageService //: IFileStorageService
             var newFiles = await fileMarker.GetRoomGroupedNewItemsAsync();
             if (newFiles.Count == 0)
             {
-                await fileOperationsManager.PublishMarkAsRead([JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync)], []);
+                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync)], []);
             }
 
             return newFiles
@@ -2203,7 +2203,7 @@ public class FileStorageService //: IFileStorageService
             var newFiles = await fileMarker.MarkedItemsAsync(folder).Where(e => e.FileEntryType == FileEntryType.File).ToListAsync();
             if (newFiles.Count == 0)
             {
-                await fileOperationsManager.PublishMarkAsRead([JsonSerializer.SerializeToElement(folderId)], []);
+                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folderId)], []);
             }
 
             return newFiles
@@ -2232,7 +2232,7 @@ public class FileStorageService //: IFileStorageService
 
             if (result.Count == 0)
             {
-                await fileOperationsManager.PublishMarkAsRead([JsonSerializer.SerializeToElement(folderId)], []);
+                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folderId)], []);
             }
 
             return result;
@@ -2507,7 +2507,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async ValueTask<object> DeleteThirdPartyAsync(string providerId)
+    public async ValueTask<string> DeleteThirdPartyAsync(string providerId)
     {
         var providerDao = daoFactory.ProviderDao;
         if (providerDao == null)

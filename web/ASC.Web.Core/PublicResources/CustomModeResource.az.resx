@@ -90,7 +90,7 @@
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Salam, $UserName!
 
-ONLYOFFICE DocSpace-ə xoş gəlmisiniz! İstifadəçi profiliniz uğurla "${__VirtualRootPath}":"${__VirtualRootPath}"-a əlavə edildi. İndi edə bilərsiniz:
+${LetterLogoText} DocSpace-ə xoş gəlmisiniz! İstifadəçi profiliniz uğurla "${__VirtualRootPath}":"${__VirtualRootPath}"-a əlavə edildi. İndi edə bilərsiniz:
 
 * Dəvət olunduğunuz otaqda digər istifadəçilərlə əməkdaşlıq edin*: real vaxtda birgə müəlliflik üçün əməkdaşlıq otaqları və ya istənilən məqsəd üçün çevik parametrləri olan şəxsi otaqlar*.
 

@@ -209,7 +209,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(Module))]
     [HttpGet("info")]
-    public Module GetModule()
+    public Module GetFilesModule()
     {
         productEntryPoint.Init();
         return new Module(productEntryPoint);

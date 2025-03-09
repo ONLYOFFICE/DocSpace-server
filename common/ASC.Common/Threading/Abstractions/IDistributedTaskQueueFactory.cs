@@ -28,7 +28,5 @@ namespace ASC.Common.Threading;
 
 public interface IDistributedTaskQueueFactory
 {
-    DistributedTaskQueue CreateQueue<T>(int timeUntilUnregisterInSeconds = 60) where T : DistributedTask;
-    DistributedTaskQueue CreateQueue(Type type, int timeUntilUnregisterInSeconds = 60);
-    DistributedTaskQueue CreateQueue(string name = null, int timeUntilUnregisterInSeconds = 60);
+    DistributedTaskQueue<T> CreateQueue<T>(int timeUntilUnregisterInSeconds = 60) where T : DistributedTask;
 }

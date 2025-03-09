@@ -26,6 +26,8 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
+[JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToNearestAncestor)]
+[JsonDerivedType(typeof(FileDownloadOperation))]
 public abstract class FileOperation : DistributedTaskProgress
 {
     protected readonly IServiceProvider _serviceProvider;
@@ -46,6 +48,11 @@ public abstract class FileOperation : DistributedTaskProgress
     protected int _processed;
     public int Total { get; set; }
 
+    public FileOperation()
+    {
+        
+    }
+    
     protected FileOperation(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -80,10 +87,19 @@ public abstract class FileOperation : DistributedTaskProgress
     protected abstract Task DoJob(AsyncServiceScope serviceScope);
 }
 
-public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvider) : FileOperation(serviceProvider)
+public abstract class ComposeFileOperation<T1, T2> : FileOperation
     where T1 : FileOperationData<string>
     where T2 : FileOperationData<int>
 {
+    public ComposeFileOperation()
+    {
+        
+    }
+
+    protected ComposeFileOperation(IServiceProvider serviceProvider) : base(serviceProvider)
+    {
+    }
+
     protected abstract FileOperationType FileOperationType { get; }
     protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
     protected FileOperation<T2, int> DaoOperation { get; set; }
@@ -106,7 +122,7 @@ public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvi
         Init(data.HoldResult);
     }
 
-    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override async Task RunJob(CancellationToken cancellationToken)
     {
         var daoOperation = DaoOperation.Files.Count != 0 || DaoOperation.Folders.Count != 0;
         var thirdPartyOperation = ThirdPartyOperation.Files.Count != 0 || ThirdPartyOperation.Folders.Count != 0;
@@ -117,13 +133,13 @@ public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvi
         if (daoOperation)
         {
             DaoOperation.Publication = PublishChanges;
-            await DaoOperation.RunJob(distributedTask, cancellationToken);
+            await DaoOperation.RunJob(cancellationToken);
         }
 
         if (thirdPartyOperation)
         {
             ThirdPartyOperation.Publication = PublishChanges;
-            await ThirdPartyOperation.RunJob(distributedTask, cancellationToken);
+            await ThirdPartyOperation.RunJob(cancellationToken);
         }
     }
 
@@ -222,12 +238,15 @@ public record FileOperationData<T>
     [ProtoMember(6)]
     public bool HoldResult { get; set; }
 
+    [ProtoMember(7)]
+    public Guid UserId { get; set; }
+    
     public FileOperationData()
     {
         
     }
 
-    public FileOperationData(IEnumerable<T> folders, IEnumerable<T> files, int tenantId, IDictionary<string, string> headers, ExternalSessionSnapshot sessionSnapshot, bool holdResult = true)
+    public FileOperationData(IEnumerable<T> folders, IEnumerable<T> files, int tenantId, Guid userId, IDictionary<string, string> headers, ExternalSessionSnapshot sessionSnapshot, bool holdResult = true)
     {
         Folders = folders;
         Files = files;
@@ -235,11 +254,13 @@ public record FileOperationData<T>
         Headers = headers;
         SessionSnapshot = sessionSnapshot;
         HoldResult = holdResult;
+        UserId = userId;
     }
 }
 
 public abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
 {
+    protected Guid CurrentUserId { get; }
     protected int CurrentTenantId { get; }
     protected FileSecurity FilesSecurity { get; private set; }
     protected IFolderDao<TId> FolderDao { get; private set; }
@@ -258,6 +279,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         Files = fileOperationData.Files?.ToList() ?? [];
         Folders = fileOperationData.Folders?.ToList() ?? [];
         this[Hold] = fileOperationData.HoldResult;
+        CurrentUserId = fileOperationData.UserId;
         CurrentTenantId = fileOperationData.TenantId;
         Headers = fileOperationData.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         SessionSnapshot = fileOperationData.SessionSnapshot;
@@ -276,7 +298,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         this[Src] = string.Join(SplitChar, Folders.Select(f => "folder_" + f).Concat(Files.Select(f => "file_" + f)).ToArray());
     }
 
-    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override async Task RunJob(CancellationToken cancellationToken)
     {
         try
         {
@@ -286,6 +308,12 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
             var scopeClass = scope.ServiceProvider.GetService<FileOperationScope>();
             var (tenantManager, daoFactory, fileSecurity, logger) = scopeClass;
             await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
+
+            if (CurrentUserId != ASC.Core.Configuration.Constants.Guest.ID)
+            {
+                var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+                await securityContext.AuthenticateMeWithoutCookieAsync(CurrentUserId);
+            }
 
             var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
             externalShare.Initialize(SessionSnapshot);

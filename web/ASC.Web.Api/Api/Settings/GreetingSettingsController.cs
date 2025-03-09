@@ -72,9 +72,9 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// <short>Save the greeting settings</short>
     /// <path>api/2.0/settings/greetingsettings</path>
     [Tags("Settings / Greeting settings")]
-    [SwaggerResponse(200, "Message about saving greeting settings successfully", typeof(object))]
+    [SwaggerResponse(200, "Message about saving greeting settings successfully", typeof(string))]
     [HttpPost("")]
-    public async Task<object> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
+    public async Task<string> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -103,9 +103,9 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// <short>Restore the greeting settings</short>
     /// <path>api/2.0/settings/greetingsettings/restore</path>
     [Tags("Settings / Greeting settings")]
-    [SwaggerResponse(200, "Greeting settings: tenant name", typeof(object))]
+    [SwaggerResponse(200, "Greeting settings: tenant name", typeof(string))]
     [HttpPost("restore")]
-    public async Task<object> RestoreGreetingSettingsAsync()
+    public async Task<string> RestoreGreetingSettingsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

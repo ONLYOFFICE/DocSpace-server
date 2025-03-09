@@ -30,7 +30,6 @@ namespace ASC.Files.Core.Helpers;
 public class DocumentServiceLicense(ICache cache,
     CoreBaseSettings coreBaseSettings,
     FilesLinkUtility filesLinkUtility,
-    FileUtility fileUtility,
     IHttpClientFactory clientFactory)
 {
     private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(15);
@@ -53,14 +52,15 @@ public class DocumentServiceLicense(ICache cache,
         if (commandResponse == null)
         {
             commandResponse = await CommandRequestAsync(
-                   fileUtility,
                    filesLinkUtility.DocServiceCommandUrl,
                    CommandMethod.License,
                    null,
                    null,
                    null,
                    null,
-                   fileUtility.SignatureSecret,
+                   filesLinkUtility.DocServiceSignatureSecret,
+                   filesLinkUtility.DocServiceSignatureHeader,
+                   filesLinkUtility.DocServiceSslVerification,
                    clientFactory
                    );
 
@@ -73,7 +73,7 @@ public class DocumentServiceLicense(ICache cache,
         return commandResponse;
     }
 
-    public async Task<bool> ValidateLicense(License license)
+    public async Task<(bool, string)> ValidateLicense(License license)
     {
         var attempt = 0;
 
@@ -83,17 +83,26 @@ public class DocumentServiceLicense(ICache cache,
 
             if (commandResponse == null)
             {
-                return true;
+                return (true, null);
             }
 
             if (commandResponse.Error != ErrorTypes.NoError)
             {
-                return false;
+                return (false, commandResponse.ErrorString);
             }
 
-            if (commandResponse.License.ResourceKey == license.ResourceKey || commandResponse.License.CustomerId == license.CustomerId)
+            if (commandResponse.License.ResourceKey == license.ResourceKey ||
+                commandResponse.License.CustomerId == license.CustomerId)
             {
-                return commandResponse.Server is { ResultType: CommandResponse.ServerInfo.ResultTypes.Success or CommandResponse.ServerInfo.ResultTypes.SuccessLimit };
+                if (commandResponse.Server == null)
+                {
+                    return (false, "Server is null");
+                }
+
+                return commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
+                    commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit
+                    ? (true, null)
+                    : (false, $"ResultType is {commandResponse.Server.ResultType}");
             }
             else
             {
@@ -102,7 +111,7 @@ public class DocumentServiceLicense(ICache cache,
             }
         }
 
-        return false;
+        return (false,  $"{attempt} failed attempts");
     }
 
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()

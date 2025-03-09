@@ -30,14 +30,14 @@ namespace ASC.Files.Api;
 public class FilesControllerInternal(
     FilesControllerHelper filesControllerHelper,
     FileStorageService fileStorageService,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
-    IDistributedCache distributedCache)
+    IFusionCache hybridCache)
     : FilesController<int>(filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
@@ -46,7 +46,7 @@ public class FilesControllerInternal(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        distributedCache)
+        hybridCache)
 {
     /// <summary>
     /// Get the list of actions performed on the file with the specified identifier
@@ -61,7 +61,7 @@ public class FilesControllerInternal(
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "The required file was not found")]
     [HttpGet("file/{fileId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(HistoryRequestDto inDto)
+    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(HistoryRequestDto inDto)
     {
         return historyApiHelper.GetFileHistoryAsync(inDto.FileId, inDto.FromDate, inDto.ToDate);
     }
@@ -70,13 +70,13 @@ public class FilesControllerInternal(
 public class FilesControllerThirdparty(
     FilesControllerHelper filesControllerHelper,
     FileStorageService fileStorageService,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
-    IDistributedCache distributedCache)
+    IFusionCache hybridCache)
     : FilesController<string>(filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
@@ -85,17 +85,18 @@ public class FilesControllerThirdparty(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        distributedCache);
+        hybridCache);
 
-public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
+public abstract class FilesController<T>(
+    FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
+        FileDeleteOperationsManager fileOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ApiContext apiContext,
         FileShareDtoHelper fileShareDtoHelper,
-        IDistributedCache distributedCache)
+        IFusionCache hybridCache)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -238,7 +239,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(DeleteRequestDto<T> inDto)
     {
-        await fileOperationsManager.PublishDelete(new List<T>(), new List<T> { inDto.FileId }, false, !inDto.File.DeleteAfter, inDto.File.Immediately);
+        await fileOperationsManager.Publish(new List<T>(), new List<T> { inDto.FileId }, false, !inDto.File.DeleteAfter, inDto.File.Immediately);
         
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
@@ -256,7 +257,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpGet("file/fillresult")]
     public async Task<FillingFormResultDto<T>> GetFillResultAsync(GetFillResulteRequestDto inDto)
     {
-        var completedFormId = await distributedCache.GetStringAsync(inDto.FillingSessionId);
+        var completedFormId = await hybridCache.GetOrDefaultAsync<string>(inDto.FillingSessionId);
 
         return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
     }
@@ -378,9 +379,9 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Update a comment</short>
     /// <path>api/2.0/files/file/{fileId}/comment</path>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Updated comment", typeof(object))]
+    [SwaggerResponse(200, "Updated comment", typeof(string))]
     [HttpPut("file/{fileId}/comment")]
-    public async Task<object> UpdateCommentAsync(UpdateCommentRequestDto<T> inDto)
+    public async Task<string> UpdateCommentAsync(UpdateCommentRequestDto<T> inDto)
     {
         return await filesControllerHelper.UpdateCommentAsync(inDto.FileId, inDto.File.Version, inDto.File.Comment);
     }
@@ -471,7 +472,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Order is set")]
     [HttpPut("order")]
-    public async Task SetOrder(OrdersRequestDto<T> inDto)
+    public async Task SetFilesOrder(OrdersRequestDto<T> inDto)
     {
         await fileStorageService.SetOrderAsync(inDto.Items);
     }

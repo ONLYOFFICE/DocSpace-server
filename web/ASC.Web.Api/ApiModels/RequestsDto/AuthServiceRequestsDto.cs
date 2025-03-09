@@ -61,9 +61,9 @@ public class AuthServiceRequestsDto
     /// </summary>
     public List<AuthKey> Props { get; set; }
 
-    public static async Task<AuthServiceRequestsDto> From(Consumer consumer)
+    public static async Task<AuthServiceRequestsDto> From(Consumer consumer, string logoText)
     {
-        var authService = await AuthService.From(consumer);
+        var authService = await AuthService.From(consumer, logoText);
         var result = new AuthServiceRequestsDto 
         { 
             Name = authService.Name, 

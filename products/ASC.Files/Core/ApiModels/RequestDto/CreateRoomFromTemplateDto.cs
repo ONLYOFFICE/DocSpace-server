@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
-public class CreateRoomFromTempateDto
+public class CreateRoomFromTemplateDto
 {
     /// <summary>
     /// Template id

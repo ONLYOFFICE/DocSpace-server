@@ -26,7 +26,7 @@
 
 namespace ASC.Api.Core.Core;
 
-public class CspStartupTask(IServiceProvider provider, IDistributedCache distributedCache) : IStartupTask
+public class CspStartupTask(IServiceProvider provider, IFusionCache hybridCache) : IStartupTask
 {
     private const string HeaderKey = "csp";
 
@@ -36,7 +36,7 @@ public class CspStartupTask(IServiceProvider provider, IDistributedCache distrib
         var serviceProvider = scope.ServiceProvider;
         var helper = serviceProvider.GetService<CspSettingsHelper>();
 
-        var oldHeaderValue = await distributedCache.GetStringAsync(HeaderKey, token: cancellationToken);
+        var oldHeaderValue = await hybridCache.GetOrDefaultAsync<string>(HeaderKey, token: cancellationToken);
         var currentHeaderValue = await helper.CreateHeaderAsync(null, false);
 
         if (oldHeaderValue != currentHeaderValue)
@@ -67,6 +67,6 @@ public class CspStartupTask(IServiceProvider provider, IDistributedCache distrib
             await helper.SaveAsync(current.Domains, false);
         }
 
-        await distributedCache.SetStringAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
+        await hybridCache.SetAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
     }
 }

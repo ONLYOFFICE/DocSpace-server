@@ -130,10 +130,10 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom/keys</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
-    [SwaggerResponse(200, "Boolean value: true - the key pair is set", typeof(object))]
+    [SwaggerResponse(200, "Boolean value: true - the key pair is set", typeof(PrivacyRoomKeysResponse))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("keys")]
-    public async Task<object> SetKeysAsync(PrivacyRoomRequestDto inDto)
+    public async Task<PrivacyRoomKeysResponse> SetKeysAsync(PrivacyRoomRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
 
@@ -147,7 +147,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
         {
             if (!string.IsNullOrEmpty(keyPair.PublicKey) && !inDto.Update)
             {
-                return new { isset = true };
+                return new PrivacyRoomKeysResponse { IsSet = true };
             }
 
             _logger.InformationUpdateAddress(authContext.CurrentAccount.ID);
@@ -155,10 +155,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
 
         await encryptionKeyPairHelper.SetKeyPairAsync(inDto.PublicKey, inDto.PrivateKeyEnc);
 
-        return new
-        {
-            isset = true
-        };
+        return new PrivacyRoomKeysResponse { IsSet = true };
     }
 
     /// <summary>

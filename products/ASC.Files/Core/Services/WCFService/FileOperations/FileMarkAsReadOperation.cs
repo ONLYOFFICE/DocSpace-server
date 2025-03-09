@@ -37,25 +37,29 @@ public record FileMarkAsReadOperationData<T> : FileOperationData<T>
     public FileMarkAsReadOperationData(IEnumerable<T> Folders,
         IEnumerable<T> Files,
         int TenantId,
+        Guid UserId,
         IDictionary<string, string> Headers,
         ExternalSessionSnapshot SessionSnapshot,
-        bool HoldResult = true) : base(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult)
+        bool HoldResult = true) : base(Folders, Files, TenantId, UserId, Headers, SessionSnapshot, HoldResult)
     {
     }
 }
 
 [Transient]
-public class FileMarkAsReadOperation(IServiceProvider serviceProvider) : 
-    ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(serviceProvider)
+public class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>
 {
+    public FileMarkAsReadOperation() { }
+    
+    public FileMarkAsReadOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+
     protected override FileOperationType FileOperationType { get => FileOperationType.MarkAsRead; }
     
-    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileMarkAsReadOperation<string>(_serviceProvider, ThirdPartyData);
 
-        return base.RunJob(distributedTask, cancellationToken);
+        return base.RunJob(cancellationToken);
 
     }
 }

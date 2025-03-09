@@ -49,11 +49,6 @@ public class Startup : BaseStartup
         services.AddMemoryCache();
 
         await base.ConfigureServices(builder);
-
-        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
-        {
-            x.MaxThreadsCount = 10;
-        });
         
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();

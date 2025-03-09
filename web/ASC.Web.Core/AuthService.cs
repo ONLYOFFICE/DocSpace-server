@@ -44,14 +44,14 @@ public class AuthService
 
     public List<AuthKey> Props { get; private set; }
 
-    public static async Task<AuthService> From(Consumer consumer)
+    public static async Task<AuthService> From(Consumer consumer, string logoText)
     {
         var result = new AuthService
         {
             Consumer = consumer,
             Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name,
-            Description = ConsumerExtension.GetResourceString(consumer.Name + "Description"),
-            Instruction = ConsumerExtension.GetResourceString(consumer.Name + "Instruction"),
+            Description = ConsumerExtension.GetResourceString(consumer.Name + "Description")?.Replace("{LogoText}", logoText),
+            Instruction = ConsumerExtension.GetResourceString(consumer.Name + "Instruction")?.Replace("{LogoText}", logoText),
             Props = []
         };
         

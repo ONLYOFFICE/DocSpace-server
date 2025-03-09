@@ -42,6 +42,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TenantClientQuery {
+  /** The user identifier */
+  @NotBlank(message = "user id must not be blank")
+  @JsonProperty("user_id")
+  private String userId;
+
   /** The tenant ID to fetch applications for. */
   @Min(value = 1, message = "tenant id must be greater than or equal to 1")
   @JsonProperty("tenant_id")

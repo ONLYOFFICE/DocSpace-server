@@ -92,5 +92,8 @@ global using Microsoft.Extensions.Logging;
 global using net.openstack.Core.Domain;
 global using net.openstack.Providers.Rackspace;
 global using ProtoBuf;
+
+global using ZiggyCreatures.Caching.Fusion;
+
 global using static Google.Cloud.Storage.V1.UrlSigner;
 global using MimeMapping = ASC.Common.Web.MimeMapping;

@@ -6934,8 +6934,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "ClientId" }, "UK_client_id")
                         .IsUnique();
 
-                    b.HasIndex(new[] { "ClientSecret" }, "UK_client_secret")
-                        .IsUnique();
+                    b.HasIndex(new[] { "ClientSecret" }, "idx_client_secret");
 
                     b.HasIndex(new[] { "TenantId" }, "idx_identity_clients_tenant_id");
 

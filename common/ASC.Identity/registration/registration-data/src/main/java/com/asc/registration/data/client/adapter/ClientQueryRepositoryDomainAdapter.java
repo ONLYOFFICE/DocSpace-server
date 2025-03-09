@@ -29,6 +29,7 @@ package com.asc.registration.data.client.adapter;
 
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
@@ -84,30 +85,32 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
   @Transactional(timeout = 2, readOnly = true)
   public Optional<Client> findById(ClientId clientId) {
     log.debug("Querying client by client id");
-    var response =
-        jpaClientRepository
-            .findById(clientId.getValue().toString())
-            .map(clientDataAccessMapper::toDomain);
-    return response;
+    return jpaClientRepository
+        .findById(clientId.getValue().toString())
+        .map(clientDataAccessMapper::toDomain);
   }
 
   /**
-   * Finds all public and private clients associated with a tenant ID, with pagination support.
+   * Finds all public and private clients belonging to a specific tenant created by a specific user,
+   * with pagination support.
    *
-   * @param tenant the tenant ID
-   * @param limit the maximum number of clients to retrieve
-   * @param lastClientId the ID of the last client retrieved in the previous page (for cursor-based
-   *     pagination)
-   * @param lastCreatedOn the creation timestamp of the last client retrieved in the previous page
-   * @return a {@link PageableResponse} containing the retrieved clients and pagination metadata
+   * @param tenantId the tenant ID to which the clients belong.
+   * @param creatorId the user ID of the creator.
+   * @param limit the maximum number of clients to retrieve.
+   * @param lastClientId the client cursor for pagination.
+   * @param lastCreatedOn the creation timestamp cursor for pagination.
+   * @return a {@link PageableResponse} containing the clients for the specified tenant and creator.
    */
   @Transactional(timeout = 3, readOnly = true)
-  public PageableResponse<Client> findAllPublicAndPrivateByTenantId(
-      TenantId tenant, int limit, String lastClientId, ZonedDateTime lastCreatedOn) {
-    log.debug("Querying all public and private clients by tenant id with pagination");
+  public PageableResponse<Client> findAllByTenantIdAndCreatorId(
+      TenantId tenantId,
+      UserId creatorId,
+      int limit,
+      String lastClientId,
+      ZonedDateTime lastCreatedOn) {
     var clients =
-        jpaClientRepository.findAllPublicAndPrivateByTenantWithCursor(
-            tenant.getValue(), lastCreatedOn, limit + 1);
+        jpaClientRepository.findAllByTenantIdAndCreatedByWithCursor(
+            tenantId.getValue(), creatorId.getValue(), lastCreatedOn, limit + 1);
     var lastClient = clients.size() > limit ? clients.get(limit - 1) : null;
 
     var data =
@@ -130,7 +133,7 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
   /**
    * Finds all clients associated with a tenant ID, with pagination support.
    *
-   * @param tenant the tenant ID
+   * @param tenantId the tenant ID
    * @param limit the maximum number of clients to retrieve
    * @param lastClientId the ID of the last client retrieved in the previous page (for cursor-based
    *     pagination)
@@ -139,11 +142,11 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
    */
   @Transactional(timeout = 3, readOnly = true)
   public PageableResponse<Client> findAllByTenantId(
-      TenantId tenant, int limit, String lastClientId, ZonedDateTime lastCreatedOn) {
+      TenantId tenantId, int limit, String lastClientId, ZonedDateTime lastCreatedOn) {
     log.debug("Querying clients by tenant id with pagination");
     var clients =
         jpaClientRepository.findAllByTenantIdWithCursor(
-            tenant.getValue(), lastCreatedOn, limit + 1);
+            tenantId.getValue(), lastCreatedOn, limit + 1);
     var lastClient = clients.size() > limit ? clients.get(limit - 1) : null;
 
     var data =
@@ -167,14 +170,32 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
    * Finds a client by its client ID and tenant ID.
    *
    * @param clientId the unique identifier of the client
-   * @param tenant the tenant ID associated with the client
+   * @param tenantId the tenant ID associated with the client
    * @return an {@link Optional} containing the found client if it exists, or empty otherwise
    */
   @Transactional(timeout = 2, readOnly = true)
-  public Optional<Client> findByClientIdAndTenantId(ClientId clientId, TenantId tenant) {
+  public Optional<Client> findByClientIdAndTenantId(ClientId clientId, TenantId tenantId) {
     log.debug("Querying client by client id and tenant id");
     return jpaClientRepository
-        .findByClientIdAndTenantId(clientId.getValue().toString(), tenant.getValue())
+        .findByClientIdAndTenantId(clientId.getValue().toString(), tenantId.getValue())
+        .map(clientDataAccessMapper::toDomain);
+  }
+
+  /**
+   * Finds a client by its unique client ID, tenant ID, and creator's user ID.
+   *
+   * @param clientId the unique client ID.
+   * @param tenantId the tenant ID to which the client belongs.
+   * @param creatorId the user ID of the creator.
+   * @return an {@link Optional} containing the client if found, or an empty {@link Optional} if not
+   *     found.
+   */
+  @Transactional(timeout = 2, readOnly = true)
+  public Optional<Client> findByClientIdAndTenantIdAndCreatorId(
+      ClientId clientId, TenantId tenantId, UserId creatorId) {
+    return jpaClientRepository
+        .findByClientIdAndTenantIdAndCreatedBy(
+            clientId.getValue().toString(), tenantId.getValue(), creatorId.getValue())
         .map(clientDataAccessMapper::toDomain);
   }
 

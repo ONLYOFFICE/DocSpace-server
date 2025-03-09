@@ -29,7 +29,7 @@ using Tenant = ASC.Core.Tenants.Tenant;
 namespace ASC.Data.Storage.Encryption;
 
 [Transient]
-public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class EncryptionOperation : DistributedTaskProgress
 {
     private const string ProgressFileName = "EncryptionProgress.tmp";
 
@@ -40,6 +40,17 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
     private IEnumerable<string> _modules;
     private IEnumerable<Tenant> _tenants;
     private string _serverRootPath;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public EncryptionOperation()
+    {
+        
+    }
+    
+    public EncryptionOperation(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
 
     public void Init(EncryptionSettings encryptionSettings, string id, string serverRootPath)
     {
@@ -51,7 +62,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
 
     protected override async Task DoJob()
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<EncryptionOperationScope>();
         var (log, storageFactoryConfig, storageFactory, tenantManager, coreBaseSettings, notifyHelper, encryptionSettingsHelper,   configuration) = scopeClass;
         notifyHelper.Init(_serverRootPath);

@@ -51,12 +51,13 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
         IEnumerable<T> files,
         IEnumerable<int> versions,
         int tenantId,
+        Guid userId,
         IDictionary<string, string> headers,
         ExternalSessionSnapshot sessionSnapshot,
         bool holdResult = true,
         bool ignoreException = false,
         bool immediately = false,
-        bool isEmptyTrash = false) : base(folders, files, tenantId, headers, sessionSnapshot, holdResult)
+        bool isEmptyTrash = false) : base(folders, files, tenantId, userId, headers, sessionSnapshot, holdResult)
     {
         IgnoreException = ignoreException;
         Immediately = immediately;
@@ -66,16 +67,20 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
 }
 
 [Transient]
-public class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>(serviceProvider)
+public class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>
 {
+    public FileDeleteOperation() { }
+    
+    public FileDeleteOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+
     protected override FileOperationType FileOperationType { get => FileOperationType.Delete; }
 
-    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileDeleteOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileDeleteOperation<string>(_serviceProvider, ThirdPartyData);
 
-        return base.RunJob(distributedTask, cancellationToken);
+        return base.RunJob(cancellationToken);
     }
 }
 
