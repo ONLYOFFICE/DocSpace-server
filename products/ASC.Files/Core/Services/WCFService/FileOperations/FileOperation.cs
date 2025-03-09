@@ -238,12 +238,15 @@ public record FileOperationData<T>
     [ProtoMember(6)]
     public bool HoldResult { get; set; }
 
+    [ProtoMember(7)]
+    public Guid UserId { get; set; }
+    
     public FileOperationData()
     {
         
     }
 
-    public FileOperationData(IEnumerable<T> folders, IEnumerable<T> files, int tenantId, IDictionary<string, string> headers, ExternalSessionSnapshot sessionSnapshot, bool holdResult = true)
+    public FileOperationData(IEnumerable<T> folders, IEnumerable<T> files, int tenantId, Guid userId, IDictionary<string, string> headers, ExternalSessionSnapshot sessionSnapshot, bool holdResult = true)
     {
         Folders = folders;
         Files = files;
@@ -251,11 +254,13 @@ public record FileOperationData<T>
         Headers = headers;
         SessionSnapshot = sessionSnapshot;
         HoldResult = holdResult;
+        UserId = userId;
     }
 }
 
 public abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
 {
+    protected Guid CurrentUserId { get; }
     protected int CurrentTenantId { get; }
     protected FileSecurity FilesSecurity { get; private set; }
     protected IFolderDao<TId> FolderDao { get; private set; }
@@ -274,6 +279,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         Files = fileOperationData.Files?.ToList() ?? [];
         Folders = fileOperationData.Folders?.ToList() ?? [];
         this[Hold] = fileOperationData.HoldResult;
+        CurrentUserId = fileOperationData.UserId;
         CurrentTenantId = fileOperationData.TenantId;
         Headers = fileOperationData.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         SessionSnapshot = fileOperationData.SessionSnapshot;
@@ -302,6 +308,12 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
             var scopeClass = scope.ServiceProvider.GetService<FileOperationScope>();
             var (tenantManager, daoFactory, fileSecurity, logger) = scopeClass;
             await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
+
+            if (CurrentUserId != ASC.Core.Configuration.Constants.Guest.ID)
+            {
+                var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+                await securityContext.AuthenticateMeWithoutCookieAsync(CurrentUserId);
+            }
 
             var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
             externalShare.Initialize(SessionSnapshot);

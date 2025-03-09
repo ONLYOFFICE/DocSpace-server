@@ -29,11 +29,8 @@ namespace ASC.Web.Files;
 [Singleton]
 public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "userQuotaOperation";
-
-    private readonly DistributedTaskQueue<UsersQuotaSyncJob> _progressQueue = queueFactory.CreateQueue<UsersQuotaSyncJob>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-
-
+    private readonly DistributedTaskQueue<UsersQuotaSyncJob> _progressQueue = queueFactory.CreateQueue<UsersQuotaSyncJob>();
+    
     public async Task RecalculateQuota(Tenant tenant)
     {
         var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);

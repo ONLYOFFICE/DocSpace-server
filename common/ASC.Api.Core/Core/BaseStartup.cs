@@ -485,10 +485,7 @@ public abstract class BaseStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
         
-        services.Configure<DistributedTaskQueueFactoryOptions>(UserPhotoResizeManager.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, options =>
-        {
-            options.MaxThreadsCount = 2;
-        });
+        services.RegisterQueue<ResizeWorkerItem>(2);
 
         services
             .AddStartupTask<WarmupServicesStartupTask>()
