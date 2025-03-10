@@ -188,7 +188,8 @@ public interface IFolderDao<T>
     /// <param name="watermark">watermark</param>
     /// <param name="color">color</param>
     /// <param name="cover">cover</param>
-    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifetime, WatermarkSettings watermark, string color, string cover);
+    /// <param name="stealth">stealth</param>
+    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifetime, WatermarkSettings watermark, string color, string cover, bool stealth);
 
     /// <summary>
     ///    Change folder type

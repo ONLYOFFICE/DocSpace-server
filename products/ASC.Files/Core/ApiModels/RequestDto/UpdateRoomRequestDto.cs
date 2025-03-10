@@ -87,7 +87,7 @@ public class UpdateRoomRequest
     /// <summary>
     /// Stealth
     /// </summary>
-    public bool Stealth { get; set; }
+    public bool? Stealth { get; set; }
 }
 
 /// <summary>
