@@ -83,6 +83,11 @@ public class UpdateRoomRequest
     /// </summary>
     [StringLength(50)]
     public string Cover { get; set; }
+    
+    /// <summary>
+    /// Stealth
+    /// </summary>
+    public bool Stealth { get; set; }
 }
 
 /// <summary>

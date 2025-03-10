@@ -18,7 +18,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.Core.Common.EF.Acl", b =>
@@ -6471,6 +6471,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("quota")
                         .HasDefaultValueSql("'-2'");
+
+                    b.Property<bool>("Stealth")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("stealth")
+                        .HasDefaultValueSql("0");
 
                     b.Property<string>("Watermark")
                         .HasColumnType("json")

@@ -106,28 +106,40 @@ public partial class FilesDbContext
         return AbstractQueries.DeleteLinksAsync(this, tenantId, entryId, entryType);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0])]
-    public IAsyncEnumerable<DbAuditEvent> GetHistoryEventsAsync(int tenantId, int entryId, byte entryType, int offset, int count)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0, null, null])]
+    public IAsyncEnumerable<DbAuditEvent> GetAuditEventsByReferences(int tenantId, int entryId, byte entryType, int offset, int count, DateTime? fromDate, DateTime? toDate)
     {
-        return AbstractQueries.GetHistoryEventsAsync(this, tenantId, entryId, entryType, offset, count);
+        return AbstractQueries.GetAuditEventsByReferences(this, tenantId, entryId, entryType, offset, count, fromDate, toDate);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0])]
-    public Task<int> GetHistoryEventsTotalCountAsync(int tenantId, int entryId, byte entryType)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0, null, null, null, null, null, null])]
+    public IAsyncEnumerable<DbAuditEvent> GetFilteredAuditEventsByReferences(int tenantId, int entryId, byte entryType, int offset, int count, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate)
     {
-        return AbstractQueries.GetHistoryEventsTotalCountAsync(this, tenantId, entryId, entryType);
+        return AbstractQueries.GetFilteredAuditEventsByReferences(this, tenantId, entryId, entryType, offset, count, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions, fromDate, toDate);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, null, null])]
+    public Task<int> GetAuditEventsByReferencesTotalCount(int tenantId, int entryId, byte entryType, DateTime? fromDate, DateTime? toDate)
+    {
+        return AbstractQueries.GetAuditEventsByReferencesTotalCount(this, tenantId, entryId, entryType, fromDate, toDate);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, null, null, null, null, null, null])]
+    public Task<int> GetFilteredAuditEventsByReferencesTotalCount(int tenantId, int entryId, byte entryType, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate)
+    {
+        return AbstractQueries.GetFilteredAuditEventsByReferencesTotalCount(this, tenantId, entryId, entryType, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions, fromDate, toDate);
     }
     
     [PreCompileQuery(([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt]))]
-    public IAsyncEnumerable<DbAuditEvent> GetUserHistoryEventsAsync(int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, int offset, int count)
+    public IAsyncEnumerable<DbAuditEvent> GetUserHistoryEventsAsync(int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, int offset, int count, DateTime? fromDate, DateTime? toDate)
     {
-        return AbstractQueries.GetUserHistoryEventsAsync(this, tenantId, folderId, parentId, sensitiveActions, userId, offset, count);
+        return AbstractQueries.GetUserHistoryEventsAsync(this, tenantId, folderId, parentId, sensitiveActions, userId, offset, count, fromDate, toDate);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
-    public Task<int> GetUserHistoryEventsTotalCountAsync(int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId)
+    public Task<int> GetUserHistoryEventsTotalCountAsync(int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, DateTime? fromDate, DateTime? toDate)
     {
-        return AbstractQueries.GetUserHistoryEventsTotalCountAsync(this, tenantId, folderId, parentId, sensitiveActions, userId);
+        return AbstractQueries.GetUserHistoryEventsTotalCountAsync(this, tenantId, folderId, parentId, sensitiveActions, userId, fromDate, toDate);
     }
 }
 
@@ -249,63 +261,119 @@ static file class AbstractQueries
                     .Where(x => x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.ExternalLink)
                     .ExecuteDelete());
     
-    public static readonly Func<FilesDbContext, int, int, byte, int, int, IAsyncEnumerable<DbAuditEvent>> GetHistoryEventsAsync =
+    public static readonly Func<FilesDbContext, int, int, byte, int, int, DateTime?, DateTime?, IAsyncEnumerable<DbAuditEvent>> GetAuditEventsByReferences =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int entryId, byte entryType, int offset, int count) =>
+            (FilesDbContext ctx, int tenantId, int entryId, byte entryType, int offset, int count, DateTime? fromDate, DateTime? toDate) =>
                 ctx.AuditEvents.Join(
                         ctx.FilesAuditReference,
                         e => e.Id,
                         r => r.AuditEventId, (@event, reference) => new { @event, reference })
-                    .Where(x => x.@event.TenantId == tenantId && x.reference.EntryId == entryId && x.reference.EntryType == entryType)
-                    .OrderByDescending(x => x.@event.Date)
+                    .Where(x => 
+                        x.@event.TenantId == tenantId && 
+                        x.reference.EntryId == entryId && 
+                        x.reference.EntryType == entryType &&
+                        (fromDate == null || x.@event.Date >= fromDate) &&
+                        (toDate == null || x.@event.Date <= toDate))
+                    .OrderByDescending(x => x.@event.Id)
                     .Skip(offset)
                     .Take(count)
                     .Select(x => x.@event));
 
-    public static readonly Func<FilesDbContext, int, int, byte, Task<int>> GetHistoryEventsTotalCountAsync =
+    public static readonly Func<FilesDbContext, int, int, byte, int, int, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, DateTime?, DateTime?, IAsyncEnumerable<DbAuditEvent>> GetFilteredAuditEventsByReferences =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int entryId, byte entryType) =>
+            (FilesDbContext ctx, int tenantId, int entryId, byte entryType, int offset, int count, IEnumerable<int> folders, IEnumerable<int> files, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate) =>
+                 ctx.AuditEvents
+                        .Join(ctx.FilesAuditReference,
+                            e => e.Id,
+                            r => r.AuditEventId, (@event, reference) => new { @event, reference })
+                        .Where(x => x.@event.TenantId == tenantId &&
+                                 (x.reference.EntryId == entryId ||
+                                 (folders.Contains(x.reference.EntryId) && filterFolderActions.Contains(x.@event.Action ?? 0) && x.reference.EntryType == 1) ||
+                                 (files.Contains(x.reference.EntryId) && filterFileActions.Contains(x.@event.Action ?? 0) && x.reference.EntryType == 2)) &&
+                                 (fromDate == null || x.@event.Date >= fromDate) &&
+                                 (toDate == null || x.@event.Date <= toDate))
+                    .OrderByDescending(x => x.@event.Id)
+                    .GroupBy(x => x.@event.Id)
+                    .Where(g => g.Count() > 1)
+                    .Skip(offset)
+                    .Take(count)
+                    .Select(g => g.FirstOrDefault().@event));
+
+    public static readonly Func<FilesDbContext, int, int, byte, DateTime?, DateTime?, Task<int>> GetAuditEventsByReferencesTotalCount =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int entryId, byte entryType, DateTime? fromDate, DateTime? toDate) =>
                 ctx.AuditEvents
                     .Join(ctx.FilesAuditReference,
                         e => e.Id,
                         r => r.AuditEventId, (@event, reference) => new { @event, reference })
-                    .Count(x => x.@event.TenantId == tenantId && x.reference.EntryId == entryId && x.reference.EntryType == entryType));
+                    .Count(x => x.@event.TenantId == tenantId && 
+                                x.reference.EntryId == entryId && 
+                                x.reference.EntryType == entryType &&
+                                (fromDate == null || x.@event.Date >= fromDate) &&
+                                (toDate == null || x.@event.Date <= toDate)));
 
-    public static readonly Func<FilesDbContext, int, int, int, IEnumerable<int?>, Guid, int, int, IAsyncEnumerable<DbAuditEvent>> GetUserHistoryEventsAsync =
+    public static readonly Func<FilesDbContext, int, int, byte, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, DateTime?, DateTime?, Task<int>> GetFilteredAuditEventsByReferencesTotalCount =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int entryId, byte entryType, IEnumerable<int> folders, IEnumerable<int> files, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate) =>
+                ctx.AuditEvents
+                    .Join(ctx.FilesAuditReference,
+                        e => e.Id,
+                        r => r.AuditEventId, (@event, reference) => new { @event, reference })
+                    .Where(x => 
+                        x.@event.TenantId == tenantId && 
+                        (x.reference.EntryId == entryId || 
+                         (folders.Contains(x.reference.EntryId) && filterFolderActions.Contains(x.@event.Action ?? 0) && x.reference.EntryType == 1) || 
+                         (files.Contains(x.reference.EntryId) && filterFileActions.Contains(x.@event.Action ?? 0) && x.reference.EntryType == 2)) && 
+                        (fromDate == null || x.@event.Date >= fromDate) && 
+                        (toDate == null || x.@event.Date <= toDate))
+                    .GroupBy(x => x.@event.Id)
+                    .Select(g => new
+                    {
+                        Id = g.Key,
+                        UniqueEntryCount = g.Select(x => x.reference.EntryId).Distinct().Count()
+                    })
+                    .Count(g => g.UniqueEntryCount > 1));
+
+    public static readonly Func<FilesDbContext, int, int, int, IEnumerable<int?>, Guid, int, int, DateTime?, DateTime?, IAsyncEnumerable<DbAuditEvent>> GetUserHistoryEventsAsync =
             Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-                (FilesDbContext ctx, int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, int offset, int count) =>
-                    ctx.FilesAuditReference.Where(r => r.EntryId == folderId && r.EntryType == (byte)FileEntryType.Folder)
+                (FilesDbContext ctx, int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, int offset, int count, DateTime? fromDate, DateTime? toDate) =>
+                    ctx.FilesAuditReference
+                        .Where(r => 
+                            r.EntryId == folderId && 
+                            r.EntryType == (byte)FileEntryType.Folder)
                         .Join(ctx.AuditEvents, r => r.AuditEventId, e => e.Id, (r, e) => e)
-                        .Where(e =>
-                            !sensitiveActions.Contains(e.Action) ||
-                            ctx.Files.Where(f => f.TenantId == tenantId && f.CurrentVersion && f.CreateBy == userId)
-                                .Join(ctx.Tree, f => f.ParentId, t => t.FolderId, (file, tree) => new { file, tree })
-                                .Where(r => r.tree.ParentId == parentId)
-                                .Select(x => x.file.Id)
-                                .Join(ctx.FilesAuditReference, f => f, r => r.EntryId, (_, r) => r)
-                                .Where(r => r.EntryType == (byte)FileEntryType.File)
-                                .Select(r => r.AuditEventId).Contains(e.Id) || 
-                            DbFunctionsExtension.JsonValue(
-                                DbFunctionsExtension.JsonValue("description", "[last]"), "CreateBy") == userId.ToString())
+                        .Where(e => 
+                            ((fromDate == null || e.Date >= fromDate) && (toDate == null || e.Date <= toDate)) && 
+                            (!sensitiveActions.Contains(e.Action) || 
+                             ctx.Files.Where(f => f.TenantId == tenantId && f.CurrentVersion && f.CreateBy == userId)
+                                 .Join(ctx.Tree, f => f.ParentId, t => t.FolderId, (file, tree) => new { file, tree })
+                                 .Where(r => r.tree.ParentId == parentId)
+                                 .Select(x => x.file.Id)
+                                 .Join(ctx.FilesAuditReference, f => f, r => r.EntryId, (_, r) => r)
+                                 .Where(r => r.EntryType == (byte)FileEntryType.File)
+                                 .Select(r => r.AuditEventId).Contains(e.Id) || 
+                             DbFunctionsExtension.JsonValue(
+                                 DbFunctionsExtension.JsonValue("description", "[last]"), "CreateBy") == userId.ToString()))
                         .OrderByDescending(a => a.Date)
                         .Skip(offset)
                         .Take(count));
 
-    public static readonly Func<FilesDbContext, int, int, int, IEnumerable<int?>, Guid, Task<int>> GetUserHistoryEventsTotalCountAsync =
+    public static readonly Func<FilesDbContext, int, int, int, IEnumerable<int?>, Guid, DateTime?, DateTime?, Task<int>> GetUserHistoryEventsTotalCountAsync =
             Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-                (FilesDbContext ctx, int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId) =>
+                (FilesDbContext ctx, int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, DateTime? fromDate, DateTime? toDate) =>
                     ctx.FilesAuditReference
                         .Where(r => r.EntryId == folderId && r.EntryType == (byte)FileEntryType.Folder)
                         .Join(ctx.AuditEvents, r => r.AuditEventId, e => e.Id, (r, e) => e)
                         .Count(e => 
-                            !sensitiveActions.Contains(e.Action) || 
-                            ctx.Files.Where(f => f.TenantId == tenantId && f.CurrentVersion && f.CreateBy == userId)
-                                .Join(ctx.Tree, f => f.ParentId, t => t.FolderId, (file, tree) => new { file, tree })
-                                .Where(r => r.tree.ParentId == parentId)
-                                .Select(x => x.file.Id).Join(ctx.FilesAuditReference, f => f, r => r.EntryId, (_, r) => r)
-                                .Where(r => r.EntryType == (byte)FileEntryType.File)
-                                .Select(r => r.AuditEventId).Contains(e.Id) || 
-                            DbFunctionsExtension.JsonValue(
-                                DbFunctionsExtension.JsonValue("description", "[last]"), "CreateBy") == userId.ToString()));
+                            ((fromDate == null || e.Date >= fromDate) && (toDate == null || e.Date <= toDate)) && 
+                            (!sensitiveActions.Contains(e.Action) || 
+                             ctx.Files.Where(f => f.TenantId == tenantId && f.CurrentVersion && f.CreateBy == userId)
+                                 .Join(ctx.Tree, f => f.ParentId, t => t.FolderId, (file, tree) => new { file, tree })
+                                 .Where(r => r.tree.ParentId == parentId)
+                                 .Select(x => x.file.Id).Join(ctx.FilesAuditReference, f => f, r => r.EntryId, (_, r) => r)
+                                 .Where(r => r.EntryType == (byte)FileEntryType.File)
+                                 .Select(r => r.AuditEventId).Contains(e.Id) || 
+                             DbFunctionsExtension.JsonValue(
+                                 DbFunctionsExtension.JsonValue("description", "[last]"), "CreateBy") == userId.ToString())));
 
 }

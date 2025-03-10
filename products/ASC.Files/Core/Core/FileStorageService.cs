@@ -227,7 +227,7 @@ public class FileStorageService //: IFileStorageService
             
             if (parent.RootFolderType == FolderType.VirtualRooms && !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms && !parent.ProviderEntry)
             {
-                parent.ParentRoomType = (await folderDao.GetFirstParentFromFileEntryAsync(parent)).FolderType;
+                parent.ParentRoomType = (await folderDao.GetFirstParentTypeFromFileEntryAsync(parent)).FolderType;
             }
 
         }
@@ -703,7 +703,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null, bool stealth = false)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null, bool? stealth = false)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
@@ -784,7 +784,7 @@ public class FileStorageService //: IFileStorageService
             newFolder.SettingsLifetime = lifetime;
             _ = RoomLogoManager.ColorChanged(color, newFolder);
             _ = await RoomLogoManager.CoverChanged(cover, newFolder);
-            newFolder.SettingsStealth = stealth;
+            newFolder.SettingsStealth = stealth.Value;
 
             var folderId = await folderDao.SaveFolderAsync(newFolder);
             if (watermark != null)

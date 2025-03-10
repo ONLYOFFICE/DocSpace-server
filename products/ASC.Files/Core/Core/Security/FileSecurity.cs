@@ -1799,7 +1799,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return !room.SettingsStealth || room.CreateBy == userId;
             }
             
-            room = await daoFactory.GetFolderDao<T>().GetFirstParentFromFileEntryAsync(checkedFile);
+            room = await daoFactory.GetFolderDao<T>().GetFirstParentTypeFromFileEntryAsync(checkedFile);
 
             cachedRooms.TryAdd(key, room);
 

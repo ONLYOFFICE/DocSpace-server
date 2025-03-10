@@ -357,7 +357,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         
         var parentRoomTask = parent.RootFolderType is FolderType.VirtualRooms or FolderType.Archive
-            ? daoFactory.GetFolderDao<T>().GetFirstParentFromFileEntryAsync(parent)
+            ? daoFactory.GetFolderDao<T>().GetFirstParentTypeFromFileEntryAsync(parent)
             : Task.FromResult<Folder<T>>(null);
 
         var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);

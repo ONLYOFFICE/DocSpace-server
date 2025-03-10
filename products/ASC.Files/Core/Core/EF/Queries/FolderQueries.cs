@@ -181,7 +181,7 @@ public partial class FilesDbContext
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<DbFolderQuery> ParentIdTypePairAsync(int folderId)
     {
-        return FolderQueries.FirstParentAsync(this, folderId);
+        return FolderQueries.ParentIdTypePairAsync(this, folderId);
     }
         
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]

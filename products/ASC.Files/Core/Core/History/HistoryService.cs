@@ -24,11 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.MessagingSystem.EF.Context;
+
 namespace ASC.Files.Core.Core.History;
 
 [Scope]
 public class HistoryService(
-    IDbContextFactory<MessagesContext> dbContextFactory, 
+    IDbContextFactory<FilesDbContext> dbContextFactory, 
     TenantManager tenantManager,
     AuditInterpreter interpreter)
 {
@@ -111,6 +113,44 @@ public class HistoryService(
         (int)MessageAction.FormOpenedForFilling
     ];
     
+    private static readonly HashSet<int?> _stealthSensitiveActions =
+    [
+        (int)MessageAction.FileCreated,
+        (int)MessageAction.FileUploaded,
+        (int)MessageAction.FileUploadedWithOverwriting,
+        (int)MessageAction.UserFileUpdated, 
+        (int)MessageAction.FileRenamed, 
+        (int)MessageAction.FileMoved, 
+        (int)MessageAction.FileMovedWithOverwriting, 
+        (int)MessageAction.FileMovedToTrash, 
+        (int)MessageAction.FileCopied, 
+        (int)MessageAction.FileCopiedWithOverwriting, 
+        (int)MessageAction.FileDeleted, 
+        (int)MessageAction.FileConverted, 
+        (int)MessageAction.FileRestoreVersion
+    ];
+
+    public async IAsyncEnumerable<HistoryEntry> GetUsersHistoryAsync(FileEntry<int> entry, int offset, int count,
+        DateTime? fromDate, DateTime? toDate, Guid userId)
+    {
+        var context = await dbContextFactory.CreateDbContextAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var events = context.GetUserHistoryEventsAsync(tenantId, entry.Id, entry.ParentId, _stealthSensitiveActions, userId, offset, count, fromDate, toDate);
+        await foreach (var hEntry in events.SelectAwait(e => interpreter.ToHistoryAsync(e, entry)).Where(x => x != null))
+        {
+            yield return hEntry;
+        }
+    }
+    
+    public async Task<int> GetUsersHistoryCountAsync(FileEntry<int> entry, DateTime? fromDate, DateTime? toDate, Guid userId)
+    {
+        var context = await dbContextFactory.CreateDbContextAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        return await context.GetUserHistoryEventsTotalCountAsync(tenantId, entry.Id, entry.ParentId, _stealthSensitiveActions, userId, fromDate, toDate);
+    }
+    
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(
         FileEntry<int> entry,
         int offset,
@@ -121,12 +161,12 @@ public class HistoryService(
         DateTime? fromDate,
         DateTime? toDate)
     {
-        var messageDbContext = await dbContextFactory.CreateDbContextAsync();
+        var context = await dbContextFactory.CreateDbContextAsync();
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var events = needFiltering 
-            ? messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate) 
-            : messageDbContext.GetAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, fromDate, toDate);
+            ? context.GetFilteredAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate) 
+            : context.GetAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, fromDate, toDate);
 
         await foreach (var hEntry in events.SelectAwait(e => interpreter.ToHistoryAsync(e, entry)).Where(x => x != null))
         {

@@ -90,7 +90,9 @@ public class HistoryApiHelper(
     ApiContext apiContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    TenantUtil tenantUtil)
+    TenantUtil tenantUtil,
+    AuthContext authContext,
+    UserManager userManager)
 {
     public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate)
     {
@@ -104,28 +106,13 @@ public class HistoryApiHelper(
     
     private async IAsyncEnumerable<HistoryDto> GetEntryHistoryAsync(int entryId, FileEntryType entryType, ApiDateTime fromDate, ApiDateTime toDate)
     {
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        
-        var fromDateUtc = fromDate != null 
-            ? tenantUtil.DateTimeToUtc(fromDate) 
-            : (DateTime?)null;
-        
-        var toDateUtc = toDate != null 
-            ? tenantUtil.DateTimeToUtc(toDate) 
-            : (DateTime?)null;
-
-        var filterFolderIds = new List<int>();
-        var filterFileIds = new List<int>();
-        var needFiltering = false;
-        
         FileEntry<int> entry = entryType switch
         {
             FileEntryType.File => await daoFactory.GetFileDao<int>().GetFileAsync(entryId),
             FileEntryType.Folder => await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId),
             _ => throw new ArgumentOutOfRangeException(nameof(entryType), entryType, null)
         };
-
+        
         if (entry == null)
         {
             throw new ItemNotFoundException(entryType == FileEntryType.File
@@ -139,24 +126,46 @@ public class HistoryApiHelper(
                 ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile
                 : FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
+        
+        var offset = Convert.ToInt32(apiContext.StartIndex);
+        var count = Convert.ToInt32(apiContext.Count);
+        
+        var fromDateUtc = fromDate != null ? tenantUtil.DateTimeToUtc(fromDate) : (DateTime?)null;
+        var toDateUtc = toDate != null ? tenantUtil.DateTimeToUtc(toDate) : (DateTime?)null;
+        
+        Task<int> totalCountTask;
+        IAsyncEnumerable<HistoryEntry> historyTask;
+        
+        var room = entry.FileEntryType == FileEntryType.Folder && entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive 
+            ? await daoFactory.GetFolderDao<int>().GetFirstParentTypeFromFileEntryAsync(entry)
+            : null;
+        
+        var userId = authContext.CurrentAccount.ID;
 
-        if (entryType == FileEntryType.Folder &&
-            DocSpaceHelper.IsFormsFillingFolder(entry) &&
-            entry.ShareRecord is { Share: FileShare.FillForms })
+        if (room is { SettingsStealth: true } && room.CreateBy != userId && !await userManager.IsDocSpaceAdminAsync(userId))
         {
-            needFiltering = true;
+            totalCountTask = historyService.GetUsersHistoryCountAsync(entry, fromDateUtc, toDateUtc, userId);
+            historyTask = historyService.GetUsersHistoryAsync(entry, offset, count, fromDateUtc, toDateUtc, userId);
+        }
+        else if (entryType == FileEntryType.Folder && DocSpaceHelper.IsFormsFillingFolder(entry) && entry.ShareRecord is { Share: FileShare.FillForms })
+        {
             var folderDao = daoFactory.GetFolderDao<int>();
             var fileDao = daoFactory.GetFileDao<int>();
 
             var f = entry as Folder<int>;
-            filterFolderIds = await folderDao.GetFoldersAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, true, false, 0, -1, 0, true, f.FolderType).Select(r => r.Id).ToListAsync();
-            filterFileIds = await fileDao.GetFilesAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, null, false, true, false, 0, -1, 0, false, true, f.FolderType).Select(r => r.Id).ToListAsync();
+            var filterFolderIds = await folderDao.GetFoldersAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, true, false, 0, -1, 0, true, f.FolderType).Select(r => r.Id).ToListAsync();
+            var filterFileIds = await fileDao.GetFilesAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, null, false, true, false, 0, -1, 0, false, true, f.FolderType).Select(r => r.Id).ToListAsync();
+            
+            totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType, true, filterFolderIds, filterFileIds, fromDateUtc, toDateUtc);
+            historyTask = historyService.GetHistoryAsync(entry, offset, count, true, filterFolderIds, filterFileIds, fromDateUtc, toDateUtc);
         }
-
-        var totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType, needFiltering, filterFolderIds, filterFileIds, fromDateUtc, toDateUtc);
-
-        var histories = historyService.GetHistoryAsync(entry, offset, count, needFiltering, filterFolderIds, filterFileIds, fromDateUtc, toDateUtc)
-            .GroupByAwait(x => ValueTask.FromResult(x.GetGroupId()),
+        else
+        {
+            totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType, false, null, null, fromDateUtc, toDateUtc);
+            historyTask = historyService.GetHistoryAsync(entry, offset, count, false, null, null, fromDateUtc, toDateUtc);
+        }
+        
+        var histories = historyTask.GroupByAwait(x => ValueTask.FromResult(x.GetGroupId()),
                 async (_, group) =>
                 {
                     var first = await historyDtoHelper.GetAsync(await group.FirstAsync());
