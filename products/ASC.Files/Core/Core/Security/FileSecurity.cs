@@ -893,7 +893,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (action == FilesSecurityActions.CreateRoomFrom)
         {
-            return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isUser && (folder is { FolderType: FolderType.DEFAULT } || file != null);
+            return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isUser && !isGuest && (folder is { FolderType: FolderType.DEFAULT } || file != null);
         }
 
         if (action == FilesSecurityActions.Embed)
