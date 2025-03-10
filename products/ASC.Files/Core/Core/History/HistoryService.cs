@@ -94,7 +94,9 @@ public class HistoryService(
         MessageAction.RoomColorChanged,
         MessageAction.RoomCoverChanged,
         MessageAction.RoomIndexExportSaved,
-        MessageAction.RoomInviteResend
+        MessageAction.RoomInviteResend,
+        MessageAction.RoomStealthEnabled,
+        MessageAction.RoomStealthDisabled
     ];
 
     private static HashSet<int> FilterFolderActions => [
@@ -127,7 +129,11 @@ public class HistoryService(
         (int)MessageAction.FileCopiedWithOverwriting, 
         (int)MessageAction.FileDeleted, 
         (int)MessageAction.FileConverted, 
-        (int)MessageAction.FileRestoreVersion
+        (int)MessageAction.FileRestoreVersion,
+        (int)MessageAction.FileVersionRemoved,
+        (int)MessageAction.FileLocked,
+        (int)MessageAction.FileUnlocked,
+        (int)MessageAction.FileIndexChanged
     ];
 
     public async IAsyncEnumerable<HistoryEntry> GetUsersHistoryAsync(FileEntry<int> entry, int offset, int count,

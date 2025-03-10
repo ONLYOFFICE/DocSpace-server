@@ -699,6 +699,11 @@ public class FileStorageService //: IFileStorageService
         {
             await filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, folder, folder.Title);
         }
+
+        if (folder.SettingsStealth)
+        {
+            await filesMessageService.SendAsync(MessageAction.RoomStealthEnabled, folder, folder.Title);
+        }
         
         return folder;
     }
@@ -784,7 +789,11 @@ public class FileStorageService //: IFileStorageService
             newFolder.SettingsLifetime = lifetime;
             _ = RoomLogoManager.ColorChanged(color, newFolder);
             _ = await RoomLogoManager.CoverChanged(cover, newFolder);
-            newFolder.SettingsStealth = stealth.Value;
+            
+            if (stealth.HasValue)
+            {
+                newFolder.SettingsStealth = stealth.Value;
+            }
 
             var folderId = await folderDao.SaveFolderAsync(newFolder);
             if (watermark != null)
@@ -974,8 +983,9 @@ public class FileStorageService //: IFileStorageService
         var watermarkChanged = updateData.Watermark != null;
         var colorChanged = updateData.Color != null && folder.SettingsColor != updateData.Color;
         var coverChanged = updateData.Cover != null && folder.SettingsCover != updateData.Cover;
+        var stealthChanged = updateData.Stealth.HasValue && folder.SettingsStealth != updateData.Stealth;
         
-        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged || colorChanged || coverChanged)
+        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged || colorChanged || coverChanged || stealthChanged)
         {                
             var oldTitle = folder.Title;
             WatermarkSettings watermark = null;
@@ -1002,7 +1012,8 @@ public class FileStorageService //: IFileStorageService
                 lifetimeChanged ? lifetime : folder.SettingsLifetime,
                 watermarkChanged ? (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark) : folder.SettingsWatermark,
                 colorChanged ? updateData.Color : folder.SettingsColor,
-                coverChanged ? updateData.Cover : folder.SettingsCover);
+                coverChanged ? updateData.Cover : folder.SettingsCover,
+                stealthChanged ? updateData.Stealth.Value : folder.SettingsStealth);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
             
@@ -1060,6 +1071,14 @@ public class FileStorageService //: IFileStorageService
                         await filesMessageService.SendAsync(MessageAction.RoomLifeTimeSet, folder, lifetime.Value.ToString(), lifetime.Period.ToStringFast(), 
                             lifetime.DeletePermanently.ToString());
                     }
+                }
+                
+                if (stealthChanged)
+                {
+                    await filesMessageService.SendAsync(updateData.Stealth.Value 
+                        ? MessageAction.RoomStealthEnabled 
+                        : MessageAction.RoomStealthDisabled, 
+                        folder, folder.Title);
                 }
             }
             
@@ -3920,6 +3939,11 @@ public class FileStorageService //: IFileStorageService
         if (stealth.HasValue && room.SettingsStealth != stealth.Value)
         {
             room.SettingsStealth = stealth.Value;
+            await folderDao.SaveFolderAsync(room);
+                
+            await filesMessageService.SendAsync(stealth.Value 
+                ? MessageAction.RoomStealthEnabled 
+                : MessageAction.RoomStealthDisabled, room, room.Title);
         }
 
         return room;

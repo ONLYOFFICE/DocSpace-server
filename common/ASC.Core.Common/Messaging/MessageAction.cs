@@ -568,6 +568,12 @@ public enum MessageAction
 
     [SwaggerEnum("Room index export saved")]
     RoomIndexExportSaved = 5106,
+    
+    [SwaggerEnum("Room stealth enabled")]
+    RoomStealthEnabled = 5120,
+
+    [SwaggerEnum("Room stealth disabled")]
+    RoomStealthDisabled = 5121,
 
     #endregion
 
