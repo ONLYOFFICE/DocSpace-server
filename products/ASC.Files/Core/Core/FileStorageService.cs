@@ -1258,7 +1258,7 @@ public class FileStorageService //: IFileStorageService
 
         file.NotFoundIfNull();
 
-        if (!fileUtility.CanWebCustomFilterEditing(file.Title) || file.RootFolderType != FolderType.VirtualRooms)
+        if (file.RootFolderType != FolderType.VirtualRooms || !fileUtility.CanWebCustomFilterEditing(file.Title))
         {
             throw new ArgumentException();
         }

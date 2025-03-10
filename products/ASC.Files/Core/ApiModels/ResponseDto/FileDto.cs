@@ -320,8 +320,8 @@ public class FileDtoHelper(
         }
 
         if (fileType == FileType.Spreadsheet &&
-            fileUtility.CanWebCustomFilterEditing(file.Title) &&
-            file.RootFolderType == FolderType.VirtualRooms)
+            file.RootFolderType == FolderType.VirtualRooms &&
+            fileUtility.CanWebCustomFilterEditing(file.Title))
         {
             var shareRecord = await _fileSecurity.GetPureSharesAsync(file, [Constants.GroupEveryone.ID]).FirstOrDefaultAsync();
 
