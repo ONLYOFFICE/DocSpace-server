@@ -367,6 +367,8 @@ public class FoldersControllerCommon(
     [HttpGet("@my")]
     public async Task<FolderContentDto<int>> GetMyFolderAsync(GetMyTrashFolderRequestDto inDto)
     {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var myId = await folderDao.GetFolderIDUserAsync(false, securityContext.CurrentAccount.ID);
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderMyAsync, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null);
     }
 
