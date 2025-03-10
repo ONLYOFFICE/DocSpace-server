@@ -175,7 +175,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// Returns the progress of the delete personal folder.
     /// </summary>
     /// <short>Get the deletion progress</short>
-    /// <path>api/2.0/people/delete/personal/start</path>
+    /// <path>api/2.0/people/delete/personal/progress</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpGet("delete/personal/progress")]
