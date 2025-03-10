@@ -319,8 +319,7 @@ public class FoldersControllerCommon(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     UserManager userManager,
-    SecurityContext securityContext,
-    IDaoFactory daoFactory)
+    SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -504,16 +503,6 @@ public class FoldersControllerCommon(
         if (!isGuest)
         {
             yield return await globalFolderHelper.FolderMyAsync;
-        }
-        else
-        {
-
-            var folderDao = daoFactory.GetFolderDao<int>();
-            var my = await folderDao.GetFolderIDUserAsync(false, securityContext.CurrentAccount.ID);
-            if (my != 0) 
-            {
-                yield return await folderDao.GetFolderIDUserAsync(false, securityContext.CurrentAccount.ID);
-            }
         }
 
         if (!withoutTrash)

@@ -32,11 +32,11 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.Files.Service.Services;
 
 [Singleton]
-public class AutoCleanMyFolderService(
+public class AutoDeletePersonalFolderService(
     IServiceScopeFactory scopeFactory,
     IConfiguration configuration,
-    ILogger<AutoCleanMyFolderService> logger)
-    : ActivePassiveBackgroundService<AutoCleanMyFolderService>(logger, scopeFactory)
+    ILogger<AutoDeletePersonalFolderService> logger)
+    : ActivePassiveBackgroundService<AutoDeletePersonalFolderService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:autoCleanUp:period") ?? "0:5:0");

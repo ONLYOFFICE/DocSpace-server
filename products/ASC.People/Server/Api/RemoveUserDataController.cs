@@ -29,6 +29,7 @@ namespace ASC.People.Api;
 public class RemoveUserDataController(PermissionContext permissionContext,
         UserManager userManager,
         QueueWorkerRemove queueWorkerRemove,
+        QueueDeletePersonalFolderType queueDeletePersonalFolder,
         SecurityContext securityContext,
         StudioNotifyService studioNotifyService,
         MessageService messageService,
@@ -142,5 +143,47 @@ public class RemoveUserDataController(PermissionContext permissionContext,
 
         var tenant = tenantManager.GetCurrentTenant();
         await queueWorkerRemove.Terminate(tenant.Id, inDto.UserId);
+    }
+
+    /// <summary>
+    /// Start delete personal folder.
+    /// </summary>
+    /// <short>Start the data deletion</short>
+    /// <path>api/2.0/people/delete/personal/start</path>
+    [Tags("People / User data")]
+    [SwaggerResponse(200, "delete personal progress", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(400, "Access denied")]
+    [HttpPost("delete/personal/start")]
+    public async Task<TaskProgressResponseDto> StartDeletePersonalFolderAsync()
+    {
+        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var userType = await userManager.GetUserTypeAsync(currentUser);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        if (userType != EmployeeType.Guest)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var progressItem = await queueDeletePersonalFolder.StartAsync(tenantId, securityContext.CurrentAccount.ID);
+
+        return TaskProgressResponseDto.Get(progressItem);
+    }
+
+    /// <summary>
+    /// Returns the progress of the delete personal folder.
+    /// </summary>
+    /// <short>Get the deletion progress</short>
+    /// <path>api/2.0/people/delete/personal/start</path>
+    [Tags("People / User data")]
+    [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
+    [HttpGet("delete/personal/progress")]
+    public async Task<TaskProgressResponseDto> GetDeletePersonalFolderProgressAsync()
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+        var progressItem = await queueWorkerRemove.GetProgressItemStatus(tenant.Id, securityContext.CurrentAccount.ID);
+
+        return TaskProgressResponseDto.Get(progressItem);
     }
 }

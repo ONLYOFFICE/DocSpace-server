@@ -24,6 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Security;
+
+using ASC.Files.Core;
+using ASC.Web.Core.PublicResources;
+
 namespace ASC.Data.Reassigns;
 
 public class QueueWorker<T>(
@@ -111,6 +116,31 @@ public class QueueWorkerUpdateUserType(IHttpContextAccessor httpContextAccessor,
         var result = _serviceProvider.GetService<UpdateUserTypeProgressItem>();
 
         result.Init(tenantId, userId, toUserId, currentUserId, employeeType);
+
+        return await StartAsync(tenantId, userId, result);
+    }
+}
+
+[Scope]
+public class QueueDeletePersonalFolderType(IHttpContextAccessor httpContextAccessor,
+        IServiceProvider serviceProvider,
+        IDistributedTaskQueueFactory queueFactory,
+        IDistributedLockProvider distributedLockProvider,
+        IDaoFactory daoFactory)
+    : QueueWorker<DeletePersonalFolderProgressItem>(httpContextAccessor, serviceProvider, queueFactory, distributedLockProvider)
+{
+    public async Task<DeletePersonalFolderProgressItem> StartAsync(int tenantId, Guid userId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var myId = await folderDao.GetFolderIDUserAsync(false, userId);
+        if (myId == 0)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var result = _serviceProvider.GetService<DeletePersonalFolderProgressItem>();
+
+        result.Init(userId);
 
         return await StartAsync(tenantId, userId, result);
     }
