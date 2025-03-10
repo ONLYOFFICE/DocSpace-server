@@ -408,14 +408,15 @@ public class ClientCommandController {
       // Note: we are ok with publishing the event and then removing the client
       // without an outbox. It is far more important in out case to remove authorizations
       // and consents on a delete attempt no matter the outcome of that delete
-      clientApplicationService.deleteClient(
-          buildAudit(clientId, request, principal, AuditCode.DELETE_CLIENT),
-          principal.getRole(),
-          DeleteTenantClientCommand.builder()
-              .clientId(clientId)
-              .tenantId(principal.getTenantId())
-              .build());
-      return ResponseEntity.status(HttpStatus.OK).build();
+      if (clientApplicationService.deleteClient(
+              buildAudit(clientId, request, principal, AuditCode.DELETE_CLIENT),
+              principal.getRole(),
+              DeleteTenantClientCommand.builder()
+                  .clientId(clientId)
+                  .tenantId(principal.getTenantId())
+                  .build())
+          == 1) return ResponseEntity.status(HttpStatus.OK).build();
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     } finally {
       MDC.clear();
     }

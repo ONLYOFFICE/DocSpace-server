@@ -32,10 +32,12 @@ import com.asc.authorization.application.security.authentication.BasicSignature;
 import com.asc.authorization.application.security.oauth.authentication.PersonalAccessTokenAuthenticationToken;
 import com.asc.authorization.application.security.oauth.grant.ExtendedAuthorizationGrantType;
 import com.asc.authorization.application.security.service.SignatureService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -89,6 +91,7 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
     if (!ExtendedAuthorizationGrantType.PERSONAL_ACCESS_TOKEN.getValue().equals(grantType)) {
       log.warn("Invalid grant type: {}", grantType);
       throwError(OAuth2ErrorCodes.INVALID_REQUEST, OAuth2ParameterNames.GRANT_TYPE);
+      return null;
     }
 
     var clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
@@ -97,6 +100,7 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
     if (!StringUtils.hasText(scope) || parameters.get(OAuth2ParameterNames.SCOPE).size() != 1) {
       log.warn("Invalid scope: {}", scope);
       throwError(OAuth2ErrorCodes.INVALID_REQUEST, OAuth2ParameterNames.SCOPE);
+      return null;
     }
 
     var requestedScopes =
@@ -112,15 +116,23 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
           }
         });
 
-    var token = request.getHeader(securityConfigurationProperties.getSignatureHeader());
-    if (token == null || token.isBlank()) {
+    var token =
+        Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
+            .filter(
+                c ->
+                    c.getName()
+                        .equalsIgnoreCase(securityConfigurationProperties.getSignatureCookie()))
+            .findFirst()
+            .orElse(null);
+    if (token == null || token.getValue().isBlank()) {
       log.error("Signature not found");
       throwError(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, OAuth2ParameterNames.PASSWORD);
+      return null;
     }
 
     try (var ignored =
         MDC.putCloseable("client_id", parameters.get(OAuth2ParameterNames.CLIENT_ID).getFirst())) {
-      var signature = signatureService.validate(token, BasicSignature.class);
+      var signature = signatureService.validate(token.getValue(), BasicSignature.class);
       setRequestAttributes(request, signature);
 
       log.debug("Conversion to PersonalAccessTokenAuthenticationToken successful");
@@ -147,7 +159,7 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
    * @param basicSignature the validated {@link BasicSignature}.
    */
   private void setRequestAttributes(HttpServletRequest request, BasicSignature basicSignature) {
-    request.setAttribute(securityConfigurationProperties.getSignatureHeader(), basicSignature);
+    request.setAttribute(securityConfigurationProperties.getSignatureCookie(), basicSignature);
   }
 
   /**

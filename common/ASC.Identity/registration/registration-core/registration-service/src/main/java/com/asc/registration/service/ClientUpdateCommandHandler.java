@@ -81,6 +81,7 @@ public class ClientUpdateCommandHandler {
    */
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
   public ClientSecretResponse regenerateSecret(
       Audit audit, Role role, RegenerateTenantClientSecretCommand command) {
@@ -149,6 +150,7 @@ public class ClientUpdateCommandHandler {
    */
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
   public void changeVisibility(
       Audit audit, Role role, ChangeTenantClientVisibilityCommand command) {
@@ -215,6 +217,7 @@ public class ClientUpdateCommandHandler {
    */
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
   public void changeActivation(
       Audit audit, Role role, ChangeTenantClientActivationCommand command) {
@@ -282,6 +285,7 @@ public class ClientUpdateCommandHandler {
    */
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
   public ClientResponse updateClient(Audit audit, Role role, UpdateTenantClientCommand command) {
     log.info("Updating client information");
@@ -361,16 +365,18 @@ public class ClientUpdateCommandHandler {
    * @param audit the audit details
    * @param role the role of the requester
    * @param command the command containing client and tenant information
+   * @return the result of the delete operation, the number of rows affected.
    */
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
-  public void deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
+  public int deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
     log.info("Trying to remove client");
 
     var client = getClient(audit, role, command.getClientId(), command.getTenantId());
     var event = clientDomainService.deleteClient(audit, client);
-    clientCommandRepository.deleteByTenantIdAndClientId(
+    return clientCommandRepository.deleteByTenantIdAndClientId(
         event, client.getClientTenantInfo().tenantId(), client.getId());
   }
 
@@ -420,28 +426,33 @@ public class ClientUpdateCommandHandler {
    * @throws ClientNotFoundException if no client is found
    */
   private Client getClient(Audit audit, Role role, String clientId, long tenantId) {
-    var cid = new ClientId(UUID.fromString(clientId));
-    var tid = new TenantId(tenantId);
-    if (role.equals(Role.ROLE_ADMIN))
-      return clientQueryRepository
-          .findByClientIdAndTenantId(cid, tid)
-          .orElseThrow(
-              () ->
-                  new ClientNotFoundException(
-                      String.format(
-                          "Client with id %s for tenant %d was not found", clientId, tenantId)));
-    else if (role.equals(Role.ROLE_USER))
-      return clientQueryRepository
-          .findByClientIdAndTenantIdAndCreatorId(cid, tid, new UserId(audit.getUserId()))
-          .orElseThrow(
-              () ->
-                  new ClientNotFoundException(
-                      String.format(
-                          "Client with id %s for tenant %d and user %s was not found",
-                          clientId, tenantId, audit.getUserEmail())));
-    throw new ClientNotFoundException(
-        String.format(
-            "Client with id %s for tenant %d and user %s was not found",
-            clientId, tenantId, audit.getUserId()));
+    try {
+      var cid = new ClientId(UUID.fromString(clientId));
+      var tid = new TenantId(tenantId);
+      if (role.equals(Role.ROLE_ADMIN))
+        return clientQueryRepository
+            .findByClientIdAndTenantId(cid, tid)
+            .orElseThrow(
+                () ->
+                    new ClientNotFoundException(
+                        String.format(
+                            "Client with id %s for tenant %d was not found", clientId, tenantId)));
+      else if (role.equals(Role.ROLE_USER))
+        return clientQueryRepository
+            .findByClientIdAndTenantIdAndCreatorId(cid, tid, new UserId(audit.getUserId()))
+            .orElseThrow(
+                () ->
+                    new ClientNotFoundException(
+                        String.format(
+                            "Client with id %s for tenant %d and user %s was not found",
+                            clientId, tenantId, audit.getUserEmail())));
+      throw new ClientNotFoundException(
+          String.format(
+              "Client with id %s for tenant %d and user %s was not found",
+              clientId, tenantId, audit.getUserId()));
+    } catch (IllegalArgumentException e) {
+      throw new ClientNotFoundException(
+          String.format("Client with id %s was not found. Invalid client id format", clientId));
+    }
   }
 }
